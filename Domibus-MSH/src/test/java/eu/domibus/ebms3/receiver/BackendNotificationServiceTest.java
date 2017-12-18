@@ -182,9 +182,9 @@ public class BackendNotificationServiceTest {
     }
 
     @Test
-    public void testValidateAndNotify(@Injectable final UserMessage userMessage,
-                                      @Injectable final String backendName,
-                                      @Injectable final NotificationType notificationType) throws Exception {
+    public void testValidateAndNotify(@Injectable final UserMessage userMessage) throws Exception {
+        String backendName = "backendName";
+        NotificationType notificationType = NotificationType.MESSAGE_RECEIVED;
         new Expectations(backendNotificationService) {{
             backendNotificationService.validateSubmission(userMessage, backendName, notificationType);
             result = null;
