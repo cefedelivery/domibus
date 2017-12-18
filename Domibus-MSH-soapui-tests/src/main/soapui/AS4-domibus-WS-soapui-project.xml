@@ -2568,7 +2568,7 @@ test.finalize();
       </_1:submitRequest>\r
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="0656abb8-b7ec-4a9a-acd8-1ec56e31b788"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="e89675f4-f450-4b56-93bc-41cff727a36a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.verifyMessagePresence(1,1,"-Dom046-");
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="8ce0b6f1-01c3-459f-b230-a834e1ee4e80"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="68bac507-5613-4910-b011-5ba086857316"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageID("-Dom046-");
 test.finalize();
