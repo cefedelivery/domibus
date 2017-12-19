@@ -154,6 +154,7 @@ public class UserManagementServiceImpl implements UserService {
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
             return UserLoginErrorReason.SUSPENDED;
         }
+        LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_BAD_CREDENTIALS, userName);
         return BAD_CREDENTIALS;
     }
 
@@ -171,6 +172,7 @@ public class UserManagementServiceImpl implements UserService {
             }
             user.setActive(false);
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
+            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
         }
         userDao.update(user);
     }

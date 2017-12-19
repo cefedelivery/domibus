@@ -84,7 +84,9 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found"),
     SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is unknown"),
     SEC_CONSOLE_LOGIN_INACTIVE_USER("SEC-014", "The user [{}] is not active"),
-    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended");
+    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended"),
+    SEC_CONSOLE_LOGIN_BAD_CREDENTIALS("SEC-016", "The user [{}] is trying to login with bad credentials"),
+    SEC_CONSOLE_LOGIN_LOCKED_USER("SEC-017", "The user [{}] is locked after trying to login for {} wrong attempts.");
 
     String code;
     String message;
