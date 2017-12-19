@@ -79,7 +79,7 @@ public class MessagingServiceImpl implements MessagingService {
 
         // Log Payload size
         if (MSHRole.RECEIVING.equals(mshRole)) {
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVE_PAYLOAD_SIZE, messageId, partInfo.getHref(), partInfo.getLength());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, messageId, partInfo.getHref(), partInfo.getLength());
         } else {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, messageId, partInfo.getHref(), partInfo.getLength());
         }
