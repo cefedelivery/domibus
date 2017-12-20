@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.MessagingService;
@@ -38,18 +39,17 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public void storeMessage(Messaging messaging) throws CompressionException{
+    public void storeMessage(Messaging messaging, MSHRole mshRole) throws CompressionException {
         if (messaging == null || messaging.getUserMessage() == null)
             return;
 
         if (messaging.getUserMessage().getPayloadInfo() != null && messaging.getUserMessage().getPayloadInfo().getPartInfo() != null) {
             for (PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
                 try {
-                    storeBinary(partInfo);
+                    storeBinary(partInfo, messaging.getUserMessage().getMessageInfo().getMessageId(), mshRole);
                 } catch (IOException exc) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, partInfo.getHref());
-                    CompressionException ex = new CompressionException("Could not store binary data for message " + exc.getMessage(), exc);
-                    throw ex;
+                    throw new CompressionException("Could not store binary data for message " + exc.getMessage(), exc);
                 }
             }
         }
@@ -57,7 +57,7 @@ public class MessagingServiceImpl implements MessagingService {
         messagingDao.create(messaging);
     }
 
-    protected void storeBinary(PartInfo partInfo) throws IOException {
+    protected void storeBinary(PartInfo partInfo, String messageId, MSHRole mshRole) throws IOException {
         partInfo.setMime(partInfo.getPayloadDatahandler().getContentType());
         if (partInfo.getMime() == null) {
             partInfo.setMime("application/unknown");
@@ -68,12 +68,20 @@ public class MessagingServiceImpl implements MessagingService {
         if (storage.getStorageDirectory() == null || storage.getStorageDirectory().getName() == null) {
             byte[] binaryData = getBinaryData(is, compressed);
             partInfo.setBinaryData(binaryData);
+            partInfo.setLength(binaryData.length);
             partInfo.setFileName(null);
-
         } else {
             final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
+            partInfo.setLength(attachmentStore.length());
             saveFileToDisk(attachmentStore, is, compressed);
+        }
+
+        // Log Payload size
+        if (MSHRole.RECEIVING.equals(mshRole)) {
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
+        } else {
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
         }
 
         if(compressed) {
