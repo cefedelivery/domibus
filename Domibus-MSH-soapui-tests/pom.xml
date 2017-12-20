@@ -50,7 +50,7 @@
                     <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
-                    <testSuite>WS-Auto for Bamboo</testSuite>
+                    <testSuite>FailingBamboo</testSuite>
                     <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
                     <projectProperties>
                         <value>${localUrl}</value>
