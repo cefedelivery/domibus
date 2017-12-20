@@ -39,7 +39,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     @Override
-    public void storeMessage(Messaging messaging, MSHRole mshRole) {
+    public void storeMessage(Messaging messaging, MSHRole mshRole) throws CompressionException {
         if (messaging == null || messaging.getUserMessage() == null)
             return;
 
@@ -79,9 +79,9 @@ public class MessagingServiceImpl implements MessagingService {
 
         // Log Payload size
         if (MSHRole.RECEIVING.equals(mshRole)) {
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, messageId, partInfo.getHref(), partInfo.getLength());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
         } else {
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, messageId, partInfo.getHref(), partInfo.getLength());
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
         }
 
         if(compressed) {
