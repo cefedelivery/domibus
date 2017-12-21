@@ -20335,7 +20335,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
    <soap:Header/>\r
    <soap:Body>\r
       <_1:retrieveMessageRequest>\r
-         <messageID> -Dom092-	</messageID>\r
+         <messageID>-Dom092-</messageID>\r
       </_1:retrieveMessageRequest>\r
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
@@ -20429,7 +20429,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
    <soap:Header/>\r
    <soap:Body>\r
       <_1:retrieveMessageRequest>\r
-         <messageID>	-Dom392- </messageID>\r
+         <messageID>-Dom392-</messageID>\r
       </_1:retrieveMessageRequest>\r
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
