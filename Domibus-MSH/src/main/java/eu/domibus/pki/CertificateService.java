@@ -28,4 +28,9 @@ public interface CertificateService {
      * @return a list of certificate
      */
     List<TrustStoreEntry> getTrustStoreEntries();
+
+    /**
+     * Save certificate data in the database, and use this data to display a revocation warning when needed.
+     */
+    void saveCertificateAndLogRevocation();
 }

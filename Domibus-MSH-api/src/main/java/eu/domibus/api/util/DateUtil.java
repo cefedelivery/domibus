@@ -9,4 +9,6 @@ import java.util.Date;
 public interface DateUtil {
 
     Date fromString(String value);
+
+    Date getStartOfDay();
 }
