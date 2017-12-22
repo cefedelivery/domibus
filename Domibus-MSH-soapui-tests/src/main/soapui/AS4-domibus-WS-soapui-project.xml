@@ -1235,7 +1235,7 @@ Domibus.uploadTruststore("receivergreen","special","\\CloudThreegateways\\green\
 </script></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to WS Blue-Red-Green" id="ac4e1190-e590-48da-a693-48e6cb24bd55"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendWebservice",context,log);
 Domibus.setMessageFilters("receiver","backendWebservice",context,log);
 Domibus.setMessageFilters("receivergreen","backendWebservice",context,log);
-</script></con:config></con:testStep><con:tearDownScript/><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>8d861779-0a64-417b-b81f-dbaed89dc796</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>42781f68-9908-4231-93af-c83bd2d27190</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f10dbea4-cf15-49a7-93b9-ab0ef7752097</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="WS-Auto for Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom000-Clean Database" searchProperties="true" id="a762ae95-e616-4d06-a45f-3a1cc31da287" disabled="true">
+</script></con:config></con:testStep><con:tearDownScript/><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>8d861779-0a64-417b-b81f-dbaed89dc796</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>42781f68-9908-4231-93af-c83bd2d27190</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f10dbea4-cf15-49a7-93b9-ab0ef7752097</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="WS-Auto-for-Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom000-Clean Database" searchProperties="true" id="a762ae95-e616-4d06-a45f-3a1cc31da287" disabled="true">
             <con:settings/>
             
             
@@ -4351,7 +4351,78 @@ test.finalize();
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="e94010e0-4889-42b6-b1f0-40e061f77c3e"/><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="dbb51f66-3fef-4299-8e7e-b70fbe1757cc"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="8cb80ec5-cdc8-4533-ac3f-f1d3b42db788"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="3d56ae27-a9e9-4821-a542-aac3ed8fd2ed"><con:configuration><token>No message with id</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains 1" id="5af843b0-9817-49c6-9d89-24b443afb8b1"><con:configuration><token>pending for download</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom093-Push-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="2e04241b-3edb-432b-be8a-fba8e1c62431">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom092-Push-Download Message-Space-Tab" searchProperties="true" id="0215f749-e697-49f0-800e-a775a72f76a9">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="request" id="d5b8ef78-d3c4-487a-8785-82b630a675f4" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+               <ns:MessageId>-Dom092-</ns:MessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc12">bdx:noprocess</ns:Service>
+               <ns:Action>TC12Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message" contentType="text/xml">
+         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="91a1fd50-842b-4575-949b-637bec97092f"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="bb12b47c-2d2e-44ed-b93e-fb2814c1b44c"/><con:assertion type="XPath Match" name="XPath Match" id="01998a64-870a-401e-b619-67b5b1ac091c"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="aa81c436-677d-4d56-adb7-7ac9ab19567c"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="a1fc8639-fe46-427f-9af8-f6fbf04c8e7c"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" id="0d92ce72-2f6c-4f3b-8641-b5dd3f4f8f0d" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+   <soap:Header/>\r
+   <soap:Body>\r
+      <_1:retrieveMessageRequest>\r
+         <messageID> -Dom092-	</messageID>\r
+      </_1:retrieveMessageRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-Dom092-");
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
+test.cleanDBMessageID("-Dom092-");
+test.finalize();
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7c142f9b-182a-4ba9-9f1a-08c7218f3002</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom093-Push-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="2e04241b-3edb-432b-be8a-fba8e1c62431">
             <con:settings/>
             
             
@@ -5200,7 +5271,30 @@ test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>${#Project#pdfAttachment}</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>${#Project#pdfAttachment}</con:url><con:id>dbbb4a16-e96d-4093-a863-79d90e497eca</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageIDStartsWith("-Dom110-");
 test.finalize();
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>d3c78fff-9566-42ec-bacd-7d23b9266efa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>80f41cff-b746-425b-858f-5614624e7efc</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom112-Push-Get Status-Empty ID" searchProperties="true" id="2695f558-671a-414c-9fba-c35ff481c073">
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>d3c78fff-9566-42ec-bacd-7d23b9266efa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>80f41cff-b746-425b-858f-5614624e7efc</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom111-Push-Download Message-Empty ID" searchProperties="true" id="1658b252-dec2-4aa6-b185-6517a48e9c88">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="request" id="a3138e2a-2dcb-4b7e-885e-01ff8c506955" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+   <soap:Header/>\r
+   <soap:Body>\r
+      <_1:retrieveMessageRequest>\r
+         <messageID></messageID>\r
+      </_1:retrieveMessageRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="Not SOAP Fault Assertion" id="265cd6d9-1d1a-4017-a909-9d9f06abe1a8" name="SOAP Fault"/><con:assertion type="Simple Contains" id="e18a282b-2aa8-424e-bf36-07bbcef29807" name="Contains"><con:configuration><token>MessageId is empty</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom112-Push-Get Status-Empty ID" searchProperties="true" id="2695f558-671a-414c-9fba-c35ff481c073">
             <con:settings/>
             
             
@@ -9571,7 +9665,78 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 test.cleanDBMessageIDStartsWith("-Dom390-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cdf00e45-4010-4325-b6fd-49695ab30dd3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09c2d33f-0ebb-404a-9c23-0831dd59ba93</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom393-Pull-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="93526450-4788-4fe8-be3b-173852788f29">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cdf00e45-4010-4325-b6fd-49695ab30dd3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09c2d33f-0ebb-404a-9c23-0831dd59ba93</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom392-Pull-Download Message-Space-Tab" searchProperties="true" id="1acb8114-125b-40c6-bd35-25fa8b2fff4d">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="request" id="8b20626e-e8f1-4e6f-bbe6-f9fb6ce679cf" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+               <ns:MessageId>-Dom392-</ns:MessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc14">bdx:noprocess</ns:Service>
+               <ns:Action>TC14Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message" contentType="text/xml">
+         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="bb1978db-c391-4442-8d24-a01987db6158"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="2bc24941-4008-4fa9-b7b7-67ebe6e5ffc8"/><con:assertion type="XPath Match" name="XPath Match" id="50f9caf8-6f6e-4ca3-b99f-f619ded020b4"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="2e04a166-c733-4bbf-8462-97eb254ceca5"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="3787cd8d-1159-4f3c-a636-202871f08e0d"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" id="c14634c5-3f23-475b-994b-57e67a2801cc" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+   <soap:Header/>\r
+   <soap:Body>\r
+      <_1:retrieveMessageRequest>\r
+         <messageID>	-Dom392- </messageID>\r
+      </_1:retrieveMessageRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-Dom392-");
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
+test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}'))
+test.finalize();
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>326baca2-da04-4d28-8fe2-29c2d841fcaa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom393-Pull-Get Status-Basic flow-ACKNOWLEDGED" searchProperties="true" id="93526450-4788-4fe8-be3b-173852788f29">
             <con:settings/>
             
             
@@ -11334,7 +11499,7 @@ test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}')
 test.finalize();	
 
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fa1e9f28-eb95-4986-baba-310ea048dc0b" name="WS-Auto Not for Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom020&amp;Dom035-Push-Submit message-Exceptional flow-Data-From/PartyId-Maximum length" searchProperties="true" id="2f0afa19-0439-4bfa-b029-0b8fd05af8ef">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fa1e9f28-eb95-4986-baba-310ea048dc0b" name="WS-Auto-Not-for-Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom020&amp;Dom035-Push-Submit message-Exceptional flow-Data-From/PartyId-Maximum length" searchProperties="true" id="2f0afa19-0439-4bfa-b029-0b8fd05af8ef">
             <con:settings/>
             
             
@@ -13646,7 +13811,7 @@ test.cleanDBMessageIDStartsWith("-Dom421");
 test.finalize();
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Set Third gateway property"].testSteps['Set false'].run( testRunner, context );
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5a91c51d-9b49-4f13-a074-f1cb5bf45853</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>109a5688-99e4-4594-bcdf-19012278b552</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ae7a435d-5dea-4e09-848b-ae658c50dc9b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d14f913e-7b8f-426d-aaa8-75728c79cccf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>031df7ff-c04c-4731-8af1-1fb44003b193</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:tearDownScript/><con:reportParameters/></con:testSuite><con:testSuite id="69663c6d-8cc1-4707-866b-b8e8d0a3a7e9" name="WS-Manual test cases"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom003-Push-Submit Message-Exceptional flow-No receipt" searchProperties="true" id="2f9c63a6-1186-4ac6-b75b-d461ce056a1f">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5a91c51d-9b49-4f13-a074-f1cb5bf45853</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>109a5688-99e4-4594-bcdf-19012278b552</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ae7a435d-5dea-4e09-848b-ae658c50dc9b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d14f913e-7b8f-426d-aaa8-75728c79cccf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>031df7ff-c04c-4731-8af1-1fb44003b193</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:tearDownScript/><con:reportParameters/></con:testSuite><con:testSuite id="69663c6d-8cc1-4707-866b-b8e8d0a3a7e9" name="WS-Manual-testCases"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom003-Push-Submit Message-Exceptional flow-No receipt" searchProperties="true" id="2f9c63a6-1186-4ac6-b75b-d461ce056a1f">
             <con:settings/>
             
             
@@ -18175,7 +18340,7 @@ def msgID = context.expand( '${Submit Message#Response#//messageID}' )
 test.cleanDBMessageID(msgID)
 test.finalize()
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="3eed3023-7762-420e-872b-cdb81afaf706" name="WS-Dynamic discovery"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom133-Push-Dynamic Discovery-Basic Flow-PEPPOL" searchProperties="true" id="82409521-7304-4b84-983c-b0a9971426ae">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="3eed3023-7762-420e-872b-cdb81afaf706" name="WS-Dynamic-Discovery"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom133-Push-Dynamic Discovery-Basic Flow-PEPPOL" searchProperties="true" id="82409521-7304-4b84-983c-b0a9971426ae">
             <con:settings/>
             
             
@@ -20273,172 +20438,7 @@ def test = new Domibus(log,null,context)
 test.cleanDBMessageIDStartsWith('-Dom137-')
 test.finalize()
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/></con:testSuite><con:testSuite id="394786ed-d102-4197-8275-bf5058965006" name="FailingBamboo"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom092-Push-Download Message-Space-Tab" searchProperties="true" id="0215f749-e697-49f0-800e-a775a72f76a9">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="request" id="d5b8ef78-d3c4-487a-8785-82b630a675f4" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
-   <soap:Header>
-      <ns:Messaging>
-         <ns:UserMessage>
-            <ns:MessageInfo>
-               <ns:MessageId>-Dom092-</ns:MessageId>
-            </ns:MessageInfo>
-            <ns:PartyInfo>
-               <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
-               </ns:From>
-               <ns:To>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
-               </ns:To>
-            </ns:PartyInfo>
-            <ns:CollaborationInfo>
-               <ns:Service type="tc12">bdx:noprocess</ns:Service>
-               <ns:Action>TC12Leg1</ns:Action>
-            </ns:CollaborationInfo>
-            <ns:MessageProperties>
-               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
-               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
-            </ns:MessageProperties>
-            <ns:PayloadInfo>
-               <ns:PartInfo href="cid:message">
-                  <ns:PartProperties>
-                     <ns:Property name="MimeType">text/xml</ns:Property>
-                  </ns:PartProperties>
-               </ns:PartInfo>
-            </ns:PayloadInfo>
-         </ns:UserMessage>
-      </ns:Messaging>
-   </soap:Header>
-   <soap:Body>\r
-      <_1:submitRequest>\r
-         <payload payloadId="cid:message" contentType="text/xml">
-         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
-         </payload>\r
-      </_1:submitRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="91a1fd50-842b-4575-949b-637bec97092f"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="bb12b47c-2d2e-44ed-b93e-fb2814c1b44c"/><con:assertion type="XPath Match" name="XPath Match" id="01998a64-870a-401e-b619-67b5b1ac091c"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="aa81c436-677d-4d56-adb7-7ac9ab19567c"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="a1fc8639-fe46-427f-9af8-f6fbf04c8e7c"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" id="0d92ce72-2f6c-4f3b-8641-b5dd3f4f8f0d" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
-   <soap:Header/>\r
-   <soap:Body>\r
-      <_1:retrieveMessageRequest>\r
-         <messageID> -Dom092-	</messageID>\r
-      </_1:retrieveMessageRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-Dom092-");
-test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
-test.cleanDBMessageID("-Dom092-");
-test.finalize();
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7c142f9b-182a-4ba9-9f1a-08c7218f3002</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom111-Push-Download Message-Empty ID" searchProperties="true" id="1658b252-dec2-4aa6-b185-6517a48e9c88">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="request" id="a3138e2a-2dcb-4b7e-885e-01ff8c506955" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
-   <soap:Header/>\r
-   <soap:Body>\r
-      <_1:retrieveMessageRequest>\r
-         <messageID></messageID>\r
-      </_1:retrieveMessageRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="Not SOAP Fault Assertion" id="265cd6d9-1d1a-4017-a909-9d9f06abe1a8" name="SOAP Fault"/><con:assertion type="Simple Contains" id="e18a282b-2aa8-424e-bf36-07bbcef29807" name="Contains"><con:configuration><token>MessageId is empty</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom392-Pull-Download Message-Space-Tab" searchProperties="true" id="1acb8114-125b-40c6-bd35-25fa8b2fff4d">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="request" id="8b20626e-e8f1-4e6f-bbe6-f9fb6ce679cf" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
-   <soap:Header>
-      <ns:Messaging>
-         <ns:UserMessage>
-            <ns:MessageInfo>
-               <ns:MessageId>-Dom392-</ns:MessageId>
-            </ns:MessageInfo>
-            <ns:PartyInfo>
-               <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
-               </ns:From>
-               <ns:To>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
-               </ns:To>
-            </ns:PartyInfo>
-            <ns:CollaborationInfo>
-               <ns:Service type="tc14">bdx:noprocess</ns:Service>
-               <ns:Action>TC14Leg1</ns:Action>
-            </ns:CollaborationInfo>
-            <ns:MessageProperties>
-               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
-               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
-            </ns:MessageProperties>
-            <ns:PayloadInfo>
-               <ns:PartInfo href="cid:message">
-                  <ns:PartProperties>
-                     <ns:Property name="MimeType">text/xml</ns:Property>
-                  </ns:PartProperties>
-               </ns:PartInfo>
-            </ns:PayloadInfo>
-         </ns:UserMessage>
-      </ns:Messaging>
-   </soap:Header>
-   <soap:Body>\r
-      <_1:submitRequest>\r
-         <payload payloadId="cid:message" contentType="text/xml">
-         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
-         </payload>\r
-      </_1:submitRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="bb1978db-c391-4442-8d24-a01987db6158"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="2bc24941-4008-4fa9-b7b7-67ebe6e5ffc8"/><con:assertion type="XPath Match" name="XPath Match" id="50f9caf8-6f6e-4ca3-b99f-f619ded020b4"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="2e04a166-c733-4bbf-8462-97eb254ceca5"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","RECEIVED");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="3787cd8d-1159-4f3c-a636-202871f08e0d"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" id="c14634c5-3f23-475b-994b-57e67a2801cc" name="retrieveMessage"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
-   <soap:Header/>\r
-   <soap:Body>\r
-      <_1:retrieveMessageRequest>\r
-         <messageID>	-Dom392- </messageID>\r
-      </_1:retrieveMessageRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","DOWNLOADED","-Dom392-");
-test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
-test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}'))
-test.finalize();
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>326baca2-da04-4d28-8fe2-29c2d841fcaa</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/></con:testSuite><con:testSuite id="35b603b2-9d89-4dc1-8640-f22f07b059bc" name="EDELIVERY-2094 - Message is not immediately deleted after download" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Push-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/></con:testSuite><con:testSuite id="35b603b2-9d89-4dc1-8640-f22f07b059bc" name="EDELIVERY-2094 - Message is not immediately deleted after download" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Push-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c">
             <con:settings/>
             
             
