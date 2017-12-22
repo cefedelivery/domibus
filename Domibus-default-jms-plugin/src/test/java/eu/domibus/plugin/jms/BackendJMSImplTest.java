@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
 import javax.jms.MapMessage;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,6 +47,9 @@ public class BackendJMSImplTest {
 
     @Injectable
     String name = "myjmsplugin";
+
+    @Injectable
+    private Properties domibusProperties;
 
     @Tested
     BackendJMSImpl backendJMS;

@@ -1,88 +1,68 @@
 package eu.domibus.controller;
 
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.plugin.Submission;
+import eu.domibus.taxud.MessageAccessPointSwitch;
+import eu.domibus.taxud.MessageEndPointSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.annotation.PostConstruct;
+import java.util.UUID;
 
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
 @RestController
-@EnableAutoConfiguration
 public class TaxudIcs2Controller {
 
     private final static Logger LOG = LoggerFactory.getLogger(TaxudIcs2Controller.class);
-    private final static String ORIGINAL_SENDER = "originalSender";
-    private final static String FINAL_RECIPIENT = "finalRecipient";
 
-    @Value("${endPoint}")
-    private String endPoint;
+    private MessageAccessPointSwitch messageAccessPointSwitch;
 
-    @RequestMapping(value = "/message", method = RequestMethod.POST, consumes = {"application/xml"}, produces = {"application/xml"})
-    public void onMessage( @RequestBody Messaging message) {
+    private MessageEndPointSwitch messageEndPointSwitch;
+
+    @PostConstruct
+    protected void init(){
+        messageAccessPointSwitch=new MessageAccessPointSwitch();
+        messageEndPointSwitch=new MessageEndPointSwitch();
+    }
+
+    @RequestMapping(value = "/message", method = RequestMethod.POST)
+    public Submission onMessage( @RequestBody Submission submission) {
         LOG.info("Message received:");
-        switchAccessPoint(message);
-        switchEndPoint(message);
+        messageAccessPointSwitch.switchAccessPoint(submission);
+        messageEndPointSwitch.switchEndPoint(submission);
+        submission.setConversationId(submission.getMessageId());
+        submission.setMessageId(UUID.randomUUID() + "@domibus.eu");
+        return submission;
     }
 
-    private void switchAccessPoint(Messaging message) {
-        From from = message.getUserMessage().getPartyInfo().getFrom();
-        PartyId fromParty = from.getPartyId();
-        String fromRole = from.getRole();
+    @RequestMapping(value = "/message", method = RequestMethod.GET)
+    public Submission onMessage( ) {
+        Submission submission=new Submission();
+        submission.setFromRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+        submission.setToRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+        submission.addFromParty("domibus-blue","urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        submission.addToParty("domibus-red","urn:oasis:names:tc:ebcore:partyid-type:unregistered");
 
-        To to = message.getUserMessage().getPartyInfo().getTo();
-        PartyId toParty = to.getPartyId();
-        String toRole = to.getRole();
-
-        LOG.info("switching access point from :");
-        LOG.info("From [{}] with role [{}]",fromParty,fromRole);
-        LOG.info("To [{}] with role [{}]",toParty,toRole);
-
-        from.setPartyId(toParty);
-        from.setRole(toRole);
-
-        to.setPartyId(fromParty);
-        to.setRole(toRole);
-
-        LOG.info("to:");
-        LOG.info("From [{}] with role [{}]",from.getPartyId(),from.getRole());
-        LOG.info("To [{}] with role [{}]",to.getPartyId(),to.getRole());
-    }
-
-    private void switchEndPoint(Messaging message) {
-        List<Property> properties = message.getUserMessage().getMessageProperties().getProperty();
-
-        Property originalSender = properties.stream()
-                .filter(property -> ORIGINAL_SENDER.equals(property.getName())).reduce((a, b) -> null).get();
-        String originalSenderValue = originalSender.getValue();
-
-        Property finalRecipient = properties.stream()
-                .filter(property -> FINAL_RECIPIENT.equals(property.getName())).reduce((a, b) -> null).get();
-        String finalRecipientValue = finalRecipient.getValue();
-
-        LOG.info("switching end points from:");
-        LOG.info("[{}] value: [{}]",ORIGINAL_SENDER,originalSenderValue);
-        LOG.info("[{}] value: [{}]",FINAL_RECIPIENT,finalRecipientValue);
-
-        originalSender.setValue(finalRecipientValue);
-        finalRecipient.setValue(originalSenderValue);
-
-        LOG.info("[{}] value: [{}]",ORIGINAL_SENDER,originalSender.getValue());
-        LOG.info("[{}] value: [{}]",FINAL_RECIPIENT,finalRecipient.getValue());
+        submission.addMessageProperty("originalSender","urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+        submission.addMessageProperty("finalRecipient","urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+        return  submission;
     }
 
 
 
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(TaxudIcs2Controller.class, args);
-    }
+
+
+
+
+
+
 
 
 }

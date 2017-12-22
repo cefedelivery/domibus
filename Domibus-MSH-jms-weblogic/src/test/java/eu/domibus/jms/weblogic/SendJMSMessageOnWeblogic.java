@@ -1,7 +1,6 @@
 package eu.domibus.jms.weblogic;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
 import weblogic.security.Security;
 
 import javax.jms.*;
@@ -17,10 +16,10 @@ import java.util.Map;
 public class SendJMSMessageOnWeblogic {
 
     private static final String PROVIDER_URL = "t3://localhost:7001";
-    private static final String USER = "admin";
-    private static final String PASSWORD = "Europa0005";
+    private static final String USER = "weblogic";
+    private static final String PASSWORD = "weblogic1";
     private static final String CONNECTION_FACTORY_JNDI = "jms/ConnectionFactory";
-    private static final String QUEUE = "jms/domibus.backend.etrustex.inQueue";
+    private static final String QUEUE = "jms/domibus.notification.jms";
 
     public static void main(String[] args) throws Exception {
         try {

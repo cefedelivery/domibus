@@ -1,6 +1,9 @@
 
 package eu.domibus.plugin;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -20,6 +23,7 @@ import java.util.*;
  *
  * @author Christian Koch, Stefan Mueller
  */
+@JsonIgnoreProperties(value = { "payloads" })
 public class Submission {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(Submission.class);
@@ -567,11 +571,14 @@ public class Submission {
         this.toParties.add(new Submission.Party(partyId, partyIdType));
     }
 
+
     public static class Party {
         private final String partyId;
         private final String partyIdType;
 
-        Party(final String partyId, final String partyIdType) {
+
+        @JsonCreator
+        Party(@JsonProperty("partyId")final String partyId, @JsonProperty("partyIdType")final String partyIdType) {
             if(!StringUtils.hasLength(partyId)) {
                 throw new IllegalArgumentException("partyId must not be empty");
             }
@@ -677,11 +684,13 @@ public class Submission {
         private String value;
         private String type;
 
+        //@JsonCreator
         public TypedProperty(String key, String value) {
             this(key, value, null);
         }
 
-        public TypedProperty(String key, String value, String type) {
+        @JsonCreator
+        public TypedProperty(@JsonProperty("key") String key, @JsonProperty("value") String value, @JsonProperty("type") String type) {
             if(!StringUtils.hasLength(key) || !StringUtils.hasLength(value)) {
                 throw new IllegalArgumentException("message properties must have a non-empty name and value");
             }
