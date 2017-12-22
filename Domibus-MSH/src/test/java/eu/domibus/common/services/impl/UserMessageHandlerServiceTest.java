@@ -33,7 +33,6 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -375,7 +374,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
         }};
     }
 
@@ -458,7 +457,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
             times = 0;
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
@@ -620,7 +619,7 @@ public class UserMessageHandlerServiceTest {
             compressionService.handleDecompression(userMessage, legConfiguration);
             result = true;
 
-            messagingService.storeMessage(messaging);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
             result = new CompressionException("Could not store binary data for message ", null);
 
             userMessage.getMessageInfo().getMessageId();
@@ -637,7 +636,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
         }};

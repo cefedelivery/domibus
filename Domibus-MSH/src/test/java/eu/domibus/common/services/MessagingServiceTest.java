@@ -1,6 +1,7 @@
 package eu.domibus.common.services;
 
 import eu.domibus.api.util.xml.XMLUtil;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.impl.CompressionService;
@@ -55,7 +56,7 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
-        messagingService.storeMessage(messaging);
+        messagingService.storeMessage(messaging, MSHRole.SENDING);
 
         new Verifications() {{
             messagingDao.create(messaging);
@@ -110,7 +111,7 @@ public class MessagingServiceTest {
 
     private PartInfo getOnePartInfo(Messaging messaging) {
         /* Check there is only one partInfo */
-        Assert.assertEquals(messaging.getUserMessage().getPayloadInfo().getPartInfo().size(), 1);
+        Assert.assertEquals(1, messaging.getUserMessage().getPayloadInfo().getPartInfo().size());
         /* return the only partInfo in the message */
         return (PartInfo) messaging.getUserMessage().getPayloadInfo().getPartInfo().toArray()[0];
     }
@@ -132,7 +133,7 @@ public class MessagingServiceTest {
             partInfo.getPartProperties().getProperties().add(property);
         }
 
-        messagingService.storeMessage(validMessaging);
+        messagingService.storeMessage(validMessaging, MSHRole.SENDING);
         partInfo = getOnePartInfo(validMessaging);
 
         return partInfo;
@@ -145,7 +146,7 @@ public class MessagingServiceTest {
         PartInfo partInfo = getOnePartInfo(messaging);
         partInfo.setPayloadDatahandler(dh);
 
-        messagingService.storeMessage(messaging);
+        messagingService.storeMessage(messaging, MSHRole.SENDING);
         partInfo = getOnePartInfo(messaging);
 
         return partInfo;
