@@ -20856,7 +20856,299 @@ def msgID = context.expand( '${Submit Message#Response#//messageID}' )
 test.cleanDBMessageID(msgID)
 test.finalize()
 </con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/></con:testSuite><con:testSuite id="35b603b2-9d89-4dc1-8640-f22f07b059bc" name="EDELIVERY-2094 - Message is not immediately deleted after download" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Push-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom164-EDELIVERY-3046-AND-EDELIVERY-2997" searchProperties="true" id="9215f810-7483-41ef-95c5-d6647c10b0a0">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Set payload storage location to HD" id="3dd1910a-e34a-4874-90bf-a69928543fcb"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Set property domibus.attachment.storage.location to some existing folder."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Set log level to INFO" id="88fa2dbd-e298-4dc1-bb91-bb6f2b69e8b7"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Set log level to INFO."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Red 1" id="da7ab200-3c29-4c86-be83-d63832661cdc"><con:settings/><con:config><script>// Start 2 Domibus: sender and receiver
+Domibus.stopSetMSHs(1,1,0,context,log);
+Domibus.startSetMSHs(1,1,0,context,log);
+</script></con:config></con:testStep><con:testStep type="request" id="7e09b5a9-1b72-4e8e-8655-74dc6e8dfea2" name="Submit Message1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting><con:setting id="WsdlSettings@enable-mtom">true</con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+               <ns:MessageId>-Dom164-1-</ns:MessageId>
+            </ns:MessageInfo>         
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+                <ns:PartInfo href="cid:attachment">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">application/pdf</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>
+      <_1:submitRequest>
+         <payload payloadId="cid:message">
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>
+         <payload payloadId="cid:attachment">
+            <value>cid:1234</value>
+         </payload>
+      </_1:submitRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="a26922f0-3110-428c-912e-7b15450917d8"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="5043f043-cf9c-4be9-828e-3cf709e47ab1"/><con:assertion type="XPath Match" name="XPath Match" id="9c22be8a-eb69-4da4-854e-e961401250f8"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="ad39eec6-e815-4571-b28e-2da9a0bcd605" disabled="true"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>${#Project#pdfAttachment}</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>C:/ec/soapui/resources/File_97mb.pdf</con:url><con:id>b03835f2-1d73-40a8-a6ed-411176a861fb</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D1" id="5d21bcef-983a-4df2-8b9a-672f6757998f"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="request" id="dea19371-b188-451b-9ed4-824583e14f44" name="retrieveMessage1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting><con:setting id="WsdlSettings@enable-mtom">true</con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+   <soap:Header/>\r
+   <soap:Body>\r
+      <_1:retrieveMessageRequest>\r
+         <messageID>-Dom164-1-</messageID>\r
+      </_1:retrieveMessageRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7" disabled="true"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom164-1-",null,"Wait long for receiver status");
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check that the payload files are deleted from HD" id="6fa90e2a-5d39-40cd-b6eb-640cb119cb52"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check that the payload files are deleted from the storage location."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Check both sender and receiver logs 1" id="7848a1b3-b208-4473-9c09-a0bc596888b6"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check that the message payload size is logged in both sender and receiver logs (with the associated message ID). \nThis information should be present once per message."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="request" name="List Pending Messages" id="905ef6ec-862f-4683-a631-102effa4bcf6">
+                <con:settings/>
+                <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    <con:interface>BackendService_1_1SoapBinding</con:interface>
+                    <con:operation>downloadMessage</con:operation>
+                    <con:request name="List Pending Messages" id="3bd62923-7ca0-487d-94d2-76fdfd82bf15">
+                        <con:settings>
+                            <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+                        </con:settings>
+                        <con:encoding>UTF-8</con:encoding>
+                        <con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint>
+                        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:listPendingMessagesRequest></_1:listPendingMessagesRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request>
+                        <con:assertion type="SOAP Response" id="15aaf1d5-2a16-4a4c-9f88-823775512faf"/>
+                        <con:assertion type="SOAP Fault Assertion" id="a20eeb7f-3a3b-4e56-b3d8-6f5fb1d15477" name="Not SOAP Fault"/><con:credentials>
+                            <con:authType>No Authorization</con:authType>
+                        </con:credentials>
+                        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+                        <con:jmsPropertyConfig/>
+                        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+                        <con:wsrmConfig version="1.2"/>
+                    </con:request>
+                </con:config>
+            </con:testStep><con:testStep type="groovy" name="Set payload storage location to DB" id="91f0dd96-4c71-4675-a501-edb2bd869b0a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Disable property domibus.attachment.storage.location."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Red 2" id="b5a64d8b-df56-4189-b838-cf7c650f0478"><con:settings/><con:config><script>// Start 2 Domibus: sender and receiver
+//Domibus.stopSetMSHs(1,1,0,context,log);
+Domibus.startSetMSHs(1,1,0,context,log);
+</script></con:config></con:testStep><con:testStep type="request" id="bd1c811e-b3f8-4c96-8446-d7af53f00d19" name="Submit Message2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting><con:setting id="WsdlSettings@enable-mtom">true</con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+               <ns:MessageId>-Dom164-2-</ns:MessageId>
+            </ns:MessageInfo>         
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+                <ns:PartInfo href="cid:attachment">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">application/pdf</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>
+      <_1:submitRequest>
+         <payload payloadId="cid:message">
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>
+         <payload payloadId="cid:attachment">
+            <value>cid:1234</value>
+         </payload>
+      </_1:submitRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="a26922f0-3110-428c-912e-7b15450917d8"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="5043f043-cf9c-4be9-828e-3cf709e47ab1"/><con:assertion type="XPath Match" name="XPath Match" id="9c22be8a-eb69-4da4-854e-e961401250f8"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="ad39eec6-e815-4571-b28e-2da9a0bcd605" disabled="true"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:attachment><con:name>${#Project#pdfAttachment}</con:name><con:contentType>application/pdf</con:contentType><con:contentId>1234</con:contentId><con:part>1234</con:part><con:url>C:/ec/soapui/resources/File_97mb.pdf</con:url><con:id>b03835f2-1d73-40a8-a6ed-411176a861fb</con:id></con:attachment><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="e61ef43b-b038-4e77-bc82-a66067bed88e" name="retrieveMessage2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>retrieveMessage</con:operation><con:request name="retrieveMessage2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="85e5ccac-5aea-4b2f-94d8-ab1a46142d4e"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting><con:setting id="WsdlSettings@enable-mtom">true</con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#remoteUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">\r
+   <soap:Header/>\r
+   <soap:Body>\r
+      <_1:retrieveMessageRequest>\r
+         <messageID>-Dom164-2-</messageID>\r
+      </_1:retrieveMessageRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="210630ad-1205-4eb3-86c3-2efc781a8cb6"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="60dc63fb-b93a-40b5-a73a-51314448ca7d"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="353a0864-03ee-4579-ad24-3d9f2b8ff3f7" disabled="true"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","DELETED","-Dom164-1-",null,"Wait long for receiver status");
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="63864051-789d-41e0-b685-aff8b726b22a"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check that the payload files are deleted from DB" id="b0066d02-7bd6-45b6-b7e0-58ba6a96f7f7"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check that the payload files are deleted from the database."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Check both sender and receiver logs 2" id="09bf84b9-a275-42e7-8639-986525d1618a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check that the message payload size is logged in both sender and receiver logs (with the associated message ID). \nThis information should be present once per message."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful WRby user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}
+
+</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
+test.cleanDBMessageIDStartsWith("-Dom089-");
+test.finalize();
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>561878b2-aeaf-4c84-aa05-2d5aff136800</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/></con:testSuite><con:testSuite id="35b603b2-9d89-4dc1-8640-f22f07b059bc" name="EDELIVERY-2094 - Message is not immediately deleted after download" disabled="true"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom095-Push-Get Status-Basic flow-DELETED" searchProperties="true" id="e4801e3a-acdd-4253-a200-c1c288a3d42c">
             <con:settings/>
             
             
