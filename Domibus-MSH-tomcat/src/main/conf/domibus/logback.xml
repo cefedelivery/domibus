@@ -91,7 +91,7 @@
         </encoder>
     </appender>
 
-    <logger name="eu.domibus" level="INFO">
+    <logger name="eu.domibus" level="DEBUG">
         <appender-ref ref="security_file"/>
         <appender-ref ref="business_file"/>
     </logger>
@@ -101,7 +101,7 @@
     </logger>
 
     <!--  In order to enable logging of request/responses please change the loglevel to INFO -->
-    <logger name="org.apache.cxf" level="WARN"/>
+    <logger name="org.apache.cxf" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="file"/>
