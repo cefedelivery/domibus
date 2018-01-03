@@ -74,6 +74,7 @@ public class PullMessageSender {
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
         String messageId = null;
+        LOG.debug("Processing a pull request");
         try {
             final String mpc = map.getString(PullContext.MPC);
             final String pMode = map.getString(PullContext.PMODE_KEY);
