@@ -75,6 +75,10 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     @XmlTransient
     private String mime;
 
+    @Transient
+    @XmlTransient
+    private long length = -1;
+
     public DataHandler getPayloadDatahandler() {
         return payloadDatahandler;
     }
@@ -252,6 +256,14 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
      */
     public void setHref(final String value) {
         this.href = value;
+    }
+
+    public long getLength() {
+        return length;
+    }
+
+    public void setLength(long length) {
+        this.length = length;
     }
 
     @Override

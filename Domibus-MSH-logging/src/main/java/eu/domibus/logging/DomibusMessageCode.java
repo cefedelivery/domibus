@@ -69,6 +69,8 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_PARTY_NAME_NOT_FOUND("BUS-058", "Party with name [{}] has not been found"),
     BUS_MSG_NOT_FOUND("BUS-059", "Message with id [{}] has not been found"),
     BUS_MSG_CONSUMED("BUS-060", "Message with id [{}] has been consumed from the queue [{}]"),
+    BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE("BUS-061", "Received payload with cid [{}] for message [{}] of size [{}] (in bytes)"),
+    BUS_MESSAGE_SENDING_PAYLOAD_SIZE("BUS-062", "Saved payload with cid [{}] for message [{}] of size [{}] (in bytes) for sending"),
 
     SEC_UNSECURED_LOGIN_ALLOWED("SEC-001", "Unsecure login is allowed, no authentication will be performed"),
     SEC_BASIC_AUTHENTICATION_USE("SEC-002", "Basic authentication is used"),
@@ -84,7 +86,11 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_INVALID_X509CERTIFICATE("SEC-012", "X509Certificate invalid or not found"),
     SEC_CONSOLE_LOGIN_UNKNOWN_USER("SEC-013", "The user [{}] is unknown"),
     SEC_CONSOLE_LOGIN_INACTIVE_USER("SEC-014", "The user [{}] is not active"),
-    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended");
+    SEC_CONSOLE_LOGIN_SUSPENDED_USER("SEC-015", "The user [{}] is suspended"),
+    SEC_CONSOLE_LOGIN_BAD_CREDENTIALS("SEC-016", "The user [{}] is trying to login with bad credentials"),
+    SEC_CONSOLE_LOGIN_LOCKED_USER("SEC-017", "The user [{}] is locked after trying to login for [{}] wrong attempts."),
+    SEC_CERTIFICATE_SOON_REVOKED("SEC-018", "The certificate with alias [{}] will be revoked on [{}]"),
+    SEC_CERTIFICATE_REVOKED("SEC-019", "The certificate with alias [{}] is revoked since [{}]");
 
     String code;
     String message;
