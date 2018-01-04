@@ -1,6 +1,6 @@
 package eu.domibus.pki;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Enum which contains supported CRL Url types
