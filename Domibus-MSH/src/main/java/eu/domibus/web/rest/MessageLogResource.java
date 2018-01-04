@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -7,12 +8,16 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,10 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -36,6 +38,14 @@ public class MessageLogResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
 
+    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
+    private static final String RECEIVED_FROM_STR = "receivedFrom";
+    private static final String RECEIVED_TO_STR = "receivedTo";
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     @Autowired
     private UserMessageLogDao userMessageLogDao;
 
@@ -44,6 +54,9 @@ public class MessageLogResource {
 
     @Autowired
     DateUtil dateUtil;
+
+    @Autowired
+    CsvServiceImpl csvServiceImpl;
 
     //significant improvements to the query execution plan have been found by always passing the date.
     //so we provide a default from and to.
@@ -80,8 +93,8 @@ public class MessageLogResource {
             @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
             @RequestParam(value = "originalSender", required = false) String originalSender,
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
-            @RequestParam(value = "receivedFrom", required = false) String receivedFrom,
-            @RequestParam(value = "receivedTo", required = false) String receivedTo) {
+            @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
 
         LOGGER.debug("Getting message log");
 
@@ -98,8 +111,8 @@ public class MessageLogResource {
         if (to == null) {
             to = defaultTo;
         }
-        filters.put("receivedFrom", from);
-        filters.put("receivedTo", to);
+        filters.put(RECEIVED_FROM_STR, from);
+        filters.put(RECEIVED_TO_STR, to);
 
         result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
@@ -120,11 +133,11 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
-        if (filters.get("receivedFrom").equals(defaultFrom)) {
-            filters.remove("receivedFrom");
+        if (filters.get(RECEIVED_FROM_STR).equals(defaultFrom)) {
+            filters.remove(RECEIVED_FROM_STR);
         }
-        if (filters.get("receivedTo").equals(defaultTo)) {
-            filters.remove("receivedTo");
+        if (filters.get(RECEIVED_TO_STR).equals(defaultTo)) {
+            filters.remove(RECEIVED_TO_STR);
         }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
@@ -135,6 +148,56 @@ public class MessageLogResource {
         result.setPageSize(pageSize);
 
         return result;
+    }
+
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv(
+            @RequestParam(value = "messageId", required = false) String messageId,
+            @RequestParam(value = "conversationId", required = false) String conversationId,
+            @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
+            @RequestParam(value = "messageType", defaultValue = "USER_MESSAGE") MessageType messageType,
+            @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus,
+            @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus,
+            @RequestParam(value = "fromPartyId", required = false) String fromPartyId,
+            @RequestParam(value = "toPartyId", required = false) String toPartyId,
+            @RequestParam(value = "refToMessageId", required = false) String refToMessageId,
+            @RequestParam(value = "originalSender", required = false) String originalSender,
+            @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
+            @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
+        Date from = dateUtil.fromString(receivedFrom);
+        if (from == null) {
+            from = defaultFrom;
+        }
+        Date to = dateUtil.fromString(receivedTo);
+        if (to == null) {
+            to = defaultTo;
+        }
+        filters.put(RECEIVED_FROM_STR, from);
+        filters.put(RECEIVED_TO_STR, to);
+
+        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+
+        List<MessageLogInfo> resultList = new ArrayList<>();
+        if (messageType == MessageType.SIGNAL_MESSAGE) {
+            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
+        } else if (messageType == MessageType.USER_MESSAGE) {
+            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
+        }
+
+        String resultText;
+        try {
+            resultText = csvServiceImpl.exportToCSV(resultList);
+        } catch (CsvException e) {
+            LOGGER.error("Exception caught during export to CSV", e);
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .header("Content-Disposition", "attachment; filename=messages_datatable.csv")
+                .body(resultText);
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {

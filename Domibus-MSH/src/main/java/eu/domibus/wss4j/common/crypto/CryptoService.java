@@ -62,6 +62,10 @@ public class CryptoService {
         return trustStore;
     }
 
+    public void setJmsOperations(JmsOperations jmsOperations) {
+        this.jmsOperations = jmsOperations;
+    }
+
     /**
      * Adds the certificate to the trustStore
      *
@@ -184,7 +188,7 @@ public class CryptoService {
         }
     }
 
-    void setTrustStoreProperties(Properties trustStoreProperties) {
+    public void setTrustStoreProperties(Properties trustStoreProperties) {
         this.trustStoreProperties = trustStoreProperties;
     }
 

@@ -1,6 +1,6 @@
 package eu.domibus.ext.delegate.services.security;
 
-import eu.domibus.api.message.UserMessageService;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.ext.exceptions.AuthenticationException;
 import eu.domibus.ext.exceptions.DomibusErrorCode;

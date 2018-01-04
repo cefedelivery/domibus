@@ -106,6 +106,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
+
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);

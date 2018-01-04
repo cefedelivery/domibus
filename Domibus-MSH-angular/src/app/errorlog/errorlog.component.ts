@@ -7,6 +7,7 @@ import {ErrorlogDetailsComponent} from "app/errorlog/errorlog-details/errorlog-d
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {DownloadService} from "../download/download.service";
 
 @Component({
   moduleId: module.id,
@@ -46,6 +47,9 @@ export class ErrorLogComponent {
   errorCodes: Array<String>;
 
   advancedSearch: boolean;
+
+  static readonly ERROR_LOG_URL : string = 'rest/errorlogs';
+  static readonly ERROR_LOG_CSV_URL : string = ErrorLogComponent.ERROR_LOG_URL + '/csv';
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -132,7 +136,7 @@ export class ErrorLogComponent {
       searchParams.set('asc', asc.toString());
     }
 
-    return this.http.get('rest/errorlogs', {
+    return this.http.get(ErrorLogComponent.ERROR_LOG_URL, {
       search: searchParams
     }).map((response: Response) =>
       response.json()
@@ -251,6 +255,49 @@ export class ErrorLogComponent {
     dialogRef.afterClosed().subscribe(result => {
       //Todo:
     });
+  }
+
+  private getFilterPath() {
+    let result = '?';
+
+    //filter
+    if (this.filter.errorSignalMessageId) {
+      result += 'errorSignalMessageId=' + this.filter.errorSignalMessageId + '&';
+    }
+    if (this.filter.mshRole) {
+      result += 'mshRole=' + this.filter.mshRole + '&';
+    }
+    if (this.filter.messageInErrorId) {
+      result += 'messageInErrorId=' + this.filter.messageInErrorId + '&';
+    }
+    if (this.filter.errorCode) {
+      result += 'errorCode=' + this.filter.errorCode + '&';
+    }
+    if (this.filter.errorDetail) {
+      result += 'errorDetail=' + this.filter.errorDetail + '&';
+    }
+    if (this.filter.timestampFrom != null) {
+      result += 'timestampFrom=' + this.filter.timestampFrom.getTime() + '&';
+    }
+    if (this.filter.timestampTo != null) {
+      result += 'timestampTo=' + this.filter.timestampTo.getTime() + '&';
+    }
+    if (this.filter.notifiedFrom != null) {
+      result += 'notifiedFrom=' + this.filter.notifiedFrom.getTime() + '&';
+    }
+    if (this.filter.notifiedTo != null) {
+      result += 'notifiedTo=' + this.filter.notifiedTo.getTime() + '&';
+    }
+
+    return result;
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return (this.count < 10000);
+  }
+
+  saveAsCSV() {
+    DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.getFilterPath());
   }
 
 }

@@ -24,6 +24,7 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests"
+	static def defaultLogLevel = 0
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -37,6 +38,13 @@ class Domibus
     void finalize() {
         log.info "Test finished."
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Log information wrapper 
+   static def void debugLog(logMsg, log,  logLevel = defaultLogLevel) {
+	if (logLevel.toString()=="1" || logLevel.toString() == "true") 
+		log.info (logMsg)
+  }
+
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
@@ -252,6 +260,7 @@ class Domibus
 
         openConnection();
 		// Choose 2 Domibus between blue, red and green
+		// 3 bits GRB 
 		switch(mapDoms){
 			case 3:
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
@@ -279,7 +288,7 @@ class Domibus
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
                 }
-                log.info "|MSG_ID: "+messageID+" | SENDER: Expected Message Status ="+ SMSH +"-- Current Message Status = "+messageStatus+" | maxNumberAttempts: "+maxNumberAttempts+"-- numberAttempts: "+numberAttempts; 
+                log.info "|MSG_ID: "+messageID+" | SENDER: Expected MSG Status ="+ SMSH +"-- Current MSG Status = "+messageStatus+" | maxNumbAttempts: "+maxNumberAttempts+"-- numbAttempts: "+numberAttempts; 
                 if(SMSH=="SEND_FAILURE"){
 					if(messageStatus=="WAITING_FOR_RETRY"){
 						if(((maxNumberAttempts-numberAttempts)>0)&&(!wait)){
@@ -703,28 +712,10 @@ class Domibus
         def proc=null; def commandString = null; 
 		def pmDescription = "SoapUI sample test description for PMode upload";
 		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
 		log.info "PMODE FILE PATH: "+pmodeFile;
 		
-		
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 
 		log.info commandString
 		if(commandString){
@@ -750,8 +741,53 @@ class Domibus
 			if(message!=null){
 				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
 			}
-		}	
+		}
+		
+		
+	}
 
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	
+	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean logOutput =false){
+		log.info "Start upload PMode for Domibus \""+side+"\".";
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null; 
+		def pmDescription = "Dummy";
+		
+		def String output = fetchCookieHeader(side,context,log);		
+		def XXSRFTOKEN = null;
+		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
+		//log.info "PMODE FILE PATH: "+pmodeFile;
+		
+		
+		commandString="curl " + urlToDomibus(side, log, context) + "/rest/pmode -v -F \"description=" + pmDescription + "\" -F  file=@" + pmodeFile ;
+
+		log.info commandString
+		if(commandString){
+			proc = commandString.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		if(logOutput){
+			log.info "outputCatcher: "+outputCatcher.toString();
+			log.info "errorCatcher: "+errorCatcher.toString();
+		}
+		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
+		if(outcome.toLowerCase()=="successfully"){
+			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+			if(message!=null){
+				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
+			}
+		}
+		else{
+			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
+			if(message!=null){
+				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
+			}
+		}
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String tsPassword="test123"){
@@ -760,28 +796,11 @@ class Domibus
         def errorCatcher = new StringBuffer();
         def proc=null; def commandString = null; 
 		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
 		def String truststoreFile = computePathRessources(baseFilePath,extFilePath,context);
 				
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			case "testEnv":
-				commandString="curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/truststore -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 
-		//log.info commandString
+		log.info commandString
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -793,40 +812,42 @@ class Domibus
 		log.info errorCatcher.toString()
 		assert(outputCatcher.toString().contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
 		log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
-		
-
 	} 
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def setMessageFilters(String side, String filterChoice,context,log){
-		log.info "Start update message filters for Domibus \""+side+"\".";
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;
-		def firstBck = "backendWebservice"; def secondBck = "Jms";
-		def firstEntId = "1"; def SecondEntId = "2";
-		
-		def String output = fetchCookieHeader(side,context,log);		
-		def XXSRFTOKEN = output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","");
-		
-		if(filterChoice.toLowerCase()!="ws"){
-			firstBck="Jms";firstEntId="2";secondBck="backendWebservice";SecondEntId="1";
-		}
-				
+	
+	
+	//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+// Return url to specific domibus
+static def String urlToDomibus(side, log, context){
+	// Return url to specific domibus base on the "side"
+		def propName = ""
 		switch(side.toLowerCase()){
 			case "sender":
-				commandString="curl "+context.expand( '${#Project#localUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				propName =  "localUrl"
 				break;
 			case "receiver":
-				commandString="curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				propName = "remoteUrl"
 				break;
 			case "receivergreen":
-				commandString="curl "+context.expand( '${#Project#greenUrl}' )+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+XXSRFTOKEN+"\" -X PUT -d [\"{\"\"\"entityId\"\"\":"+firstEntId+",\"\"\"index\"\"\":0,\"\"\"backendName\"\"\":\"\"\""+firstBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":0},{\"\"\"entityId\"\"\":"+SecondEntId+",\"\"\"index\"\"\":1,\"\"\"backendName\"\"\":\"\"\""+secondBck+"\"\"\",\"\"\"routingCriterias\"\"\":[],\"\"\"from\"\"\":null,\"\"\"to\"\"\":null,\"\"\"action\"\"\":null,\"\"\"sevice\"\"\":null,\"\"\"\$\$index\"\"\":1}\"] ";
+				propName  = "greenUrl"
+				break;
+			case "testEnv":
+				propName  = "testEnvUrl"
 				break;
 			default:
-				assert (false) , "Unknown side."
+				assert (false) , "Unknown side. Supported values: sender, receiver, receivergreen and testEnv"
 		}
 
-		//log.info commandString
+		return context.expand("\${#Project#${propName}}")
+}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def getMessageFilters(String side,context,log){
+		log.info "Get message filters for Domibus \""+side+"\".";
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;		
+
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X GET ";
+
 		if(commandString){
 			proc = commandString.execute();
 			if(proc!=null){
@@ -834,9 +855,89 @@ class Domibus
 				proc.waitFor()
 			}
 		}
-		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus."
 		
-		log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
+		return outputCatcher.toString();
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def formatFilters(String filters,String filterChoice,context,log, String extraCriteria=null, logLevel = 1){
+		log.info "Trying to re-order backends filters ..."
+		def swapBck = null
+		debugLog("FILTERS:" + filters, log, logLevel)
+		
+		if(filters!=null){
+			filters=filters.substring(filters.indexOf("["),filters.lastIndexOf("]")-1);
+		}
+		assert(filters!=null),"Error:formatFilters: Not able to get the backend details."
+		def tableBcks = filters.split("},");
+		debugLog(tableBcks.toString(), log,  logLevel) 
+		
+		if(tableBcks.length==1){
+			return "ok";
+		}
+		
+		for(def i=0;i<tableBcks.length;i++){
+			tableBcks[i]="{\""+tableBcks[i].split("\"",2)[1]+"}";
+			tableBcks[i]=tableBcks[i].replace("\"","\"\"\"");
+		}
+		debugLog("after for loop", log, logLevel)
+		debugLog(tableBcks.toString(), log, logLevel)
+		
+		for(def  j = 0; j<tableBcks.length; j++){
+			if(tableBcks[j].toLowerCase().contains(filterChoice.toLowerCase()) ) { 
+				if(extraCriteria==null || (extraCriteria!=null && tableBcks[j].toLowerCase().contains(extraCriteria.toLowerCase()) ) ) {
+					if(j==0){
+						return "correct";
+					}
+					debugLog("switch $j element", log, logLevel)
+					swapBck = tableBcks[0];
+					tableBcks[0] = tableBcks[j];
+					tableBcks[j] = swapBck;
+					return   "[\"" + tableBcks.join(",")+"\"]"
+				}
+			}
+		}
+		
+		return "ko"
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	static def setMessageFilters(String side, String filterChoice,context,log,String extraCriteria=null, logLevel = 1){
+		log.info "Start setting message filters for Domibus \""+side+"\".";
+		def String output = null;
+	    def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+        def proc=null; def commandString = null;
+		
+		def filtersString = getMessageFilters(side,context,log);
+		debugLog("filtersString:" + filtersString, log,  logLevel)
+		assert(filtersString!=null),"Error:setMessageFilter: Not able to get the backend details."
+		assert(filtersString.toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed."
+		
+		def String bckParams = formatFilters(filtersString, filterChoice, context, log, extraCriteria, logLevel);
+		debugLog("bckParams:" + bckParams, log, logLevel)
+		assert(bckParams!="ko"),"Error:setMessageFilter: The backend you want to set is not installed."
+
+		if(bckParams.equals("ok")){
+			log.info "Only one backend installed: Nothing to do.";
+		}
+		else{
+			if(bckParams.equals("correct")){
+				log.info "The requested backend is already selected: Nothing to do.";
+			}
+			else{
+				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X PUT -d "+bckParams;
+				debugLog("commandString ="+commandString, log, logLevel)
+				if(commandString){
+					proc = commandString.execute();
+					if(proc!=null){
+						proc.consumeProcessOutput(outputCatcher, errorCatcher)
+						proc.waitFor()
+					}
+				}
+				assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+			}
+		}
 
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -846,23 +947,7 @@ class Domibus
         def proc=null; def commandString = null; 
 		//def JSESSIONID = null; def XSRFTOKEN = null;def XXSRFTOKEN = null;
 		
-		
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString = "curl "+context.expand( '${#Project#localUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "receiver":
-				commandString = "curl "+context.expand( '${#Project#remoteUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "receivergreen":
-				commandString = "curl "+context.expand( '${#Project#greenUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			case "testEnv":
-				commandString = "curl "+context.expand( '${#Project#testEnvUrl}' )+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
 		
 		//log.info commandString;
 		if(commandString){
@@ -876,6 +961,11 @@ class Domibus
 		assert(outputCatcher.toString().contains("200 OK")),"Error:Authenticating user: Error while trying to connect to domibus."
 		return outputCatcher.toString();
 	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+static def String returnXsfrToken(String side,context,log){
+	def String output = fetchCookieHeader(side,context,log)		
+	return output.find("XSRF-TOKEN.*;").replace("XSRF-TOKEN=","").replace(";","")
+}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def computePathRessources(String type,String extension,context){
 		def returnPath = null;
@@ -894,22 +984,7 @@ class Domibus
         def proc=null
 		def commandString = null;
 
-		switch(side.toLowerCase()){
-			case "sender":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#localUrl}' )+"/services";
-				break;
-			case "receiver":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#remoteUrl}' )+"/services";
-				break;
-			case "receivergreen":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#greenUrl}' )+"/services";
-				break;
-			case "testEnv":
-				commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+context.expand( '${#Project#testEnvUrl}' )+"/services"
-				break;
-			default:
-				assert (false) , "Unknown side."
-		}
+		commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+urlToDomibus(side, log, context)+"/services";
 		
 		if(commandString){
 			proc = commandString.execute();
@@ -922,7 +997,7 @@ class Domibus
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Copy file from source to destination
-    static def void copyFile(String source, String destination,log){
+    static def void copyFile(String source, String destination, log, overwriteOpt=true){
 		// Check that destination folder exists.
 		//def destFolder = new File("${destination}");
 		//assert destFolder.exists(), "Error while trying to copy file to folder "+destination+": Destination folder doesn't exist.";
@@ -930,7 +1005,7 @@ class Domibus
 		def builder = new AntBuilder();
 		try{
 			builder.sequential {
-				copy(tofile: destination, file:source, overwrite:true)
+				copy(tofile: destination, file:source, overwrite:overwriteOpt)
 			}
 			log.info "File was successfuly copied."
 		}
@@ -980,39 +1055,58 @@ static def String pathToDomibus(color, log, context){
 
 		// Check file exists
 		def testFile = new File(pathToPropertyFile)
-		if (!testFile.exists()) testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
+		if (!testFile.exists()) {
+			testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
+			return null
+			}
 		else log.info "File [${pathToPropertyFile}] exists."
 
-		// Create backup file 
-		Domibus.copyFile(pathToPropertyFile, "${pathToPropertyFile}${backup_file_sufix}",log)
+		// Create backup file if already not created
+		def backupFileName = "${pathToPropertyFile}${backup_file_sufix}"
+		def backupFile = new File(backupFileName)
+		if (backupFile.exists()) {
+			log.info "File [${backupFileName}] already exists and would not be overwrite - old backup file would be preserved."
+		}
+		else  {		
+			copyFile(pathToPropertyFile, backupFileName, log)
+			log.info "Backup copy of config file created: [${backupFile}]"
+		}
 		
 		def fileContent = testFile.text
-		def found = false
-		def foundInCommentedRow = false
 		//run in loop for all properties key values pairs 
-		 propValueDict.each{ propertyToChangeName, newValueToAssign -> 
+		for (item in propValueDict) {
+			def propertyToChangeName = item.key
+			def newValueToAssign = item.value
+			
 		 	// Check that property exist in config file
-			 found = false
-			 foundInCommentedRow = false
+			def found = 0
+			def foundInCommentedRow = 0 
 			testFile.eachLine{line, n ->
-			     n++
-			  if (line =~ /^${propertyToChangeName}=/) {
+			    n++
+			  if (line =~ /^\s*${propertyToChangeName}=/) {
 			     log.info "In line $n searched property was found. Line value is: $line"
-			     found = true
+			     found++
 			  }
-			  if (line =~ ~/# *${propertyToChangeName}=.*/) {
+			  if (line =~ ~/#+\s*${propertyToChangeName}=.*/) {
 			     log.info "In line $n commented searched property was found. Line value is: $line"
-			     foundInCommentedRow = true
+			     foundInCommentedRow++
 			  }
 			}
-
+			
+			if (found > 1) {
+				testRunner.fail("The search string ($propertyToChangeName=) was found ${found} times in file [${pathToPropertyFile}]. Expect only one assigment - check if configuration file is not corrupted.") 
+				return null
+			}
 			// If property is present in file change it value
 			if (found) 
-				fileContent = fileContent.replaceAll(/(?m)^(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+				fileContent = fileContent.replaceAll(/(?m)^\s*(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
 			else 
 				if (foundInCommentedRow)  
-					fileContent = fileContent.replaceAll(/(?m)^# *(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
-				else testRunner.fail("The search string ($propertyToChangeName) was not found in file [${pathToPropertyFile}].") 
+					fileContent = fileContent.replaceFirst(/(?m)^#+\s*(${propertyToChangeName}=)(.*)/){ all, paramName, value -> "${paramName}${newValueToAssign}"} 
+				else {
+					testRunner.fail("The search string ($propertyToChangeName) was not found in file [${pathToPropertyFile}]. No changes would be applied - properties file restored.") 
+					return null
+				}
 		    log.info "In [${pathToPropertyFile}] file property ${propertyToChangeName} was changed to value ${newValueToAssign}"
 		 } //loop end 
 		
@@ -1022,8 +1116,7 @@ static def String pathToDomibus(color, log, context){
     }
 
 
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
    // Restor Domibus configuration file 
     static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
 		// Restore from backup file domibus.properties file
@@ -1032,13 +1125,20 @@ static def String pathToDomibus(color, log, context){
 		
 		// Check backup file exists
 		def backupFileHandler = new File(backupFile)
-		if (!backupFileHandler.exists()) testRunner.fail("CRITICAL ERROR: File [${backupFile}] does not exist.")
+		if (!backupFileHandler.exists()) {
+			testRunner.fail("CRITICAL ERROR: File [${backupFile}] does not exist.")
+			return null
+		}
 		else {	
+			log.info "Restore properties file from existing backup"
 			copyFile(backupFile, pathToPropertyFile, log)
-			if (backupFileHandler.delete())
+			if (backupFileHandler.delete()) {
 			   log.info "Successufuly restory configuration from backup file and backup file was removed" 
-			else 
+			}
+			else {
 			   testRunner.fail "Not able to delete configuration backup file" 
+			   return null
+			}
 		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
