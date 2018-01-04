@@ -25,6 +25,7 @@ class Domibus
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests"
 	static def defaultLogLevel = 0
+	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -49,14 +50,20 @@ class Domibus
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
 		log.info("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||");
-		GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
-		GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 
 		def sql = null;
 
         try{
-            if (database.toLowerCase() == "mysql" || database.toLowerCase() == "oracle" ){
-                sql = Sql.newInstance(url, dbUser, dbPassword, driver)
-			}else{
+            switch (database.toLowerCase()) {
+			case  "mysql": 
+				GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+				sql = Sql.newInstance(url, dbUser, dbPassword, driver)
+				break
+			case "oracle":
+				GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 			
+				sql = Sql.newInstance(url, dbUser, dbPassword, driver)
+				break
+			default:
+				log.warn "Unknown type of DB"
                 sql = Sql.newInstance(url, driver)
 			}
 			log.info "Connection opened with success";
@@ -363,7 +370,7 @@ class Domibus
         def connectionOpenedInsideMethod = false
         def sqlDB
         if (!((sqlRed) && (sqlBlue) && (sqlGreen))) {
-            log.debug "Method executed without connections open to the DB - try to open connection"
+            debugLog("Method executed without connections open to the DB - try to open connection", log)
             openConnection()
             connectionOpenedInsideMethod = true
         }
@@ -384,12 +391,12 @@ class Domibus
         }
 
         for (query in sqlQueriesList) {
-            log.debug "Executing SQL query: " + query
+            debugLog("Executing SQL query: " + query, log)
             sqlDB.execute query
         }
 
         if (connectionOpenedInsideMethod) {
-            log.debug "Connection to DB opened during method execution - close opened connection"
+            debugLog("Connection to DB opened during method execution - close opened connection", log)
             closeConnection()
         }
     }
@@ -459,6 +466,39 @@ class Domibus
 
         closeConnection()
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Add quote when value is not null - for sql queries or return String "null"
+    static def String addQuotationWhenNotNull(value) {
+		if (value != null) 
+			return "'" + value +"'"
+		
+		return "null"
+	}
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Add authentication record if it's not present already in table
+    def addAuthenticationRecord(targetSchema, userName, authRoles, originaUser, passwd = DEFAULT_PASSWORD){
+        log.info "Add authentication record, if exist delete first, to: ${targetSchema} with user name: ${userName} and original user value: ${originaUser}"
+
+        def sqlQuery = [
+				"delete from TB_AUTHENTICATION_ENTRY where username in ('" + userName + "')",
+                "INSERT INTO tb_authentication_entry (USERNAME, PASSWD, AUTH_ROLES, ORIGINAL_USER) values (" + addQuotationWhenNotNull(userName) +", "+ 
+				addQuotationWhenNotNull(passwd) +", " + addQuotationWhenNotNull(authRoles) + ", " + addQuotationWhenNotNull(originaUser) +")" ] as String[]
+
+        executeListOfSqlQueries(sqlQuery, targetSchema)
+    }
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Remove authentication record from TB_AUTHENTICATION_ENTRY table
+    def delAuthenticationRecord(targetSchema, userNameList){
+		userNameList = [] + userNameList
+        log.info "Remove authentication record from TB_AUTHENTICATION_ENTRY table for user(s) name: ${userNameList}"
+
+        def sqlQuery = ["delete from TB_AUTHENTICATION_ENTRY where username in ('" + userNameList.join("','") + "')" ] as String[]
+
+        executeListOfSqlQueries(sqlQuery, targetSchema)
+    }	
+	
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
 	// Check that an entry is created in the table TB_SEND_ATTEMPT
 	def checkSendAttempt(String messageID, int mapDoms=4){
