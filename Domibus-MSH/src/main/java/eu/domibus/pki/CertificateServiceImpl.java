@@ -2,10 +2,14 @@ package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.security.TrustStoreEntry;
+import eu.domibus.common.model.certificate.CertificateStatus;
+import eu.domibus.common.model.certificate.CertificateType;
+import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,6 +29,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
+import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
+import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
+
 /**
  * @Author Cosmin Baciu
  * @Since 3.2
@@ -33,6 +40,10 @@ import java.util.*;
 public class CertificateServiceImpl implements CertificateService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CertificateServiceImpl.class);
+
+    public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.offset";
+
+    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "10";
 
     @Autowired
     CRLService crlService;
@@ -43,6 +54,9 @@ public class CertificateServiceImpl implements CertificateService {
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
+
+    @Autowired
+    private CertificateDao certificateDao;
 
     @Cacheable(value = "certValidationByAlias", key = "#alias")
     @Override
@@ -114,11 +128,11 @@ public class CertificateServiceImpl implements CertificateService {
     /**
      * Verifies the existence and validity of a certificate.
      *
-     * @Author Federico Martini
-     * @Since 3.3
      * @param alias
      * @return boolean
      * @throws DomibusCertificateException
+     * @Author Federico Martini
+     * @Since 3.3
      */
     @Override
     public boolean isCertificateValid(String alias) throws DomibusCertificateException {
@@ -151,7 +165,6 @@ public class CertificateServiceImpl implements CertificateService {
         }
         throw new IllegalArgumentException("The certificate does not contain a common name (CN): " + certificate.getSubjectDN().getName());
     }
-
 
     /**
      * Load certificate with alias from JKS file and return as {@code X509Certificate}.
@@ -203,4 +216,119 @@ public class CertificateServiceImpl implements CertificateService {
             return Lists.newArrayList();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveCertificateAndLogRevocation() {
+        saveCertificateData();
+        logCertificateRevocationWarning();
+    }
+
+    /**
+     * Create or update certificate in the db.
+     */
+    protected void saveCertificateData() {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates();
+        for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
+            certificateDao.saveOrUpdate(certificate);
+        }
+    }
+
+    /**
+     * Load expired and soon expired certificates, add a warning of error log, and save a flag saying the system already
+     * notified it for the day.
+     */
+    protected void logCertificateRevocationWarning() {
+        List<eu.domibus.common.model.certificate.Certificate> unNotifiedSoonRevoked = certificateDao.getUnNotifiedSoonRevoked();
+        for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedSoonRevoked) {
+            LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, certificate.getAlias(), certificate.getNotAfter());
+            certificateDao.updateRevocation(certificate);
+        }
+
+        List<eu.domibus.common.model.certificate.Certificate> unNotifiedRevoked = certificateDao.getUnNotifiedRevoked();
+        for (eu.domibus.common.model.certificate.Certificate certificate : unNotifiedRevoked) {
+            LOG.securityError(SEC_CERTIFICATE_REVOKED, certificate.getAlias(), certificate.getNotAfter());
+            certificateDao.updateRevocation(certificate);
+        }
+    }
+
+    /**
+     * Group keystore and trustStore certificates in a list.
+     *
+     * @return a list of certificate.
+     */
+    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates() {
+        KeyStore trustStore = cryptoService.getTrustStore();
+        List<eu.domibus.common.model.certificate.Certificate> allCertificates = new ArrayList<>();
+        allCertificates.addAll(loadAndEnrichCertificateFromKeystore(trustStore, CertificateType.PUBLIC));
+        KeyStore keyStore = cryptoService.getKeyStore();
+        allCertificates.addAll(loadAndEnrichCertificateFromKeystore(keyStore, CertificateType.PRIVATE));
+        return Collections.unmodifiableList(allCertificates);
+    }
+
+    /**
+     * Load certificate from a keystore and enrich them with status and type.
+     *
+     * @param keyStore        the store where to retrieve the certificates.
+     * @param certificateType the type of the certificate (Public/Private)
+     * @return the list of certificates.
+     */
+    private List<eu.domibus.common.model.certificate.Certificate> loadAndEnrichCertificateFromKeystore(KeyStore keyStore, CertificateType certificateType) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
+        if (keyStore != null) {
+            certificates = extractCertificateFromKeyStore(
+                    keyStore);
+            for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
+                certificate.setCertificateType(certificateType);
+                CertificateStatus certificateStatus = getCertificateStatus(certificate.getNotAfter());
+                certificate.setCertificateStatus(certificateStatus);
+            }
+        }
+        return certificates;
+    }
+
+    /**
+     * Process the certificate status base on its expiration date.
+     *
+     * @param notAfter the expiration date of the certificate.
+     * @return the certificate status.
+     */
+    protected CertificateStatus getCertificateStatus(Date notAfter) {
+        int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
+        try {
+            revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+        } catch (NumberFormatException n) {
+
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
+        if (now.isAfter(LocalDateTime.fromDateFields(notAfter))) {
+            return CertificateStatus.REVOKED;
+        } else if (offsetDate.isAfter(LocalDateTime.fromDateFields(notAfter))) {
+            return CertificateStatus.SOON_REVOKED;
+        }
+        return CertificateStatus.OK;
+    }
+
+    protected List<eu.domibus.common.model.certificate.Certificate> extractCertificateFromKeyStore(KeyStore trustStore) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = new ArrayList<>();
+        try {
+            final Enumeration<String> aliases = trustStore.aliases();
+            while (aliases.hasMoreElements()) {
+                final String alias = aliases.nextElement();
+                final X509Certificate x509Certificate = (X509Certificate) trustStore.getCertificate(alias);
+                eu.domibus.common.model.certificate.Certificate certificate = new eu.domibus.common.model.certificate.Certificate();
+                certificate.setAlias(alias);
+                certificate.setNotAfter(x509Certificate.getNotAfter());
+                certificate.setNotBefore(x509Certificate.getNotBefore());
+                certificates.add(certificate);
+            }
+        } catch (KeyStoreException e) {
+            LOG.warn(e.getMessage(), e);
+        }
+        return Collections.unmodifiableList(certificates);
+    }
+
 }
