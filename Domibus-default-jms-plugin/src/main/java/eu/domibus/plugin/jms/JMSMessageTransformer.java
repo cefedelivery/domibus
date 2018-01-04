@@ -28,8 +28,8 @@ import java.text.MessageFormat;
 import java.util.*;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * This class is responsible for transformations from {@link javax.jms.MapMessage} to {@link eu.domibus.plugin.Submission} and vice versa

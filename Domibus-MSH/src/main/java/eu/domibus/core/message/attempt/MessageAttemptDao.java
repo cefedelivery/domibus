@@ -3,7 +3,7 @@ package eu.domibus.core.message.attempt;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.NoResultException;
