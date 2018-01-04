@@ -34,6 +34,9 @@ import java.util.List;
 @Service
 public class CRLUtil {
 
+    /** LDAP attribute for CRL */
+    private static final String LDAP_CRL_ATTRIBUTE = "certificateRevocationList;binary";
+
     @Autowired
     private HttpUtil httpUtil;
 
@@ -45,10 +48,10 @@ public class CRLUtil {
      *
      * @param crlURL
      * @return {@link X509CRL} certificate to download
-     * @throws DomibusCRLException
+     * @throws DomibusCRLException runtime exception in case of error
      */
     public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
-        if (CRLUrlType.LDAP.isURL(crlURL)) {
+        if (CRLUrlType.LDAP.canHandleURL(crlURL)) {
             return downloadCRLfromLDAP(crlURL);
         } else {
             return downloadCRLFromWebOrClasspath(crlURL);
@@ -101,7 +104,7 @@ public class CRLUtil {
         try {
             DirContext ctx = new InitialDirContext(env);
             Attributes attributes = ctx.getAttributes(StringUtils.EMPTY);
-            Attribute attribute = attributes.get("certificateRevocationList;binary");
+            Attribute attribute = attributes.get(LDAP_CRL_ATTRIBUTE);
             byte[] value = (byte[]) attribute.get();
             if ((value == null) || (value.length == 0)) {
                 throw new DomibusCRLException("error downloading CRL from '" + ldapURL + "'");
@@ -123,7 +126,7 @@ public class CRLUtil {
 
     protected InputStream getCrlInputStream(URL crlURL) throws IOException {
         InputStream result;
-        if (CRLUrlType.HTTP.isURL(crlURL.toString()) || CRLUrlType.HTTPS.isURL(crlURL.toString())) {
+        if (CRLUrlType.HTTP.canHandleURL(crlURL.toString()) || CRLUrlType.HTTPS.canHandleURL(crlURL.toString())) {
             result = httpUtil.downloadURL(crlURL.toString());
         } else {
             result = crlURL.openStream();

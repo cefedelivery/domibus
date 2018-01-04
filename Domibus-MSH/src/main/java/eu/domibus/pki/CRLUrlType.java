@@ -26,12 +26,18 @@ public enum CRLUrlType {
         return prefix;
     }
 
-    public boolean isURL(final String crlURL) {
+    /**
+     * Returns true if the given {@code crlURL} starts with the prefix defined
+     *
+     * @param crlURL url to check
+     * @return boolean
+     */
+    public boolean canHandleURL(final String crlURL) {
         return !StringUtils.isBlank(crlURL) && crlURL.toLowerCase().startsWith(prefix);
     }
 
     /**
-     * Check is the gived url is among the one declred in this enum
+     * Check if the given url is among the ones declared in this enum
      *
      * @param crlURL url to be checked
      * @return boolean
