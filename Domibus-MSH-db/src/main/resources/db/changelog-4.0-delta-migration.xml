@@ -4,4 +4,12 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
+    <changeSet author="baciuco" id="EDELIVERY-2489">
+        <update tableName="QRTZ_CRON_TRIGGERS">
+            <column name="CRON_EXPRESSION" value='* 0/1 * * * ?'/>
+            <where>CRON_EXPRESSION = '0/60 * * * * ?'</where>
+        </update>
+    </changeSet>
+
+
 </databaseChangeLog>

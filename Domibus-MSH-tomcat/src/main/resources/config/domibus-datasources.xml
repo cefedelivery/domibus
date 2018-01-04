@@ -52,7 +52,7 @@
 
     <bean id="domibusJDBC-XADataSource"
           class="com.atomikos.jdbc.AtomikosDataSourceBean"
-          init-method="init" destroy-method="close">
+          init-method="init" destroy-method="close" depends-on="userTransactionService">
         <property name="uniqueResourceName">
             <value>domibusJDBC-XA</value>
         </property>

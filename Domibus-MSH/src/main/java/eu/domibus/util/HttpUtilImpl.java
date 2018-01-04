@@ -2,7 +2,7 @@ package eu.domibus.util;
 
 import eu.domibus.api.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.http.HttpHost;

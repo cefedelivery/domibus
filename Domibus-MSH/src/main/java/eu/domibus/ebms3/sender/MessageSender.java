@@ -24,7 +24,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.PolicyService;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;

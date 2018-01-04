@@ -2,7 +2,7 @@ package eu.domibus.core.security;
 
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
