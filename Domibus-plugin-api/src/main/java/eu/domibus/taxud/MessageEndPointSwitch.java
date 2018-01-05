@@ -19,6 +19,11 @@ public class MessageEndPointSwitch {
 
     private final static String FINAL_RECIPIENT = "finalRecipient";
 
+    private SubmissionLog submissionLog;
+    public MessageEndPointSwitch() {
+        submissionLog=new SubmissionLog();
+    }
+
     public void switchEndPoint(Submission submission) {
         Collection<Submission.TypedProperty> properties = submission.getMessageProperties();
         Submission.TypedProperty originalSender=null;
@@ -40,9 +45,8 @@ public class MessageEndPointSwitch {
         String finalRecipientType = finalRecipient.getType();
         String finalRecipientValue = finalRecipient.getValue();
 
-       /* LOG.info("switching end points from:");
-        LOG.info("[{}] value: [{}] type: [{}]",ORIGINAL_SENDER,originalSender.getValue(),originalSender.getType());
-        LOG.info("[{}] value: [{}] type: [{}]",FINAL_RECIPIENT,finalRecipient.getValue(),finalRecipient.getType());*/
+        LOG.info("switching end points from:");
+        submissionLog.logEndPoints(originalSender,finalRecipient);
 
         properties.clear();
 
@@ -52,8 +56,7 @@ public class MessageEndPointSwitch {
         properties.add(newOriginalSender);
         properties.add(newFinalRecipient);
 
-       /* LOG.info("to:");
-        LOG.info("[{}] value: [{}] type: [{}]",ORIGINAL_SENDER,newOriginalSender.getValue(),newOriginalSender.getType());
-        LOG.info("[{}] value: [{}] type: [{}]",FINAL_RECIPIENT,newFinalRecipient.getValue(),newFinalRecipient.getType());*/
+        LOG.info("to:");
+        submissionLog.logEndPoints(newOriginalSender,newFinalRecipient);
     }
 }

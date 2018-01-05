@@ -15,17 +15,18 @@ import java.util.Set;
 public class MessageAccessPointSwitch {
     private final static Logger LOG = LoggerFactory.getLogger(MessageAccessPointSwitch.class);
 
+    private SubmissionLog submissionLog;
+
+    public MessageAccessPointSwitch() {
+        this.submissionLog = new SubmissionLog();
+    }
+
     public  void switchAccessPoint(Submission submission) {
         Set<Submission.Party> fromParties = new HashSet<>(submission.getFromParties());
         Set<Submission.Party> toParties = new HashSet<>(submission.getToParties());
 
-       // LOG.info("switching access point from :");
-        for (Submission.Party party : submission.getFromParties()) {
-         //   LOG.info("From [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
-        }
-        for (Submission.Party party : submission.getToParties()) {
-          //  LOG.info("to [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
-        }
+       LOG.info("switching access point from :");
+        submissionLog.logAccesPoints(submission);
 
         submission.getFromParties().clear();
         submission.getToParties().clear();
@@ -33,13 +34,8 @@ public class MessageAccessPointSwitch {
         submission.getFromParties().addAll(toParties);
         submission.getToParties().addAll(fromParties);
 
-        //LOG.info("to:");
-        for (Submission.Party party : submission.getFromParties()) {
-          //  LOG.info("From [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
-        }
-        for (Submission.Party party : submission.getToParties()) {
-           // LOG.info("to [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
-        }
+        LOG.info("to:");
+        submissionLog.logAccesPoints(submission);
 
         String fromRole = submission.getFromRole();
         String toRole = submission.getToRole();

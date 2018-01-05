@@ -3,15 +3,15 @@ package eu.domibus.controller;
 import eu.domibus.plugin.Submission;
 import eu.domibus.taxud.MessageAccessPointSwitch;
 import eu.domibus.taxud.MessageEndPointSwitch;
+import eu.domibus.taxud.SubmissionLog;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import java.util.UUID;
+import java.io.IOException;
 
 /**
  * @author Thomas Dussart
@@ -26,20 +26,26 @@ public class TaxudIcs2Controller {
 
     private MessageEndPointSwitch messageEndPointSwitch;
 
+    private SubmissionLog submissionLog;
+
     @PostConstruct
     protected void init(){
         messageAccessPointSwitch=new MessageAccessPointSwitch();
         messageEndPointSwitch=new MessageEndPointSwitch();
+        submissionLog=new SubmissionLog();
     }
 
-    @RequestMapping(value = "/message", method = RequestMethod.POST)
-    public Submission onMessage( @RequestBody Submission submission) {
+    @PostMapping(value = "/message", consumes = "multipart/form-data")
+    public void  onMessage(  @RequestPart("submissionJson") Submission submission,
+                            @RequestPart(value = "payload") MultipartFile payload) {
         LOG.info("Message received:");
-        messageAccessPointSwitch.switchAccessPoint(submission);
-        messageEndPointSwitch.switchEndPoint(submission);
-        submission.setConversationId(submission.getMessageId());
-        submission.setMessageId(UUID.randomUUID() + "@domibus.eu");
-        return submission;
+        submissionLog.logAccesPoints(submission);
+        try {
+            byte[] decode = Base64.decodeBase64(payload.getBytes());
+            LOG.info("Content:[{}]",new String(decode));
+        } catch (IOException e) {
+            LOG.error(e.getMessage(),e);
+        }
     }
 
     @RequestMapping(value = "/message", method = RequestMethod.GET)
@@ -52,6 +58,8 @@ public class TaxudIcs2Controller {
 
         submission.addMessageProperty("originalSender","urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
         submission.addMessageProperty("finalRecipient","urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+        submission.setAction("action");
+        submission.setService("service");
         return  submission;
     }
 

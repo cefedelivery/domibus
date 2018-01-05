@@ -11,13 +11,11 @@ import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
@@ -35,11 +33,13 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
@@ -51,6 +51,10 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
+    public static final String PAYLOAD_FILE_NAME = "payload.xml";
+    public static final String PAYLOAD_PARAM_NAME = "payload";
+    public static final String SUBMISSION_PARAM_NAME = "submissionJson";
+    public static final String DOMIBUS_C4_REST_ENDPOINT = "domibus.c4.rest.endpoint";
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -82,9 +86,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @PostConstruct
     protected void init() {
-        List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>(
-                Arrays.asList(new MappingJackson2HttpMessageConverter(), new ResourceHttpMessageConverter()));
-        restTemplate = new RestTemplate(converters);
+        /*List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>(
+                //Arrays.asList(new MappingJackson2HttpMessageConverter(), new ResourceHttpMessageConverter(),new FormHttpMessageConverter(),new ByteArrayHttpMessageConverter()));
+                Arrays.asList(new MappingJackson2HttpMessageConverter(), new ByteArrayHttpMessageConverter()));*/
+        restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
     }
 
     public BackendJMSImpl(String name) {
@@ -163,38 +170,62 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Override
     public void deliverMessage(final String messageId) {
         metric.setStartTime(System.currentTimeMillis());
+        String submissionRestUrl = domibusProperties.getProperty(DOMIBUS_C4_REST_ENDPOINT);
+        Submission submission;
         try {
-            Submission submission = this.messageRetriever.downloadMessage(messageId);
-            String submissionRestUrl = domibusProperties.getProperty("domibus.c4.rest.endpoint");
-            HttpHeaders header = new HttpHeaders();
-            header.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
-
-            // creating an HttpEntity for the JSON part
-            HttpHeaders jsonHeader = new HttpHeaders();
-            jsonHeader.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Submission> jsonHttpEntity = new HttpEntity<>(submission, jsonHeader);
-
-            // creating an HttpEntity for the binary part
-            HttpHeaders pictureHeader = new HttpHeaders();
-            pictureHeader.setContentType(MediaType.IMAGE_PNG);
-            submission.getPayloads().
-            HttpEntity<ByteArrayResource> picturePart = new HttpEntity<>(pngPicture, pictureHeader);
-
-            restTemplate.postForObject(submissionRestUrl, submission, Submission.class);
-            /*Set<Submission.Payload> payloads = submission.getPayloads();
-            for (Submission.Payload payload : payloads) {
-                response.addPayload(payload);
-            }*/
-            // this.messageSubmitter.submit(response, this.getName());
-            //long currentTimeMillis = System.currentTimeMillis();
-            metric.setLastChanged(System.currentTimeMillis());
+            submission = this.messageRetriever.downloadMessage(messageId);
         } catch (MessageNotFoundException e) {
             LOG.error("Error downloading message " + e);
-        } catch (MessagingProcessingException e) {
-            LOG.error("Error while processing submission ", e);
+            return;
         }
+
+        MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
+        multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
+
+        if(LOG.isInfoEnabled()) {
+            logMultipart(submissionRestUrl, multipartRequest);
+        }
+
+        restTemplate.postForLocation(submissionRestUrl, multipartRequest);
+        metric.setLastChanged(System.currentTimeMillis());
+
+    }
+
+    private void logMultipart(String submissionRestUrl, MultiValueMap<String, Object> multipartRequest) {
+        LOG.info("Sending :");
+        Map<String, Object> stringObjectMap = multipartRequest.toSingleValueMap();
+        Set<Map.Entry<String, Object>> entries = stringObjectMap.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            LOG.info("Key:[{}]", entry.getKey());
+            LOG.info("Value:[{}]", entry.getValue());
+        }
+        LOG.info("To:[{}]", submissionRestUrl);
+    }
+
+    private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
+        MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
+        for (Submission.Payload payload : payloads) {
+            try {
+                InputStream inputStream = payload.getPayloadDatahandler().getInputStream();
+                int available = inputStream.available();
+                if (available == 0) {
+                    LOG.warn("Payload skipped because it is empty");
+                    return multipartRequest;
+                }
+                byte[] b = new byte[available];
+                inputStream.read(b);
+                ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.encodeBase64(b)) {
+                    @Override
+                    public String getFilename() {
+                        return PAYLOAD_FILE_NAME;
+                    }
+                };
+                multipartRequest.add(PAYLOAD_PARAM_NAME, byteArrayResource);
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return multipartRequest;
     }
 
     @Override
