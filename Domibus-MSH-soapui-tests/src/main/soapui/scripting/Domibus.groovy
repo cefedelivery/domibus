@@ -1181,6 +1181,167 @@ static def String pathToDomibus(color, log, context){
 			}
 		}
     }
-//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Add user 
+    def void addUser(color,username,password='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu',log,context,idUser=10,logLevel=1){
+		debugLog("Trying to add user (" +username+","+password+")", log, logLevel);
+		if(searchUser(color,username,log,context,logLevel=1)!=0){
+			log.info "User \""+username+"\" already exists. If you want to insert it again, please use method deleteUser to delete it."
+		}
+		else{
+			def sql=null;
+			// Connect to database
+			openConnection();
+			switch(color.toLowerCase()){
+				case "blue":
+					sql=sqlBlue;
+					break;
+				case "red":
+					sql=sqlRed;
+					break;
+				case "green":
+					sql=sqlGreen;
+					break;
+				default:
+					assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+			}
+			try{
+				sql.execute "INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES (${idUser}, ${username},${password}, 1)";
+				sql.execute "INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES (${idUser}, '2');";
+			}
+			catch (SQLException ex){
+				closeConnection();
+				assert 0,"SQLException occured during insertion: " + ex;
+			}		
+			// Close DB connection
+			closeConnection();
+			log.info "User \""+username+"\" created."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Delete user 
+    def void deleteUser(color,username,log,context,logLevel=1){
+		debugLog("Trying to delete user " +username, log, logLevel);
+		def idUser=searchUser(color,username,log,context,logLevel=1);
+		if(idUser==0){
+			log.info "User \""+username+"\" doesn't exist. Nothing to do !"
+		}
+		else{
+			def sql=null;
+			// Connect to database
+			openConnection();
+			switch(color.toLowerCase()){
+				case "blue":
+					sql=sqlBlue;
+					break;
+				case "red":
+					sql=sqlRed;
+					break;
+				case "green":
+					sql=sqlGreen;
+					break;
+				default:
+					assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+			}
+			try{
+				sql.execute "DELETE FROM TB_USER_ROLES WHERE USER_ID = ${idUser}";
+				sql.execute "DELETE FROM TB_USER WHERE (ID_PK = ${idUser})";
+			}
+			catch (SQLException ex){
+				closeConnection();
+				assert 0,"SQLException occured during removal: " + ex;
+			}		
+			// Close DB connection
+			closeConnection();
+			log.info "User \""+username+"\" deleted." 
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // search for user 
+    def searchUser(color,username,log,context,logLevel=1){
+		debugLog("Searching for user \"" +username+"\" in the DB", log, logLevel);
+		def idFound=null;
+		def sql=null;
+		// Connect to database
+		openConnection();
+		switch(color.toLowerCase()){
+			case "blue":
+				sql=sqlBlue;
+				break;
+			case "red":
+				sql=sqlRed;
+				break;
+			case "green":
+				sql=sqlGreen;
+				break;
+			default:
+				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+		}
+		try{
+			sql.eachRow ("select ID_PK FROM TB_USER WHERE (USER_NAME = ${username})"){
+					idFound = it.ID_PK;
+			}
+		}
+		catch (SQLException ex){
+			closeConnection();
+			assert 0,"SQLException occured during searching: " + ex;
+		}
+		// Close DB connection
+		closeConnection();
+		if(!idFound){
+			return 0;
+		}
+		else{
+			return idFound; 
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Insert wrong password 
+    def insertWrongPassword(side,color,username,password,context,log,logLevel=1){
+		debugLog("Insert wrong password for user " +username, log, logLevel);
+		if(searchUser(color,username,log,context,logLevel=1)==0){
+			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
+		}
+		else{
+			def outputCatcher = new StringBuffer();
+			def errorCatcher = new StringBuffer();
+			def proc=null; def commandString = null; 
 
+			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+			if(commandString){
+				proc = commandString.execute();
+				if(proc!=null){
+					proc.consumeProcessOutput(outputCatcher, errorCatcher)
+					proc.waitFor()
+				}
+			}
+			assert((outputCatcher.toString().contains("Bad credentials"))||(outputCatcher.toString().contains("Suspended"))),"Error:Authenticating user: Error while trying to connect to domibus."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // lock user  
+    def lockUser(side,color,username,password,context,log,logLevel=1){
+		debugLog("Trying to lock user " +username, log, logLevel);
+		if(searchUser(color,username,log,context,logLevel=1)==0){
+			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
+		}
+		else{
+			def outputCatcher = new StringBuffer();
+			def errorCatcher = new StringBuffer();
+			def proc=null; def commandString = null; 
+			for(def i=0;i<6;i++){
+				commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+				if(commandString){
+					proc = commandString.execute();
+					if(proc!=null){
+						proc.consumeProcessOutput(outputCatcher, errorCatcher)
+						proc.waitFor()
+					}
+				}
+			}
+			assert(outputCatcher.toString().contains("Suspended")),"Error:blocking user: Error while trying to block the user."
+			log.info "User \""+username+"\" should be locked."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 }
