@@ -11,31 +11,40 @@ import org.quartz.impl.matchers.GroupMatcher;
 import javax.annotation.PostConstruct;
 
 /**
+ * Quartz Helper class which:
+ * <p>
+ * 1. checks existing jobs - if ClassNotFoundException is thrown - it deletes the job
+ * 2. starts manually the Quartz scheduler
+ *
  * @author Catalin Enache
  * @version 1.0
  * @since 05/01/2018
  */
 public class DomibusQuartzStarter {
 
-    /** logger */
+    /**
+     * logger
+     */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusQuartzStarter.class);
 
-    /** injected scheduler by SchedulerBeanFactory */
+    /**
+     * injected scheduler by SchedulerBeanFactory
+     */
     private Scheduler scheduler;
 
     @PostConstruct
     public void checkJobsAndStartScheduler() throws SchedulerException {
 
-        LOG.info("Quartz scheduler -> start checking jobs...");
+        LOG.info("Start checking Quartz jobs...");
 
-        //go through jobs to see which one throws ClassCastException
+        //go through jobs to see which one throws ClassNotFoundException
         for (String groupName : scheduler.getJobGroupNames()) {
             for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
 
-                String jobName = jobKey.getName();
-                String jobGroup = jobKey.getGroup();
+                final String jobName = jobKey.getName();
+                final String jobGroup = jobKey.getGroup();
 
-                LOG.info("Found jobName=" + jobName + " from groupName=" + jobGroup);
+                LOG.info("Found Quartz jobName=" + jobName + " from groupName=" + jobGroup);
 
                 try {
                     scheduler.getJobDetail(jobKey).getJobClass().getName();
@@ -43,9 +52,9 @@ public class DomibusQuartzStarter {
                     if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
                         try {
                             scheduler.deleteJob(jobKey);
-                            LOG.warn("Quartz scheduler -> DELETED jobName=" + jobName + " from groupName=" + jobGroup + " cause: " + se.getMessage());
+                            LOG.warn("DELETED Quartz jobName=" + jobName + " from groupName=" + jobGroup + " cause: " + se.getMessage());
                         } catch (Exception e) {
-                            LOG.error("Error while deleting job: " + jobName, e);
+                            LOG.error("Error while deleting Quartz job: " + jobName, e);
                         }
                     }
                 }
@@ -54,7 +63,6 @@ public class DomibusQuartzStarter {
 
         scheduler.start();
         LOG.info("Quartz scheduler started...");
-
     }
 
     public void setScheduler(Scheduler scheduler) {
