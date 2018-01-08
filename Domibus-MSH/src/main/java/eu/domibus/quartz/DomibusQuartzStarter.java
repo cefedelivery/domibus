@@ -22,14 +22,10 @@ import javax.annotation.PostConstruct;
  */
 public class DomibusQuartzStarter {
 
-    /**
-     * logger
-     */
+    /** logger */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusQuartzStarter.class);
 
-    /**
-     * injected scheduler by SchedulerBeanFactory
-     */
+    /** injected scheduler by SchedulerBeanFactory */
     private Scheduler scheduler;
 
     @PostConstruct
@@ -44,7 +40,7 @@ public class DomibusQuartzStarter {
                 final String jobName = jobKey.getName();
                 final String jobGroup = jobKey.getGroup();
 
-                LOG.info("Found Quartz jobName=" + jobName + " from groupName=" + jobGroup);
+                LOG.info("Found Quartz job: " + jobName + " from group: " + jobGroup);
 
                 try {
                     scheduler.getJobDetail(jobKey).getJobClass().getName();
@@ -52,7 +48,7 @@ public class DomibusQuartzStarter {
                     if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
                         try {
                             scheduler.deleteJob(jobKey);
-                            LOG.warn("DELETED Quartz jobName=" + jobName + " from groupName=" + jobGroup + " cause: " + se.getMessage());
+                            LOG.warn("DELETED Quartz job: " + jobName + " from group: " + jobGroup + " cause: " + se.getMessage());
                         } catch (Exception e) {
                             LOG.error("Error while deleting Quartz job: " + jobName, e);
                         }
