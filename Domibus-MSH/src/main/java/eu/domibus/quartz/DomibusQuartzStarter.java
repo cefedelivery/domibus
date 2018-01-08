@@ -31,9 +31,34 @@ public class DomibusQuartzStarter {
     /** injected scheduler by SchedulerFactoryBean */
     private Scheduler scheduler;
 
+    /**
+     * entry point method (post-construct)
+     *
+     * @throws SchedulerException Quartz scheduler exception
+     */
     @PostConstruct
     public void checkJobsAndStartScheduler() throws SchedulerException {
 
+        //check Quartz scheduler jobs first
+        checkSchedulerJobs();
+
+        scheduler.start();
+        LOG.info("Quartz scheduler started.");
+    }
+
+
+    /** scheduler's setter */
+    public void setScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
+
+    /**
+     * run through scheduler jobs and check for ClassNotFoundException
+     *
+     * @throws SchedulerException Qurtz scheduler exception
+     */
+    void checkSchedulerJobs() throws SchedulerException {
         LOG.info("Start checking Quartz jobs...");
 
         //go through jobs to see which one throws ClassNotFoundException
@@ -59,12 +84,7 @@ public class DomibusQuartzStarter {
                 }
             }
         }
-
-        scheduler.start();
-        LOG.info("Quartz scheduler started...");
     }
 
-    public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
-    }
+
 }
