@@ -11,13 +11,16 @@ import org.quartz.impl.matchers.GroupMatcher;
 import javax.annotation.PostConstruct;
 
 /**
- * Quartz Helper class which:
+ * Quartz scheduler starter class which:
  * <p>
- * 1. checks existing jobs - if ClassNotFoundException is thrown - it deletes the job
+ * 1. checks existing jobs - if {@code ClassNotFoundException} is thrown - it deletes the job.
+ * It could be the case of FS-PLUGIN which leaves metadata in {@code QRTZ_*} tables
+ * <p>
  * 2. starts manually the Quartz scheduler
  *
  * @author Catalin Enache
  * @version 1.0
+ * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
  * @since 05/01/2018
  */
 public class DomibusQuartzStarter {
@@ -25,7 +28,7 @@ public class DomibusQuartzStarter {
     /** logger */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusQuartzStarter.class);
 
-    /** injected scheduler by SchedulerBeanFactory */
+    /** injected scheduler by SchedulerFactoryBean */
     private Scheduler scheduler;
 
     @PostConstruct
