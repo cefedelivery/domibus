@@ -21,7 +21,7 @@ import javax.annotation.PostConstruct;
  * @author Catalin Enache
  * @version 1.0
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
- * @since 05/01/2018
+ * @since 3.3.2
  */
 public class DomibusQuartzStarter {
 

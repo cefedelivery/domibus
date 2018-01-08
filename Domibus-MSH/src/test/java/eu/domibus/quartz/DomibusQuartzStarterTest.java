@@ -22,7 +22,7 @@ import java.util.Set;
  *
  * @author Catalin Enache
  * @version 1.0
- * @since 08/01/2018
+ * @since 3.3.2
  */
 @RunWith(JMockit.class)
 public class DomibusQuartzStarterTest {
