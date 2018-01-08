@@ -40,7 +40,7 @@ public class DomibusQuartzStarter {
                 final String jobName = jobKey.getName();
                 final String jobGroup = jobKey.getGroup();
 
-                LOG.info("Found Quartz job: " + jobName + " from group: " + jobGroup);
+                LOG.debug("Found Quartz job: " + jobName + " from group: " + jobGroup);
 
                 try {
                     scheduler.getJobDetail(jobKey).getJobClass().getName();
