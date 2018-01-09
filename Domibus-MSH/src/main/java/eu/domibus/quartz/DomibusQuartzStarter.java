@@ -54,32 +54,43 @@ public class DomibusQuartzStarter {
 
 
     /**
-     * run through scheduler jobs and check for ClassNotFoundException
+     * goes through scheduler jobs and check for {@code ClassNotFoundException}
      *
      * @throws SchedulerException Qurtz scheduler exception
      */
-    void checkSchedulerJobs() throws SchedulerException {
+    protected void checkSchedulerJobs() throws SchedulerException {
         LOG.info("Start checking Quartz jobs...");
 
-        //go through jobs to see which one throws ClassNotFoundException
         for (String groupName : scheduler.getJobGroupNames()) {
-            for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+            checkSchedulerJobsFromGroup(groupName);
+        }
+    }
 
-                final String jobName = jobKey.getName();
-                final String jobGroup = jobKey.getGroup();
+    /**
+     * check scheduler jobs from a give group
+     *
+     * @param groupName scheduler group name
+     * @throws SchedulerException scheduler exception
+     */
+    private void checkSchedulerJobsFromGroup(final String groupName) throws SchedulerException {
 
-                LOG.debug("Found Quartz job: " + jobName + " from group: " + jobGroup);
+        //go through jobs to see which one throws ClassNotFoundException
+        for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
 
-                try {
-                    scheduler.getJobDetail(jobKey).getJobClass().getName();
-                } catch (SchedulerException se) {
-                    if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
-                        try {
-                            scheduler.deleteJob(jobKey);
-                            LOG.warn("DELETED Quartz job: " + jobName + " from group: " + jobGroup + " cause: " + se.getMessage());
-                        } catch (Exception e) {
-                            LOG.error("Error while deleting Quartz job: " + jobName, e);
-                        }
+            final String jobName = jobKey.getName();
+            final String jobGroup = jobKey.getGroup();
+
+            LOG.info("Found Quartz job: " + jobName + " from group: " + jobGroup);
+
+            try {
+                scheduler.getJobDetail(jobKey).getJobClass().getName();
+            } catch (SchedulerException se) {
+                if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
+                    try {
+                        scheduler.deleteJob(jobKey);
+                        LOG.warn("DELETED Quartz job: " + jobName + " from group: " + jobGroup + " cause: " + se.getMessage());
+                    } catch (Exception e) {
+                        LOG.error("Error while deleting Quartz job: " + jobName, e);
                     }
                 }
             }

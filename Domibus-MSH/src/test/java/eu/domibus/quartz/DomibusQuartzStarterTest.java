@@ -83,8 +83,6 @@ public class DomibusQuartzStarterTest {
     @Test
     public void checkSchedulerJobs_InvalidConfig_JobDeleted(final @Mocked JobDetailImpl jobDetail) throws Exception {
 
-
-
         new Expectations() {{
             scheduler.getJobGroupNames();
             times = 1;
