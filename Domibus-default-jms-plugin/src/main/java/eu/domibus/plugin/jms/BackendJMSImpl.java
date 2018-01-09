@@ -15,8 +15,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
@@ -33,13 +37,13 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.sql.DataSource;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyStore;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
@@ -75,16 +79,26 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    @Autowired
+    @Qualifier("nonXa")
+    private DataSource dataSource;
+
+    @Autowired
+    private AccessPoint accessPoint;
+
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
     private Metric metric = new Metric();
 
-
-
-
     private org.springframework.web.client.RestTemplate restTemplate;
+
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
+    private Map<String, String> partyAliasMap = new HashMap<>();
+
+    private KeyStore trustStore;
 
     @PostConstruct
     protected void init() {
@@ -94,6 +108,18 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+
+        jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        if (trustStore == null) {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        }
+        LOG.info("Initiating truststore");
+        String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
+        String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
+        try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {
+            trustStore.load(strustStoreStream, trustStorePassword.toCharArray());
+        }
     }
 
     public BackendJMSImpl(String name) {
@@ -169,6 +195,33 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         replyJmsTemplate.send(replyMessageCreator);
     }
 
+    public boolean authenticate(Submission submission) {
+        try {
+            getSenderAlias(submission);
+        } catch (NoMactchingAliasException e) {
+            return false;
+        }
+    }
+
+    private String getSenderAlias(Submission submission) {
+        Submission.Party party = accessPoint.extractSendingAccessPoint(submission);
+        String partyId = party.getPartyId();
+        String alias = partyAliasMap.get(partyId);
+        if (alias != null) {
+            return alias;
+        }
+        String query = "SELECT p.NAME FROM TB_PARTY_IDENTIFIER pi ,TB_PARTY p WHERE pi.FK_PARTY=p.ID_PK AND pi.PARTY_ID=:party_id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("party_id", partyId);
+        try {
+            alias = this.jdbcTemplate.queryForObject(query, namedParameters, String.class);
+            partyAliasMap.put(partyId, alias);
+            return alias;
+        } catch (DataAccessException e) {
+            LOG.error("No alias found for sender [{}]", partyId);
+            throw new NoMactchingAliasException("No alias found sender");
+        }
+    }
+
     @Override
     public void deliverMessage(final String messageId) {
         metric.setStartTime(System.currentTimeMillis());
@@ -184,7 +237,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
         multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
 
-        if(LOG.isInfoEnabled()) {
+        if (LOG.isInfoEnabled()) {
             logMultipart(submissionRestUrl, multipartRequest);
         }
 

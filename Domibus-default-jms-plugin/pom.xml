@@ -84,6 +84,11 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
+            <artifactId>spring-jdbc</artifactId>
+            <groupId>org.springframework</groupId>
+            <version>4.2.2.RELEASE</version>
+        </dependency>
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.9</version>

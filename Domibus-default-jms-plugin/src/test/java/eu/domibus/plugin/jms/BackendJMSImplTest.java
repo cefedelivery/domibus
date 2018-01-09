@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
 import javax.jms.MapMessage;
+import javax.sql.DataSource;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +51,10 @@ public class BackendJMSImplTest {
 
     @Injectable
     private Properties domibusProperties;
+
+    @Injectable
+    //@Qualifier("domibusJDBC-nonXADataSource")
+    private DataSource nonXa  ;
 
     @Tested
     BackendJMSImpl backendJMS;

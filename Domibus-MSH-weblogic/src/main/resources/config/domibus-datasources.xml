@@ -37,7 +37,7 @@
     <bean id="domibusJDBC-XADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jdbc/cipaeDeliveryDs"/>
     </bean>
-    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+    <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean" name="nonXa">
         <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
     </bean>
 

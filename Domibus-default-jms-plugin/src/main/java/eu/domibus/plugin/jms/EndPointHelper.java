@@ -1,8 +1,10 @@
-package eu.domibus.taxud;
+package eu.domibus.plugin.jms;
 
 import eu.domibus.plugin.Submission;
+import eu.domibus.taxud.SubmissionLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
@@ -11,6 +13,7 @@ import java.util.Collection;
  * @since 4.0
  */
 
+@Component
 public class MessageEndPointSwitch {
 
     private final static Logger LOG = LoggerFactory.getLogger(MessageEndPointSwitch.class);

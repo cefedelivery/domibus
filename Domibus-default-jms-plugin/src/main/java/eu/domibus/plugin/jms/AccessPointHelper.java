@@ -1,8 +1,10 @@
-package eu.domibus.taxud;
+package eu.domibus.plugin.jms;
 
 import eu.domibus.plugin.Submission;
+import eu.domibus.taxud.SubmissionLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,12 +14,13 @@ import java.util.Set;
  * @since 4.0
  */
 
-public class MessageAccessPointSwitch {
-    private final static Logger LOG = LoggerFactory.getLogger(MessageAccessPointSwitch.class);
+@Component
+public class AccessPoint {
+    private final static Logger LOG = LoggerFactory.getLogger(AccessPoint.class);
 
     private SubmissionLog submissionLog;
 
-    public MessageAccessPointSwitch() {
+    public AccessPoint() {
         this.submissionLog = new SubmissionLog();
     }
 
@@ -42,5 +45,12 @@ public class MessageAccessPointSwitch {
 
         submission.setFromRole(toRole);
         submission.setToRole(fromRole);
+    }
+
+    public Submission.Party extractSendingAccessPoint(Submission submission){
+        if(submission.getFromParties().size()>0){
+            return submission.getFromParties().iterator().next();
+        }
+        return null;
     }
 }
