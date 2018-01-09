@@ -1,6 +1,8 @@
 package eu.domibus.controller;
 
 import eu.domibus.plugin.Submission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -9,12 +11,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.activation.DataHandler;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -22,23 +28,24 @@ import java.util.Set;
  */
 public class TaxudClient {
 
-    public static void main(String[] args) {
-new TaxudClient().sendSubmission();
-    }
+    private final static Logger LOG = LoggerFactory.getLogger(TaxudIcs2Controller.class);
 
     private static final String APPLICATION_XML = "application/xml";
+
     private static final String MIME_TYPE = "MimeType";
+
     private static final String CONTENT_ID = "cid:message";
 
-    public void sendSubmission(){
+    private RestTemplate restTemplate;
 
-        String submissionRestUrl="http://localhost:8080/message";
+    private String submissionRestUrl="http://localhost:8080/message";
 
-
-        RestTemplate restTemplate = new RestTemplate();
+    public void initTemplate(){
+        restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-       // restTemplate.getMessageConverters().add(new ResourceHttpMessageConverter());
+    }
+    public void sendPayload(){
 
         Submission submission = restTemplate.getForObject(submissionRestUrl, Submission.class);
         MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
@@ -62,15 +69,10 @@ new TaxudClient().sendSubmission();
                 inputStream = payload.getPayloadDatahandler().getInputStream();
                 inputStream.read(b);
                 if(b.length!=0) {
-                    ByteArrayResource byteArrayResource = new ByteArrayResource(b) {
-                        @Override
-                        public String getFilename() {
-                            return "Test.xml";
-                        }
-                    };
+                    ByteArrayResource byteArrayResource = new ByteArrayResource(b);
                     multipartRequest.add("payload", byteArrayResource);
                 }else{
-                    System.out.println("Skip payload");
+                    LOG.warn("Skip payload");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -87,7 +89,45 @@ new TaxudClient().sendSubmission();
         restTemplate.postForLocation(submissionRestUrl, multipartRequest);
     }
 
-    public void test(){
+    public void sendCertifate(){
+        KeyStore trustStore = null;
+        try (FileInputStream keyStoreStream = new FileInputStream("C:\\install\\domains\\12.1.3\\red\\conf\\domibus\\keystores\\gateway_keystore.jks")) {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(keyStoreStream, "test123".toCharArray());
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
+            LOG.error(e.getMessage(),e);
+            return;
+        }
 
+        byte[] certificate;
+        try {
+            Certificate blue_gw = trustStore.getCertificate("blue_gw");
+            certificate = Base64.getEncoder().encode(blue_gw.getEncoded());
+        } catch (KeyStoreException|CertificateEncodingException e) {
+            LOG.error(e.getMessage(),e);
+            return;
+        }
+        Submission submission = restTemplate.getForObject(submissionRestUrl, Submission.class);
+        MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
+        multipartRequest.add("submissionJson", submission);
+
+        ByteArrayResource byteArrayResource =  new ByteArrayResource(certificate);/* {
+            @Override
+            public String getFilename() {
+                return "Test.xml";
+            }
+        };*/
+        multipartRequest.add("certificate", byteArrayResource);
+
+        Boolean aBoolean = restTemplate.postForObject("http://localhost:8080/authenticate", multipartRequest, Boolean.class);
+        LOG.info("Authenticated "+aBoolean);
+
+    }
+
+    public static void main(String[] args) {
+        TaxudClient taxudClient = new TaxudClient();
+        taxudClient.initTemplate();
+        taxudClient.sendCertifate();
+        taxudClient.sendPayload();
     }
 }

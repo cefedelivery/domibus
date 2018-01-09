@@ -82,6 +82,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private Metric metric = new Metric();
 
 
+
+
     private org.springframework.web.client.RestTemplate restTemplate;
 
     @PostConstruct
