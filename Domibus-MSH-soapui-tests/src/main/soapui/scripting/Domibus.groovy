@@ -1215,9 +1215,9 @@ static def String pathToDomibus(color, log, context){
 		}
 		else{
 			def commandResult = null;
-			def commandString = null; 
+			def commandString = null;
+			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
 			for(def i=0;i<6;i++){
-				commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
 				commandResult = runCurlCommand(commandString,log);
 			}
 			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."
