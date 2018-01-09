@@ -29,7 +29,7 @@ import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;

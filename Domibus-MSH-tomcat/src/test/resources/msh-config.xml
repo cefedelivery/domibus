@@ -28,7 +28,7 @@
     <bean id="retentionWorkerTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="retentionWorkerJob"/>
-        <property name="cronExpression" value="0/60 * * * * ?"/>
+        <property name="cronExpression" value="* 0/1 * * * ?"/>
         <property name="startDelay" value="20000"/>
     </bean>
 

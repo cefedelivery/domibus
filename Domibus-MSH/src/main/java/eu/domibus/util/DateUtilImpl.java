@@ -1,8 +1,9 @@
 package eu.domibus.util;
 
 import eu.domibus.api.util.DateUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -38,5 +39,10 @@ public class DateUtilImpl implements DateUtil {
     public Timestamp fromISO8601(String value) {
         DateTime dateTime = new DateTime(value);
         return new Timestamp(dateTime.getMillis());
+    }
+
+    @Override
+    public Date getStartOfDay() {
+        return LocalDateTime.now().withTime(0,0,0,0).toDate();
     }
 }

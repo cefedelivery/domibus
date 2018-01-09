@@ -14,17 +14,19 @@ import com.eviware.soapui.support.GroovyUtils
 
 class Domibus
 {
-    def messageExchange=null
-    def context=null
-    def log=null
+    def messageExchange=null;
+    def context=null;
+    def log=null;
 	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
     def sleepDelay=6000
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
-	static def backup_file_sufix = "_backup_for_soapui_tests"
-	static def defaultLogLevel = 0
+	static def backup_file_sufix = "_backup_for_soapui_tests";
+	static def defaultLogLevel = 0;
+	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+	static def MAX_LOGIN_BEFORE_LOCK = 6;
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -48,18 +50,24 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
-		log.info("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||");
-		GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
-		GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 
+		debugLog("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||",log);
 		def sql = null;
 
         try{
-            if (database.toLowerCase() == "mysql" || database.toLowerCase() == "oracle" ){
-                sql = Sql.newInstance(url, dbUser, dbPassword, driver)
-			}else{
+            switch (database.toLowerCase()) {
+			case  "mysql": 
+				GroovyUtils.registerJdbcDriver( "com.mysql.jdbc.Driver" )
+				sql = Sql.newInstance(url, dbUser, dbPassword, driver)
+				break
+			case "oracle":
+				GroovyUtils.registerJdbcDriver( "oracle.jdbc.driver.OracleDriver" ) 			
+				sql = Sql.newInstance(url, dbUser, dbPassword, driver)
+				break
+			default:
+				log.warn "Unknown type of DB"
                 sql = Sql.newInstance(url, driver)
 			}
-			log.info "Connection opened with success";
+			debugLog("Connection opened with success",log);
 			return sql;
         }
         catch (SQLException ex){
@@ -69,9 +77,7 @@ class Domibus
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
     // Open 3 DB connections
-    def openConnection(){
-        //log.debug "Open DB connections"
-		
+    def openConnection(){		
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
 		if(thirdGateway.toLowerCase().trim()=="true"){
@@ -81,7 +87,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Close the DB connection opened previously
     def closeConnection(){
-        log.debug "DB connection would be closed"
+        debugLog("DB connection would be closed",log)
         if(sqlBlue){
             sqlBlue.connection.close()
             sqlBlue = null
@@ -362,13 +368,13 @@ class Domibus
     def executeListOfSqlQueries(String[] sqlQueriesList, String targetSchema) {
         def connectionOpenedInsideMethod = false
         def sqlDB
-        if (!((sqlRed) && (sqlBlue) && (sqlGreen))) {
-            log.debug "Method executed without connections open to the DB - try to open connection"
+        if (!((sqlRed) || (sqlBlue) || (sqlGreen))) {
+            debugLog("Method executed without connections open to the DB - try to open connection", log)
             openConnection()
             connectionOpenedInsideMethod = true
         }
 
-        switch (targetSchema) {
+        switch (targetSchema.toUpperCase()) {
             case "RED":
                 sqlDB = this.sqlRed
                 break
@@ -376,6 +382,7 @@ class Domibus
                 sqlDB = this.sqlBlue
                 break
 			case "GREEN":
+				assert(thirdGateway.toLowerCase().trim()=="true"), "\"GREEN\" schema is not actif. Please set soapui project custom property \"thirdGateway\" to true."
                 sqlDB = this.sqlGreen
                 break
             default:
@@ -384,12 +391,18 @@ class Domibus
         }
 
         for (query in sqlQueriesList) {
-            log.debug "Executing SQL query: " + query
-            sqlDB.execute query
+            debugLog("Executing SQL query: " + query, log)
+			try{
+				sqlDB.execute query
+			}
+			catch (SQLException ex){
+				closeConnection();
+				assert 0,"SQLException occured: " + ex;
+			}
         }
 
         if (connectionOpenedInsideMethod) {
-            log.debug "Connection to DB opened during method execution - close opened connection"
+            debugLog("Connection to DB opened during method execution - close opened connection", log)
             closeConnection()
         }
     }
@@ -459,6 +472,39 @@ class Domibus
 
         closeConnection()
     }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Add quote when value is not null - for sql queries or return String "null"
+    static def String addQuotationWhenNotNull(value) {
+		if (value != null) 
+			return "'" + value +"'"
+		
+		return "null"
+	}
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Add authentication record if it's not present already in table
+    def addAuthenticationRecord(targetSchema, userName, authRoles, originaUser, passwd = DEFAULT_PASSWORD){
+        log.info "Add authentication record, if exist delete first, to: ${targetSchema} with user name: ${userName} and original user value: ${originaUser}"
+
+        def sqlQuery = [
+				"delete from TB_AUTHENTICATION_ENTRY where username in ('" + userName + "')",
+                "INSERT INTO tb_authentication_entry (USERNAME, PASSWD, AUTH_ROLES, ORIGINAL_USER) values (" + addQuotationWhenNotNull(userName) +", "+ 
+				addQuotationWhenNotNull(passwd) +", " + addQuotationWhenNotNull(authRoles) + ", " + addQuotationWhenNotNull(originaUser) +")" ] as String[]
+
+        executeListOfSqlQueries(sqlQuery, targetSchema)
+    }
+	
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    // Remove authentication record from TB_AUTHENTICATION_ENTRY table
+    def delAuthenticationRecord(targetSchema, userNameList){
+		userNameList = [] + userNameList
+        log.info "Remove authentication record from TB_AUTHENTICATION_ENTRY table for user(s) name: ${userNameList}"
+
+        def sqlQuery = ["delete from TB_AUTHENTICATION_ENTRY where username in ('" + userNameList.join("','") + "')" ] as String[]
+
+        executeListOfSqlQueries(sqlQuery, targetSchema)
+    }	
+	
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII	
 	// Check that an entry is created in the table TB_SEND_ATTEMPT
 	def checkSendAttempt(String messageID, int mapDoms=4){
@@ -705,113 +751,72 @@ class Domibus
 
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean logOutput =false){
+	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null){
 		log.info "Start upload PMode for Domibus \""+side+"\".";
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null; 
+	    def commandString = null;
+		def commandResult = null;
 		def pmDescription = "SoapUI sample test description for PMode upload";
 		
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
 		log.info "PMODE FILE PATH: "+pmodeFile;
 		
 		commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
-
-		log.info commandString
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
-		if(logOutput){
-			log.info "outputCatcher: "+outputCatcher.toString();
-			log.info "errorCatcher: "+errorCatcher.toString();
-		}
-		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
+		commandResult = runCurlCommand(commandString,log);
+		assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
 		if(outcome.toLowerCase()=="successfully"){
-			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+			log.info commandResult[0]+" Domibus: \""+side+"\".";
 			if(message!=null){
-				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
+				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
 			}
 		}
 		else{
 			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
 			if(message!=null){
-				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
+				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
 			}
 		}
-		
-		
 	}
 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	
-	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null,boolean logOutput =false){
+	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null){
 		log.info "Start upload PMode for Domibus \""+side+"\".";
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null; 
+	    def commandString = null;
+		def commandResult = null;
 		def pmDescription = "Dummy";
 		
 		def String output = fetchCookieHeader(side,context,log);		
 		def XXSRFTOKEN = null;
 		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
-		//log.info "PMODE FILE PATH: "+pmodeFile;
-		
 		
 		commandString="curl " + urlToDomibus(side, log, context) + "/rest/pmode -v -F \"description=" + pmDescription + "\" -F  file=@" + pmodeFile ;
-
-		log.info commandString
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
-		if(logOutput){
-			log.info "outputCatcher: "+outputCatcher.toString();
-			log.info "errorCatcher: "+errorCatcher.toString();
-		}
-		assert(outputCatcher.toString().contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
+		commandResult = runCurlCommand(commandString,log);
+		assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
 		if(outcome.toLowerCase()=="successfully"){
-			log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+			log.info commandResult[0]+" Domibus: \""+side+"\".";
 			if(message!=null){
-				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
+				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
 			}
 		}
 		else{
 			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
 			if(message!=null){
-				assert(outputCatcher.toString().contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
+				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
 			}
 		}
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String tsPassword="test123"){
 		log.info "Start upload truststore for Domibus \""+side+"\".";
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null; 
+	    def commandString = null;
+		def commandResult = null;
 		
 		def String truststoreFile = computePathRessources(baseFilePath,extFilePath,context);
 				
 		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
-
-		log.info commandString
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
-		log.info outputCatcher.toString()
-		log.info errorCatcher.toString()
-		assert(outputCatcher.toString().contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
-		log.info outputCatcher.toString()+" Domibus: \""+side+"\".";
+		commandResult = runCurlCommand(commandString,log);
+		assert(commandResult[0].contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
+		log.info commandResult[0]+" Domibus: \""+side+"\".";
 	} 
 	
 	
@@ -842,35 +847,26 @@ static def String urlToDomibus(side, log, context){
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def getMessageFilters(String side,context,log){
 		log.info "Get message filters for Domibus \""+side+"\".";
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;		
-
-		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X GET ";
-
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
+	    def commandString = null;		
+		def commandResult = null;
 		
-		assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
-		return outputCatcher.toString();
+		commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X GET ";
+		commandResult = runCurlCommand(commandString,log);	
+		assert(commandResult[1].contains("200 OK")||commandResult[1].contains("successfully")),"Error:getMessageFilter: Error while trying to connect to domibus."
+		return commandResult[0];
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def formatFilters(String filters,String filterChoice,context,log, String extraCriteria=null, logLevel = 1){
+	static def formatFilters(String filters,String filterChoice,context,log, String extraCriteria=null){
 		log.info "Trying to re-order backends filters ..."
 		def swapBck = null
-		debugLog("FILTERS:" + filters, log, logLevel)
+		debugLog("FILTERS:" + filters, log)
 		
 		if(filters!=null){
 			filters=filters.substring(filters.indexOf("["),filters.lastIndexOf("]")-1);
 		}
 		assert(filters!=null),"Error:formatFilters: Not able to get the backend details."
 		def tableBcks = filters.split("},");
-		debugLog(tableBcks.toString(), log,  logLevel) 
+		debugLog(tableBcks.toString(), log) 
 		
 		if(tableBcks.length==1){
 			return "ok";
@@ -880,8 +876,8 @@ static def String urlToDomibus(side, log, context){
 			tableBcks[i]="{\""+tableBcks[i].split("\"",2)[1]+"}";
 			tableBcks[i]=tableBcks[i].replace("\"","\"\"\"");
 		}
-		debugLog("after for loop", log, logLevel)
-		debugLog(tableBcks.toString(), log, logLevel)
+		debugLog("after for loop", log)
+		debugLog(tableBcks.toString(), log)
 		
 		for(def  j = 0; j<tableBcks.length; j++){
 			if(tableBcks[j].toLowerCase().contains(filterChoice.toLowerCase()) ) { 
@@ -889,7 +885,7 @@ static def String urlToDomibus(side, log, context){
 					if(j==0){
 						return "correct";
 					}
-					debugLog("switch $j element", log, logLevel)
+					debugLog("switch $j element", log)
 					swapBck = tableBcks[0];
 					tableBcks[0] = tableBcks[j];
 					tableBcks[j] = swapBck;
@@ -901,20 +897,19 @@ static def String urlToDomibus(side, log, context){
 		return "ko"
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def setMessageFilters(String side, String filterChoice,context,log,String extraCriteria=null, logLevel = 1){
+	static def setMessageFilters(String side, String filterChoice,context,log,String extraCriteria=null){
 		log.info "Start setting message filters for Domibus \""+side+"\".";
 		def String output = null;
-	    def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null;
+	    def commandString = null;
+		def commandResult = null;
 		
 		def filtersString = getMessageFilters(side,context,log);
-		debugLog("filtersString:" + filtersString, log,  logLevel)
+		debugLog("filtersString:" + filtersString, log)
 		assert(filtersString!=null),"Error:setMessageFilter: Not able to get the backend details."
 		assert(filtersString.toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed."
 		
-		def String bckParams = formatFilters(filtersString, filterChoice, context, log, extraCriteria, logLevel);
-		debugLog("bckParams:" + bckParams, log, logLevel)
+		def String bckParams = formatFilters(filtersString, filterChoice, context, log, extraCriteria);
+		debugLog("bckParams:" + bckParams, log);
 		assert(bckParams!="ko"),"Error:setMessageFilter: The backend you want to set is not installed."
 
 		if(bckParams.equals("ok")){
@@ -926,15 +921,8 @@ static def String urlToDomibus(side, log, context){
 			}
 			else{
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X PUT -d "+bckParams;
-				debugLog("commandString ="+commandString, log, logLevel)
-				if(commandString){
-					proc = commandString.execute();
-					if(proc!=null){
-						proc.consumeProcessOutput(outputCatcher, errorCatcher)
-						proc.waitFor()
-					}
-				}
-				assert(errorCatcher.toString().contains("200 OK")||outputCatcher.toString().contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				commandResult = runCurlCommand(commandString,log);
+				assert(commandResult[0].contains("200 OK")||commandResult[0].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
 				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
 			}
 		}
@@ -942,24 +930,13 @@ static def String urlToDomibus(side, log, context){
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def fetchCookieHeader(String side,context,log){
-		def outputCatcher = new StringBuffer();
-        def errorCatcher = new StringBuffer();
-        def proc=null; def commandString = null; 
-		//def JSESSIONID = null; def XSRFTOKEN = null;def XXSRFTOKEN = null;
+		def commandString = null;
+		def commandResult = null;
 		
 		commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\"admin\"\"\",\"\"\"password\"\"\":\"\"\"123456\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-		
-		//log.info commandString;
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
-
-		assert(outputCatcher.toString().contains("200 OK")),"Error:Authenticating user: Error while trying to connect to domibus."
-		return outputCatcher.toString();
+		commandResult = runCurlCommand(commandString,log);
+		assert(commandResult[0].contains("200 OK")),"Error:Authenticating user: Error while trying to connect to domibus."
+		return commandResult[0];
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 static def String returnXsfrToken(String side,context,log){
@@ -979,21 +956,12 @@ static def String returnXsfrToken(String side,context,log){
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Ping Gateway
     static def String pingMSH(String side, context, log){
-        def outputCatcher = new StringBuffer()
-        def errorCatcher = new StringBuffer()
-        def proc=null
 		def commandString = null;
-
-		commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+urlToDomibus(side, log, context)+"/services";
+		def commandResult = null;
 		
-		if(commandString){
-			proc = commandString.execute();
-			if(proc!=null){
-				proc.consumeProcessOutput(outputCatcher, errorCatcher)
-				proc.waitFor()
-			}
-		}
-		return outputCatcher.toString().trim();
+		commandString = "curl -s -o /dev/null -w \"%{http_code}\" --noproxy localhost "+urlToDomibus(side, log, context)+"/services";
+		commandResult = runCurlCommand(commandString,log); 
+		return commandResult[0].trim();
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Copy file from source to destination
@@ -1142,5 +1110,121 @@ static def String pathToDomibus(color, log, context){
 		}
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
+	// Run curl command
+	static def runCurlCommand(String inputCommand,log){
+		def proc=null;
+		def outputCatcher = new StringBuffer();
+		def errorCatcher = new StringBuffer();
+		debugLog("Run curl command: "+inputCommand,log);
+		if(inputCommand){
+			proc = inputCommand.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+		}
+		debugLog("outputCatcher: "+outputCatcher.toString(),log);
+		debugLog("errorCatcher: "+errorCatcher.toString(),log);
+		return([outputCatcher.toString(),errorCatcher.toString()]);
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Add user 
+    def void addUser(color,username,idUser=12345,password='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu'){
+		debugLog("Trying to add user (" +username+","+password+")", log);
+		if(searchUser(color,username)!=0){
+			log.info "User \""+username+"\" already exists. If you want to insert it again, please use method deleteUser to delete it."
+		}
+		else{
+			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES (\""+idUser+"\",\""+username+"\",\""+password+"\", 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
+			executeListOfSqlQueries(sqlQueriesList,color);
+			log.info "User \""+username+"\" created."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Delete user 
+    def void deleteUser(color,username){
+		debugLog("Trying to delete user " +username, log);
+		def idUser=searchUser(color,username);
+		if(idUser==0){
+			log.info "User \""+username+"\" doesn't exist. Nothing to do !"
+		}
+		else{	
+			def sqlQueriesList = ["DELETE FROM TB_USER_ROLES WHERE USER_ID = "+idUser,"DELETE FROM TB_USER WHERE (ID_PK = "+idUser+")"] as String[];
+			executeListOfSqlQueries(sqlQueriesList,color);
+			log.info "User \""+username+"\" deleted." 
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // search for user 
+    def searchUser(color,username){
+		debugLog("Searching for user \"" +username+"\" in the DB", log);
+		def idFound=null;
+		def sql=null;
+		// Connect to database
+		openConnection();
+		switch(color.toLowerCase()){
+			case "blue":
+				sql=sqlBlue;
+				break;
+			case "red":
+				sql=sqlRed;
+				break;
+			case "green":
+				sql=sqlGreen;
+				break;
+			default:
+				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
+		}
+		try{
+			sql.eachRow ("select ID_PK FROM TB_USER WHERE (USER_NAME = ${username})"){
+					idFound = it.ID_PK;
+			}
+		}
+		catch (SQLException ex){
+			closeConnection();
+			assert 0,"SQLException occured during searching: " + ex;
+		}
+		// Close DB connection
+		closeConnection();
+		if(!idFound){
+			return 0;
+		}
+		else{
+			return idFound; 
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // Insert wrong password 
+    def insertWrongPassword(side,color,username,password){
+		debugLog("Insert wrong password for user " +username, log);
+		if(searchUser(color,username)==0){
+			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
+		}
+		else{
+			def commandResult = null;
+			def commandString = null; 
+			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+			commandResult = runCurlCommand(commandString,log);
+			assert((commandResult[0].contains("Bad credentials"))||(commandResult[0].contains("Suspended"))),"Error:Authenticating user: Error while trying to connect to domibus."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII3IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+   // lock user  
+    def lockUser(side,color,username,password){
+		debugLog("Trying to lock user " +username, log);
+		if(searchUser(color,username)==0){
+			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
+		}
+		else{
+			def commandResult = null;
+			def commandString = null;
+			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+			for(def i=0;i<MAX_LOGIN_BEFORE_LOCK;i++){
+				commandResult = runCurlCommand(commandString,log);
+			}
+			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."
+			log.info "User \""+username+"\" should be locked."
+		}
+    }
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 }

@@ -7,6 +7,7 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,7 +57,8 @@ public class CRLUtilTest {
 
     @Test
     public void testDownloadCRL(@Mocked final URL crlUrl) throws Exception {
-        X509CRL crl = pkiUtil.createCRL(Arrays.asList(new BigInteger[]{new BigInteger("0400000000011E44A5E405", 16), new BigInteger("0400000000011E44A5E404", 16)}));
+        X509CRL crl = pkiUtil.createCRL(Arrays.asList(new BigInteger("0400000000011E44A5E405", 16),
+                new BigInteger("0400000000011E44A5E404", 16)));
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(crl.getEncoded());
 
         final String crlUrlString = "file://test";
@@ -101,7 +103,7 @@ public class CRLUtilTest {
         //prepare
         String crlUrl1 = "http://domain1.crl";
         String crlUrl2 = "http://domain2.crl";
-        List<String> crlUrlList = Arrays.asList(new String[]{crlUrl1, crlUrl2});
+        List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
         X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, crlUrlList);
 
         //test
@@ -127,4 +129,26 @@ public class CRLUtilTest {
         System.out.println(x509CRL);
 
     }
+
+    @Test
+    public void testDownloadCRLFromLDAP() throws Exception {
+        final String ldapURL = "ldap://ldap.sbca.telesec.de/CN=Shared%20Business%20CA%204,OU=T-Systems%20Trust%20Center,O=T-Systems%20International%20GmbH,C=DE?CertificateRevocationList";
+
+        //final String ldapURL = "ldap://ldap.infonotary.com/dc=identity-ca,dc=infonotary,dc=com";
+
+        X509CRL x509CRL = crlUtil.downloadCRLfromLDAP(ldapURL);
+        Assert.assertNotNull(x509CRL);
+
+        System.out.println(x509CRL);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testDownloadCRLFromLDAP_WrongUrl() throws Exception {
+        //ldap url contains spaces and it will fail
+        final String ldapURL = "ldap://ldap.sbca.telesec.de/CN=Shared Business CA 04,OU=T-Systems Trust Center,O=T-Systems International GmbH,C=DE?CertificateRevocationList";
+
+        X509CRL x509CRL = crlUtil.downloadCRLfromLDAP(ldapURL);
+    }
+
+
 }
