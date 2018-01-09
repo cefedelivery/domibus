@@ -14,18 +14,19 @@ import com.eviware.soapui.support.GroovyUtils
 
 class Domibus
 {
-    def messageExchange=null
-    def context=null
-    def log=null
+    def messageExchange=null;
+    def context=null;
+    def log=null;
 	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
     def sleepDelay=6000
     def sqlBlue=null;
     def sqlRed=null;
 	def sqlGreen=null;
 	def thirdGateway = "false";
-	static def backup_file_sufix = "_backup_for_soapui_tests"
+	static def backup_file_sufix = "_backup_for_soapui_tests";
 	static def defaultLogLevel = 0;
-	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+	static def MAX_LOGIN_BEFORE_LOCK = 6;
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -367,13 +368,13 @@ class Domibus
     def executeListOfSqlQueries(String[] sqlQueriesList, String targetSchema) {
         def connectionOpenedInsideMethod = false
         def sqlDB
-        if (!((sqlRed) && (sqlBlue) && (sqlGreen))) {
+        if (!((sqlRed) || (sqlBlue) || (sqlGreen))) {
             debugLog("Method executed without connections open to the DB - try to open connection", log)
             openConnection()
             connectionOpenedInsideMethod = true
         }
 
-        switch (targetSchema) {
+        switch (targetSchema.toUpperCase()) {
             case "RED":
                 sqlDB = this.sqlRed
                 break
@@ -381,6 +382,7 @@ class Domibus
                 sqlDB = this.sqlBlue
                 break
 			case "GREEN":
+				assert(thirdGateway.toLowerCase().trim()=="true"), "\"GREEN\" schema is not actif. Please set soapui project custom property \"thirdGateway\" to true."
                 sqlDB = this.sqlGreen
                 break
             default:
@@ -1134,7 +1136,7 @@ static def String pathToDomibus(color, log, context){
 		}
 		else{
 			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES (\""+idUser+"\",\""+username+"\",\""+password+"\", 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
-			executeListOfSqlQueries(sqlQueriesList,color.toUpperCase());
+			executeListOfSqlQueries(sqlQueriesList,color);
 			log.info "User \""+username+"\" created."
 		}
     }
@@ -1148,7 +1150,7 @@ static def String pathToDomibus(color, log, context){
 		}
 		else{	
 			def sqlQueriesList = ["DELETE FROM TB_USER_ROLES WHERE USER_ID = "+idUser,"DELETE FROM TB_USER WHERE (ID_PK = "+idUser+")"] as String[];
-			executeListOfSqlQueries(sqlQueriesList,color.toUpperCase());
+			executeListOfSqlQueries(sqlQueriesList,color);
 			log.info "User \""+username+"\" deleted." 
 		}
     }
@@ -1217,7 +1219,7 @@ static def String pathToDomibus(color, log, context){
 			def commandResult = null;
 			def commandString = null;
 			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-			for(def i=0;i<6;i++){
+			for(def i=0;i<MAX_LOGIN_BEFORE_LOCK;i++){
 				commandResult = runCurlCommand(commandString,log);
 			}
 			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."
