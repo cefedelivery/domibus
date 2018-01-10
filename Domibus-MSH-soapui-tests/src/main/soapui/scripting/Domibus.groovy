@@ -419,13 +419,16 @@ class Domibus
                 "delete from TB_PROPERTY",
                 "delete from TB_PART_INFO",
                 "delete from TB_PARTY_ID",
-                //"delete from TB_PARTY_ID",
                 "delete from TB_MESSAGING",
                 "delete from TB_ERROR",
                 "delete from TB_USER_MESSAGE",
                 "delete from TB_SIGNAL_MESSAGE",
                 "delete from TB_RECEIPT",
                 "delete from TB_MESSAGE_INFO",
+				"delete from TB_ERROR_LOG",
+				"delete from TB_SEND_ATTEMPT",
+				"delete from TB_MESSAGE_ACKNW_PROP",
+				"delete from TB_MESSAGE_ACKNW",
                 "delete from TB_MESSAGE_LOG"
         ] as String[]
 
