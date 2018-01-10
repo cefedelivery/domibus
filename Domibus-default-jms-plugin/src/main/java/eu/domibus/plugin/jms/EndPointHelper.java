@@ -14,16 +14,16 @@ import java.util.Collection;
  */
 
 @Component
-public class MessageEndPointSwitch {
+public class EndPointHelper {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MessageEndPointSwitch.class);
+    private final static Logger LOG = LoggerFactory.getLogger(EndPointHelper.class);
 
     private final static String ORIGINAL_SENDER = "originalSender";
 
     private final static String FINAL_RECIPIENT = "finalRecipient";
 
     private SubmissionLog submissionLog;
-    public MessageEndPointSwitch() {
+    public EndPointHelper() {
         submissionLog=new SubmissionLog();
     }
 

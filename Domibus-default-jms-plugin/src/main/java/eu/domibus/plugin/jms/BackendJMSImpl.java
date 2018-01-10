@@ -3,6 +3,7 @@ package eu.domibus.plugin.jms;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -92,7 +93,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private DataSource dataSource;
 
     @Autowired
-    private AccessPoint accessPoint;
+    private AccessPointHelper accessPointHelper;
+
+    @Autowired
+    private MessageIdGenerator messageIdGenerator;
+
+    @Autowired
+    private EndPointHelper endPointHelper;
 
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
@@ -234,7 +241,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private String getSenderAlias(Submission submission) {
-        Submission.Party party = accessPoint.extractSendingAccessPoint(submission);
+        Submission.Party party = accessPointHelper.extractSendingAccessPoint(submission);
         String partyId = party.getPartyId();
         String alias = partyAliasMap.get(partyId);
         if (alias != null) {
@@ -255,7 +262,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Override
     public void deliverMessage(final String messageId) {
         metric.setStartTime(System.currentTimeMillis());
-
         Submission submission;
         try {
             submission = this.messageRetriever.downloadMessage(messageId);
@@ -266,7 +272,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         try {
             authenticate(submission);
             sendPayload(submission);
-            accessPoint.switchAccessPoint(submission);
+            accessPointHelper.switchAccessPoint(submission);
+            endPointHelper.switchEndPoint(submission);
+            submission.setMessageId(messageIdGenerator.generateMessageId());
         } catch (AuthenticationException e) {
             //return invalid message.
         }

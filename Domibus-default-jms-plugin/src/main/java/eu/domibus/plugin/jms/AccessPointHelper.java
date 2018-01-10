@@ -15,12 +15,12 @@ import java.util.Set;
  */
 
 @Component
-public class AccessPoint {
-    private final static Logger LOG = LoggerFactory.getLogger(AccessPoint.class);
+public class AccessPointHelper {
+    private final static Logger LOG = LoggerFactory.getLogger(AccessPointHelper.class);
 
     private SubmissionLog submissionLog;
 
-    public AccessPoint() {
+    public AccessPointHelper() {
         this.submissionLog = new SubmissionLog();
     }
 
