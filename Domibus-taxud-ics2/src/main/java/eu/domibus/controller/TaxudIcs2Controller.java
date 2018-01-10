@@ -1,7 +1,7 @@
 package eu.domibus.controller;
 
 import eu.domibus.plugin.Submission;
-import eu.domibus.taxud.SubmissionLog;
+import eu.domibus.taxud.SubmissionLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class TaxudIcs2Controller {
 
     private final static String ORIGINAL_SENDER = "originalSender";
 
-    private SubmissionLog submissionLogging;
+    private SubmissionLogging submissionLogging;
 
     private CertificateLogging certificateLogging;
 
@@ -39,7 +39,7 @@ public class TaxudIcs2Controller {
 
     @PostConstruct
     protected void init() {
-        submissionLogging = new SubmissionLog();
+        submissionLogging = new SubmissionLogging();
     }
 
     @PostMapping(value = "/message", consumes = "multipart/form-data")

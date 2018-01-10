@@ -12,6 +12,7 @@ import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,15 +40,11 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
 import javax.sql.DataSource;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -96,10 +93,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private AccessPointHelper accessPointHelper;
 
     @Autowired
-    private MessageIdGenerator messageIdGenerator;
+    private EndPointHelper endPointHelper;
 
     @Autowired
-    private EndPointHelper endPointHelper;
+    private CryptoService cryptoService;
+
+    @Autowired
+    private MessageIdGenerator messageIdGenerator;
 
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
@@ -113,7 +113,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private Map<String, String> partyAliasMap = new HashMap<>();
 
-    private KeyStore trustStore;
+    private String return
+
+
 
     @PostConstruct
     protected void init() {
@@ -122,23 +124,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-        initTrustore();
-    }
-
-    private void initTrustore() {
-        LOG.info("Initiating truststore");
-        try {
-            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        } catch (KeyStoreException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        String trustStoreFilename = domibusProperties.getProperty("domibus.security.truststore.location");
-        String trustStorePassword = domibusProperties.getProperty("domibus.security.truststore.password");
-        try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {
-            trustStore.load(strustStoreStream, trustStorePassword.toCharArray());
-        } catch (IOException | CertificateException | NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
     public BackendJMSImpl(String name) {
@@ -232,7 +217,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private byte[] encodeCertificate(String senderAlias) {
         try {
             Certificate certificate;
-            certificate = trustStore.getCertificate(senderAlias);
+            certificate =cryptoService.getTrustStore().getCertificate(senderAlias);
             return Base64.encodeBase64(certificate.getEncoded());
         } catch (CertificateEncodingException | KeyStoreException e) {
             LOG.error(e.getMessage(), e);
@@ -275,8 +260,11 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             accessPointHelper.switchAccessPoint(submission);
             endPointHelper.switchEndPoint(submission);
             submission.setMessageId(messageIdGenerator.generateMessageId());
+            messageSubmitter.submit(submission,getName());
         } catch (AuthenticationException e) {
             //return invalid message.
+        } catch (MessagingProcessingException e) {
+            LOG.error(e.getMessage(),e);
         }
 
     }

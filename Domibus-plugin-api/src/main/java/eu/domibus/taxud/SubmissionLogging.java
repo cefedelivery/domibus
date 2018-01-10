@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
  * @since 4.0
  */
 
-public class SubmissionLog {
+public class SubmissionLogging {
 
-    private final static Logger LOG = LoggerFactory.getLogger(SubmissionLog.class);
+    private final static Logger LOG = LoggerFactory.getLogger(SubmissionLogging.class);
 
     private final static String ORIGINAL_SENDER = "originalSender";
 

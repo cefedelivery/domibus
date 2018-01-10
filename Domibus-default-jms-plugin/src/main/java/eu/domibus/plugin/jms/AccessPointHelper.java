@@ -1,7 +1,7 @@
 package eu.domibus.plugin.jms;
 
 import eu.domibus.plugin.Submission;
-import eu.domibus.taxud.SubmissionLog;
+import eu.domibus.taxud.SubmissionLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,10 @@ import java.util.Set;
 public class AccessPointHelper {
     private final static Logger LOG = LoggerFactory.getLogger(AccessPointHelper.class);
 
-    private SubmissionLog submissionLog;
+    private SubmissionLogging submissionLogging;
 
     public AccessPointHelper() {
-        this.submissionLog = new SubmissionLog();
+        this.submissionLogging = new SubmissionLogging();
     }
 
     public  void switchAccessPoint(Submission submission) {
@@ -29,7 +29,7 @@ public class AccessPointHelper {
         Set<Submission.Party> toParties = new HashSet<>(submission.getToParties());
 
        LOG.info("switching access point from :");
-        submissionLog.logAccesPoints(submission);
+        submissionLogging.logAccesPoints(submission);
 
         submission.getFromParties().clear();
         submission.getToParties().clear();
@@ -38,7 +38,7 @@ public class AccessPointHelper {
         submission.getToParties().addAll(fromParties);
 
         LOG.info("to:");
-        submissionLog.logAccesPoints(submission);
+        submissionLogging.logAccesPoints(submission);
 
         String fromRole = submission.getFromRole();
         String toRole = submission.getToRole();

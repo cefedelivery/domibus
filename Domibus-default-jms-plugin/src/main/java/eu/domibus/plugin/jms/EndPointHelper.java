@@ -1,7 +1,7 @@
 package eu.domibus.plugin.jms;
 
 import eu.domibus.plugin.Submission;
-import eu.domibus.taxud.SubmissionLog;
+import eu.domibus.taxud.SubmissionLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,9 +22,9 @@ public class EndPointHelper {
 
     private final static String FINAL_RECIPIENT = "finalRecipient";
 
-    private SubmissionLog submissionLog;
+    private SubmissionLogging submissionLogging;
     public EndPointHelper() {
-        submissionLog=new SubmissionLog();
+        submissionLogging =new SubmissionLogging();
     }
 
     public void switchEndPoint(Submission submission) {
@@ -49,7 +49,7 @@ public class EndPointHelper {
         String finalRecipientValue = finalRecipient.getValue();
 
         LOG.info("switching end points from:");
-        submissionLog.logEndPoints(originalSender,finalRecipient);
+        submissionLogging.logEndPoints(originalSender,finalRecipient);
 
         properties.clear();
 
@@ -60,6 +60,6 @@ public class EndPointHelper {
         properties.add(newFinalRecipient);
 
         LOG.info("to:");
-        submissionLog.logEndPoints(newOriginalSender,newFinalRecipient);
+        submissionLogging.logEndPoints(newOriginalSender,newFinalRecipient);
     }
 }

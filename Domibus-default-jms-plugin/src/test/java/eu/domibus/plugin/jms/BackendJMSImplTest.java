@@ -4,9 +4,11 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
+import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMapMessage;
@@ -55,6 +57,18 @@ public class BackendJMSImplTest {
     @Injectable
     //@Qualifier("domibusJDBC-nonXADataSource")
     private DataSource nonXa  ;
+
+    @Injectable
+    private AccessPointHelper accessPointHelper;
+
+    @Injectable
+    private EndPointHelper endPointHelper;
+
+    @Injectable
+    private CryptoService cryptoService;
+
+    @Injectable
+    private MessageIdGenerator messageIdGenerator;
 
     @Tested
     BackendJMSImpl backendJMS;
