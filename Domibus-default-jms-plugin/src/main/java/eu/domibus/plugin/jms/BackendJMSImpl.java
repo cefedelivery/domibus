@@ -42,6 +42,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -59,6 +64,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String PAYLOAD_PARAM_NAME = "payload";
     public static final String SUBMISSION_PARAM_NAME = "submissionJson";
     public static final String DOMIBUS_C4_REST_ENDPOINT = "domibus.c4.rest.endpoint";
+    public static final String CERTIFICATE_PARAM_NAME = "certificate";
+    public static final String AUTHENTICATION_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.authenticate.endpoint";
+    public static final String PAYLOAD_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.payload.endpoint";
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -102,23 +110,27 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @PostConstruct
     protected void init() {
-        /*List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>(
-                //Arrays.asList(new MappingJackson2HttpMessageConverter(), new ResourceHttpMessageConverter(),new FormHttpMessageConverter(),new ByteArrayHttpMessageConverter()));
-                Arrays.asList(new MappingJackson2HttpMessageConverter(), new ByteArrayHttpMessageConverter()));*/
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        initTrustore();
+    }
 
-        if (trustStore == null) {
-            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        }
+    private void initTrustore() {
         LOG.info("Initiating truststore");
-        String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
-        String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
+        try {
+            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        } catch (KeyStoreException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        String trustStoreFilename = domibusProperties.getProperty("domibus.security.truststore.location");
+        String trustStorePassword = domibusProperties.getProperty("domibus.security.truststore.password");
         try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {
             trustStore.load(strustStoreStream, trustStorePassword.toCharArray());
+        } catch (IOException | CertificateException | NoSuchAlgorithmException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -195,11 +207,29 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         replyJmsTemplate.send(replyMessageCreator);
     }
 
-    public boolean authenticate(Submission submission) {
+    protected void authenticate(Submission submission) {
+        String senderAlias;
+        senderAlias = getSenderAlias(submission);
+        byte[] encodedCertificate = encodeCertificate(senderAlias);
+        MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
+        multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
+        ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
+        multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);
+        String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
+        Boolean aBoolean = restTemplate.postForObject(authenticationUrl, multipartRequest, Boolean.class);
+        if (!aBoolean) {
+            throw new AuthenticationException("UMDS rejected authentication");
+        }
+    }
+
+    private byte[] encodeCertificate(String senderAlias) {
         try {
-            getSenderAlias(submission);
-        } catch (NoMactchingAliasException e) {
-            return false;
+            Certificate certificate;
+            certificate = trustStore.getCertificate(senderAlias);
+            return Base64.encodeBase64(certificate.getEncoded());
+        } catch (CertificateEncodingException | KeyStoreException e) {
+            LOG.error(e.getMessage(), e);
+            throw new AuthenticationException("Error while extracting certificate", e);
         }
     }
 
@@ -218,32 +248,43 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             return alias;
         } catch (DataAccessException e) {
             LOG.error("No alias found for sender [{}]", partyId);
-            throw new NoMactchingAliasException("No alias found sender");
+            throw new AuthenticationException("No alias found for sender");
         }
     }
 
     @Override
     public void deliverMessage(final String messageId) {
         metric.setStartTime(System.currentTimeMillis());
-        String submissionRestUrl = domibusProperties.getProperty(DOMIBUS_C4_REST_ENDPOINT);
+
         Submission submission;
         try {
             submission = this.messageRetriever.downloadMessage(messageId);
         } catch (MessageNotFoundException e) {
-            LOG.error("Error downloading message " + e);
+            LOG.error(e.getMessage(),e);
             return;
         }
+        try {
+            authenticate(submission);
+            sendPayload(submission);
+            accessPoint.switchAccessPoint(submission);
+        } catch (AuthenticationException e) {
+            //return invalid message.
+        }
 
+    }
+
+    private void sendPayload(Submission submission) {
         MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
         multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
 
+        String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
+
         if (LOG.isInfoEnabled()) {
-            logMultipart(submissionRestUrl, multipartRequest);
+            logMultipart(payloadEndPointUrl, multipartRequest);
         }
 
-        restTemplate.postForLocation(submissionRestUrl, multipartRequest);
+        restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
         metric.setLastChanged(System.currentTimeMillis());
-
     }
 
     private void logMultipart(String submissionRestUrl, MultiValueMap<String, Object> multipartRequest) {

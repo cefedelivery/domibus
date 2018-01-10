@@ -22,11 +22,7 @@ public class TaxudIcs2Controller {
 
     private final static String ORIGINAL_SENDER = "originalSender";
 
-    /*private MessageAccessPointSwitch messageAccessPointSwitch;
-
-    private MessageEndPointSwitch messageEndPointSwitch;*/
-
-    private SubmissionLog submissionLog;
+    private SubmissionLog submissionLogging;
 
     private CertificateLogging certificateLogging;
 
@@ -43,16 +39,14 @@ public class TaxudIcs2Controller {
 
     @PostConstruct
     protected void init() {
-       /* messageAccessPointSwitch = new MessageAccessPointSwitch();
-        messageEndPointSwitch = new MessageEndPointSwitch();*/
-        submissionLog = new SubmissionLog();
+        submissionLogging = new SubmissionLog();
     }
 
     @PostMapping(value = "/message", consumes = "multipart/form-data")
     public void onMessage(@RequestPart("submissionJson") Submission submission,
                           @RequestPart(value = "payload") byte[] payload) {
         LOG.info("Message received:");
-        submissionLog.logAccesPoints(submission);
+        submissionLogging.logAccesPoints(submission);
         payloadLogging.log(payload);
     }
 
@@ -60,7 +54,7 @@ public class TaxudIcs2Controller {
     public boolean authenticate(@RequestPart("submissionJson") Submission submission,
                                 @RequestPart(value = "certificate") byte[] certficiate) {
         LOG.info("Authentication required:");
-        submissionLog.logAccesPoints(submission);
+        submissionLogging.logAccesPoints(submission);
         Submission.TypedProperty originalSender = extractOriginalSender(submission);
         if (originalSender == null || invalidSender.equals(originalSender.getValue())) {
             return false;
