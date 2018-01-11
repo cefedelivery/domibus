@@ -13,10 +13,8 @@
                 <constraints nullable="false"/>
             </column>
             <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP">
-                <constraints nullable="false"/>
             </column>
             <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP">
-                <constraints nullable="false"/>
             </column>
             <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
             <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">
