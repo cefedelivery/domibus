@@ -23,7 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 /**
  * Created by draguio on 17/02/2016.
  */
-public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
+public class SubmitMessageSignOnlyIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
 

@@ -18,7 +18,7 @@ import java.sql.SQLException;
  * @since 3.3
  */
 
-public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
+public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
 
@@ -42,7 +42,7 @@ public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageOK() throws SendMessageFault, SQLException, InterruptedException {
+    public void testSubmitMessageOK() throws SendMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "SBDH-ORDER";
         //SendRequest sendRequest = createSendRequest(payloadHref);

@@ -19,7 +19,7 @@ import java.sql.SQLException;
  * Created by draguio on 17/02/2016.
  */
 @Ignore
-public class SendMessageWithPayloadProfileIT extends AbstractSendMessageIT {
+public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Autowired

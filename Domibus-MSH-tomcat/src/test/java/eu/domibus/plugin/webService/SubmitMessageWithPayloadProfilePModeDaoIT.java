@@ -14,7 +14,7 @@ import java.sql.SQLException;
  */
 @ContextConfiguration("classpath:pmode-dao.xml")
 @Ignore
-public class SendMessageWithPayloadProfilePModeDaoIT extends SendMessageWithPayloadProfileIT {
+public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWithPayloadProfileIT {
 
     private static boolean initialized;
 

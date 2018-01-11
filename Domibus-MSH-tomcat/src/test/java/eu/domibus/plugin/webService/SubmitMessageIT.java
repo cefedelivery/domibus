@@ -21,7 +21,7 @@ import java.sql.SQLException;
  * Created by feriaad on 02/02/2016.
  */
 @Ignore
-public class SendMessageIT extends AbstractSendMessageIT {
+public class SubmitMessageIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Autowired

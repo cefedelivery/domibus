@@ -24,7 +24,7 @@ import java.util.List;
  * @author martifp
  */
 @Ignore
-public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
+public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Autowired
