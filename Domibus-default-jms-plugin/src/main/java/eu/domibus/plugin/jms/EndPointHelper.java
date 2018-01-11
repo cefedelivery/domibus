@@ -32,10 +32,10 @@ public class EndPointHelper {
         Submission.TypedProperty originalSender=null;
         Submission.TypedProperty finalRecipient=null;
         for (Submission.TypedProperty property : properties) {
-            if(ORIGINAL_SENDER.equals(property.getKey())){
-                originalSender=property;
-            }
-            if(FINAL_RECIPIENT.equals(property.getKey())){
+                if(ORIGINAL_SENDER.equals(property.getKey())){
+                    originalSender=property;
+                }
+                if(FINAL_RECIPIENT.equals(property.getKey())){
                 finalRecipient=property;
             }
         }

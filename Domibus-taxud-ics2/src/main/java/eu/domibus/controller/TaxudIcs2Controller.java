@@ -20,8 +20,6 @@ public class TaxudIcs2Controller {
 
     private final static Logger LOG = LoggerFactory.getLogger(TaxudIcs2Controller.class);
 
-    private final static String ORIGINAL_SENDER = "originalSender";
-
     private SubmissionLogging submissionLogging;
 
     private CertificateLogging certificateLogging;
@@ -55,7 +53,9 @@ public class TaxudIcs2Controller {
                                 @RequestPart(value = "certificate") byte[] certficiate) {
         LOG.info("Authentication required:");
         submissionLogging.logAccesPoints(submission);
-        Submission.TypedProperty originalSender = extractOriginalSender(submission);
+        Submission.TypedProperty originalSender = extractEndPoint(submission,SubmissionLogging.ORIGINAL_SENDER);
+        Submission.TypedProperty finalRecipient = extractEndPoint(submission,SubmissionLogging.FINAL_RECIPIENT);
+        submissionLogging.logEndPoints(originalSender,finalRecipient);
         if (originalSender == null || invalidSender.equals(originalSender.getValue())) {
             return false;
         }
@@ -63,11 +63,11 @@ public class TaxudIcs2Controller {
         return true;
     }
 
-    private Submission.TypedProperty extractOriginalSender(@RequestPart("submissionJson") Submission submission) {
+    private Submission.TypedProperty extractEndPoint(Submission submission,final String endPointType) {
         Submission.TypedProperty originalSender = null;
         Collection<Submission.TypedProperty> properties = submission.getMessageProperties();
         for (Submission.TypedProperty property : properties) {
-            if (ORIGINAL_SENDER.equals(property.getKey())) {
+            if (endPointType.equals(property.getKey())) {
                 originalSender = property;
                 break;
             }
