@@ -36,11 +36,18 @@ public class AuthenticationClient {
 
     public void authenticate() {
         KeyStore trustStore = null;
-        try (FileInputStream keyStoreStream = new FileInputStream("C:\\install\\domains\\12.1.3\\red\\conf\\domibus\\keystores\\gateway_keystore.jks")) {
+        FileInputStream keyStoreStream;
+        try {
+            keyStoreStream = new FileInputStream("C:\\install\\domains\\12.1.3\\red\\conf\\domibus\\keystores\\gateway_keystore.jks");
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(keyStoreStream, "test123".toCharArray());
         } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException e) {
             e.printStackTrace();
+        }
+        finally {
+            if(keyStoreStream!=null) {
+                keyStoreStream.close();
+            }
         }
 
         try {
