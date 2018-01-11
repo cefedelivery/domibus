@@ -24,7 +24,6 @@
         </xsd:complexType>
     </xsd:element>
 
-    <!--
     <xsd:element name="downloadMessageRequest">
         <xsd:complexType>
             <xsd:sequence>
@@ -38,10 +37,10 @@
             <xsd:sequence>
                 <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:PayloadType"/>
-                <xsd:any minOccurs="0"/>  Introduced to support validation and MTOM/XOP
+                <xsd:any minOccurs="0"/> <!-- Introduced to support validation and MTOM/XOP -->
             </xsd:sequence>
         </xsd:complexType>
-    </xsd:element>-->
+    </xsd:element>
     <xsd:element name="retrieveMessageRequest">
         <xsd:complexType>
             <xsd:sequence>
@@ -239,7 +238,6 @@
             <xsd:element maxOccurs="unbounded" minOccurs="0" name="item" nillable="true" type="tns:errorResultImpl"/>
         </xsd:sequence>
     </xsd:complexType>
-    <!--
     <xsd:element name="getStatusRequest" nillable="true">
         <xsd:complexType>
             <xsd:sequence>
@@ -247,7 +245,6 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-    -->
     <xsd:element name="statusRequest" nillable="true">
         <xsd:complexType>
             <xsd:sequence>

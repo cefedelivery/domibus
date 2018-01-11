@@ -35,7 +35,6 @@
         <wsdl:part element="tns:getErrorsRequest" name="getErrorsRequest">
         </wsdl:part>
     </wsdl:message>
-    <!--
     <wsdl:message name="downloadMessage">
         <wsdl:part element="tns:downloadMessageRequest" name="downloadMessageRequest">
         </wsdl:part>
@@ -50,7 +49,6 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
-    -->
     <wsdl:message name="retrieveMessage">
         <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest">
         </wsdl:part>
@@ -122,16 +120,15 @@
         </wsdl:part>
     </wsdl:message>
     <wsdl:portType name="BackendInterface">
-        <!--
         <wsdl:operation name="sendMessage">
-             deprecated in 3.3; this method does not handle large payloads, use submitMessage instead
+            <!-- deprecated in 3.3; this method does not handle large payloads, use submitMessage instead -->
             <wsdl:input message="tns:sendMessage" name="sendMessage">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
             </wsdl:output>
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
-        </wsdl:operation>-->
+        </wsdl:operation>
         <wsdl:operation name="submitMessage">
             <wsdl:input message="tns:submitMessage" name="submitMessage">
             </wsdl:input>
@@ -140,15 +137,14 @@
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
         </wsdl:operation>
-        <!--
         <wsdl:operation name="getMessageStatus">
-             deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
-            backwards compatibility, use getStatus instead
+            <!-- deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
+            backwards compatibility, use getStatus instead -->
             <wsdl:input message="tns:getMessageStatus" name="getMessageStatus">
             </wsdl:input>
             <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse">
             </wsdl:output>
-        </wsdl:operation>-->
+        </wsdl:operation>
         <wsdl:operation name="getStatus">
             <wsdl:input message="tns:getStatus" name="getStatus">
             </wsdl:input>
@@ -169,16 +165,15 @@
             <wsdl:output message="tns:getMessageErrorsResponse" name="getMessageErrorsResponse">
             </wsdl:output>
         </wsdl:operation>
-        <!--
         <wsdl:operation name="downloadMessage">
-             deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead
+            <!-- deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead -->
             <wsdl:input message="tns:downloadMessage" name="downloadMessage">
             </wsdl:input>
             <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse">
             </wsdl:output>
             <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
             </wsdl:fault>
-        </wsdl:operation>-->
+        </wsdl:operation>
         <wsdl:operation name="retrieveMessage">
             <wsdl:input message="tns:retrieveMessage" name="retrieveMessage">
             </wsdl:input>
@@ -256,7 +251,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <!--
         <wsdl:operation name="downloadMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="downloadMessage">
@@ -269,7 +263,7 @@
             <wsdl:fault name="DownloadMessageFault">
                 <soap12:fault name="DownloadMessageFault" use="literal"/>
             </wsdl:fault>
-        </wsdl:operation>-->
+        </wsdl:operation>
         <wsdl:operation name="retrieveMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="downloadMessage">
