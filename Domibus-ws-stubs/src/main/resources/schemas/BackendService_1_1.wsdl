@@ -167,8 +167,9 @@
             <wsdl:output message="tns:getMessageErrorsResponse" name="getMessageErrorsResponse">
             </wsdl:output>
         </wsdl:operation>
+        <!--
         <wsdl:operation name="downloadMessage">
-            <!-- deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead -->
+            - deprecated in 3.3; this method does not handle large payloads, use retrieveMessage instead -
             <wsdl:input message="tns:downloadMessage" name="downloadMessage">
             </wsdl:input>
             <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse">
@@ -176,6 +177,7 @@
             <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault">
             </wsdl:fault>
         </wsdl:operation>
+        -->
         <wsdl:operation name="retrieveMessage">
             <wsdl:input message="tns:retrieveMessage" name="retrieveMessage">
             </wsdl:input>
@@ -254,6 +256,7 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <!--
         <wsdl:operation name="downloadMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="downloadMessage">
@@ -267,6 +270,7 @@
                 <soap12:fault name="DownloadMessageFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
+        -->
         <wsdl:operation name="retrieveMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="downloadMessage">

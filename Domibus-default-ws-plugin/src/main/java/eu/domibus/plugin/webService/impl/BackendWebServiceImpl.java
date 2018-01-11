@@ -5,7 +5,6 @@ import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.exceptions.DomibusServiceException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeException;
 import eu.domibus.ext.services.MessageAcknowledgeService;
 import eu.domibus.logging.DomibusLogger;
@@ -16,7 +15,6 @@ import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +24,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -206,75 +203,15 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     /**
-     * @param downloadMessageRequest
-     * @param downloadMessageResponse
-     * @param ebMSHeaderInfo
-     * @throws DownloadMessageFault
-     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#retrieveMessage(RetrieveMessageRequest, Holder, Holder)}
-     */
-    @Deprecated
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = DownloadMessageFault.class)
-    public void downloadMessage(final DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> downloadMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws DownloadMessageFault {
-
-        UserMessage userMessage = null;
-        boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(downloadMessageRequest.getMessageID());
-
-        String trimmedMessageId = trim(downloadMessageRequest.getMessageID()).replace("\t","");
-
-        try {
-            if (isMessageIdNotEmpty) {
-                userMessage = downloadMessage(trimmedMessageId, null);
-            }
-        } catch (final MessageNotFoundException mnfEx) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", mnfEx);
-            }
-            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createDownloadMessageFault(mnfEx));
-        }
-
-        if (userMessage == null) {
-            LOG.error(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]");
-            throw new DownloadMessageFault(MESSAGE_NOT_FOUND_ID + downloadMessageRequest.getMessageID() + "]", createFault("UserMessage not found"));
-        }
-
-        // To avoid blocking errors during the Header's response validation
-        if (StringUtils.isEmpty(userMessage.getCollaborationInfo().getAgreementRef().getValue())) {
-            userMessage.getCollaborationInfo().setAgreementRef(null);
-        }
-        Messaging messaging = EBMS_OBJECT_FACTORY.createMessaging();
-        messaging.setUserMessage(userMessage);
-        ebMSHeaderInfo.value = messaging;
-        downloadMessageResponse.value = WEBSERVICE_OF.createDownloadMessageResponse();
-
-        fillInfoParts(downloadMessageResponse, messaging);
-
-        try {
-            messageAcknowledgeService.acknowledgeMessageDelivered(trimmedMessageId, new Timestamp(System.currentTimeMillis()));
-        } catch (AuthenticationException | MessageAcknowledgeException e) {
-            //if an error occurs related to the message acknowledgement do not block the download message operation
-            LOG.error("Error acknowledging message [" + downloadMessageRequest.getMessageID() + "]", e);
-        }
-    }
-
-    protected DownloadMessageFault createFault(String message, DomibusServiceException e) {
-        FaultDetail detail = WEBSERVICE_OF.createFaultDetail();
-        detail.setCode(e.getErrorCode().getErrorCode());
-        detail.setMessage(e.getMessage());
-        return new DownloadMessageFault(message, detail);
-    }
-
-    /**
      * Add support for large files using DataHandler instead of byte[]
      *
      * @param retrieveMessageRequest
      * @param retrieveMessageResponse
      * @param ebMSHeaderInfo
-     * @throws DownloadMessageFault
+     * @throws RetrieveMessageFault
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = DownloadMessageFault.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = RetrieveMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
 
         UserMessage userMessage = null;
@@ -318,32 +255,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         } catch (AuthenticationException | MessageAcknowledgeException e) {
             //if an error occurs related to the message acknowledgement do not block the download message operation
             LOG.error("Error acknowledging message [" + retrieveMessageRequest.getMessageID() + "]", e);
-        }
-    }
-
-
-    private void fillInfoParts(Holder<DownloadMessageResponse> downloadMessageResponse, Messaging messaging) throws DownloadMessageFault {
-
-        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
-            ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
-            PayloadType payloadType = WEBSERVICE_OF.createPayloadType();
-            try {
-                if(extPartInfo.getPayloadDatahandler() != null ) {
-                    payloadType.setValue(IOUtils.toByteArray(extPartInfo.getPayloadDatahandler().getInputStream()));
-                    LOG.debug("downloadMessage - payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
-                }
-            } catch (final IOException ioEx) {
-                LOG.error(ERROR_IS_PAYLOAD_DATA_HANDLER, ioEx);
-                throw new DownloadMessageFault(ERROR_IS_PAYLOAD_DATA_HANDLER, createDownloadMessageFault(ioEx));
-            }
-            if (extPartInfo.isInBody()) {
-                extPartInfo.setHref(BODYLOAD);
-                payloadType.setPayloadId(BODYLOAD);
-                downloadMessageResponse.value.setBodyload(payloadType);
-            } else {
-                payloadType.setPayloadId(partInfo.getHref());
-                downloadMessageResponse.value.getPayload().add(payloadType);
-            }
         }
     }
 
