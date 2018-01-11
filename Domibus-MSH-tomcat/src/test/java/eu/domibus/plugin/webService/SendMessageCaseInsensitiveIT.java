@@ -4,8 +4,8 @@ import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,8 @@ public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
     public void testSendMessageOK() throws SendMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "SBDH-ORDER";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
 
@@ -96,7 +97,8 @@ public class SendMessageCaseInsensitiveIT extends AbstractSendMessageIT {
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);
 
-        SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
 }

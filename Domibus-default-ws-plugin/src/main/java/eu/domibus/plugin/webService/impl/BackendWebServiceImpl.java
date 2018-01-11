@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
@@ -72,82 +70,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public BackendWebServiceImpl(final String name) {
         super(name);
     }
-
-    /**
-     * @param sendRequest
-     * @param ebMSHeaderInfo
-     * @return
-     * @throws SendMessageFault
-     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#submitMessage(SubmitRequest, Messaging)}
-     */
-    @Deprecated
-    @SuppressWarnings("ValidExternallyBoundObject")
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
-        LOG.info("Received message");
-
-        final PayloadType bodyload = sendRequest.getBodyload();
-
-        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
-
-        List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
-
-        for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
-
-            ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
-            partInfosToAdd.add(extendedPartInfo);
-            i.remove();
-
-            boolean foundPayload = false;
-            final String href = extendedPartInfo.getHref();
-            LOG.debug("Looking for payload: " + href);
-            for (final PayloadType payload : sendRequest.getPayload()) {
-                LOG.debug("comparing with payload id: " + payload.getPayloadId());
-                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
-                    this.copyPartProperties(payload.getContentType(), extendedPartInfo);
-                    extendedPartInfo.setInBody(false);
-                    LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(payload.getValue(), payload.getContentType() == null ? DEFAULT_MT : payload.getContentType())));
-                    foundPayload = true;
-                    break;
-                }
-            }
-            if (!foundPayload) {
-                if (bodyload == null) {
-                    // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
-                }
-                // It can only be in body load, href MAY be null!
-                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
-                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
-                    extendedPartInfo.setInBody(true);
-                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(bodyload.getValue(), bodyload.getContentType() == null ? DEFAULT_MT : bodyload.getContentType())));
-                } else {
-                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
-                }
-            }
-        }
-        partInfoList.addAll(partInfosToAdd);
-        if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setTimestamp(getXMLTimeStamp());
-            ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
-        }
-        final String messageId;
-        try {
-            messageId = this.submit(ebMSHeaderInfo);
-        } catch (final MessagingProcessingException mpEx) {
-            LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
-            throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
-        }
-        LOG.info("Received message from backend to send, assigning messageID" + messageId);
-        final SendResponse response = WEBSERVICE_OF.createSendResponse();
-        response.getMessageID().add(messageId);
-        return response;
-    }
-
 
     /**
      * Add support for large files using DataHandler instead of byte[]

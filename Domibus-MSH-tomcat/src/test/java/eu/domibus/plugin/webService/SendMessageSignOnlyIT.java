@@ -6,8 +6,8 @@ import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,11 +60,13 @@ public class SendMessageSignOnlyIT extends AbstractSendMessageIT {
     public void testSendMessageValid() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
-        SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
 
         TimeUnit.SECONDS.sleep(4);
 

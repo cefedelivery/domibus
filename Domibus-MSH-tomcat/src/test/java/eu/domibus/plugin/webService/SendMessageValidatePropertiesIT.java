@@ -5,8 +5,8 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,12 +48,14 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessagePropertiesRequiredMissing() throws SendMessageFault {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);;
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
@@ -72,7 +74,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessageWrongIntValue() throws SendMessageFault {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "xxx", INT_TYPE));
@@ -80,7 +83,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
@@ -99,7 +103,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessageWrongBooleanValue() throws SendMessageFault {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
@@ -107,7 +112,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
@@ -126,7 +132,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessageWrongStringValue() throws SendMessageFault {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         Property aStringProperty = properties.iterator().next();
@@ -136,7 +143,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
@@ -155,7 +163,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessagePropertiesRequiredOk() throws SendMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
@@ -164,7 +173,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         super.prepareSendMessage("validAS4Response.xml");
-        SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
 
@@ -178,7 +188,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessageWrongType() throws SendMessageFault {
 
         String payloadHref = "payload";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
         properties.add(super.createProperty("aNumber", "123", INT_TYPE));
@@ -187,7 +198,8 @@ public class SendMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+            backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SendMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());

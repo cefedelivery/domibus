@@ -7,8 +7,8 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SendMessageFault;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,7 +46,8 @@ public class SendMessageIT extends AbstractSendMessageIT {
     public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
 
         String payloadHref = "sbdh-order";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        //SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         // Must use tc3 and TC3Leg1
@@ -63,7 +64,8 @@ public class SendMessageIT extends AbstractSendMessageIT {
 
         super.prepareSendMessage("validAS4Response.xml");
 
-        SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
 }

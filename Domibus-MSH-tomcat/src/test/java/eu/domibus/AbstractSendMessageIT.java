@@ -6,9 +6,9 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.PayloadType;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.LargePayloadType;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -16,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +64,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
                         .withBody(body)));
     }
 
-    protected void verifySendMessageAck(SendResponse response) throws InterruptedException, SQLException{
+    protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException{
         // Required in order to let time to the message to be consumed
         TimeUnit.SECONDS.sleep(4);
 
@@ -144,18 +146,35 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         return aProperty;
     }
 
-    protected SendRequest createSendRequest(String payloadHref) {
-        SendRequest sendRequest = new SendRequest();
-        PayloadType payload = new PayloadType();
-        payload.setPayloadId(payloadHref);
-        payload.setContentType("text/xml");
-        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
-        sendRequest.getPayload().add(payload);
+//    protected SendRequest createSendRequest(String payloadHref) {
+//        SendRequest sendRequest = new SendRequest();
+//        PayloadType payload = new PayloadType();
+//        payload.setPayloadId(payloadHref);
+//        payload.setContentType("text/xml");
+//        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
+//        sendRequest.getPayload().add(payload);
+//
+//        payload = new PayloadType();
+//        payload.setPayloadId(payloadHref);
+//        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
+//        sendRequest.setBodyload(payload);
+//        return sendRequest;
+//    }
 
-        payload = new PayloadType();
-        payload.setPayloadId(payloadHref);
-        payload.setValue(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()));
-        sendRequest.setBodyload(payload);
-        return sendRequest;
+    protected SubmitRequest createSubmitRequest(String payloadHref) {
+        final SubmitRequest submitRequest = new SubmitRequest();
+        LargePayloadType largePayload = new LargePayloadType();
+        final DataHandler messageHandler = new DataHandler(new ByteArrayDataSource(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml"));
+        largePayload.setPayloadId(payloadHref);
+        largePayload.setContentType("text/xml");
+        largePayload.setValue(messageHandler);
+        submitRequest.getPayload().add(largePayload);
+
+        //payload = new PayloadType();
+        largePayload = new LargePayloadType();
+        largePayload.setPayloadId(payloadHref);
+        largePayload.setValue(messageHandler);
+        submitRequest.setBodyload(largePayload);
+        return submitRequest;
     }
 }

@@ -120,8 +120,9 @@
         </wsdl:part>
     </wsdl:message>
     <wsdl:portType name="BackendInterface">
+        <!--
         <wsdl:operation name="sendMessage">
-            <!-- deprecated in 3.3; this method does not handle large payloads, use submitMessage instead -->
+            - deprecated in 3.3; this method does not handle large payloads, use submitMessage instead -
             <wsdl:input message="tns:sendMessage" name="sendMessage">
             </wsdl:input>
             <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse">
@@ -129,6 +130,7 @@
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
         </wsdl:operation>
+    -->
         <wsdl:operation name="submitMessage">
             <wsdl:input message="tns:submitMessage" name="submitMessage">
             </wsdl:input>
@@ -186,6 +188,7 @@
 
     <wsdl:binding name="BackendService_1_1SoapBinding" type="tns:BackendInterface">
         <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <!--
         <wsdl:operation name="sendMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="sendMessage">
@@ -198,7 +201,7 @@
             <wsdl:fault name="SendMessageFault">
                 <soap12:fault name="SendMessageFault" use="literal"/>
             </wsdl:fault>
-        </wsdl:operation>
+        </wsdl:operation>-->
         <wsdl:operation name="submitMessage">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="submitMessage">
