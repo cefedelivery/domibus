@@ -13,9 +13,10 @@ public class SubmissionLogging {
 
     private final static Logger LOG = LoggerFactory.getLogger(SubmissionLogging.class);
 
-    private final static String ORIGINAL_SENDER = "originalSender";
+    public final static String ORIGINAL_SENDER = "originalSender";
 
-    private final static String FINAL_RECIPIENT = "finalRecipient";
+    public final static String FINAL_RECIPIENT = "finalRecipient";
+
     public void logAccesPoints(Submission submission){
         for (Submission.Party party : submission.getFromParties()) {
             LOG.debug("From [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
