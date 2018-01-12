@@ -43,7 +43,7 @@ public class SubmitMessageIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageOK() throws SendMessageFault, InterruptedException, SQLException {
 
         String payloadHref = "sbdh-order";
         //SendRequest sendRequest = createSendRequest(payloadHref);

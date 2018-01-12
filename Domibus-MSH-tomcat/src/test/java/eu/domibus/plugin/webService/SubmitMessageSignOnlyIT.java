@@ -57,7 +57,7 @@ public class SubmitMessageSignOnlyIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValid() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessageValid() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);

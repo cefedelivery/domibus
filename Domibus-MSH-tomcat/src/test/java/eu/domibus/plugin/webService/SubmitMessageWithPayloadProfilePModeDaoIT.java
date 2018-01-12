@@ -35,9 +35,9 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValid() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValid() throws SendMessageFault, InterruptedException, SQLException {
 
-        super.testSendMessageValid();
+        super.testSubmitMessageValid();
     }
 
     /**
@@ -47,9 +47,9 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
 
-       super.testSendMessageValidNoMimeType();
+       super.testSubmitMessageValidNoMimeType();
     }
 
     /**
@@ -59,9 +59,9 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
      * @throws InterruptedException
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
 
-        super.testSendMessageInvalidPayloadHref();
+        super.testSubmitMessageInvalidPayloadHref();
     }
 
     /**
@@ -71,8 +71,8 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
      * @throws InterruptedException
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
 
-       super.testSendMessagePayloadHrefMismatch();
+       super.testSubmitMessagePayloadHrefMismatch();
     }
 }

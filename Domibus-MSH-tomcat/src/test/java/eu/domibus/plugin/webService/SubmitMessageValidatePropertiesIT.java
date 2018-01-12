@@ -71,7 +71,7 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessageWrongIntValue() throws SendMessageFault {
+    public void testSubmitMessageWrongIntValue() throws SendMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -100,7 +100,7 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessageWrongBooleanValue() throws SendMessageFault {
+    public void testSubmitMessageWrongBooleanValue() throws SendMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -129,7 +129,7 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      */
     //@Test(expected = SendMessageFault.class)
-    public void testSendMessageWrongStringValue() throws SendMessageFault {
+    public void testSubmitMessageWrongStringValue() throws SendMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -160,7 +160,7 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      */
     @Test
-    public void testSendMessagePropertiesRequiredOk() throws SendMessageFault, SQLException, InterruptedException {
+    public void testSubmitMessagePropertiesRequiredOk() throws SendMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -185,7 +185,7 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * @throws SendMessageFault
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessageWrongType() throws SendMessageFault {
+    public void testSubmitMessageWrongType() throws SendMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);

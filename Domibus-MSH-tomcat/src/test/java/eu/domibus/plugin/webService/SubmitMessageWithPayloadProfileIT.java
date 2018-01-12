@@ -42,7 +42,7 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValid() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValid() throws SendMessageFault, InterruptedException, SQLException {
 
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
@@ -63,7 +63,7 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
 
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
@@ -84,7 +84,7 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload_invalid";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -110,7 +110,7 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
      * @throws InterruptedException
      */
     @Test(expected = SendMessageFault.class)
-    public void testSendMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
