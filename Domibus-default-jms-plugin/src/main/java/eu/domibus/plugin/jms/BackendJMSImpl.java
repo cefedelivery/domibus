@@ -196,7 +196,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
             sendReplyMessage(messageID, errorMessage, jmsCorrelationID);
 
-            LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
+            LOG.debug("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
             LOG.error("Exception occurred while receiving message [" + map + "]", e);
             throw new DefaultJmsPluginException("Exception occurred while receiving message [" + map + "]", e);
@@ -319,14 +319,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private void logMultipart(String submissionRestUrl, MultiValueMap<String, Object> multipartRequest) {
-        LOG.info("Sending :");
+        LOG.debug("Sending :");
         Map<String, Object> stringObjectMap = multipartRequest.toSingleValueMap();
         Set<Map.Entry<String, Object>> entries = stringObjectMap.entrySet();
         for (Map.Entry<String, Object> entry : entries) {
-            LOG.info("Key:[{}]", entry.getKey());
-            LOG.info("Value:[{}]", entry.getValue());
+            LOG.debug("Key:[{}]", entry.getKey());
+            LOG.debug("Value:[{}]", entry.getValue());
         }
-        LOG.info("To:[{}]", submissionRestUrl);
+        LOG.debug("To:[{}]", submissionRestUrl);
     }
 
     private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
@@ -399,7 +399,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Scheduled(fixedDelay = 10000)
     public void doSomething() {
         if (metric.ofInterest()) {
-            LOG.info("METRICS:[{}] messages send and return from c3 to c4 in [{}] seconds", metric.getCounter(), (double) (metric.lastChanged - metric.getStartTime()) / 1000);
+            LOG.debug("METRICS:[{}] messages send and return from c3 to c4 in [{}] seconds", metric.getCounter(), (double) (metric.lastChanged - metric.getStartTime()) / 1000);
             metric.clear();
         }
     }
