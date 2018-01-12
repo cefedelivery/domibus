@@ -183,7 +183,7 @@ public class CRLVerifierServiceImpl implements ICRLVerifierService {
                     }
                 }
             } else {
-                LOG.info("The CRL is null for the given certificate");
+                LOG.debug("The CRL is null for the given certificate");
             }
         } catch (Exception ex) {
             if (ex instanceof AuthenticationException) {

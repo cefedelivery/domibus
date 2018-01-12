@@ -119,7 +119,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
         UserMessage userMessage;
         try {
-            LOG.info("Searching message with id [" + messageId + "]");
+            LOG.debug("Searching message with id [" + messageId + "]");
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
@@ -224,7 +224,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
-        LOG.info("Preparing to submit message");
+        LOG.debug("Preparing to submit message");
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
@@ -296,7 +296,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
 
-            LOG.info("Message submitted");
+            LOG.debug("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (EbMS3Exception ebms3Ex) {

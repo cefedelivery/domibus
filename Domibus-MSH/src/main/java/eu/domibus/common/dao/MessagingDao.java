@@ -88,7 +88,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             emptyQuery.setParameter("PARTINFOS", databasePayloads);
             emptyQuery.executeUpdate();
         }
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
+        LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DATA_CLEARED, messageId);
     }
 
     /**

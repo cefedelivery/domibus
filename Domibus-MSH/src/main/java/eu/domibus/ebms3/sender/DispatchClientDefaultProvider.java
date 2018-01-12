@@ -81,10 +81,10 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
         Boolean useProxyBool = Boolean.parseBoolean(useProxy);
         if (useProxyBool) {
-            LOG.info("Usage of Proxy required");
+            LOG.debug("Usage of Proxy required");
             configureProxy(httpClientPolicy, httpConduit);
         } else {
-            LOG.info("No proxy configured");
+            LOG.debug("No proxy configured");
         }
         return dispatch;
     }

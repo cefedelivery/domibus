@@ -118,7 +118,7 @@ public class CryptoServiceTest {
         try {
             classUnderTest.getCertificateFromKeystore(alias);
         } catch (KeyStoreException ksEx) {
-            LOG.info("KeyStoreException correctly raised:", ksEx);
+            LOG.debug("KeyStoreException correctly raised:", ksEx);
         }
     }
 

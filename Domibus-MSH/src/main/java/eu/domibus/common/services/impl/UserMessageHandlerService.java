@@ -157,7 +157,7 @@ public class UserMessageHandlerService {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
             return generateReceipt(request, legConfiguration, messageExists);
         }
     }
@@ -169,7 +169,7 @@ public class UserMessageHandlerService {
      * @throws EbMS3Exception
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
-        LOG.info("Checking charset for attachments");
+        LOG.debug("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             if(partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
                 continue;
@@ -211,7 +211,7 @@ public class UserMessageHandlerService {
      */
     //TODO: improve error handling
     String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
-        LOG.info("Persisting received message");
+        LOG.debug("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
 
         handlePayloads(request, userMessage);
@@ -247,7 +247,7 @@ public class UserMessageHandlerService {
                 backendName,
                 to.getEndpoint());
 
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
+        LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
         nonRepudiationService.saveRequest(request, userMessage);
 
@@ -278,7 +278,7 @@ public class UserMessageHandlerService {
                     ex.setMshRole(MSHRole.RECEIVING);
                     throw ex;
                 }
-                LOG.info("Using soap body payload");
+                LOG.debug("Using soap body payload");
                 bodyloadFound = true;
                 payloadFound = true;
                 partInfo.setInBody(true);
@@ -342,7 +342,7 @@ public class UserMessageHandlerService {
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            LOG.info("Generating receipt for incoming message");
+            LOG.debug("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();
@@ -358,7 +358,7 @@ public class UserMessageHandlerService {
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
                 saveResponse(responseMessage);
 
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
+                LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 // this cannot happen

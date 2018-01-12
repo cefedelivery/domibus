@@ -145,7 +145,7 @@ public class BackendNotificationService {
             return;
         }
 
-        LOG.info("Notify backend " + matchingBackendFilter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
+        LOG.debug("Notify backend " + matchingBackendFilter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
         validateAndNotify(userMessage, matchingBackendFilter.getBackendName(), notificationType, properties);
     }
 
@@ -221,7 +221,7 @@ public class BackendNotificationService {
             LOG.debug("No submission validators found for backend [" + backendName + "]");
             return;
         }
-        LOG.info("Performing submission validation for backend [" + backendName + "]");
+        LOG.debug("Performing submission validation for backend [" + backendName + "]");
         Submission submission = submissionAS4Transformer.transformFromMessaging(userMessage);
         List<SubmissionValidator> submissionValidators = submissionValidatorList.getSubmissionValidators();
         for (SubmissionValidator submissionValidator : submissionValidators) {
@@ -239,7 +239,7 @@ public class BackendNotificationService {
     }
 
     protected void validateAndNotify(UserMessage userMessage, String backendName, NotificationType notificationType, Map<String, Object> properties) {
-        LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
+        LOG.debug("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
 
         validateSubmission(userMessage, backendName, notificationType);
         String finalRecipient = getFinalRecipient(userMessage);
@@ -266,9 +266,9 @@ public class BackendNotificationService {
 
         if (properties != null) {
             String finalRecipient = (String) properties.get(MessageConstants.FINAL_RECIPIENT);
-            LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
+            LOG.debug("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
         }
-        LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
+        LOG.debug("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 

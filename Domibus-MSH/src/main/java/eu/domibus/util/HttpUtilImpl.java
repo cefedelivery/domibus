@@ -42,7 +42,7 @@ public class HttpUtilImpl implements HttpUtil {
             String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
             String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
             String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
-            LOG.info("Using proxy for downloading URL " + url);
+            LOG.debug("Using proxy for downloading URL " + url);
             return downloadURLViaProxy(url, httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
         return downloadURLDirect(url);

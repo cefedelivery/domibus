@@ -157,7 +157,7 @@ public class ReliabilityChecker {
                         throw ex;
                     }
 
-                    LOG.businessInfo(DomibusMessageCode.BUS_RELIABILITY_SUCCESSFUL, messageId);
+                    LOG.businessDebug(DomibusMessageCode.BUS_RELIABILITY_SUCCESSFUL, messageId);
                     return CheckResult.OK;
                 } catch (final JAXBException e) {
                     ReliabilityChecker.LOG.error("", e);

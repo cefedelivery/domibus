@@ -24,11 +24,11 @@ public class AuthenticationController {
     @PostMapping(value = "/message", consumes = "multipart/form-data")
     public void  authenticate(  @RequestPart("submissionJson") Submission submission,
                                 @RequestPart(value = "payload") MultipartFile payload) {
-        LOG.info("Message received:");
+        LOG.debug("Message received:");
         submissionLog.logAccesPoints(submission);
         try {
             byte[] decode = Base64.decodeBase64(payload.getBytes());
-            LOG.info("Content:[{}]",new String(decode));
+            LOG.debug("Content:[{}]",new String(decode));
         } catch (IOException e) {
             LOG.error(e.getMessage(),e);
         }

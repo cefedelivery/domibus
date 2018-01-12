@@ -36,7 +36,7 @@ public class PayloadProfileValidator {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         final PayloadProfile profile = legConfiguration.getPayloadProfile();
         if (profile == null) {
-            LOG.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
+            LOG.businessDebug(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
             // no profile means everything is valid
             return;
         }
@@ -91,6 +91,6 @@ public class PayloadProfileValidator {
             }
         }
 
-        LOG.businessInfo(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION, profile.getName());
+        LOG.businessDebug(DomibusMessageCode.BUS_PAYLOAD_PROFILE_VALIDATION, profile.getName());
     }
 }

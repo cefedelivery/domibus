@@ -39,10 +39,10 @@ public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate
         }
         final String messageId = event.getMessageId();
         if (newMessageReceiveFailureDefined) {
-            LOG.info("Calling messageReceiveFailed method");
+            LOG.debug("Calling messageReceiveFailed method");
             backendConnector.messageReceiveFailed(event);
         } else {
-            LOG.info("Calling deprecated messageReceiveFailed method");
+            LOG.debug("Calling deprecated messageReceiveFailed method");
             backendConnector.messageReceiveFailed(messageId, event.getEndpoint());
         }
     }

@@ -102,7 +102,7 @@ public class PullMessageSender {
                 //@thom why do not I have the error inside the message??
                 LOG.debug("No message for sent pull request with mpc "+mpc);
                 for (Error error1 : error) {
-                    LOG.info(error1.getErrorCode()+" "+error1.getShortDescription());
+                    LOG.debug(error1.getErrorCode()+" "+error1.getShortDescription());
                 }
                 return;
             }

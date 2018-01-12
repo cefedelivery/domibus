@@ -55,7 +55,7 @@ public class FSProcessFileService {
                 fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
                 FSMessage message= new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);
-                LOG.info("Message submitted: [{}]", processableFile.getName());
+                LOG.debug("Message submitted: [{}]", processableFile.getName());
 
                 renameProcessedFile(processableFile, messageId);
             } else {

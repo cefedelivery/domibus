@@ -26,6 +26,6 @@ public class DomibusPropertiesServiceTest {
         assertNotEquals("", service.getBuiltTime());
         assertNotEquals("", service.getImplVersion());
 
-        LOG.info(service.getDisplayVersion());
+        LOG.debug(service.getDisplayVersion());
     }
 }

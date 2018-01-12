@@ -104,13 +104,13 @@ public class CompressionService {
     public boolean handleDecompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_NOT_ENABLED);
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_NOT_ENABLED);
             return false;
         }
 
         for (final PartInfo partInfo : ebmsMessage.getPayloadInfo().getPartInfo()) {
             if (partInfo.isInBody()) {
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_PART_INFO_IN_BODY, partInfo.getHref());
+                LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION_PART_INFO_IN_BODY, partInfo.getHref());
                 continue;
             }
 
@@ -146,7 +146,7 @@ public class CompressionService {
                 throw ex;
             }
             partInfo.setPayloadDatahandler(new DataHandler(new DecompressionDataSource(partInfo.getPayloadDatahandler().getDataSource(), mimeType)));
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION, partInfo.getHref());
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_DECOMPRESSION, partInfo.getHref());
         }
         return true;
     }

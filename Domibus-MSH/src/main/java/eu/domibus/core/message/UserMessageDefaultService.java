@@ -117,7 +117,7 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void restoreFailedMessage(String messageId) {
-        LOG.info("Restoring message [{}]", messageId);
+        LOG.debug("Restoring message [{}]", messageId);
         final UserMessageLog userMessageLog = getFailedMessage(messageId);
 
         if (MessageStatus.DELETED == userMessageLog.getMessageStatus()) {
@@ -240,7 +240,7 @@ public class UserMessageDefaultService implements UserMessageService {
                     String queueName = notificationListener.getBackendNotificationQueue().getQueueName();
                     JmsMessage message = jmsManager.consumeMessage(queueName, messageId);
                     if (message != null) {
-                        LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+                        LOG.businessDebug(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
                     }
                 } catch (JMSException jmsEx) {
                     LOG.error("Error trying to get the queue name", jmsEx);
