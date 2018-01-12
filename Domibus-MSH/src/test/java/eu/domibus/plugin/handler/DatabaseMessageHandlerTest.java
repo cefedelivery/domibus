@@ -253,7 +253,7 @@ public class DatabaseMessageHandlerTest {
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
-        assertEquals(messageId, MESS_ID);
+        assertEquals(MESS_ID, messageId);
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext();
@@ -262,7 +262,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
@@ -330,7 +330,7 @@ public class DatabaseMessageHandlerTest {
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
-        assertEquals(messageId, MESS_ID);
+        assertEquals(MESS_ID, messageId);
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext();
@@ -342,7 +342,7 @@ public class DatabaseMessageHandlerTest {
             compressionService.handleCompression(message = withCapture(), withAny(new LegConfiguration()));
             assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
             assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             UserMessageLog userMessageLog;
             userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
@@ -393,7 +393,7 @@ public class DatabaseMessageHandlerTest {
         }};
 
         final String messageId = dmh.submit(messageData, BACKEND);
-        assertEquals(messageId, MESS_ID);
+        assertEquals(MESS_ID, messageId);
 
         new Verifications() {{
             authUtils.getOriginalUserFromSecurityContext();
@@ -402,7 +402,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
         }};
 
@@ -440,7 +440,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -483,7 +483,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -526,7 +526,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assertEquals(ErrorCode.EBMS_0010, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("does not correspond to the access point's name"));
         }
 
@@ -541,7 +541,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -574,7 +574,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assertEquals(ErrorCode.EBMS_0010, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("The initiator party's name is the same as the responder party's one"));
         }
 
@@ -591,7 +591,7 @@ public class DatabaseMessageHandlerTest {
             times = 0;
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -641,7 +641,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0303);
+            assertEquals(ErrorCode.EBMS_0303, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("No mime type found for payload with cid:"));
         }
 
@@ -653,7 +653,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             errorLogDao.create(withAny(new ErrorLogEntry()));
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -685,7 +685,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assertEquals(ErrorCode.EBMS_0010, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("PMode could not be found. Are PModes configured in the database?"));
         }
 
@@ -696,7 +696,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             times = 0;
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             times = 0;
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
@@ -732,7 +732,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (PModeMismatchException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0010);
+            assertEquals(ErrorCode.EBMS_0010, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("invalid pullprocess configuration"));
         }
 
@@ -742,7 +742,7 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
             userMessageService.scheduleSending(MESS_ID);
@@ -851,7 +851,7 @@ public class DatabaseMessageHandlerTest {
             compressionService.handleCompression(userMessage, legConfiguration);
             result = true;
 
-            messagingService.storeMessage(new Messaging());
+            messagingService.storeMessage(new Messaging(), MSHRole.SENDING);
             result = new CompressionException("Could not store binary data for message due to IO exception", new IOException("test compression"));
         }};
 
@@ -860,7 +860,7 @@ public class DatabaseMessageHandlerTest {
             Assert.fail("It should throw " + MessagingProcessingException.class.getCanonicalName());
         } catch (MessagingProcessingException mpEx) {
             LOG.debug("MessagingProcessingException catched: " + mpEx.getMessage());
-            assertEquals(mpEx.getEbms3ErrorCode(), ErrorCode.EBMS_0303);
+            assertEquals(ErrorCode.EBMS_0303, mpEx.getEbms3ErrorCode());
             assert (mpEx.getMessage().contains("Could not store binary data for message due to IO exception"));
         }
 
@@ -871,7 +871,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.findUserMessageExchangeContext(withAny(new UserMessage()), MSHRole.SENDING);
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
-            messagingService.storeMessage(withAny(new Messaging()));
+            messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
             userMessageLogDao.create(withAny(new UserMessageLog()));
             times = 0;
         }};
@@ -1195,7 +1195,7 @@ public class DatabaseMessageHandlerTest {
             errorLogDao.getErrorsForMessage(MESS_ID);
             Assert.assertNotNull(results);
             ErrorResult errRes = results.iterator().next();
-            Assert.assertEquals(errRes.getErrorCode(), ErrorCode.EBMS_0008);
+            Assert.assertEquals(ErrorCode.EBMS_0008, errRes.getErrorCode());
         }};
 
     }

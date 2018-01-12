@@ -1,6 +1,6 @@
 package eu.domibus.web.converter;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 /**

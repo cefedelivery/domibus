@@ -7,7 +7,8 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class MessageFilterResource {
                 messageFilter.setPersisted(true);
             }
         }
-        return new Pair<>(messageFilterResultROS,areFiltersPersisted);
+        return new ImmutablePair<>(messageFilterResultROS,areFiltersPersisted);
     }
 
     @RequestMapping(method = RequestMethod.GET)

@@ -31,7 +31,7 @@ import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -281,7 +281,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);
 
             try {
-                messagingService.storeMessage(message);
+                messagingService.storeMessage(message, MSHRole.SENDING);
             } catch (CompressionException exc) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);

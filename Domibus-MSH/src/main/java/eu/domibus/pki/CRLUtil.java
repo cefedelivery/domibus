@@ -2,6 +2,7 @@ package eu.domibus.pki;
 
 import eu.domibus.api.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
@@ -10,16 +11,21 @@ import org.bouncycastle.asn1.x509.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -28,13 +34,34 @@ import java.util.List;
 @Service
 public class CRLUtil {
 
+    /** LDAP attribute for CRL */
+    private static final String LDAP_CRL_ATTRIBUTE = "certificateRevocationList;binary";
+
     @Autowired
-    HttpUtil httpUtil;
+    private HttpUtil httpUtil;
+
+    /**
+     * Entry point for downloading certificates from either http(s), classpath source or LDAP
+     *
+     * @see CRLUtil#downloadCRLFromWebOrClasspath(String)
+     * @see CRLUtil#downloadCRLfromLDAP(String)
+     *
+     * @param crlURL
+     * @return {@link X509CRL} certificate to download
+     * @throws DomibusCRLException runtime exception in case of error
+     */
+    public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
+        if (CRLUrlType.LDAP.canHandleURL(crlURL)) {
+            return downloadCRLfromLDAP(crlURL);
+        } else {
+            return downloadCRLFromWebOrClasspath(crlURL);
+        }
+    }
 
     /**
      * Downloads CRL from the given URL. Supports loading the crl using http, https, ftp based,  classpath
      */
-    public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
+    X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
         URL url;
         try {
             url = getCrlURL(crlURL);
@@ -58,13 +85,48 @@ public class CRLUtil {
         }
     }
 
+
+    /**
+     * Downloads CRL from an ldap:// address e.g. ldap://ldap.example.com/dc=identity-ca,dc=example,dc=com
+     *
+     * @param ldapURL ldap url address to download from
+     *
+     * @return {@link X509CRL} the certificate
+     * @throws DomibusCRLException runtime exception in case of error
+
+     */
+    X509CRL downloadCRLfromLDAP(String ldapURL) throws DomibusCRLException {
+        Hashtable<String, String> env = new Hashtable<>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.PROVIDER_URL, ldapURL);
+
+        InputStream inStream = null;
+        try {
+            DirContext ctx = new InitialDirContext(env);
+            Attributes attributes = ctx.getAttributes(StringUtils.EMPTY);
+            Attribute attribute = attributes.get(LDAP_CRL_ATTRIBUTE);
+            byte[] value = (byte[]) attribute.get();
+            if ((value == null) || (value.length == 0)) {
+                throw new DomibusCRLException("error downloading CRL from '" + ldapURL + "'");
+            } else {
+                inStream = new ByteArrayInputStream(value);
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                return (X509CRL) cf.generateCRL(inStream);
+            }
+        } catch (NamingException | CertificateException | CRLException e) {
+            throw new DomibusCRLException("Cannot download CRL from '" + ldapURL + "'", e);
+        } finally {
+            IOUtils.closeQuietly(inStream);
+        }
+    }
+
     public BigInteger parseCertificateSerial(String serial) {
         return new BigInteger(serial.trim().replaceAll("\\s", ""), 16);
     }
 
     protected InputStream getCrlInputStream(URL crlURL) throws IOException {
-        InputStream result = null;
-        if (crlURL.toString().startsWith("http://") || crlURL.toString().startsWith("https://")) {
+        InputStream result;
+        if (CRLUrlType.HTTP.canHandleURL(crlURL.toString()) || CRLUrlType.HTTPS.canHandleURL(crlURL.toString())) {
             result = httpUtil.downloadURL(crlURL.toString());
         } else {
             result = crlURL.openStream();
@@ -73,16 +135,7 @@ public class CRLUtil {
     }
 
     public URL getCrlURL(String crlURL) throws MalformedURLException {
-        return isURLSupported(crlURL) ? new URL(crlURL) : getResourceFromClasspath(crlURL);
-    }
-
-    public boolean isURLSupported(String crlURL) {
-        if (crlURL.startsWith("http://") ||
-                crlURL.startsWith("https://") ||
-                crlURL.startsWith("ftp://") ||
-                crlURL.startsWith("file:/"))
-            return true;
-        return false;
+        return CRLUrlType.isURLSupported(crlURL) ? new URL(crlURL) : getResourceFromClasspath(crlURL);
     }
 
     public URL getResourceFromClasspath(String url) {

@@ -11,24 +11,32 @@ Domibus 4.0 (from 3.3):
                   ........................
                   </ehcache>
                 -Modify file "\conf\domibus\domibus.properties":
+                    o update all the cron expressions from 0/60 * * * * ? to * 0/1 * * * ?
                     o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class
                       and replace it by:
                       - [WebLogic only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
                       - [Tomcat only]
-                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosPlatform
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosJ2eePlatform
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
                      o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
                         - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+Domibus 3.3.2 (from 3.3.1):
+                - In the file "\conf\domibus\domibus.properties" add the folowing properties :
+                    o in the security section:
+                        domibus.certificate.check.cron=0 0 0/1 * * ?
+                        domibus.certificate.revocation.offset=10 (Optional, default is 10)
+                - Run the appropriate DB migration script(mysql5innoDb-3.3.1-to-3.3.2-migration.ddl for MySQL or oracle10g-3.3.1-to-3.3.2-migration.ddl for Oracle)
 Domibus 3.3.1 (from 3.3):
+               - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - In the file "\conf\domibus\domibus.properties" add the folowing properties :
                     o in the security section:
                         domibus.console.login.maximum.attempt=5
                         domibus.console.login.suspension.time=3600
                         domibus.account.unlock.cron=0 0/1 * * * ?
-               - Run the appropriate DB migration script.
+               - Run the appropriate DB migration script(mysql5innoDb-3.3-to-3.3.1-migration.ddl for MySQL or oracle10g-3.3-to-3.3.1-migration.ddl for Oracle)
 Domibus 3.3 (from 3.2.5):
                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
                - Run the appropriate DB migration script(mysql5innoDb-3.2.5-to-3.3-migration.ddl for MySQL or oracle10g-3.2.5-to-3.3-migration.ddl for Oracle)

@@ -1,7 +1,7 @@
 package eu.domibus.api.message.acknowledge;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.sql.Timestamp;
 import java.util.Map;
