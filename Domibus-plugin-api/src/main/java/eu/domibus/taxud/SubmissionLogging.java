@@ -18,15 +18,15 @@ public class SubmissionLogging {
     private final static String FINAL_RECIPIENT = "finalRecipient";
     public void logAccesPoints(Submission submission){
         for (Submission.Party party : submission.getFromParties()) {
-            LOG.info("From [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
+            LOG.debug("From [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
         }
         for (Submission.Party party : submission.getToParties()) {
-            LOG.info("to [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
+            LOG.debug("to [{}] with type [{}]",party.getPartyId(),party.getPartyIdType());
         }
     }
 
     public void logEndPoints(Submission.TypedProperty originalSender,Submission.TypedProperty finalRecipient){
-        LOG.info("[{}] value: [{}] type: [{}]",ORIGINAL_SENDER,originalSender.getValue(),originalSender.getType());
-        LOG.info("[{}] value: [{}] type: [{}]",FINAL_RECIPIENT,finalRecipient.getValue(),finalRecipient.getType());
+        LOG.debug("[{}] value: [{}] type: [{}]",ORIGINAL_SENDER,originalSender.getValue(),originalSender.getType());
+        LOG.debug("[{}] value: [{}] type: [{}]",FINAL_RECIPIENT,finalRecipient.getValue(),finalRecipient.getType());
     }
 }
