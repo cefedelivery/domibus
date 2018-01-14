@@ -9,9 +9,12 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
+import eu.domibus.plugin.JsonSubmission;
 import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.Umds;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
+import eu.domibus.taxud.SubmissionLogging;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +71,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String AUTHENTICATION_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.authenticate.endpoint";
     public static final String PAYLOAD_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.payload.endpoint";
     public static final String CID_MESSAGE = "cid:message";
+    public static final String DOMIBUS_TAXUD_CUST_DOMAIN = "domibus.taxud.cust.domain";
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -104,6 +108,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
+    @Autowired
+    private IdentifierHelper identifierHelper;
+
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
@@ -134,6 +141,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @PostConstruct
     protected void init() {
         restTemplate = new RestTemplate();
+       /* List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
+        interceptors.add(new LoggingRequestInterceptor());
+        restTemplate.setInterceptors(interceptors);*/
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
@@ -212,21 +222,52 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageId, errorMessage, correlationId);
         replyJmsTemplate.send(replyMessageCreator);
     }
+    private Submission.TypedProperty extractEndPoint(Submission submission,final String endPointType) {
+        Submission.TypedProperty originalSender = null;
+        Collection<Submission.TypedProperty> properties = submission.getMessageProperties();
+        for (Submission.TypedProperty property : properties) {
+            if (endPointType.equals(property.getKey())) {
+                originalSender = property;
+                break;
+            }
+        }
+        return originalSender;
+    }
+
 
     protected void authenticate(Submission submission) {
         String senderAlias;
         senderAlias = getSenderAlias(submission);
+
         byte[] encodedCertificate = encodeCertificate(senderAlias);
+
         MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
-        multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
+        multipartRequest.add(SUBMISSION_PARAM_NAME, buidUmds(submission));
+
         ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
         multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);
+
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
         Boolean aBoolean = restTemplate.postForObject(authenticationUrl, multipartRequest, Boolean.class);
         if (!aBoolean) {
             LOG.error("UMDS rejected authentication for message with id[{}]",submission.getMessageId());
             throw new AuthenticationException("UMDS rejected authentication");
         }
+    }
+
+    private Umds buidUmds(Submission submission) {
+        Submission.TypedProperty originalSender = extractEndPoint(submission, SubmissionLogging.ORIGINAL_SENDER);
+        Submission.TypedProperty finalRecipient = extractEndPoint(submission, SubmissionLogging.ORIGINAL_SENDER);
+        Umds umds = identifierHelper.buildUmds(originalSender.getValue());
+        umds.setApplicationUrl(identifierHelper.getApplicationUrl(finalRecipient.getValue()));
+
+        String domain="TAX";
+        String custServiceAndActionMapping=domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN);
+        if(custServiceAndActionMapping.equals(submission.getService()+submission.getAction())){
+            domain="CUST";
+        }
+        umds.setDomain(domain);
+        return umds;
     }
 
     private byte[] encodeCertificate(String senderAlias) {
@@ -308,7 +349,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private void sendPayload(Submission submission) {
         MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
-        multipartRequest.add(SUBMISSION_PARAM_NAME, submission);
+        multipartRequest.add(SUBMISSION_PARAM_NAME, buildJsonSubmission(submission));
 
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
 
@@ -318,6 +359,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
         metric.setLastChanged(System.currentTimeMillis());
+    }
+
+    private JsonSubmission buildJsonSubmission(Submission submission) {
+        return new JsonSubmission();
     }
 
     private void logMultipart(String submissionRestUrl, MultiValueMap<String, Object> multipartRequest) {

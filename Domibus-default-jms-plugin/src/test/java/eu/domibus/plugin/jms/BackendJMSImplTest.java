@@ -70,6 +70,9 @@ public class BackendJMSImplTest {
     @Injectable
     private MessageIdGenerator messageIdGenerator;
 
+    @Injectable
+    private IdentifierHelper identifierHelper;
+
     @Tested
     BackendJMSImpl backendJMS;
 
