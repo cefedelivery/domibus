@@ -32,7 +32,7 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
             throw new PluginException(DomibusCoreErrorCode.DOM_001, "pluginsLocation context param should not be empty");
         }
         String resolvedPluginsLocation = PropertyResolverBuilder.create().build().getResolvedProperty(pluginsLocation);
-        LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
+        LOG.debug("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
 
         try {
             pluginClassLoader = new PluginClassLoader(new File(resolvedPluginsLocation), Thread.currentThread().getContextClassLoader());

@@ -81,17 +81,17 @@ public class SetPolicyOutInterceptor extends AbstractSoapInterceptor {
 
         final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
         message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
-        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
+        LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_ALGORITHM_OUTGOING_USE, securityAlgorithm);
         Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
         Validate.notNull(receiverParty, "Initiator party was not found");
 
         final String encryptionUsername = receiverParty.getName();
         message.put(SecurityConstants.ENCRYPT_USERNAME, encryptionUsername);
-        LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
+        LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_USER_OUTGOING_USE, encryptionUsername);
 
         try {
             final Policy policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
+            LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_USE, legConfiguration.getSecurity().getPolicy());
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
         } catch (final ConfigurationException e) {
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_OUTGOING_NOT_FOUND, e, legConfiguration.getSecurity().getPolicy());

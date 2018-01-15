@@ -59,7 +59,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
                                           final String documentId, final String processId,
                                           final String processIdType) throws EbMS3Exception {
 
-        LOG.info("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
+        LOG.debug("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
                 " " + processId + " " + processIdType);
 
         try {
@@ -148,7 +148,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             return null;
         }
 
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
+        LOG.debug("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
                 httpProxyUser + " " + httpProxyPassword + " ");
 
         return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);

@@ -23,7 +23,7 @@ public class TestResource {
 
     @RequestMapping(value = "testPost", method = RequestMethod.POST)
     public UserRO testPost(@RequestBody LoginRO loginRO, HttpServletRequest request) {
-        LOGGER.info("-------------Testing post", loginRO);
+        LOGGER.debug("-------------Testing post", loginRO);
         final UserRO userRO = new UserRO();
         userRO.setUsername("testPost");
         return userRO;
@@ -31,7 +31,7 @@ public class TestResource {
 
     @RequestMapping(value = "testGet", method = RequestMethod.GET)
     public UserRO testGet() {
-        LOGGER.info("-------------Testing get");
+        LOGGER.debug("-------------Testing get");
         final UserRO userRO = new UserRO();
         userRO.setUsername("testGet");
         return userRO;

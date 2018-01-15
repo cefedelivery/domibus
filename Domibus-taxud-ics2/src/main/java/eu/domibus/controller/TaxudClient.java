@@ -20,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -120,7 +119,7 @@ public class TaxudClient {
         multipartRequest.add("certificate", byteArrayResource);
 
         Boolean aBoolean = restTemplate.postForObject("http://localhost:8080/authenticate", multipartRequest, Boolean.class);
-        LOG.info("Authenticated "+aBoolean);
+        LOG.debug("Authenticated "+aBoolean);
 
     }
 

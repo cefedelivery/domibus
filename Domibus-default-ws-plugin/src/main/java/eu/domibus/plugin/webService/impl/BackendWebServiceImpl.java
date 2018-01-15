@@ -85,7 +85,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public SendResponse sendMessage(final SendRequest sendRequest, final Messaging ebMSHeaderInfo) throws SendMessageFault {
-        LOG.info("Received message");
+        LOG.debug("Received message");
 
         final PayloadType bodyload = sendRequest.getBodyload();
 
@@ -142,7 +142,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
             throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
-        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+        LOG.debug("Received message from backend to send, assigning messageID" + messageId);
         final SendResponse response = WEBSERVICE_OF.createSendResponse();
         response.getMessageID().add(messageId);
         return response;
@@ -161,7 +161,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
-        LOG.info("Received message");
+        LOG.debug("Received message");
 
         final LargePayloadType bodyload = submitRequest.getBodyload();
 
@@ -218,7 +218,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
             throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
-        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+        LOG.debug("Received message from backend to send, assigning messageID" + messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;

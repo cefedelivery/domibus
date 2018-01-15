@@ -17,7 +17,7 @@ public class CertificateLogging {
     public void log(byte[] payload) {
         if (LOG.isInfoEnabled()) {
             byte[] decode = Base64.decodeBase64(payload);
-            LOG.info("Certificate:[{}]", new String(decode));
+            LOG.debug("Certificate:[{}]", new String(decode));
         }
     }
 }

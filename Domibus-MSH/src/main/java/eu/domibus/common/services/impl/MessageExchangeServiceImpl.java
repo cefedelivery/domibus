@@ -273,7 +273,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 if (!certificateChainValid) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
+                LOG.debug("Receiver certificate exists and is valid [" + receiverName + "]");
             } catch (DomibusCertificateException e) {
                 throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
@@ -297,7 +297,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 if (!certificateService.isCertificateValid(certificate)) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
-                LOG.info("Sender certificate exists and is valid [" + senderName + "]");
+                LOG.debug("Sender certificate exists and is valid [" + senderName + "]");
             } catch (DomibusCertificateException | KeyStoreException ex) {
                 // Is this an error and we stop the sending or we just log a warning that we were not able to validate the cert?
                 // my opinion is that since the option is enabled, we should validate no matter what => this is an error

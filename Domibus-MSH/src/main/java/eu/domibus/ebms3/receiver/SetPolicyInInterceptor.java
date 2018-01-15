@@ -121,7 +121,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
-            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
+            LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -130,7 +130,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final String securityAlgorithm = legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
             message.put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
             message.getExchange().put(SecurityConstants.ASYMMETRIC_SIGNATURE_ALGORITHM, securityAlgorithm);
-            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
+            LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_ALGORITHM_INCOMING_USE, securityAlgorithm);
 
         } catch (EbMS3Exception e) {
             setBindingOperation(message);

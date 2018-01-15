@@ -103,18 +103,18 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
-            LOG.info("Message does not contain security info ==> skipping sender trust verification.");
+            LOG.debug("Message does not contain security info ==> skipping sender trust verification.");
             return;
         }
 
         boolean isPullMessage = false;
         MessageType messageType = (MessageType) message.get(MSHDispatcher.MESSAGE_TYPE_IN);
         if (messageType != null && messageType.equals(MessageType.SIGNAL_MESSAGE)) {
-            LOG.info("PULL Signal Message");
+            LOG.debug("PULL Signal Message");
             isPullMessage = true;
         }
 
-        LOG.info("Validating sender certificate");
+        LOG.debug("Validating sender certificate");
         String senderPartyName;
         if (isPullMessage) {
             senderPartyName = getReceiverPartyName(message);
@@ -143,9 +143,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                     return false;
                 }
                 if (isPullMessage) {
-                    LOG.info("[Pulling] - Sender certificate exists and is valid [" + sender + "]");
+                    LOG.debug("[Pulling] - Sender certificate exists and is valid [" + sender + "]");
                 } else {
-                    LOG.info("Sender certificate exists and is valid [" + sender + "]");
+                    LOG.debug("Sender certificate exists and is valid [" + sender + "]");
                 }
             } catch (DomibusCertificateException dce) {
                 LOG.error("Could not verify if the certificate chain is valid for alias " + sender, dce);
@@ -161,12 +161,12 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             return true;
         }
 
-        LOG.info("Verifying sender trust");
+        LOG.debug("Verifying sender trust");
         if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
             if (isPullMessage) {
-                LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
+                LOG.debug("[Pulling] - Sender [" + sender + "] is trusted.");
             } else {
-                LOG.info("Sender [" + sender + "] is trusted.");
+                LOG.debug("Sender [" + sender + "] is trusted.");
             }
             return true;
         }
@@ -237,7 +237,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
             if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
-                LOG.info("Checking for message embedded certificate in the BinarySecurityToken tag");
+                LOG.debug("Checking for message embedded certificate in the BinarySecurityToken tag");
                 cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
             }
             if(cert == null) {

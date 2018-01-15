@@ -114,7 +114,7 @@ public class JMXHelper {
     protected Map<String, String> getJMSCredentials() {
         String jmxUser = domibusProperties.getProperty(DOMIBUS_JMX_USER_PROP);
         if (StringUtils.isEmpty(jmxUser)) {
-            LOG.info("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
+            LOG.debug("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
             return securityHelper.getBootIdentity();
         }
         final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PWD_PROP);

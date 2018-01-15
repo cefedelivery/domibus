@@ -77,7 +77,7 @@ public class MessagingServiceImpl implements MessagingService {
         }
 
         if(compressed) {
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
 

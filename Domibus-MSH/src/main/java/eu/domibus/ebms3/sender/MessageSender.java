@@ -1,10 +1,10 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -17,6 +17,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -103,7 +104,7 @@ public class MessageSender implements MessageListener {
         }
 
 
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
+        LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
 
         MessageAttempt attempt = new MessageAttempt();
         attempt.setMessageId(messageId);
@@ -125,7 +126,7 @@ public class MessageSender implements MessageListener {
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
             Policy policy;
             try {
@@ -185,10 +186,13 @@ public class MessageSender implements MessageListener {
         } finally {
             try {
                 if (abortSending) {
-                    LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+                    LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                     retryService.purgeTimedoutMessageInANewTransaction(messageId);
                 } else {
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                    LOG.info("Sending message to [{}] with messageId [{}]",
+                            ((PartyId)userMessage.getPartyInfo().getTo().getPartyId().toArray()[0]).getValue(),
+                            userMessage.getMessageInfo().getMessageId());
                 }
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);

@@ -36,8 +36,8 @@ class TestResult {
         boolean success = mpc.equals(compareMpc) &&
                 pMode.equals(comparePmode) &&
                 notifyBusiness.equals(compareNotify);
-        LOG.info("Comparing " + compareMpc + " " + mpc + " " + comparePmode + " " + pMode + " " + compareNotify + " " + notifyBusiness);
-        LOG.info("succes " + success);
+        LOG.debug("Comparing " + compareMpc + " " + mpc + " " + comparePmode + " " + pMode + " " + compareNotify + " " + notifyBusiness);
+        LOG.debug("succes " + success);
 
         if (!success) {
             if(next==null){

@@ -35,7 +35,7 @@ public class PropertyProfileValidator {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         final PropertySet propSet = legConfiguration.getPropertySet();
         if (propSet == null) {
-            LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
+            LOG.businessDebug(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
             // no profile means everything is valid
             return;
         }
@@ -86,6 +86,6 @@ public class PropertyProfileValidator {
             }
         }
 
-        LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION, propSet.getName());
+        LOG.businessDebug(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION, propSet.getName());
     }
 }

@@ -48,7 +48,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             default:
         }
         super.update(messageLog);
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
+        LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
     }
 
     public MessageStatus getMessageStatus(String messageId) {

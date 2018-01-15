@@ -37,7 +37,7 @@ public class WeblogicNotificationListenerService extends NotificationListenerSer
 //        } else {
 //            queueName = super.getQueueName(queue);
 //        }
-        LOG.info("getQueueName for [" + queue.getQueueName() + "] = " + queueName);
+        LOG.debug("getQueueName for [" + queue.getQueueName() + "] = " + queueName);
         return queueName;
     }
 

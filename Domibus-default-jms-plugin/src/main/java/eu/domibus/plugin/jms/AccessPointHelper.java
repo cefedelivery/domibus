@@ -28,7 +28,7 @@ public class AccessPointHelper {
         Set<Submission.Party> fromParties = new HashSet<>(submission.getFromParties());
         Set<Submission.Party> toParties = new HashSet<>(submission.getToParties());
 
-       LOG.info("switching access point from :");
+       LOG.debug("switching access point from :");
         submissionLogging.logAccesPoints(submission);
 
         submission.getFromParties().clear();
@@ -37,7 +37,7 @@ public class AccessPointHelper {
         submission.getFromParties().addAll(toParties);
         submission.getToParties().addAll(fromParties);
 
-        LOG.info("to:");
+        LOG.debug("to:");
         submissionLogging.logAccesPoints(submission);
 
         String fromRole = submission.getFromRole();

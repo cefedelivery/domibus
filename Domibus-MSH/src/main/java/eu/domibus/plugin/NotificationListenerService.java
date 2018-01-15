@@ -83,7 +83,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
 
-            LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
+            LOG.debug("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
 
             switch (notificationType) {
                 case MESSAGE_RECEIVED:
@@ -150,7 +150,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             authUtils.hasUserOrAdminRole();
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.info("Authorized as " + (originalUser == null ? "super user" : originalUser));
+        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
         /* if originalUser is null, all messages are returned */
         return getQueueElements(NotificationType.MESSAGE_RECEIVED, originalUser);
@@ -201,7 +201,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
                     countOfMessagesIncluded++;
                     LOG.debug("Added MessageId [" + messageId + "]");
                     if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
-                        LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
+                        LOG.debug("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
                         break;
                     }
                 }
@@ -236,7 +236,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             LOG.businessError(DomibusMessageCode.BUS_MSG_NOT_FOUND, messageId);
             throw new MessageNotFoundException("No message with id [" + messageId + "] pending for download");
         }
-        LOG.businessInfo(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
+        LOG.businessDebug(DomibusMessageCode.BUS_MSG_CONSUMED, messageId, queueName);
 
     }
 

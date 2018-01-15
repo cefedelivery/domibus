@@ -33,7 +33,7 @@ public class JMSDestinationHelperImpl implements JMSDestinationHelper {
     public boolean isInternal(String name) {
         String internalQueueExpression = domibusProperties.getProperty(INTERNALQUEUE_EXPRESSION);
         if (StringUtils.isEmpty(internalQueueExpression)) {
-            LOG.info("Property [" + INTERNALQUEUE_EXPRESSION + "] is not defined: using the default expression [" + DEFAULT_INTERNAL_QUEUE_EXPRESSION + "]");
+            LOG.debug("Property [" + INTERNALQUEUE_EXPRESSION + "] is not defined: using the default expression [" + DEFAULT_INTERNAL_QUEUE_EXPRESSION + "]");
             internalQueueExpression = DEFAULT_INTERNAL_QUEUE_EXPRESSION;
         }
         return regexUtil.matches(internalQueueExpression, name);

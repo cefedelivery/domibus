@@ -191,7 +191,7 @@ public class PModeDaoTestIT {
             pModeDao.updatePModes(pModeBytes);
             fail("The Pmode is invalid so it should have thrown an exception");
         } catch (XmlProcessingException e) {
-            LOG.info("Exception thrown as expected due to invalid PMode");
+            LOG.debug("Exception thrown as expected due to invalid PMode");
             assertNotNull(e.getErrors());
             assertTrue(e.getErrors().size() > 0);
         }

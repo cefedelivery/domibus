@@ -134,7 +134,7 @@ public abstract class PModeProvider {
         configurationRaw.setXml(bytes);
         configurationRawDAO.create(configurationRaw);
 
-        LOG.info("Configuration successfully updated");
+        LOG.debug("Configuration successfully updated");
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
         jmsOperations.send(new ReloadPmodeMessageCreator());
 
@@ -174,17 +174,17 @@ public abstract class PModeProvider {
 
         try {
             agreementName = findAgreement(userMessage.getCollaborationInfo().getAgreementRef());
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_AGREEMENT_FOUND, agreementName, userMessage.getCollaborationInfo().getAgreementRef());
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_AGREEMENT_FOUND, agreementName, userMessage.getCollaborationInfo().getAgreementRef());
             senderParty = findPartyName(userMessage.getPartyInfo().getFrom().getPartyId());
-            LOG.businessInfo(DomibusMessageCode.BUS_PARTY_ID_FOUND, senderParty, userMessage.getPartyInfo().getFrom().getPartyId());
+            LOG.businessDebug(DomibusMessageCode.BUS_PARTY_ID_FOUND, senderParty, userMessage.getPartyInfo().getFrom().getPartyId());
             receiverParty = findPartyName(userMessage.getPartyInfo().getTo().getPartyId());
-            LOG.businessInfo(DomibusMessageCode.BUS_PARTY_ID_FOUND, receiverParty, userMessage.getPartyInfo().getTo().getPartyId());
+            LOG.businessDebug(DomibusMessageCode.BUS_PARTY_ID_FOUND, receiverParty, userMessage.getPartyInfo().getTo().getPartyId());
             service = findServiceName(userMessage.getCollaborationInfo().getService());
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, service, userMessage.getCollaborationInfo().getService());
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, service, userMessage.getCollaborationInfo().getService());
             action = findActionName(userMessage.getCollaborationInfo().getAction());
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_ACTION_FOUND, action, userMessage.getCollaborationInfo().getAction());
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_ACTION_FOUND, action, userMessage.getCollaborationInfo().getAction());
             leg = findLegName(agreementName, senderParty, receiverParty, service, action);
-            LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
+            LOG.businessDebug(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", userMessage.getMessageInfo().getMessageId(), null);

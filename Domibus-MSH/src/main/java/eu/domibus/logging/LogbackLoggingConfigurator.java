@@ -32,7 +32,7 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
         String logbackConfigurationFile = getDefaultLogbackConfigurationFile();
         String customLogbackConfigurationFile = System.getProperty(LOGBACK_CONFIGURATION_FILE_PARAM);
         if (StringUtils.isNotEmpty(customLogbackConfigurationFile)) {
-            LOG.info("Found custom logback configuration file: [" + customLogbackConfigurationFile + "]");
+            LOG.debug("Found custom logback configuration file: [" + customLogbackConfigurationFile + "]");
             logbackConfigurationFile = customLogbackConfigurationFile;
         }
         configureLogging(logbackConfigurationFile);
@@ -45,7 +45,7 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
             return;
         }
 
-        LOG.info("Using the logback configuration file from [" + logbackConfigurationFile + "]");
+        LOG.debug("Using the logback configuration file from [" + logbackConfigurationFile + "]");
 
         if (!new File(logbackConfigurationFile).exists()) {
             LOG.warn("Could not configure logging: the file [" + logbackConfigurationFile + "] does not exists");

@@ -36,7 +36,7 @@ public class PluginClassLoader extends URLClassLoader {
                 urls.add(pluginJar.toURI().toURL());
             }
         }
-        LOG.info("Adding the following plugins to the classpath: " + urls);
+        LOG.debug("Adding the following plugins to the classpath: " + urls);
         return urls.toArray(new URL[urls.size()]);
     }
 }

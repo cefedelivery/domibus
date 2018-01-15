@@ -36,7 +36,7 @@ public class GatewayConfigurationValidator {
 
     @PostConstruct
     public void validateConfiguration() {
-        LOG.info("Checking gateway configuration ...");
+        LOG.debug("Checking gateway configuration ...");
         validateCerts();
 
         try {

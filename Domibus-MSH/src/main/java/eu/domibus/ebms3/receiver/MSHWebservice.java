@@ -18,6 +18,7 @@ import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
@@ -117,6 +118,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 handlePullRequestReceipt(request, messaging);
             }
         } else {
+            LOG.info("Received message from [{}] with messageId [{}]",
+                    ((PartyId)messaging.getUserMessage().getPartyInfo().getFrom().getPartyId().toArray()[0]).getValue(),
+                    messaging.getUserMessage().getMessageInfo().getMessageId());
             String pmodeKey = null;
             try {
                 //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
@@ -127,10 +131,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 assert false;
             }
             try {
-                LOG.info("Using pmodeKey {}", pmodeKey);
+                LOG.debug("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
-                LOG.info("Ping message " + userMessageHandlerContext.isPingMessage());
+                LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
+                LOG.debug("Ping message " + userMessageHandlerContext.isPingMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {
@@ -162,7 +166,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
             SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {

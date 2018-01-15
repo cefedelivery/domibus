@@ -32,9 +32,9 @@ public class DomibusPropertiesService {
                 LOG.warn("The 'domibus.properties' has not been found!");
             }
             domibusProps.load(is);
-            LOG.info("=========================================================================================================");
-            LOG.info("|         " + getDisplayVersion() + "        |");
-            LOG.info("=========================================================================================================");
+            LOG.debug("=========================================================================================================");
+            LOG.debug("|         " + getDisplayVersion() + "        |");
+            LOG.debug("=========================================================================================================");
         } catch (Exception ex) {
             LOG.warn("Error loading Domibus properties", ex);
         }

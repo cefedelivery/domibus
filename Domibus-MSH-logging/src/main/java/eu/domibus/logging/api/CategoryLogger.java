@@ -79,7 +79,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         if (instanceofLAL) {
             ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, formattedMessage, args, null);
         } else {
-            logger.info(marker, formattedMessage, args);
+            logger.debug(marker, formattedMessage, args);
         }
     }
 

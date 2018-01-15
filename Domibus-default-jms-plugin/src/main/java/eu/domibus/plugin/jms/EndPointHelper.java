@@ -48,7 +48,7 @@ public class EndPointHelper {
         String finalRecipientType = finalRecipient.getType();
         String finalRecipientValue = finalRecipient.getValue();
 
-        LOG.info("switching end points from:");
+        LOG.debug("switching end points from:");
         submissionLogging.logEndPoints(originalSender,finalRecipient);
 
         properties.clear();
@@ -59,7 +59,7 @@ public class EndPointHelper {
         properties.add(newOriginalSender);
         properties.add(newFinalRecipient);
 
-        LOG.info("to:");
+        LOG.debug("to:");
         submissionLogging.logEndPoints(newOriginalSender,newFinalRecipient);
     }
 }

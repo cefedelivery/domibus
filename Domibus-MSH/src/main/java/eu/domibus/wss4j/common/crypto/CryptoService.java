@@ -95,7 +95,7 @@ public class CryptoService {
         if (trustStore == null) {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         }
-        LOG.info("Initiating truststore");
+        LOG.debug("Initiating truststore");
         String trustStoreFilename = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
         String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
         try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {

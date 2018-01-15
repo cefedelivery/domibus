@@ -131,7 +131,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             return super.findUserMessageExchangeContext(userMessage, mshRole);
         } catch (final EbMS3Exception e) {
-            LOG.info("PmodeKey not found, starting the dynamic discovery process");
+            LOG.debug("PmodeKey not found, starting the dynamic discovery process");
             doDynamicDiscovery(userMessage, mshRole);
 
         }
@@ -146,7 +146,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "No matching dynamic discovery processes found for message.", userMessage.getMessageInfo().getMessageId(), null);
         }
 
-        LOG.info("Found " + candidates.size() + " dynamic discovery candidates. MSHRole: " + mshRole);
+        LOG.debug("Found " + candidates.size() + " dynamic discovery candidates. MSHRole: " + mshRole);
 
         if(MSHRole.RECEIVING.equals(mshRole)) {
             PartyId fromPartyId = getFromPartyId(userMessage);
@@ -197,7 +197,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     protected synchronized Party updateConfigurationParty(String name, String type, String endpoint) {
-        LOG.info("Update the configuration party with: " + name + " " + type + " " + endpoint);
+        LOG.debug("Update the configuration party with: " + name + " " + type + " " + endpoint);
         // update the list of party types
         PartyIdType configurationType = updateConfigurationType(type);
 
@@ -248,7 +248,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected PartyIdType updateConfigurationType(String type) {
         Set<PartyIdType> partyIdTypes = getConfiguration().getBusinessProcesses().getPartyIdTypes();
         if (partyIdTypes == null) {
-            LOG.info("Empty partyIdTypes set");
+            LOG.debug("Empty partyIdTypes set");
             partyIdTypes = new HashSet<>();
         }
 
@@ -338,7 +338,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         if(finalRecipient == null) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Dynamic discovery processes found for message but finalRecipient information is missing in messageProperties.", userMessage.getMessageInfo().getMessageId(), null);
         }
-        LOG.info("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
+        LOG.debug("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
 
         //lookup sml/smp - result is cached
         final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
