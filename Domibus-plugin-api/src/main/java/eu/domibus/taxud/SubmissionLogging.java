@@ -11,9 +11,7 @@ public class SubmissionLogging {
 
    // private final static Logger LOG = LoggerFactory.getLogger(SubmissionLogging.class);
 
-    public final static String ORIGINAL_SENDER = "originalSender";
 
-    public final static String FINAL_RECIPIENT = "finalRecipient";
 
     public void logAccesPoints(Submission submission){
         /*for (Submission.Party party : submission.getFromParties()) {

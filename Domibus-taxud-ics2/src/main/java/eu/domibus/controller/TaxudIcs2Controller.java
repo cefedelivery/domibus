@@ -3,6 +3,8 @@ package eu.domibus.controller;
 import eu.domibus.plugin.JsonSubmission;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.Umds;
+import eu.domibus.taxud.CertificateLogging;
+import eu.domibus.taxud.PayloadLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +40,8 @@ public class TaxudIcs2Controller {
     @PostMapping(value = "/message", consumes = "multipart/form-data")
     public void onMessage(@RequestPart("submissionJson") JsonSubmission submission,
                           @RequestPart(value = "payload") byte[] payload) {
-        LOG.info("Message received:");
-        //submissionLogging.logAccesPoints(submission);
-        payloadLogging.log(payload);
+        LOG.info("Message received:\n  [{}]",submission);
+        payloadLogging.decodeAndlog(payload);
     }
 
     @PostMapping(value = "/authenticate", consumes = "multipart/form-data")
@@ -48,14 +49,13 @@ public class TaxudIcs2Controller {
                                 @RequestPart(value = "certificate") byte[] certficiate) {
         LOG.info("Authentication required for :\n   [{}]",submission);
         if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
+            LOG.info("Not Authenticated");
             return false;
         }
-        certificateLogging.log(certficiate);
+        certificateLogging.decodeAndlog(certficiate);
+        LOG.info("Authenticated");
         return true;
     }
-
-
-
 
     //for testing purpose.
     @RequestMapping(value = "/message", method = RequestMethod.GET)

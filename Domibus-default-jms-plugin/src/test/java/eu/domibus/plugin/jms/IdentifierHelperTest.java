@@ -14,7 +14,7 @@ public class IdentifierHelperTest {
     @Test
     public void buildUmds() {
         IdentifierHelper identifierHelper=new IdentifierHelper();
-        Umds umds = identifierHelper.buildUmds("urn:oasis:names:tc:ebcore:partyid-type:unregistered:EID:bourgpa:EMPL");
+        Umds umds = identifierHelper.buildUmdsFromOriginalSender("urn:oasis:names:tc:ebcore:partyid-type:unregistered:EID:bourgpa:EMPL");
         assertEquals("EID",umds.getUser_typeOfIdentifier());
         assertEquals("bourgpa",umds.getUser_identifier());
         assertEquals("EMPL",umds.getUser_typeOfActor());

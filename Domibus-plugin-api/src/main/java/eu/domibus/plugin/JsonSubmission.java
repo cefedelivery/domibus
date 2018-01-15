@@ -568,6 +568,22 @@ public class JsonSubmission {
     }
 
 
+    @Override
+    public String toString() {
+        return "JsonSubmission{" +"\n"+
+                ", action='" + action + '\'' +"\n"+
+                ", service='" + service + '\'' +"\n"+
+                ", serviceType='" + serviceType + '\'' +"\n"+
+                ", conversationId='" + conversationId + '\'' +"\n"+
+                ", messageId='" + messageId + '\'' +"\n"+
+                ", refToMessageId='" + refToMessageId + '\'' +"\n"+
+                ", agreementRef='" + agreementRef + '\'' +"\n"+
+                ", agreementRefType='" + agreementRefType + '\'' +"\n"+
+                ", fromRole='" + fromRole + '\'' +"\n"+
+                ", toRole='" + toRole + '\'' +"\n"+
+                '}';
+    }
+
     public static class Party {
         private final String partyId;
         private final String partyIdType;

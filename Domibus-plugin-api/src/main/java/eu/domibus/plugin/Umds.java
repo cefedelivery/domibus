@@ -80,15 +80,15 @@ public class Umds {
 
     @Override
     public String toString() {
-        return "Umds{" +
-                "domain='" + domain + '\'' +
-                ", applicationUrl='" + applicationUrl + '\'' +
-                ", user_typeOfIdentifier='" + user_typeOfIdentifier + '\'' +
-                ", user_identifier='" + user_identifier + '\'' +
-                ", user_typeOfActor='" + user_typeOfActor + '\'' +
-                ", delegator_typeOfIdentifier='" + delegator_typeOfIdentifier + '\'' +
-                ", delegator_identifier='" + delegator_identifier + '\'' +
-                ", delegator_typeOfActor='" + delegator_typeOfActor + '\'' +
+        return "Umds{" +"\n"+
+                "  domain='" + domain + '\'' +"\n"+
+                ", applicationUrl='" + applicationUrl + '\'' +"\n"+
+                ", user_typeOfIdentifier='" + user_typeOfIdentifier + '\'' +"\n"+
+                ", user_identifier='" + user_identifier + '\'' +"\n"+
+                ", user_typeOfActor='" + user_typeOfActor + '\'' +"\n"+
+                ", delegator_typeOfIdentifier='" + delegator_typeOfIdentifier + '\'' +"\n"+
+                ", delegator_identifier='" + delegator_identifier + '\'' +"\n"+
+                ", delegator_typeOfActor='" + delegator_typeOfActor + '\'' +"\n"+
                 '}';
     }
 }
