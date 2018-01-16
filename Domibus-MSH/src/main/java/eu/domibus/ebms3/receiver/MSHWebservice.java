@@ -118,9 +118,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 handlePullRequestReceipt(request, messaging);
             }
         } else {
-            LOG.info("Received message from [{}] with messageId [{}]",
-                    ((PartyId)messaging.getUserMessage().getPartyInfo().getFrom().getPartyId().toArray()[0]).getValue(),
-                    messaging.getUserMessage().getMessageInfo().getMessageId());
+            UserMessage userMessage = messaging.getUserMessage();
+            if(userMessage != null && userMessage.getPartyInfo() != null && userMessage.getMessageInfo() != null) {
+                LOG.info("Received message from [{}] with messageId [{}]",
+                        ((PartyId) userMessage.getPartyInfo().getFrom().getPartyId().toArray()[0]).getValue(),
+                        userMessage.getMessageInfo().getMessageId());
+            }
             String pmodeKey = null;
             try {
                 //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
