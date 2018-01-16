@@ -30,7 +30,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>());
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertEquals("Backend Name, From, To, Action, Service, Persisted" + System.lineSeparator(), exportToCSV);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(null);
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertEquals("Backend Name, From, To, Action, Service, Persisted" + System.lineSeparator(), exportToCSV);
     }
 
     @Test
