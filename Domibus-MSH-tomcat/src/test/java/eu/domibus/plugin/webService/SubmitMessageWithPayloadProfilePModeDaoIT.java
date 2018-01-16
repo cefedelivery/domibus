@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.plugin.webService.generated.SendMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,11 +31,11 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
     /**
      * Test for the backend sendMessage service with payload profile enabled
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSubmitMessageValid() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValid() throws SubmitMessageFault, InterruptedException, SQLException {
 
         super.testSubmitMessageValid();
     }
@@ -43,11 +43,11 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
     /**
      * Test for the backend sendMessage service with payload profile enabled, no mime-type specified on payload
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSubmitMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValidNoMimeType() throws SubmitMessageFault, InterruptedException, SQLException {
 
        super.testSubmitMessageValidNoMimeType();
     }
@@ -55,11 +55,11 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
     /**
      * Test for the backend sendMessage service with payload profile enabled and invalid payload Href
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSubmitMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageInvalidPayloadHref() throws SubmitMessageFault, InterruptedException {
 
         super.testSubmitMessageInvalidPayloadHref();
     }
@@ -67,11 +67,11 @@ public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWith
     /**
      * Test for the backend sendMessage service with payload profile enabled
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSubmitMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessagePayloadHrefMismatch() throws SubmitMessageFault, InterruptedException {
 
        super.testSubmitMessagePayloadHrefMismatch();
     }

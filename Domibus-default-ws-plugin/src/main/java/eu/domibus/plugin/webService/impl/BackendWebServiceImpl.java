@@ -73,13 +73,13 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      *
      * @param submitRequest
      * @param ebMSHeaderInfo
-     * @return
-     * @throws SendMessageFault
+     * @return {@link SubmitResponse} object
+     * @throws SubmitMessageFault
      */
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
-    public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SendMessageFault {
+    public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.info("Received message");
 
         final LargePayloadType bodyload = submitRequest.getBodyload();
@@ -111,7 +111,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             if (!foundPayload) {
                 if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    throw new SendMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                    throw new SubmitMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
                 // It can only be in body load, href MAY be null!
                 if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
@@ -120,7 +120,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
                     extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
                 } else {
-                    throw new SendMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                    throw new SubmitMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
                 }
             }
         }
@@ -135,7 +135,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
             LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
-            throw new SendMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
+            throw new SubmitMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID" + messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();

@@ -5,7 +5,7 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.SendMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Assert;
@@ -53,11 +53,11 @@ public class SubmitMessageSignOnlyIT extends AbstractSendMessageIT {
     /**
      * Test for the backend sendMessage service with payload profile enabled
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSubmitMessageValid() throws SendMessageFault, InterruptedException {
+    public void testSubmitMessageValid() throws SubmitMessageFault, InterruptedException {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);

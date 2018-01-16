@@ -4,7 +4,7 @@ import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.SendMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Assert;
@@ -42,10 +42,10 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * Tests that a send message fails because one or more mandatory properties are missing in the user message.
      * Validate Message Properties - 01
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSendMessagePropertiesRequiredMissing() throws SendMessageFault {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSendMessagePropertiesRequiredMissing() throws SubmitMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -56,22 +56,22 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         try {
             //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
-        } catch (SendMessageFault re) {
+        } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
             throw re;
         }
-        Assert.fail("SendMessageFault was expected but was not raised");
+        Assert.fail("SubmitMessageFault was expected but was not raised");
     }
 
     /**
      * Tests that a send message fails because the int property value is wrong.
      * Validate Message Properties - 02
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSubmitMessageWrongIntValue() throws SendMessageFault {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageWrongIntValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -85,22 +85,22 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         try {
             //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
-        } catch (SendMessageFault re) {
+        } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
             throw re;
         }
-        Assert.fail("SendMessageFault was expected but was not raised");
+        Assert.fail("SubmitMessageFault was expected but was not raised");
     }
 
     /**
      * Test that a send message fails because the boolean property value is wrong.
      * Validate Message Properties - 03
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSubmitMessageWrongBooleanValue() throws SendMessageFault {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageWrongBooleanValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -114,22 +114,22 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         try {
             //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
-        } catch (SendMessageFault re) {
+        } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
             throw re;
         }
-        Assert.fail("SendMessageFault was expected but was not raised");
+        Assert.fail("SubmitMessageFault was expected but was not raised");
     }
 
     /**
      * Test that a send message fails because the String property value is null.
      * Validate Message Properties - 04
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
-    //@Test(expected = SendMessageFault.class)
-    public void testSubmitMessageWrongStringValue() throws SendMessageFault {
+    //@Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageWrongStringValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -145,22 +145,22 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         try {
             //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
-        } catch (SendMessageFault re) {
+        } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
             throw re;
         }
-        Assert.fail("SendMessageFault was expected but was not raised");
+        Assert.fail("SubmitMessageFault was expected but was not raised");
     }
 
     /**
      * Test that a send message is successful with all the 4 properties covering all possible types.
      * Validate Message Properties - 05
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
     @Test
-    public void testSubmitMessagePropertiesRequiredOk() throws SendMessageFault, SQLException, InterruptedException {
+    public void testSubmitMessagePropertiesRequiredOk() throws SubmitMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -182,10 +182,10 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
      * Test that a send message fails because the property type is wrong.
      * Validate Message Properties - 06
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSubmitMessageWrongType() throws SendMessageFault {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageWrongType() throws SubmitMessageFault {
 
         String payloadHref = "payload";
         //SendRequest sendRequest = createSendRequest(payloadHref);
@@ -200,11 +200,11 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         try {
             //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
-        } catch (SendMessageFault re) {
+        } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
             Assert.assertEquals(message, re.getMessage());
             throw re;
         }
-        Assert.fail("SendMessageFault was expected but was not raised");
+        Assert.fail("SubmitMessageFault was expected but was not raised");
     }
 }

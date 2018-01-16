@@ -119,8 +119,13 @@
         <wsdl:part element="tns:submitResponse" name="submitResponse">
         </wsdl:part>
     </wsdl:message>
+    <!--
     <wsdl:message name="SendMessageFault">
         <wsdl:part element="tns:FaultDetail" name="SendMessageFault">
+        </wsdl:part>
+    </wsdl:message>-->
+    <wsdl:message name="SubmitMessageFault">
+        <wsdl:part element="tns:FaultDetail" name="SubmitMessageFault">
         </wsdl:part>
     </wsdl:message>
     <wsdl:message name="getMessageErrorsResponse">
@@ -144,7 +149,7 @@
             </wsdl:input>
             <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse">
             </wsdl:output>
-            <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
+            <wsdl:fault message="tns:SubmitMessageFault" name="SubmitMessageFault">
             </wsdl:fault>
         </wsdl:operation>
         <!--
@@ -222,8 +227,8 @@
             <wsdl:output name="submitMessageResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="SendMessageFault">
-                <soap12:fault name="SendMessageFault" use="literal"/>
+            <wsdl:fault name="SubmitMessageFault">
+                <soap12:fault name="SubmitMessageFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
         <!--
