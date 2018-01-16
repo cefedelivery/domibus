@@ -14,6 +14,7 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.5.9.RELEASE</version>
     </parent>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -31,11 +32,6 @@
             <artifactId>domibus-plugin-api</artifactId>
             <version>3.3.1</version>
         </dependency>
-       <!-- <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-logging</artifactId>
-            <version>3.3.1</version>
-        </dependency>-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
