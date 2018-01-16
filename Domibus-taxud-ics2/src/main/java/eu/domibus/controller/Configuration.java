@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @since 4.0
  */
 @org.springframework.context.annotation.Configuration
-@ComponentScan("eu.domibus.controller")
+@ComponentScan({"eu.domibus.controller","eu.domibus.taxud"})
 public class Configuration {
 
     /*@Bean

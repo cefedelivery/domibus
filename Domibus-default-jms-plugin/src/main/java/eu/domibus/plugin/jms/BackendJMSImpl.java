@@ -4,6 +4,7 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -14,7 +15,8 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.Umds;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import eu.domibus.taxud.SubmissionLogging;
+import eu.domibus.taxud.CertificateLogging;
+import eu.domibus.taxud.PayloadLogging;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,14 +66,29 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
+
+    public final static String ORIGINAL_SENDER = "originalSender";
+
+    public final static String FINAL_RECIPIENT = "finalRecipient";
+
+    public final static String DELEGATOR = "delegator";
+
     public static final String PAYLOAD_FILE_NAME = "payload.xml";
+
     public static final String PAYLOAD_PARAM_NAME = "payload";
+
     public static final String SUBMISSION_PARAM_NAME = "submissionJson";
+
     public static final String CERTIFICATE_PARAM_NAME = "certificate";
+
     public static final String AUTHENTICATION_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.authenticate.endpoint";
+
     public static final String PAYLOAD_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.payload.endpoint";
+
     public static final String CID_MESSAGE = "cid:message";
+
     public static final String DOMIBUS_TAXUD_CUST_DOMAIN = "domibus.taxud.cust.domain";
+
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
     private JmsOperations replyJmsTemplate;
@@ -111,6 +128,15 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Autowired
     private IdentifierHelper identifierHelper;
 
+    @Autowired
+    private DomainCoreConverter coreConverter;
+
+    @Autowired
+    private PayloadLogging payloadLogging;
+
+    @Autowired
+    private  CertificateLogging certificateLogging;
+
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
@@ -141,9 +167,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @PostConstruct
     protected void init() {
         restTemplate = new RestTemplate();
-       /* List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
-        interceptors.add(new LoggingRequestInterceptor());
-        restTemplate.setInterceptors(interceptors);*/
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
@@ -239,10 +262,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         String senderAlias;
         senderAlias = getSenderAlias(submission);
 
+        Umds umds = buidUmds(submission);
+        LOG.info("Authentication submission for :\n   [{}]",umds);
         byte[] encodedCertificate = encodeCertificate(senderAlias);
 
         MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
-        multipartRequest.add(SUBMISSION_PARAM_NAME, buidUmds(submission));
+        multipartRequest.add(SUBMISSION_PARAM_NAME, umds);
 
         ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
         multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);
@@ -255,11 +280,15 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
     }
 
-    private Umds buidUmds(Submission submission) {
-        Submission.TypedProperty originalSender = extractEndPoint(submission, SubmissionLogging.ORIGINAL_SENDER);
-        Submission.TypedProperty finalRecipient = extractEndPoint(submission, SubmissionLogging.ORIGINAL_SENDER);
-        Umds umds = identifierHelper.buildUmds(originalSender.getValue());
+    private Umds buidUmds(final Submission submission) {
+        final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
+        final Submission.TypedProperty finalRecipient = extractEndPoint(submission, FINAL_RECIPIENT);
+        final Submission.TypedProperty delegator = extractEndPoint(submission, DELEGATOR);
+        Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         umds.setApplicationUrl(identifierHelper.getApplicationUrl(finalRecipient.getValue()));
+        if(delegator!=null){
+            identifierHelper.updateDelegatorInfo(umds,delegator.getValue());
+        }
 
         String domain="TAX";
         String custServiceAndActionMapping=domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN);
@@ -274,7 +303,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         try {
             Certificate certificate;
             certificate = cryptoService.getTrustStore().getCertificate(senderAlias);
-            return Base64.encodeBase64(certificate.getEncoded());
+            byte[] encodedCertificate = certificate.getEncoded();
+            certificateLogging.log(encodedCertificate);
+            return Base64.encodeBase64(encodedCertificate);
         } catch (CertificateEncodingException | KeyStoreException e) {
             LOG.error(e.getMessage(), e);
             throw new AuthenticationException("Error while extracting certificate", e);
@@ -328,12 +359,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
     }
 
-    private Submission getSubmissionResponse(Submission submission, String message) {
+    private Submission getSubmissionResponse(Submission submission, String messageId) {
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
         submission.setMessageId(messageIdGenerator.generateMessageId());
         submission.getPayloads().clear();
-        submission.addPayload(getPayload(message, MediaType.TEXT_XML));
+        submission.setRefToMessageId(messageId);
+        submission.addPayload(getPayload(messageId, MediaType.TEXT_XML));
         return submission;
     }
 
@@ -348,32 +380,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private void sendPayload(Submission submission) {
+        JsonSubmission jsonSubmission = coreConverter.convert(submission, JsonSubmission.class);
+        LOG.info("Message submission:\n  [{}]",jsonSubmission);
         MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
-        multipartRequest.add(SUBMISSION_PARAM_NAME, buildJsonSubmission(submission));
+        multipartRequest.add(SUBMISSION_PARAM_NAME, jsonSubmission);
 
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
-
-        if (LOG.isInfoEnabled()) {
-            logMultipart(payloadEndPointUrl, multipartRequest);
-        }
-
         restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
         metric.setLastChanged(System.currentTimeMillis());
-    }
-
-    private JsonSubmission buildJsonSubmission(Submission submission) {
-        return new JsonSubmission();
-    }
-
-    private void logMultipart(String submissionRestUrl, MultiValueMap<String, Object> multipartRequest) {
-        LOG.debug("Sending :");
-        Map<String, Object> stringObjectMap = multipartRequest.toSingleValueMap();
-        Set<Map.Entry<String, Object>> entries = stringObjectMap.entrySet();
-        for (Map.Entry<String, Object> entry : entries) {
-            LOG.debug("Key:[{}]", entry.getKey());
-            LOG.debug("Value:[{}]", entry.getValue());
-        }
-        LOG.debug("To:[{}]", submissionRestUrl);
     }
 
     private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
@@ -386,9 +400,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                     LOG.warn("Payload skipped because it is empty");
                     return multipartRequest;
                 }
-                byte[] b = new byte[available];
-                inputStream.read(b);
-                ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.encodeBase64(b)) {
+                byte[] payloadContent = new byte[available];
+                inputStream.read(payloadContent);
+                payloadLogging.log(payloadContent);
+                ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.encodeBase64(payloadContent)) {
                     @Override
                     public String getFilename() {
                         return PAYLOAD_FILE_NAME;

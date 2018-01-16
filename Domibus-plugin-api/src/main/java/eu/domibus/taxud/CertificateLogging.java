@@ -1,4 +1,4 @@
-package eu.domibus.controller;
+package eu.domibus.taxud;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -14,10 +14,17 @@ public class CertificateLogging {
 
     private final static Logger LOG = LoggerFactory.getLogger(CertificateLogging.class);
 
-    public void log(byte[] payload) {
+    public void decodeAndlog(byte[] payload) {
         if (LOG.isInfoEnabled()) {
             byte[] decode = Base64.decodeBase64(payload);
-            LOG.debug("Certificate:[{}]", new String(decode));
+            LOG.info("Certificate:");
+            LOG.info(new String(decode));
         }
     }
+
+    public void log(byte[] payload) {
+        LOG.info("Certificate:");
+        LOG.info(new String(payload));
+    }
 }
+

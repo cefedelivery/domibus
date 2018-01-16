@@ -5,9 +5,12 @@ import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
+import eu.domibus.taxud.CertificateLogging;
+import eu.domibus.taxud.PayloadLogging;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -72,6 +75,15 @@ public class BackendJMSImplTest {
 
     @Injectable
     private IdentifierHelper identifierHelper;
+
+    @Injectable
+    private DomainCoreConverter coreConverter;
+
+    @Injectable
+    private CertificateLogging certificateLogging;
+
+    @Injectable
+    private PayloadLogging payloadLogging;
 
     @Tested
     BackendJMSImpl backendJMS;
