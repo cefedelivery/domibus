@@ -214,7 +214,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = RetrieveMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
 
-        UserMessage userMessage = null;
+        UserMessage userMessage;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
 
         if(!isMessageIdNotEmpty) {
@@ -295,19 +295,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         detail.setCode(eu.domibus.common.ErrorCode.EBMS_0004.getErrorCodeName());
         detail.setMessage(message);
         return detail;
-    }
-
-    /**
-     * @deprecated since 3.3-rc1. Use {@link BackendWebServiceImpl#getStatus(StatusRequest)}.
-     * Converts DOWNLOADED status to RECEIVED to maintain the backwards compatibility
-     *
-     * @param messageStatusRequest
-     * @return
-     */
-    @Deprecated
-    @Override
-    public MessageStatus getMessageStatus(final GetStatusRequest messageStatusRequest) {
-        return defaultTransformer.transformFromMessageStatus(messageRetriever.getMessageStatus(messageStatusRequest.getMessageID()));
     }
 
     @Override

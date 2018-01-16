@@ -139,14 +139,15 @@
             <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault">
             </wsdl:fault>
         </wsdl:operation>
+        <!--
         <wsdl:operation name="getMessageStatus">
-            <!-- deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
-            backwards compatibility, use getStatus instead -->
+            - deprecated in 3.3; this method converts status DOWNLOADED to RECEIVED for
+            backwards compatibility, use getStatus instead -
             <wsdl:input message="tns:getMessageStatus" name="getMessageStatus">
             </wsdl:input>
             <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse">
             </wsdl:output>
-        </wsdl:operation>
+        </wsdl:operation> -->
         <wsdl:operation name="getStatus">
             <wsdl:input message="tns:getStatus" name="getStatus">
             </wsdl:input>
@@ -217,6 +218,7 @@
                 <soap12:fault name="SendMessageFault" use="literal"/>
             </wsdl:fault>
         </wsdl:operation>
+        <!--
         <wsdl:operation name="getMessageStatus">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="getMessageStatus">
@@ -225,7 +227,7 @@
             <wsdl:output name="getMessageStatusResponse">
                 <soap12:body use="literal"/>
             </wsdl:output>
-        </wsdl:operation>
+        </wsdl:operation> -->
         <wsdl:operation name="getStatus">
             <soap12:operation soapAction="" style="document"/>
             <wsdl:input name="getStatus">
