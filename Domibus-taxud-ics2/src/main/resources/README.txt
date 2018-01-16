@@ -16,4 +16,15 @@ Add following line into setDomainEnv in order to externalise the mock configurat
 set EXTRA_JAVA_PROPERTIES=%EXTRA_JAVA_PROPERTIES% -Dspring.config.location=classpath:/application.properties,%DOMAIN_HOME%\conf\taxud-umds\application.properties
 set EXTRA_JAVA_PROPERTIES=%EXTRA_JAVA_PROPERTIES% -Dlogging.config=%DOMAIN_HOME%\conf\taxud-umds\logback.xml
 
+add the following properties into domibus.properties
+
+#umds url
+domibus.c4.rest.authenticate.endpoint=http://localhost:8001/Domibus-taxud-ics2-1.0-SNAPSHOT/authenticate
+
+#c4 url
+domibus.c4.rest.payload.endpoint=http://localhost:8001/Domibus-taxud-ics2-1.0-SNAPSHOT/message
+
+#If the the association "service:action" equals the property the domain will be CUST else it will be TAX
+domibus.taxud.cust.domain=bdx:noprocess:TC7Leg1
+
 
