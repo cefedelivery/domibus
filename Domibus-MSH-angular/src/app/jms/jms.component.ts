@@ -409,11 +409,27 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   isSaveAsCSVButtonEnabled() {
-    return true;
+    return (this.rows.length < 10000);
   }
 
   getFilterPath() {
-    return "";
+    let result = '?';
+    if(!isNullOrUndefined(this.request.source)) {
+      result += 'source=' + this.request.source + '&';
+    }
+    if(!isNullOrUndefined(this.request.jmsType)) {
+      result += 'jmsType=' + this.request.jmsType + '&';
+    }
+    if(!isNullOrUndefined(this.request.fromDate)) {
+      result += 'fromDate=' + this.request.fromDate.getTime() + '&';
+    }
+    if(!isNullOrUndefined(this.request.toDate)) {
+      result += 'toDate=' + this.request.toDate.getTime() + '&';
+    }
+    if(!isNullOrUndefined(this.request.selector)) {
+      result += 'selector=' + this.request.selector + '&';
+    }
+    return result;
   }
 
   saveAsCSV() {

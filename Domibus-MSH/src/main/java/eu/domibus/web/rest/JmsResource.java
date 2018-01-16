@@ -11,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -102,11 +101,18 @@ public class JmsResource {
     }
 
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
-    public ResponseEntity<String> getCsv() {
+    public ResponseEntity<String> getCsv(
+            @RequestParam(value = "source") String source,
+            @RequestParam(value = "jmsType", required = false) String jmsType,
+            @RequestParam(value = "fromDate", required = false) Long fromDate,
+            @RequestParam(value = "toDate", required = false) Long toDate,
+            @RequestParam(value = "selector", required = false) String selector) {
         String resultText;
 
-        MessagesRequestRO request = new MessagesRequestRO();
-        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector());
+        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(source, jmsType, fromDate == null?null:new Date(fromDate), toDate == null?null:new Date(toDate), selector);
+        List<String> excludedItems = new ArrayList<>();
+        excludedItems.add("PROPERTY_ORIGINAL_QUEUE");
+        csvServiceImpl.setExcludedItems(excludedItems);
 
         try {
             resultText = csvServiceImpl.exportToCSV(jmsMessageList);
