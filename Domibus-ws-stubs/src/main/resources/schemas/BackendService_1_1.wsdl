@@ -35,6 +35,8 @@
         <wsdl:part element="tns:getErrorsRequest" name="getErrorsRequest">
         </wsdl:part>
     </wsdl:message>
+
+    <!--
     <wsdl:message name="downloadMessage">
         <wsdl:part element="tns:downloadMessageRequest" name="downloadMessageRequest">
         </wsdl:part>
@@ -49,6 +51,7 @@
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
     </wsdl:message>
+    -->
     <wsdl:message name="retrieveMessage">
         <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest">
         </wsdl:part>
@@ -67,10 +70,12 @@
         <wsdl:part element="tns:listPendingMessagesResponse" name="listPendingMessagesResponse">
         </wsdl:part>
     </wsdl:message>
+    <!--
     <wsdl:message name="getMessageStatusResponse">
         <wsdl:part element="tns:getMessageStatusResponse" name="getMessageStatusResponse">
         </wsdl:part>
     </wsdl:message>
+    -->
     <wsdl:message name="getStatusResponse">
         <wsdl:part element="tns:getStatusResponse" name="getStatusResponse">
         </wsdl:part>
@@ -79,10 +84,12 @@
         <wsdl:part element="tns:listPendingMessagesRequest" name="listPendingMessagesRequest">
         </wsdl:part>
     </wsdl:message>
+    <!--
     <wsdl:message name="getMessageStatus">
         <wsdl:part element="tns:getStatusRequest" name="getStatusRequest">
         </wsdl:part>
     </wsdl:message>
+    -->
     <wsdl:message name="getStatus">
         <wsdl:part element="tns:statusRequest" name="statusRequest">
         </wsdl:part>
@@ -91,6 +98,7 @@
         <wsdl:part element="tns:FaultDetail" name="StatusFault">
         </wsdl:part>
     </wsdl:message>
+    <!--
     <wsdl:message name="sendMessageResponse">
         <wsdl:part element="tns:sendResponse" name="sendResponse">
         </wsdl:part>
@@ -100,7 +108,7 @@
         </wsdl:part>
         <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo">
         </wsdl:part>
-    </wsdl:message>
+    </wsdl:message>-->
     <wsdl:message name="submitMessage">
         <wsdl:part element="tns:submitRequest" name="submitRequest">
         </wsdl:part>
