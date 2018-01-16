@@ -1138,7 +1138,7 @@ static def String pathToDomibus(color, log, context){
 			log.info "User \""+username+"\" already exists. If you want to insert it again, please use method deleteUser to delete it."
 		}
 		else{
-			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES (\""+idUser+"\",\""+username+"\",\""+password+"\", 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
+			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('"+idUser+"','"+username+"','"+password+"', 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
 			executeListOfSqlQueries(sqlQueriesList,color);
 			log.info "User \""+username+"\" created."
 		}
