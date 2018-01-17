@@ -24,7 +24,7 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests";
-	static def defaultLogLevel = 0;
+	static def defaultLogLevel = 1;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 	static def MAX_LOGIN_BEFORE_LOCK = 6;
 
@@ -610,7 +610,37 @@ class Domibus
             log.info "This configuration changed was skipped, continue with next test step."
         }
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    static def cleanCache(String side, context, log){
+		log.info "Cleaning cache for domibus "+side+" ...";
+		def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+		def proc=null;
+		def pathS=context.expand( '${#Project#pathExeSender}' );
+        def pathR=context.expand( '${#Project#pathExeReceiver}' );
+		def pathRG=context.expand( '${#Project#pathExeGreen}' );
+		switch(side.toLowerCase()){
+				case "sender":
+					log.info "PATH = "+pathS;
+					proc="cmd /c cd ${pathS} && clean.bat".execute();
+					break;
+				case "receiver":
+					log.info "PATH = "+pathR;
+					proc="cmd /c cd ${pathR} && clean.bat".execute();
+					break;
+				case "receivergreen":
+					log.info "PATH = "+pathRG;
+					proc="cmd /c cd ${pathRG} && clean.bat".execute();
+					break;
+				default:
+					assert (false) , "Unknown side.";
+		}
+		if(proc!=null){
+			proc.consumeProcessOutput(outputCatcher, errorCatcher)
+			proc.waitFor()
+		}		
+		log.info "Cleaning should be done."
+	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Start several gateways
     static def startSetMSHs(int dom1,int dom2,int dom3, context, log){
