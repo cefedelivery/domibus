@@ -219,6 +219,9 @@ public class MSHWebServiceTest {
             messaging.getSignalMessage();
             result = null;
 
+            messaging.getUserMessage().getMessageInfo();
+            result = null;
+
             UserMessageHandlerContext arg = new UserMessageHandlerContext();
             arg.setLegConfiguration(legConfiguration);
             mshWebservice.getMessageHandler();
