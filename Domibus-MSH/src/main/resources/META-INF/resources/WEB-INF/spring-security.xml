@@ -9,6 +9,7 @@
 	http://www.springframework.org/schema/security/spring-security.xsd">
 
     <http pattern="/services/**" security="none"/>
+    <http pattern="/metrics/**" security="none"/>
 
     <!-- Skip the security; the REST services exposed in the domibus-ext-services-api are protected by an interceptor -->
     <http pattern="/ext/**" security="none"/>

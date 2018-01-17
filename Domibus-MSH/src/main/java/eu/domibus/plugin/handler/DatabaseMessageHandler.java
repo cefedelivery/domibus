@@ -1,9 +1,11 @@
 package eu.domibus.plugin.handler;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -31,6 +33,7 @@ import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
+import eu.domibus.util.Metrics;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,6 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -107,6 +112,12 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     UserMessageService userMessageService;
+
+    private final MetricRegistry metrics = new MetricRegistry();
+
+    private final Meter requests = metrics.meter("requests");
+
+    private final com.codahale.metrics.Timer message = metrics.timer(name(DatabaseMessageHandler.class, "responses"));
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -221,6 +232,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
+        Metrics.getGlobalContext();
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }

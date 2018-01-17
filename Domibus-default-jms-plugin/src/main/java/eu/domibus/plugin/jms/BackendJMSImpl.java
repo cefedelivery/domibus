@@ -31,8 +31,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -62,7 +60,7 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 /**
  * @author Christian Koch, Stefan Mueller
  */
-@EnableScheduling
+
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
@@ -458,13 +456,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
-    public void doSomething() {
-        if (metric.ofInterest()) {
-            LOG.debug("METRICS:[{}] messages send and return from c3 to c4 in [{}] seconds", metric.getCounter(), (double) (metric.lastChanged - metric.getStartTime()) / 1000);
-            metric.clear();
-        }
-    }
 
     static private class Metric {
         Long startTime;

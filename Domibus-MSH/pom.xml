@@ -165,6 +165,17 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
         </dependency>
+        <!-- Dropwizard -->
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+        </dependency>
+        <!-- End Dropwizard -->
+
 
         <!-- Overrides the version coming from CXF due to a bug related to large attachments; to be removed when CXF upgrades also the xmlsec version -->
         <dependency>

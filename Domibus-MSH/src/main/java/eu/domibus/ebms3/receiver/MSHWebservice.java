@@ -29,6 +29,7 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.util.Metrics;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         this.jaxbContext = jaxbContext;
     }
 
+    private long time=0;
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
@@ -149,7 +151,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
         }
 
+        if(time==0)
+        Metrics.getGlobalContext().stop();
         return responseMessage;
+
     }
 
     UserMessageHandlerContext getMessageHandler() {

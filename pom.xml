@@ -44,6 +44,7 @@
         <commons-test.version>4.2</commons-test.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
+        <metrics.version>4.0.2</metrics.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -435,6 +436,19 @@
                 <scope>test</scope>
             </dependency>
             <!-- End Test dependencies -->
+
+            <!-- Dropwizard -->
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <!-- End Dropwizard -->
         </dependencies>
     </dependencyManagement>
     <build>
