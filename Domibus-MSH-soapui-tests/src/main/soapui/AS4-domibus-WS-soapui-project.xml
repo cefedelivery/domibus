@@ -19312,7 +19312,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path PEPPOL'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Green" id="4cea2afc-6d5e-4b63-ade3-8909f177f5e4"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Green" id="4cea2afc-6d5e-4b63-ade3-8909f177f5e4"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,1,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19443,34 +19443,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="8e248a0b-91c5-4589-9d4d-b6f5e9a15a14"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="17f9a0e7-ab0f-4eb0-b4ca-e0af90f76bc0"/><con:assertion type="XPath Match" name="XPath Match" id="37ff5536-5101-4fcb-8512-3662867b649b"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="a43c5950-caa7-4041-8b49-b0e7db0992e9"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("RECEIVED",null);
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Restore path" id="236c21ef-66c6-42d9-b81c-7249b17bafd5" disabled="true"><con:settings/><con:config><script>// Restore correct path
-testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setPaths"].testSteps['Set domibus path'].run( testRunner, context );</script></con:config></con:testStep><con:testStep type="request" id="0d98270c-7899-4fdf-8ed7-6d755a0a249c" name="Copy of Dynamic PEPPOL"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Copy of Dynamic PEPPOL" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">\r
-   <env:Header>\r
-      <eb:Messaging env:mustUnderstand="true" xmlns:eb="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">\r
-         <eb:SignalMessage>\r
-            <eb:MessageInfo>\r
-               <eb:Timestamp>2018-01-17T14:52:41.149Z</eb:Timestamp>\r
-               <eb:MessageId>b7f9bda2-418b-4cd2-8b60-68c4764cecb5@domibus.eu</eb:MessageId>\r
-            </eb:MessageInfo>\r
-            <eb:Error category="PROCESSING" errorCode="EBMS:0010" origin="ebMS" severity="failure" shortDescription="ProcessingModeMismatch">\r
-               <eb:Description xml:lang="">The ebMS header or another header (e.g. reliability, security) expected by the MSH is not compatible with the expected content, based on the associated P-Mode.</eb:Description>\r
-               <eb:ErrorDetail>Error for pullrequest with mpc:http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1 [DOM_003]:No process was found for the configuration</eb:ErrorDetail>\r
-            </eb:Error>\r
-         </eb:SignalMessage>\r
-      </eb:Messaging>\r
-   </env:Header>\r
-   <env:Body>\r
-      <env:Fault>\r
-         <env:Code>\r
-            <env:Value>env:Receiver</env:Value>\r
-         </env:Code>\r
-         <env:Reason>\r
-            <env:Text xml:lang="en">An error occurred while processing your request. Please check the message header for more details.</env:Text>\r
-         </env:Reason>\r
-      </env:Fault>\r
-   </env:Body>\r
-</env:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="545e5136-c266-4d47-bf67-c4de01fbc4b4"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="1367d063-18bb-42ab-b548-5b17c7e67f12"/><con:assertion type="XPath Match" name="XPath Match" id="3cca8a62-7c81-421a-86ca-3f41187ebc48"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="7ba7b60a-4127-417e-9e1a-6c2f255f67db"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED",null);
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore path'].run(testRunner, context);</con:tearDownScript><con:properties/>
+testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set domibus path'].run( testRunner, context );</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore path'].run(testRunner, context);</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>fbc83d61-ebfe-41ce-8695-aaf17c12ee2a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2c8289fa-683a-4ce9-be18-d347f1f2aa73</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e26e8c17-3a46-466f-9256-3bdb1b815b09</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>181dc2f6-579e-409c-90ca-d919f207ed8a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ad461d5d-6662-4627-a844-ac38e1324650</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b6b02b0a-2913-4a1c-a422-e70c97306b4a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09acf100-b143-4079-8b84-07521ee8f639</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom134-Push-Dynamic Discovery-Basic Flow-OASIS" searchProperties="true" id="7fa1d7bf-ee0d-408c-b2ee-6a9cccb52d91">
             <con:settings/>
             
@@ -19507,7 +19480,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Green" id="d54055a7-fe45-49db-bacf-a68e07d844c8"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue-Green" id="d54055a7-fe45-49db-bacf-a68e07d844c8"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,1,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19675,7 +19648,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path PEPPOL'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="3d57e55d-f874-41be-bf8f-44bd46f4b65d"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="3d57e55d-f874-41be-bf8f-44bd46f4b65d"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19732,7 +19705,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path PEPPOL'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="8341e1dc-ab43-4c21-8599-e6864a3454b5"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="8341e1dc-ab43-4c21-8599-e6864a3454b5"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19821,7 +19794,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="b07f042a-1648-415a-aa76-c7bb8d6cf476"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="b07f042a-1648-415a-aa76-c7bb8d6cf476"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19913,7 +19886,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="2108f0bf-7c26-4fde-973c-ac14455031e8"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="2108f0bf-7c26-4fde-973c-ac14455031e8"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -19996,7 +19969,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="b83305ff-4ca5-46c2-b60d-022a8c2d7f49"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="b83305ff-4ca5-46c2-b60d-022a8c2d7f49"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20051,7 +20024,8 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 {
 	log.info "script aborted";
 	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:tearDownScript/><con:properties/>
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Restore path" id="a1a3b392-e181-4f5c-9c82-979f217b613e" disabled="true"><con:settings/><con:config><script>// Restore correct path
+testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set domibus path'].run( testRunner, context );</script></con:config></con:testStep><con:tearDownScript/><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>fbc83d61-ebfe-41ce-8695-aaf17c12ee2a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>4154f327-2bd7-40d0-ac23-a0f7faec814a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f74ad04a-7fc3-45a8-916d-55962c96274b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>be0fd2fe-9c7a-409f-b236-ddd15cfea5f9</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>432fbf8a-a023-4499-8e67-9869a593390f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3a804deb-fe6b-4f01-bd2c-57e0767c9f2e</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c2a4989a-9aa7-4326-8abb-f739a200a218</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>9951b4cc-a77e-4fcd-8369-9330fe8bf6de</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom141-Push-Dynamic Discovery-OASIS-Certficate-RegularExpression" searchProperties="true" id="c251b2e5-f80d-4b2c-b15f-32849ea45262">
             <con:settings/>
             
@@ -20088,7 +20062,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="faf92eb0-e9e3-4b23-97f1-f6282758338b"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="faf92eb0-e9e3-4b23-97f1-f6282758338b"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20229,7 +20203,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="c21e8849-d8ca-468c-9615-12e7a85b3a34"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue" id="c21e8849-d8ca-468c-9615-12e7a85b3a34"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20328,7 +20302,7 @@ Domibus.copyFile(source,dest,log);
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="bc19dcc1-c8a6-4e0a-a161-c5ae3b763227"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="bc19dcc1-c8a6-4e0a-a161-c5ae3b763227"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20382,7 +20356,7 @@ Domibus.copyFile(source,dest,log);
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="9be84ac1-c845-4a50-9a6c-135baf56acef"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="9be84ac1-c845-4a50-9a6c-135baf56acef"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20431,7 +20405,8 @@ testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testC
 def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\DynamicDiscovery\\Sender\\gateway_keystore.jks";
 def String dest = "C:\\domibus\\senderDynPeppol\\domibus\\conf\\domibus\\keystores\\gateway_keystore.jks"; 
 Domibus.copyFile(source,dest,log);
-</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore keystore file'].run(testRunner, context);</con:tearDownScript><con:properties/>
+</script></con:config></con:testStep><con:testStep type="groovy" name="Restore path" id="336ad3de-8264-4c01-83c0-f4a2283d0463" disabled="true"><con:settings/><con:config><script>// Restore correct path
+testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set domibus path'].run( testRunner, context );</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore keystore file'].run(testRunner, context);</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>fbc83d61-ebfe-41ce-8695-aaf17c12ee2a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2c8289fa-683a-4ce9-be18-d347f1f2aa73</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e26e8c17-3a46-466f-9256-3bdb1b815b09</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>181dc2f6-579e-409c-90ca-d919f207ed8a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ad461d5d-6662-4627-a844-ac38e1324650</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b6b02b0a-2913-4a1c-a422-e70c97306b4a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>09acf100-b143-4079-8b84-07521ee8f639</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom149-Push-EDELIVERY-2204-OASIS-Expired-Revoked" searchProperties="true" id="2f0d52ea-f3cd-4ce4-9975-3cd1142edff9">
             <con:settings/>
             
@@ -20483,7 +20458,7 @@ Domibus.copyFile(source,dest,log);
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="32613027-4df1-45d1-9389-94cc1a40fe35"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 1" id="32613027-4df1-45d1-9389-94cc1a40fe35"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20537,7 +20512,7 @@ Domibus.copyFile(source,dest,log);
 testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set Dynamic Discovery path OASIS'].run( testRunner, context );
 
 // Clean the domibus cache
-Domibus.cleanCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="02c73247-702e-474e-9640-05530683ae10"><con:settings/><con:config><script>// Start blue and green 
+Domibus.clearCache("sender", context, log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restart Blue 2" id="02c73247-702e-474e-9640-05530683ae10"><con:settings/><con:config><script>// Start blue and green 
 Domibus.stopSetMSHs(1,0,0,context,log);
 sleep(2000);
 // Start blue and green 
@@ -20585,7 +20560,8 @@ testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testC
 // Copy keystore 
 def String source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\DynamicDiscovery\\Sender\\gateway_keystore.jks";
 def String dest = "C:\\domibus\\senderDynOasis\\domibus\\conf\\domibus\\keystores\\gateway_keystore.jks"; 
-Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore keystore file'].run(testRunner, context);</con:tearDownScript><con:properties/>
+Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Restore path" id="c1ac7aa7-3fab-43f4-b923-9e1a59652a76" disabled="true"><con:settings/><con:config><script>// Restore correct path
+testRunner.testCase.testSuite.project.getTestSuiteByName("Administration").testCases["Configuration-setLocalInstallationsPaths"].testSteps['Set domibus path'].run( testRunner, context );</script></con:config></con:testStep><con:tearDownScript>testRunner.testCase.testSteps['Restore keystore file'].run(testRunner, context);</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cfce5373-6318-43c6-8aab-2792786af2cf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>907b56bd-bff4-449d-b84c-8ed82b332327</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3fcf1617-5e90-450e-bc0e-c7cd7840450c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>cb253836-9800-4570-99b9-82d1d6e205c8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>29296f70-95d5-4801-afcb-02cc210759bd</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e0de97f3-e5ea-49e6-aa49-428b5af762d2</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b00c2e52-9cd7-4178-b65b-c16eac472360</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>eaa94670-f16f-4478-9858-ac876d84d50f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>176fd0a4-f682-442c-8e8b-d2262abb2b7d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>bac416f9-9709-43d2-aed3-31c6fcff7d80</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d4b16c89-b64f-40c2-8ea4-22d9d2f0896a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>fbc83d61-ebfe-41ce-8695-aaf17c12ee2a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>4154f327-2bd7-40d0-ac23-a0f7faec814a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f74ad04a-7fc3-45a8-916d-55962c96274b</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>be0fd2fe-9c7a-409f-b236-ddd15cfea5f9</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>432fbf8a-a023-4499-8e67-9869a593390f</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>3a804deb-fe6b-4f01-bd2c-57e0767c9f2e</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>c2a4989a-9aa7-4326-8abb-f739a200a218</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>9951b4cc-a77e-4fcd-8369-9330fe8bf6de</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="a57251f7-c5b7-43e7-939f-97c42e6b34d8" name="ToBeAdded"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom158-EDELIVERY-977-Adding irrelevant attributes" searchProperties="true" id="5ba9adfb-ec9a-49ad-a9f0-97d047b6a8b4" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
             <con:settings/>
             

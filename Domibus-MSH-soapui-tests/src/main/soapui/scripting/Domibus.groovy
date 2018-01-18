@@ -27,6 +27,7 @@ class Domibus
 	static def defaultLogLevel = 1;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 	static def MAX_LOGIN_BEFORE_LOCK = 6;
+	static def CLEAR_CACHE_COMMAND_TOMCAT = $/rmdir /S /Q ..\work && rmdir /S /Q ..\logs && del /S /Q ..\temp\* && rmdir /S /Q ..\webapps\domibus && rmdir /S /Q ..\conf\domibus\work/$;
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -611,7 +612,7 @@ class Domibus
         }
     }
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-    static def cleanCache(String side, context, log){
+    static def clearCache(String side, context, log, String server = "tomcat"){
 		log.info "Cleaning cache for domibus "+side+" ...";
 		def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
@@ -619,27 +620,43 @@ class Domibus
 		def pathS=context.expand( '${#Project#pathExeSender}' );
         def pathR=context.expand( '${#Project#pathExeReceiver}' );
 		def pathRG=context.expand( '${#Project#pathExeGreen}' );
-		switch(side.toLowerCase()){
-				case "sender":
-					log.info "PATH = "+pathS;
-					proc="cmd /c cd ${pathS} && clean.bat".execute();
-					break;
-				case "receiver":
-					log.info "PATH = "+pathR;
-					proc="cmd /c cd ${pathR} && clean.bat".execute();
-					break;
-				case "receivergreen":
-					log.info "PATH = "+pathRG;
-					proc="cmd /c cd ${pathRG} && clean.bat".execute();
-					break;
-				default:
-					assert (false) , "Unknown side.";
+		def commandToRun =null;
+		switch(server.toLowerCase()){
+			case "tomcat":
+				switch(side.toLowerCase()){
+					case "sender":
+						log.info "PATH = "+pathS;
+						commandToRun = "cmd /c cd ${pathS} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					case "receiver":
+						log.info "PATH = "+pathR;
+						commandToRun = "cmd /c cd ${pathR} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					case "receivergreen":
+						log.info "PATH = "+pathRG;
+						commandToRun = "cmd /c cd ${pathRG} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					default:
+						assert (false) , "Unknown side.";
+				}
+				break;
+			case "weblogic":
+				log.info "I don't know how to clean in weblogic yet.";
+				break;
+			case "wildfly":
+				log.info "I don't know how to clean in wildfly yet.";
+				break;
+			default:
+				assert (false) , "Unknown server.";
 		}
-		if(proc!=null){
-			proc.consumeProcessOutput(outputCatcher, errorCatcher)
-			proc.waitFor()
-		}		
-		log.info "Cleaning should be done."
+		if(commandToRun){
+			proc = commandToRun.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}		
+			log.info "Cleaning should be done."
+		}
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Start several gateways
