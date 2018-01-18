@@ -33,7 +33,6 @@ import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.*;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
-import eu.domibus.util.Metrics;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -232,7 +231,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-        Metrics.getGlobalContext();
+        eu.domibus.core.metrics.Metrics.getGlobalContext();
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }

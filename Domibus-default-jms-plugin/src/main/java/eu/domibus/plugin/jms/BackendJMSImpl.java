@@ -1,5 +1,7 @@
 package eu.domibus.plugin.jms;
 
+import com.codahale.metrics.SlidingTimeWindowReservoir;
+import com.codahale.metrics.Timer;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
@@ -52,7 +54,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 import static eu.domibus.ebms3.common.model.Property.MIME_TYPE;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
@@ -86,6 +91,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String CID_MESSAGE = "cid:message";
 
     public static final String DOMIBUS_TAXUD_CUST_DOMAIN = "domibus.taxud.cust.domain";
+    public static final String DOMIBUS_DO_NOT_DELIVER = "domibus.do.not.deliver";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -139,13 +145,19 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
-    private Metric metric = new Metric();
-
     private org.springframework.web.client.RestTemplate restTemplate;
 
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     private Map<String, String> partyAliasMap = new HashMap<>();
+
+    private static Timer deliverMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "deliverMessageTimer"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
+
+    private static Timer downloadMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "downloadMessage"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
+
+    private static Timer authenticateTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "authenticate"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
+
+    private static Timer uploadPayloadTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "uploadPayload"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
 
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<message_id>\n" +
@@ -169,6 +181,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        cryptoService.getTrustStore();
     }
 
     public BackendJMSImpl(String name) {
@@ -331,20 +345,34 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void deliverMessage(final String messageId) {
-        metric.setStartTime(System.currentTimeMillis());
+        if(Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_DELIVER,"false"))){
+            LOG.warn("Skipping delivery.");
+            return;
+        }
+        Timer.Context deliverMessageContext = deliverMessageTimer.time();
         Submission submission;
+        Timer.Context downloadMessageContext=null;
         try {
+            downloadMessageContext = downloadMessageTimer.time();
             submission = this.messageRetriever.downloadMessage(messageId);
         } catch (MessageNotFoundException e) {
             LOG.error(e.getMessage(), e);
             return;
         }
+        finally {
+            downloadMessageContext.close();
+        }
 
         try {
-            authenticate(submission);
-            sendPayload(submission);
+            Timer.Context authenticateContext = authenticateTimer.time();
+            //authenticate(submission);
+            authenticateContext.close();
+            Timer.Context uploadPayload = uploadPayloadTimer.time();
+            //sendPayload(submission);
+            uploadPayload.close();
             Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
             messageSubmitter.submit(submissionResponse, getName());
+            deliverMessageContext.close();
         } catch (AuthenticationException e) {
             Submission submissionResponseError = getSubmissionResponse(submission, UMDS_REJECTED_TEMPLATE.replace("$messId", messageId));
             try {
@@ -357,13 +385,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
     }
 
-    private Submission getSubmissionResponse(Submission submission, String messageId) {
+    private Submission getSubmissionResponse(Submission submission, String message) {
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
+        submission.setRefToMessageId(org.apache.commons.lang.StringUtils.trim(submission.getMessageId()));
         submission.setMessageId(messageIdGenerator.generateMessageId());
         submission.getPayloads().clear();
-        submission.setRefToMessageId(messageId);
-        submission.addPayload(getPayload(messageId, MediaType.TEXT_XML));
+        submission.addPayload(getPayload(message, MediaType.TEXT_XML));
         return submission;
     }
 
@@ -385,7 +413,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
         restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
-        metric.setLastChanged(System.currentTimeMillis());
     }
 
     private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {

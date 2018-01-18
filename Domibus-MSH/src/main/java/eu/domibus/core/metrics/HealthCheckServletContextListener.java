@@ -2,7 +2,7 @@ package eu.domibus.core.metrics;
 
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlets.HealthCheckServlet;
-import eu.domibus.util.Metrics;
+import eu.domibus.api.metrics.Metrics;
 
 
 /**

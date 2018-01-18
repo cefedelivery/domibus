@@ -1,7 +1,7 @@
 package eu.domibus.core.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.servlets.MetricsServlet;
-import eu.domibus.util.Metrics;
+import eu.domibus.api.metrics.Metrics;
 
 /**
  * @author Thomas Dussart
