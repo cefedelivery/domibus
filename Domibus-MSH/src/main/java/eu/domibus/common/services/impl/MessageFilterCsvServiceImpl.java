@@ -35,13 +35,16 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
     }
 
     private String routingCriteriasToCsvString(List<RoutingCriteria> routingCriterias) {
-        List<String> result = new ArrayList<>(4);
+        List<String> result = new ArrayList<>();
+        // initialize with empty strings
+        for (String ignored : routingCriteriasArray) {
+            result.add("");
+        }
+
         for(RoutingCriteria rc : routingCriterias) {
             for(int i = 0; i < routingCriteriasArray.length; i++) {
                 if(rc.getName().equalsIgnoreCase(routingCriteriasArray[i])) {
-                    result.add(i, Objects.toString(rc.getExpression(),""));
-                } else {
-                    result.add(i, "");
+                    result.set(i, Objects.toString(rc.getExpression(),""));
                 }
             }
         }
@@ -59,14 +62,13 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
 
     @Override
     public String exportToCSV(List<?> list) {
-        if(list == null || list.isEmpty()) {
-            return "";
-        }
-
         StringBuilder result = new StringBuilder();
         result.append(getCsvHeader());
-        for (Object messageFilterRO : list) {
-            result.append(toCsvString((MessageFilterRO) messageFilterRO));
+
+        if(list != null && !list.isEmpty()) {
+            for (Object messageFilterRO : list) {
+                result.append(toCsvString((MessageFilterRO) messageFilterRO));
+            }
         }
         return result.toString().replace("[","").replace("]", "");
     }
