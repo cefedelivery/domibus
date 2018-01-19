@@ -975,7 +975,7 @@ static def String urlToDomibus(side, log, context){
 			else{
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X PUT -d "+bckParams;
 				commandResult = runCurlCommand(commandString,log);
-				assert(commandResult[0].contains("200 OK")||commandResult[0].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				assert(commandResult[1].contains("200 OK")||commandResult[1].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
 				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
 			}
 		}
