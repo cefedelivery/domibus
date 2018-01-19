@@ -11,9 +11,9 @@
             UPDATE QRTZ_CRON_TRIGGERS SET CRON_EXPRESSION = '* 0/1 * * * ?' WHERE CRON_EXPRESSION = '0/60 * * * * ?';
             SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
         </sql>
+        <sql dbms="oracle">
+            UPDATE QRTZ_CRON_TRIGGERS SET CRON_EXPRESSION = '* 0/1 * * * ?' WHERE CRON_EXPRESSION = '0/60 * * * * ?';
+        </sql>
     </changeSet>
-
-
-
 
 </databaseChangeLog>
