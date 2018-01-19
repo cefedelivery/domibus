@@ -15,37 +15,37 @@ import java.util.Date;
  */
 public class MessageLogInfo {
 
-    private String conversationId;
+    private final String messageId;
 
     private String fromPartyId;
 
     private String toPartyId;
 
-    private String originalSender;
-
-    private String finalRecipient;
-
-    private String refToMessageId;
-
-    private final String messageId;
-
     private final MessageStatus messageStatus;
 
     private final NotificationStatus notificationStatus;
 
-    private final MSHRole mshRole;
-
-    private final MessageType messageType;
-
-    private final Date deleted;
-
     private final Date received;
+
+    private final MSHRole mshRole;
 
     private final int sendAttempts;
 
     private final int sendAttemptsMax;
 
     private final Date nextAttempt;
+
+    private String conversationId;
+
+    private final MessageType messageType;
+
+    private final Date deleted;
+
+    private String originalSender;
+
+    private String finalRecipient;
+
+    private String refToMessageId;
 
     private final Date failed;
 

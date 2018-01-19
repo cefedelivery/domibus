@@ -186,6 +186,12 @@ public class MessageLogResource {
             resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
         }
 
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(MessageLogInfo.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn("mshRole", "AP Role");
+
         String resultText;
         try {
             resultText = csvServiceImpl.exportToCSV(resultList);
@@ -196,7 +202,7 @@ public class MessageLogResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=messages_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("messages"))
                 .body(resultText);
     }
 

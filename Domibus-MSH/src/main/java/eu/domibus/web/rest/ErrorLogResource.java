@@ -113,6 +113,14 @@ public class ErrorLogResource {
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, null, true, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
 
+        // needed for empty csv file purposes
+        errorLogCsvServiceImpl.setClass(ErrorLogRO.class);
+
+        // column customization
+        errorLogCsvServiceImpl.customizeColumn("ErrorSignalMessageId", "Signal Message Id");
+        errorLogCsvServiceImpl.customizeColumn("MshRole", "AP Role");
+        errorLogCsvServiceImpl.customizeColumn("MessageInErrorId", "Message Id");
+
         String resultText;
         try {
             resultText = errorLogCsvServiceImpl.exportToCSV(errorLogROList);
@@ -123,7 +131,7 @@ public class ErrorLogResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=errorlog_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + errorLogCsvServiceImpl.getCsvFilename("errorlog"))
                 .body(resultText);
     }
 

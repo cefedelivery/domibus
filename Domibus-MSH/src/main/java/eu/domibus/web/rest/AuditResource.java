@@ -124,6 +124,7 @@ public class AuditResource {
 
         int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
 
+        // get list of audits
         AuditCriteria auditCriteria = new AuditCriteria();
         auditCriteria.setAuditTargetName(auditTargetName);
         auditCriteria.setUser(user);
@@ -135,9 +136,18 @@ public class AuditResource {
         auditCriteria.setStart(0);
         auditCriteria.setMax(maxCSVrows);
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
+
+        // excluding unneeded columns
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("revisionId");
         csvServiceImpl.setExcludedItems(excludedItems);
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(AuditResponseRo.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn("AuditTargetName", "Table");
+
         try {
             resultText = csvServiceImpl.exportToCSV(auditResponseRos);
         } catch (CsvException e) {
@@ -146,7 +156,7 @@ public class AuditResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=audit_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("audit"))
                 .body(resultText);
     }
 }

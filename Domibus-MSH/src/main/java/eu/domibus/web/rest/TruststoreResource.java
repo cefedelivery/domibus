@@ -72,6 +72,9 @@ public class TruststoreResource {
         String resultText;
         final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
 
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(TrustStoreRO.class);
+
         try {
             resultText = csvServiceImpl.exportToCSV(trustStoreROS);
         } catch (CsvException e) {
@@ -80,7 +83,7 @@ public class TruststoreResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=truststore_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("truststore"))
                 .body(resultText);
     }
 

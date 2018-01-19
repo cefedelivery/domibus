@@ -139,15 +139,20 @@ public class PModeResource {
     public ResponseEntity<String> getCsv() {
         String resultText;
 
+        // get list of archived pmodes
         List<PModeResponseRO> pModeResponseROList = pmodeList();
         // set first PMode as current
         if(!pModeResponseROList.isEmpty()) {
             pModeResponseROList.get(0).setCurrent(true);
         }
 
+        // excluding unneeded columns
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("id");
         csvServiceImpl.setExcludedItems(excludedItems);
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(PModeResponseRO.class);
 
         try {
             resultText = csvServiceImpl.exportToCSV(pModeResponseROList);
@@ -157,7 +162,7 @@ public class PModeResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=pmodearchive_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
                 .body(resultText);
     }
 

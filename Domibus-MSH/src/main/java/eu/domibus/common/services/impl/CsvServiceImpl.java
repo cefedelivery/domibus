@@ -9,9 +9,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -19,24 +18,35 @@ import java.util.Objects;
  */
 
 @Service
-public class CsvServiceImpl implements CsvService {
+public class CsvServiceImpl<T> implements CsvService {
+
+    private Class<T> theClass = null;
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CsvServiceImpl.class);
 
+    private Map<String, String> customNames = new HashMap<>();
+
     private List<String> excluded = new ArrayList<>();
+
+    public void setClass(Class<T> tClass) {
+        theClass = tClass;
+    }
 
     @Override
     public String exportToCSV(List<?> list) {
-        if(list == null || list.isEmpty()) {
-            return "";
-        }
-
         StringBuilder result = new StringBuilder();
-        final Class<?> aClass = list.get(0).getClass();
-        Field[] fields = aClass.getDeclaredFields();
-
-        createCSVColumnHeader(result, fields);
-        createCSVContents(list, result, fields);
+        Field[] fields;
+        if(list != null && !list.isEmpty()) {
+            final Class<?> aClass = list.get(0).getClass();
+            fields = aClass.getDeclaredFields();
+            createCSVColumnHeader(result, fields);
+            createCSVContents(list, result, fields);
+        } else {
+            if (theClass != null) {
+                fields = theClass.getDeclaredFields();
+                createCSVColumnHeader(result, fields);
+            }
+        }
 
         return result.toString();
     }
@@ -44,7 +54,10 @@ public class CsvServiceImpl implements CsvService {
     @Override
     public void createCSVColumnHeader(StringBuilder result, Field[] fields) {
         for(Field field : fields) {
-            final String varName = field.getName();
+            String varName = field.getName();
+            if(customNames.get(varName.toUpperCase()) != null) {
+                varName = customNames.get(varName.toUpperCase());
+            }
             if (excluded.contains(varName)) {
                 continue;
             }
@@ -84,6 +97,16 @@ public class CsvServiceImpl implements CsvService {
             result.deleteCharAt(result.length() - 1);
             result.append(System.lineSeparator());
         }
+    }
+
+    public void customizeColumn(String original, String custom) {
+        customNames.put(original.toUpperCase(), custom);
+    }
+
+    public String getCsvFilename(String module) {
+        Date date = new Date() ;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+        return module + "_datatable_" + dateFormat.format(date) + ".csv";
     }
 
     public void setExcludedItems(List<String> excludedItems) {

@@ -101,6 +101,10 @@ public class JmsMessage {
         return (String) getCustomProperties().get(key);
     }
 
+    public void setCustomProperties(Map<String, Object> customProperties) {
+        this.customProperties = customProperties;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)

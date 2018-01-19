@@ -109,10 +109,23 @@ public class JmsResource {
             @RequestParam(value = "selector", required = false) String selector) {
         String resultText;
 
+        // get list of messages
         final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(source, jmsType, fromDate == null?null:new Date(fromDate), toDate == null?null:new Date(toDate), selector);
+        customizeJMSProperties(jmsMessageList);
+
+        // excluding unneeded columns
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("PROPERTY_ORIGINAL_QUEUE");
         csvServiceImpl.setExcludedItems(excludedItems);
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(JmsMessage.class);
+
+        // column name customization
+        csvServiceImpl.customizeColumn("type", "JMS Type");
+        csvServiceImpl.customizeColumn("Timestamp", "Time");
+        csvServiceImpl.customizeColumn("CustomProperties", "Custom prop");
+        csvServiceImpl.customizeColumn("Properties", "JMS prop");
 
         try {
             resultText = csvServiceImpl.exportToCSV(jmsMessageList);
@@ -122,8 +135,15 @@ public class JmsResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=jms_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jms"))
                 .body(resultText);
+    }
+
+    private void customizeJMSProperties(List<JmsMessage> jmsMessageList) {
+        for(JmsMessage message : jmsMessageList) {
+            message.setCustomProperties(message.getCustomProperties());
+            message.setProperties(message.getJMSProperties());
+        }
     }
 
 

@@ -5,6 +5,7 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.ro.ErrorLogRO;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -17,7 +18,7 @@ import java.util.Objects;
  */
 
 @Service
-public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
+public class ErrorLogCsvServiceImpl extends CsvServiceImpl<ErrorLogRO> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorLogCsvServiceImpl.class);
 

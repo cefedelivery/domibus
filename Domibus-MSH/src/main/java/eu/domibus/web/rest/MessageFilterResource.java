@@ -83,7 +83,7 @@ public class MessageFilterResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=messagefilter_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + messageFilterCsvServiceImpl.getCsvFilename("messagefilter"))
                 .body(resultText);
     }
 }

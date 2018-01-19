@@ -108,6 +108,7 @@ public class PartyResource {
         String resultText;
         final List<PartyResponseRo> partyResponseRoList = listParties(name,endPoint,partyId,process,0, 10000);
 
+        // excluding unneeded columns
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("entityId");
         excludedItems.add("identifiers");
@@ -115,6 +116,14 @@ public class PartyResource {
         excludedItems.add("processesWithPartyAsInitiator");
         excludedItems.add("processesWithPartyAsResponder");
         csvServiceImpl.setExcludedItems(excludedItems);
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(PartyResponseRo.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn("EndPoint", "End point");
+        csvServiceImpl.customizeColumn("JoinedIdentifiers", "Party id");
+        csvServiceImpl.customizeColumn("JoinedProcesses", "Process");
 
         try {
             resultText = csvServiceImpl.exportToCSV(partyResponseRoList);
@@ -124,7 +133,7 @@ public class PartyResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=party_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("party"))
                 .body(resultText);
     }
 

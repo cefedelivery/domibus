@@ -96,14 +96,23 @@ public class UserResource {
     public ResponseEntity<String> getCsv() {
         String resultText;
 
+        // get list of users
         final List<UserResponseRO> userResponseROList = users();
 
+        // excluding unneeded columns
         List<String> excludedItems = new ArrayList<>();
         excludedItems.add("authorities");
         excludedItems.add("status");
         excludedItems.add("password");
         excludedItems.add("suspended");
         csvServiceImpl.setExcludedItems(excludedItems);
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(UserResponseRO.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn("UserName", "Username");
+        csvServiceImpl.customizeColumn("Roles", "Role");
 
         try {
             resultText = csvServiceImpl.exportToCSV(userResponseROList);
@@ -113,7 +122,7 @@ public class UserResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=users_datatable.csv")
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("users"))
                 .body(resultText);
     }
 
