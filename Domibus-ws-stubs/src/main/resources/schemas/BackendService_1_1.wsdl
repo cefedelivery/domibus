@@ -173,7 +173,7 @@
         </wsdl:operation>
         <wsdl:operation name="retrieveMessage">
             <soap12:operation soapAction="" style="document"/>
-            <wsdl:input name="downloadMessage">
+            <wsdl:input name="retrieveMessage">
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output name="retrieveMessageResponse">
