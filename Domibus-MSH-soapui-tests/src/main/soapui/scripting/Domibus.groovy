@@ -1028,7 +1028,7 @@ static def String returnXsfrToken(String side,context,log){
 			builder.sequential {
 				copy(tofile: destination, file:source, overwrite:overwriteOpt)
 			}
-			log.info "File was successfuly copied."
+			log.info "File ${source} was successfuly copied to ${destination}"
 		}
 		catch(Exception ex){
 			log.error "Error while trying to copy files: "+ex;
