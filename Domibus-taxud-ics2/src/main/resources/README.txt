@@ -27,4 +27,10 @@ domibus.c4.rest.payload.endpoint=http://localhost:8001/Domibus-taxud-ics2-1.0-SN
 #If the the association "service:action" equals the property the domain will be CUST else it will be TAX
 domibus.taxud.cust.domain=bdx:noprocess:TC7Leg1
 
+#Externalisation of the jms plugin providing queue concurrency.
+domibus.internal.queue.concurency=30-30
+
+#If true disable umds/c4 delivering and submission back.
+domibus.do.not.deliver=true
+
 
