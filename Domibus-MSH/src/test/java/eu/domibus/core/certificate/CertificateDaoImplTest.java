@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.PersistenceContext;
-import javax.validation.ConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class CertificateDaoImplTest {
     @Autowired
     private DateUtil dateUtil;
 
-    @Test(expected = ConstraintViolationException.class)
+    @Test
     @Transactional
     public void saveWithNullDates(){
         Certificate firstCertificate = new Certificate();

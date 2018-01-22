@@ -1,6 +1,7 @@
 package eu.domibus.common.model.certificate;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,7 +31,7 @@ public class Certificate extends AbstractBaseEntity {
     private Date notBefore;
 
     @Column(name = "NOT_VALID_AFTER_DATE")
-    @NotNull
+    @NotEmpty
     @Temporal(TemporalType.TIMESTAMP)
     private Date notAfter;
 
