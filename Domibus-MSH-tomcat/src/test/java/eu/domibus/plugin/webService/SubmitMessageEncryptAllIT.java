@@ -55,12 +55,10 @@ public class SubmitMessageEncryptAllIT extends AbstractSendMessageIT {
     @Test
     public void testSubmitMessageValid() throws SubmitMessageFault, InterruptedException {
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
 
         TimeUnit.SECONDS.sleep(7);

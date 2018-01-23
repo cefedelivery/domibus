@@ -48,13 +48,11 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSendMessagePropertiesRequiredMissing() throws SubmitMessageFault {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
-        SubmitRequest submitRequest = createSubmitRequest(payloadHref);;
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
@@ -74,7 +72,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSubmitMessageWrongIntValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
@@ -83,7 +80,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
@@ -103,7 +99,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSubmitMessageWrongBooleanValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
@@ -112,7 +107,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
@@ -132,7 +126,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSubmitMessageWrongStringValue() throws SubmitMessageFault {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
@@ -143,7 +136,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
@@ -163,7 +155,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSubmitMessagePropertiesRequiredOk() throws SubmitMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
@@ -173,7 +164,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         super.prepareSendMessage("validAS4Response.xml");
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
@@ -188,7 +178,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
     public void testSubmitMessageWrongType() throws SubmitMessageFault {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
         List<Property> properties = ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty();
@@ -198,7 +187,6 @@ public class SubmitMessageValidatePropertiesIT extends AbstractSendMessageIT {
         System.out.println("Props: " + ebMSHeaderInfo.getUserMessage().getMessageProperties().getProperty());
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";

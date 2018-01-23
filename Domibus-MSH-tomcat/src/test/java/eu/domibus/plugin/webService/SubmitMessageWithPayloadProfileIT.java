@@ -46,12 +46,10 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         super.prepareSendMessage("validAS4Response2.xml");
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
@@ -67,12 +65,10 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
 
         //TODO Prepare the request to the backend
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref, null);
 
         super.prepareSendMessage("validAS4Response.xml");
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
@@ -87,13 +83,11 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
     public void testSubmitMessageInvalidPayloadHref() throws SubmitMessageFault, InterruptedException {
 
         String payloadHref = "payload_invalid";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
         super.prepareSendMessage("validAS4Response.xml");
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "Message submission failed";
@@ -113,13 +107,11 @@ public class SubmitMessageWithPayloadProfileIT extends AbstractSendMessageIT {
     public void testSubmitMessagePayloadHrefMismatch() throws SubmitMessageFault, InterruptedException {
 
         String payloadHref = "payload";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref + "000");
         super.prepareSendMessage("validAS4Response.xml");
 
         try {
-            //backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
             backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         } catch (SubmitMessageFault re) {
             String message = "No payload found for PartInfo with href: payload000";

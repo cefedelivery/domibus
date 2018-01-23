@@ -97,7 +97,6 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);
 
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }

@@ -46,7 +46,6 @@ public class SubmitMessageIT extends AbstractSendMessageIT {
     public void testSubmitMessageOK() throws SubmitMessageFault, InterruptedException, SQLException {
 
         String payloadHref = "sbdh-order";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
@@ -64,7 +63,6 @@ public class SubmitMessageIT extends AbstractSendMessageIT {
 
         super.prepareSendMessage("validAS4Response.xml");
 
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
