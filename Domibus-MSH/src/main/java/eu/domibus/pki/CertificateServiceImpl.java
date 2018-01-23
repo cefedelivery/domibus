@@ -43,7 +43,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.offset";
 
-    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "10";
+    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "15";
 
     @Autowired
     CRLService crlService;
