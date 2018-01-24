@@ -12,4 +12,23 @@
             <column name="SUSPENSION_DATE" type="timestamp"/>
         </addColumn>
     </changeSet>
+    <changeSet author="dussath" id="EDELIVERY-3053">
+    <createTable tableName="TB_MESSAGING_LOCK">
+        <column autoIncrement="true" name="ID_PK" type="INT">
+            <constraints primaryKey="true"/>
+        </column>
+        <column name="MESSAGE_TYPE" type="VARCHAR(10)"/>
+        <column name="MESSAGE_RECEIVED" type="DATETIME"/>
+        <column name="MESSAGE_STATE" type="VARCHAR(10)"/>
+        <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+        <column name="INITIATOR" type="VARCHAR(255)"/>
+        <column name="MPC" type="VARCHAR(255)"/>
+    </createTable>
+        <createIndex indexName="IDX_MESSAGE_LOCK_SEARCH" tableName="TB_MESSAGING_LOCK">
+            <column name="MESSAGE_TYPE"/>
+            <column name="MESSAGE_STATE"/>
+            <column name="INITIATOR"/>
+            <column name="MPC"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

@@ -20,9 +20,9 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -44,7 +44,6 @@ import javax.jms.Message;
 import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,6 +100,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
+
+    @Autowired
+    private MessagingLockService messagingLockService;
 
 
     /**
@@ -197,17 +199,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
-        List<MessagePullDto> messagingOnStatusReceiverAndMpc = new ArrayList<>();
-        for (Identifier identifier : identifiers) {
-            messagingOnStatusReceiverAndMpc.addAll(messagingDao.findMessagingOnStatusReceiverAndMpc(identifier.getPartyId(), MessageStatus.READY_TO_PULL, mpc));
+        if(identifiers.size()==0){
+            LOG.warn("No identifier found for party:[{}]",initiator.getName());
+            return  null;
         }
-
-        if (!messagingOnStatusReceiverAndMpc.isEmpty()) {
-            MessagePullDto messagePullDto = messagingOnStatusReceiverAndMpc.get(0);
-            userMessageLogService.setIntermediaryPullStatus(messagePullDto.getMessageId());
-            return messagePullDto.getMessageId();
-        }
-        return null;
+        String partyId = identifiers.iterator().next().getPartyId();
+        return messagingLockService.getPullMessageToProcess(partyId,mpc);
     }
 
     /**
