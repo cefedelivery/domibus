@@ -14,6 +14,7 @@ import java.util.Date;
  * @since 3.3
  */
 public class MessageLogInfo {
+    // order of the fields is important for CSV generation
 
     private final String messageId;
 
