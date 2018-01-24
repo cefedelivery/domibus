@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import com.google.common.collect.Lists;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -44,7 +45,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
             throw new MessagingLockException("Max tentative to lock a message has been reached:" + maxTentative);
         }
         try {
-            return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc,lockedIds);
+            return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc, lockedIds);
         } catch (MessagingLockException e) {
             assert e.getMessageAlreadyLockedId() != null;
             lockedIds.add(e.getMessageAlreadyLockedId());
@@ -63,6 +64,18 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         Identifier identifier = identifiers.iterator().next();
         MessagingLock messagingLock = new MessagingLock(messageId, identifier.getPartyId(), mpc);
         messagingLockDao.save(messagingLock);
+    }
+
+    @Override
+    @Transactional
+    public void delete(final String messageId) {
+        messagingLockDao.delete(messageId);
+    }
+
+    @Override
+    @Transactional
+    public void rollback(final String messageId) {
+        messagingLockDao.updateStatus(messageId, MessageState.READY);
     }
 
 }

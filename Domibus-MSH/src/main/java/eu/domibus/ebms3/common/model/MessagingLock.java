@@ -3,6 +3,7 @@ package eu.domibus.ebms3.common.model;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 
 import static eu.domibus.ebms3.common.model.MessageState.READY;
 
@@ -14,9 +15,13 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
 @Table(name = "TB_MESSAGING_LOCK")
 @NamedQueries({
         @NamedQuery(name = "MessagingLock.findNexMessageToProcess",
-                query = "select m From MessagingLock m where m.received=(select min(m.received) from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC)"),
+                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC ORDER BY m.received"),
         @NamedQuery(name = "MessagingLock.findNexMessageToProcessExcludingLocked",
-                query = "select m From MessagingLock m where m.received=(select min(m.received) from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC and m.entityId not in(:LOCKED_IDS))")
+                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC and m.entityId not in(:LOCKED_IDS) ORDER BY m.received"),
+        @NamedQuery(name = "MessagingLock.delete",
+                query = "delete from MessagingLock m where m.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "MessagingLock.updateStatus",
+                query = "update MessagingLock m set m.messageState=:MESSAGE_STATE where m.messageId=:MESSAGE_ID")
 })
 public class MessagingLock extends AbstractBaseEntity {
 
@@ -74,5 +79,37 @@ public class MessagingLock extends AbstractBaseEntity {
 
     public void setMessageState(MessageState messageState) {
         this.messageState = messageState;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MessagingLock that = (MessagingLock) o;
+        return Objects.equals(messageType, that.messageType) &&
+                Objects.equals(received, that.received) &&
+                messageState == that.messageState &&
+                Objects.equals(messageId, that.messageId) &&
+                Objects.equals(initiator, that.initiator) &&
+                Objects.equals(mpc, that.mpc);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(super.hashCode(), messageType, received, messageState, messageId, initiator, mpc);
+    }
+
+    @Override
+    public String toString() {
+        return "MessagingLock{" +
+                "messageType='" + messageType + '\'' +
+                ", received=" + received +
+                ", messageState=" + messageState +
+                ", messageId='" + messageId + '\'' +
+                ", initiator='" + initiator + '\'' +
+                ", mpc='" + mpc + '\'' +
+                '}';
     }
 }

@@ -30,5 +30,8 @@
             <column name="INITIATOR"/>
             <column name="MPC"/>
         </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOCK_UNIQUE_ID" tableName="TB_MESSAGING_LOCK" unique="true">
+            <column name="MESSAGE_ID" />
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

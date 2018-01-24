@@ -65,6 +65,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private static final String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
     private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
+    public static final String DOMIBUS_PULL_PER_MPC_CONCURENCY = "domibus.pull.per.mpc.concurrency";
 
     @Autowired
     private MessagingDao messagingDao;
@@ -183,7 +184,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                                 return message;
                             }
                         };
-                        jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
+                        //TODO extract this outside of the loop for clarity.
+                        Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_PER_MPC_CONCURENCY, "1"));
+                        for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
+                            jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
+                        }
 
                     }
                 }
@@ -199,12 +204,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
-        if(identifiers.size()==0){
-            LOG.warn("No identifier found for party:[{}]",initiator.getName());
-            return  null;
+        if (identifiers.size() == 0) {
+            LOG.warn("No identifier found for party:[{}]", initiator.getName());
+            return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        return messagingLockService.getPullMessageToProcess(partyId,mpc);
+        return messagingLockService.getPullMessageToProcess(partyId, mpc);
     }
 
     /**
@@ -263,7 +268,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
@@ -284,7 +289,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(senderName);
