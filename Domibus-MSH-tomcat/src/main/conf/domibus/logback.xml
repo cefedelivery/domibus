@@ -17,6 +17,14 @@
     </appender>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/domibus.log</file>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SECURITY</marker>
+                <marker>BUSINESS</marker>
+            </evaluator>
+            <onMismatch>NEUTRAL</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>${catalina.home}/logs/domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
