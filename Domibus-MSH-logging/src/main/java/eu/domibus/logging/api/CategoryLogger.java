@@ -89,10 +89,14 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
         }
         String formattedMessage = formatMessage(marker, key, args);
 
+        logWarn(marker, formattedMessage, null, args);
+    }
+
+    protected void logWarn(Marker marker, String message, Throwable t, Object[] args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.WARN_INT, formattedMessage, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.WARN_INT, message, args, t);
         } else {
-            logger.warn(marker, formattedMessage, args);
+            logger.warn(marker, message, args);
         }
     }
 

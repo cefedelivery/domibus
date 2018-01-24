@@ -91,21 +91,24 @@ public class DomibusLogger extends CategoryLogger {
     }
 
     protected void markerWarn(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
-        warn(marker, key, args);
-
+        // log with stacktrace and no marker
         if (t != null) {
             final String message = formatMessage(marker, key, args);
-            warn(message, t);
+            logWarn(null, message, t, args);
         }
+
+        //without stacktrace and with marker
+        warn(marker, key, args);
     }
 
     protected void markerError(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        // log with stacktrace and no marker
         if (t != null) {
             final String message = formatMessage(marker, key, args);
             logError(null, message, t, args);
-            marker.add(LOGGED_MARKER);
         }
 
+        //without stacktrace and with marker
         error(marker, key, args);
     }
 
