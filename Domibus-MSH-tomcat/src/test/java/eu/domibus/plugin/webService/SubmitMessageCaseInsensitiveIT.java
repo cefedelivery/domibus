@@ -45,7 +45,6 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
     public void testSubmitMessageOK() throws SubmitMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "SBDH-ORDER";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
