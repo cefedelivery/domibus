@@ -9,6 +9,8 @@ import {TrustStoreUploadComponent} from "./truststore-upload/truststore-upload.c
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
+import {AlertService} from "../alert/alert.service";
 
 @Component({
   selector: 'app-truststore',
@@ -33,7 +35,7 @@ export class TruststoreComponent implements OnInit {
   static readonly TRUSTSTORE_URL: string = "rest/truststore";
   static readonly TRUSTSTORE_CSV_URL: string = TruststoreComponent.TRUSTSTORE_URL + "/csv";
 
-  constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog) {
+  constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog, public alertService: AlertService) {
   }
 
   ngOnInit(): void {
@@ -69,6 +71,10 @@ export class TruststoreComponent implements OnInit {
       return ["Name", "Subject", "Issuer", "Valid from", "Valid until"].indexOf(col.name) != -1
     });
     this.getTrustStoreEntries();
+
+    if(this.trustStoreEntries.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error("Maximum number of rows reached for downloading CSV");
+    }
   }
 
   getTrustStoreEntries(): void {
@@ -112,7 +118,7 @@ export class TruststoreComponent implements OnInit {
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
   isSaveAsCSVButtonEnabled() : boolean {
-    return this.rows.length < 10000;
+    return this.rows.length < AlertComponent.MAX_COUNT_CSV;
   }
 
   /**

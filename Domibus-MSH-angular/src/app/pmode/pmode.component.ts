@@ -16,6 +16,7 @@ import {PmodeDirtyUploadComponent} from "./pmode-dirty-upload/pmode-dirty-upload
 import {Observable} from "rxjs/Observable";
 import {DateFormatService} from "../customDate/dateformat.service";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   moduleId: module.id,
@@ -144,6 +145,9 @@ export class PModeComponent implements OnInit, DirtyOperations {
       this.getActivePMode();
       this.actualRow = 0;
       this.count = response.json().length;
+      if(this.count > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error("Maximum number of rows reached for downloading CSV");
+      }
     },
       () => {},
       () => {
@@ -464,7 +468,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
   isSaveAsCSVButtonEnabled() : boolean {
-    return this.allPModes.length < 10000;
+    return this.allPModes.length < AlertComponent.MAX_COUNT_CSV;
   }
 
   /**

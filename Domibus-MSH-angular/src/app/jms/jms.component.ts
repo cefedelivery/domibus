@@ -12,6 +12,7 @@ import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Observable} from "rxjs/Observable";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   selector: 'app-jms',
@@ -222,6 +223,10 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
         this.updateQueuesInfo();
 
+        if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+          this.alertService.error("Maximum number of rows reached for downloading CSV");
+        }
+
       },
       error => {
         this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
@@ -409,7 +414,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   isSaveAsCSVButtonEnabled() {
-    return (this.rows.length < 10000);
+    return (this.rows.length < AlertComponent.MAX_COUNT_CSV);
   }
 
   getFilterPath() {

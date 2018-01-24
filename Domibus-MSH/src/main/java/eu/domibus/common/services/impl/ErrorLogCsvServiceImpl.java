@@ -33,7 +33,11 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl<ErrorLogRO> {
                     if(field.getName().equals("errorCode")) {
                         varResult = ((ErrorCode)varResult).getErrorCodeName();
                     }
-                    result.append(Objects.toString(varResult,""));
+                    String fieldValue = Objects.toString(varResult, "");
+                    if(fieldValue.contains(",")) {
+                        fieldValue = "\"" + fieldValue + "\"";
+                    }
+                    result.append(fieldValue);
                     result.append(",");
                 } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);

@@ -11,6 +11,8 @@ import {AlertService} from "./alert.service";
 export class AlertComponent {
   message: any;
 
+  public static readonly MAX_COUNT_CSV: number = 10000;
+
   constructor(private alertService: AlertService) { }
 
   ngOnInit() {

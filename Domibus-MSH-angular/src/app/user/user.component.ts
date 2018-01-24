@@ -14,6 +14,7 @@ import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {SecurityService} from "../security/security.service";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   moduleId: module.id,
@@ -110,6 +111,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.getUsers();
 
     this.getUserRoles();
+
+    if(this.users.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error("Maximum number of rows reached for downloading CSV");
+    }
   }
 
   getUsers(): void {
@@ -318,7 +323,7 @@ export class UserComponent implements OnInit, DirtyOperations {
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
   isSaveAsCSVButtonEnabled() : boolean {
-    return this.users.length < 10000;
+    return this.users.length < AlertComponent.MAX_COUNT_CSV;
   }
 
   /**

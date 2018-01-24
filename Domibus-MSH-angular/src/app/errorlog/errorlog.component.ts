@@ -8,6 +8,7 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   moduleId: module.id,
@@ -87,12 +88,12 @@ export class ErrorLogComponent {
         name: 'Notified'
       }
 
-    ]
+    ];
 
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1
-    })
+    });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
@@ -183,6 +184,10 @@ export class ErrorLogComponent {
       this.errorCodes = result.errorCodes;
 
       this.loading = false;
+
+      if(this.count > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error("Maximum number of rows reached for downloading CSV");
+      }
     }, (error: any) => {
       console.log("error getting the error log:" + error);
       this.loading = false;
@@ -293,7 +298,7 @@ export class ErrorLogComponent {
   }
 
   isSaveAsCSVButtonEnabled() {
-    return (this.count < 10000);
+    return (this.count < AlertComponent.MAX_COUNT_CSV);
   }
 
   saveAsCSV() {

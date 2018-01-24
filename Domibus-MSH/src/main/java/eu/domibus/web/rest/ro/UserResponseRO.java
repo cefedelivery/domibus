@@ -12,13 +12,14 @@ import java.util.List;
  * @since 3.3
  */
 public class UserResponseRO {
+    // order of the fields is important for CSV generation
     private String userName;
     private String email;
+    private String roles="";
+    private String password;
     private boolean active;
     private List<String> authorities;
-    private String roles="";
     private String status;
-    private String password;
     private boolean suspended;
 
     public UserResponseRO() {
@@ -103,29 +104,6 @@ public class UserResponseRO {
     public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
-
-    /*public String toCsvString() {
-        // RFC 4180
-        return new StringBuilder()
-                .append(Objects.toString(userName,"")).append(",")
-                .append(Objects.toString(email,"")).append(",")
-                .append("\"").append(Objects.toString(roles,"")).append("\"").append(",")
-                .append(Objects.toString(password,"******")).append(",")
-                .append(active)
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Username").append(",")
-                .append("Email").append(",")
-                .append("Role").append(",")
-                .append("Password").append(",")
-                .append("Active")
-                .append(System.lineSeparator())
-                .toString();
-    }*/
 
     @Override
     public String toString() {

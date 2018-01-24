@@ -2,8 +2,8 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.DomibusCacheService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
@@ -51,7 +51,7 @@ public class TruststoreResourceTest {
     DomainCoreConverter domainConverter;
 
     @Injectable
-    private CsvService csvServiceImpl;
+    private CsvServiceImpl csvServiceImpl;
 
     @Test
     public void testUploadTruststoreFileSuccess() {

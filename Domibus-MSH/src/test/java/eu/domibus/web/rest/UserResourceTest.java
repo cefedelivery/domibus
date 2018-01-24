@@ -3,8 +3,8 @@ package eu.domibus.web.rest;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import mockit.Expectations;
@@ -37,7 +37,7 @@ public class UserResourceTest {
     DomainCoreConverter domainConverter;
 
     @Injectable
-    private CsvService csvServiceImpl;
+    private CsvServiceImpl csvServiceImpl;
 
     private List<UserResponseRO> getUserResponseList() {
         final List<UserResponseRO> userResponseROList = new ArrayList<>();

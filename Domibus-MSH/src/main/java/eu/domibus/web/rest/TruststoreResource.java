@@ -75,6 +75,10 @@ public class TruststoreResource {
         // needed for empty csv file purposes
         csvServiceImpl.setClass(TrustStoreRO.class);
 
+        // column customization
+        csvServiceImpl.customizeColumn("ValidFrom", "Valid from");
+        csvServiceImpl.customizeColumn("ValidUntil", "Valid until");
+
         try {
             resultText = csvServiceImpl.exportToCSV(trustStoreROS);
         } catch (CsvException e) {

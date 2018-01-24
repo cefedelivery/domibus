@@ -6,6 +6,7 @@ import {AuditCriteria, AuditResponseRo} from "./audit";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {Observable} from "rxjs/Observable";
+import {AlertComponent} from "../alert/alert.component";
 
 /**
  * @author Thomas Dussart
@@ -76,6 +77,10 @@ export class AuditComponent implements OnInit {
     auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
         this.rows = response;
         this.loading = false;
+
+        if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+          this.alertService.error("Maximum number of rows reached for downloading CSV");
+        }
       },
       error => {
         this.alertService.error("Could not load audits " + error);
@@ -165,7 +170,7 @@ export class AuditComponent implements OnInit {
   }
 
   isSaveAsCSVButtonEnabled() {
-    return (this.count < 10000);
+    return (this.count < AlertComponent.MAX_COUNT_CSV);
   }
 
   saveAsCSV() {
