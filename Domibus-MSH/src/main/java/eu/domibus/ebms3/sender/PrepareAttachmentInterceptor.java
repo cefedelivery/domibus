@@ -2,7 +2,6 @@ package eu.domibus.ebms3.sender;
 
 import com.codahale.metrics.Timer;
 import eu.domibus.api.metrics.Metrics;
-import eu.domibus.util.SoapUtil;
 import org.apache.cxf.attachment.AttachmentImpl;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.helpers.CastUtils;
@@ -17,7 +16,6 @@ import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.MimeHeader;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.TransformerException;
 import java.util.ArrayList;
 import java.util.Iterator;
 

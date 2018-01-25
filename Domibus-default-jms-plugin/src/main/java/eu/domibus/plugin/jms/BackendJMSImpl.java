@@ -12,7 +12,6 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
-import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -30,12 +29,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
@@ -349,10 +345,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Override
     public void deliverMessage(final String messageId) {
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "deliverMessage")).time();
-
-
         if(Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_DELIVER,"false"))){
             LOG.warn("Skipping delivery.");
+            try {
+                this.messageRetriever.downloadMessage(messageId);
+            } catch (MessageNotFoundException e) {
+                LOG.error(e.getMessage(),e);
+            }
             return;
         }
         Timer.Context deliverMessageContext = deliverMessageTimer.time();

@@ -14,30 +14,18 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
 import org.apache.commons.lang.Validate;
-import org.apache.cxf.attachment.AttachmentImpl;
-import org.apache.cxf.attachment.AttachmentUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
-import org.apache.cxf.helpers.CastUtils;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.message.Attachment;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.policy.PolicyVerificationOutInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
-import org.apache.cxf.wsdl.interceptors.BareOutInterceptor;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MimeHeader;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
