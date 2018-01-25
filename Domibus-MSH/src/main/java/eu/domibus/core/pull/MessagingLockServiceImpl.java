@@ -7,6 +7,7 @@ import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,6 +36,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         try {
             return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
         } catch (MessagingLockException e) {
+            LOG.error("Messagin locking exception, retrying without ids[{}]", StringUtils.join(e.getMessageAlreadyLockedId(), ","));
             List<Integer> lockedIds = Lists.newArrayList(e.getMessageAlreadyLockedId());
             return tryAnotherMessage(initiator, mpc, lockedIds);
         }
