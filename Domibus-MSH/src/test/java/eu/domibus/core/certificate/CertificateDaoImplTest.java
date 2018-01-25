@@ -59,6 +59,19 @@ public class CertificateDaoImplTest {
     @Autowired
     private DateUtil dateUtil;
 
+    @Test(expected = javax.validation.ConstraintViolationException.class)
+    @Transactional
+    public void saveWithNullDates(){
+        Certificate firstCertificate = new Certificate();
+        firstCertificate.setAlias("whatEver");
+        firstCertificate.setNotBefore(null);
+        firstCertificate.setNotAfter(null);
+        firstCertificate.setCertificateType(CertificateType.PUBLIC);
+        firstCertificate.setCertificateStatus(CertificateStatus.OK);
+        certificateDao.saveOrUpdate(firstCertificate);
+        em.flush();
+    }
+
     @Test
     @Transactional
     public void saveOrUpdate() throws Exception {
