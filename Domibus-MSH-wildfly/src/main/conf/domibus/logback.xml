@@ -5,7 +5,8 @@
         <file>logs/domibus.log</file>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>LOGGED_MARKER</marker>
+                <marker>SECURITY</marker>
+                <marker>BUSINESS</marker>
             </evaluator>
             <onMismatch>NEUTRAL</onMismatch>
             <onMatch>DENY</onMatch>
