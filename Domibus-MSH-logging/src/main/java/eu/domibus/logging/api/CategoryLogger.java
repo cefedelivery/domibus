@@ -37,59 +37,79 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     }
 
     public void trace(Marker marker, MessageCode key, Object... args) {
+        trace(marker, key, null, args);
+    }
+
+    public void trace(Marker marker, MessageCode key, Throwable t, Object... args) {
         if (!logger.isTraceEnabled()) {
             return;
         }
         String formattedMessage = formatMessage(marker, key, args);
 
+        logTrace(marker, formattedMessage, t, args);
+    }
+
+    protected void logTrace(Marker marker, String formattedMessage, Throwable t, Object[] args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.TRACE_INT, formattedMessage, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.TRACE_INT, formattedMessage, args, t);
         } else {
             logger.trace(marker, formattedMessage, args);
         }
     }
 
     public void debug(Marker marker, MessageCode key, Object... args) {
+        debug(marker, key, null, args);
+    }
+
+    public void debug(Marker marker, MessageCode key, Throwable t, Object... args) {
         if (!logger.isDebugEnabled()) {
             return;
         }
         String formattedMessage = formatMessage(marker, key, args);
 
-        logDebug(marker, formattedMessage, args);
+        logDebug(marker, formattedMessage, t, args);
     }
 
-    protected void logDebug(Marker marker, String message, Object... args) {
+    protected void logDebug(Marker marker, String message, Throwable t, Object... args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, message, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.DEBUG_INT, message, args, t);
         } else {
             logger.debug(marker, message, args);
         }
     }
 
-    protected void logDebug(String message, Object... args) {
-        logDebug(null, message, args);
+    public void info(Marker marker, MessageCode key, Object... args) {
+        info(marker, key, null, args);
     }
 
-    public void info(Marker marker, MessageCode key, Object... args) {
+    public void info(Marker marker, MessageCode key, Throwable t, Object... args) {
         if (!logger.isInfoEnabled()) {
             return;
         }
         String formattedMessage = formatMessage(marker, key, args);
 
+        logInfo(marker, formattedMessage, t, args);
+    }
+
+    protected void logInfo(Marker marker, String formattedMessage, Throwable t, Object[] args) {
         if (instanceofLAL) {
-            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, formattedMessage, args, null);
+            ((LocationAwareLogger) logger).log(marker, fqcn, LocationAwareLogger.INFO_INT, formattedMessage, args, t);
         } else {
             logger.info(marker, formattedMessage, args);
         }
     }
 
     public void warn(Marker marker, MessageCode key, Object... args) {
+        warn(marker, key, null, args);
+    }
+
+    public void warn(Marker marker, MessageCode key, Throwable t, Object... args) {
         if (!logger.isWarnEnabled()) {
             return;
         }
         String formattedMessage = formatMessage(marker, key, args);
 
-        logWarn(marker, formattedMessage, null, args);
+        logWarn(marker, formattedMessage, t, args);
     }
 
     protected void logWarn(Marker marker, String message, Throwable t, Object[] args) {
@@ -101,12 +121,16 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     }
 
     public void error(Marker marker, MessageCode key, Object... args) {
+        error(marker, key, null, args);
+    }
+
+    public void error(Marker marker, MessageCode key, Throwable t, Object... args) {
         if (!logger.isErrorEnabled()) {
             return;
         }
         String formattedMessage = formatMessage(marker, key, args);
 
-        logError(marker, formattedMessage, null, args);
+        logError(marker, formattedMessage, t, args);
     }
 
     protected void logError(Marker marker, String message, Throwable t, Object[] args) {
