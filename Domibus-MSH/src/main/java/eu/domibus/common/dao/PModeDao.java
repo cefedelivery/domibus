@@ -228,7 +228,7 @@ public class PModeDao extends PModeProvider {
         }
     }
 
-    protected String findPartyName(final Collection<PartyId> partyIds) throws EbMS3Exception {
+    public String findPartyName(final Collection<PartyId> partyIds) throws EbMS3Exception {
         Identifier identifier;
         for (final PartyId partyId : partyIds) {
             LOG.debug("Trying to find party [" + partyId + "]");

@@ -11,11 +11,7 @@ import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import mockit.Delegate;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.VerificationsInOrder;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
@@ -60,6 +56,7 @@ public class BackendFSImplTest {
 
     @Injectable
     String name = "fsplugin";
+
 
     @Tested
     BackendFSImpl backendFS;

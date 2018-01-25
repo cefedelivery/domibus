@@ -220,7 +220,7 @@ public abstract class PModeProvider {
 
     protected abstract String findServiceName(eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception;
 
-    protected abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
+    public abstract String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception;
 
     protected abstract String findAgreement(AgreementRef agreementRef) throws EbMS3Exception;
 

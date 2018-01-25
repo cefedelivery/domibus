@@ -6,6 +6,7 @@ import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
@@ -85,6 +86,8 @@ public class BackendJMSImplTest {
     @Injectable
     private PayloadLogging payloadLogging;
 
+    @Injectable
+    private PModeProvider pModeProvider;
     @Tested
     BackendJMSImpl backendJMS;
 

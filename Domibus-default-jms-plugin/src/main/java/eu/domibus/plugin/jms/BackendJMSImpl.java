@@ -2,11 +2,15 @@ package eu.domibus.plugin.jms;
 
 import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
+import com.google.common.collect.Lists;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -24,12 +28,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
@@ -45,7 +45,6 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
-import javax.sql.DataSource;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,10 +113,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private Properties domibusProperties;
 
     @Autowired
-    @Qualifier("nonXa")
-    private DataSource dataSource;
-
-    @Autowired
     private AccessPointHelper accessPointHelper;
 
     @Autowired
@@ -141,15 +136,15 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Autowired
     private  CertificateLogging certificateLogging;
 
+    @Autowired
+    private PModeProvider pModeProvider;
+
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
     private org.springframework.web.client.RestTemplate restTemplate;
 
-    private NamedParameterJdbcTemplate jdbcTemplate;
-
-    private Map<String, String> partyAliasMap = new HashMap<>();
 
     private static Timer deliverMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "deliverMessageTimer"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
 
@@ -179,9 +174,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-
-        jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-
         cryptoService.getTrustStore();
     }
 
@@ -326,18 +318,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private String getSenderAlias(Submission submission) {
         Submission.Party party = accessPointHelper.extractSendingAccessPoint(submission);
-        String partyId = party.getPartyId();
-        String alias = partyAliasMap.get(partyId);
-        if (alias != null) {
-            return alias;
-        }
-        String query = "SELECT p.NAME FROM TB_PARTY_IDENTIFIER pi ,TB_PARTY p WHERE pi.FK_PARTY=p.ID_PK AND pi.PARTY_ID=:party_id";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("party_id", partyId);
+        PartyId partyId=new PartyId();
+        partyId.setValue(party.getPartyId());
+        partyId.setType(party.getPartyIdType());
         try {
-            alias = this.jdbcTemplate.queryForObject(query, namedParameters, String.class);
-            partyAliasMap.put(partyId, alias);
-            return alias;
-        } catch (DataAccessException e) {
+            return pModeProvider.findPartyName(Lists.newArrayList(partyId));
+        } catch (EbMS3Exception e) {
             LOG.error("No alias found for sender [{}]", partyId);
             throw new AuthenticationException("No alias found for sender");
         }
@@ -365,10 +351,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         try {
             Timer.Context authenticateContext = authenticateTimer.time();
-            //authenticate(submission);
+            authenticate(submission);
             authenticateContext.close();
             Timer.Context uploadPayload = uploadPayloadTimer.time();
-            //sendPayload(submission);
+            sendPayload(submission);
             uploadPayload.close();
             Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
             messageSubmitter.submit(submissionResponse, getName());
