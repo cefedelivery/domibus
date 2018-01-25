@@ -12,11 +12,9 @@
             <column name="CERTIFICATE_ALIAS" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP" defaultValue="1970-01-01 00:00:01">
-                <constraints nullable="false"/>
+            <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP">
             </column>
-            <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP" defaultValue="1970-01-01 00:00:01">
-                <constraints nullable="false"/>
+            <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP">
             </column>
             <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
             <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">

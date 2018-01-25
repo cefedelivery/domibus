@@ -73,8 +73,8 @@ public class MessagingServiceImpl implements MessagingService {
         } else {
             final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
-            partInfo.setLength(attachmentStore.length());
-            saveFileToDisk(attachmentStore, is, compressed);
+            final long fileLength = saveFileToDisk(attachmentStore, is, compressed);
+            partInfo.setLength(fileLength);
         }
 
         // Log Payload size
@@ -97,7 +97,7 @@ public class MessagingServiceImpl implements MessagingService {
         return binaryData;
     }
 
-    protected void saveFileToDisk(File file, InputStream is, boolean isCompressed) throws IOException{
+    protected long saveFileToDisk(File file, InputStream is, boolean isCompressed) throws IOException{
         OutputStream fileOutputStream = new FileOutputStream(file);
         if (isCompressed) {
             fileOutputStream = new GZIPOutputStream(fileOutputStream);
@@ -106,6 +106,7 @@ public class MessagingServiceImpl implements MessagingService {
         fileOutputStream.flush();
         IOUtils.closeQuietly(fileOutputStream);
         LOG.debug("Done writing file [{}]. Written [{}] bytes.", file.getName(), total);
+        return total;
     }
 
     protected byte[] compress(byte[] binaryData) throws IOException{
