@@ -26,7 +26,7 @@ class Domibus
 	static def backup_file_sufix = "_backup_for_soapui_tests";
 	static def defaultLogLevel = 0;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
-	static def MAX_LOGIN_BEFORE_LOCK = 6;
+	static def MAX_LOGIN_BEFORE_LOCK = 5;
 	static def CLEAR_CACHE_COMMAND_TOMCAT = $/rmdir /S /Q ..\work & rmdir /S /Q ..\logs & del /S /Q ..\temp\* & FOR /D %p IN ("..\temp\*.*") DO rmdir /s /q "%p"  & rmdir /S /Q ..\webapps\domibus & rmdir /S /Q ..\conf\domibus\work/$;
 
     // Short constructor of the Domibus Class
@@ -1028,7 +1028,7 @@ static def String returnXsfrToken(String side,context,log){
 			builder.sequential {
 				copy(tofile: destination, file:source, overwrite:overwriteOpt)
 			}
-			log.info "File was successfuly copied."
+			log.info "File ${source} was successfuly copied to ${destination}"
 		}
 		catch(Exception ex){
 			log.error "Error while trying to copy files: "+ex;
@@ -1272,7 +1272,7 @@ static def String pathToDomibus(color, log, context){
 			def commandResult = null;
 			def commandString = null;
 			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-			for(def i=0;i<MAX_LOGIN_BEFORE_LOCK;i++){
+			for(def i=0;i<=MAX_LOGIN_BEFORE_LOCK;i++){
 				commandResult = runCurlCommand(commandString,log);
 			}
 			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."

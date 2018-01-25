@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="EDELIVERY-3010" author="CatalinEnache">
+        <sql dbms="oracle">
+            ALTER TABLE QRTZ_BLOB_TRIGGERS DISABLE CONSTRAINT FK_BLOB_TRIGGERS;
+            ALTER TABLE QRTZ_CRON_TRIGGERS DISABLE CONSTRAINT FK_CRON_TRIGGERS;
+            ALTER TABLE QRTZ_SIMPLE_TRIGGERS DISABLE CONSTRAINT FK_SIMPLE_TRIGGERS;
+            ALTER TABLE QRTZ_SIMPROP_TRIGGERS DISABLE CONSTRAINT FK_SIMPROP_TRIGGERS;
+            ALTER TABLE QRTZ_TRIGGERS DISABLE CONSTRAINT FK_TRIGGERS;
+
+            UPDATE QRTZ_BLOB_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_CALENDARS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_CRON_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_FIRED_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_JOB_DETAILS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_LOCKS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_PAUSED_TRIGGER_GRPS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SCHEDULER_STATE SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SIMPLE_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SIMPROP_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+
+            ALTER TABLE QRTZ_BLOB_TRIGGERS ENABLE CONSTRAINT FK_BLOB_TRIGGERS;
+            ALTER TABLE QRTZ_CRON_TRIGGERS ENABLE CONSTRAINT FK_CRON_TRIGGERS;
+            ALTER TABLE QRTZ_SIMPLE_TRIGGERS ENABLE CONSTRAINT FK_SIMPLE_TRIGGERS;
+            ALTER TABLE QRTZ_SIMPROP_TRIGGERS ENABLE CONSTRAINT FK_SIMPROP_TRIGGERS;
+            ALTER TABLE QRTZ_TRIGGERS ENABLE CONSTRAINT FK_TRIGGERS;
+        </sql>
+
+        <sql dbms="mysql">
+            SET FOREIGN_KEY_CHECKS = 0;
+
+            UPDATE QRTZ_BLOB_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_CALENDARS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_CRON_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_FIRED_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_JOB_DETAILS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_LOCKS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_PAUSED_TRIGGER_GRPS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SCHEDULER_STATE SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SIMPLE_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_SIMPROP_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+            UPDATE QRTZ_TRIGGERS SET SCHED_NAME='schedulerFactoryBean' WHERE SCHED_NAME='org.springframework.scheduling.quartz.SchedulerFactoryBean#0';
+
+            SET FOREIGN_KEY_CHECKS = 1;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
