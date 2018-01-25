@@ -42,9 +42,9 @@
           class="eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory">
     </bean>
 
-    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="taskExecutor" ref="taskExecutor"/>
-        <property name="autoStartup" value="true"/>
+        <property name="autoStartup" value="false"/>
         <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
         <property name="waitForJobsToCompleteOnShutdown" value="true"/>
         <property name="overwriteExistingJobs" value="true"/>
@@ -72,5 +72,9 @@
         <property name="triggers">
             <ref bean="domibusStandardTriggerList"/>
         </property>
+    </bean>
+
+    <bean id="domibusQuartzStarter" class="eu.domibus.quartz.DomibusQuartzStarter">
+        <property name="scheduler" ref="schedulerFactoryBean"/>
     </bean>
 </beans>
