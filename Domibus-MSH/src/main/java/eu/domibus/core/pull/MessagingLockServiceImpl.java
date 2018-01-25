@@ -36,14 +36,15 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         try {
             return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
         } catch (MessagingLockException e) {
-            LOG.error("Messagin locking exception, retrying without ids[{}]", StringUtils.join(e.getMessageAlreadyLockedId(), ","));
             List<Integer> lockedIds = Lists.newArrayList(e.getMessageAlreadyLockedId());
+            LOG.error("Messaging locking mechanism for initiator:[{}] and mpc:[{}], retrying without ids[{}]", initiator,mpc,StringUtils.join(lockedIds, ","));
             return tryAnotherMessage(initiator, mpc, lockedIds);
         }
     }
 
     private String tryAnotherMessage(final String initiator, final String mpc, final List<Integer> lockedIds) {
         if (lockedIds.size() >= maxTentative) {
+            LOG.error("Max tentative:[{}] to lock a message has been reached for initiator:[{}] and mpc:[{}]"+ maxTentative,initiator,mpc);
             throw new MessagingLockException("Max tentative to lock a message has been reached:" + maxTentative);
         }
         try {
@@ -51,6 +52,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         } catch (MessagingLockException e) {
             assert e.getMessageAlreadyLockedId() != null;
             lockedIds.add(e.getMessageAlreadyLockedId());
+            LOG.error("Messaging locking mechanism for initiator:[{}] and mpc:[{}], retrying without ids[{}]", initiator,mpc,StringUtils.join(lockedIds, ","));
             return tryAnotherMessage(initiator, mpc, lockedIds);
         }
     }

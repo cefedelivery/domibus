@@ -68,6 +68,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         } catch (ReliabilityException e) {
             LOG.warn("There should be a raw xml entry for this message.");
         }
+        LOG.error("Pull receipt [{}]",reliabilityCheckSuccessful);
         if(ReliabilityChecker.CheckResult.OK==reliabilityCheckSuccessful){
             messagingLockService.delete(messageId);
         }
