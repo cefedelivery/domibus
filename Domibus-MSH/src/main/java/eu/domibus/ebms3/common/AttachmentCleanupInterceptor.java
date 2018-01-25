@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.common;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.attachment.AttachmentDataSource;
@@ -14,6 +16,8 @@ import javax.activation.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * CXF is storing in tmp files the payloads higher then 200Mb.
@@ -32,8 +36,10 @@ public class AttachmentCleanupInterceptor extends AbstractPhaseInterceptor<Messa
     }
 
     public void handleMessage(Message message) throws Fault {
+        final Timer.Context buildSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(AttachmentCleanupInterceptor.class, "handleMessage")).time();
         Exchange exchange = message.getExchange();
         cleanRequestAttachment(exchange);
+        buildSoapMessageContext.stop();
     }
 
     public void handleFault(Message message) {

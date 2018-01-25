@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.util.SoapUtil;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.ws.WebServiceException;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Thomas Dussart
@@ -40,6 +44,7 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
         if(!MessageType.USER_MESSAGE.equals(messageType) || messageId==null){
             return;
         }
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "handleMessage")).time();
         try {
             SOAPMessage soapContent = message.getContent(SOAPMessage.class);
             String rawXMLMessage = SoapUtil.getRawXMLMessage(soapContent);
@@ -47,7 +52,10 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
             messageExchangeService.savePulledMessageRawXml(rawXMLMessage,messageId.toString());
         } catch (TransformerException e) {
             throw new WebServiceException(new IllegalArgumentException(e));
+        } finally {
+            handleMessageContext.stop();
         }
+
 
     }
 }

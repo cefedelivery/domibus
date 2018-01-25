@@ -3,6 +3,7 @@ package eu.domibus.plugin.jms;
 import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
@@ -11,6 +12,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -28,8 +30,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
@@ -45,6 +51,7 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.sql.DataSource;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,6 +120,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private Properties domibusProperties;
 
     @Autowired
+    @Qualifier("nonXa")
+    private DataSource dataSource;
+
+    @Autowired
     private AccessPointHelper accessPointHelper;
 
     @Autowired
@@ -145,6 +156,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private org.springframework.web.client.RestTemplate restTemplate;
 
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
+    private Map<String, String> partyAliasMap = new HashMap<>();
 
     private static Timer deliverMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "deliverMessageTimer"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
 
@@ -208,6 +222,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "receiveMessage")).time();
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);
             final String jmsCorrelationID = map.getJMSCorrelationID();
@@ -237,6 +252,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         } catch (Exception e) {
             LOG.error("Exception occurred while receiving message [" + map + "]", e);
             throw new DefaultJmsPluginException("Exception occurred while receiving message [" + map + "]", e);
+        } finally {
+            handleMessageContext.stop();
         }
     }
 
@@ -331,6 +348,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void deliverMessage(final String messageId) {
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "deliverMessage")).time();
+
+
         if(Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_DELIVER,"false"))){
             LOG.warn("Skipping delivery.");
             return;
@@ -368,6 +388,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             }
         } catch (MessagingProcessingException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            handleMessageContext.stop();
         }
     }
 
@@ -445,7 +467,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void messageSendSuccess(String messageId) {
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "messageSendSuccess")).time();
         replyJmsTemplate.send(new SignalMessageCreator(messageId, NotificationType.MESSAGE_SEND_SUCCESS));
+        handleMessageContext.stop();
     }
 
     private class DownloadMessageCreator implements MessageCreator {
