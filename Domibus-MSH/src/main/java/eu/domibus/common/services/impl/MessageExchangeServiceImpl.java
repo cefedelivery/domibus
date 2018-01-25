@@ -273,10 +273,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
                 if (!certificateChainValid) {
+                    LOG.error("Receiver Cerfitication chaing not valid [{}]",chainExceptionMessage);
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Receiver certificate exists and is valid [" + receiverName + "]");
             } catch (DomibusCertificateException e) {
+                LOG.error("Receiver DomibusCertificateException [{}]",chainExceptionMessage);
                 throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage, e);
             }
         }
@@ -297,6 +299,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender[" + senderName + "] certificate not found in Keystore");
                 }
                 if (!certificateService.isCertificateValid(certificate)) {
+                    LOG.error("Sender certificate is null",chainExceptionMessage);
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
                 LOG.info("Sender certificate exists and is valid [" + senderName + "]");
