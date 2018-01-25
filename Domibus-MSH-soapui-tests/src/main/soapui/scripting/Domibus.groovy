@@ -859,7 +859,7 @@ class Domibus
 		}
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String tsPassword="test123"){
+	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String outcome="successfully",String tsPassword="test123"){
 		log.info "Start upload truststore for Domibus \""+side+"\".";
 	    def commandString = null;
 		def commandResult = null;
@@ -868,7 +868,7 @@ class Domibus
 				
 		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 		commandResult = runCurlCommand(commandString,log);
-		assert(commandResult[0].contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
+		assert(commandResult[0].contains(outcome)),"Error:uploadTruststore: Error while trying to upload the truststore to domibus."
 		log.info commandResult[0]+" Domibus: \""+side+"\".";
 	} 
 	
