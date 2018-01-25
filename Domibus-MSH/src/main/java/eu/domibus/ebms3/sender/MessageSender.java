@@ -1,8 +1,10 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.ErrorCode;
@@ -41,6 +43,8 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Timestamp;
 import java.util.EnumSet;
 import java.util.Set;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 
 /**
@@ -102,6 +106,7 @@ public class MessageSender implements MessageListener {
             LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
             return;
         }
+        final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "onMessage")).time();
 
 
         LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -121,11 +126,15 @@ public class MessageSender implements MessageListener {
         final String pModeKey;
 
         Boolean abortSending = false;
+        final Timer.Context findUserMessage = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "findUserMessage")).time();
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        findUserMessage.stop();
         try {
+            final Timer.Context legConfigContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "legConfigContext")).time();
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            legConfigContext.stop();
             LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
             Policy policy;
@@ -156,7 +165,9 @@ public class MessageSender implements MessageListener {
             }
 
             LOG.debug("PMode found : " + pModeKey);
+            final Timer.Context buildSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "messageBuilder.buildSOAPMessage(userMessage, legConfiguration)")).time();
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
+            buildSoapMessageContext.stop();
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
             isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
@@ -189,17 +200,23 @@ public class MessageSender implements MessageListener {
                     LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                     retryService.purgeTimedoutMessageInANewTransaction(messageId);
                 } else {
+                    final Timer.Context reliabilityContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "handleReliability")).time();
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                    reliabilityContext.stop();
                     LOG.info("Sending message to [{}] with messageId [{}]",
                             ((PartyId)userMessage.getPartyInfo().getTo().getPartyId().toArray()[0]).getValue(),
                             userMessage.getMessageInfo().getMessageId());
                 }
+                final Timer.Context attemptContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "attempt")).time();
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
                 messageAttemptService.create(attempt);
+                attemptContext.stop();
             } catch (Exception ex) {
                 LOG.error("Finally: ", ex);
+            } finally {
+                context.stop();
             }
         }
     }

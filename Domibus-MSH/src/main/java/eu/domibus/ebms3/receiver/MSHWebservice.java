@@ -1,8 +1,10 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Timer;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.messaging.MessagingException;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -46,6 +48,8 @@ import javax.xml.ws.*;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -108,6 +112,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
+        Timer mshWebservice = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "invoke"));
+        final Timer.Context mshWebserviceContext = mshWebservice.time();
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);
@@ -136,7 +142,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
             try {
                 LOG.debug("Using pmodeKey {}", pmodeKey);
+                Timer handleNewUserMessage = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "handleNewUserMessage"));
+                final Timer.Context handleNewUserMessageContext = handleNewUserMessage.time();
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
+                handleNewUserMessageContext.stop();
                 LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
                 LOG.debug("Ping message " + userMessageHandlerContext.isPingMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
@@ -150,6 +159,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                     LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
                 }
                 throw new WebServiceException(e);
+            } finally {
+                mshWebserviceContext.stop();
             }
         }
 

@@ -2,7 +2,9 @@ package eu.domibus.plugin.handler;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.usermessage.UserMessageService;
@@ -26,6 +28,7 @@ import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -232,6 +235,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
         eu.domibus.core.metrics.Metrics.getGlobalContext();
+
+
+        final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "submit")).time();
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
@@ -318,6 +324,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
+        } finally {
+            handleMessageContext.stop();
         }
 
     }

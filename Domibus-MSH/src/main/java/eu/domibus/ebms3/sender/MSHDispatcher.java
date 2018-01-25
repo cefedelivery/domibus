@@ -1,6 +1,8 @@
 
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -19,6 +21,8 @@ import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import java.net.ConnectException;
 import java.util.Properties;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -42,8 +46,11 @@ public class MSHDispatcher {
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
         boolean cacheable = isDispatchClientCacheActivated();
+        final Timer.Context createDispatcherContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "dispatchClientProvider.getClient")).time();
         final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getClient(endpoint, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm(), policy, pModeKey, cacheable);
+        createDispatcherContext.stop();
 
+        final Timer.Context invokeContext = Metrics.METRIC_REGISTRY.timer(name(MSHDispatcher.class, "dispatch.invoke")).time();
         final SOAPMessage result;
         try {
             result = dispatch.invoke(soapMessage);
@@ -55,6 +62,8 @@ public class MSHDispatcher {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
+        } finally {
+            invokeContext.stop();
         }
         return result;
     }
