@@ -115,7 +115,7 @@ public class CRLUtilTest {
         System.out.println(crlDistributionPoints);
     }
 
-//    @Test
+    @Test
     public void testDownloadCRLViaProxy() throws Exception {
         String url = "http://onsitecrl.verisign.com/offlineca/NATIONALITANDTELECOMAGENCYPEPPOLRootCA.crl";
         ByteArrayInputStream inputStream = new HttpUtilImpl().downloadURLDirect(url);
