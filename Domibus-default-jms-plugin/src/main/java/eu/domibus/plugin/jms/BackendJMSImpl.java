@@ -116,10 +116,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private Properties domibusProperties;
 
     @Autowired
-    @Qualifier("nonXa")
-    private DataSource dataSource;
-
-    @Autowired
     private AccessPointHelper accessPointHelper;
 
     @Autowired
