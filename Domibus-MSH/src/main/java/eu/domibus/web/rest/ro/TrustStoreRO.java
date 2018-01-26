@@ -57,29 +57,6 @@ public class TrustStoreRO {
         this.validUntil = validUntil;
     }
 
-    /*public String toCsvString() {
-        // RFC 4180
-        return new StringBuilder()
-                .append(Objects.toString(name,"")).append(",")
-                .append("\"").append(Objects.toString(subject,"")).append("\"").append(",")
-                .append("\"").append(Objects.toString(issuer,"")).append("\"").append(",")
-                .append(Objects.toString(validFrom,"")).append(",")
-                .append(Objects.toString(validUntil,""))
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Name").append(",")
-                .append("Subject").append(",")
-                .append("Issuer").append(",")
-                .append("Valid From").append(",")
-                .append("Valid Until")
-                .append(System.lineSeparator())
-                .toString();
-    }*/
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

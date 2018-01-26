@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -67,6 +68,11 @@ public class TruststoreResource {
         return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRO.class);
     }
 
+    /**
+     * This method returns a CSV file with the contents of Truststore table
+     *
+     * @return CSV file with the contents of Truststore table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
         String resultText;
@@ -86,7 +92,7 @@ public class TruststoreResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("truststore"))
                 .body(resultText);
     }

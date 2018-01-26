@@ -6,6 +6,8 @@ import eu.domibus.api.util.DomibusStringUtil;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -36,7 +38,7 @@ public class CsvServiceImpl<T> implements CsvService {
     public String exportToCSV(List<?> list) {
         StringBuilder result = new StringBuilder();
         Field[] fields;
-        if(list != null && !list.isEmpty()) {
+        if(CollectionUtils.isNotEmpty(list)) {
             final Class<?> aClass = list.get(0).getClass();
             fields = aClass.getDeclaredFields();
             createCSVColumnHeader(result, fields);
@@ -62,7 +64,7 @@ public class CsvServiceImpl<T> implements CsvService {
                 continue;
             }
             result.append(DomibusStringUtil.uncamelcase(varName));
-            result.append(",");
+            result.append(COMMA);
         }
         result.deleteCharAt(result.length() - 1);
         result.append(System.lineSeparator());
@@ -81,13 +83,13 @@ public class CsvServiceImpl<T> implements CsvService {
                 field.setAccessible(true);
                 try {
                     // get the vield value
-                    String fieldValue = Objects.toString(field.get(elem), "");
+                    String fieldValue = Objects.toString(field.get(elem), StringUtils.EMPTY);
                     // if field contains ,(comma) we should include ""
-                    if(fieldValue.contains(",")) {
+                    if(fieldValue.contains(COMMA)) {
                         fieldValue = "\"" + fieldValue + "\"";
                     }
                     result.append(fieldValue);
-                    result.append(",");
+                    result.append(COMMA);
                 } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);
                     throw new CsvException(DomibusCoreErrorCode.DOM_001, "Exception while writing on CSV", e);

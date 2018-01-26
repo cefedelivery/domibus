@@ -5,12 +5,14 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.criteria.AuditCriteria;
 import eu.domibus.web.rest.ro.AuditResponseRo;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -113,6 +115,11 @@ public class AuditResource {
         return auditService.listAuditTarget();
     }
 
+    /**
+     * This method returns a CSV file with the contents of Audit table
+     *
+     * @return CSV file with the contents of Audit table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
             @RequestParam(value = "auditTargetName", required = false) Set<String> auditTargetName,
@@ -122,7 +129,7 @@ public class AuditResource {
             @RequestParam(value = "to", required = false) String to) {
         String resultText;
 
-        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+        int maxCSVrows = NumberUtils.toInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         // get list of audits
         AuditCriteria auditCriteria = new AuditCriteria();
@@ -138,9 +145,7 @@ public class AuditResource {
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
 
         // excluding unneeded columns
-        List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("revisionId");
-        csvServiceImpl.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.AUDIT_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(AuditResponseRo.class);
@@ -155,7 +160,7 @@ public class AuditResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("audit"))
                 .body(resultText);
     }

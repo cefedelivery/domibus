@@ -34,11 +34,11 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl<ErrorLogRO> {
                         varResult = ((ErrorCode)varResult).getErrorCodeName();
                     }
                     String fieldValue = Objects.toString(varResult, "");
-                    if(fieldValue.contains(",")) {
+                    if(fieldValue.contains(COMMA)) {
                         fieldValue = "\"" + fieldValue + "\"";
                     }
                     result.append(fieldValue);
-                    result.append(",");
+                    result.append(COMMA);
                 } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);
                     throw new CsvException(DomibusCoreErrorCode.DOM_001, "Exception while writing on CSV", e);

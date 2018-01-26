@@ -5,6 +5,7 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -92,6 +93,11 @@ public class UserResource {
         return result;
     }
 
+    /**
+     * This method returns a CSV file with the contents of User table
+     *
+     * @return CSV file with the contents of User table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
         String resultText;
@@ -100,12 +106,7 @@ public class UserResource {
         final List<UserResponseRO> userResponseROList = users();
 
         // excluding unneeded columns
-        List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("authorities");
-        excludedItems.add("status");
-        excludedItems.add("password");
-        excludedItems.add("suspended");
-        csvServiceImpl.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.USER_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(UserResponseRO.class);
@@ -121,7 +122,7 @@ public class UserResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("users"))
                 .body(resultText);
     }

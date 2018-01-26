@@ -8,6 +8,7 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
@@ -150,6 +151,11 @@ public class MessageLogResource {
         return result;
     }
 
+    /**
+     * This method returns a CSV file with the contents of Messages table
+     *
+     * @return CSV file with the contents of Messages table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
             @RequestParam(value = "messageId", required = false) String messageId,
@@ -177,7 +183,7 @@ public class MessageLogResource {
         filters.put(RECEIVED_FROM_STR, from);
         filters.put(RECEIVED_TO_STR, to);
 
-        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
@@ -201,7 +207,7 @@ public class MessageLogResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("messages"))
                 .body(resultText);
     }

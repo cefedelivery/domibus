@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -13,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -100,6 +100,11 @@ public class JmsResource {
         }
     }
 
+    /**
+     * This method returns a CSV file with the contents of JMS Messages table
+     *
+     * @return CSV file with the contents of JMS Messages table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
             @RequestParam(value = "source") String source,
@@ -110,13 +115,16 @@ public class JmsResource {
         String resultText;
 
         // get list of messages
-        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(source, jmsType, fromDate == null?null:new Date(fromDate), toDate == null?null:new Date(toDate), selector);
+        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(
+                source,
+                jmsType,
+                fromDate == null ? null : new Date(fromDate),
+                toDate == null ? null : new Date(toDate),
+                selector);
         customizeJMSProperties(jmsMessageList);
 
         // excluding unneeded columns
-        List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("PROPERTY_ORIGINAL_QUEUE");
-        csvServiceImpl.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(JmsMessage.class);
@@ -134,7 +142,7 @@ public class JmsResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jms"))
                 .body(resultText);
     }

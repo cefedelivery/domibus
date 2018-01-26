@@ -1,5 +1,7 @@
 package eu.domibus.web.rest.ro;
 
+import eu.domibus.common.services.CsvService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,7 +17,7 @@ public class UserResponseRO {
     // order of the fields is important for CSV generation
     private String userName;
     private String email;
-    private String roles="";
+    private String roles = StringUtils.EMPTY;
     private String password;
     private boolean active;
     private List<String> authorities;
@@ -46,10 +48,10 @@ public class UserResponseRO {
 
     public void updateRolesField(){
         int count=0;
-        String separator="";
+        String separator = StringUtils.EMPTY;
         for (String authority : authorities) {
             if(count>0){
-               separator=",";
+               separator= CsvService.COMMA;
             }
             count++;
             roles+=separator+authority;

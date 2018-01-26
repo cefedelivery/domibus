@@ -6,6 +6,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 
+/**
+ * @author Tiago Miguel
+ * @since 4.0
+ */
 public class PModeResponseRO {
 
     private int id;
@@ -63,26 +67,6 @@ public class PModeResponseRO {
     public void setCurrent(boolean current) {
         this.current = current;
     }
-
-    /*public String toCsvString() {
-        return new StringBuilder()
-                .append(Objects.toString(configurationDate,"")).append(",")
-                .append(Objects.toString(username,"")).append(",")
-                .append(Objects.toString(description,"")).append(",")
-                .append(Objects.toString(current,""))
-                .append(System.lineSeparator())
-                .toString();
-    }
-
-    public static String csvTitle() {
-        return new StringBuilder()
-                .append("Configuration Date").append(",")
-                .append("Username").append(",")
-                .append("Description").append(",")
-                .append("Current")
-                .append(System.lineSeparator())
-                .toString();
-    }*/
 
     @Override
     public boolean equals(Object o) {

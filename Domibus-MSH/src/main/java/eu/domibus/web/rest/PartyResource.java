@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,22 +100,21 @@ public class PartyResource {
         );
     }
 
+    /**
+     * This method returns a CSV file with the contents of Party table
+     *
+     * @return CSV file with the contents of Party table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(@RequestParam(value = "name", required = false) String name,
                                          @RequestParam(value = "endPoint", required = false) String endPoint,
                                          @RequestParam(value = "partyId", required = false) String partyId,
                                          @RequestParam(value = "process", required = false) String process) {
         String resultText;
-        final List<PartyResponseRo> partyResponseRoList = listParties(name,endPoint,partyId,process,0, 10000);
+        final List<PartyResponseRo> partyResponseRoList = listParties(name,endPoint,partyId,process,0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
         // excluding unneeded columns
-        List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("entityId");
-        excludedItems.add("identifiers");
-        excludedItems.add("userName");
-        excludedItems.add("processesWithPartyAsInitiator");
-        excludedItems.add("processesWithPartyAsResponder");
-        csvServiceImpl.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.PARTY_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(PartyResponseRo.class);
@@ -132,7 +131,7 @@ public class PartyResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("party"))
                 .body(resultText);
     }

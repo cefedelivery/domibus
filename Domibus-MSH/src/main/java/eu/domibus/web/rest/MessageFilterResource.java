@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
@@ -38,7 +39,7 @@ public class MessageFilterResource {
     DomainCoreConverter coreConverter;
 
     @Autowired
-    MessageFilterCsvServiceImpl messageFilterCsvServiceImpl;
+    private MessageFilterCsvServiceImpl messageFilterCsvServiceImpl;
 
     protected Pair<List<MessageFilterRO>,Boolean> getBackendFiltersInformation() {
         boolean areFiltersPersisted = true;
@@ -71,6 +72,11 @@ public class MessageFilterResource {
         routingService.updateBackendFilters(backendFilters);
     }
 
+    /**
+     * This method returns a CSV file with the contents of Message Filter table
+     *
+     * @return CSV file with the contents of Message Filter table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
         String resultText;
@@ -82,7 +88,7 @@ public class MessageFilterResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + messageFilterCsvServiceImpl.getCsvFilename("messagefilter"))
                 .body(resultText);
     }

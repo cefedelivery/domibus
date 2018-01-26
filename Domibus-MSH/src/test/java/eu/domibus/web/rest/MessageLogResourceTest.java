@@ -12,6 +12,7 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
@@ -203,7 +204,7 @@ public class MessageLogResourceTest {
 
         new Expectations() {{
             domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = "10000";
+            result = CsvService.MAX_NUMBER_OF_ENTRIES;
             userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
             result = userMessageList;
             csvServiceImpl.exportToCSV(userMessageList);
@@ -230,7 +231,7 @@ public class MessageLogResourceTest {
 
         new Expectations() {{
             domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = "10000";
+            result = CsvService.MAX_NUMBER_OF_ENTRIES;
             signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
             result = signalMessageList;
             csvServiceImpl.exportToCSV(signalMessageList);
@@ -254,7 +255,7 @@ public class MessageLogResourceTest {
         // Given
         new Expectations() {{
             domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = "10000";
+            result = CsvService.MAX_NUMBER_OF_ENTRIES;
             csvServiceImpl.exportToCSV((List<?>) any);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};

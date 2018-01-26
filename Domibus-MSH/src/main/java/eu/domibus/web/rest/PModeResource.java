@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -135,21 +136,26 @@ public class PModeResource {
         return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
 
+    /**
+     * This method returns a CSV file with the contents of PMode Archive table
+     *
+     * @return CSV file with the contents of PMode Archive table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
         String resultText;
 
         // get list of archived pmodes
-        List<PModeResponseRO> pModeResponseROList = pmodeList();
+        List<PModeResponseRO> pModeResponseROList = new ArrayList();
+        pModeResponseROList.addAll(pmodeList());
+
         // set first PMode as current
         if(!pModeResponseROList.isEmpty()) {
             pModeResponseROList.get(0).setCurrent(true);
         }
 
         // excluding unneeded columns
-        List<String> excludedItems = new ArrayList<>();
-        excludedItems.add("id");
-        csvServiceImpl.setExcludedItems(excludedItems);
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(PModeResponseRO.class);
@@ -161,7 +167,7 @@ public class PModeResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
                 .body(resultText);
     }
