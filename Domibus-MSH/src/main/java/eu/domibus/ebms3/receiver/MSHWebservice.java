@@ -108,7 +108,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         this.jaxbContext = jaxbContext;
     }
 
-    private long time=0;
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
@@ -163,9 +162,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 mshWebserviceContext.stop();
             }
         }
-
-        if(time==0)
-        eu.domibus.core.metrics.Metrics.getGlobalContext().stop();
         return responseMessage;
 
     }

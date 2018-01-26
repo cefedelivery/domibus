@@ -1,6 +1,5 @@
 package eu.domibus.plugin.jms;
 
-import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
 import eu.domibus.api.metrics.Metrics;
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
@@ -47,7 +45,6 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.Session;
-import javax.sql.DataSource;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +53,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.codahale.metrics.MetricRegistry.name;
 import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
@@ -116,10 +112,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private Properties domibusProperties;
 
     @Autowired
-    @Qualifier("nonXa")
-    private DataSource dataSource;
-
-    @Autowired
     private AccessPointHelper accessPointHelper;
 
     @Autowired
@@ -141,7 +133,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private PayloadLogging payloadLogging;
 
     @Autowired
-    private  CertificateLogging certificateLogging;
+    private CertificateLogging certificateLogging;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -151,18 +143,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
     private org.springframework.web.client.RestTemplate restTemplate;
-
-    private NamedParameterJdbcTemplate jdbcTemplate;
-
-    private Map<String, String> partyAliasMap = new HashMap<>();
-
-    private static Timer deliverMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "deliverMessageTimer"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
-
-    private static Timer downloadMessageTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "downloadMessage"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
-
-    private static Timer authenticateTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "authenticate"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
-
-    private static Timer uploadPayloadTimer = METRIC_REGISTRY.register(name(BackendJMSImpl.class, "uploadPayload"), new Timer(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
 
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<message_id>\n" +
@@ -262,7 +242,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageId, errorMessage, correlationId);
         replyJmsTemplate.send(replyMessageCreator);
     }
-    private Submission.TypedProperty extractEndPoint(Submission submission,final String endPointType) {
+
+    private Submission.TypedProperty extractEndPoint(Submission submission, final String endPointType) {
         Submission.TypedProperty originalSender = null;
         Collection<Submission.TypedProperty> properties = submission.getMessageProperties();
         for (Submission.TypedProperty property : properties) {
@@ -277,10 +258,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     protected void authenticate(Submission submission) {
         String senderAlias;
+        Timer.Context senderAliasContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.getSenderAlias")).time();
         senderAlias = getSenderAlias(submission);
-
+        senderAliasContext.stop();
+        Timer.Context buildUmds = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.buildUmds")).time();
         Umds umds = buidUmds(submission);
-        LOG.info("Authentication submission for :\n   [{}]",umds);
+        LOG.info("Authentication submission for :\n   [{}]", umds);
+        buildUmds.stop();
+        Timer.Context encodeCertificate = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.encodeCertificate")).time();
         byte[] encodedCertificate = encodeCertificate(senderAlias);
 
         MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
@@ -289,10 +274,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
         multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);
 
+        encodeCertificate.stop();
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
+
+        Timer.Context authenticationPost = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.postMultipartRequest")).time();
         Boolean aBoolean = restTemplate.postForObject(authenticationUrl, multipartRequest, Boolean.class);
+        authenticationPost.stop();
         if (!aBoolean) {
-            LOG.error("UMDS rejected authentication for message with id[{}]",submission.getMessageId());
+            LOG.error("UMDS rejected authentication for message with id[{}]", submission.getMessageId());
             throw new AuthenticationException("UMDS rejected authentication");
         }
     }
@@ -303,14 +292,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         final Submission.TypedProperty delegator = extractEndPoint(submission, DELEGATOR);
         Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         umds.setApplicationUrl(identifierHelper.getApplicationUrl(finalRecipient.getValue()));
-        if(delegator!=null){
-            identifierHelper.updateDelegatorInfo(umds,delegator.getValue());
+        if (delegator != null) {
+            identifierHelper.updateDelegatorInfo(umds, delegator.getValue());
         }
 
-        String domain="TAX";
-        String custServiceAndActionMapping=domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN);
-        if(custServiceAndActionMapping.equals(submission.getService()+submission.getAction())){
-            domain="CUST";
+        String domain = "TAX";
+        String custServiceAndActionMapping = domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN);
+        if (custServiceAndActionMapping.equals(submission.getService() + submission.getAction())) {
+            domain = "CUST";
         }
         umds.setDomain(domain);
         return umds;
@@ -331,7 +320,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private String getSenderAlias(Submission submission) {
         Submission.Party party = accessPointHelper.extractSendingAccessPoint(submission);
-        PartyId partyId=new PartyId();
+        PartyId partyId = new PartyId();
         partyId.setValue(party.getPartyId());
         partyId.setType(party.getPartyIdType());
         try {
@@ -345,39 +334,38 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Override
     public void deliverMessage(final String messageId) {
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "deliverMessage")).time();
-        if(Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_DELIVER,"false"))){
+        if (Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_DELIVER, "false"))) {
             LOG.warn("Skipping delivery.");
             try {
                 this.messageRetriever.downloadMessage(messageId);
             } catch (MessageNotFoundException e) {
-                LOG.error(e.getMessage(),e);
+                LOG.error(e.getMessage(), e);
             }
             return;
         }
-        Timer.Context deliverMessageContext = deliverMessageTimer.time();
         Submission submission;
-        Timer.Context downloadMessageContext=null;
+        Timer.Context downloadMessageContext = null;
         try {
-            downloadMessageContext = downloadMessageTimer.time();
+            downloadMessageContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "downloadMessage")).time();
             submission = this.messageRetriever.downloadMessage(messageId);
         } catch (MessageNotFoundException e) {
             LOG.error(e.getMessage(), e);
             return;
-        }
-        finally {
-            downloadMessageContext.close();
+        } finally {
+            downloadMessageContext.stop();
         }
 
         try {
-            Timer.Context authenticateContext = authenticateTimer.time();
+            Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate")).time();
             authenticate(submission);
-            authenticateContext.close();
-            Timer.Context uploadPayload = uploadPayloadTimer.time();
+            authenticateContext.stop();
+            Timer.Context uploadPayload = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "uploadPayload")).time();
             sendPayload(submission);
-            uploadPayload.close();
+            uploadPayload.stop();
+            Timer.Context transformResponseContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "transformResponse")).time();
             Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
+            transformResponseContext.stop();
             messageSubmitter.submit(submissionResponse, getName());
-            deliverMessageContext.close();
         } catch (AuthenticationException e) {
             Submission submissionResponseError = getSubmissionResponse(submission, UMDS_REJECTED_TEMPLATE.replace("$messId", messageId));
             try {
@@ -413,13 +401,19 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private void sendPayload(Submission submission) {
+        Timer.Context convertJsonContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.convertJson")).time();
         JsonSubmission jsonSubmission = coreConverter.convert(submission, JsonSubmission.class);
-        LOG.info("Message submission:\n  [{}]",jsonSubmission);
+        convertJsonContext.stop();
+        LOG.info("Message submission:\n  [{}]", jsonSubmission);
+        Timer.Context buildRequestFromPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.buildRequestFromPayload")).time();
         MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
         multipartRequest.add(SUBMISSION_PARAM_NAME, jsonSubmission);
-
+        buildRequestFromPayloadContext.stop();
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
+
+        Timer.Context postPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.postPayload")).time();
         restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
+        postPayloadContext.stop();
     }
 
     private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {

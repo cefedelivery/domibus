@@ -1,7 +1,5 @@
 package eu.domibus.plugin.handler;
 
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.metrics.Metrics;
@@ -113,12 +111,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     UserMessageService userMessageService;
-
-    private final MetricRegistry metrics = new MetricRegistry();
-
-    private final Meter requests = metrics.meter("requests");
-
-    private final com.codahale.metrics.Timer message = metrics.timer(name(DatabaseMessageHandler.class, "responses"));
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -233,9 +225,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Transactional
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public String submit(final Submission messageData, final String backendName) throws MessagingProcessingException {
-        eu.domibus.core.metrics.Metrics.getGlobalContext();
-
-
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(DatabaseMessageHandler.class, "submit")).time();
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
