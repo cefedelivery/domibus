@@ -65,7 +65,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private static final String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
     private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
-    public static final String DOMIBUS_PULL_PER_MPC_CONCURENCY = "domibus.pull.per.mpc.concurrency";
+
+    private static final String DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE = "domibus.pull.request.send.per.job.cycle";
 
     @Autowired
     private MessagingDao messagingDao;
@@ -185,7 +186,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                             }
                         };
                         //TODO extract this outside of the loop for clarity.
-                        Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_PER_MPC_CONCURENCY, "1"));
+                        Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
                         }
