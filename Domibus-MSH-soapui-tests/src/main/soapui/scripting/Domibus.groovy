@@ -26,7 +26,8 @@ class Domibus
 	static def backup_file_sufix = "_backup_for_soapui_tests";
 	static def defaultLogLevel = 0;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
-	static def MAX_LOGIN_BEFORE_LOCK = 6;
+	static def MAX_LOGIN_BEFORE_LOCK = 5;
+	static def CLEAR_CACHE_COMMAND_TOMCAT = $/rmdir /S /Q ..\work & rmdir /S /Q ..\logs & del /S /Q ..\temp\* & FOR /D %p IN ("..\temp\*.*") DO rmdir /s /q "%p"  & rmdir /S /Q ..\webapps\domibus & rmdir /S /Q ..\conf\domibus\work/$;
 
     // Short constructor of the Domibus Class
     Domibus(log, messageExchange, context) {
@@ -419,13 +420,16 @@ class Domibus
                 "delete from TB_PROPERTY",
                 "delete from TB_PART_INFO",
                 "delete from TB_PARTY_ID",
-                //"delete from TB_PARTY_ID",
                 "delete from TB_MESSAGING",
                 "delete from TB_ERROR",
                 "delete from TB_USER_MESSAGE",
                 "delete from TB_SIGNAL_MESSAGE",
                 "delete from TB_RECEIPT",
                 "delete from TB_MESSAGE_INFO",
+				"delete from TB_ERROR_LOG",
+				"delete from TB_SEND_ATTEMPT",
+				"delete from TB_MESSAGE_ACKNW_PROP",
+				"delete from TB_MESSAGE_ACKNW",
                 "delete from TB_MESSAGE_LOG"
         ] as String[]
 
@@ -607,7 +611,56 @@ class Domibus
             log.info "This configuration changed was skipped, continue with next test step."
         }
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+    static def clearCache(String side, context, log, String server = "tomcat"){
+		log.info "Cleaning cache for domibus "+side+" ...";
+		def outputCatcher = new StringBuffer();
+        def errorCatcher = new StringBuffer();
+		def proc=null;
+		def pathS=context.expand( '${#Project#pathExeSender}' );
+        def pathR=context.expand( '${#Project#pathExeReceiver}' );
+		def pathRG=context.expand( '${#Project#pathExeGreen}' );
+		def commandToRun =null;
+		switch(server.toLowerCase()){
+			case "tomcat":
+				switch(side.toLowerCase()){
+					case "sender":
+						log.info "PATH = "+pathS;
+						commandToRun = "cmd /c cd ${pathS} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					case "receiver":
+						log.info "PATH = "+pathR;
+						commandToRun = "cmd /c cd ${pathR} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					case "receivergreen":
+						log.info "PATH = "+pathRG;
+						commandToRun = "cmd /c cd ${pathRG} && "+CLEAR_CACHE_COMMAND_TOMCAT;
+						break;
+					default:
+						assert (false) , "Unknown side.";
+				}
+				break;
+			case "weblogic":
+				log.info "I don't know how to clean in weblogic yet.";
+				break;
+			case "wildfly":
+				log.info "I don't know how to clean in wildfly yet.";
+				break;
+			default:
+				assert (false) , "Unknown server.";
+		}
+		if(commandToRun){
+			proc = commandToRun.execute();
+			if(proc!=null){
+				proc.consumeProcessOutput(outputCatcher, errorCatcher)
+				proc.waitFor()
+			}
+			debugLog("commandToRun = "+commandToRun, log);
+			debugLog("outputCatcher = "+outputCatcher, log);
+			debugLog("errorCatcher = "+errorCatcher, log);
+			log.info "Cleaning should be done."
+		}
+	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Start several gateways
     static def startSetMSHs(int dom1,int dom2,int dom3, context, log){
@@ -806,7 +859,7 @@ class Domibus
 		}
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String tsPassword="test123"){
+	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log,String outcome="successfully",String tsPassword="test123"){
 		log.info "Start upload truststore for Domibus \""+side+"\".";
 	    def commandString = null;
 		def commandResult = null;
@@ -815,7 +868,7 @@ class Domibus
 				
 		commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 		commandResult = runCurlCommand(commandString,log);
-		assert(commandResult[0].contains("successfully")),"Error:uploadTruststore: Error while trying to connect to domibus."
+		assert(commandResult[0].contains(outcome)),"Error:uploadTruststore: Error while trying to upload the truststore to domibus."
 		log.info commandResult[0]+" Domibus: \""+side+"\".";
 	} 
 	
@@ -922,7 +975,7 @@ static def String urlToDomibus(side, log, context){
 			else{
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log) +"\" -X PUT -d "+bckParams;
 				commandResult = runCurlCommand(commandString,log);
-				assert(commandResult[0].contains("200 OK")||commandResult[0].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
+				assert(commandResult[1].contains("200 OK")||commandResult[1].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
 				log.info "Message filters update done successfully for Domibus: \""+side+"\".";
 			}
 		}
@@ -975,7 +1028,7 @@ static def String returnXsfrToken(String side,context,log){
 			builder.sequential {
 				copy(tofile: destination, file:source, overwrite:overwriteOpt)
 			}
-			log.info "File was successfuly copied."
+			log.info "File ${source} was successfuly copied to ${destination}"
 		}
 		catch(Exception ex){
 			log.error "Error while trying to copy files: "+ex;
@@ -1135,7 +1188,7 @@ static def String pathToDomibus(color, log, context){
 			log.info "User \""+username+"\" already exists. If you want to insert it again, please use method deleteUser to delete it."
 		}
 		else{
-			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES (\""+idUser+"\",\""+username+"\",\""+password+"\", 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
+			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('"+idUser+"','"+username+"','"+password+"', 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
 			executeListOfSqlQueries(sqlQueriesList,color);
 			log.info "User \""+username+"\" created."
 		}
@@ -1219,7 +1272,7 @@ static def String pathToDomibus(color, log, context){
 			def commandResult = null;
 			def commandString = null;
 			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-			for(def i=0;i<MAX_LOGIN_BEFORE_LOCK;i++){
+			for(def i=0;i<=MAX_LOGIN_BEFORE_LOCK;i++){
 				commandResult = runCurlCommand(commandString,log);
 			}
 			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."

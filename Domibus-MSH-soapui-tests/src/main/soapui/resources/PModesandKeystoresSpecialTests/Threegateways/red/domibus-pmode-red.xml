@@ -2,9 +2,9 @@
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="red_gw">
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
-		<mpc name="insolvencyMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPC" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="15"/>
-		<mpc name="insolvencyMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull1" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="15"/>
-		<mpc name="insolvencyMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull2" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="15"/>
+		<mpc name="insolvencyMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPC" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="6"/>
+		<mpc name="insolvencyMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull1" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="6"/>
+		<mpc name="insolvencyMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/insolvencyMPCPull2" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="6"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
