@@ -120,9 +120,7 @@ public class PartyResource {
         csvServiceImpl.setClass(PartyResponseRo.class);
 
         // column customization
-        csvServiceImpl.customizeColumn("EndPoint", "End point");
-        csvServiceImpl.customizeColumn("JoinedIdentifiers", "Party id");
-        csvServiceImpl.customizeColumn("JoinedProcesses", "Process");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.PARTY_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(partyResponseRoList);

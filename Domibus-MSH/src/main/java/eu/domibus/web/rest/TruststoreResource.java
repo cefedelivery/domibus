@@ -82,8 +82,7 @@ public class TruststoreResource {
         csvServiceImpl.setClass(TrustStoreRO.class);
 
         // column customization
-        csvServiceImpl.customizeColumn("ValidFrom", "Valid from");
-        csvServiceImpl.customizeColumn("ValidUntil", "Valid until");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.TRUSTSTORE_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(trustStoreROS);

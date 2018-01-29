@@ -196,7 +196,7 @@ public class MessageLogResource {
         csvServiceImpl.setClass(MessageLogInfo.class);
 
         // column customization
-        csvServiceImpl.customizeColumn("mshRole", "AP Role");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns());
 
         String resultText;
         try {

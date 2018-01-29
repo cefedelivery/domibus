@@ -101,8 +101,8 @@ public class CsvServiceImpl<T> implements CsvService {
         }
     }
 
-    public void customizeColumn(String original, String custom) {
-        customNames.put(original.toUpperCase(), custom);
+    public void customizeColumn(Map<String, String> customized) {
+        customNames.putAll(customized);
     }
 
     public String getCsvFilename(String module) {

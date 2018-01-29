@@ -151,7 +151,7 @@ public class AuditResource {
         csvServiceImpl.setClass(AuditResponseRo.class);
 
         // column customization
-        csvServiceImpl.customizeColumn("AuditTargetName", "Table");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.AUDIT_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(auditResponseRos);

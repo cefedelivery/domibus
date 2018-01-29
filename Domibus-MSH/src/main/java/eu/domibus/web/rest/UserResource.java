@@ -112,8 +112,7 @@ public class UserResource {
         csvServiceImpl.setClass(UserResponseRO.class);
 
         // column customization
-        csvServiceImpl.customizeColumn("UserName", "Username");
-        csvServiceImpl.customizeColumn("Roles", "Role");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.USER_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(userResponseROList);

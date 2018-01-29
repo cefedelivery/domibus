@@ -130,10 +130,7 @@ public class JmsResource {
         csvServiceImpl.setClass(JmsMessage.class);
 
         // column name customization
-        csvServiceImpl.customizeColumn("type", "JMS Type");
-        csvServiceImpl.customizeColumn("Timestamp", "Time");
-        csvServiceImpl.customizeColumn("CustomProperties", "Custom prop");
-        csvServiceImpl.customizeColumn("Properties", "JMS prop");
+        csvServiceImpl.customizeColumn(CsvCustomColumns.JMS_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(jmsMessageList);

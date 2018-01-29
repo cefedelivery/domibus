@@ -124,9 +124,7 @@ public class ErrorLogResource {
         errorLogCsvServiceImpl.setClass(ErrorLogRO.class);
 
         // column customization
-        errorLogCsvServiceImpl.customizeColumn("ErrorSignalMessageId", "Signal Message Id");
-        errorLogCsvServiceImpl.customizeColumn("MshRole", "AP Role");
-        errorLogCsvServiceImpl.customizeColumn("MessageInErrorId", "Message Id");
+        errorLogCsvServiceImpl.customizeColumn(CsvCustomColumns.ERRORLOG_RESOURCE.getCustomColumns());
 
         String resultText;
         try {
