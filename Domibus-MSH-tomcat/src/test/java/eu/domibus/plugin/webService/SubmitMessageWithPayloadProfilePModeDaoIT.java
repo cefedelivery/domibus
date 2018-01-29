@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.plugin.webService.generated.SendMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
  */
 @ContextConfiguration("classpath:pmode-dao.xml")
 @Ignore
-public class SendMessageWithPayloadProfilePModeDaoIT extends SendMessageWithPayloadProfileIT {
+public class SubmitMessageWithPayloadProfilePModeDaoIT extends SubmitMessageWithPayloadProfileIT {
 
     private static boolean initialized;
 
@@ -31,48 +31,48 @@ public class SendMessageWithPayloadProfilePModeDaoIT extends SendMessageWithPayl
     /**
      * Test for the backend sendMessage service with payload profile enabled
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValid() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValid() throws SubmitMessageFault, InterruptedException, SQLException {
 
-        super.testSendMessageValid();
+        super.testSubmitMessageValid();
     }
 
     /**
      * Test for the backend sendMessage service with payload profile enabled, no mime-type specified on payload
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageValidNoMimeType() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageValidNoMimeType() throws SubmitMessageFault, InterruptedException, SQLException {
 
-       super.testSendMessageValidNoMimeType();
+       super.testSubmitMessageValidNoMimeType();
     }
 
     /**
      * Test for the backend sendMessage service with payload profile enabled and invalid payload Href
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSendMessageInvalidPayloadHref() throws SendMessageFault, InterruptedException {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessageInvalidPayloadHref() throws SubmitMessageFault, InterruptedException {
 
-        super.testSendMessageInvalidPayloadHref();
+        super.testSubmitMessageInvalidPayloadHref();
     }
 
     /**
      * Test for the backend sendMessage service with payload profile enabled
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
-    @Test(expected = SendMessageFault.class)
-    public void testSendMessagePayloadHrefMismatch() throws SendMessageFault, InterruptedException {
+    @Test(expected = SubmitMessageFault.class)
+    public void testSubmitMessagePayloadHrefMismatch() throws SubmitMessageFault, InterruptedException {
 
-       super.testSendMessagePayloadHrefMismatch();
+       super.testSubmitMessagePayloadHrefMismatch();
     }
 }

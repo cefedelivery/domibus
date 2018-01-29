@@ -5,11 +5,15 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet author="baciuco" id="EDELIVERY-2489">
-        <update tableName="QRTZ_CRON_TRIGGERS">
-            <column name="CRON_EXPRESSION" value='* 0/1 * * * ?'/>
-            <where>CRON_EXPRESSION = '0/60 * * * * ?'</where>
-        </update>
+        <sql dbms="mysql">
+            SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
+            SET SQL_SAFE_UPDATES = 0;
+            UPDATE QRTZ_CRON_TRIGGERS SET CRON_EXPRESSION = '* 0/1 * * * ?' WHERE CRON_EXPRESSION = '0/60 * * * * ?';
+            SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
+        </sql>
+        <sql dbms="oracle">
+            UPDATE QRTZ_CRON_TRIGGERS SET CRON_EXPRESSION = '* 0/1 * * * ?' WHERE CRON_EXPRESSION = '0/60 * * * * ?';
+        </sql>
     </changeSet>
-
 
 </databaseChangeLog>

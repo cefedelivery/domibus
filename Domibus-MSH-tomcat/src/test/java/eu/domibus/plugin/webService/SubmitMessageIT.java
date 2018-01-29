@@ -6,9 +6,9 @@ import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Service;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.SendMessageFault;
-import eu.domibus.plugin.webService.generated.SendRequest;
-import eu.domibus.plugin.webService.generated.SendResponse;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitRequest;
+import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,7 +21,7 @@ import java.sql.SQLException;
  * Created by feriaad on 02/02/2016.
  */
 @Ignore
-public class SendMessageIT extends AbstractSendMessageIT {
+public class SubmitMessageIT extends AbstractSendMessageIT {
 
     private static boolean initialized;
     @Autowired
@@ -39,14 +39,14 @@ public class SendMessageIT extends AbstractSendMessageIT {
     /**
      * Sample example of a test for the backend sendMessage service
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSendMessageOK() throws SendMessageFault, InterruptedException, SQLException {
+    public void testSubmitMessageOK() throws SubmitMessageFault, InterruptedException, SQLException {
 
         String payloadHref = "sbdh-order";
-        SendRequest sendRequest = createSendRequest(payloadHref);
+        SubmitRequest submitRequest = createSubmitRequest(payloadHref);
         Messaging ebMSHeaderInfo = createMessageHeader(payloadHref);
 
         // Must use tc3 and TC3Leg1
@@ -63,7 +63,7 @@ public class SendMessageIT extends AbstractSendMessageIT {
 
         super.prepareSendMessage("validAS4Response.xml");
 
-        SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }
 }

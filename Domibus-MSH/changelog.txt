@@ -4,6 +4,7 @@ Domibus 4.0
 - Add an audit and versioning system
 - Possibility to have information of all PMode changes' history
 - Possibility to export the contents of a datatable to CSV
+- Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
 Domibus 3.3.2
 - Add certificate revocation logging.
     When a certificate is about to expire a warning message will be displayed in the logs.

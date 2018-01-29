@@ -1,22 +1,17 @@
 package eu.domibus.plugin.webService;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.AbstractIT;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesResponse;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.ConnectionFactory;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * This JUNIT implements the Test cases List Pending Messages-01 and List Pending Messages-02.
