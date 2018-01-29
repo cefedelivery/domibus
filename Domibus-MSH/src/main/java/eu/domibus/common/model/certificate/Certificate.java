@@ -12,13 +12,7 @@ import java.util.Objects;
  * @since 4.0
  */
 @Entity
-@Table(name = "TB_CERTIFICATE",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"CERTIFICATE_ALIAS"}
-                )
-        }
-)
+@Table(name = "TB_CERTIFICATE")
 @NamedQueries({
         @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
         @NamedQuery(name = "Certificate.findByAliasAndType", query = "FROM Certificate c where c.alias=:ALIAS AND c.certificateType=:CERTIFICATE_TYPE"),
