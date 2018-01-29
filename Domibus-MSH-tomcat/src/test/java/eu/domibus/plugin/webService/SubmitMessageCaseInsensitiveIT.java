@@ -3,7 +3,7 @@ package eu.domibus.plugin.webService;
 import eu.domibus.AbstractSendMessageIT;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.webService.generated.BackendInterface;
-import eu.domibus.plugin.webService.generated.SendMessageFault;
+import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Before;
@@ -38,14 +38,13 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
      * Sample example of a test for the backend sendMessage service.
      * The message components should be case insensitive from the PMode data
      *
-     * @throws SendMessageFault
+     * @throws SubmitMessageFault
      * @throws InterruptedException
      */
     @Test
-    public void testSubmitMessageOK() throws SendMessageFault, SQLException, InterruptedException {
+    public void testSubmitMessageOK() throws SubmitMessageFault, SQLException, InterruptedException {
 
         String payloadHref = "SBDH-ORDER";
-        //SendRequest sendRequest = createSendRequest(payloadHref);
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
@@ -97,7 +96,6 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);
 
-        //SendResponse response = backendWebService.sendMessage(sendRequest, ebMSHeaderInfo);
         SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
         verifySendMessageAck(response);
     }

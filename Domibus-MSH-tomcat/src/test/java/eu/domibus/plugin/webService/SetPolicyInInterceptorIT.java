@@ -1,22 +1,9 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractIT;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
-import eu.domibus.ebms3.sender.MSHDispatcher;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.cxf.bus.extension.ExtensionManagerBus;
-import org.apache.cxf.bus.managers.PhaseManagerImpl;
-import org.apache.cxf.interceptor.InterceptorChain;
-import org.apache.cxf.message.ExchangeImpl;
-import org.apache.cxf.message.MessageImpl;
-import org.apache.cxf.phase.PhaseInterceptorChain;
-import org.apache.cxf.ws.policy.PolicyBuilder;
-import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
@@ -25,22 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.ws.Provider;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Iterator;
 
 
 /**
