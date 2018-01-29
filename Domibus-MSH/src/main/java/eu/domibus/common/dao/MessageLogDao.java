@@ -6,6 +6,8 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,6 +15,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.util.*;
+
 
 /**
  * @param <F>
@@ -27,6 +30,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
         super(type);
     }
 
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void setMessageStatus(MessageLog messageLog, MessageStatus messageStatus) {
         messageLog.setMessageStatus(messageStatus);
 
@@ -48,7 +52,11 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
             default:
         }
         super.update(messageLog);
-        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageStatus);
+        final String messageId = messageLog.getMessageId();
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+        }
+        LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_UPDATE, messageLog.getMessageType(), messageStatus);
     }
 
     public MessageStatus getMessageStatus(String messageId) {

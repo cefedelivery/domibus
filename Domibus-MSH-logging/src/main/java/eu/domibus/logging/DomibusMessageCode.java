@@ -56,7 +56,7 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_MESSAGE_PERSISTED("BUS-045", "Message persisted"),
     BUS_MESSAGE_RECEIPT_GENERATED("BUS-046", "Message receipt generated with nonRepudiation value [{}]"),
     BUS_MESSAGE_RECEIPT_FAILURE("BUS-047", "Message receipt generation failure"),
-    BUS_MESSAGE_STATUS_UPDATE("BUS-048", "Message status updated to [{}]"),
+    BUS_MESSAGE_STATUS_UPDATE("BUS-048", "Message with type [{}] has status updated to [{}]"),
     BUS_MESSAGE_PAYLOAD_DATA_CLEARED("BUS-049", "All payloads data for user message [{}] have been cleared"),
     BUS_SECURITY_POLICY_OUTGOING_NOT_FOUND("BUS-050", "Security policy [{}] was not found for outgoing message"),
     BUS_SECURITY_POLICY_OUTGOING_USE("BUS-051", "Security policy [{}] is used for outgoing message"),
