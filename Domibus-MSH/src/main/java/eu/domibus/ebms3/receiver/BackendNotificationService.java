@@ -294,6 +294,10 @@ public class BackendNotificationService {
         if (isPluginNotificationDisabled()) {
             return;
         }
+        if (isChangeStatusDisabled()) {
+            return;
+        }
+
         if (messageLog.getMessageStatus() == newStatus) {
             LOG.debug("Notification not sent: message status has not changed [{}]", newStatus);
             return;
@@ -329,6 +333,11 @@ public class BackendNotificationService {
 
     protected boolean isPluginNotificationDisabled() {
         String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        return !Boolean.valueOf(pluginNotificationEnabled);
+    }
+
+    protected boolean isChangeStatusDisabled() {
+        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.changeMessageStatus.active", "true");
         return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }
