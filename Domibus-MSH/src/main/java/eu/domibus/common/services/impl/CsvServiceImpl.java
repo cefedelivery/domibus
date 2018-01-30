@@ -86,7 +86,7 @@ public class CsvServiceImpl<T> implements CsvService {
                     String fieldValue = Objects.toString(field.get(elem), StringUtils.EMPTY);
                     // if field contains ,(comma) we should include ""
                     if(fieldValue.contains(COMMA)) {
-                        fieldValue = "\"" + fieldValue + "\"";
+                        fieldValue = DOUBLE_QUOTES + fieldValue + DOUBLE_QUOTES;
                     }
                     result.append(fieldValue);
                     result.append(COMMA);

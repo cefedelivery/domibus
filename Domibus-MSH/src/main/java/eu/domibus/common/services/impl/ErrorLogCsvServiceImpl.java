@@ -6,6 +6,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.ErrorLogRO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -33,9 +34,9 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl<ErrorLogRO> {
                     if(field.getName().equals("errorCode")) {
                         varResult = ((ErrorCode)varResult).getErrorCodeName();
                     }
-                    String fieldValue = Objects.toString(varResult, "");
+                    String fieldValue = Objects.toString(varResult, StringUtils.EMPTY);
                     if(fieldValue.contains(COMMA)) {
-                        fieldValue = "\"" + fieldValue + "\"";
+                        fieldValue = DOUBLE_QUOTES + fieldValue + DOUBLE_QUOTES;
                     }
                     result.append(fieldValue);
                     result.append(COMMA);

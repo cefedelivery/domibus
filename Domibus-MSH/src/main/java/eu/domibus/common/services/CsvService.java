@@ -14,6 +14,7 @@ public interface CsvService {
     int MAX_NUMBER_OF_ENTRIES = 10000;
 
     String COMMA = ",";
+    String DOUBLE_QUOTES = "\"";
 
     String exportToCSV(List<?> list);
     void createCSVColumnHeader(StringBuilder result, Field[] fields);
