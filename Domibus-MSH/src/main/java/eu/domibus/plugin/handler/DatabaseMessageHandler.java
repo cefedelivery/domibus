@@ -294,13 +294,13 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 throw ex;
             }
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
+
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
             }
-
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
-
             LOG.debug("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
