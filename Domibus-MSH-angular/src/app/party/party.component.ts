@@ -6,6 +6,7 @@ import {PartyService} from "./party.service";
 import {PartyResponseRo} from "./party";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
+import {AlertComponent} from "../alert/alert.component";
 
 /**
  * @author Thomas Dussart
@@ -66,6 +67,9 @@ export class PartyComponent implements OnInit {
         this.rows = response[0];
         this.count = response[1];
         this.loading = false;
+        if(this.count > AlertComponent.MAX_COUNT_CSV) {
+          this.alertService.error("Maximum number of rows reached for downloading CSV");
+        }
       },
       error => {
         this.alertService.error("Could not load parties" + error);
@@ -135,6 +139,14 @@ export class PartyComponent implements OnInit {
     console.log('Page Event', event);
     this.offset = event.offset;
     this.search();
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return (this.count < AlertComponent.MAX_COUNT_CSV);
+  }
+
+  saveAsCSV() {
+    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
   }
 
 }

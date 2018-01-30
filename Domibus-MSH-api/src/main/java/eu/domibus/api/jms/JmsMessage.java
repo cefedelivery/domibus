@@ -13,15 +13,13 @@ import java.util.Map;
 public class JmsMessage {
 
     public static final String PROPERTY_ORIGINAL_QUEUE = "originalQueue";
-
+    // order of the fields is important for CSV generation
     protected String id;
     protected String type;
-    protected String content;
     protected Date timestamp;
-
-    protected Map<String, Object> properties = new HashMap<>();
-
+    protected String content;
     protected Map<String, Object> customProperties;
+    protected Map<String, Object> properties = new HashMap<>();
 
     public String getId() {
         return id;
@@ -99,6 +97,10 @@ public class JmsMessage {
 
     public String getCustomStringProperty(String key) {
         return (String) getCustomProperties().get(key);
+    }
+
+    public void setCustomProperties(Map<String, Object> customProperties) {
+        this.customProperties = customProperties;
     }
 
     @Override

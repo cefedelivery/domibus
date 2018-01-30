@@ -9,6 +9,7 @@ import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/mess
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   moduleId: module.id,
@@ -145,7 +146,7 @@ export class MessageLogComponent {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc)
+    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
   getMessageLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
@@ -253,6 +254,10 @@ export class MessageLogComponent {
       this.msgStatus = result.msgStatus;
       this.notifStatus = result.notifStatus;
       this.loading = false;
+
+      if(this.count > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error("Maximum number of rows reached for downloading CSV");
+      }
     }, (error: any) => {
       console.log("error getting the error log:" + error);
       this.loading = false;
@@ -366,7 +371,7 @@ export class MessageLogComponent {
   }
 
   isSaveAsCSVButtonEnabled() : boolean {
-    return (this.count < 10000);
+    return (this.count <= AlertComponent.MAX_COUNT_CSV);
   }
 
   private getFilterPath() {

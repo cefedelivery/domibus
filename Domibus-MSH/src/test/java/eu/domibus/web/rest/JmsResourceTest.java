@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.services.AuditService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.web.rest.ro.*;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -32,6 +33,9 @@ public class JmsResourceTest {
 
     @Injectable
     private AuditService auditService;
+
+    @Injectable
+    private CsvServiceImpl csvServiceImpl;
 
     @Test
     public void testDestinations() {

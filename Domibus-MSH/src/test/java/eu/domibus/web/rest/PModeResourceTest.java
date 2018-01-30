@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.pmode.PModeArchiveInfo;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
@@ -37,6 +39,9 @@ public class PModeResourceTest {
 
     @Injectable
     private DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvServiceImpl csvServiceImpl;
 
     @Test
     public void testDownloadPmodes() {
@@ -300,5 +305,42 @@ public class PModeResourceTest {
         Assert.assertEquals(description, pModeResponseRO.getDescription());
         Assert.assertTrue(pModeResponseRO.isCurrent());
 
+    }
+
+    @Test
+    public void testGetCsv() throws EbMS3Exception {
+        // Given
+        Date date = new Date();
+        List<PModeArchiveInfo> pModeArchiveInfoList = new ArrayList<>();
+        PModeArchiveInfo pModeArchiveInfo1 = new PModeArchiveInfo(1, date, "user1", "description1");
+        PModeArchiveInfo pModeArchiveInfo2 = new PModeArchiveInfo(2, date, "user2", "description2");
+        pModeArchiveInfoList.add(pModeArchiveInfo1);
+        pModeArchiveInfoList.add(pModeArchiveInfo2);
+
+        List<PModeResponseRO> pModeResponseROList = new ArrayList<>();
+        PModeResponseRO pModeResponseRO1 = new PModeResponseRO(1, date, "user1", "description1");
+        PModeResponseRO pModeResponseRO2 = new PModeResponseRO(2, date, "user2", "description2");
+        pModeResponseROList.add(pModeResponseRO1);
+        pModeResponseROList.add(pModeResponseRO2);
+        new Expectations() {{
+           pModeProvider.getRawConfigurationList();
+           result = pModeArchiveInfoList;
+           domainConverter.convert(pModeArchiveInfoList, PModeResponseRO.class);
+           result = pModeResponseROList;
+           csvServiceImpl.exportToCSV(pModeResponseROList);
+           result = "Configuration Date, Username, Description" + System.lineSeparator() +
+           date + ", user1, description1" + System.lineSeparator() +
+           date + ", user2, description2" + System.lineSeparator();
+        }};
+
+        // When
+        final ResponseEntity<String> csv = pModeResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals("Configuration Date, Username, Description" + System.lineSeparator() +
+                        date + ", user1, description1" + System.lineSeparator() +
+                        date + ", user2, description2" + System.lineSeparator(),
+                csv.getBody());
     }
 }

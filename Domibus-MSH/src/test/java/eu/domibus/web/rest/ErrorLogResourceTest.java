@@ -123,7 +123,7 @@ public class ErrorLogResourceTest {
         errorLogROEntries.add(errorLogRO);
         new Expectations() {{
             domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = "10000";
+            result = ErrorLogCsvServiceImpl.MAX_NUMBER_OF_ENTRIES;
             errorLogDao.findPaged(anyInt,anyInt,anyString,anyBoolean, (HashMap<String, Object>) any);
             result = errorLogEntries;
             domainConverter.convert(errorLogEntries, ErrorLogRO.class);

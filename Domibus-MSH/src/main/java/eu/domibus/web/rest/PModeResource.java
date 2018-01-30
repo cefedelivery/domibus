@@ -1,6 +1,9 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +41,9 @@ public class PModeResource {
 
     @Autowired
     private DomainCoreConverter domainConverter;
+
+    @Autowired
+    private CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
     public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
@@ -128,4 +135,41 @@ public class PModeResource {
     public List<PModeResponseRO> pmodeList() {
         return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
+
+    /**
+     * This method returns a CSV file with the contents of PMode Archive table
+     *
+     * @return CSV file with the contents of PMode Archive table
+     */
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        String resultText;
+
+        // get list of archived pmodes
+        List<PModeResponseRO> pModeResponseROList = new ArrayList();
+        pModeResponseROList.addAll(pmodeList());
+
+        // set first PMode as current
+        if(!pModeResponseROList.isEmpty()) {
+            pModeResponseROList.get(0).setCurrent(true);
+        }
+
+        // excluding unneeded columns
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(PModeResponseRO.class);
+
+        try {
+            resultText = csvServiceImpl.exportToCSV(pModeResponseROList);
+        } catch (CsvException e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
+                .body(resultText);
+    }
+
 }

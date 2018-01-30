@@ -5,6 +5,8 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.ro.ErrorLogRO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -17,7 +19,7 @@ import java.util.Objects;
  */
 
 @Service
-public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
+public class ErrorLogCsvServiceImpl extends CsvServiceImpl<ErrorLogRO> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorLogCsvServiceImpl.class);
 
@@ -32,8 +34,12 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
                     if(field.getName().equals("errorCode")) {
                         varResult = ((ErrorCode)varResult).getErrorCodeName();
                     }
-                    result.append(Objects.toString(varResult,""));
-                    result.append(",");
+                    String fieldValue = Objects.toString(varResult, StringUtils.EMPTY);
+                    if(fieldValue.contains(COMMA)) {
+                        fieldValue = DOUBLE_QUOTES + fieldValue + DOUBLE_QUOTES;
+                    }
+                    result.append(fieldValue);
+                    result.append(COMMA);
                 } catch (IllegalAccessException e) {
                     LOG.error("Exception while writing on CSV ", e);
                     throw new CsvException(DomibusCoreErrorCode.DOM_001, "Exception while writing on CSV", e);
@@ -42,5 +48,9 @@ public class ErrorLogCsvServiceImpl extends CsvServiceImpl {
             result.deleteCharAt(result.length() - 1);
             result.append(System.lineSeparator());
         }
+    }
+
+    @Override
+    public void setExcludedItems(List<String> excludedItems) {
     }
 }

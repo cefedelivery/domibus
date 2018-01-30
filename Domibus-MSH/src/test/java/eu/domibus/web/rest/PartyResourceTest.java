@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
@@ -35,6 +36,9 @@ public class PartyResourceTest {
 
     @Tested
     private PartyResource partyResource;
+
+    @Injectable
+    private CsvServiceImpl csvServiceImpl;
 
     @Test
     public void listParties() throws Exception {

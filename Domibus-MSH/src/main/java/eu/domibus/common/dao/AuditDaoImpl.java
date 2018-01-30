@@ -74,11 +74,17 @@ public class AuditDaoImpl implements AuditDao {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Searching audit for ");
             LOG.debug("target :");
-            auditTargets.forEach(LOG::debug);
+            if (auditTargets != null) {
+                auditTargets.forEach(LOG::debug);
+            }
             LOG.debug("actions :");
-            actions.forEach(LOG::debug);
+            if (actions != null) {
+                actions.forEach(LOG::debug);
+            }
             LOG.debug("users :");
-            users.forEach(LOG::debug);
+            if (users != null) {
+                users.forEach(LOG::debug);
+            }
             LOG.debug("from :" + from);
             LOG.debug("to :" + to);
             LOG.debug("start :" + start);

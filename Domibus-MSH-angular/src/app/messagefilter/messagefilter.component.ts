@@ -329,7 +329,7 @@ export class MessageFilterComponent implements DirtyOperations {
     });
   }
 
-  saveDialog(withDownload: boolean) {
+  saveDialog(withDownloadCSV: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -338,14 +338,14 @@ export class MessageFilterComponent implements DirtyOperations {
         this.http.put(MessageFilterComponent.MESSAGE_FILTER_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
           this.alertService.success("The operation 'update message filters' completed successfully.", false);
           this.getBackendFiltersInfo();
-          if(withDownload) {
+          if(withDownloadCSV) {
             DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
           }
         }, err => {
           this.alertService.error("The operation 'update message filters' not completed successfully.", false);
         });
       } else {
-        if(withDownload) {
+        if(withDownloadCSV) {
           DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
         }
       }

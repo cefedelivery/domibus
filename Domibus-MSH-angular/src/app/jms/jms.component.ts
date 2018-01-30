@@ -11,6 +11,8 @@ import {DirtyOperations} from "../common/dirty-operations";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Observable} from "rxjs/Observable";
+import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   selector: 'app-jms',
@@ -221,6 +223,10 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
         this.updateQueuesInfo();
 
+        if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+          this.alertService.error("Maximum number of rows reached for downloading CSV");
+        }
+
       },
       error => {
         this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
@@ -405,6 +411,34 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.alertService.error("The operation 'updates on message(s)' could not be completed: " + error);
       }
     )
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return (this.rows.length < AlertComponent.MAX_COUNT_CSV);
+  }
+
+  getFilterPath() {
+    let result = '?';
+    if(!isNullOrUndefined(this.request.source)) {
+      result += 'source=' + this.request.source + '&';
+    }
+    if(!isNullOrUndefined(this.request.jmsType)) {
+      result += 'jmsType=' + this.request.jmsType + '&';
+    }
+    if(!isNullOrUndefined(this.request.fromDate)) {
+      result += 'fromDate=' + this.request.fromDate.getTime() + '&';
+    }
+    if(!isNullOrUndefined(this.request.toDate)) {
+      result += 'toDate=' + this.request.toDate.getTime() + '&';
+    }
+    if(!isNullOrUndefined(this.request.selector)) {
+      result += 'selector=' + this.request.selector + '&';
+    }
+    return result;
+  }
+
+  saveAsCSV() {
+    DownloadService.downloadNative("rest/jms/csv" + this.getFilterPath());
   }
 
   isDirty(): boolean {

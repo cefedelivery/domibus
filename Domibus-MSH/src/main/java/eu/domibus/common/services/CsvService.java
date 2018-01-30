@@ -8,7 +8,17 @@ import java.util.List;
  * @since 4.0
  */
 public interface CsvService {
+
+    String APPLICATION_EXCEL_STR = "application/ms-excel";
+
+    int MAX_NUMBER_OF_ENTRIES = 10000;
+
+    String COMMA = ",";
+    String DOUBLE_QUOTES = "\"";
+
     String exportToCSV(List<?> list);
     void createCSVColumnHeader(StringBuilder result, Field[] fields);
     void createCSVContents(List<?> list, StringBuilder result, Field[] fields);
+
+    void setExcludedItems(List<String> excludedItems);
 }

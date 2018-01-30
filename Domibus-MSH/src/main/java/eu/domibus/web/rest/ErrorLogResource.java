@@ -7,10 +7,12 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.ErrorLogCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ public class ErrorLogResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    ErrorLogCsvServiceImpl csvService;
+    ErrorLogCsvServiceImpl errorLogCsvServiceImpl;
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
@@ -92,6 +94,11 @@ public class ErrorLogResource {
         return result;
     }
 
+    /**
+     * This method returns a CSV file with the contents of Error Log table
+     *
+     * @return CSV file with the contents of Error Log table
+     */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
             @RequestParam(value = "errorSignalMessageId", required = false) String errorSignalMessageId,
@@ -108,22 +115,28 @@ public class ErrorLogResource {
         HashMap<String, Object> filters = createFilterMap(errorSignalMessageId, mshRole, messageInErrorId, errorCode, errorDetail, timestampFrom, timestampTo, notifiedFrom, notifiedTo);
         result.setFilter(filters);
 
-        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS,"10000"));
+        int maxCSVrows = NumberUtils.toInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, null, true, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
 
+        // needed for empty csv file purposes
+        errorLogCsvServiceImpl.setClass(ErrorLogRO.class);
+
+        // column customization
+        errorLogCsvServiceImpl.customizeColumn(CsvCustomColumns.ERRORLOG_RESOURCE.getCustomColumns());
+
         String resultText;
         try {
-            resultText = csvService.exportToCSV(errorLogROList);
+            resultText = errorLogCsvServiceImpl.exportToCSV(errorLogROList);
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/ms-excel"))
-                .header("Content-Disposition", "attachment; filename=errorlog_datatable.csv")
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + errorLogCsvServiceImpl.getCsvFilename("errorlog"))
                 .body(resultText);
     }
 

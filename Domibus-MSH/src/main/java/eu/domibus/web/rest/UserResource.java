@@ -1,15 +1,20 @@
 package eu.domibus.web.rest;
 
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +44,9 @@ public class UserResource {
 
     @Autowired
     private DomainCoreConverter domainConverter;
+
+    @Autowired
+    private CsvServiceImpl csvServiceImpl;
 
     /**
      * {@inheritDoc}
@@ -71,7 +79,7 @@ public class UserResource {
     @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
     public void save(@RequestBody List<UserResponseRO> usersRo) {
         LOG.debug("Saving " + usersRo);
-        List<eu.domibus.api.user.User> users = domainConverter.convert(usersRo, eu.domibus.api.user.User.class);
+        List<User> users = domainConverter.convert(usersRo, User.class);
         userService.saveUsers(users);
     }
 
@@ -83,6 +91,39 @@ public class UserResource {
             result.add(userRole.getRole());
         }
         return result;
+    }
+
+    /**
+     * This method returns a CSV file with the contents of User table
+     *
+     * @return CSV file with the contents of User table
+     */
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        String resultText;
+
+        // get list of users
+        final List<UserResponseRO> userResponseROList = users();
+
+        // excluding unneeded columns
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.USER_RESOURCE.getExcludedItems());
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(UserResponseRO.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn(CsvCustomColumns.USER_RESOURCE.getCustomColumns());
+
+        try {
+            resultText = csvServiceImpl.exportToCSV(userResponseROList);
+        } catch (CsvException e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("users"))
+                .body(resultText);
     }
 
 

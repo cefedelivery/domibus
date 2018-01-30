@@ -20,6 +20,7 @@ import java.util.List;
 @RunWith(JMockit.class)
 public class MessageFilterCsvServiceImplTest {
 
+    private static final String MESSAGE_FILTER_HEADER = "Plugin, From, To, Action, Service, Persisted";
     @Tested
     MessageFilterCsvServiceImpl messageFilterCsvService;
 
@@ -30,7 +31,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>());
 
         // Then
-        Assert.assertEquals("Backend Name, From, To, Action, Service, Persisted" + System.lineSeparator(), exportToCSV);
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
     }
 
     @Test
@@ -40,7 +41,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(null);
 
         // Then
-        Assert.assertEquals("Backend Name, From, To, Action, Service, Persisted" + System.lineSeparator(), exportToCSV);
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
     }
 
     @Test
@@ -65,7 +66,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(messageFilterROList);
 
         // Then
-        Assert.assertEquals("Backend Name, From, To, Action, Service, Persisted" + System.lineSeparator() +
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator() +
                 "backendName,from:from, , , ,true" + System.lineSeparator(), exportToCSV);
     }
 }

@@ -1,15 +1,20 @@
 package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.party.PartyService;
+import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
-import eu.domibus.api.party.PartyService;
 import eu.domibus.core.party.ProcessRo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,8 +37,10 @@ public class PartyResource {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-
     private PartyService partyService;
+
+    @Autowired
+    private CsvServiceImpl csvServiceImpl;
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
@@ -91,6 +98,40 @@ public class PartyResource {
                 partyId,
                 process
         );
+    }
+
+    /**
+     * This method returns a CSV file with the contents of Party table
+     *
+     * @return CSV file with the contents of Party table
+     */
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv(@RequestParam(value = "name", required = false) String name,
+                                         @RequestParam(value = "endPoint", required = false) String endPoint,
+                                         @RequestParam(value = "partyId", required = false) String partyId,
+                                         @RequestParam(value = "process", required = false) String process) {
+        String resultText;
+        final List<PartyResponseRo> partyResponseRoList = listParties(name,endPoint,partyId,process,0, CsvService.MAX_NUMBER_OF_ENTRIES);
+
+        // excluding unneeded columns
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.PARTY_RESOURCE.getExcludedItems());
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(PartyResponseRo.class);
+
+        // column customization
+        csvServiceImpl.customizeColumn(CsvCustomColumns.PARTY_RESOURCE.getCustomColumns());
+
+        try {
+            resultText = csvServiceImpl.exportToCSV(partyResponseRoList);
+        } catch (CsvException e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("party"))
+                .body(resultText);
     }
 
     /**

@@ -7,18 +7,19 @@ import java.util.Date;
  * @since 4.0
  */
 public class AuditResponseRo {
+    // order of the fields is important for CSV generation
+
+    private String auditTargetName;
+
+    private String user;
+
+    private String action;
+
+    private Date changed;
 
     private String id;
 
     private String revisionId;
-
-    private String auditTargetName;
-
-    private String action;
-
-    private String user;
-
-    private Date changed;
 
     public AuditResponseRo() {
     }

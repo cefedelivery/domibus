@@ -6,6 +6,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 
+/**
+ * @author Tiago Miguel
+ * @since 4.0
+ */
 public class PModeResponseRO {
 
     private int id;
@@ -13,6 +17,16 @@ public class PModeResponseRO {
     private String username;
     private String description;
     private boolean current;
+
+    public PModeResponseRO() {
+    }
+
+    public PModeResponseRO(int id, Date configurationDate, String username, String description) {
+        setId(id);
+        setConfigurationDate(configurationDate);
+        setUsername(username);
+        setDescription(description);
+    }
 
     public int getId() {
         return id;

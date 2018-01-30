@@ -15,14 +15,14 @@ import java.util.Objects;
  */
 
 @Service
-public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
+public class MessageFilterCsvServiceImpl extends CsvServiceImpl<MessageFilterRO> {
 
     private List<String> csvHeader = new ArrayList<>();
 
     private String[] routingCriteriasArray = {"From", "To", "Action", "Service"};
 
     public MessageFilterCsvServiceImpl() {
-        csvHeader.add("Backend Name");
+        csvHeader.add("Plugin");
         csvHeader.addAll(Arrays.asList(routingCriteriasArray));
         csvHeader.add("Persisted");
     }
@@ -71,5 +71,9 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
             }
         }
         return result.toString().replace("[","").replace("]", "");
+    }
+
+    @Override
+    public void setExcludedItems(List<String> excludedItems) {
     }
 }
