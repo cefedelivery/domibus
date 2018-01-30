@@ -26,7 +26,7 @@ public class CsvServiceImpl<T> implements CsvService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CsvServiceImpl.class);
 
-    private Map<String, String> customNames = new HashMap<>();
+    private final Map<String, String> customNames = new HashMap<>();
 
     private List<String> excluded = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public class CsvServiceImpl<T> implements CsvService {
                 // set that field to be accessible
                 field.setAccessible(true);
                 try {
-                    // get the vield value
+                    // get the field value
                     String fieldValue = Objects.toString(field.get(elem), StringUtils.EMPTY);
                     // if field contains ,(comma) we should include ""
                     if(fieldValue.contains(COMMA)) {
