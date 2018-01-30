@@ -130,7 +130,7 @@ public class CRLUtilTest {
 
     }
 
-    //@Test
+    @Test
     public void testDownloadCRLFromLDAP() throws Exception {
         final String ldapURL = "ldap://ldap.sbca.telesec.de/CN=Shared%20Business%20CA%204,OU=T-Systems%20Trust%20Center,O=T-Systems%20International%20GmbH,C=DE?CertificateRevocationList";
 
