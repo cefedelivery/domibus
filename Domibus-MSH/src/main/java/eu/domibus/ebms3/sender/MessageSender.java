@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
@@ -100,6 +102,8 @@ public class MessageSender implements MessageListener {
     UserMessageLogDao userMessageLogDao;
 
 
+    private final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MessageSender.class, "senderCounter"));
+
     private void sendUserMessage(final String messageId) {
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
         if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
@@ -107,6 +111,7 @@ public class MessageSender implements MessageListener {
             return;
         }
         final Timer.Context context = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "onMessage")).time();
+        pendingRequests.inc();
 
 
         LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
@@ -204,7 +209,7 @@ public class MessageSender implements MessageListener {
                     reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
                     reliabilityContext.stop();
                     LOG.info("Sending message to [{}] with messageId [{}]",
-                            ((PartyId)userMessage.getPartyInfo().getTo().getPartyId().toArray()[0]).getValue(),
+                            ((PartyId) userMessage.getPartyInfo().getTo().getPartyId().toArray()[0]).getValue(),
                             userMessage.getMessageInfo().getMessageId());
                 }
                 final Timer.Context attemptContext = Metrics.METRIC_REGISTRY.timer(name(MessageSender.class, "attempt")).time();
@@ -217,9 +222,13 @@ public class MessageSender implements MessageListener {
                 LOG.error("Finally: ", ex);
             } finally {
                 context.stop();
+                pendingRequests.dec();
             }
         }
     }
+
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MessageSender.class, "senderMeter"));
+
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
@@ -240,6 +249,7 @@ public class MessageSender implements MessageListener {
         } catch (final JMSException e) {
             LOG.error("Error processing message", e);
         }
+        requestsPerSecond.mark();
         sendUserMessage(messageId);
     }
 

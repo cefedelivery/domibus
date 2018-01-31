@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
@@ -108,9 +110,16 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         this.jaxbContext = jaxbContext;
     }
 
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "mshRequestsMeter"));
+    private final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "mshRequestsCounter"));
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
+        requestsPerSecond.mark();
+        pendingRequests.inc();
+
+
         Timer mshWebservice = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "invoke"));
         final Timer.Context mshWebserviceContext = mshWebservice.time();
         SOAPMessage responseMessage = null;
@@ -160,6 +169,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 throw new WebServiceException(e);
             } finally {
                 mshWebserviceContext.stop();
+                pendingRequests.dec();
             }
         }
         return responseMessage;
