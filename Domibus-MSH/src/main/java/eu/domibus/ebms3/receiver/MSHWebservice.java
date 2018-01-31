@@ -111,7 +111,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
     private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "mshRequestsMeter"));
-    private final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "mshRequestsCounter"));
+    private static final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "mshRequestsCounter"));
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
