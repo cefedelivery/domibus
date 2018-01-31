@@ -10,7 +10,7 @@ DECLARE
     csv VARCHAR2(3000 BYTE);
 BEGIN
   csv := 'SENT_MESSAGE_ID,SENT_DATE,RECEIVED_MESSAGE_ID,RECEIVED_DATE,DELAY';
-  csv := csv||chr(13)||chr(10);
+  -- csv := csv||chr(13)||chr(10);
   dbms_output.put_line(csv);
     -- loop through all successfully sent messages
   FOR message_rec IN (select * FROM TB_MESSAGE_LOG where MESSAGE_STATUS='ACKNOWLEDGED' AND MESSAGE_TYPE='USER_MESSAGE' AND MSH_ROLE='SENDING')
@@ -39,7 +39,7 @@ BEGIN
         END;
         -- dbms_output.put_line('');
         dbms_output.put_line(csv);
-        csv := csv||chr(13)||chr(10);
+        -- csv := csv||chr(13)||chr(10);
   END LOOP;
 END;
 /
