@@ -18,7 +18,8 @@ BEGIN
         dbms_output.put_line('Sent at: ' || SENT_DATE);
         BEGIN
             -- if there is a reply with refToMessageId, retrieve the date it was received
-            select RECEIVED into RECEIVED_DATE FROM TB_MESSAGE_LOG where MESSAGE_ID IN (select MESSAGE_ID FROM TB_MESSAGE_INFO where REF_TO_MESSAGE_ID=message_rec.MESSAGE_ID) AND MESSAGE_TYPE='USER_MESSAGE';
+            select RECEIVED, MESSAGE_ID into RECEIVED_DATE, message_id FROM TB_MESSAGE_LOG where MESSAGE_ID IN (select MESSAGE_ID FROM TB_MESSAGE_INFO where REF_TO_MESSAGE_ID=message_rec.MESSAGE_ID) AND MESSAGE_TYPE='USER_MESSAGE';
+            dbms_output.put_line('Message_id: ' || message_id);
             dbms_output.put_line('Received at: ' || RECEIVED_DATE);
             dbms_output.put_line(RECEIVED_DATE - SENT_DATE);
         EXCEPTION
