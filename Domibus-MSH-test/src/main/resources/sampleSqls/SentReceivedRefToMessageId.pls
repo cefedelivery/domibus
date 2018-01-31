@@ -6,28 +6,40 @@ set serveroutput on
 DECLARE 
     SENT_DATE TIMESTAMP(6);
     RECEIVED_DATE TIMESTAMP(6);
-    message_id  VARCHAR2(255 BYTE);
+    RECEIVED_MESSAGE_ID  VARCHAR2(255 BYTE);
+    csv VARCHAR2(3000 BYTE);
 BEGIN
+  csv := 'SENT_MESSAGE_ID,SENT_DATE,RECEIVED_MESSAGE_ID,RECEIVED_DATE,DELAY';
+  csv := csv||chr(13)||chr(10);
+  dbms_output.put_line(csv);
     -- loop through all successfully sent messages
   FOR message_rec IN (select * FROM TB_MESSAGE_LOG where MESSAGE_STATUS='ACKNOWLEDGED' AND MESSAGE_TYPE='USER_MESSAGE' AND MSH_ROLE='SENDING')
   LOOP
-        dbms_output.put_line('');
-        dbms_output.put_line('Message_id: ' || message_rec.MESSAGE_ID);
+        -- dbms_output.put_line('');
+        -- dbms_output.put_line('Message_id: ' || message_rec.MESSAGE_ID);
+        csv := message_rec.MESSAGE_ID;
         -- retrieve sent date
         select RECEIVED into SENT_DATE FROM TB_MESSAGE_LOG where MESSAGE_ID=message_rec.MESSAGE_ID;
-        dbms_output.put_line('Sent at: ' || SENT_DATE);
+        -- dbms_output.put_line('Sent at: ' || SENT_DATE);
+        csv := csv || ',' || SENT_DATE;
         BEGIN
             -- if there is a reply with refToMessageId, retrieve the date it was received
-            select RECEIVED, MESSAGE_ID into RECEIVED_DATE, message_id FROM TB_MESSAGE_LOG where MESSAGE_ID IN (select MESSAGE_ID FROM TB_MESSAGE_INFO where REF_TO_MESSAGE_ID=message_rec.MESSAGE_ID) AND MESSAGE_TYPE='USER_MESSAGE';
-            dbms_output.put_line('Message_id: ' || message_id);
-            dbms_output.put_line('Received at: ' || RECEIVED_DATE);
-            dbms_output.put_line(RECEIVED_DATE - SENT_DATE);
+            select RECEIVED, MESSAGE_ID into RECEIVED_DATE, RECEIVED_MESSAGE_ID FROM TB_MESSAGE_LOG where MESSAGE_ID IN (select MESSAGE_ID FROM TB_MESSAGE_INFO where REF_TO_MESSAGE_ID=message_rec.MESSAGE_ID) AND MESSAGE_TYPE='USER_MESSAGE';
+            -- dbms_output.put_line('Message_id: ' || message_id);
+            -- dbms_output.put_line('Received at: ' || RECEIVED_DATE);
+            -- dbms_output.put_line(RECEIVED_DATE - SENT_DATE);
+            csv := csv ||  ',' || RECEIVED_MESSAGE_ID || ',' || RECEIVED_DATE || ',' || (RECEIVED_DATE - SENT_DATE);
         EXCEPTION
             WHEN NO_DATA_FOUND THEN -- there is no reply from C3
-            dbms_output.put_line('No reply found.');    
-        END;    
-        dbms_output.put_line('');
+            csv := csv ||  ',' || 'NONE' || ',' || 'NULL' || ',' || 'NULL';
+            -- dbms_output.put_line('No reply found.');
+            WHEN OTHERS THEN
+            csv := csv ||  ',' || 'OTHER' || ',' || 'NULL' || ',' || 'NULL';
+            -- dbms_output.put_line('Others errors');
+        END;
+        -- dbms_output.put_line('');
+        dbms_output.put_line(csv);
+        csv := csv||chr(13)||chr(10);
   END LOOP;
-
 END;
 /
