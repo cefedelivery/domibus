@@ -1311,7 +1311,7 @@ test.finalize();
 def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
-ExcelReporting.reportTestCase(testRunner, log)
+//ExcelReporting.reportTestCase(testRunner, log)
 
 def test = new Domibus(log,null,context)
 def msgID = context.expand( '${Submit Message#Response#//messageID}' )
