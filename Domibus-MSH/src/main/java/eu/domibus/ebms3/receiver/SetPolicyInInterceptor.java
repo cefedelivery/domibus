@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.metrics.Metrics;
@@ -74,6 +75,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(SetPolicyInInterceptor.class, "setPolicyIn"));
+
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);
     }
@@ -102,6 +105,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        requestsPerSecond.mark();
+
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SetPolicyInInterceptor.class, "handleMessage")).time();
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
