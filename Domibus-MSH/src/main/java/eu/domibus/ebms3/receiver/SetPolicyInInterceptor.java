@@ -75,7 +75,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
-    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(SetPolicyInInterceptor.class, "setPolicyIn"));
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(SetPolicyInInterceptor.class, "handleMessage"));
 
     public SetPolicyInInterceptor() {
         this(Phase.RECEIVE);

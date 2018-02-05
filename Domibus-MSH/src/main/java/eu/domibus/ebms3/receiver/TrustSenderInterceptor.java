@@ -85,7 +85,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     private CertificateService certificateService;
 
-    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(TrustSenderInterceptor.class, "setPolicyIn"));
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(TrustSenderInterceptor.class, "handleMessage"));
 
     public TrustSenderInterceptor() {
         super(false);
