@@ -11,6 +11,7 @@ import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.wss4j.common.crypto.BlockUtil;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -98,6 +99,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        if(!BlockUtil.getInitiated()) return;
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
         if(org.apache.commons.lang.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
@@ -120,6 +122,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
+         //   System.out.println("******** Loading policy*********");
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want

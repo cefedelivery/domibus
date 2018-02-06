@@ -12,6 +12,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.wss4j.common.crypto.BlockUtil;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -100,7 +101,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-
+        if(!BlockUtil.getInitiated()) return;
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
             LOG.info("Message does not contain security info ==> skipping sender trust verification.");

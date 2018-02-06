@@ -37,6 +37,10 @@
         <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
     </bean>
 
+    <bean id="domibusReadyInterceptor" class="eu.domibus.ebms3.receiver.DomibusReadyInterceptor">
+        <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
+    </bean>
+
     <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
         <property name="prettyLogging" value="true"/>
         <property name="showBinaryContent" value="false"/>
@@ -90,6 +94,7 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="domibusReadyInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>

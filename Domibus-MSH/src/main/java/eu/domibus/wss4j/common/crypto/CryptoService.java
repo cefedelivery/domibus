@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -49,6 +50,19 @@ public class CryptoService {
     private KeyStore trustStore;
 
     private KeyStore keyStore;
+
+    @PostConstruct
+    public void init(){
+        getTrustStore();
+        try {
+            getCertificateFromKeystore("blue_gw");
+            BlockUtil.increase();
+            System.out.println("BlockUtil increased");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public synchronized KeyStore getTrustStore() {
         if (trustStore == null) {
