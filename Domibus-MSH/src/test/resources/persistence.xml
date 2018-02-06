@@ -45,17 +45,16 @@
         <class>eu.domibus.ebms3.common.model.UserMessage</class>
         <class>eu.domibus.plugin.routing.BackendFilterEntity</class>
         <class>eu.domibus.plugin.routing.RoutingCriteriaEntity</class>
+        <class>eu.domibus.ebms3.common.model.MessagingLock</class>
 
         <!-- Comment this class if you don't use the default ws plugin.
         Default ws plugin uses the same db config as the core for storing auth info-->
-        <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 
         <properties>
-            <property name="hibernate.transaction.manager_lookup_class"
-                      value="com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup"/>
             <property name="hibernate.archive.autodetection" value="class"/>
             <property name="hibernate.ConnectionReleaseMode" value="after_statement"/>
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle10gDialect"/>
             <!--<property name="hibernate.hbm2ddl.import_files" value="database/quartz.sql, database/sendMessageDataset.sql"/>-->
             <property name="hibernate.hbm2ddl.import_files" value="dataset/database/quartz.sql"/>
         </properties>

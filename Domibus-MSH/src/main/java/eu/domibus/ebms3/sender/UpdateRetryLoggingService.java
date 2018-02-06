@@ -8,6 +8,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -44,6 +45,9 @@ public class UpdateRetryLoggingService {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    @Autowired
+    private MessagingLockService messagingLockService;
+
     /**
      * This method is responsible for the handling of retries for a given sent message.
      * In case of failure the message will be put back in waiting_for_retry status, after a certain amount of retry/time
@@ -79,6 +83,7 @@ public class UpdateRetryLoggingService {
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
             increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
+            messagingLockService.rollback(messageId);
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
@@ -86,6 +91,7 @@ public class UpdateRetryLoggingService {
                 backendNotificationService.notifyOfSendFailure(messageId);
             }
             userMessageLogService.setMessageAsSendFailure(messageId);
+            messagingLockService.delete(messageId);
 
             if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);

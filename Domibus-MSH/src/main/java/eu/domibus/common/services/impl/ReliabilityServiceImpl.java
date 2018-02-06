@@ -3,10 +3,10 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -33,9 +33,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
-
-    @Autowired
     private UserMessageLogService userMessageLogService;
 
     @Autowired
@@ -47,6 +44,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
+    @Autowired
+    private MessagingLockService messagingLockService;
+
     /**
      * {@inheritDoc}
      */
@@ -55,6 +55,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     public void handleReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
+
 
     /**
      * {@inheritDoc}
@@ -66,6 +67,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
             messageExchangeService.removeRawMessageIssuedByPullRequestInNewTransaction(messageId);
         } catch (ReliabilityException e) {
             LOG.warn("There should be a raw xml entry for this message.");
+        }
+        if(ReliabilityChecker.CheckResult.OK==reliabilityCheckSuccessful){
+            messagingLockService.delete(messageId);
         }
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
