@@ -51,6 +51,7 @@
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
                     <testSuite>WS-Auto-for-Bamboo</testSuite>
+					<testCase>Dom090-Push-Download Message-Exceptional flow-Message downloaded</testCase>
                     <testCase>Dom102-Push-Test Experience-Several payloads</testCase>
 					<testCase>Dom110-Push-payload conversion-EDELIVERY-1436</testCase>
 					<testCase>Dom402-Pull-Test Experience-Several payloads</testCase>
