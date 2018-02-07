@@ -29,7 +29,7 @@ BEGIN
             -- dbms_output.put_line('Message_id: ' || message_id);
             -- dbms_output.put_line('Received at: ' || RECEIVED_DATE);
             -- dbms_output.put_line(RECEIVED_DATE - SENT_DATE);
-
+            csv := csv || ',' || RECEIVED_MESSAGE_ID || ',' || RECEIVED_DATE;
             select (extract(day FROM RECEIVED_DATE - SENT_DATE)*24*60*60)+
                     (extract(hour FROM RECEIVED_DATE - SENT_DATE)*60*60)+
                     (extract(minute FROM RECEIVED_DATE - SENT_DATE)*60)+
