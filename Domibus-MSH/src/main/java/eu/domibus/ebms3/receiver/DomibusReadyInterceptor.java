@@ -23,5 +23,4 @@ public class DomibusReadyInterceptor extends AbstractPhaseInterceptor<Message> {
         }
     }
 
-
 }

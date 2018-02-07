@@ -90,6 +90,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     public static final String DOMIBUS_TAXUD_CUST_DOMAIN = "domibus.taxud.cust.domain";
     public static final String DOMIBUS_DO_NOT_DELIVER = "domibus.do.not.deliver";
+    public static final String DOMIBUS_PULL_USER_IDENTIFIER = "domibus.pull.user.identifier";
+    public static final String DOMIBUS_PULL_ACTION = "domibus.pull.action";
+    public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -387,6 +390,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         submission.setMessageId(messageIdGenerator.generateMessageId());
         submission.getPayloads().clear();
         submission.addPayload(getPayload(message, MediaType.TEXT_XML));
+        final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
+        Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
+        String identifierForPullMessage = domibusProperties.getProperty(DOMIBUS_PULL_USER_IDENTIFIER, "identifierForPullMessage");
+        if(identifierForPullMessage.equals(umds.getUser_identifier())){
+            submission.setAction(domibusProperties.getProperty(DOMIBUS_PULL_ACTION, "tc13Action"));
+            submission.setService(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE, "testService13"));
+        }
         return submission;
     }
 

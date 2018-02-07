@@ -106,7 +106,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        if(!BlockUtil.getInitiated()) return;
         requestsPerSecond.mark();
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SetPolicyInInterceptor.class, "handleMessage")).time();
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
