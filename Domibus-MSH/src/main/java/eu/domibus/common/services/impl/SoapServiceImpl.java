@@ -55,7 +55,8 @@ public class SoapServiceImpl implements SoapService {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "Messaging header is empty!", null, null);
         }
 
-        return ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
+        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "TEMP TEST ~~~~~~~~~~~~~", null, null);
+        //return ((JAXBElement<Messaging>) this.jaxbContext.createUnmarshaller().unmarshal(messagingNode)).getValue();
     }
 }
 
