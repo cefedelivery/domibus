@@ -281,8 +281,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         Element secTokenRef = getSecTokenRef(securityHeader);
         /* CXF class which has to be initialized in order to parse the Security token reference */
         STRParserParameters encryptedEphemeralKey1 = new STRParserParameters();
+        data.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
         encryptedEphemeralKey1.setData(data);
-        encryptedEphemeralKey1.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
+        //encryptedEphemeralKey1.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
         encryptedEphemeralKey1.setStrElement(secTokenRef);
         decryptedBytes = new EncryptedKeySTRParser();
         /* This Apache CXF call will look for a certificate in the Truststore whose Subject Key Identifier bytes matches the <wsse:SecurityTokenReference><wsse:KeyIdentifier> bytes */
