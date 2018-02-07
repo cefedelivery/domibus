@@ -40,7 +40,7 @@ BEGIN
             --dbms_output.put_line('Reply sent at: ' || REPLY_SEND_DATE);
             --dbms_output.put_line(REPLY_SEND_DATE - RECEIVED_MESSAGE_DATE);
 
-            csv := csv || ',' || REPLY_MESSAGE_ID || ',' || RECEIVED_MESSAGE_DATE;
+            csv := csv || ',' || REPLY_MESSAGE_ID || ',' || REPLY_SEND_DATE;
             select (extract(day FROM REPLY_SEND_DATE - RECEIVED_MESSAGE_DATE)*24*60*60)+
                     (extract(hour FROM REPLY_SEND_DATE - RECEIVED_MESSAGE_DATE)*60*60)+
                     (extract(minute FROM REPLY_SEND_DATE - RECEIVED_MESSAGE_DATE)*60)+
