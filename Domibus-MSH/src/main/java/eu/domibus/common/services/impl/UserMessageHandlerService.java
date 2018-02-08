@@ -166,7 +166,7 @@ public class UserMessageHandlerService {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
                 }
             }
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
+            LOG.businessDebug(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
             final Timer.Context receiptContext = Metrics.METRIC_REGISTRY.timer(name(UserMessageHandlerService.class, "generateReceipt")).time();
             final SOAPMessage soapMessage = generateReceipt(request, legConfiguration, messageExists);
             receiptContext.stop();

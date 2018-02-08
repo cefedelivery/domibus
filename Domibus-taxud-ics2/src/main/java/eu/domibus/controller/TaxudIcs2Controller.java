@@ -37,22 +37,20 @@ public class TaxudIcs2Controller {
 
 
 
-    @PostMapping(value = "/message", consumes = "multipart/form-data")
-    public void onMessage(@RequestPart("submissionJson") JsonSubmission submission,
-                          @RequestPart(value = "payload") byte[] payload) {
+    @PostMapping(value = "/message")
+    public void onMessage(@RequestBody JsonSubmission submission) {
         LOG.info("Message received:\n  [{}]",submission);
-        payloadLogging.decodeAndlog(payload);
+        payloadLogging.decodeAndlog(submission.getPayload());
     }
 
-    @PostMapping(value = "/authenticate", consumes = "multipart/form-data")
-    public boolean authenticate(@RequestPart("submissionJson") Umds submission,
-                                @RequestPart(value = "certificate") byte[] certficiate) {
+    @PostMapping(value = "/authenticate")
+    public boolean authenticate(@RequestBody Umds submission) {
         LOG.info("Authentication required for :\n   [{}]",submission);
         if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
             LOG.info("Not Authenticated");
             return false;
         }
-        certificateLogging.decodeAndlog(certficiate);
+        certificateLogging.decodeAndlog(submission.getCertficiate());
         LOG.info("Authenticated");
         return true;
     }

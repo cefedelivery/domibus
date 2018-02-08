@@ -40,6 +40,7 @@ public class JsonSubmission {
     private String agreementRefType;
     private String fromRole;
     private String toRole;
+    private byte[] payload;
 
     /**
      * Getter for action
@@ -778,5 +779,13 @@ public class JsonSubmission {
         public String getValue() {
             return value;
         }
+    }
+
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    public void setPayload(byte[] payload) {
+        this.payload = payload;
     }
 }

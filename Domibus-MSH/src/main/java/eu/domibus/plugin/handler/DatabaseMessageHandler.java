@@ -312,9 +312,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             else{
                 messagingLockService.addLockingInformation(to,messageId,message.getUserMessage().getMpc());
             }
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
 
-            LOG.info("Message submitted");
+            LOG.debug("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (EbMS3Exception ebms3Ex) {

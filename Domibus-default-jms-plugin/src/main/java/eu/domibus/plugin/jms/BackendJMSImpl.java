@@ -93,6 +93,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_PULL_USER_IDENTIFIER = "domibus.pull.user.identifier";
     public static final String DOMIBUS_PULL_ACTION = "domibus.pull.action";
     public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
+    public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -270,18 +271,19 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         buildUmds.stop();
         Timer.Context encodeCertificate = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.encodeCertificate")).time();
         byte[] encodedCertificate = encodeCertificate(senderAlias);
+        umds.setCertficiate(encodedCertificate);
 
-        MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
+        /*MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
         multipartRequest.add(SUBMISSION_PARAM_NAME, umds);
 
         ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
-        multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);
+        multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);*/
 
         encodeCertificate.stop();
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context authenticationPost = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.postMultipartRequest")).time();
-        Boolean aBoolean = restTemplate.postForObject(authenticationUrl, multipartRequest, Boolean.class);
+        Boolean aBoolean = restTemplate.postForObject(authenticationUrl, umds, Boolean.class);
         authenticationPost.stop();
         if (!aBoolean) {
             LOG.error("UMDS rejected authentication for message with id[{}]", submission.getMessageId());
@@ -300,7 +302,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
 
         String domain = "TAX";
-        String custServiceAndActionMapping = domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN);
+        String custServiceAndActionMapping = domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN,"");
         if (custServiceAndActionMapping.equals(submission.getService() + submission.getAction())) {
             domain = "CUST";
         }
@@ -384,18 +386,19 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private Submission getSubmissionResponse(Submission submission, String message) {
+        final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
+        Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
         submission.setRefToMessageId(org.apache.commons.lang.StringUtils.trim(submission.getMessageId()));
         submission.setMessageId(messageIdGenerator.generateMessageId());
         submission.getPayloads().clear();
         submission.addPayload(getPayload(message, MediaType.TEXT_XML));
-        final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
-        Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         String identifierForPullMessage = domibusProperties.getProperty(DOMIBUS_PULL_USER_IDENTIFIER, "identifierForPullMessage");
-        if(identifierForPullMessage.equals(umds.getUser_identifier())){
-            submission.setAction(domibusProperties.getProperty(DOMIBUS_PULL_ACTION, "tc13Action"));
-            submission.setService(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE, "testService13"));
+        if(identifierForPullMessage.equalsIgnoreCase(umds.getUser_identifier())){
+            submission.setAction(domibusProperties.getProperty(DOMIBUS_PULL_ACTION, "TC13Leg1"));
+            submission.setService(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE, "bdx:noprocess"));
+            submission.setServiceType(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE_TYPE, "tc13"));
         }
         return submission;
     }
@@ -416,41 +419,37 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         convertJsonContext.stop();
         LOG.info("Message submission:\n  [{}]", jsonSubmission);
         Timer.Context buildRequestFromPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.buildRequestFromPayload")).time();
-        MultiValueMap<String, Object> multipartRequest = buildMultiPartRequestFromPayload(submission.getPayloads());
-        multipartRequest.add(SUBMISSION_PARAM_NAME, jsonSubmission);
+        byte[] bytes = buildMultiPartRequestFromPayload(submission.getPayloads());
+        jsonSubmission.setPayload(bytes);
+        /*MultiValueMap<String, Object> multipartRequest = (MultiValueMap<String, Object>) bytes;
+        multipartRequest.add(SUBMISSION_PARAM_NAME, jsonSubmission);*/
         buildRequestFromPayloadContext.stop();
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context postPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.postPayload")).time();
-        restTemplate.postForLocation(payloadEndPointUrl, multipartRequest);
+        restTemplate.postForLocation(payloadEndPointUrl, jsonSubmission);
         postPayloadContext.stop();
     }
 
-    private MultiValueMap<String, Object> buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
+    private byte[] buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
         MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
         for (Submission.Payload payload : payloads) {
-            try {
-                InputStream inputStream = payload.getPayloadDatahandler().getInputStream();
+            try(InputStream inputStream = payload.getPayloadDatahandler().getInputStream();) {
+
                 int available = inputStream.available();
                 if (available == 0) {
                     LOG.warn("Payload skipped because it is empty");
-                    return multipartRequest;
+                    return new byte[]{0};
                 }
                 byte[] payloadContent = new byte[available];
                 inputStream.read(payloadContent);
                 payloadLogging.log(payloadContent);
-                ByteArrayResource byteArrayResource = new ByteArrayResource(Base64.encodeBase64(payloadContent)) {
-                    @Override
-                    public String getFilename() {
-                        return PAYLOAD_FILE_NAME;
-                    }
-                };
-                multipartRequest.add(PAYLOAD_PARAM_NAME, byteArrayResource);
+                return payloadContent;
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
-        return multipartRequest;
+        return new byte[]{0};
     }
 
     @Override

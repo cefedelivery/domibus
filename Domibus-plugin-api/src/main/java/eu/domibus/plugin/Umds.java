@@ -13,6 +13,7 @@ public class Umds {
     private String delegator_typeOfIdentifier;
     private String delegator_identifier;
     private String delegator_typeOfActor;
+    private byte[] certficiate;
 
     public String getDomain() {
         return domain;
@@ -76,6 +77,14 @@ public class Umds {
 
     public void setDelegator_typeOfActor(String delegator_typeOfActor) {
         this.delegator_typeOfActor = delegator_typeOfActor;
+    }
+
+    public byte[] getCertficiate() {
+        return certficiate;
+    }
+
+    public void setCertficiate(byte[] certficiate) {
+        this.certficiate = certficiate;
     }
 
     @Override
