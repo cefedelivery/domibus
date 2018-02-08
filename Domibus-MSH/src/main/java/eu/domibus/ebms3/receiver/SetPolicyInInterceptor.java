@@ -131,7 +131,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
-         //   System.out.println("******** Loading policy*********");
             final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
             LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want

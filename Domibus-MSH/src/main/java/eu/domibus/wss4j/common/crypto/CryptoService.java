@@ -52,16 +52,14 @@ public class CryptoService {
     private KeyStore keyStore;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         getTrustStore();
         try {
-            getCertificateFromKeystore("blue_gw");
-            BlockUtil.increase();
-            System.out.println("BlockUtil increased");
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+            loadKeystore();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Can not load keystore.");
         }
-
+        BlockUtil.increase();
     }
 
     public synchronized KeyStore getTrustStore() {
@@ -157,7 +155,7 @@ public class CryptoService {
             trustStore.load(newTrustStoreBytes, password.toCharArray());
             trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
         } finally {
-            if(fileOutputStream != null) {
+            if (fileOutputStream != null) {
                 fileOutputStream.close();
             }
         }
@@ -185,16 +183,20 @@ public class CryptoService {
     public Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
         try {
             if (keyStore == null) {
-                keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
-                String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
-                try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
-                    keyStore.load(fileInputStream, keyStorePassword.toCharArray());
-                }
+                loadKeystore();
             }
             return keyStore.getCertificate(alias);
         } catch (Exception ex) {
             throw new KeyStoreException(ex);
+        }
+    }
+
+    private void loadKeystore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
+        String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
+        try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
+            keyStore.load(fileInputStream, keyStorePassword.toCharArray());
         }
     }
 

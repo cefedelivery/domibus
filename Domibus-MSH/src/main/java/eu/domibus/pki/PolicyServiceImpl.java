@@ -41,7 +41,7 @@ public class PolicyServiceImpl implements PolicyService {
      */
     @Override
     @Cacheable("policyCache")
-    public synchronized Policy parsePolicy(final String location) throws ConfigurationException {
+    public Policy parsePolicy(final String location) throws ConfigurationException {
         final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
         try {
             return pb.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation(), location)));

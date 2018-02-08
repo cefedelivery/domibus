@@ -18,7 +18,6 @@ public class DomibusReadyInterceptor extends AbstractPhaseInterceptor<Message> {
     @Override
     public void handleMessage(Message message) throws Fault {
         if(!BlockUtil.getInitiated()){
-            System.out.println("Do nothing");
             throw new Fault(new IllegalStateException("Server starting"));
         }
     }

@@ -83,7 +83,10 @@ public class UpdateRetryLoggingService {
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
             increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
-            messagingLockService.rollback(messageId);
+            //@TODO taxud poc make this cleaner.
+            if(messageStatus==MessageStatus.READY_TO_PULL) {
+                messagingLockService.rollback(messageId);
+            }
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
@@ -91,7 +94,10 @@ public class UpdateRetryLoggingService {
                 backendNotificationService.notifyOfSendFailure(messageId);
             }
             userMessageLogService.setMessageAsSendFailure(messageId);
-            messagingLockService.delete(messageId);
+            //@TODO taxud poc make this cleaner.
+            if(messageStatus==MessageStatus.READY_TO_PULL) {
+                messagingLockService.delete(messageId);
+            }
 
             if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);
