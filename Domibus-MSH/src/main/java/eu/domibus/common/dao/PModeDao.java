@@ -223,7 +223,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_FOUND, e);
+            LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_NOT_FOUND, e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching service found", null, null);
         }
     }
