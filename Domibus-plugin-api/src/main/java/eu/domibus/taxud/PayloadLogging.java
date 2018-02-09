@@ -16,7 +16,7 @@ public class PayloadLogging {
     public void decodeAndlog(byte[] payload) {
         if (LOG.isInfoEnabled()) {
             byte[] decode = Base64.decodeBase64(payload);
-            LOG.info("Payload:[{}]", new String(decode));
+            LOG.info("Decoded Payload:[{}]", new String(decode));
         }
     }
 

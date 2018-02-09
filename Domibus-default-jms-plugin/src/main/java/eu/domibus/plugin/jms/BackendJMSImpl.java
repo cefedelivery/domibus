@@ -74,14 +74,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     public final static String DELEGATOR = "delegator";
 
-    public static final String PAYLOAD_FILE_NAME = "payload.xml";
-
-    public static final String PAYLOAD_PARAM_NAME = "payload";
-
-    public static final String SUBMISSION_PARAM_NAME = "submissionJson";
-
-    public static final String CERTIFICATE_PARAM_NAME = "certificate";
-
     public static final String AUTHENTICATION_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.authenticate.endpoint";
 
     public static final String PAYLOAD_ENDPOINT_PROPERTY_NAME = "domibus.c4.rest.payload.endpoint";
@@ -94,6 +86,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_PULL_ACTION = "domibus.pull.action";
     public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
     public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
+    public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -167,8 +160,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     protected void init() {
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-        cryptoService.getTrustStore();
     }
 
     public BackendJMSImpl(String name) {
@@ -273,12 +264,6 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         byte[] encodedCertificate = encodeCertificate(senderAlias);
         umds.setCertficiate(encodedCertificate);
 
-        /*MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
-        multipartRequest.add(SUBMISSION_PARAM_NAME, umds);
-
-        ByteArrayResource byteArrayResource = new ByteArrayResource(encodedCertificate);
-        multipartRequest.add(CERTIFICATE_PARAM_NAME, byteArrayResource);*/
-
         encodeCertificate.stop();
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
 
@@ -302,7 +287,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
 
         String domain = "TAX";
-        String custServiceAndActionMapping = domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN,"");
+        String custServiceAndActionMapping = domibusProperties.getProperty(DOMIBUS_TAXUD_CUST_DOMAIN, "");
         if (custServiceAndActionMapping.equals(submission.getService() + submission.getAction())) {
             domain = "CUST";
         }
@@ -361,12 +346,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
 
         try {
-            Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate")).time();
-            authenticate(submission);
-            authenticateContext.stop();
-            Timer.Context uploadPayload = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "uploadPayload")).time();
-            sendPayload(submission);
-            uploadPayload.stop();
+            if (!Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"))) {
+                Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate")).time();
+                authenticate(submission);
+                authenticateContext.stop();
+                Timer.Context uploadPayload = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "uploadPayload")).time();
+                sendPayload(submission);
+                uploadPayload.stop();
+            }
             Timer.Context transformResponseContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "transformResponse")).time();
             Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
             transformResponseContext.stop();
@@ -395,7 +382,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         submission.getPayloads().clear();
         submission.addPayload(getPayload(message, MediaType.TEXT_XML));
         String identifierForPullMessage = domibusProperties.getProperty(DOMIBUS_PULL_USER_IDENTIFIER, "identifierForPullMessage");
-        if(identifierForPullMessage.equalsIgnoreCase(umds.getUser_identifier())){
+        if (identifierForPullMessage.equalsIgnoreCase(umds.getUser_identifier())) {
             submission.setAction(domibusProperties.getProperty(DOMIBUS_PULL_ACTION, "TC13Leg1"));
             submission.setService(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE, "bdx:noprocess"));
             submission.setServiceType(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE_TYPE, "tc13"));
@@ -421,8 +408,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         Timer.Context buildRequestFromPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.buildRequestFromPayload")).time();
         byte[] bytes = buildMultiPartRequestFromPayload(submission.getPayloads());
         jsonSubmission.setPayload(bytes);
-        /*MultiValueMap<String, Object> multipartRequest = (MultiValueMap<String, Object>) bytes;
-        multipartRequest.add(SUBMISSION_PARAM_NAME, jsonSubmission);*/
+
         buildRequestFromPayloadContext.stop();
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
 
@@ -432,9 +418,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private byte[] buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {
-        MultiValueMap<String, Object> multipartRequest = new LinkedMultiValueMap<>();
         for (Submission.Payload payload : payloads) {
-            try(InputStream inputStream = payload.getPayloadDatahandler().getInputStream();) {
+            try (InputStream inputStream = payload.getPayloadDatahandler().getInputStream();) {
 
                 int available = inputStream.available();
                 if (available == 0) {
@@ -444,7 +429,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 byte[] payloadContent = new byte[available];
                 inputStream.read(payloadContent);
                 payloadLogging.log(payloadContent);
-                return payloadContent;
+                return Base64.encodeBase64(payloadContent);
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -474,64 +459,4 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         handleMessageContext.stop();
     }
 
-    private class DownloadMessageCreator implements MessageCreator {
-        private String messageId;
-
-
-        public DownloadMessageCreator(final String messageId) {
-            this.messageId = messageId;
-        }
-
-        @Override
-        public Message createMessage(final Session session) throws JMSException {
-            final MapMessage mapMessage = session.createMapMessage();
-            try {
-                downloadMessage(messageId, mapMessage);
-            } catch (final MessageNotFoundException e) {
-                throw new DefaultJmsPluginException("Unable to create push message", e);
-            }
-            mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
-            return mapMessage;
-        }
-    }
-
-
-    static private class Metric {
-        Long startTime;
-        Long lastChanged;
-        int counter = 0;
-
-        public boolean ofInterest() {
-            return lastChanged != null && lastChanged < (System.currentTimeMillis() + 10000);
-        }
-
-        public void clear() {
-            startTime = null;
-            lastChanged = null;
-            counter = 0;
-        }
-
-        public Long getStartTime() {
-            return startTime;
-        }
-
-        public Long getLastChanged() {
-            return lastChanged;
-        }
-
-        public void setStartTime(Long startTime) {
-            if (this.startTime == null) {
-                this.startTime = startTime;
-            }
-        }
-
-        public void setLastChanged(Long lastChanged) {
-            this.lastChanged = lastChanged;
-            counter++;
-        }
-
-        public int getCounter() {
-            return counter;
-        }
-    }
 }

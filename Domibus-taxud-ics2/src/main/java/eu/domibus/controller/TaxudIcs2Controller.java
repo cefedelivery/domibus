@@ -35,15 +35,13 @@ public class TaxudIcs2Controller {
         this.payloadLogging = payloadLogging;
     }
 
-
-
-    @PostMapping(value = "/message")
+    @RequestMapping(method = RequestMethod.POST,value = "/message",produces="application/json")
     public void onMessage(@RequestBody JsonSubmission submission) {
         LOG.info("Message received:\n  [{}]",submission);
         payloadLogging.decodeAndlog(submission.getPayload());
     }
 
-    @PostMapping(value = "/authenticate")
+    @RequestMapping(method = RequestMethod.POST,value = "/authenticate",produces="application/json")
     public boolean authenticate(@RequestBody Umds submission) {
         LOG.info("Authentication required for :\n   [{}]",submission);
         if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
