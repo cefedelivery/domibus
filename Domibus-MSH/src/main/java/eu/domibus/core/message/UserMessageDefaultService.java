@@ -29,7 +29,7 @@ import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.NotificationListener;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
