@@ -8,6 +8,8 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -65,7 +67,13 @@ public class MessagingDao extends BasicDao<Messaging> {
      * @param messageId
      */
     @Transactional(propagation = Propagation.MANDATORY)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void clearPayloadData(String messageId) {
+
+        //add messageId to MDC map
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+        }
         Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
         payloadsQuery.setParameter("MESSAGE_ID", messageId);
         List<PartInfo> results = payloadsQuery.getResultList();

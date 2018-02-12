@@ -21,8 +21,9 @@ import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.XmlProcessingException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
@@ -163,6 +164,7 @@ public abstract class PModeProvider {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
 
         final String agreementName;
@@ -171,6 +173,13 @@ public abstract class PModeProvider {
         final String service;
         final String action;
         final String leg;
+
+        final String messageId =  userMessage.getMessageInfo().getMessageId();
+        //add messageId to MDC map
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+        }
+
 
         try {
             agreementName = findAgreement(userMessage.getCollaborationInfo().getAgreementRef());
@@ -187,7 +196,7 @@ public abstract class PModeProvider {
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
             if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", userMessage.getMessageInfo().getMessageId(), null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", messageId, null);
             }
 
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
@@ -196,7 +205,7 @@ public abstract class PModeProvider {
 
         } catch (IllegalStateException ise) {
             // It can happen if DB is clean and no pmodes are configured yet!
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", userMessage.getMessageInfo().getMessageId(), ise);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", messageId, ise);
         }
     }
 
