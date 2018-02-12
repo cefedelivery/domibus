@@ -117,8 +117,8 @@ public class FaultInHandler extends AbstractFaultHandler {
     private void processEbMSError(final SOAPMessageContext context, final EbMS3Exception ebMS3Exception) {
 
         if(ebMS3Exception == null) {
-            LOG.warn("ebMSException is null onm this stage and shouldn't");
-            throw new MissingResourceException("ebMSException is null onm this stage and shouldn't", EbMS3Exception.class.getName(), "ebMS3Exception");
+            LOG.warn("ebMSException is null on this stage and shouldn't");
+            throw new MissingResourceException("ebMSException is null on this stage and shouldn't", EbMS3Exception.class.getName(), "ebMS3Exception");
         }
 
         // at this point an EbMS3Exception is available in any case
