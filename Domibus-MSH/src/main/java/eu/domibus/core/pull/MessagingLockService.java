@@ -14,9 +14,9 @@ public interface MessagingLockService {
 
     void addLockingInformation(Party initiator, String messageId, String mpc);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     void delete(String messageId);
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     void rollback(String messageId);
 }

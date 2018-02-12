@@ -71,7 +71,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void delete(final String messageId) {
         messagingLockDao.delete(messageId);
     }
