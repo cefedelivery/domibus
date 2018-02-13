@@ -16,6 +16,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.plugin.BackendConnector;
@@ -291,9 +292,14 @@ public class BackendNotificationService {
         userMessageLogDao.setAsNotified(messageId);
     }
 
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
         if (isPluginNotificationDisabled()) {
             return;
+        }
+        final String messageId = messageLog.getMessageId();
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
         }
         if (messageLog.getMessageStatus() == newStatus) {
             LOG.debug("Notification not sent: message status has not changed [{}]", newStatus);

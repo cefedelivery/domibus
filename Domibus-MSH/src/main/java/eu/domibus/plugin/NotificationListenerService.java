@@ -12,6 +12,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.delegate.BackendConnectorDelegate;
@@ -213,6 +214,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void removeFromPending(final String messageId) throws MessageNotFoundException {
 
         if (!authUtils.isUnsecureLoginAllowed())
@@ -221,6 +223,11 @@ public class NotificationListenerService implements MessageListener, JmsListener
         if (this.mode == BackendConnector.Mode.PUSH) {
             LOG.debug("No messages will be removed because this a PUSH consumer");
             return;
+        }
+
+        //add messageId to MDC map
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
         }
 
         String queueName;
