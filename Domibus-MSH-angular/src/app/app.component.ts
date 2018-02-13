@@ -2,6 +2,7 @@ import {Component, OnInit} from "@angular/core";
 import {SecurityService} from "./security/security.service";
 import {Router} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
+import {Title} from "@angular/platform-browser";
 
 @Component({
   selector: 'app-root',
@@ -13,11 +14,20 @@ export class AppComponent implements OnInit {
   isAdmin: boolean;
   _currentUser: string;
   fullMenu: boolean = true;
-  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed"
+  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
+  domibusTitle: string = "My Super Domibus!";
 
   constructor(private securityService: SecurityService,
               private router: Router,
-              private securityEventService: SecurityEventService) {
+              private securityEventService: SecurityEventService,
+              private titleService: Title) {
+    /*let PropertiesReader = require('properties-reader');
+    let properties = PropertiesReader('');*/
+    this.titleService.setTitle(this.domibusTitle);
+  }
+
+  setTitle(newTitle: string) {
+    this.domibusTitle = newTitle;
   }
 
   ngOnInit() {
