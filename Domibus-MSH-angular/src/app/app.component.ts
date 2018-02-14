@@ -3,6 +3,8 @@ import {SecurityService} from "./security/security.service";
 import {Router} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
 import {Title} from "@angular/platform-browser";
+import {Http, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-root',
@@ -15,19 +17,17 @@ export class AppComponent implements OnInit {
   _currentUser: string;
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
-  domibusTitle: string = "My Super Domibus!";
 
   constructor(private securityService: SecurityService,
               private router: Router,
               private securityEventService: SecurityEventService,
+              private http: Http,
               private titleService: Title) {
-    /*let PropertiesReader = require('properties-reader');
-    let properties = PropertiesReader('');*/
-    this.titleService.setTitle(this.domibusTitle);
-  }
+    let applicationNameResponse: Observable<Response>  = this.http.get("/rest/application/name");
 
-  setTitle(newTitle: string) {
-    this.domibusTitle = newTitle;
+    applicationNameResponse.subscribe((name: Response) => {
+      this.titleService.setTitle(name.json());
+    });
   }
 
   ngOnInit() {
