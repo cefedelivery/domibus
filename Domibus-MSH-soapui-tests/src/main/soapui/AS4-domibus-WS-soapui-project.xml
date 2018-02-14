@@ -2136,24 +2136,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom019-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom020&amp;Dom035-Push-Submit message-Exceptional flow-Data-From/PartyId-Maximum length" searchProperties="true" id="2f0afa19-0439-4bfa-b029-0b8fd05af8ef">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue PartyId Max Length" id="8fd6408f-ec07-4f23-8d22-c4589579c940"><con:settings/><con:config><script>// Upload PMode: PartyId value > Max allowed length (255)  
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartyId-MaxLength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom024-Push-Submit message-Exceptional flow-Data-From/Role-Empty" searchProperties="true" id="d940bd71-27fb-41ec-bf53-74438b40b5f4">
             <con:settings/>
             
@@ -2216,24 +2198,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom024-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom025&amp;Dom040-Push-Submit message-Exceptional flow-Data-From/Role-Maximum Length" searchProperties="true" id="fc717519-2d71-44fc-85a4-5ec2aec4560e">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue Role Max Length" id="2a675e56-d617-4113-bb6b-46af57d8bb28"><con:settings/><con:config><script>// Upload PMode: Role value > Max allowed length (255)
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Role-MaxLength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom026-Push-Submit message-Exceptional flow-Data-From/PartyId:Type-Existence" searchProperties="true" id="ecc5da9e-5375-4c1c-a4b6-0385c4edb9d0">
             <con:settings/>
             
@@ -2295,24 +2259,6 @@ test.verifyMessagePresence(0,0,"-Dom026-");
 test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="91f49ef5-0ec9-4936-8984-44d5f7085bf0"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="553507e1-1df4-4663-819a-3d5234e79960"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="ccda583a-6e89-4e34-9fa8-f73282008b0c"><con:configuration><token>No matching party found</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageID("-Dom026-");
 test.finalize();
-//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom029&amp;Dom044-Push-Submit message-Exceptional flow-Data-From/PartyId:Type-Maximum Length" searchProperties="true" id="d6c47816-a6fd-4283-b9c3-80c12ea33a59">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue PartyId Type Max Length" id="6819f82b-088d-4f04-a184-eabbc6c08411"><con:settings/><con:config><script>// Upload PMode: PartyId Type value > Max allowed length (255)
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartyIdType-MaxLength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom030-Push-Submit message-Exceptional flow-Data-To/PartyId-Existence" searchProperties="true" id="d6362e20-7540-4982-b287-16f75e9c0d28">
             <con:settings/>
@@ -2811,24 +2757,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom052-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom053-Push-Submit message-Exceptional flow-Data-Service-Maximum length" searchProperties="true" id="2fed919e-9903-4682-a5eb-824302945c55">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue Service Max Length" id="61a5c303-2730-4340-8a0a-255de36b3456"><con:settings/><con:config><script>// Upload PMode: Service value > Max allowed length (255) 
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Service-MaxLength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ba9db319-b7cc-4f30-9a2f-3d112806acad</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom054-Push-Submit message-Exceptional flow-Data-Action-Existence" searchProperties="true" id="8d7bd77a-8d06-4a1b-bd9e-688ea3b37813">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom054-Push-Submit message-Exceptional flow-Data-Action-Existence" searchProperties="true" id="8d7bd77a-8d06-4a1b-bd9e-688ea3b37813">
             <con:settings/>
             
             
@@ -3013,23 +2942,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom057-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom058-Push-Submit message-Exceptional flow-Data-Action-Maximum length" searchProperties="true" id="cc775dca-8508-41d0-910c-2d3023e111e2">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue Action Max Length" id="a381c9cf-5ed2-4516-bdf1-0d5625a0e00a"><con:settings/><con:config><script>// Upload PMode: Action value > Max allowed length (255)
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Action-Maxlength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom059-Push-Submit message-Exceptional flow-Data-ConversationId-Empty" searchProperties="true" id="fb0feb31-a997-4ea8-9911-043de8f019f7">
             <con:settings/>
             
@@ -3835,23 +3747,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom077-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom078-Push-Submit message-Exceptional flow-Data-PartInfo:href-Maximum length" searchProperties="true" id="0180e851-f9c4-4c6b-b476-0dd7fbe881bd">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue PartInfo href Max Length" id="7c4e0658-a800-4e16-a6e4-a3b037626c5e"><con:settings/><con:config><script>// Upload PMode: PartInfo/href value > Max allowed length (255)
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartInfohref-Maxlength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom079-Push-Submit message-Exceptional flow-Data-Property(MimeType)-Existence" searchProperties="true" id="2aa85746-5c38-486c-939b-2913f0eb5aa5">
             <con:settings/>
             
@@ -4037,23 +3932,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:assertion 
 test.cleanDBMessageID("-Dom081-");
 test.finalize();
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom082-Push-Submit message-Exceptional flow-Data-Property(MimeType)-Maximum length" searchProperties="true" id="66154faa-9a2f-40ba-854e-155808a947f5">
-            <con:settings/>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            <con:testStep type="groovy" name="Upload PMode Blue MimeType Max Length" id="fa0e7574-d5a2-4bb8-bee8-fb178fd93b1d"><con:settings/><con:config><script>// Upload PMode: MimeType value > Max allowed length (255)  
-Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-MimeType-Maxlength.xml",context,log,"Failed to upload the PMode");
-</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom083-Push-Submit message-Exceptional flow-Data-Property(Description)-Empty" searchProperties="true" id="b02c81de-37dd-49e5-b863-3e25dd7fcd31">
             <con:settings/>
             
@@ -6394,7 +6272,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
          </payload>\r
       </_1:submitRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="Not SOAP Fault Assertion" id="971deb64-71a2-4caa-9ad9-662c6d2650b9" name="SOAP Fault"/><con:assertion type="SOAP Response" id="a3a2f3c1-c5e5-4704-b810-e801276e4a2d" name="SOAP Response"/><con:assertion type="Simple Contains" id="be59de63-d719-4be4-856a-d741384dce94" name="Contains"><con:configuration><token>(?s).*org.xml.sax.SAXParseException.*attribut.*</token><ignoreCase>false</ignoreCase><useRegEx>true</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="7cd5c66a-ce60-4d6b-b6e9-0feebe005516" name="Submit Message 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+</soap:Envelope>]]></con:request><con:assertion type="Not SOAP Fault Assertion" id="971deb64-71a2-4caa-9ad9-662c6d2650b9" name="SOAP Fault"/><con:assertion type="SOAP Response" id="a3a2f3c1-c5e5-4704-b810-e801276e4a2d" name="SOAP Response"/><con:assertion type="Simple Contains" id="be59de63-d719-4be4-856a-d741384dce94" name="Contains"><con:configuration><token>(?s).*org.xml.sax.SAXParseException.*attribut.*</token><ignoreCase>true</ignoreCase><useRegEx>true</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="7cd5c66a-ce60-4d6b-b6e9-0feebe005516" name="Submit Message 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>\r
       <ns:Messaging>\r
          <ns:UserMessage>\r
@@ -6436,7 +6314,7 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
          </payload>\r
       </_1:submitRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="Not SOAP Fault Assertion" id="971deb64-71a2-4caa-9ad9-662c6d2650b9" name="SOAP Fault"/><con:assertion type="SOAP Response" id="6a274cc3-d7fc-4fc9-9c62-9e0e38e80900" name="SOAP Response"/><con:assertion type="Simple Contains" id="b726403c-042f-4e5a-90fb-20a3c2ae7391" name="Contains"><con:configuration><token>(?s).*org.xml.sax.SAXParseException.*attribut.*</token><ignoreCase>false</ignoreCase><useRegEx>true</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
+</soap:Envelope>]]></con:request><con:assertion type="Not SOAP Fault Assertion" id="971deb64-71a2-4caa-9ad9-662c6d2650b9" name="SOAP Fault"/><con:assertion type="SOAP Response" id="6a274cc3-d7fc-4fc9-9c62-9e0e38e80900" name="SOAP Response"/><con:assertion type="Simple Contains" id="b726403c-042f-4e5a-90fb-20a3c2ae7391" name="Contains"><con:configuration><token>(?s).*org.xml.sax.SAXParseException.*attribut.*</token><ignoreCase>true</ignoreCase><useRegEx>true</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
 //ExcelReporting.reportTestCase(testRunner, log)
 
 def test = new Domibus(log,null,context);
@@ -11328,7 +11206,129 @@ test.cleanDBMessageID(context.expand('${Submit Message#Request#//ns:MessageId}')
 test.finalize();	
 
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
-        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fa1e9f28-eb95-4986-baba-310ea048dc0b" name="WS-Auto-Not-for-Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom119-Push-3 Domibus Senario-Basic Flow" searchProperties="true" id="93f35b96-2232-4f4c-b3f5-7ebfa12c81f0">
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:reportParameters/></con:testSuite><con:testSuite id="fa1e9f28-eb95-4986-baba-310ea048dc0b" name="WS-Auto-Not-for-Bamboo"><con:settings><con:setting id="IncludeOverview">true</con:setting><con:setting id="IncludeResults">true</con:setting><con:setting id="FlowLayout">false</con:setting><con:setting id="ErrorDetails">true</con:setting><con:setting id="IncludeCoverage">true</con:setting><con:setting id="GeneratableJUnitReport@Style">Single Page (Print)</con:setting><con:setting id="GeneratableJUnitReport@Folder"/></con:settings><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom020&amp;Dom035-Push-Submit message-Exceptional flow-Data-From/PartyId-Maximum length" searchProperties="true" id="9628c525-45df-4f41-a08d-e6e0bfc1f350">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue PartyId Max Length" id="8008c373-c84f-4342-bceb-47ae1ed7d022"><con:settings/><con:config><script>// Upload PMode: PartyId value > Max allowed length (255)  
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartyId-MaxLength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom025&amp;Dom040-Push-Submit message-Exceptional flow-Data-From/Role-Maximum Length" searchProperties="true" id="6d9625cb-703c-4aab-82d1-c7107d7bbda7">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue Role Max Length" id="bae0c03b-c084-4ef4-a1d7-0479ea2a8140"><con:settings/><con:config><script>// Upload PMode: Role value > Max allowed length (255)
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Role-MaxLength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom029&amp;Dom044-Push-Submit message-Exceptional flow-Data-From/PartyId:Type-Maximum Length" searchProperties="true" id="ff0f9401-6199-47f3-9f53-435bb93cca56">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue PartyId Type Max Length" id="c496121f-5b00-4dfa-803f-2df22b5c7f62"><con:settings/><con:config><script>// Upload PMode: PartyId Type value > Max allowed length (255)
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartyIdType-MaxLength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom053-Push-Submit message-Exceptional flow-Data-Service-Maximum length" searchProperties="true" id="807fb081-3d3f-465a-99a2-e0bd68e3a7ce">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue Service Max Length" id="53ebbfcb-f154-480d-92ec-75c3b3d89802"><con:settings/><con:config><script>// Upload PMode: Service value > Max allowed length (255) 
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Service-MaxLength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>ba9db319-b7cc-4f30-9a2f-3d112806acad</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom058-Push-Submit message-Exceptional flow-Data-Action-Maximum length" searchProperties="true" id="0ba05ce5-a555-486e-b6db-923c2b97446d">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue Action Max Length" id="79fef213-9f5d-4817-8af6-111667ce2f79"><con:settings/><con:config><script>// Upload PMode: Action value > Max allowed length (255)
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-Action-Maxlength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom078-Push-Submit message-Exceptional flow-Data-PartInfo:href-Maximum length" searchProperties="true" id="03fcbdf1-4953-4881-a134-ccea0b095c09">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue PartInfo href Max Length" id="ce6361d6-d549-4fa1-9f7c-87ff891fd21a"><con:settings/><con:config><script>// Upload PMode: PartInfo/href value > Max allowed length (255)
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-PartInfohref-Maxlength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom082-Push-Submit message-Exceptional flow-Data-Property(MimeType)-Maximum length" searchProperties="true" id="cb9734f0-0109-4473-9149-22cdac49b334">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Upload PMode Blue MimeType Max Length" id="86956049-cc35-40d1-ac78-6364853f0408"><con:settings/><con:config><script>// Upload PMode: MimeType value > Max allowed length (255)  
+Domibus.uploadPmode("sender","special","\\maxLength\\pmode-blue-MimeType-Maxlength.xml",context,log,"Failed to upload the PMode");
+</script></con:config></con:testStep><con:tearDownScript>//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom119-Push-3 Domibus Senario-Basic Flow" searchProperties="true" id="93f35b96-2232-4f4c-b3f5-7ebfa12c81f0">
             <con:settings/>
             
             
