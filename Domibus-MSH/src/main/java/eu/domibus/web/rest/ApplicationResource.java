@@ -21,8 +21,8 @@ import java.util.Properties;
 public class ApplicationResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationResource.class);
-    private static final String DOMIBUS_CUSTOM_NAME = "domibus.custom.name";
-    private static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
+    protected static final String DOMIBUS_CUSTOM_NAME = "domibus.custom.name";
+    protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
