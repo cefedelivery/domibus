@@ -28,7 +28,7 @@ import java.util.*;
  */
 public class TaxudClient {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TaxudIcs2Controller.class);
+    private final static Logger LOG = LoggerFactory.getLogger(UmdsController.class);
 
     private static final String APPLICATION_XML = "application/xml";
 

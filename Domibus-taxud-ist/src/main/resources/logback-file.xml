@@ -22,7 +22,7 @@
         </encoder>
     </appender>
 
-    <logger name="eu.domibus.controller.TaxudIcs2Controller" level="INFO"/>    
+    <logger name="eu.domibus.controller.IstController" level="INFO"/>
     <logger name="eu.domibus.taxud.PayloadLogging" level="INFO"/>
     <logger name="eu.domibus.taxud.CertificateLogging" level="INFO"/>
 

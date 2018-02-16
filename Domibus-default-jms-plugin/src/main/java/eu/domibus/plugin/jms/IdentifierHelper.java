@@ -3,7 +3,10 @@ package eu.domibus.plugin.jms;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Umds;
+import eu.domibus.taxud.IdentifierUtil;
 import org.springframework.stereotype.Component;
+
+import static eu.domibus.taxud.IdentifierUtil.UNREGISTERED;
 
 /**
  * @author Thomas Dussart
@@ -13,10 +16,10 @@ import org.springframework.stereotype.Component;
 public class IdentifierHelper {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(IdentifierHelper.class);
 
-    private final static String UNREGISTERED="unregistered";
+
 
     public Umds buildUmdsFromOriginalSender(final String originalSender){
-        String[] split = splitIdetifier(originalSender);
+        String[] split = splitIdentifier(originalSender);
         Umds umds = new Umds();
         umds.setUser_typeOfIdentifier(split[0]);
         umds.setUser_identifier(split[1]);
@@ -25,21 +28,14 @@ public class IdentifierHelper {
     }
 
     public void updateDelegatorInfo(final Umds umds,final String delegator){
-        String[] split = splitIdetifier(delegator);
+        String[] split = splitIdentifier(delegator);
         umds.setDelegator_typeOfIdentifier(split[0]);
         umds.setDelegator_identifier(split[1]);
         umds.setDelegator_typeOfActor(split[2]);
     }
 
-    private String[] splitIdetifier(String originalSender) {
-        int startParsingIndex = originalSender.indexOf(UNREGISTERED) + UNREGISTERED.length()+1;
-        String sender = originalSender.substring(startParsingIndex);
-        String[] split = sender.split(":");
-        if(split.length!=3){
-            LOG.error("Invalid identifier [{}]",sender);
-            throw new IllegalArgumentException("Invalid UMDS format for original sender");
-        }
-        return split;
+    private String[] splitIdentifier(String originalSender) {
+        return IdentifierUtil.splitIdentifier(originalSender);
     }
 
     public String getApplicationUrl(final String finalRecipient){

@@ -1,7 +1,5 @@
 package eu.domibus.controller;
 
-import eu.domibus.plugin.JsonSubmission;
-import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.Umds;
 import eu.domibus.taxud.CertificateLogging;
 import eu.domibus.taxud.PayloadLogging;
@@ -16,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
  * @since 4.0
  */
 @RestController
-public class TaxudIcs2Controller {
+public class UmdsController {
 
-    private final static Logger LOG = LoggerFactory.getLogger(TaxudIcs2Controller.class);
+    private final static Logger LOG = LoggerFactory.getLogger(UmdsController.class);
 
 
 
@@ -30,16 +28,11 @@ public class TaxudIcs2Controller {
     private String invalidSender;
 
     @Autowired
-    public TaxudIcs2Controller(CertificateLogging certificateLogging, PayloadLogging payloadLogging) {
+    public UmdsController(CertificateLogging certificateLogging, PayloadLogging payloadLogging) {
         this.certificateLogging = certificateLogging;
         this.payloadLogging = payloadLogging;
     }
 
-    @RequestMapping(method = RequestMethod.POST,value = "/message",produces="application/json")
-    public void onMessage(@RequestBody JsonSubmission submission) {
-        LOG.info("Message received:\n  [{}]",submission);
-        payloadLogging.decodeAndlog(submission.getPayload());
-    }
 
     @RequestMapping(method = RequestMethod.POST,value = "/authenticate",produces="application/json")
     public boolean authenticate(@RequestBody Umds submission) {
@@ -55,8 +48,9 @@ public class TaxudIcs2Controller {
 
     //for testing purpose.
     @RequestMapping(value = "/message", method = RequestMethod.GET)
-    public Submission onMessage() {
-        Submission submission = new Submission();
+    public String onMessage() {
+        return "Taxud umds is up";
+        /*Submission submission = new Submission();
         submission.setFromRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
         submission.setToRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
         submission.addFromParty("domibus-blue", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
@@ -66,7 +60,8 @@ public class TaxudIcs2Controller {
         submission.addMessageProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
         submission.setAction("action");
         submission.setService("service");
-        return submission;
+        return submission;*/
     }
+
 
 }
