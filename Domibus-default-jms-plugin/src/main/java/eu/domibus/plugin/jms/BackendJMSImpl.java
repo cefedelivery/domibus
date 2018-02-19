@@ -76,11 +76,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String CID_MESSAGE = "cid:message";
 
     public static final String DOMIBUS_TAXUD_CUST_DOMAIN = "domibus.taxud.cust.domain";
-
     public static final String DOMIBUS_DO_NOT_DELIVER = "domibus.do.not.deliver";
-
+    public static final String DOMIBUS_PULL_USER_IDENTIFIER = "domibus.pull.user.identifier";
+    public static final String DOMIBUS_PULL_ACTION = "domibus.pull.action";
+    public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
+    public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
     public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
-
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -264,6 +265,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context authenticationPost = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.postMultipartRequest")).time();
+        LOG.trace("authenticating to:[{}] ",authenticationUrl);
         Boolean aBoolean = restTemplate.postForObject(authenticationUrl, umds, Boolean.class);
         authenticationPost.stop();
         if (!aBoolean) {
@@ -276,6 +278,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
         final Submission.TypedProperty finalRecipient = extractEndPoint(submission, FINAL_RECIPIENT);
         final Submission.TypedProperty delegator = extractEndPoint(submission, DELEGATOR);
+        LOG.trace("Build umds from indentifier:[{}]",originalSender.getValue());
         Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         umds.setApplicationUrl(identifierHelper.getApplicationUrl(finalRecipient.getValue()));
         if (delegator != null) {
@@ -349,8 +352,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 Timer.Context uploadPayload = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "uploadPayload")).time();
                 sendPayload(submission);
                 uploadPayload.stop();
+            }else {
+                Timer.Context transformResponseContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "transformResponse")).time();
+                Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
+                transformResponseContext.stop();
+                messageSubmitter.submit(submissionResponse, getName());
             }
-
         } catch (AuthenticationException e) {
             Submission submissionResponseError = getSubmissionResponse(submission, UMDS_REJECTED_TEMPLATE.replace("$messId", messageId));
             try {
@@ -358,18 +365,28 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             } catch (MessagingProcessingException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
+        } catch (MessagingProcessingException e) {
+            LOG.error(e.getMessage(), e);
         } finally {
             handleMessageContext.stop();
         }
     }
 
     private Submission getSubmissionResponse(Submission submission, String message) {
+        final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
+        Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
         submission.setRefToMessageId(org.apache.commons.lang.StringUtils.trim(submission.getMessageId()));
         submission.setMessageId(messageIdGenerator.generateMessageId());
         submission.getPayloads().clear();
         submission.addPayload(getPayload(message, MediaType.TEXT_XML));
+        String identifierForPullMessage = domibusProperties.getProperty(DOMIBUS_PULL_USER_IDENTIFIER, "identifierForPullMessage");
+        if (identifierForPullMessage.equalsIgnoreCase(umds.getUser_identifier())) {
+            submission.setAction(domibusProperties.getProperty(DOMIBUS_PULL_ACTION, "TC13Leg1"));
+            submission.setService(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE, "bdx:noprocess"));
+            submission.setServiceType(domibusProperties.getProperty(DOMIBUS_PULL_SERVICE_TYPE, "tc13"));
+        }
         return submission;
     }
 
@@ -413,9 +430,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context postPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.postPayload")).time();
+        LOG.trace("Sending payload to:[{}]",payloadEndPointUrl);
         restTemplate.postForLocation(payloadEndPointUrl, jsonSubmission);
-        requestsPerSecond.mark();
         postPayloadContext.stop();
+        requestsPerSecond.mark();
     }
 
     private byte[] buildMultiPartRequestFromPayload(Set<Submission.Payload> payloads) {

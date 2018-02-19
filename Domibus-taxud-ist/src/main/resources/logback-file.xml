@@ -22,9 +22,8 @@
         </encoder>
     </appender>
 
-    <logger name="eu.domibus.controller.IstController" level="INFO"/>
-    <logger name="eu.domibus.taxud.PayloadLogging" level="INFO"/>
-    <logger name="eu.domibus.taxud.CertificateLogging" level="INFO"/>
+    <logger name="eu.domibus.controller.IstController" level="WARN"/>
+    <logger name="eu.domibus.taxud.PayloadLogging" level="WARN"/>
 
     <root level="ERROR">
         <appender-ref ref="STDOUT"/>

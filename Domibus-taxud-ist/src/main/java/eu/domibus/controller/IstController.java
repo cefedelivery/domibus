@@ -1,6 +1,6 @@
 package eu.domibus.controller;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.JsonSubmission;
 import eu.domibus.plugin.webService.generated.BackendInterface;
@@ -9,11 +9,18 @@ import eu.domibus.plugin.webService.generated.SendMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.taxud.IdentifierUtil;
 import eu.domibus.taxud.PayloadLogging;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.activation.DataHandler;
 import javax.ws.rs.core.MediaType;
@@ -30,14 +37,15 @@ public class IstController {
 
     private final static Logger LOG = LoggerFactory.getLogger(IstController.class);
 
-    public final static String ORIGINAL_SENDER = "originalSender";
+    private final static String ORIGINAL_SENDER = "originalSender";
 
-    public final static String FINAL_RECIPIENT = "finalRecipient";
+    private final static String FINAL_RECIPIENT = "finalRecipient";
 
-    public final static String DELEGATOR = "delegator";
-    public static final String CID_MESSAGE = "cid:message";
-    public static final String MIME_TYPE = "MimeType";
-    public static final String TEXT_XML = "text/xml";
+    private static final String CID_MESSAGE = "cid:message";
+
+    private static final String MIME_TYPE = "MimeType";
+
+    private static final String TEXT_XML = "text/xml";
 
     private PayloadLogging payloadLogging;
 
@@ -45,8 +53,6 @@ public class IstController {
 
     private EndPointHelper endPointHelper;
 
-    @Value("${domibus.wsdl}")
-    private String wsdlUrl;
 
     @Value("${domibus.pull.user.identifier}")
     private String pullUserIdentifier;
@@ -62,6 +68,8 @@ public class IstController {
 
     private BackendInterface backendInterface;
 
+    private Observable<Submission> quoteObservable = null;
+
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<response_to_message_id>\n" +
             " $messId\n" +
@@ -76,23 +84,39 @@ public class IstController {
                          final AccessPointHelper accessPointHelper,
                          final EndPointHelper endPointHelper) {
         this.payloadLogging = payloadLogging;
-        this.backendInterface=backendInterface;
-        this.accessPointHelper=accessPointHelper;
-        this.endPointHelper=endPointHelper;
+        this.backendInterface = backendInterface;
+        this.accessPointHelper = accessPointHelper;
+        this.endPointHelper = endPointHelper;
     }
 
-    @RequestMapping(method = RequestMethod.POST,value = "/message",produces="application/json")
-    public void onMessage(@RequestBody JsonSubmission submission) {
-        LOG.info("Message received:\n  [{}]",submission);
-        payloadLogging.decodeAndlog(submission.getPayload());
-        String response = HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", submission.getMessageId());
+    @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
+    public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
+        LOG.info("Message received:\n  [{}]", jsonSubmission);
+        payloadLogging.decodeAndlog(jsonSubmission.getPayload());
+        Observable<Submission> quoteObservable = Observable.<Submission>create(subscriber -> {
+            Submission submission = prepareSubmission(jsonSubmission);
+            subscriber.onNext(submission);
+            subscriber.onComplete();
+        }).subscribeOn(Schedulers.io());
+        quoteObservable.subscribe(this::sendMessage);
 
+    }
+
+    private void sendMessage(Submission submission){
+        try {
+            backendInterface.submitMessage(submission.getSubmitRequest(), submission.getMessaging());
+        } catch (SendMessageFault e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private Submission prepareSubmission(JsonSubmission submission){
+        String response = HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", submission.getMessageId());
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
 
         final JsonSubmission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
         final JsonSubmission.TypedProperty finalRecipient = extractEndPoint(submission, FINAL_RECIPIENT);
-        final JsonSubmission.TypedProperty delegator = extractEndPoint(submission, DELEGATOR);
 
         //create payload.
         LargePayloadType payloadType = new LargePayloadType();
@@ -101,11 +125,11 @@ public class IstController {
         payloadType.setValue(getPayload(response, MediaType.TEXT_XML));
 
         //setup submit request.
-        SubmitRequest submitRequest=new SubmitRequest();
+        SubmitRequest submitRequest = new SubmitRequest();
         submitRequest.getPayload().add(payloadType);
 
         //setup messaging.
-        Messaging messaging=new Messaging();
+        Messaging messaging = new Messaging();
         UserMessage userMessage = new UserMessage();
         MessageInfo responseMessageInfo = new MessageInfo();
         responseMessageInfo.setMessageId(UUID.randomUUID() + "@domibus");
@@ -116,12 +140,10 @@ public class IstController {
         userMessage.setPartyInfo(partyInfo);
 
 
-
-
         JsonSubmission.Party submissionFrom = submission.getFromParties().iterator().next();
         JsonSubmission.Party submissionTo = submission.getToParties().iterator().next();
         String submissionService = submission.getService();
-        String submissionServiceType= submission.getServiceType();
+        String submissionServiceType = submission.getServiceType();
         String submissionAction = submission.getAction();
 
         From responseFrom = new From();
@@ -143,11 +165,11 @@ public class IstController {
 
         String[] splitIdentifier = IdentifierUtil.splitIdentifier(finalRecipient.getValue());
         if (splitIdentifier[1].equalsIgnoreCase(pullUserIdentifier)) {
-            submission.setAction(pullAction);
-            submission.setService(pullService);
-            submission.setServiceType(pullServiceType);
+            submissionAction = pullAction;
+            submissionService = pullService;
+            submissionServiceType = pullServiceType;
         }
-        CollaborationInfo collaborationInfo=new CollaborationInfo();
+        CollaborationInfo collaborationInfo = new CollaborationInfo();
         Service responseService = new Service();
         responseService.setType(submissionServiceType);
         responseService.setValue(submissionService);
@@ -183,13 +205,27 @@ public class IstController {
         responsePartInfoProperty.setName(MIME_TYPE);
         responsePartInfoProperty.setValue(TEXT_XML);
         messaging.setUserMessage(userMessage);
-        try {
-            backendInterface.submitMessage(submitRequest,messaging);
-        } catch (SendMessageFault e) {
-            LOG.error(e.getMessage(),e);
+        return new Submission(submitRequest,messaging);
+    }
+
+    static class Submission{
+        private SubmitRequest submitRequest;
+        private Messaging messaging;
+
+        public Submission(SubmitRequest submitRequest, Messaging messaging) {
+            this.submitRequest = submitRequest;
+            this.messaging = messaging;
         }
 
+        public SubmitRequest getSubmitRequest() {
+            return submitRequest;
+        }
+
+        public Messaging getMessaging() {
+            return messaging;
+        }
     }
+
     private JsonSubmission.TypedProperty extractEndPoint(JsonSubmission submission, final String endPointType) {
         JsonSubmission.TypedProperty originalSender = null;
         Collection<JsonSubmission.TypedProperty> properties = submission.getMessageProperties();
@@ -201,36 +237,20 @@ public class IstController {
         }
         return originalSender;
     }
-    public DataHandler getPayload(final String payloadContent, final String mediaType) {
+
+    private DataHandler getPayload(final String payloadContent, final String mediaType) {
         javax.mail.util.ByteArrayDataSource dataSource = null;
-        try {
-            dataSource = new javax.mail.util.ByteArrayDataSource(Base64.encode(payloadContent.getBytes()), mediaType);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(),e);
-        }
-        //dataSource.setName("content.xml");
+        dataSource = new javax.mail.util.ByteArrayDataSource(org.apache.commons.codec.binary.Base64.encodeBase64(payloadContent.getBytes()), mediaType);
+        dataSource.setName("content.xml");
         return new DataHandler(dataSource);
     }
-
 
 
     //for testing purpose.
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     public String onMessage() {
         return "Taxud ist is up";
-        /*Submission submission = new Submission();
-        submission.setFromRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-        submission.setToRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-        submission.addFromParty("domibus-blue", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-        submission.addToParty("domibus-red", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-
-        submission.addMessageProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:wrong#sender");
-        submission.addMessageProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-        submission.setAction("action");
-        submission.setService("service");
-        return submission;*/
     }
-
 
 
 }
