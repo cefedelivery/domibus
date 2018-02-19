@@ -82,6 +82,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
     public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
     public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
+    public static final String DOMIBUS_DO_NOT_PUSH_BACK_TO_C3 = "domibus.do.not.push.back.to.c3";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -265,7 +266,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         String authenticationUrl = domibusProperties.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context authenticationPost = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.postMultipartRequest")).time();
-        LOG.trace("authenticating to:[{}] ",authenticationUrl);
+        LOG.trace("authenticating to:[{}] ", authenticationUrl);
         Boolean aBoolean = restTemplate.postForObject(authenticationUrl, umds, Boolean.class);
         authenticationPost.stop();
         if (!aBoolean) {
@@ -278,7 +279,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         final Submission.TypedProperty originalSender = extractEndPoint(submission, ORIGINAL_SENDER);
         final Submission.TypedProperty finalRecipient = extractEndPoint(submission, FINAL_RECIPIENT);
         final Submission.TypedProperty delegator = extractEndPoint(submission, DELEGATOR);
-        LOG.trace("Build umds from indentifier:[{}]",originalSender.getValue());
+        LOG.trace("Build umds from indentifier:[{}]", originalSender.getValue());
         Umds umds = identifierHelper.buildUmdsFromOriginalSender(originalSender.getValue());
         umds.setApplicationUrl(identifierHelper.getApplicationUrl(finalRecipient.getValue()));
         if (delegator != null) {
@@ -352,7 +353,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 Timer.Context uploadPayload = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "uploadPayload")).time();
                 sendPayload(submission);
                 uploadPayload.stop();
-            }else {
+            }
+            if (!Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"))) {
                 Timer.Context transformResponseContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "transformResponse")).time();
                 Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
                 transformResponseContext.stop();
@@ -430,7 +432,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         String payloadEndPointUrl = domibusProperties.getProperty(PAYLOAD_ENDPOINT_PROPERTY_NAME);
 
         Timer.Context postPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.postPayload")).time();
-        LOG.trace("Sending payload to:[{}]",payloadEndPointUrl);
+        LOG.trace("Sending payload to:[{}]", payloadEndPointUrl);
         restTemplate.postForLocation(payloadEndPointUrl, jsonSubmission);
         postPayloadContext.stop();
         requestsPerSecond.mark();

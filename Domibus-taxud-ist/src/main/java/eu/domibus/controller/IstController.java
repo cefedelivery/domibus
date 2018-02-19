@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.activation.DataHandler;
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.Collection;
@@ -66,6 +67,11 @@ public class IstController {
     @Value("${domibus.pull.service.type}")
     private String pullServiceType;
 
+    @Value("${domibus.do.not.push.back.to.c3}")
+    private String doNotPushBackProperty;
+
+    private boolean doNotPushBack;
+
     private BackendInterface backendInterface;
 
     private Observable<Submission> quoteObservable = null;
@@ -89,16 +95,23 @@ public class IstController {
         this.endPointHelper = endPointHelper;
     }
 
+    @PostConstruct
+    protected void init(){
+        doNotPushBack=Boolean.valueOf(doNotPushBackProperty);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
     public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
         LOG.info("Message received:\n  [{}]", jsonSubmission);
         payloadLogging.decodeAndlog(jsonSubmission.getPayload());
-        Observable<Submission> quoteObservable = Observable.<Submission>create(subscriber -> {
-            Submission submission = prepareSubmission(jsonSubmission);
-            subscriber.onNext(submission);
-            subscriber.onComplete();
-        }).subscribeOn(Schedulers.io());
-        quoteObservable.subscribe(this::sendMessage);
+        if(!doNotPushBack) {
+            Observable<Submission> quoteObservable = Observable.<Submission>create(subscriber -> {
+                Submission submission = prepareSubmission(jsonSubmission);
+                subscriber.onNext(submission);
+                subscriber.onComplete();
+            }).subscribeOn(Schedulers.io());
+            quoteObservable.subscribe(this::sendMessage);
+        }
 
     }
 
