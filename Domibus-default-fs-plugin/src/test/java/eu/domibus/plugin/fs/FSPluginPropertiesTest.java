@@ -55,7 +55,7 @@ public class FSPluginPropertiesTest {
 
     @Test
     public void testGetSentPurgeWorkerCronExpression() throws Exception {
-        Assert.assertEquals("* 0/1 * * * ?", fSPluginProperties.getSentPurgeWorkerCronExpression());
+        Assert.assertEquals("0 0/1 * * * ?", fSPluginProperties.getSentPurgeWorkerCronExpression());
     }
     
     @Test
@@ -70,7 +70,7 @@ public class FSPluginPropertiesTest {
 
     @Test
     public void testGetFailedPurgeWorkerCronExpression() throws Exception {
-        Assert.assertEquals("* 0/1 * * * ?", fSPluginProperties.getFailedPurgeWorkerCronExpression());
+        Assert.assertEquals("0 0/1 * * * ?", fSPluginProperties.getFailedPurgeWorkerCronExpression());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class FSPluginPropertiesTest {
 
     @Test
     public void testGetReceivedPurgeWorkerCronExpression() throws Exception {
-        Assert.assertEquals("* 0/1 * * * ?", fSPluginProperties.getReceivedPurgeWorkerCronExpression());
+        Assert.assertEquals("0 0/1 * * * ?", fSPluginProperties.getReceivedPurgeWorkerCronExpression());
     }
 
     @Test
