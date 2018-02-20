@@ -63,20 +63,7 @@
         <sonar.core.coveragePlugin>jacoco</sonar.core.coveragePlugin>
         <!--<sonar.host.url>http://edelquality.westeurope.cloudapp.azure.com:9000/sonar/</sonar.host.url>-->
 
-        <!-- soap ui code coverage start -->
-        <!--<jacoco.maven.plugin.version>0.7.9</jacoco.maven.plugin.version>-->
         <jacoco.maven.plugin.version>0.7.7.201606060606</jacoco.maven.plugin.version>
-        <!--<mysql.version>5.1.34</mysql.version>-->
-        <soapui.plugin.version>5.1.2</soapui.plugin.version>
-        <soapui.root.folder>${maven.multiModuleProjectDirectory}/Domibus-MSH-soapui-tests/src/main/soapui</soapui.root.folder>
-        <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
-        <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
-        <sonar.jacoco.remotePort.blue>${jacocoRemotePortBlue}</sonar.jacoco.remotePort.blue>
-        <sonar.jacoco.remoteAddress.blue>${jacocoRemoteAddressBlue}</sonar.jacoco.remoteAddress.blue>
-        <sonar.jacoco.remotePort.red>${jacocoRemotePortRed}</sonar.jacoco.remotePort.red>
-        <sonar.jacoco.remoteAddress.red>${jacocoRemoteAddressRed}</sonar.jacoco.remoteAddress.red>
-        <!-- soap ui code coverage end -->
-
         <sonar.host.url>http://localhost:9000/</sonar.host.url>
         <sonar.ws.timeout>300</sonar.ws.timeout>
         <!--   Enable the proxy when running sonar from within the EC network -->
@@ -780,15 +767,5 @@
                 <module>Domibus-MSH-swagger</module>
             </modules>
         </profile>
-        <!--
-        <profile>
-            <id>run-soapui</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>Domibus-MSH-soapui-tests</module>
-            </modules>
-        </profile>-->
     </profiles>
 </project>
