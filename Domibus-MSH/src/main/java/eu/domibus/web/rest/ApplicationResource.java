@@ -15,6 +15,8 @@ import java.util.Properties;
 /**
  * @author Cosmin Baciu
  * @since 3.3
+ * <p>
+ * Rest for getting application related information
  */
 @RestController
 @RequestMapping(value = "/rest/application")
@@ -31,6 +33,10 @@ public class ApplicationResource {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    /**
+     * Rest method for the Domibus Info (Version, Build Time, ...)
+     * @return Domibus Info
+     */
     @RequestMapping(value = "info", method = RequestMethod.GET)
     public DomibusInfoRO getDomibusInfo() {
         LOG.debug("Getting application info");
@@ -39,6 +45,10 @@ public class ApplicationResource {
         return domibusInfoRO;
     }
 
+    /**
+     * Rest get method for the Domibus Customized Name
+     * @return Domibus Customized Name (
+     */
     @RequestMapping(value = "name", method = RequestMethod.GET)
     public String getDomibusName() {
         LOG.debug("Getting application name");

@@ -47,20 +47,27 @@ public class ApplicationResourceTest {
         Assert.assertEquals(DOMIBUS_VERSION, domibusInfo.getVersion());
     }
 
-    @Test
-    public void testGetDomibusName() {
+    public void testDomibusName(String name) {
         // Given
         new Expectations(applicationResource) {{
-           domibusProperties.getProperty(applicationResource.DOMIBUS_CUSTOM_NAME, applicationResource.DOMIBUS_DEFAULTVALUE_NAME);
-           result = DOMIBUS_CUSTOMIZED_NAME;
+            domibusProperties.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
+            result = name;
         }};
 
         // When
         final String domibusName = applicationResource.getDomibusName();
 
         // Then
-        Assert.assertEquals(DOMIBUS_CUSTOMIZED_NAME, domibusName);
+        Assert.assertEquals(name, domibusName);
+    }
 
+    @Test
+    public void testGetDomibusCustomName() {
+        testDomibusName(DOMIBUS_CUSTOMIZED_NAME);
+    }
 
+    @Test
+    public void testGetDomibusDefaultName() {
+        testDomibusName(ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
     }
 }
