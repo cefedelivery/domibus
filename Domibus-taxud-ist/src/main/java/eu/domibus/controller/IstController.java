@@ -2,6 +2,7 @@ package eu.domibus.controller;
 
 
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.example.ws.WebserviceExample;
 import eu.domibus.plugin.JsonSubmission;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
@@ -26,6 +27,7 @@ import javax.activation.DataHandler;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -72,7 +74,7 @@ public class IstController {
 
     private boolean doNotPushBack;
 
-    private BackendInterface backendInterface;
+    private WebserviceExample webserviceExample;
 
     private Observable<Submission> quoteObservable = null;
 
@@ -86,11 +88,11 @@ public class IstController {
 
     @Autowired
     public IstController(final PayloadLogging payloadLogging,
-                         final BackendInterface backendInterface,
+                         final WebserviceExample webserviceExample,
                          final AccessPointHelper accessPointHelper,
                          final EndPointHelper endPointHelper) {
         this.payloadLogging = payloadLogging;
-        this.backendInterface = backendInterface;
+        this.webserviceExample = webserviceExample;
         this.accessPointHelper = accessPointHelper;
         this.endPointHelper = endPointHelper;
     }
@@ -98,6 +100,7 @@ public class IstController {
     @PostConstruct
     protected void init(){
         doNotPushBack=Boolean.valueOf(doNotPushBackProperty);
+        LOG.warn("Do not push to c3:[{}]",doNotPushBack);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
@@ -112,13 +115,12 @@ public class IstController {
             }).subscribeOn(Schedulers.io());
             quoteObservable.subscribe(this::sendMessage);
         }
-
     }
 
     private void sendMessage(Submission submission){
         try {
-            backendInterface.submitMessage(submission.getSubmitRequest(), submission.getMessaging());
-        } catch (SendMessageFault e) {
+            webserviceExample.getPort().submitMessage(submission.getSubmitRequest(), submission.getMessaging());
+        } catch (SendMessageFault|MalformedURLException e) {
             LOG.error(e.getMessage(), e);
         }
     }

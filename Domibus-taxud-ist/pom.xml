@@ -72,10 +72,14 @@
             <version>1.9</version>
         </dependency>
         <dependency>
-            <groupId>eu.domibus</groupId>
+        <!--    <groupId>eu.domibus</groupId>
             <artifactId>domibus-ws-stubs</artifactId>
+            <version>3.3.1</version>-->
+            <groupId>eu.domibus</groupId>
+            <artifactId>backend-client-example</artifactId>
             <version>3.3.1</version>
         </dependency>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

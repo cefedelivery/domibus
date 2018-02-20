@@ -1,5 +1,6 @@
 package eu.domibus.controller;
 
+import eu.domibus.example.ws.WebserviceExample;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.BackendService11;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,9 +23,7 @@ public class Configuration {
     private String wsdlUrl;
 
     @Bean
-    public BackendInterface backendInterface() throws MalformedURLException {
-        BackendService11 backendService = new BackendService11(new URL(wsdlUrl),  new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1"));
-        BackendInterface backendPort = backendService.getBACKENDPORT();
-        return backendPort;
+    public WebserviceExample backendInterface() throws MalformedURLException {
+        return new WebserviceExample(wsdlUrl);
     }
 }

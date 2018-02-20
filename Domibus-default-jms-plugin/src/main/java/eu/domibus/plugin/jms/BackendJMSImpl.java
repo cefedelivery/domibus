@@ -152,12 +152,18 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             " $messId\n" +
             "</message_id>\n" +
             "<error>UMDS has rejected message</error>";
+    private Boolean doNotSendToC4;
+    private Boolean doNotPushToC3;
 
 
     @PostConstruct
     protected void init() {
         restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        doNotSendToC4 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"));
+        doNotPushToC3 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"));
+        LOG.warn("Do not send to c4:[{}]",doNotSendToC4);
+        LOG.warn("Do not push to c3:[{}]",doNotPushToC3);
     }
 
     public BackendJMSImpl(String name) {
@@ -346,7 +352,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         }
 
         try {
-            if (!Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"))) {
+
+            if (!doNotSendToC4) {
                 Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate")).time();
                 authenticate(submission);
                 authenticateContext.stop();
@@ -354,7 +361,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 sendPayload(submission);
                 uploadPayload.stop();
             }
-            if (!Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"))) {
+
+            //means c4 is not pushing back to c3, so we send the submision from c3
+            if (doNotPushToC3) {
                 Timer.Context transformResponseContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "transformResponse")).time();
                 Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
                 transformResponseContext.stop();
