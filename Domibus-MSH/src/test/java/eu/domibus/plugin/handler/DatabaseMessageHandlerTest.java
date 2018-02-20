@@ -1200,4 +1200,53 @@ public class DatabaseMessageHandlerTest {
 
     }
 
+    @Test
+    public void testGetStatus() {
+        // Given
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.ACKNOWLEDGED;
+        }};
+
+        // When
+        final MessageStatus status = dmh.getStatus(MESS_ID);
+
+        // Then
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            Assert.assertEquals(MessageStatus.ACKNOWLEDGED, status);
+        }};
+    }
+
+    @Test
+    public void testGetStatusAccessDenied() {
+        // Given
+        new Expectations(dmh) {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            dmh.validateOriginalUser((UserMessage)any, anyString, anyString);
+            result = new AccessDeniedException("");
+        }};
+
+        // When
+        MessageStatus status = null;
+        try {
+            status = dmh.getStatus(MESS_ID);
+            Assert.fail("It should throw " + AccessDeniedException.class.getCanonicalName());
+        } catch (AccessDeniedException ex) {
+            // Then
+            MessageStatus finalStatus = status;
+            new Verifications() {{
+                authUtils.hasUserOrAdminRole();
+                Assert.assertNull(finalStatus);
+            }};
+        }
+
+
+    }
+
 }
