@@ -189,3 +189,8 @@ group by
 		select min(INCOMING_AK_DIF),max(INCOMING_AK_DIF),avg(INCOMING_AK_DIF)from MESSAGE_RESULT_SPLIT WHERE INCOMING_MESS_RECEIVED_DATE< TO_DATE( '02/15/2018 17:30','MM/DD/YYYY HH24:MI');
 
 select SUBSTR(TO_CHAR(INCOMING_MESS_RECEIVED_DATE,'HH24')||':'||TO_CHAR(INCOMING_MESS_RECEIVED_DATE,'mi'),0,4)||'0' AS DVF,min(INCOMING_AK_DIF),max(INCOMING_AK_DIF),avg(INCOMING_AK_DIF) from MESSAGE_RESULT_SPLIT GROUP BY SUBSTR(TO_CHAR(INCOMING_MESS_RECEIVED_DATE,'HH24')||':'||TO_CHAR(INCOMING_MESS_RECEIVED_DATE,'mi'),0,4)||'0';
+
+Clean WildFly web service notification queue
+/home/edelivery/domibus/domibus/bin/jboss-cli.sh --connect
+/subsystem=messaging/hornetq-server=default/jms-queue=DomibusNotifyBackendWebServiceQueue:remove-messages
+quit
