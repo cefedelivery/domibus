@@ -114,45 +114,64 @@
                     </dependencies>
                 </plugin>
 
-                <!-- the magic starts here -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin.version}</version>
 
-                    <executions>
-                        <execution>
-                            <id>dump coverage from blue</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>dump</goal>
-                            </goals>
-                            <configuration>
-                                <destFile>${sonar.jacoco.reportPath}</destFile>
-                                <address>${sonar.jacoco.remoteAddress.blue}</address>
-                                <port>${sonar.jacoco.remotePort.blue}</port>
-                                <reset>false</reset>
-                                <append>true</append>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>dump coverage from red</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>dump</goal>
-                            </goals>
-                            <configuration>
-                                <destFile>${sonar.jacoco.reportPath}</destFile>
-                                <address>${sonar.jacoco.remoteAddress.red}</address>
-                                <port>${sonar.jacoco.remotePort.red}</port>
-                                <reset>false</reset>
-                                <append>true</append>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>dump-coverage</id>
+            <!-- profile will run only if only '-DjacocoRemotePortBlue' property is specified in the run command line
+             otherwise said, if we don't want to have the call the dump foal we will NOT specify this property  -->
+            <activation>
+                <property>
+                    <name>jacocoRemotePortBlue</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- the magic starts here -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.maven.plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>dump coverage from blue</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>dump</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                    <address>${sonar.jacoco.remoteAddress.blue}</address>
+                                    <port>${sonar.jacoco.remotePort.blue}</port>
+                                    <reset>false</reset>
+                                    <append>true</append>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>dump coverage from red</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>dump</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                    <address>${sonar.jacoco.remoteAddress.red}</address>
+                                    <port>${sonar.jacoco.remotePort.red}</port>
+                                    <reset>false</reset>
+                                    <append>true</append>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+
+
         </profile>
     </profiles>
 
