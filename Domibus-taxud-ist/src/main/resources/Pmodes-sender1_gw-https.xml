@@ -366,6 +366,8 @@
                 <initiatorParty name="sender6_gw"/>
                 <initiatorParty name="sender7_gw"/>
                 <initiatorParty name="sender8_gw"/>
+                <initiatorParty name="sender9_gw"/>
+                <initiatorParty name="sender10_gw"/>
                 <initiatorParty name="taxud_gw"/>
             </initiatorParties>
             <responderParties>
@@ -377,6 +379,8 @@
                 <responderParty name="sender6_gw"/>
                 <responderParty name="sender7_gw"/>
                 <responderParty name="sender8_gw"/>
+                <responderParty name="sender9_gw"/>
+                <responderParty name="sender10_gw"/>
                 <responderParty name="taxud_gw"/>
             </responderParties>
             <legs>
