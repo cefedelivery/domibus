@@ -154,12 +154,6 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         largePayload.setContentType("text/xml");
         largePayload.setValue(messageHandler);
         submitRequest.getPayload().add(largePayload);
-
-        //payload = new PayloadType();
-        largePayload = new LargePayloadType();
-        largePayload.setPayloadId(payloadHref);
-        largePayload.setValue(messageHandler);
-        submitRequest.setBodyload(largePayload);
         return submitRequest;
     }
 }

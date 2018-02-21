@@ -82,7 +82,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.info("Received message");
 
-        final LargePayloadType bodyload = submitRequest.getBodyload();
+        //final LargePayloadType bodyload = submitRequest.getBodyload();
 
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
@@ -109,19 +109,19 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
             }
             if (!foundPayload) {
-                if (bodyload == null) {
+//                if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
-                    throw new SubmitMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
-                }
+                    throw new SubmitMessageFault("No Payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+//                }
                 // It can only be in body load, href MAY be null!
-                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
-                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
-                    extendedPartInfo.setInBody(true);
-                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
-                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
-                } else {
-                    throw new SubmitMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
-                }
+//                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
+//                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
+//                    extendedPartInfo.setInBody(true);
+//                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+//                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
+//                } else {
+//                    throw new SubmitMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+//                }
             }
         }
         partInfoList.addAll(partInfosToAdd);
