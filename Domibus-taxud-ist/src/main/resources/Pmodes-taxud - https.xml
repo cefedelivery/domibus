@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="taxud_gw">
+
+    <mpcs>
+        <mpc name="defaultMpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender1_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender1_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender2_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender2_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender3_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender3_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender4_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender4_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender5_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender5_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender6_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender6_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender7_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender7_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender8_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender8_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender9_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender9_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+        <mpc name="sender10_mpc"
+             qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/sender10_mpc"
+             enabled="true"
+             default="true"
+             retention_downloaded="14400"
+             retention_undownloaded="14400"/>
+    </mpcs>
+    <businessProcesses>
+        <roles>
+            <role name="defaultInitiatorRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+            <role name="defaultResponderRole"
+                  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+        </roles>
+        <parties>
+            <partyIdTypes>
+                <partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+            </partyIdTypes>
+            <party name="taxud_gw"
+                   endpoint="https://domnibus1.itsmtaxud.eu/domibus-weblogic/services/msh"
+                   allowChunking="false">
+                <identifier partyId="taxud_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender1_gw"
+                   endpoint="https://52.166.179.174:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender1_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender2_gw"
+                   endpoint="https://52.178.6.49:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender2_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender3_gw"
+                   endpoint="https://13.93.126.107:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender3_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender4_gw"
+                   endpoint="https://13.93.121.242:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender4_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender5_gw"
+                   endpoint="https://52.178.15.3:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender5_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender6_gw"
+                   endpoint="https://52.233.178.181:8443/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender6_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender7_gw"
+                   endpoint="https://52.174.42.235:8080/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender8_gw"
+                   endpoint="https://52.166.67.146:8080/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender9_gw"
+                   endpoint="https://52.178.0.38:8080/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
+            </party>
+            <party name="sender10_gw"
+                   endpoint="https://52.178.2.61:8080/domibus-wildfly/services/msh"
+                   allowChunking="false">
+                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+            </party>
+        </parties>
+        <meps>
+            <mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+            <mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+            <binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+            <binding name="pull" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/pull"/>
+            <binding name="pushAndPush"
+                     value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+        </meps>
+        <properties>
+            <property name="originalSenderProperty"
+                      key="originalSender"
+                      datatype="string"
+                      required="true"/>
+            <property name="finalRecipientProperty"
+                      key="finalRecipient"
+                      datatype="string"
+                      required="true"/>
+            <propertySet name="ecodexPropertySet">
+                <propertyRef property="finalRecipientProperty"/>
+                <propertyRef property="originalSenderProperty"/>
+            </propertySet>
+        </properties>
+        <payloadProfiles>
+            <payload name="businessContentPayload"
+                     cid="cid:message"
+                     required="true"
+                     mimeType="text/xml"/>
+            <payload name="businessContentAttachment"
+                     cid="cid:attachment"
+                     required="false"
+                     mimeType="application/octet-stream"/>
+            <payloadProfile name="MessageProfile"
+                            maxSize="40894464">
+                <attachment name="businessContentPayload"/>
+                <attachment name="businessContentAttachment"/>
+            </payloadProfile>
+        </payloadProfiles>
+        <securities>
+            <security name="eDeliveryPolicy"
+                      policy="eDeliveryPolicy.xml"
+                      signatureMethod="RSA_SHA256"/>
+            <security name="noSigNoEnc"
+                      policy="doNothingPolicy.xml"
+                      signatureMethod="RSA_SHA256"/>
+            <security name="eSensPolicy"
+                      policy="eSensPolicy.v2.0.xml"
+                      signatureMethod="RSA_SHA256"/>
+        </securities>
+        <errorHandlings>
+            <errorHandling name="demoErrorHandling"
+                           errorAsResponse="true"
+                           businessErrorNotifyProducer="false"
+                           businessErrorNotifyConsumer="false"
+                           deliveryFailureNotifyProducer="false"/>
+        </errorHandlings>
+        <agreements>
+            <agreement name="agreement1" value="A1" type=""/>
+            <agreement name="agreement2" value="A2" type=""/>
+            <agreement name="agreement3" value="A3" type=""/>
+        </agreements>
+        <services>
+            <service name="testService1" value="bdx:noprocess" type="tc1"/>
+            <service name="testService2" value="bdx:noprocess" type="tc2"/>
+            <service name="testService3" value="bdx:noprocess" type="tc3"/>
+            <service name="testService4" value="bdx:noprocess" type="tc4"/>
+            <service name="testService5" value="bdx:noprocess" type="tc5"/>
+            <service name="testService7" value="bdx:noprocess" type="tc7"/>
+            <service name="testService8" value="bdx:noprocess" type="tc8"/>
+            <service name="testService9" value="bdx:noprocess" type="tc9"/>
+            <service name="testService10" value="bdx:noprocess" type="tc10"/>
+            <service name="testService11" value="bdx:noprocess" type="tc11"/>
+            <service name="testService12" value="bdx:noprocess" type="tc12"/>
+        </services>
+        <actions>
+            <action name="tc1Action" value="TC1Leg1"/>
+            <action name="tc2Action" value="TC2Leg1"/>
+            <action name="tc3Action" value="TC3Leg1"/>
+            <action name="tc4Action" value="TC4Leg1"/>
+            <action name="tc5Action" value="TC5Leg1"/>
+            <action name="tc7Action" value="TC7Leg1"/>
+            <action name="tc8Action" value="TC8Leg1"/>
+            <action name="tc9Action" value="TC9Leg1"/>
+            <action name="tc10Action" value="TC10Leg1"/>
+            <action name="tc11Action" value="TC11Leg1"/>
+            <action name="tc12Action" value="TC12Leg1"/>
+        </actions>
+        <as4>
+            <receptionAwareness name="receptionAwareness" retry="5;10;CONSTANT" duplicateDetection="true"/>
+            <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+            <reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+        </as4>
+        <legConfigurations>
+            <legConfiguration name="pushTestcase1tc2Action"
+                              service="testService1"
+                              action="tc1Action"
+                              defaultMpc="defaultMpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender1_gw_leg"
+                              service="testService2"
+                              action="tc2Action"
+                              defaultMpc="sender1_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender2_gw_leg"
+                              service="testService3"
+                              action="tc3Action"
+                              defaultMpc="sender2_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender3_gw_leg"
+                              service="testService4"
+                              action="tc4Action"
+                              defaultMpc="sender3_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender4_gw_leg"
+                              service="testService5"
+                              action="tc5Action"
+                              defaultMpc="sender4_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender5_gw_leg"
+                              service="testService6"
+                              action="tc6Action"
+                              defaultMpc="sender5_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender6_gw_leg"
+                              service="testService7"
+                              action="tc7Action"
+                              defaultMpc="sender6_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender7_gw_leg"
+                              service="testService8"
+                              action="tc8Action"
+                              defaultMpc="sender7_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender8_gw_leg"
+                              service="testService9"
+                              action="tc9Action"
+                              defaultMpc="sender8_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender9_gw_leg"
+                              service="testService10"
+                              action="tc10Action"
+                              defaultMpc="sender9_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+            <legConfiguration name="sender10_gw_leg"
+                              service="testService11"
+                              action="tc11Action"
+                              defaultMpc="sender10_mpc"
+                              reliability="AS4Reliability"
+                              security="eSensPolicy"
+                              receptionAwareness="receptionAwareness"
+                              propertySet="ecodexPropertySet"
+                              payloadProfile="MessageProfile"
+                              errorHandling="demoErrorHandling"
+                              compressPayloads="true"/>
+        </legConfigurations>
+
+        <process name="tc1Process"
+                 agreement=""
+                 mep="oneway"
+                 binding="push"
+                 initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender1_gw"/>
+                <initiatorParty name="sender2_gw"/>
+                <initiatorParty name="sender3_gw"/>
+                <initiatorParty name="sender4_gw"/>
+                <initiatorParty name="sender5_gw"/>
+                <initiatorParty name="sender6_gw"/>
+                <initiatorParty name="sender7_gw"/>
+                <initiatorParty name="sender8_gw"/>
+                <initiatorParty name="taxud_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="sender1_gw"/>
+                <responderParty name="sender2_gw"/>
+                <responderParty name="sender3_gw"/>
+                <responderParty name="sender4_gw"/>
+                <responderParty name="sender5_gw"/>
+                <responderParty name="sender6_gw"/>
+                <responderParty name="sender7_gw"/>
+                <responderParty name="sender8_gw"/>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="pushTestcase1tc1Action"/>
+                <leg name="pushTestcase1tc2Action"/>
+            </legs>
+        </process>
+        <process name="sender1PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender1_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender1_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender2PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender2_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender2_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender3PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender3_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender3_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender4PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender4_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender4_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender5PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender5_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender5_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender6PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender6_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender6_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender7PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender7_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender7_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender8PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender8_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender8_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender9PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender9_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender9_gw_leg"/>
+            </legs>
+        </process>
+        <process name="sender10PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
+                 responderRole="defaultResponderRole">
+            <initiatorParties>
+                <initiatorParty name="sender10_gw"/>
+            </initiatorParties>
+            <responderParties>
+                <responderParty name="taxud_gw"/>
+            </responderParties>
+            <legs>
+                <leg name="sender10_gw_leg"/>
+            </legs>
+        </process>
+    </businessProcesses>
+</db:configuration>
