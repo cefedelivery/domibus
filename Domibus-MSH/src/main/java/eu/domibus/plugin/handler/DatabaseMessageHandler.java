@@ -111,9 +111,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
-
+        }
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
@@ -156,7 +156,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         return transformer.transformFromMessaging(userMessage);
     }
 
-    private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
+    protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
             LOG.debug("OriginalUser is [" + authOriginalUser + "]");
             /* check the message belongs to the authenticated user */
@@ -184,9 +184,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasAdminRole();
-
+        }
         return convertMessageStatus(userMessageLogDao.getMessageStatus(messageId));
     }
 
@@ -201,8 +201,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
-            authUtils.hasAdminRole();
+        if (!authUtils.isUnsecureLoginAllowed()) {
+            authUtils.hasUserOrAdminRole();
+        }
+
+        // check if user can get the status of that message (only admin or original users are authorized to do that)
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        String originalUser = authUtils.getOriginalUserFromSecurityContext();
+        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
         return userMessageLogDao.getMessageStatus(messageId);
     }
@@ -210,9 +216,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasAdminRole();
-
+        }
         return errorLogDao.getErrorsForMessage(messageId);
     }
 

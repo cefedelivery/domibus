@@ -2,6 +2,9 @@ import {Component, OnInit} from "@angular/core";
 import {SecurityService} from "./security/security.service";
 import {Router} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
+import {Title} from "@angular/platform-browser";
+import {Http, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-root',
@@ -13,11 +16,18 @@ export class AppComponent implements OnInit {
   isAdmin: boolean;
   _currentUser: string;
   fullMenu: boolean = true;
-  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed"
+  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
 
   constructor(private securityService: SecurityService,
               private router: Router,
-              private securityEventService: SecurityEventService) {
+              private securityEventService: SecurityEventService,
+              private http: Http,
+              private titleService: Title) {
+    let applicationNameResponse: Observable<Response>  = this.http.get('rest/application/name');
+
+    applicationNameResponse.subscribe((name: Response) => {
+      this.titleService.setTitle(name.json());
+    });
   }
 
   ngOnInit() {
