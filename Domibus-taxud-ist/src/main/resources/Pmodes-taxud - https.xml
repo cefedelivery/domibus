@@ -371,7 +371,6 @@
             </responderParties>
             <legs>
                 <leg name="pushTestcase1tc1Action"/>
-                <leg name="pushTestcase1tc2Action"/>
             </legs>
         </process>
         <process name="sender1PullProcess" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole"
