@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
@@ -24,6 +25,7 @@ import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -48,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
 import static eu.domibus.common.services.impl.PullContext.*;
@@ -204,13 +208,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+        Timer.Context retrieveReadyToPullUserMessageId = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.retrieveReadyToPullUserMessageId")).time();
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.size() == 0) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        return messagingLockService.getPullMessageToProcess(partyId, mpc);
+        String pullMessageToProcess = messagingLockService.getPullMessageToProcess(partyId, mpc);
+        retrieveReadyToPullUserMessageId.close();
+        return pullMessageToProcess;
     }
 
     /**
@@ -218,10 +225,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
+        Timer.Context extractProcessOnMpc = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.extractProcessOnMpc")).time();
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
             processValidator.validatePullProcess(processes);
+            extractProcessOnMpc.stop();
             return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
         } catch (IllegalArgumentException e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");

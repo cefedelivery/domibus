@@ -60,11 +60,11 @@ public class IstController {
     @Value("${domibus.pull.user.identifier}")
     private String pullUserIdentifier;
 
-    @Value("${domibus.pull.action}")
+/*    @Value("${domibus.pull.action}")
     private String pullAction;
 
     @Value("${domibus.pull.service}")
-    private String pullService;
+    private String pullService;*/
 
     @Value("${domibus.pull.service.type}")
     private String pullServiceType;
@@ -173,16 +173,15 @@ public class IstController {
         responseTo.setRole(submission.getFromRole());
         partyInfo.setTo(responseTo);
         PartyId responseToPartyId = new PartyId();
-        responseToPartyId.setValue(submissionTo.getPartyId());
+        String to_partyId = submissionTo.getPartyId();
+        responseToPartyId.setValue(to_partyId);
         responseToPartyId.setType(submissionTo.getPartyIdType());
         responseTo.setPartyId(responseToPartyId);
 
 
         String[] splitIdentifier = IdentifierUtil.splitIdentifier(finalRecipient.getValue());
         if (splitIdentifier[1].equalsIgnoreCase(pullUserIdentifier)) {
-            submissionAction = pullAction;
-            submissionService = pullService;
-            submissionServiceType = pullServiceType;
+            submissionServiceType = to_partyId+pullServiceType;
         }
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         Service responseService = new Service();

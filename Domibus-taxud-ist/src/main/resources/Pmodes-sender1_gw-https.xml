@@ -81,17 +81,17 @@
                 <partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
             </partyIdTypes>
             <party name="taxud_gw"
-                   endpoint="https://domnibus1.itsmtaxud.eu/domibus-weblogic/services/msh"
+                   endpoint="http://localhost:9001/domibus-weblogic/services/msh"
                    allowChunking="false">
                 <identifier partyId="taxud_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender1_gw"
-                   endpoint="https://52.166.179.174:8443/domibus-wildfly/services/msh"
+                   endpoint="http://localhost:7001/domibus-weblogic/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender1_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender2_gw"
-                   endpoint="https://52.178.6.49:8443/domibus-wildfly/services/msh"
+                   endpoint="http://localhost:7001/domibus-weblogic/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender2_gw" partyIdType="partyTypeUrn"/>
             </party>
@@ -198,29 +198,19 @@
         </agreements>
         <services>
             <service name="testService1" value="bdx:noprocess" type="tc1"/>
-            <service name="sender1_gw_testService" value="bdx:noprocess" type="sender1_pull"/>
-            <service name="sender2_gw_testService" value="bdx:noprocess" type="sender2_pull"/>
-            <service name="sender3_gw_testService" value="bdx:noprocess" type="sender3_pull"/>
-            <service name="sender4_gw_testService" value="bdx:noprocess" type="sender4_ppull"/>
-            <service name="sender5_gw_testService" value="bdx:noprocess" type="sender5_ppull"/>
-            <service name="sender6_gw_testService" value="bdx:noprocess" type="sender6_pull"/>
-            <service name="sender7_gw_testService" value="bdx:noprocess" type="sender7_pull"/>
-            <service name="sender8_gw_testService" value="bdx:noprocess" type="sender8_pull"/>
-            <service name="sender9_gw_testService" value="bdx:noprocess" type="sender9_pull"/>
-            <service name="sender10_gw_testService" value="bdx:noprocess" type="sender10_pull"/>
+            <service name="sender1_gw_testService" value="bdx:noprocess" type="sender1_gw_pull"/>
+            <service name="sender2_gw_testService" value="bdx:noprocess" type="sender2_gw_pull"/>
+            <service name="sender3_gw_testService" value="bdx:noprocess" type="sender3_gw_pull"/>
+            <service name="sender4_gw_testService" value="bdx:noprocess" type="sender4_gw_pull"/>
+            <service name="sender5_gw_testService" value="bdx:noprocess" type="sender5_gw_pull"/>
+            <service name="sender6_gw_testService" value="bdx:noprocess" type="sender6_gw_pull"/>
+            <service name="sender7_gw_testService" value="bdx:noprocess" type="sender7_gw_pull"/>
+            <service name="sender8_gw_testService" value="bdx:noprocess" type="sender8_gw_pull"/>
+            <service name="sender9_gw_testService" value="bdx:noprocess" type="sender9_gw_pull"/>
+            <service name="sender10_gw_testService" value="bdx:noprocess" type="sender10_gw_pull"/>
         </services>
         <actions>
             <action name="tc1Action" value="TC1Leg1"/>
-            <!--<action name="tc2Action" value="TC2Leg1"/>
-            <action name="tc3Action" value="TC3Leg1"/>
-            <action name="tc4Action" value="TC4Leg1"/>
-            <action name="tc5Action" value="TC5Leg1"/>
-            <action name="tc7Action" value="TC7Leg1"/>
-            <action name="tc8Action" value="TC8Leg1"/>
-            <action name="tc9Action" value="TC9Leg1"/>
-            <action name="tc10Action" value="TC10Leg1"/>
-            <action name="tc11Action" value="TC11Leg1"/>
-            <action name="tc12Action" value="TC12Leg1"/>-->
         </actions>
         <as4>
             <receptionAwareness name="receptionAwareness" retry="5;10;CONSTANT" duplicateDetection="true"/>
