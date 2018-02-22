@@ -97,9 +97,7 @@
                             </property>
                         </soapuiProperties>
                         <testFailIgnore>true</testFailIgnore>
-
                     </configuration>
-
                     <dependencies>
                         <dependency>
                             <groupId>mysql</groupId>
@@ -113,8 +111,6 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-
-
             </plugins>
             </build>
         </profile>
