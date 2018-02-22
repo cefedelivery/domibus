@@ -42,7 +42,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
-        Timer.Context getFirstNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getFirstNextPullMessageToProcess")).time();
+        Timer.Context getFirstNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getFirstNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
         namedQuery.setParameter(INITIATOR, initiator);
@@ -57,7 +57,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     }
 
     private String getMessageId(TypedQuery<MessagingLock> namedQuery) {
-        Timer.Context getMessageId = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getMessageId")).time();
+        Timer.Context getMessageId = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getMessageId")).time();
         try {
             MessagingLock messagingLock = namedQuery.getSingleResult();
             LOG.debug("Message retrieved:   \n[{}]", messagingLock);
@@ -78,7 +78,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, final List<Integer> lockedIds) {
-        Timer.Context getAfterLockNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getAfterLockNextPullMessageToProcess")).time();
+        Timer.Context getAfterLockNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getAfterLockNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
         namedQuery.setParameter(INITIATOR, initiator);
@@ -116,16 +116,20 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     public void delete(final String messageId) {
+        Timer.Context deleteMessageLock = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.deleteMessageLock")).time();
         Query query = entityManager.createNamedQuery("MessagingLock.delete");
         query.setParameter(MESSAGE_ID,messageId);
         query.executeUpdate();
+        deleteMessageLock.close();
     }
 
     @Override
     public void updateStatus(final String messageId,final MessageState messageState) {
+        Timer.Context updateStatus = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.updateStatus")).time();
         Query query = entityManager.createNamedQuery("MessagingLock.updateStatus");
         query.setParameter(MESSAGE_ID,messageId);
         query.setParameter(MESSAGE_STATE,messageState);
         query.executeUpdate();
+        updateStatus.stop();
     }
 }

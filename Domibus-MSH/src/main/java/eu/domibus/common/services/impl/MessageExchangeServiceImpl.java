@@ -208,7 +208,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
-        Timer.Context retrieveReadyToPullUserMessageId = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "retrieveReadyToPullUserMessageId")).time();
+        Timer.Context retrieveReadyToPullUserMessageId = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.retrieveReadyToPullUserMessageId")).time();
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.size() == 0) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
@@ -225,7 +225,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
-        Timer.Context extractProcessOnMpc = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "extractProcessOnMpc")).time();
+        Timer.Context extractProcessOnMpc = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.extractProcessOnMpc")).time();
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
