@@ -52,6 +52,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
 
 import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -232,10 +233,13 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
 
     SOAPMessage handlePullRequest(Messaging messaging) {
+        Timer.Context handlePullRequest = METRIC_REGISTRY.timer(name(MSHWebservice.class, "handlePullRequest")).time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
         String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
-        return pullRequestHandler.handlePullRequest(messageId, pullContext);
+        SOAPMessage soapMessage = pullRequestHandler.handlePullRequest(messageId, pullContext);
+        handlePullRequest.stop();
+        return soapMessage;
     }
 
     private Messaging getMessage(SOAPMessage request) {

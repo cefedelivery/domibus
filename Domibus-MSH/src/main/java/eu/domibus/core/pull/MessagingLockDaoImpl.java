@@ -1,5 +1,7 @@
 package eu.domibus.core.pull;
 
+import com.codahale.metrics.Timer;
+import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.*;
 import java.util.List;
 
+import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 import static eu.domibus.ebms3.common.model.MessageState.READY;
 import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
 
@@ -38,6 +42,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
+        Timer.Context getFirstNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getFirstNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
         namedQuery.setParameter(INITIATOR, initiator);
@@ -46,24 +51,34 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         namedQuery.setFirstResult(0);
         namedQuery.setMaxResults(1);
         LOG.debug("Retrieving message of type:[{}] and state:[{}] for initiator:[{}] and mpc:[{}]", messageType, READY, initiator, mpc);
-        return getMessageId(namedQuery);
+        String messageId = getMessageId(namedQuery);
+        getFirstNextPullMessageToProcess.stop();
+        return messageId;
     }
 
     private String getMessageId(TypedQuery<MessagingLock> namedQuery) {
+        Timer.Context getMessageId = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getMessageId")).time();
         try {
             MessagingLock messagingLock = namedQuery.getSingleResult();
             LOG.debug("Message retrieved:   \n[{}]", messagingLock);
+            Timer.Context lockMessage = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "lockMessage")).time();
             lockMessage(messagingLock);
+            lockMessage.close();
             LOG.debug("Message wit id:[{}] locked", messagingLock.getMessageId());
-            return messagingLock.getMessageId();
+            String messageId = messagingLock.getMessageId();
+            return messageId;
         } catch (NoResultException e) {
             LOG.debug("No message found");
             return null;
+        }
+        finally {
+            getMessageId.close();
         }
     }
 
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, final List<Integer> lockedIds) {
+        Timer.Context getAfterLockNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "getAfterLockNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
         namedQuery.setParameter(INITIATOR, initiator);
@@ -79,7 +94,9 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             }
         }
 
-        return getMessageId(namedQuery);
+        String messageId = getMessageId(namedQuery);
+        getAfterLockNextPullMessageToProcess.stop();
+        return messageId;
     }
 
     private void lockMessage(MessagingLock messagingLock) {
