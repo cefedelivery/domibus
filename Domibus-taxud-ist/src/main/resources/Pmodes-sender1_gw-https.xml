@@ -116,24 +116,24 @@
                 <identifier partyId="sender6_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender7_gw"
-                   endpoint="https://52.174.42.235:8080/domibus-wildfly/services/msh"
+                   endpoint="https://52.174.42.235:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender8_gw"
-                   endpoint="https://52.166.67.146:8080/domibus-wildfly/services/msh"
+                   endpoint="https://52.166.67.146:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender9_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender9_gw"
-                   endpoint="https://52.178.0.38:8080/domibus-wildfly/services/msh"
+                   endpoint="https://52.178.0.38:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender9_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender10_gw"
-                   endpoint="https://52.178.2.61:8080/domibus-wildfly/services/msh"
+                   endpoint="https://52.178.2.61:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender9_gw" partyIdType="partyTypeUrn"/>
             </party>
         </parties>
         <meps>
