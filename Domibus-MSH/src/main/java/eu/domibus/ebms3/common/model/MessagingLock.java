@@ -81,6 +81,10 @@ public class MessagingLock extends AbstractBaseEntity {
         this.messageState = messageState;
     }
 
+    public MessageState getMessageState() {
+        return messageState;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

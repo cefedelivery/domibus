@@ -20,12 +20,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <!-- add exclusion to deploy in weblogic-->
-            <exclusions>
+           <!--<exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
-            </exclusions>
+            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
@@ -115,7 +115,7 @@
             <artifactId>spring-boot-maven-plugin</artifactId>
         </plugin>
         <!-- tag::wsdl[] -->
-        <plugin>
+       <!-- <plugin>
             <groupId>org.jvnet.jaxb2.maven2</groupId>
             <artifactId>maven-jaxb2-plugin</artifactId>
             <version>0.12.3</version>
@@ -135,7 +135,7 @@
                     </schema>
                 </schemas>
             </configuration>
-        </plugin>
+        </plugin>-->
         <!-- end::wsdl[] -->
     </plugins>
 </pluginManagement>

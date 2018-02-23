@@ -19,6 +19,7 @@ import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pull.MessagingLockException;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -236,7 +237,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Timer.Context handlePullRequest = METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequest")).time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+        String messageId=null;
+        try {
+            messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+        }catch (MessagingLockException e){
+
+        }
         SOAPMessage soapMessage = pullRequestHandler.handlePullRequest(messageId, pullContext);
         handlePullRequest.stop();
         return soapMessage;

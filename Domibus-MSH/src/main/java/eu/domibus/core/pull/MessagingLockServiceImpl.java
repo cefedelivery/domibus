@@ -30,19 +30,17 @@ public class MessagingLockServiceImpl implements MessagingLockService {
 
     private final static int maxTentative = 3;
 
+    protected void postConstruct
+
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRED)
     public String getPullMessageToProcess(final String initiator, final String mpc) {
-        try {
-            return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
-        } catch (MessagingLockException e) {
-            List<Integer> lockedIds = Lists.newArrayList(e.getMessageAlreadyLockedId());
-            LOG.error("Messaging locking mechanism for initiator:[{}] and mpc:[{}], retrying without ids[{}]", initiator,mpc,StringUtils.join(lockedIds, ","));
-            return tryAnotherMessage(initiator, mpc, lockedIds);
-        }
+
+        return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
+
     }
 
-    private String tryAnotherMessage(final String initiator, final String mpc, final List<Integer> lockedIds) {
+    /*private String tryAnotherMessage(final String initiator, final String mpc, final List<Integer> lockedIds) {
         if (lockedIds.size() >= maxTentative) {
             LOG.error("Max tentative:[{}] to lock a message has been reached for initiator:[{}] and mpc:[{}]"+ maxTentative,initiator,mpc);
             throw new MessagingLockException("Max tentative to lock a message has been reached:" + maxTentative);
@@ -55,7 +53,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
             LOG.error("Messaging locking mechanism for initiator:[{}] and mpc:[{}], retrying without ids[{}]", initiator,mpc,StringUtils.join(lockedIds, ","));
             return tryAnotherMessage(initiator, mpc, lockedIds);
         }
-    }
+    }*/
 
     @Override
     @Transactional
@@ -71,7 +69,7 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void delete(final String messageId) {
         messagingLockDao.delete(messageId);
     }

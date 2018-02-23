@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -68,6 +69,9 @@ public class PullRequestHandler {
     @Autowired
     private ReliabilityService reliabilityService;
 
+    @Autowired
+    private MessagingLockService messagingLockService;
+
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -117,6 +121,8 @@ public class PullRequestHandler {
                         leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
+
+                messagingLockService.delete(messageId);
                 checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {

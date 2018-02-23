@@ -21,6 +21,7 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.pull.MessagingLockException;
 import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -64,7 +65,7 @@ import static eu.domibus.common.services.impl.PullContext.*;
 @Service
 public class MessageExchangeServiceImpl implements MessageExchangeService {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageExchangeServiceImpl.class);
 
     private static final String DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.receiver.certificate.validation.onsending";
 
@@ -129,7 +130,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc}@
      */
     @Override
     @Transactional(readOnly = true)
@@ -191,6 +192,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         };
                         //TODO extract this outside of the loop for clarity.
                         Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+                        LOG.debug("Sending:[{}] pull request for mpc:[{}]",numberOfPullRequestPerMpc,mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
                         }
@@ -206,8 +208,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     //TODO change this mechanism.
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public synchronized String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Timer.Context retrieveReadyToPullUserMessageId = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.retrieveReadyToPullUserMessageId")).time();
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.size() == 0) {
