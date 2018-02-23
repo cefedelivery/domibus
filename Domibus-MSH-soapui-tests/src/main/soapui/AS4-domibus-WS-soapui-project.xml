@@ -5939,8 +5939,7 @@ PartyId seems to be case sensitive for pull binding messages.</con:description><
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED","RECEIVED");
 test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
-test.cleanDBMessageIDStartsWith(context.expand('%${Submit Message#Request#//ns:MessageId}'))
-test.cleanDBMessageIDStartsWith('4')
+test.cleanDBMessageIDStartsWith(context.expand('%${Submit Message#Request#//ns:MessageId}'));
 test.finalize();	
 
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
