@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration" party="sender9_gw">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="sender5_gw">
 
     <mpcs>
         <mpc name="defaultMpc"
@@ -86,54 +86,54 @@
                 <identifier partyId="taxud_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender1_gw"
-                   endpoint="https://52.166.179.174:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc01.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender1_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender2_gw"
-                   endpoint="https://52.178.6.49:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc02.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender2_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender3_gw"
-                   endpoint="https://13.93.126.107:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc03.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender3_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender4_gw"
-                   endpoint="https://13.93.121.242:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc04.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender4_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender5_gw"
-                   endpoint="https://52.178.15.3:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc05.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender5_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender6_gw"
-                   endpoint="https://52.233.178.181:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc06.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender6_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender7_gw"
-                   endpoint="https://52.174.42.235:8080/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc07.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender8_gw"
-                   endpoint="https://52.166.67.146:8080/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc08.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender9_gw"
-                   endpoint="https://52.178.0.38:8080/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc09.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender9_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender10_gw"
-                   endpoint="https://52.178.2.61:8080/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc10.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender10_gw" partyIdType="partyTypeUrn"/>
             </party>
         </parties>
         <meps>
@@ -198,29 +198,19 @@
         </agreements>
         <services>
             <service name="testService1" value="bdx:noprocess" type="tc1"/>
-            <service name="testService2" value="bdx:noprocess" type="tc2"/>
-            <service name="testService3" value="bdx:noprocess" type="tc3"/>
-            <service name="testService4" value="bdx:noprocess" type="tc4"/>
-            <service name="testService5" value="bdx:noprocess" type="tc5"/>
-            <service name="testService7" value="bdx:noprocess" type="tc7"/>
-            <service name="testService8" value="bdx:noprocess" type="tc8"/>
-            <service name="testService9" value="bdx:noprocess" type="tc9"/>
-            <service name="testService10" value="bdx:noprocess" type="tc10"/>
-            <service name="testService11" value="bdx:noprocess" type="tc11"/>
-            <service name="testService12" value="bdx:noprocess" type="tc12"/>
+            <service name="sender1_gw_testService" value="bdx:noprocess" type="sender1_gw_pull"/>
+            <service name="sender2_gw_testService" value="bdx:noprocess" type="sender2_gw_pull"/>
+            <service name="sender3_gw_testService" value="bdx:noprocess" type="sender3_gw_pull"/>
+            <service name="sender4_gw_testService" value="bdx:noprocess" type="sender4_gw_pull"/>
+            <service name="sender5_gw_testService" value="bdx:noprocess" type="sender5_gw_pull"/>
+            <service name="sender6_gw_testService" value="bdx:noprocess" type="sender6_gw_pull"/>
+            <service name="sender7_gw_testService" value="bdx:noprocess" type="sender7_gw_pull"/>
+            <service name="sender8_gw_testService" value="bdx:noprocess" type="sender8_gw_pull"/>
+            <service name="sender9_gw_testService" value="bdx:noprocess" type="sender9_gw_pull"/>
+            <service name="sender10_gw_testService" value="bdx:noprocess" type="sender10_gw_pull"/>
         </services>
         <actions>
             <action name="tc1Action" value="TC1Leg1"/>
-            <action name="tc2Action" value="TC2Leg1"/>
-            <action name="tc3Action" value="TC3Leg1"/>
-            <action name="tc4Action" value="TC4Leg1"/>
-            <action name="tc5Action" value="TC5Leg1"/>
-            <action name="tc7Action" value="TC7Leg1"/>
-            <action name="tc8Action" value="TC8Leg1"/>
-            <action name="tc9Action" value="TC9Leg1"/>
-            <action name="tc10Action" value="TC10Leg1"/>
-            <action name="tc11Action" value="TC11Leg1"/>
-            <action name="tc12Action" value="TC12Leg1"/>
         </actions>
         <as4>
             <receptionAwareness name="receptionAwareness" retry="5;10;CONSTANT" duplicateDetection="true"/>
@@ -240,8 +230,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender1_gw_leg"
-                              service="testService2"
-                              action="tc2Action"
+                              service="sender1_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender1_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -251,8 +241,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender2_gw_leg"
-                              service="testService3"
-                              action="tc3Action"
+                              service="sender2_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender2_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -262,8 +252,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender3_gw_leg"
-                              service="testService4"
-                              action="tc4Action"
+                              service="sender3_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender3_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -273,8 +263,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender4_gw_leg"
-                              service="testService5"
-                              action="tc5Action"
+                              service="sender4_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender4_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -284,8 +274,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender5_gw_leg"
-                              service="testService6"
-                              action="tc6Action"
+                              service="sender5_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender5_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -295,8 +285,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender6_gw_leg"
-                              service="testService7"
-                              action="tc7Action"
+                              service="sender6_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender6_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -306,8 +296,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender7_gw_leg"
-                              service="testService8"
-                              action="tc8Action"
+                              service="sender7_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender7_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -317,8 +307,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender8_gw_leg"
-                              service="testService9"
-                              action="tc9Action"
+                              service="sender8_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender8_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -328,8 +318,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender9_gw_leg"
-                              service="testService10"
-                              action="tc10Action"
+                              service="sender9_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender9_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -339,8 +329,8 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
             <legConfiguration name="sender10_gw_leg"
-                              service="testService11"
-                              action="tc11Action"
+                              service="sender10_gw_testService"
+                              action="tc1Action"
                               defaultMpc="sender10_mpc"
                               reliability="AS4Reliability"
                               security="eSensPolicy"
@@ -384,7 +374,6 @@
                 <responderParty name="taxud_gw"/>
             </responderParties>
             <legs>
-                <leg name="pushTestcase1tc1Action"/>
                 <leg name="pushTestcase1tc2Action"/>
             </legs>
         </process>

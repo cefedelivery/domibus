@@ -81,59 +81,59 @@
                 <partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
             </partyIdTypes>
             <party name="taxud_gw"
-                   endpoint="http://localhost:9001/domibus-weblogic/services/msh"
+                   endpoint="https://domnibus1.itsmtaxud.eu/domibus-weblogic/services/msh"
                    allowChunking="false">
                 <identifier partyId="taxud_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender1_gw"
-                   endpoint="http://localhost:7001/domibus-weblogic/services/msh"
+                   endpoint="https://ics2poc01.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender1_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender2_gw"
-                   endpoint="http://localhost:7001/domibus-weblogic/services/msh"
+                   endpoint="https://ics2poc02.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender2_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender3_gw"
-                   endpoint="https://13.93.126.107:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc03.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender3_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender4_gw"
-                   endpoint="https://13.93.121.242:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc04.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender4_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender5_gw"
-                   endpoint="https://52.178.15.3:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc05.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender5_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender6_gw"
-                   endpoint="https://52.233.178.181:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc06.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender6_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender7_gw"
-                   endpoint="https://52.174.42.235:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc07.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender8_gw"
-                   endpoint="https://52.166.67.146:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc08.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
                 <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender9_gw"
-                   endpoint="https://52.178.0.38:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc09.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender7_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender9_gw" partyIdType="partyTypeUrn"/>
             </party>
             <party name="sender10_gw"
-                   endpoint="https://52.178.2.61:8443/domibus-wildfly/services/msh"
+                   endpoint="https://ics2poc10.westeurope.cloudapp.azure.com:8443/domibus-wildfly/services/msh"
                    allowChunking="false">
-                <identifier partyId="sender8_gw" partyIdType="partyTypeUrn"/>
+                <identifier partyId="sender10_gw" partyIdType="partyTypeUrn"/>
             </party>
         </parties>
         <meps>
@@ -356,6 +356,8 @@
                 <initiatorParty name="sender6_gw"/>
                 <initiatorParty name="sender7_gw"/>
                 <initiatorParty name="sender8_gw"/>
+                <initiatorParty name="sender9_gw"/>
+                <initiatorParty name="sender10_gw"/>
                 <initiatorParty name="taxud_gw"/>
             </initiatorParties>
             <responderParties>
@@ -367,6 +369,8 @@
                 <responderParty name="sender6_gw"/>
                 <responderParty name="sender7_gw"/>
                 <responderParty name="sender8_gw"/>
+                <responderParty name="sender9_gw"/>
+                <responderParty name="sender10_gw"/>
                 <responderParty name="taxud_gw"/>
             </responderParties>
             <legs>
