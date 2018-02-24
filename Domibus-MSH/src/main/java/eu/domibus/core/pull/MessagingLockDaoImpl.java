@@ -1,7 +1,6 @@
 package eu.domibus.core.pull;
 
 import com.codahale.metrics.Timer;
-import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
@@ -46,7 +45,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
+    public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, int maxResult) {
         Timer.Context getFirstNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getFirstNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
@@ -54,7 +53,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         namedQuery.setParameter(MPC, mpc);
         namedQuery.setParameter(MESSAGE_STATE, READY);
         namedQuery.setFirstResult(0);
-        namedQuery.setMaxResults(1);
+        namedQuery.setMaxResults(maxResult);
         //LOG.debug("Retrieving message of type:[{}] and state:[{}] for initiator:[{}] and mpc:[{}]", messageType, READY, initiator, mpc);
         String messageId = getMessageId(namedQuery);
         getFirstNextPullMessageToProcess.stop();
@@ -64,7 +63,15 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     private String getMessageId(TypedQuery<MessagingLock> namedQuery) {
         Timer.Context getMessageId = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getMessageId")).time();
         try {
-            MessagingLock messagingLock = namedQuery.getSingleResult();
+            List<MessagingLock> messagingLockList = namedQuery.getResultList();
+            if(messagingLockList.size()==0){
+                return null;
+            }
+            int maxIndex=messagingLockList.size()-1;
+            int min=0;
+            int randomIndex= (int) ((Math.random()*(maxIndex-min))+min);
+            LOG.debug("messagingLockList sise:[{}], peaking:[{}]",messagingLockList.size(),randomIndex);
+            MessagingLock messagingLock=messagingLockList.get(randomIndex);
           //  LOG.debug("Message retrieved:   \n[{}]", messagingLock);
             Timer.Context lockMessage = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "lockMessage")).time();
             if(!lockMessage(messagingLock)){

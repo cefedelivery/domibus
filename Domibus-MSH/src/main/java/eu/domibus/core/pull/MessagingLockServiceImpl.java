@@ -1,19 +1,16 @@
 package eu.domibus.core.pull;
 
-import com.google.common.collect.Lists;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,13 +27,11 @@ public class MessagingLockServiceImpl implements MessagingLockService {
 
     private final static int maxTentative = 3;
 
-    protected void postConstruct
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String getPullMessageToProcess(final String initiator, final String mpc) {
 
-        return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
+        return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc, 100);
 
     }
 
