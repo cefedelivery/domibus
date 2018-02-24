@@ -586,3 +586,30 @@ CREATE UNIQUE INDEX IDX_MESSAGE_LOCK_UNIQUE_ID ON TB_MESSAGING_LOCK(MESSAGE_ID);
 
 ALTER SEQUENCE HIBERNATE_SEQUENCE CACHE 1000;
 
+CREATE OR REPLACE  procedure get_next(
+  message_type in VARCHAR2,
+  initiator in VARCHAR2,
+  mpc in VARCHAR2,
+  message_id out VARCHAR2)
+is
+resource_busy    EXCEPTION;
+pragma exception_init( resource_busy, -54 );
+ID_PK NUMBER;
+  begin
+    for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc and TB_MESSAGING_LOCK.INITIATOR=initiator AND message_type=message_type)
+    loop
+      begin
+        select TB_MESSAGING_LOCK.MESSAGE_ID into message_id from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
+        exit;
+        exception
+        when resource_busy then
+        null;
+        when NO_DATA_FOUND then
+        null;
+      end;
+    end loop;
+  end;
+
+
+
+
