@@ -5,6 +5,7 @@ import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,16 @@ import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
  * @since 4.0
  */
 @Repository
+@NamedStoredProcedureQuery(
+        name = "get_next",
+        procedureName = "get_next",
+        parameters = {
+                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "message_type"),
+                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "initiator"),
+                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "mpc"),
+                @StoredProcedureParameter(mode = ParameterMode.OUT, type = String.class, name = "message_id")
+        }
+)
 public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockDaoImpl.class);
@@ -41,11 +52,40 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
+    @Autowired
+    private GetNextMessageProcedure getNextMessageProcedure;
+
     private int count;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, int maxResult) {
+
+        String messageId = getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
+        if(messageId!=null) {
+            LOG.debug("Database locked message with id [{}]",messageId);
+        }
+        /*else {
+            LOG.debug("No message found");
+        }*/
+        return messageId;
+        /*String lockedMessageID=null;
+        Query nativeQuery = this.entityManager.createNativeQuery("{call get_next(?,?,?,?)}");
+        nativeQuery.setParameter(1, messageType);
+        nativeQuery.setParameter(2, initiator);
+        nativeQuery.setParameter(3, mpc);
+        nativeQuery.setParameter(4, lockedMessageID);
+        nativeQuery.executeUpdate();
+        if(lockedMessageID!=null) {
+            LOG.debug("Database locked message with id [{}]",lockedMessageID);
+        }
+        else {
+            LOG.debug("No message found");
+        }
+        return lockedMessageID;
+*/
+
+        /*Double sum = (Double) query.getOutputParameterValue("sum");
         Timer.Context getFirstNextPullMessageToProcess = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.getFirstNextPullMessageToProcess")).time();
         TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findNexMessageToProcess", MessagingLock.class);
         namedQuery.setParameter(MESSAGE_TYPE, messageType);
@@ -57,7 +97,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         //LOG.debug("Retrieving message of type:[{}] and state:[{}] for initiator:[{}] and mpc:[{}]", messageType, READY, initiator, mpc);
         String messageId = getMessageId(namedQuery);
         getFirstNextPullMessageToProcess.stop();
-        return messageId;
+        return messageId;*/
     }
 
     private String getMessageId(TypedQuery<MessagingLock> namedQuery) {
@@ -174,4 +214,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         query.executeUpdate();
         updateStatus.stop();
     }
+
+
 }

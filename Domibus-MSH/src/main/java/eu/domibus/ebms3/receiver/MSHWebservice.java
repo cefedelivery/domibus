@@ -136,7 +136,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             }
         } else {
             UserMessage userMessage = messaging.getUserMessage();
-            if(userMessage != null && userMessage.getPartyInfo() != null && userMessage.getMessageInfo() != null) {
+            if (userMessage != null && userMessage.getPartyInfo() != null && userMessage.getMessageInfo() != null) {
                 LOG.info("Received message from [{}] with messageId [{}]",
                         ((PartyId) userMessage.getPartyInfo().getFrom().getPartyId().toArray()[0]).getValue(),
                         userMessage.getMessageInfo().getMessageId());
@@ -237,12 +237,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Timer.Context handlePullRequest = METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequest")).time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        String messageId=null;
-        try {
-            messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
-        }catch (MessagingLockException e){
 
-        }
+        String messageId =messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
+
         SOAPMessage soapMessage = pullRequestHandler.handlePullRequest(messageId, pullContext);
         handlePullRequest.stop();
         return soapMessage;
