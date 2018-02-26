@@ -1,7 +1,10 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.ConfigurationException;
@@ -16,6 +19,7 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -40,6 +44,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.util.Set;
+
+import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 
 /**
  * @author Thomas Dussart
@@ -67,13 +74,19 @@ public class PullMessageSender {
     @Autowired
     private PolicyService policyService;
 
+    private static final Meter outGoingPullRequests = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "pull.outgoing.pullrequest"));
+
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
+        outGoingPullRequests.mark();
+
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
         String messageId = null;
+
+        Timer.Context processPullRequestTimer = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.processPullRequest")).time();
         try {
             final String mpc = map.getString(PullContext.MPC);
             final String pMode = map.getString(PullContext.PMODE_KEY);
@@ -95,7 +108,9 @@ public class PullMessageSender {
                 throw ex;
             }
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
+            Timer.Context processPullRequestDispathTimer = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.dispatchPullRequest")).time();
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
+            processPullRequestDispathTimer.stop();
             messaging = MessageUtil.getMessage(response, jaxbContext);
             if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
                 Set<Error> error = signalMessage.getError();
@@ -108,10 +123,14 @@ public class PullMessageSender {
             }
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+            Timer.Context pullhandleNewUserMessage = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.handleNewUserMessage")).time();
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            pullhandleNewUserMessage.stop();
             //send receipt
 
+            Timer.Context pullReceiptDispathTimer = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.dispatchPullReceipt")).time();
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
+            pullReceiptDispathTimer.stop();
 
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {
             LOG.error(e.getMessage(), e);
@@ -125,6 +144,9 @@ public class PullMessageSender {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
             checkConnectionProblem(e);
+        }
+        finally {
+            processPullRequestTimer.stop();
         }
     }
 

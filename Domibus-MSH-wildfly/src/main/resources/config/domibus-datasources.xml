@@ -66,7 +66,7 @@
         <property name="connectionFactory"
                   ref="domibusJMS-XAConnectionFactory"/>
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="3-10"/>
+        <property name="concurrency" value="${domibus.internal.queue.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
