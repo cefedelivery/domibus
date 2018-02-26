@@ -23,16 +23,6 @@ import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
  * @since 4.0
  */
 @Repository
-@NamedStoredProcedureQuery(
-        name = "get_next",
-        procedureName = "get_next",
-        parameters = {
-                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "message_type"),
-                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "initiator"),
-                @StoredProcedureParameter(mode = ParameterMode.IN, type = String.class, name = "mpc"),
-                @StoredProcedureParameter(mode = ParameterMode.OUT, type = String.class, name = "message_id")
-        }
-)
 public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockDaoImpl.class);

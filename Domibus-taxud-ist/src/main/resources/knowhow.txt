@@ -37,6 +37,10 @@ rampup
 
 screen sudo /mnt/resource/apache-jmeter-3.2/bin/jmeter -n -t /mnt/resource/apache-jmeter-3.2/Domibus_test_20_mins_rampup_30_mins_30KB_17tps.jmx
 
+sudo /mnt/resource/_apache-jmeter-3.2/bin/jmeter -n -t /mnt/resource/_apache-jmeter-3.2/Domibus_test_5000x30KB_tax_pulled.jmx
+
+tail -f /home/edelivery/logs/domibus.log
+
 C2:
 
 stop servers:
@@ -194,3 +198,5 @@ Clean WildFly web service notification queue
 /home/edelivery/domibus/domibus/bin/jboss-cli.sh --connect
 /subsystem=messaging/hornetq-server=default/jms-queue=DomibusNotifyBackendWebServiceQueue:remove-messages
 quit
+
+
