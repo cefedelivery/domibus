@@ -14,6 +14,7 @@ import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.pki.PolicyService;
 import eu.domibus.wss4j.common.crypto.BlockUtil;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
@@ -49,10 +50,7 @@ import javax.xml.soap.SOAPMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
@@ -73,6 +71,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     @Autowired
     private SoapService soapService;
+
+    @Autowired
+    private PolicyService policyService;
 
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
@@ -129,9 +130,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             if(legConfigurationExtractor ==null)return;
 
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
-            final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
-            final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
+            Policy policy = policyService.parsePolicy("policies"+File.separator + policyName);
+
             LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -147,7 +148,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
-        } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
+        } catch (IOException | JAXBException e) {
             setBindingOperation(message);
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
