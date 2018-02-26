@@ -594,7 +594,6 @@ CREATE OR REPLACE  procedure get_next(
 is
 resource_busy    EXCEPTION;
 pragma exception_init( resource_busy, -54 );
-ID_PK NUMBER;
   begin
     for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc and TB_MESSAGING_LOCK.INITIATOR=initiator AND message_type=message_type)
     loop
@@ -603,11 +602,12 @@ ID_PK NUMBER;
         exit;
         exception
         when resource_busy then
-        null;
-        when NO_DATA_FOUND then
-        null;
+        message_id:=null;
       end;
     end loop;
+    exception
+    when NO_DATA_FOUND then
+    message_id:=null;
   end;
 
 
