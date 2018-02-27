@@ -120,7 +120,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject inFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
-             FileObject inFolderByRecipient = fsFilesManager.getEnsureChildFolder(inFolder, finalRecipientFolder)) {
+             FileObject inFolderByRecipient = fsFilesManager.getEnsureChildFolder(inFolder, finalRecipientFolder);
+             FileObject inFolderByMessageId = fsFilesManager.getEnsureChildFolder(inFolderByRecipient, messageId)) {
 
             boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
 
@@ -130,7 +131,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String contentId = entry.getKey();
                 String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
-                try (FileObject fileObject = inFolderByRecipient.resolveFile(fileName);
+                try (FileObject fileObject = inFolderByMessageId.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
                     LOG.info("Message payload received: [{}]", fileObject.getName());
