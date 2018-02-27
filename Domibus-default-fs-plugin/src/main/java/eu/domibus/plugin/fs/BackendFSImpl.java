@@ -113,14 +113,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
         final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
         LOG.debug("Final recipient is: {}", finalRecipient);
-        final String finalRecipientFolder = sanetizeFileName(finalRecipient);
+        final String finalRecipientFolder = sanitizeFileName(finalRecipient);
         LOG.debug("Final recipient folder is: {}", finalRecipientFolder);
 
         // Persist message
         String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
-             FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder)) {
+             FileObject inFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+             FileObject inFolderByRecipient = fsFilesManager.getEnsureChildFolder(inFolder, finalRecipientFolder)) {
 
             boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
 
@@ -130,7 +130,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String contentId = entry.getKey();
                 String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
-                try (FileObject fileObject = incomingFolderByRecipient.resolveFile(fileName);
+                try (FileObject fileObject = inFolderByRecipient.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
                     LOG.info("Message payload received: [{}]", fileObject.getName());
@@ -386,9 +386,10 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     /**
      * extracts finalRecipient from message properties
+     *
      * @see {@link UserMessage}
      * @param userMessage
-     * @return
+     * @return finalRecipient String
      */
     private String getFinalRecipient(final UserMessage userMessage) {
         String finalRecipient = null;
@@ -401,7 +402,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return finalRecipient;
     }
 
-    private String sanetizeFileName(final String fileName) {
+    /**
+     * replacing all non [a-zA-z0-9] characters with _ from a fileName
+     *
+     * @param fileName filename to be sanitized
+     * @return sanitized fileName
+     */
+    private String sanitizeFileName(final String fileName) {
         return fileName.replaceAll("[^\\w.-]", "_");
     }
 
