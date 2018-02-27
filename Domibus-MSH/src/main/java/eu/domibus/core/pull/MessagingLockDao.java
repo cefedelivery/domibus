@@ -1,6 +1,5 @@
 package eu.domibus.core.pull;
 
-import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 
 import java.util.List;
@@ -19,5 +18,4 @@ public interface MessagingLockDao {
 
     void delete(String messageId);
 
-    void updateStatus(String messageId, MessageState messageState);
 }

@@ -68,9 +68,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         } catch (ReliabilityException e) {
             LOG.warn("There should be a raw xml entry for this message.");
         }
-        if(ReliabilityChecker.CheckResult.OK==reliabilityCheckSuccessful){
-            messagingLockService.delete(messageId);
-        }
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 

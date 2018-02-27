@@ -84,9 +84,6 @@ public class UpdateRetryLoggingService {
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
             increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
             //@TODO taxud poc make this cleaner.
-            if(messageStatus==MessageStatus.READY_TO_PULL) {
-                messagingLockService.rollback(messageId);
-            }
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
             if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {

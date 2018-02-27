@@ -69,10 +69,6 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         messagingLockDao.delete(messageId);
     }
 
-    @Override
-    @Transactional
-    public void rollback(final String messageId) {
-        messagingLockDao.updateStatus(messageId, MessageState.READY);
-    }
+
 
 }

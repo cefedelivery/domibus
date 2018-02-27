@@ -195,15 +195,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         deleteMessageLock.close();
     }
 
-    @Override
-    public void updateStatus(final String messageId,final MessageState messageState) {
-        Timer.Context updateStatus = METRIC_REGISTRY.timer(name(MessagingLockDaoImpl.class, "pull.updateStatus")).time();
-        Query query = entityManager.createNamedQuery("MessagingLock.updateStatus");
-        query.setParameter(MESSAGE_ID,messageId);
-        query.setParameter(MESSAGE_STATE,messageState);
-        query.executeUpdate();
-        updateStatus.stop();
-    }
 
 
 }

@@ -77,7 +77,7 @@ public class PullMessageSender {
     private static final Meter outGoingPullRequests = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "pull.outgoing.pullrequest"));
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
-    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
         outGoingPullRequests.mark();
