@@ -3,9 +3,12 @@ package eu.domibus.plugin.fs;
 import eu.domibus.common.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
+import eu.domibus.plugin.fs.ebms3.Property;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
@@ -108,20 +111,26 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             throw new FSPluginException("Unable to download message " + messageId, e);
         }
 
+        final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
+        LOG.debug("Final recipient is: {}", finalRecipient);
+        final String finalRecipientFolder = sanetizeFileName(finalRecipient);
+        LOG.debug("Final recipient folder is: {}", finalRecipientFolder);
+
         // Persist message
         String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
-            
+             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+             FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder)) {
+
             boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
 
             for (Map.Entry<String, FSPayload> entry : fsMessage.getPayloads().entrySet()) {
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
-                String contentId  = entry.getKey();
+                String contentId = entry.getKey();
                 String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
-                try (FileObject fileObject = incomingFolder.resolveFile(fileName);
+                try (FileObject fileObject = incomingFolderByRecipient.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
                     LOG.info("Message payload received: [{}]", fileObject.getName());
@@ -373,6 +382,27 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain [" + domain + "]", ex);
         }
+    }
+
+    /**
+     * extracts finalRecipient from message properties
+     * @see {@link UserMessage}
+     * @param userMessage
+     * @return
+     */
+    private String getFinalRecipient(final UserMessage userMessage) {
+        String finalRecipient = null;
+        for (final Property p : userMessage.getMessageProperties().getProperty()) {
+            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+                finalRecipient = p.getValue();
+                break;
+            }
+        }
+        return finalRecipient;
+    }
+
+    private String sanetizeFileName(final String fileName) {
+        return fileName.replaceAll("[^\\w.-]", "_");
     }
 
 }
