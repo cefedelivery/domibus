@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
@@ -76,11 +77,14 @@ public class PullMessageSender {
 
     private static final Meter outGoingPullRequests = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "pull.outgoing.pullrequest"));
 
+    private static final Counter pullRequestCount = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "pull.outgoing.count"));
+
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
         outGoingPullRequests.mark();
+        pullRequestCount.inc();
 
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
