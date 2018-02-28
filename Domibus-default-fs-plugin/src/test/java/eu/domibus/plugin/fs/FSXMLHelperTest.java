@@ -74,7 +74,7 @@ public class FSXMLHelperTest {
 
         userMessage.setPartyInfo(partyInfo);
 
-        //TODO Collaboration info
+        //TODO add Collaboration info
 
         return  userMessage;
     }
