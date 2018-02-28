@@ -11,6 +11,7 @@ import eu.domibus.plugin.fs.ebms3.Property;
 import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +22,10 @@ import org.apache.tika.mime.MimeTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -119,9 +123,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         // Persist message
         String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-             FileObject inFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
-             FileObject inFolderByRecipient = fsFilesManager.getEnsureChildFolder(inFolder, finalRecipientFolder);
-             FileObject inFolderByMessageId = fsFilesManager.getEnsureChildFolder(inFolderByRecipient, messageId)) {
+             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+             FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
+             FileObject incomingFolderByMessageId = fsFilesManager.getEnsureChildFolder(incomingFolderByRecipient, messageId)) {
+
+            //let's write the metadata file first
+            try (FileObject fileObject = incomingFolderByMessageId.resolveFile(FSSendMessagesService.METADATA_FILE_NAME);
+                 FileContent fileContent = fileObject.getContent()) {
+
+                writeMetadata(fileContent.getOutputStream(), fsMessage.getMetadata());
+                LOG.info("Message metadata file written at: [{}]", fileObject.getName());
+            }
 
             boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
 
@@ -131,12 +143,14 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 String contentId = entry.getKey();
                 String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
 
-                try (FileObject fileObject = inFolderByMessageId.resolveFile(fileName);
+                try (FileObject fileObject = incomingFolderByMessageId.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
                     LOG.info("Message payload received: [{}]", fileObject.getName());
                 }
             }
+        } catch (JAXBException ex) {
+            throw new FSPluginException("An error occurred while writing metadata for downloaded message " + messageId, ex);
         } catch (IOException | FSSetUpException ex) {
             throw new FSPluginException("An error occurred persisting downloaded message " + messageId, ex);
         }
@@ -388,8 +402,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     /**
      * extracts finalRecipient from message properties
      *
-     * @see {@link UserMessage}
-     * @param userMessage
+     * @see {UserMessage}
+     * @param userMessage Object which contains finalRecipient info
      * @return finalRecipient String
      */
     private String getFinalRecipient(final UserMessage userMessage) {
@@ -409,8 +423,19 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      * @param fileName filename to be sanitized
      * @return sanitized fileName
      */
-    private String sanitizeFileName(final String fileName) {
+    private String sanitizeFileName(@NotNull final String fileName) {
         return fileName.replaceAll("[^\\w.-]", "_");
+    }
+
+    /**
+     * Writes metadata file
+     *
+     * @param outputStream {@link OutputStream} to write the xml
+     * @param userMessage  Object which contains metadata to be printed
+     * @throws JAXBException exception thrown
+     */
+    private void writeMetadata(OutputStream outputStream, UserMessage userMessage) throws JAXBException {
+        FSXMLHelper.writeXML(outputStream, UserMessage.class, userMessage);
     }
 
 }

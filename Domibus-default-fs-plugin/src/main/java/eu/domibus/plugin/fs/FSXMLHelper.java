@@ -1,22 +1,19 @@
 package eu.domibus.plugin.fs;
 
-import java.io.InputStream;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
-import org.apache.commons.vfs2.FileSystemException;
-import org.xml.sax.SAXException;
-
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.ebms3.ObjectFactory;
+import org.apache.commons.vfs2.FileSystemException;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.*;
+import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -47,6 +44,16 @@ public class FSXMLHelper {
         JAXBElement<T> jaxbElement = um.unmarshal(streamSource, clazz);
 
         return jaxbElement.getValue();
+    }
+
+    public static void writeXML(OutputStream outputStream, Class clazz, Object objectToWrite) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        QName _QNAME = new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", clazz.getSimpleName());
+
+        marshaller.marshal(new JAXBElement(_QNAME, clazz, null, objectToWrite), outputStream);
     }
 
     public static Schema loadSchema(String schemaName) throws SAXException {
