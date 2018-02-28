@@ -197,6 +197,9 @@ select SUBSTR(TO_CHAR(INCOMING_MESS_RECEIVED_DATE,'HH24')||':'||TO_CHAR(INCOMING
 Clean WildFly web service notification queue
 /home/edelivery/domibus/domibus/bin/jboss-cli.sh --connect
 /subsystem=messaging/hornetq-server=default/jms-queue=DomibusNotifyBackendWebServiceQueue:remove-messages
+/subsystem=messaging/hornetq-server=default/jms-queue=DomibusSendMessageQueue:remove-messages
+/subsystem=messaging/hornetq-server=default/jms-queue=DomibusPullMessageQueue:remove-messages
 quit
+
 
 
