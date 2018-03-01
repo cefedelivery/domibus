@@ -151,6 +151,7 @@ public class PullMessageSender {
         }
         finally {
             processPullRequestTimer.stop();
+            pullRequestCount.dec();
         }
     }
 
