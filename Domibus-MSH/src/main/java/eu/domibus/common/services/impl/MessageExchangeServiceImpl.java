@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
@@ -27,6 +28,7 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.MSHWebservice;
+import eu.domibus.ebms3.sender.SaveRawPulledMessageInterceptor;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -262,10 +264,12 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Transactional
     public void savePulledMessageRawXml(final String rawXml, final String messageId) {
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        final Timer.Context savePulledMessageRawXml = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "savePulledMessageRawXml")).time();
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXml);
         rawEnvelopeLog.setUserMessage(userMessage);
         rawEnvelopeLogDao.create(rawEnvelopeLog);
+        savePulledMessageRawXml.stop();
     }
 
     @Override

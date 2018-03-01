@@ -11,6 +11,7 @@ import org.apache.cxf.binding.soap.interceptor.SoapOutInterceptor;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
@@ -23,7 +24,7 @@ import static com.codahale.metrics.MetricRegistry.name;
  * @since 3.3
  * Interceptor to save the raw xml in case of a pull message.
  * The non repudiation mechanism needs the raw message at the end of the interceptor queue, as it needs the security interceptors added
- * informations in order to do his job.
+ *  informations in order to do his job.
  * It is only saving userMessage found in the ServerOutInterceptor=> PullMessage.
  */
 //@thom test this class
