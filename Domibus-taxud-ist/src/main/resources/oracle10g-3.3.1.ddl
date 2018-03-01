@@ -610,6 +610,10 @@ pragma exception_init( resource_busy, -54 );
     message_id_out:=null;
   end;
 
+ ALTER TABLE TB_RAWENVELOPE_LOG ADD MESSAGE_ID VARCHAR2(255);
+
+CREATE INDEX IDX_RAWENVELOPE_MESSAGE_ID ON TB_RAWENVELOPE_LOG(MESSAGE_ID);
+
 
 
 

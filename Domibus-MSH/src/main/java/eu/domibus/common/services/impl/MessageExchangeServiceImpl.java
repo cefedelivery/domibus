@@ -248,29 +248,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     }
 
 
-    @Override
-    @Transactional(noRollbackFor = ReliabilityException.class)
-    public void removeRawMessageIssuedByPullRequest(final String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId) {
-        removeRawMessageIssuedByPullRequest(messageId);
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
     }
 
-    @Override
-    @Transactional
-    public void savePulledMessageRawXml(final String rawXml, final String messageId) {
-        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        final Timer.Context savePulledMessageRawXml = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "savePulledMessageRawXml")).time();
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXml);
-        rawEnvelopeLog.setUserMessage(userMessage);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
-        savePulledMessageRawXml.stop();
-    }
+
 
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
@@ -280,6 +265,22 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             throw new ReliabilityException(DomibusCoreErrorCode.DOM_004, "There should always have a raw message for message " + messageId);
         }
         return rawXmlByMessageId;
+    }
+
+
+    @Override
+    @Transactional
+    public void removeAndSaveRawXml(String rawXml, String messageId) {
+        final Timer.Context removeRawMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageExchangeServiceImpl.class, "rawxml.deleteUserMessageRawEnvelope")).time();
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+        removeRawMessageContext.stop();
+        final Timer.Context saveRawMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageExchangeServiceImpl.class, "rawxml.savePulledMessage")).time();
+        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+        rawEnvelopeLog.setRawXML(rawXml);
+        rawEnvelopeLog.setMessageId(messageId);
+        rawEnvelopeLogDao.create(rawEnvelopeLog);
+        saveRawMessageContext.stop();
+
     }
 
 

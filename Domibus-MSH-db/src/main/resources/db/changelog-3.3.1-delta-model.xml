@@ -34,4 +34,12 @@
             <column name="MESSAGE_ID" />
         </createIndex>
     </changeSet>
+    <changeSet author="dussath" id="EDELIVERY_3053">
+    <addColumn tableName="TB_RAWENVELOPE_LOG">
+        <column name="MESSAGE_ID" type="VARCHAR(255)" afterColumn="RAW_XML"/>
+    </addColumn>
+        <createIndex indexName="IDX_RAWENVELOPE_MESSAGE_ID" tableName="TB_RAWENVELOPE_LOG">
+            <column name="MESSAGE_ID" />
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
