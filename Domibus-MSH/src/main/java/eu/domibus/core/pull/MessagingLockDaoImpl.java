@@ -45,19 +45,13 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Autowired
     private GetNextMessageProcedure getNextMessageProcedure;
 
-    private int count;
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, int maxResult) {
-
         String messageId = getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
         if(messageId!=null) {
-            LOG.debug("Database locked message with id [{}]",messageId);
+            LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]",messageId,messageType, initiator, mpc);
         }
-        /*else {
-            LOG.debug("No message found");
-        }*/
         return messageId;
         /*String lockedMessageID=null;
         Query nativeQuery = this.entityManager.createNativeQuery("{call get_next(?,?,?,?)}");
