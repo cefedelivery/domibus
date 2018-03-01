@@ -115,10 +115,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             throw new FSPluginException("Unable to download message " + messageId, e);
         }
 
+        //extract final recipient
         final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
-        LOG.debug("Final recipient is: {}", finalRecipient);
+        if (StringUtils.isBlank(finalRecipient)) {
+            throw new FSPluginException("Unable to extract finalRecipinet from message " + messageId);
+        }
         final String finalRecipientFolder = sanitizeFileName(finalRecipient);
-        LOG.debug("Final recipient folder is: {}", finalRecipientFolder);
+
 
         // Persist message
         String domain = resolveDomain(fsMessage);
@@ -141,7 +144,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
                 String contentId = entry.getKey();
-                String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
+                String fileName = getFileName(contentId, fsPayload.getMimeType());
 
                 try (FileObject fileObject = incomingFolderByMessageId.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
@@ -165,8 +168,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return fileName;
     }
 
+    private String getFileName(String contentId, String mimeType) {
+        return contentId.replaceFirst("cid:", StringUtils.EMPTY) + getFileNameExtension(mimeType);
+    }
+
     private String getFileNameExtension(String mimeType) {
-        String extension = "";
+        String extension = StringUtils.EMPTY;
         try {
             extension = FSMimeTypeHelper.getExtension(mimeType);
         } catch (MimeTypeException ex) {
@@ -402,7 +409,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     /**
      * extracts finalRecipient from message properties
      *
-     * @see {UserMessage}
+     * @see UserMessage
      * @param userMessage Object which contains finalRecipient info
      * @return finalRecipient String
      */
