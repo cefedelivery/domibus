@@ -187,8 +187,11 @@ group by
 		
 		ff713308-717c-409a-ac98-e0427019f8a6@domibus.eu,15-FEB-18 17.18.05.558000,b77e563c-759f-42e3-8692-dee20b3783b8@domibus.eu,15-FEB-18 17.18.06.976000,1.418,c2f6645e-7403-4692-961e-750bf564d26c@domibus.eu,15-FEB-18 17.18.09.539000,3.981
 
-		
+
+		-- push rampup
 		sudo /mnt/resource/apache-jmeter-3.2/bin/jmeter -n -t /mnt/resource/apache-jmeter-3.2/Domibus_test_20_mins_rampup_30_mins_30KB_17tps.jmx
+		-- pull rampup
+		sudo /mnt/resource/apache-jmeter-3.2/bin/jmeter -n -t /mnt/resource/apache-jmeter-3.2/Domibus_test_20_mins_rampup_30_mins_30KB_10tps_pull.jmx
 		
 		select min(INCOMING_AK_DIF),max(INCOMING_AK_DIF),avg(INCOMING_AK_DIF)from MESSAGE_RESULT_SPLIT WHERE INCOMING_MESS_RECEIVED_DATE< TO_DATE( '02/15/2018 17:30','MM/DD/YYYY HH24:MI');
 
