@@ -183,17 +183,23 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
     SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
+        Timer handlePullRequestReceiptTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt"));
+        final Timer.Context handlePullRequestReceiptContext = handlePullRequestReceiptTimer.time();
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
         try {
+            Timer.Context findMessageContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.findUserMessageByMessageId")).time();
             final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            findMessageContext.stop();
             String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+            Timer.Context getSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.getSoapMessage")).time();
             SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
+            getSoapMessageContext.stop();
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
@@ -213,6 +219,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             LOG.warn(r.getMessage());
         } finally {
             reliabilityService.handlePullReceiptReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            handlePullRequestReceiptContext.stop();
         }
         return null;
     }
