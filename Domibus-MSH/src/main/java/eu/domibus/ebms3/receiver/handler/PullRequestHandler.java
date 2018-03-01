@@ -109,12 +109,15 @@ public class PullRequestHandler {
         SOAPMessage soapMessage = null;
         try {
 
+            LOG.debug("Retrieved message with id:[{}]",messageId);
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            LOG.debug("Message  [{}]",userMessage);
+            leg = pullContext.filterLegOnMpc();
+            LOG.debug("leg[{}]",leg);
             try {
                 messageExchangeService.verifyReceiverCertificate(leg, pullContext.getInitiator().getName());
                 messageExchangeService.verifySenderCertificate(leg, pullContext.getResponder().getName());
-                leg = pullContext.filterLegOnMpc();
-                LOG.debug("Retrieved message [{}], leg[{}]",userMessage,leg);
+
                 soapMessage = messageBuilder.buildSOAPMessage(userMessage, leg);
                 PhaseInterceptorChain.getCurrentMessage().getExchange().put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
                 if (pullRequestMatcher.matchReliableCallBack(leg) &&
