@@ -50,7 +50,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc, int maxResult) {
         String messageId = getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
         if(messageId!=null) {
-            LOG.debug("Database locked message with id [{}]",messageId);
             LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]",messageId,messageType, initiator, mpc);
         }
         return messageId;
