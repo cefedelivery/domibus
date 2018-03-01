@@ -54,8 +54,10 @@ public class CryptoService {
     @PostConstruct
     public void init() {
         getTrustStore();
+        LOG.debug("TrustStore initialized");
         try {
             loadKeystore();
+            LOG.debug("Keystore initialized");
         } catch (Exception ex) {
             throw new IllegalArgumentException("Can not load keystore.");
         }

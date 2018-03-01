@@ -151,6 +151,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
+        //TODO taxud change this behavior as the pull request do not start if not incoming message has been pushed
         final boolean configurationLoaded = pModeProvider.isConfigurationLoaded();
         if (!configurationLoaded) {
             LOG.debug("A configuration problem occurred while initiating the pull request. Probably no configuration is loaded.");
