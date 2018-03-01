@@ -46,10 +46,16 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
         }
         final Timer.Context handleMessageContext = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "handleMessage")).time();
         try {
+            final Timer.Context prepareContext = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "handleMessage.prepare.message")).time();
             SOAPMessage soapContent = message.getContent(SOAPMessage.class);
             String rawXMLMessage = SoapUtil.getRawXMLMessage(soapContent);
+            prepareContext.stop();
+            final Timer.Context removeContext = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "handleMessage.remove")).time();
             messageExchangeService.removeRawMessageIssuedByPullRequest(messageId.toString());
+            removeContext.stop();
+            final Timer.Context saveContext = Metrics.METRIC_REGISTRY.timer(name(SaveRawPulledMessageInterceptor.class, "handleMessage.save")).time();
             messageExchangeService.savePulledMessageRawXml(rawXMLMessage,messageId.toString());
+            saveContext.stop();
         } catch (TransformerException e) {
             throw new WebServiceException(new IllegalArgumentException(e));
         } finally {
