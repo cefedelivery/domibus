@@ -54,11 +54,13 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     @Transactional
     public void addLockingInformation(final Party initiator, final String messageId, final String mpc) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
+        //TODO throw an exception here.
         if (identifiers.size() == 0) {
             LOG.warn("No identifier defined for party:[{}], the message will not be available for pulling", initiator.getName());
             return;
         }
         Identifier identifier = identifiers.iterator().next();
+        LOG.debug("Saving messagelock with id:[{}],partyID:[{}], mpc:[{}]",messageId,identifier.getPartyId(),mpc);
         MessagingLock messagingLock = new MessagingLock(messageId, identifier.getPartyId(), mpc);
         messagingLockDao.save(messagingLock);
     }

@@ -231,6 +231,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
+            if(LOG.isDebugEnabled()){
+                for (Process process : processes) {
+                    LOG.debug("Process:[{}] correspond to mpc:[{}]",process.getName(),mpcQualifiedName);
+                }
+            }
             processValidator.validatePullProcess(processes);
             extractProcessOnMpc.stop();
             return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
