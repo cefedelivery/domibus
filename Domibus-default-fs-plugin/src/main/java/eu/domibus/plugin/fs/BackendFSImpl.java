@@ -44,6 +44,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final String LS = System.lineSeparator();
     private static final String ERROR_EXTENSION = ".error";
 
+    private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
+    private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
+
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
             WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED
@@ -56,6 +59,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final Set<MessageStatus> SEND_FAILED_MESSAGE_STATUSES = EnumSet.of(
             SEND_FAILURE
     );
+
+
 
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
@@ -138,8 +143,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 LOG.info("Message metadata file written at: [{}]", fileObject.getName());
             }
 
-            boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
-
+            //write payloads
             for (Map.Entry<String, FSPayload> entry : fsMessage.getPayloads().entrySet()) {
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
@@ -157,15 +161,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (IOException | FSSetUpException ex) {
             throw new FSPluginException("An error occurred persisting downloaded message " + messageId, ex);
         }
-    }
-
-    private String getFileName(boolean multiplePayloads, String messageId, String contentId, String mimeType) {
-        String fileName = messageId;
-        if (multiplePayloads) {
-            fileName += "_" + contentId.replaceFirst("cid:", "");
-        }
-        fileName += getFileNameExtension(mimeType);
-        return fileName;
     }
 
     private String getFileName(String contentId, String mimeType) {
@@ -431,7 +426,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      * @return sanitized fileName
      */
     private String sanitizeFileName(@NotNull final String fileName) {
-        return fileName.replaceAll("[^\\w.-]", "_");
+        return fileName.replaceAll(FILENAME_SANITIZE_REGEX, FILENAME_SANITIZE_REPLACEMENT);
     }
 
     /**
