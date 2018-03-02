@@ -586,6 +586,10 @@ CREATE UNIQUE INDEX IDX_MESSAGE_LOCK_UNIQUE_ID ON TB_MESSAGING_LOCK(MESSAGE_ID);
 
 ALTER SEQUENCE HIBERNATE_SEQUENCE CACHE 1000;
 
+ ALTER TABLE TB_RAWENVELOPE_LOG ADD MESSAGE_ID VARCHAR2(255);
+
+CREATE INDEX IDX_RAWENVELOPE_MESSAGE_ID ON TB_RAWENVELOPE_LOG(MESSAGE_ID);
+
 create or replace procedure get_next(
   message_type_in in VARCHAR2,
   initiator_in in VARCHAR2,
@@ -595,7 +599,7 @@ is
 resource_busy    EXCEPTION;
 pragma exception_init( resource_busy, -54 );
   begin
-    for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in)
+    for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK)
     loop
       begin
         select TB_MESSAGING_LOCK.MESSAGE_ID into message_id_out from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
@@ -610,9 +614,7 @@ pragma exception_init( resource_busy, -54 );
     message_id_out:=null;
   end;
 
- ALTER TABLE TB_RAWENVELOPE_LOG ADD MESSAGE_ID VARCHAR2(255);
 
-CREATE INDEX IDX_RAWENVELOPE_MESSAGE_ID ON TB_RAWENVELOPE_LOG(MESSAGE_ID);
 
 
 
