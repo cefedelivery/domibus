@@ -231,10 +231,10 @@
             <column name="FROM_QUEUE" type="VARCHAR2(255)"/>
             <column name="TO_QUEUE" type="VARCHAR2(255)"/>
         </createTable>
-
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT">
+            --  Changeset src/main/resources/db/changelog-4.0-delta-model.xml::EDELIVERY-3170::rodrfla
             SELECT
             DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
             rc.MODIFICATION_TYPE as ACTION_TYPE,
@@ -248,7 +248,6 @@
             SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
             TB_ACTION_AUDIT aa
             ORDER BY AUDIT_DATE DESC
-            --  Changeset src/main/resources/db/changelog-4.0-delta-model.xml::EDELIVERY-3170::rodrfla
         </createView>
 
     </changeSet>
