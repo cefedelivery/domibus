@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -44,7 +43,7 @@ public class FSPurgeReceivedServiceTest {
     private FileObject recentFile;
 
     @Before
-    public void setUp() throws FileSystemException, IOException, JAXBException {
+    public void setUp() throws IOException {
         String location = "ram:///FSPurgeReceivedServiceTest";
 
         FileSystemManager fsManager = VFS.getManager();
