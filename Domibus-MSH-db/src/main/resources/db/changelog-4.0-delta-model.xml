@@ -231,7 +231,7 @@
             <column name="FROM_QUEUE" type="VARCHAR2(255)"/>
             <column name="TO_QUEUE" type="VARCHAR2(255)"/>
         </createTable>
-        
+
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT">
