@@ -11,18 +11,12 @@ import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import mockit.Delegate;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.VerificationsInOrder;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
 import javax.activation.DataHandler;
@@ -39,6 +33,9 @@ import java.util.*;
 public class BackendFSImplTest {
 
     private static final String TEXT_XML = "text/xml";
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Injectable
     protected MessageRetriever<Submission> messageRetriever;
@@ -61,6 +58,7 @@ public class BackendFSImplTest {
     @Injectable
     String name = "fsplugin";
 
+
     @Tested
     BackendFSImpl backendFS;
 
@@ -74,9 +72,13 @@ public class BackendFSImplTest {
 
     private FileObject failedFolder;
 
+    private String location;
+
     @Before
     public void setUp() throws org.apache.commons.vfs2.FileSystemException {
-        String location = "ram:///BackendFSImplTest";
+        location = "ram:///BackendFSImplTest";
+
+        //location = folder.getRoot().getAbsolutePath() + "/BackendFSImplTest";
 
         FileSystemManager fsManager = VFS.getManager();
         rootDir = fsManager.resolveFile(location);
@@ -115,7 +117,7 @@ public class BackendFSImplTest {
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
@@ -132,6 +134,7 @@ public class BackendFSImplTest {
 
         // Assert results
         FileObject[] files = incomingFolder.findFiles(new FileTypeSelector(FileType.FILE));
+
         Assert.assertEquals(1, files.length);
         FileObject fileMessage = files[0];
 
@@ -150,11 +153,18 @@ public class BackendFSImplTest {
         final String messageContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGludm9pY2U+aGVsbG88L2ludm9pY2U+";
         final String invoiceContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
+        final String finalRecipient = backendFS.getFinalRecipient(userMessage);
+        final FileObject finalRecipientFolder = incomingFolder.resolveFile(backendFS.sanitizeFileName(finalRecipient));
+        finalRecipientFolder.createFolder();
+
+        final FileObject messageIdFolder = finalRecipientFolder.resolveFile(messageId);
+        messageIdFolder.createFolder();
+
         final DataHandler messageHandler = new DataHandler(new ByteArrayDataSource(messageContent.getBytes(), TEXT_XML));
         final DataHandler invoiceHandler = new DataHandler(new ByteArrayDataSource(invoiceContent.getBytes(), TEXT_XML));
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, messageHandler));
-        fsPayloads.put("cid:invoice", new FSPayload(TEXT_XML, invoiceHandler));
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", messageHandler));
+        fsPayloads.put("cid:invoice", new FSPayload(TEXT_XML, "invoice.xml", invoiceHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
@@ -165,12 +175,20 @@ public class BackendFSImplTest {
             
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
+
+            fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipient);
+            result = finalRecipientFolder;
+
+            fsFilesManager.getEnsureChildFolder(finalRecipientFolder, messageId);
+            result = messageIdFolder;
         }};
 
+        //tested method
         backendFS.deliverMessage(messageId);
 
         // Assert results
-        FileObject[] files = incomingFolder.findFiles(new FileTypeSelector(FileType.FILE));
+        //FileObject[] files = messageIdFolder.findFiles(new FileTypeSelector(FileType.FILE));
+        FileObject[] files = messageIdFolder.getChildren();
         Arrays.sort(files, new Comparator<FileObject>() {
             @Override
             public int compare(FileObject o1, FileObject o2) {
@@ -216,7 +234,7 @@ public class BackendFSImplTest {
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource(payloadContent.getBytes(), TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
@@ -238,7 +256,7 @@ public class BackendFSImplTest {
         final DataHandler dataHandler = new DataHandler(new ByteArrayDataSource((byte[])null, TEXT_XML));
         final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
-        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, dataHandler));
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", dataHandler));
 
         new Expectations(1, backendFS) {{
             backendFS.downloadMessage(messageId, null);
@@ -473,6 +491,7 @@ public class BackendFSImplTest {
               void delegate(FileObject file) throws IOException {
                      Assert.assertNotNull(file);
                      Assert.assertEquals("ram:///BackendFSImplTest/SENT/content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml", file.getName().getURI());
+                  //Assert.assertEquals(location + "/SENT/content_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml", file.getName().getURI());
                  }  
             }));
         }};

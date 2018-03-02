@@ -32,18 +32,12 @@ public class FSPurgeReceivedService extends FSAbstractPurgeService {
         List<FileObject> allDescendants = new ArrayList<>();
 
         FileObject[] level1Folders = targetFolder.getChildren();
-
-
         for (FileObject level1Folder : level1Folders) {
-
-            //only folders
             if (FileType.FOLDER.equals(level1Folder.getType())) {
 
                 //go to messageID/level2 folders
                 FileObject[] level2Folders = level1Folder.getChildren();
-
                 for (FileObject level2Folder : level2Folders) {
-
                     if (FileType.FOLDER.equals(level2Folder.getType())) {
                         allDescendants.add(level2Folder);
                     }

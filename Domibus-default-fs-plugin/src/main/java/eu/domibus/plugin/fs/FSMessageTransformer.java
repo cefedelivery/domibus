@@ -24,7 +24,9 @@ import java.util.Map;
 public class FSMessageTransformer
         implements MessageRetrievalTransformer<FSMessage>, MessageSubmissionTransformer<FSMessage> {
 
-    private static final String MIME_TYPE = "MimeType";
+    private static final String PAYLOAD_PROPERTY_MIME_TYPE = "MimeType";
+
+    private static final String PAYLOAD_PROPERTY_FILE_NAME = "FileName";
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
@@ -71,14 +73,17 @@ public class FSMessageTransformer
 
     private void setPayloadToSubmission(Submission submission, final Map<String, FSPayload> dataHandlers) {
         for (Map.Entry<String, FSPayload> entry : dataHandlers.entrySet()) {
-            String contentId = entry.getKey();
-            DataHandler dataHandler = entry.getValue().getDataHandler();
-            String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
+            final String contentId = entry.getKey();
+            final FSPayload fsPayload = entry.getValue();
+            DataHandler dataHandler = fsPayload.getDataHandler();
+            final String fileName = fsPayload.getFileName();
+            final String mimeType = FSMimeTypeHelper.getMimeType(dataHandler.getName());
             if (StringUtils.isEmpty(mimeType)) {
                 throw new FSPayloadException("Could not detect mime type for " + dataHandler.getName());
             }
-            ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(1);
-            payloadProperties.add(new Submission.TypedProperty(MIME_TYPE, mimeType));
+            ArrayList<Submission.TypedProperty> payloadProperties = new ArrayList<>(2);
+            payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_MIME_TYPE, mimeType));
+            payloadProperties.add(new Submission.TypedProperty(PAYLOAD_PROPERTY_FILE_NAME, fileName));
             submission.addPayload(contentId, dataHandler, payloadProperties);
         }
     }
@@ -86,22 +91,31 @@ public class FSMessageTransformer
     private Map<String, FSPayload> getPayloadsFromSubmission(Submission submission) {
         Map<String, FSPayload> result = new HashMap<>(submission.getPayloads().size());
         for (final Submission.Payload payload : submission.getPayloads()) {
-            String mimeType = null;
-            for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
-                if (payloadProperty.getKey().equals(MIME_TYPE)) {
-                    mimeType = payloadProperty.getValue();
-                    break;
-                }
-            }
-            
+
+            //mime type
+            String mimeType = extractPayloadProperty(payload, PAYLOAD_PROPERTY_MIME_TYPE);
             if (mimeType == null) {
                 mimeType = payload.getPayloadDatahandler().getContentType();
             }
+
+            //file name
+            final String fileName = extractPayloadProperty(payload, PAYLOAD_PROPERTY_FILE_NAME);
             
-            FSPayload fsPayload = new FSPayload(mimeType, payload.getPayloadDatahandler());
+            FSPayload fsPayload = new FSPayload(mimeType, fileName, payload.getPayloadDatahandler());
             result.put(payload.getContentId(), fsPayload);
         }
         return result;
+    }
+
+    private String extractPayloadProperty(Submission.Payload payload, String propertyName) {
+        String propertyValue = null;
+        for (Submission.TypedProperty payloadProperty : payload.getPayloadProperties()) {
+            if (payloadProperty.getKey().equals(propertyName)) {
+                propertyValue = payloadProperty.getValue();
+                break;
+            }
+        }
+        return propertyValue;
     }
 
     private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {

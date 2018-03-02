@@ -140,7 +140,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                  FileContent fileContent = fileObject.getContent()) {
 
                 writeMetadata(fileContent.getOutputStream(), fsMessage.getMetadata());
-                LOG.info("Message metadata file written at: [{}]", fileObject.getName());
+                LOG.info("Message metadata file written at: [{}]", fileObject.getName().getURI());
             }
 
             //write payloads
@@ -148,7 +148,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
                 String contentId = entry.getKey();
-                String fileName = getFileName(contentId, fsPayload.getMimeType());
+                String fileName = getFileName(contentId, fsPayload);
 
                 try (FileObject fileObject = incomingFolderByMessageId.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
@@ -163,8 +163,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
     }
 
-    private String getFileName(String contentId, String mimeType) {
-        return contentId.replaceFirst("cid:", StringUtils.EMPTY) + getFileNameExtension(mimeType);
+    private String getFileName(String contentId, FSPayload fsPayload) {
+        //original name + extension
+        String fileName = fsPayload.getFileName();
+
+        //if empty, we compose it - based on cid and extension
+        if (StringUtils.isBlank(fileName)) {
+            fileName = contentId.replaceFirst("cid:", StringUtils.EMPTY) + getFileNameExtension(fsPayload.getMimeType());
+        }
+        return fileName;
     }
 
     private String getFileNameExtension(String mimeType) {
@@ -408,7 +415,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      * @param userMessage Object which contains finalRecipient info
      * @return finalRecipient String
      */
-    private String getFinalRecipient(final UserMessage userMessage) {
+    protected String getFinalRecipient(final UserMessage userMessage) {
         String finalRecipient = null;
         for (final Property p : userMessage.getMessageProperties().getProperty()) {
             if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
@@ -425,7 +432,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
      * @param fileName filename to be sanitized
      * @return sanitized fileName
      */
-    private String sanitizeFileName(@NotNull final String fileName) {
+    protected String sanitizeFileName(@NotNull final String fileName) {
         return fileName.replaceAll(FILENAME_SANITIZE_REGEX, FILENAME_SANITIZE_REPLACEMENT);
     }
 

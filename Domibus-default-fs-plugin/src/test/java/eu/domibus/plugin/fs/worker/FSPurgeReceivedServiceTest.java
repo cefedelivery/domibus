@@ -1,12 +1,11 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.io.IOException;
-import java.util.Collections;
-
-import javax.xml.bind.JAXBException;
-
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.fs.FSFilesManager;
+import eu.domibus.plugin.fs.FSPluginProperties;
+import eu.domibus.plugin.fs.exception.FSSetUpException;
 import mockit.*;
-
+import mockit.integration.junit4.JMockit;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -16,11 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.FSFilesManager;
-import eu.domibus.plugin.fs.FSPluginProperties;
-import eu.domibus.plugin.fs.exception.FSSetUpException;
-import mockit.integration.junit4.JMockit;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.util.Collections;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -39,6 +36,10 @@ public class FSPurgeReceivedServiceTest {
 
     private FileObject rootDir;
     private FileObject incomingFolder;
+    private FileObject incomingFolderByRecipient;
+    private FileObject oldIncomingFolderByMessageId;
+    private FileObject recentIncomingFolderByMessageId;
+
     private FileObject oldFile;
     private FileObject recentFile;
 
@@ -53,12 +54,20 @@ public class FSPurgeReceivedServiceTest {
         incomingFolder = rootDir.resolveFile(FSFilesManager.INCOMING_FOLDER);
         incomingFolder.createFolder();
 
-        oldFile = incomingFolder.resolveFile("old_3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu.xml");
+        incomingFolderByRecipient = incomingFolder.resolveFile("urn_oasis_names_tc_ebcore_partyid-type_unregistered_C4");
+        incomingFolderByRecipient.createFolder();
+
+        oldIncomingFolderByMessageId = incomingFolderByRecipient.resolveFile("3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu");
+        oldIncomingFolderByMessageId.createFolder();
+
+        oldFile = oldIncomingFolderByMessageId.resolveFile("old_message.xml");
         oldFile.createFile();
         // set modified time to 30s ago
         oldFile.getContent().setLastModifiedTime(System.currentTimeMillis() - 30000);
 
-        recentFile = incomingFolder.resolveFile("recent_3c5558e4-7b6d-11e7-bb31-be2e44b06b36@domibus.eu.xml");
+        recentIncomingFolderByMessageId = incomingFolderByRecipient.resolveFile("3c5558e4-7b6d-11e7-bb31-be2e44b06b36@domibus.eu");
+        recentIncomingFolderByMessageId.createFolder();
+        recentFile = recentIncomingFolderByMessageId.resolveFile("recent_message.xml");
         recentFile.createFile();
     }
 
@@ -66,6 +75,10 @@ public class FSPurgeReceivedServiceTest {
     public void tearDown() throws FileSystemException {
         rootDir.close();
         incomingFolder.close();
+
+        incomingFolderByRecipient.close();
+        oldIncomingFolderByMessageId.close();
+        recentIncomingFolderByMessageId.close();
     }
 
     @Test
@@ -80,7 +93,7 @@ public class FSPurgeReceivedServiceTest {
             fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
             result = incomingFolder;
 
-            fsFilesManager.findAllDescendantFiles(incomingFolder);
+            instance.findAllDescendants(incomingFolder);
             result = new FileObject[]{ recentFile, oldFile };
 
             fsPluginProperties.getReceivedPurgeExpired(null);

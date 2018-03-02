@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 public class FSXMLHelperTest {
 
     @Rule
-    public TemporaryFolder folder= new TemporaryFolder();
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void parseXML() {
