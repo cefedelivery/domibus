@@ -235,19 +235,21 @@
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT">
-            SELECT * FROM (SELECT
-            DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
-            rc.MODIFICATION_TYPE as ACTION_TYPE,
-            ri.USER_NAME as USER_NAME ,
-            ri.REVISION_DATE as AUDIT_DATE,
-            '' || rc.ENTITY_ID as ID,
-            '' || ri.ID as REV_ID
+            --  Changeset src/main/resources/db/changelog-4.0-delta-model.xml::EDELIVERY-3170::rodrfla
+
+            SELECT
+                DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
+                rc.MODIFICATION_TYPE as ACTION_TYPE,
+                ri.USER_NAME as USER_NAME ,
+                ri.REVISION_DATE as AUDIT_DATE,
+                '' || rc.ENTITY_ID as ID,
+                '' || ri.ID as REV_ID
             FROM TB_REV_INFO ri, TB_REV_CHANGES rc
             WHERE ri.ID=rc.REV
             UNION
-            SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
-            TB_ACTION_AUDIT aa)Q
-            ORDER BY Q.AUDIT_DATE DESC
+            SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1'
+            FROM TB_ACTION_AUDIT aa
+            ORDER BY AUDIT_DATE DESC;
         </createView>
 
     </changeSet>
