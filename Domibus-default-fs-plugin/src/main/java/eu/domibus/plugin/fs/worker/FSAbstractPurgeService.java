@@ -41,7 +41,6 @@ public abstract class FSAbstractPurgeService {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject targetFolder = fsFilesManager.getEnsureChildFolder(rootDir, getTargetFolderName())) {
 
-            //contentFiles = fsFilesManager.findAllDescendantFiles(targetFolder);
             contentFiles = findAllDescendants(targetFolder);
             LOG.debug(Arrays.toString(contentFiles));
             
@@ -96,9 +95,9 @@ public abstract class FSAbstractPurgeService {
     /**
      * Returns all the files (or folders) to be deleted after a period ot time
      *
-     * @param targetFolder
-     * @return
-     * @throws FileSystemException
+     * @param targetFolder folder to read all descendants
+     * @return array of {@link FileObject}
+     * @throws FileSystemException VFS exception
      */
     public FileObject[] findAllDescendants(final FileObject targetFolder) throws FileSystemException {
         return fsFilesManager.findAllDescendantFiles(targetFolder);
