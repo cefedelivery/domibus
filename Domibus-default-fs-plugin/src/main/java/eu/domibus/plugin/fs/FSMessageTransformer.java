@@ -26,7 +26,8 @@ public class FSMessageTransformer
 
     private static final String PAYLOAD_PROPERTY_MIME_TYPE = "MimeType";
 
-    private static final String PAYLOAD_PROPERTY_FILE_NAME = "FileName";
+    /** we used this attribute name and not FileName to avoid name collision with Domibus core class SubmissionAS4Transformer */
+    private static final String PAYLOAD_PROPERTY_FILE_NAME = "PayloadName";
 
     private final ObjectFactory objectFactory = new ObjectFactory();
 
