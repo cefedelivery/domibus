@@ -234,8 +234,8 @@
 
         <createView
                 replaceIfExists="true"
-                viewName="V_AUDIT">
-            --  Changeset src/main/resources/db/changelog-4.0-delta-model.xml::EDELIVERY-3170::rodrfla
+                viewName="V_AUDIT_DETAIL">
+            -- Changeset src/main/resources/db/changelog-4.0-delta-model.xml::EDELIVERY-3170::rodrfla
             SELECT
             DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
             rc.MODIFICATION_TYPE as ACTION_TYPE,
@@ -248,10 +248,9 @@
             UNION
             SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
             TB_ACTION_AUDIT aa
-            ORDER BY AUDIT_DATE DESC
         </createView>
-
     </changeSet>
+    
     <changeSet author="migueti" id="EDELIVERY-2754_AUDIT">
         <createTable tableName="TB_CONFIGURATION_RAW_AUD">
             <column name="ID_PK" type="INT"/>
@@ -272,5 +271,15 @@
                                  constraintName="FK_CONFIGURATION_RAW_AUD" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+    </changeSet>
+
+    <changeSet author="rodrfla" id="EDELIVERY-3170">
+        <createView
+                replaceIfExists="true"
+                viewName="V_AUDIT">
+            SELECT *
+            FROM V_AUDIT_DETAIL VAD
+            ORDER BY VAD.AUDIT_DATE DESC;
+        </createView>
     </changeSet>
 </databaseChangeLog>
