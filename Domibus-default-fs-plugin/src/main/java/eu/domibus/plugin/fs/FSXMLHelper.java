@@ -3,7 +3,6 @@ package eu.domibus.plugin.fs;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.ebms3.ObjectFactory;
-import org.apache.commons.vfs2.FileSystemException;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -29,7 +28,7 @@ public class FSXMLHelper {
         super();
     }
     
-    public static <T> T parseXML(InputStream inputStream, Class<T> clazz) throws JAXBException, FileSystemException {
+    public static <T> T parseXML(InputStream inputStream, Class<T> clazz) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
         Unmarshaller um = jaxbContext.createUnmarshaller();
         
@@ -46,6 +45,14 @@ public class FSXMLHelper {
         return jaxbElement.getValue();
     }
 
+    /**
+     * Writes an object to XML file
+     *
+     * @param outputStream outputStream to write into
+     * @param clazz class of the object
+     * @param objectToWrite object to write
+     * @throws JAXBException JAXB exception
+     */
     public static void writeXML(OutputStream outputStream, Class clazz, Object objectToWrite) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
         Marshaller marshaller = jaxbContext.createMarshaller();
