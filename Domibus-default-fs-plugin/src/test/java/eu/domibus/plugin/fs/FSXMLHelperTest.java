@@ -20,7 +20,6 @@ import java.io.InputStream;
  * JUnit for {@link FSXMLHelper} class
  *
  * @author Catalin Enache
- * @version 1.0
  * @since 3.3.2
  */
 public class FSXMLHelperTest {
@@ -64,8 +63,6 @@ public class FSXMLHelperTest {
 
     @Test
     public void testWriteXML() throws Exception {
-
-
 
         try (FileObject file = testFolder.resolveFile(FSSendMessagesService.METADATA_FILE_NAME);
              FileContent fileContent = file.getContent()) {
