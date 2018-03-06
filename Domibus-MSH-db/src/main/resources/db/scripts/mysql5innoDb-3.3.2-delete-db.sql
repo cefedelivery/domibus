@@ -1,8 +1,12 @@
+-- *********************************************************************
+-- Delete script for Domibus DB with a time interval
+-- Change START_DATE and END_DATE values accordingly
+-- *********************************************************************
 SET @START_DATE='2017-01-20 10:00:00', @END_DATE='2018-12-20 15:00:00';
 
 SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
-
 SET SQL_SAFE_UPDATES = 0;
+SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE FROM TB_MESSAGING where
             (SIGNAL_MESSAGE_ID IN
@@ -70,5 +74,6 @@ DELETE FROM TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSA
 DELETE FROM TB_MESSAGE_LOG WHERE received BETWEEN @START_DATE and @END_DATE;
 
 SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
+SET FOREIGN_KEY_CHECKS = 1;
 
 COMMIT;
