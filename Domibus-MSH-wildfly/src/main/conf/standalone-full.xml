@@ -389,13 +389,13 @@
                     <address-setting match="jms.queue.DomibusSendMessageQueue">
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>1</max-delivery-attempts>
+                        <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusPullMessageQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>1</max-delivery-attempts>
+                        <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
