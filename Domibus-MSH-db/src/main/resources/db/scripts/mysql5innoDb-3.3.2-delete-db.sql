@@ -2,7 +2,7 @@
 -- Delete script for Domibus DB with a time interval
 -- Change START_DATE and END_DATE values accordingly
 -- *********************************************************************
-SET @START_DATE='2017-01-20 10:00:00', @END_DATE='2018-12-20 15:00:00';
+SET @START_DATE='2017-01-20 10:00:00', @END_DATE='2017-12-20 15:00:00';
 
 SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
 SET SQL_SAFE_UPDATES = 0;
