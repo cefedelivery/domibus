@@ -1,6 +1,9 @@
 -- *********************************************************************
--- Delete script for Domibus DB with a time interval
+-- Delete script for MySQL Domibus DB with a time interval
 -- Change START_DATE and END_DATE values accordingly
+--
+-- Important: This script will not delete any messages from Domibus
+-- JMS notification queue - these have to be deleted manually
 -- *********************************************************************
 SET @START_DATE='2017-01-20 10:00:00', @END_DATE='2017-12-20 15:00:00';
 

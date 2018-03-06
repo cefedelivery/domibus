@@ -1,10 +1,11 @@
 -- *********************************************************************
--- Delete script for Domibus DB with a time interval
+-- Delete script for Oracle Domibus DB with a time interval
 -- Change START_DATE and END_DATE values accordingly
+--
+-- Important: This script will not delete any messages from Domibus
+-- JMS notification queue - these have to be deleted manually
 -- *********************************************************************
-
 DEFINE START_DATE = TO_DATE('20-JAN-17 10:00:00', 'DD-MM-YY HH24:MI:SS');
-
 DEFINE END_DATE = TO_DATE('20-DEC-17 03:00:00', 'DD-MM-YY HH24:MI:SS');
 
 DELETE FROM TB_MESSAGING WHERE (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID IN (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE))));
