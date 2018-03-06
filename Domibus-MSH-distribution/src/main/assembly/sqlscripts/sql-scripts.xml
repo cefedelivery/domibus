@@ -25,5 +25,20 @@
             <lineEnding>unix</lineEnding>
             <filtered>false</filtered>
         </fileSet>
+
+        <fileSet>
+            <directory>${project.basedir}/../Domibus-MSH-db/src/main/resources/db/scripts</directory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <outputDirectory>sql-scripts</outputDirectory>
+            <includes>
+                <include>*.sql</include>
+            </includes>
+            <!-- excludes/-->
+            <fileMode>0444</fileMode>
+            <directoryMode>0555</directoryMode>
+            <!-- directory/-->
+            <lineEnding>unix</lineEnding>
+            <filtered>false</filtered>
+        </fileSet>
     </fileSets>
 </assembly>
