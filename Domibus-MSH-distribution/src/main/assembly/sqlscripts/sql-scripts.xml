@@ -25,7 +25,6 @@
             <lineEnding>unix</lineEnding>
             <filtered>false</filtered>
         </fileSet>
-
         <fileSet>
             <directory>${project.basedir}/../Domibus-MSH-db/src/main/resources/db/scripts</directory>
             <useDefaultExcludes>true</useDefaultExcludes>
