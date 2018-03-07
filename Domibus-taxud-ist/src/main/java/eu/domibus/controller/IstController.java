@@ -101,7 +101,7 @@ public class IstController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
     public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
-        LOG.info("Message received:\n  [{}]", jsonSubmission);
+        LOG.info("Message received with id:\n  [{}]", jsonSubmission.getMessageId());
         payloadLogging.decodeAndlog(jsonSubmission.getPayload());
         if(!doNotPushBack) {
             Observable<Submission> quoteObservable = Observable.<Submission>create(subscriber -> {

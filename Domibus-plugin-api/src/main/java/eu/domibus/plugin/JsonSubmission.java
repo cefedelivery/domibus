@@ -43,16 +43,6 @@ public class JsonSubmission {
     private byte[] payload;
 
 
-    @Override
-    public String toString() {
-        return "JsonSubmission{" +
-                "action='" + action + '\'' +
-                ", service='" + service + '\'' +
-                ", serviceType='" + serviceType + '\'' +
-                ", messageId='" + messageId + '\'' +
-                '}';
-    }
-
     /**
      * Getter for action
      * <p/>
