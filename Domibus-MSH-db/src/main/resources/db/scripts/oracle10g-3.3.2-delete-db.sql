@@ -2,8 +2,9 @@
 -- Delete script for Oracle Domibus DB with a time interval
 -- Change START_DATE and END_DATE values accordingly
 --
--- Important: This script will not delete any messages from Domibus
--- JMS notification queue - these have to be deleted manually
+-- Important: In order to keep the JMS queues synchronized with the DB data that will be
+-- deleted by this script, the Domibus Administrator should remove manually the associated
+-- JMS messages from the plugin notifications queues
 -- *********************************************************************
 DEFINE START_DATE = TO_DATE('20-JAN-17 10:00:00', 'DD-MM-YY HH24:MI:SS');
 DEFINE END_DATE = TO_DATE('20-DEC-17 03:00:00', 'DD-MM-YY HH24:MI:SS');
