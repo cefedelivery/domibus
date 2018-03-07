@@ -43,14 +43,17 @@ public class GetNextMessageProcedure {
 
         @Override
         public void execute(Connection conn) throws SQLException {
-            try (CallableStatement stmt = conn.prepareCall(
-                    "{CALL get_next(:message_type, :initiator, :mpc, :message_id)}")) {
-                stmt.setString("message_type", messageType);
-                stmt.setString("initiator", initiator);
-                stmt.setString("mpc", mpc);
-                stmt.registerOutParameter("message_id", Types.VARCHAR);
+            /*try (CallableStatement stmt = conn.prepareCall(
+                    "{CALL get_next(:message_type, :initiator, :mpc, :message_id)}"))
+            {
+            */try (CallableStatement stmt = conn.prepareCall(
+                    "{CALL get_next(?, ?, ?, ?)}")) {
+                stmt.setString(1, messageType);
+                stmt.setString(2, initiator);
+                stmt.setString(3, mpc);
+                stmt.registerOutParameter(4, Types.VARCHAR);
                 stmt.executeUpdate();
-                messageId = stmt.getString("message_id");
+                messageId = stmt.getString(4);
                 if (stmt.wasNull()) {
                     messageId = null;
                 }
