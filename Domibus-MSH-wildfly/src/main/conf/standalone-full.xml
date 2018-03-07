@@ -389,72 +389,72 @@
                     <address-setting match="jms.queue.DomibusSendMessageQueue">
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>1</max-delivery-attempts>
+                        <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusPullMessageQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>1</max-delivery-attempts>
+                        <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusNotifyBackendJmsQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusErrorNotifyConsumerQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusErrorNotifyProducerQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageInQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusPluginToBackendQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusNotifyBackendWebServiceQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusNotifyBackendFileSystemQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusUnknownReceiverQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusNotifyBackendQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
+                        <redelivery-delay>30000</redelivery-delay>
                         <max-delivery-attempts>10</max-delivery-attempts>
                     </address-setting>
                     <address-setting match="jms.queue.DomibusClusterCommandTopic">
