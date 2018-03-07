@@ -1,17 +1,13 @@
 package eu.domibus.core.pull;
 
-import eu.domibus.common.model.configuration.Identifier;
-import eu.domibus.common.model.configuration.Party;
-import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 /**
  * @author Thomas Dussart
@@ -23,15 +19,15 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockServiceImpl.class);
 
     @Autowired
+    @Qualifier("dMessagingLock")
     private MessagingLockDao messagingLockDao;
 
-    private final static int maxTentative = 3;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String getPullMessageToProcess(final String initiator, final String mpc) {
 
-        return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc, 100);
+        return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
 
     }
 
@@ -52,16 +48,11 @@ public class MessagingLockServiceImpl implements MessagingLockService {
 
     @Override
     @Transactional
-    public void addLockingInformation(final Party initiator, final String messageId, final String mpc) {
-        Set<Identifier> identifiers = initiator.getIdentifiers();
-        //TODO throw an exception here.
-        if (identifiers.size() == 0) {
-            LOG.warn("No identifier defined for party:[{}], the message will not be available for pulling", initiator.getName());
-            return;
-        }
-        Identifier identifier = identifiers.iterator().next();
-        LOG.debug("Saving messagelock with id:[{}],partyID:[{}], mpc:[{}]",messageId,identifier.getPartyId(),mpc);
-        MessagingLock messagingLock = new MessagingLock(messageId, identifier.getPartyId(), mpc);
+    public void addLockingInformation(final PartyIdExtractor partyIdExtractor, final String messageId, final String mpc) {
+
+        String partyId = partyIdExtractor.getPartyId();
+        LOG.debug("Saving messagelock with id:[{}],partyID:[{}], mpc:[{}]",messageId, partyId,mpc);
+        MessagingLock messagingLock = new MessagingLock(messageId, partyId, mpc);
         messagingLockDao.save(messagingLock);
     }
 

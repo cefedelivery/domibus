@@ -25,6 +25,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pull.MessagingLockDaoImpl;
 import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -310,7 +311,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
             else{
-                messagingLockService.addLockingInformation(to,messageId,message.getUserMessage().getMpc());
+                messagingLockService.addLockingInformation(new PartyExtractor(to),messageId,message.getUserMessage().getMpc());
             }
 
             LOG.debug("Message submitted");

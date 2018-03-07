@@ -42,6 +42,17 @@ public class JsonSubmission {
     private String toRole;
     private byte[] payload;
 
+
+    @Override
+    public String toString() {
+        return "JsonSubmission{" +
+                "action='" + action + '\'' +
+                ", service='" + service + '\'' +
+                ", serviceType='" + serviceType + '\'' +
+                ", messageId='" + messageId + '\'' +
+                '}';
+    }
+
     /**
      * Getter for action
      * <p/>
@@ -568,22 +579,6 @@ public class JsonSubmission {
         this.toParties.add(new JsonSubmission.Party(partyId, partyIdType));
     }
 
-
-    @Override
-    public String toString() {
-        return "JsonSubmission{" +"\n"+
-                ", action='" + action + '\'' +"\n"+
-                ", service='" + service + '\'' +"\n"+
-                ", serviceType='" + serviceType + '\'' +"\n"+
-                ", conversationId='" + conversationId + '\'' +"\n"+
-                ", messageId='" + messageId + '\'' +"\n"+
-                ", refToMessageId='" + refToMessageId + '\'' +"\n"+
-                ", agreementRef='" + agreementRef + '\'' +"\n"+
-                ", agreementRefType='" + agreementRefType + '\'' +"\n"+
-                ", fromRole='" + fromRole + '\'' +"\n"+
-                ", toRole='" + toRole + '\'' +"\n"+
-                '}';
-    }
 
     public static class Party {
         private final String partyId;

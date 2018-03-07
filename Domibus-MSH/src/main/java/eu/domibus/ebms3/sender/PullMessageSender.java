@@ -99,7 +99,7 @@ public class PullMessageSender {
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
-            LOG.debug("Sending pull request with mpc "+mpc);
+            LOG.debug("Sending pull request with mpc " + mpc);
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
             Party receiverParty = pModeProvider.getReceiverParty(pMode);
             Policy policy;
@@ -113,15 +113,15 @@ public class PullMessageSender {
             }
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
             Timer.Context processPullRequestDispathTimer = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.dispatchPullRequest")).time();
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
             processPullRequestDispathTimer.stop();
             messaging = MessageUtil.getMessage(response, jaxbContext);
-            if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
+            if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
                 Set<Error> error = signalMessage.getError();
                 //@thom why do not I have the error inside the message??
-                LOG.debug("No message for sent pull request with mpc "+mpc);
+                LOG.debug("No message for sent pull request with mpc " + mpc);
                 for (Error error1 : error) {
-                    LOG.debug(error1.getErrorCode()+" "+error1.getShortDescription());
+                    LOG.debug(error1.getErrorCode() + " " + error1.getShortDescription());
                 }
                 return;
             }
@@ -131,9 +131,8 @@ public class PullMessageSender {
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
             pullhandleNewUserMessage.stop();
             //send receipt
-
             Timer.Context pullReceiptDispathTimer = METRIC_REGISTRY.timer(name(PullMessageSender.class, "pull.dispatchPullReceipt")).time();
-            mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
+            mshDispatcher.dispatch(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
             pullReceiptDispathTimer.stop();
 
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {
@@ -148,19 +147,17 @@ public class PullMessageSender {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
             checkConnectionProblem(e);
-        }
-        finally {
+        } finally {
             processPullRequestTimer.stop();
             pullRequestCount.dec();
         }
     }
 
     private void checkConnectionProblem(EbMS3Exception e) {
-        if(e.getErrorCode()== ErrorCode.EbMS3ErrorCode.EBMS_0005) {
+        if (e.getErrorCode() == ErrorCode.EbMS3ErrorCode.EBMS_0005) {
             LOG.warn(e.getErrorDetail());
             LOG.warn(e.getMessage());
-        }
-        else{
+        } else {
             throw new WebServiceException(e);
         }
     }

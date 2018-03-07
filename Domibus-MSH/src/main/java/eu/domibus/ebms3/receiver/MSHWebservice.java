@@ -240,7 +240,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
 
-    SOAPMessage handlePullRequest(Messaging messaging) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public SOAPMessage handlePullRequest(Messaging messaging) {
         Timer.Context handlePullRequest = METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequest")).time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());

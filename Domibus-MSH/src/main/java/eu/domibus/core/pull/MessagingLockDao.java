@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface MessagingLockDao {
 
-    String getNextPullMessageToProcess(String messageType, String initiator, String mpc, int maxResult);
+    String getNextPullMessageToProcess(String messageType, String initiator, String mpc);
 
     String getNextPullMessageToProcess(String messageType, String initiator, String mpc, List<Integer> lockedIds);
 
