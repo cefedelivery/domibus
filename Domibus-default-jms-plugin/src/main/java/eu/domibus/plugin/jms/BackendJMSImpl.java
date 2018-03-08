@@ -27,8 +27,13 @@ import eu.domibus.taxud.CertificateLogging;
 import eu.domibus.taxud.PayloadLogging;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
@@ -135,7 +140,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
-    private org.springframework.web.client.RestTemplate restTemplate;
+    private org.springframework.web.client.RestTemplate umdsTemplate;
+
+    private org.springframework.web.client.RestTemplate istTemplate;
 
     private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "c3-c4-throughput"));
 
@@ -158,12 +165,30 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @PostConstruct
     protected void init() {
-        restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        umdsTemplate = new RestTemplate(getClientHttpRequestFactory());
+        umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        istTemplate=new RestTemplate(getClientHttpRequestFactory());
+        istTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
         doNotSendToC4 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"));
         doNotPushToC3 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"));
         LOG.warn("Do not send to c4:[{}]",doNotSendToC4);
         LOG.warn("Do not push to c3:[{}]",doNotPushToC3);
+    }
+
+    private ClientHttpRequestFactory getClientHttpRequestFactory() {
+        int timeout = 15000;
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .setSocketTimeout(timeout)
+                .build();
+        CloseableHttpClient client = HttpClientBuilder
+                .create()
+                .setDefaultRequestConfig(config)
+                .build();
+        return new HttpComponentsClientHttpRequestFactory(client);
     }
 
     public BackendJMSImpl(String name) {
@@ -273,10 +298,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         Timer.Context authenticationPost = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "authenticate.postMultipartRequest")).time();
         LOG.trace("authenticating to:[{}] ", authenticationUrl);
-        Boolean aBoolean = restTemplate.postForObject(authenticationUrl, umds, Boolean.class);
+        Boolean aBoolean = umdsTemplate.postForObject(authenticationUrl, umds, Boolean.class);
         authenticationPost.stop();
         if (!aBoolean) {
-            LOG.error("UMDS rejected authentication for message with id[{}]", submission.getMessageId());
+            LOG.warn("UMDS rejected authentication for message with id[{}]", submission.getMessageId());
             throw new AuthenticationException("UMDS rejected authentication");
         }
     }
@@ -442,7 +467,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         Timer.Context postPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "sendPayload.postPayload")).time();
         LOG.trace("Sending payload to:[{}]", payloadEndPointUrl);
-        restTemplate.postForLocation(payloadEndPointUrl, jsonSubmission);
+        istTemplate.postForLocation(payloadEndPointUrl, jsonSubmission);
         postPayloadContext.stop();
         requestsPerSecond.mark();
     }
