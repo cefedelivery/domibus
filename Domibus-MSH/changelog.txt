@@ -2,6 +2,7 @@ Domibus 3.3.2
 - Add certificate revocation logging.
     When a certificate is about to expire a warning message will be displayed in the logs.
     When a certificate has expired a error message will be displayed in the logs.
+- Several other log improvements
 - Corrected logs configuration in logback.xml file which have cause wrong info to be written to business log file
 - When FS-Plugin will be used on Receiver Domibus installation, metadata.xml will be written along with payload(s) into Incoming folder
 - Added Database delete (cleanup) scripts for MySQL and Oracle - these will be provided into Domibus sql-scripts distribution .zip file
