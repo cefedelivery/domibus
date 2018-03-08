@@ -166,20 +166,23 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @PostConstruct
     protected void init() {
-        umdsTemplate = new RestTemplate(getClientHttpRequestFactory());
-        umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-
-        istTemplate=new RestTemplate(getClientHttpRequestFactory());
-        istTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-
+        int timeout = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT,"10000"));
         doNotSendToC4 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"));
         doNotPushToC3 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"));
         LOG.warn("Do not send to c4:[{}]",doNotSendToC4);
         LOG.warn("Do not push to c3:[{}]",doNotPushToC3);
+
+        umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout));
+        umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+        istTemplate=new RestTemplate(getClientHttpRequestFactory(timeout));
+        istTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+
     }
 
-    private ClientHttpRequestFactory getClientHttpRequestFactory() {
-        int timeout = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT,"10000"));
+    private ClientHttpRequestFactory getClientHttpRequestFactory(final int timeout) {
+
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout)
                 .setConnectionRequestTimeout(timeout)
