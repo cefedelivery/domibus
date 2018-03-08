@@ -88,6 +88,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
     public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
     public static final String DOMIBUS_DO_NOT_PUSH_BACK_TO_C3 = "domibus.do.not.push.back.to.c3";
+    public static final String DOMIBUS_TAXUD_REST_TIMEOUT = "domibus.taxud.rest.timeout";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -178,7 +179,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     private ClientHttpRequestFactory getClientHttpRequestFactory() {
-        int timeout = 15000;
+        int timeout = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT,"10000"));
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout)
                 .setConnectionRequestTimeout(timeout)
