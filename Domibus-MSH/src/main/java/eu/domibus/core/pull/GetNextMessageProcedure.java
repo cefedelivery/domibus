@@ -46,7 +46,10 @@ public class GetNextMessageProcedure {
             /*try (CallableStatement stmt = conn.prepareCall(
                     "{CALL get_next(:message_type, :initiator, :mpc, :message_id)}"))
             {
-            */try (CallableStatement stmt = conn.prepareCall(
+            */
+           // CallableStatement callableStatement = conn.prepareCall("set SESSION innodb_lock_wait_timeout=1;");
+           // callableStatement.execute();
+            try (CallableStatement stmt = conn.prepareCall(
                     "{CALL get_next(?, ?, ?, ?)}")) {
                 stmt.setString(1, messageType);
                 stmt.setString(2, initiator);
