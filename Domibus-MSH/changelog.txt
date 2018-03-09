@@ -6,7 +6,7 @@ Domibus 3.3.2
 - Corrected logs configuration in logback.xml file which have cause wrong info to be written to business log file
 - When FS-Plugin will be used on Receiver Domibus installation, metadata.xml will be written along with payload(s) into Incoming folder
 - Added Database delete (cleanup) scripts for MySQL and Oracle - these will be provided into Domibus sql-scripts distribution .zip file
-- Corrected the retry policy for the DomibusSendMessageQueue and DomibusPullMessageQueue
+- Corrected the retry policy for the DomibusSendMessageQueue and DomibusPullMessageQueue for WildFly distribution
 Domibus 3.3.1
 - Add an account locking policy mechanism. When a user has failed to provide the correct password five times, his account will be locked for a configurable amount of time (default to one hour).
 - Allow plugins to retrieve the metadata of a User Message
