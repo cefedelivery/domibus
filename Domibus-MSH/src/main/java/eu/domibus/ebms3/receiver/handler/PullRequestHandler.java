@@ -120,11 +120,11 @@ public class PullRequestHandler {
         try {
 
             LOG.debug("Retrieved message with id:[{}]",messageId);
-            MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
+            messagingLockService.delete(messageId);
             //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
             //when trying to delete it.
+            MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
             if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
-                messagingLockService.delete(messageId);
                 return null;
             }
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -143,7 +143,6 @@ public class PullRequestHandler {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
 
-                messagingLockService.delete(messageId);
                 checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {
