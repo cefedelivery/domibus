@@ -1,6 +1,7 @@
 -- *********************************************************************
 -- Delete script for MySQL Domibus DB with a time interval
--- Change START_DATE and END_DATE values accordingly
+-- Change START_DATE and END_DATE values accordingly - pay attention to that
+-- fact that info are stored in DB using timezone agnostic data types.
 --
 -- Important: In order to keep the JMS queues synchronized with the DB data that will be
 -- deleted by this script, the Domibus Administrator should remove manually the associated
