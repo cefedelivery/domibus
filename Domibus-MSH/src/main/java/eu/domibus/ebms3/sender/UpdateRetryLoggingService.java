@@ -92,9 +92,6 @@ public class UpdateRetryLoggingService {
             }
             userMessageLogService.setMessageAsSendFailure(messageId);
             //@TODO taxud poc make this cleaner.
-            if(messageStatus==MessageStatus.READY_TO_PULL) {
-                messagingLockService.delete(messageId);
-            }
 
             if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);

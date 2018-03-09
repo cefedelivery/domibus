@@ -7,10 +7,13 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
@@ -72,10 +75,17 @@ public class PullRequestHandler {
     @Autowired
     private MessagingLockService messagingLockService;
 
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
+
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
-            return handleRequest(messageId, pullContext);
+            SOAPMessage soapMessage = handleRequest(messageId, pullContext);
+            if(soapMessage!=null) {
+                return soapMessage;
+            }
+            return notifyNoMessage(pullContext);
         } else {
             return notifyNoMessage(pullContext);
         }
@@ -110,7 +120,15 @@ public class PullRequestHandler {
         try {
 
             LOG.debug("Retrieved message with id:[{}]",messageId);
+            MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
+            //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
+            //when trying to delete it.
+            if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
+                messagingLockService.delete(messageId);
+                return null;
+            }
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+
             LOG.debug("Message  [{}]",userMessage);
             leg = pullContext.filterLegOnMpc();
             LOG.debug("leg[{}]",leg);
