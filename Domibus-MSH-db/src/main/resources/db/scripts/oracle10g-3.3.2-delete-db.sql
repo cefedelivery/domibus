@@ -34,7 +34,7 @@ DELETE FROM tb_messaging WHERE
                             FROM
                                 tb_message_log
                             WHERE
-                                received BETWEEN &start_date AND &end_date
+                                received BETWEEN &START_DATE AND &END_DATE
                         )
                 )
         )
@@ -60,7 +60,7 @@ DELETE FROM tb_messaging WHERE
                             FROM
                                 tb_message_log
                             WHERE
-                                received BETWEEN &start_date AND &end_date
+                                received BETWEEN &START_DATE AND &END_DATE
                         )
                 )
         )
@@ -74,7 +74,7 @@ DELETE FROM tb_error_log WHERE
             FROM
                 tb_message_log
             WHERE
-                received BETWEEN &start_date AND &end_date
+                received BETWEEN &START_DATE AND &END_DATE
         )
     );
 
@@ -86,7 +86,7 @@ DELETE FROM tb_error_log WHERE
             FROM
                 tb_message_log
             WHERE
-                received BETWEEN &start_date AND &end_date
+                received BETWEEN &START_DATE AND &END_DATE
         )
     );
 
@@ -109,7 +109,7 @@ DELETE FROM tb_party_id WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -133,7 +133,7 @@ DELETE FROM tb_party_id WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -163,7 +163,7 @@ DELETE FROM tb_receipt_data WHERE
                                 FROM
                                     tb_message_log
                                 WHERE
-                                    received BETWEEN &start_date AND &end_date
+                                    received BETWEEN &START_DATE AND &END_DATE
                             )
                     )
             )
@@ -194,7 +194,7 @@ DELETE FROM tb_property WHERE
                                 FROM
                                     tb_message_log
                                 WHERE
-                                    received BETWEEN &start_date AND &end_date
+                                    received BETWEEN &START_DATE AND &END_DATE
                             )
                     )
             )
@@ -219,7 +219,7 @@ DELETE FROM tb_property WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -243,7 +243,7 @@ DELETE FROM tb_part_info WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -267,7 +267,7 @@ DELETE FROM tb_rawenvelope_log WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -291,7 +291,7 @@ DELETE FROM tb_rawenvelope_log WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -315,7 +315,7 @@ DELETE FROM tb_error WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -333,7 +333,7 @@ DELETE FROM tb_user_message WHERE
                 FROM
                     tb_message_log
                 WHERE
-                    received BETWEEN &start_date AND &end_date
+                    received BETWEEN &START_DATE AND &END_DATE
             )
     );
 
@@ -350,7 +350,7 @@ DELETE FROM tb_signal_message WHERE
                 FROM
                     tb_message_log
                 WHERE
-                    received BETWEEN &start_date AND &end_date
+                    received BETWEEN &START_DATE AND &END_DATE
             )
     );
 
@@ -373,7 +373,7 @@ DELETE FROM tb_receipt WHERE
                         FROM
                             tb_message_log
                         WHERE
-                            received BETWEEN &start_date AND &end_date
+                            received BETWEEN &START_DATE AND &END_DATE
                     )
             )
     );
@@ -385,11 +385,11 @@ DELETE FROM tb_message_info WHERE
         FROM
             tb_message_log
         WHERE
-            received BETWEEN &start_date AND &end_date
+            received BETWEEN &START_DATE AND &END_DATE
     );
 
 DELETE FROM tb_message_log WHERE
-    received BETWEEN &start_date AND &end_date;
+    received BETWEEN &START_DATE AND &END_DATE;
 
 COMMIT;
 
