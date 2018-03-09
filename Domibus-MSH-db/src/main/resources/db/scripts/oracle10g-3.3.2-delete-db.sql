@@ -4,46 +4,392 @@
 --
 -- Important: In order to keep the JMS queues synchronized with the DB data that will be
 -- deleted by this script, the Domibus Administrator should remove manually the associated
--- JMS messages from the plugin notifications queues
+-- JMS messages FROM the plugin notifications queues
 -- *********************************************************************
-DEFINE START_DATE = TO_DATE('20-JAN-17 10:00:00', 'DD-MM-YY HH24:MI:SS');
-DEFINE END_DATE = TO_DATE('20-DEC-17 03:00:00', 'DD-MM-YY HH24:MI:SS');
 
-DELETE FROM TB_MESSAGING WHERE (SIGNAL_MESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID IN (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE))));
+/* For SQL*Plus client use specific definition like:
+   variable START_DATE varchar2(30)
+   exec :START_DATE := '2013-10-01';
+*/
+DEFINE START_DATE = TO_DATE('08-MAR-2018 09:59:00', 'DD-MM-YY HH24:MI:SS');
+DEFINE END_DATE = TO_DATE('08-MAR-2018 10:00:00', 'DD-MM-YY HH24:MI:SS');
 
-DELETE FROM TB_MESSAGING WHERE (USER_MESSAGE_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE))));
+DELETE FROM tb_messaging WHERE
+    (
+        signal_message_id IN (
+            SELECT
+                id_pk
+            FROM
+                tb_signal_message
+            WHERE
+                messageinfo_id_pk IN (
+                    SELECT
+                        id_pk
+                    FROM
+                        tb_message_info
+                    WHERE
+                        message_id IN (
+                            SELECT
+                                message_id
+                            FROM
+                                tb_message_log
+                            WHERE
+                                received BETWEEN &start_date AND &end_date
+                        )
+                )
+        )
+    );
 
-DELETE FROM TB_ERROR_LOG WHERE (ERROR_SIGNAL_MESSAGE_ID IN (SELECT MESSAGE_ID FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE));
+DELETE FROM tb_messaging WHERE
+    (
+        user_message_id IN (
+            SELECT
+                id_pk
+            FROM
+                tb_user_message
+            WHERE
+                messageinfo_id_pk IN (
+                    SELECT
+                        id_pk
+                    FROM
+                        tb_message_info
+                    WHERE
+                        message_id IN (
+                            SELECT
+                                message_id
+                            FROM
+                                tb_message_log
+                            WHERE
+                                received BETWEEN &start_date AND &end_date
+                        )
+                )
+        )
+    );
 
-DELETE FROM TB_ERROR_LOG WHERE (MESSAGE_IN_ERROR_ID IN (SELECT MESSAGE_ID FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE));
+DELETE FROM tb_error_log WHERE
+    (
+        error_signal_message_id IN (
+            SELECT
+                message_id
+            FROM
+                tb_message_log
+            WHERE
+                received BETWEEN &start_date AND &end_date
+        )
+    );
 
-DELETE FROM TB_PARTY_ID WHERE FROM_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE));
+DELETE FROM tb_error_log WHERE
+    (
+        message_in_error_id IN (
+            SELECT
+                message_id
+            FROM
+                tb_message_log
+            WHERE
+                received BETWEEN &start_date AND &end_date
+        )
+    );
 
-DELETE FROM TB_PARTY_ID WHERE TO_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE));
+DELETE FROM tb_party_id WHERE
+    from_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_user_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_RECEIPT_DATA WHERE RECEIPT_ID IN (select ID_PK from TB_RECEIPT WHERE ID_PK IN (select receipt_ID_PK from TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN  (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE))));
+DELETE FROM tb_party_id WHERE
+    to_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_user_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_PROPERTY WHERE MESSAGEPROPERTIES_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE));
+DELETE FROM tb_receipt_data WHERE
+    receipt_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_receipt
+        WHERE
+            id_pk IN (
+                SELECT
+                    receipt_id_pk
+                FROM
+                    tb_signal_message
+                WHERE
+                    messageinfo_id_pk IN (
+                        SELECT
+                            id_pk
+                        FROM
+                            tb_message_info
+                        WHERE
+                            message_id IN (
+                                SELECT
+                                    message_id
+                                FROM
+                                    tb_message_log
+                                WHERE
+                                    received BETWEEN &start_date AND &end_date
+                            )
+                    )
+            )
+    );
 
-DELETE FROM TB_PROPERTY WHERE PARTPROPERTIES_ID IN (select ID_PK from TB_PART_INFO WHERE PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE)));
+DELETE FROM tb_property WHERE
+    partproperties_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_part_info
+        WHERE
+            payloadinfo_id IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_user_message
+                WHERE
+                    messageinfo_id_pk IN (
+                        SELECT
+                            id_pk
+                        FROM
+                            tb_message_info
+                        WHERE
+                            message_id IN (
+                                SELECT
+                                    message_id
+                                FROM
+                                    tb_message_log
+                                WHERE
+                                    received BETWEEN &start_date AND &end_date
+                            )
+                    )
+            )
+    );
 
-DELETE FROM TB_PART_INFO WHERE PAYLOADINFO_ID IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE));
+DELETE FROM tb_property WHERE
+    messageproperties_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_user_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_RAWENVELOPE_LOG WHERE USERMESSAGE_ID_FK IN (select ID_PK from TB_USER_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE)));
+DELETE FROM tb_part_info WHERE
+    payloadinfo_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_user_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_RAWENVELOPE_LOG WHERE SIGNALMESSAGE_ID_FK IN (select ID_PK from TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE)));
+DELETE FROM tb_rawenvelope_log WHERE
+    usermessage_id_fk IN (
+        SELECT
+            id_pk
+        FROM
+            tb_user_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_ERROR WHERE SIGNALMESSAGE_ID IN (select ID_PK from TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE)));
+DELETE FROM tb_rawenvelope_log WHERE
+    signalmessage_id_fk IN (
+        SELECT
+            id_pk
+        FROM
+            tb_signal_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_USER_MESSAGE WHERE messageInfo_ID_PK in (select ID_PK from TB_MESSAGE_INFO WHERE TIME_STAMP between &START_DATE and &END_DATE);
+DELETE FROM tb_error WHERE
+    signalmessage_id IN (
+        SELECT
+            id_pk
+        FROM
+            tb_signal_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_SIGNAL_MESSAGE WHERE messageInfo_ID_PK IN (select ID_PK from TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE));
+DELETE FROM tb_user_message WHERE
+    messageinfo_id_pk IN (
+        SELECT
+            id_pk
+        FROM
+            tb_message_info
+        WHERE
+            message_id IN (
+                SELECT
+                    message_id
+                FROM
+                    tb_message_log
+                WHERE
+                    received BETWEEN &start_date AND &end_date
+            )
+    );
 
-DELETE FROM TB_RECEIPT WHERE ID_PK NOT IN(select receipt_ID_PK from TB_SIGNAL_MESSAGE);
+DELETE FROM tb_signal_message WHERE
+    messageinfo_id_pk IN (
+        SELECT
+            id_pk
+        FROM
+            tb_message_info
+        WHERE
+            message_id IN (
+                SELECT
+                    message_id
+                FROM
+                    tb_message_log
+                WHERE
+                    received BETWEEN &start_date AND &end_date
+            )
+    );
 
-DELETE FROM TB_MESSAGE_INFO WHERE MESSAGE_ID in (SELECT message_id FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE);
+DELETE FROM tb_receipt WHERE
+    id_pk IN (
+        SELECT
+            receipt_id_pk
+        FROM
+            tb_signal_message
+        WHERE
+            messageinfo_id_pk IN (
+                SELECT
+                    id_pk
+                FROM
+                    tb_message_info
+                WHERE
+                    message_id IN (
+                        SELECT
+                            message_id
+                        FROM
+                            tb_message_log
+                        WHERE
+                            received BETWEEN &start_date AND &end_date
+                    )
+            )
+    );
 
-DELETE FROM TB_MESSAGE_LOG WHERE received between &START_DATE and &END_DATE;
+DELETE FROM tb_message_info WHERE
+    message_id IN (
+        SELECT
+            message_id
+        FROM
+            tb_message_log
+        WHERE
+            received BETWEEN &start_date AND &end_date
+    );
+
+DELETE FROM tb_message_log WHERE
+    received BETWEEN &start_date AND &end_date;
 
 COMMIT;
 
