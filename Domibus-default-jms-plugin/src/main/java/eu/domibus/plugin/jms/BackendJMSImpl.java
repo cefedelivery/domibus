@@ -89,6 +89,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
     public static final String DOMIBUS_DO_NOT_PUSH_BACK_TO_C3 = "domibus.do.not.push.back.to.c3";
     public static final String DOMIBUS_TAXUD_REST_TIMEOUT = "domibus.taxud.rest.timeout";
+    public static final String DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL = "domibus.taxud.rest.connections";
 
     @Autowired
     @Qualifier(value = "replyJmsTemplate")
@@ -167,21 +168,22 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @PostConstruct
     protected void init() {
         int timeout = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT,"10000"));
+        int connections = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL,"100"));
         doNotSendToC4 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"));
         doNotPushToC3 = Boolean.valueOf(domibusProperties.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"));
         LOG.warn("Do not send to c4:[{}]",doNotSendToC4);
         LOG.warn("Do not push to c3:[{}]",doNotPushToC3);
 
-        umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout));
+        umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-        istTemplate=new RestTemplate(getClientHttpRequestFactory(timeout));
+        istTemplate=new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         istTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
 
     }
 
-    private ClientHttpRequestFactory getClientHttpRequestFactory(final int timeout) {
+    private ClientHttpRequestFactory getClientHttpRequestFactory(final int timeout, final int connections) {
 
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout)
@@ -190,6 +192,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 .build();
         CloseableHttpClient client = HttpClientBuilder
                 .create()
+                .setMaxConnTotal(connections)
+                .setMaxConnPerRoute(connections)
                 .setDefaultRequestConfig(config)
                 .build();
         return new HttpComponentsClientHttpRequestFactory(client);
