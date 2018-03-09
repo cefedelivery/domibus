@@ -117,16 +117,17 @@ public class PullRequestHandler {
         final Timestamp startDate = new Timestamp(System.currentTimeMillis());
         boolean abortSending = false;
         SOAPMessage soapMessage = null;
+        LOG.debug("Retrieved message with id:[{}]",messageId);
+
+        //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
+        //when trying to delete it.
+        MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
+        if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
+            messagingLockService.delete(messageId);
+            return null;
+        }
         try {
 
-            LOG.debug("Retrieved message with id:[{}]",messageId);
-            messagingLockService.delete(messageId);
-            //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
-            //when trying to delete it.
-            MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
-            if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
-                return null;
-            }
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
 
             LOG.debug("Message  [{}]",userMessage);
@@ -143,6 +144,7 @@ public class PullRequestHandler {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
 
+                messagingLockService.delete(messageId);
                 checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {
