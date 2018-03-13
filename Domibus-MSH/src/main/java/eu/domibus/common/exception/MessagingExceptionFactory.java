@@ -18,7 +18,7 @@ public class MessagingExceptionFactory {
         ErrorCode errorCode = originalException.getErrorCodeObject();
         MessagingProcessingException messagingProcessingException;
 
-        String message = ErrorCode.EbMS3ErrorCode.findErrorCodeBy(originalException.getErrorCodeObject().getErrorCodeName()).getShortDescription() + "\r detail: " + originalException.getErrorDetail();
+        String message = ErrorCode.EbMS3ErrorCode.findErrorCodeBy(originalException.getErrorCodeObject().getErrorCodeName()).getShortDescription() + " detail: " + originalException.getErrorDetail();
 
         switch (errorCode) {
             case EBMS_0007:
