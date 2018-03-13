@@ -63,18 +63,18 @@
                         <testSuite>WS-Auto-for-Bamboo</testSuite>
                         <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
                         <projectProperties>
-                            <value>localUrl=${localUrl}</value>
-                            <value>remoteUrl=${remoteUrl}</value>
-                            <value>driverBlue=${driverBlue}</value>
-                            <value>driverRed=${driverRed}</value>
-                            <value>jdbcUrlBlue=${jdbcUrlBlue}</value>
-                            <value>jdbcUrlRed=${jdbcUrlRed}</value>
-                            <value>databaseBlue=${databaseBlue}</value>
-                            <value>databaseRed=${databaseRed}</value>
-                            <value>blueDbUser=${blueDbUser}</value>
-                            <value>blueDbPassword=${blueDbPassword}</value>
-                            <value>redDbUser=${redDbUser}</value>
-                            <value>redDbPassword=${redDbPassword}</value>
+                            <value>${localUrl}</value>
+                            <value>${remoteUrl}</value>
+                            <value>${driverBlue}</value>
+                            <value>${driverRed}</value>
+                            <value>${jdbcUrlBlue}</value>
+                            <value>${jdbcUrlRed}</value>
+                            <value>${databaseBlue}</value>
+                            <value>${databaseRed}</value>
+                            <value>${blueDbUser}</value>
+                            <value>${blueDbPassword}</value>
+                            <value>${redDbUser}</value>
+                            <value>${redDbPassword}</value>
                             <value>updateReport=false</value>
                             <value>thirdGateway=false</value>
                         </projectProperties>
