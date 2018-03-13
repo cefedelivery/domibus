@@ -107,13 +107,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
                     .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)));
 
             if (defaultProxy != null) {
-                LOG.debug("Creating SMP client with proxy");
                 dynamicDiscoveryBuilder
                         .fetcher(new DefaultURLFetcher(defaultProxy));
-            } else {
-                LOG.debug("Creating SMP client without proxy");
-                // no proxy is configured
             }
+
+            LOG.debug("Creating SMP client " + (defaultProxy != null ? "with" : "without") + " proxy.");
 
             return dynamicDiscoveryBuilder.build();
         } catch (TechnicalException exc) {
