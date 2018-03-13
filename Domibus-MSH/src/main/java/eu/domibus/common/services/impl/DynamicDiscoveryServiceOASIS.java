@@ -100,23 +100,22 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         KeyStore truststore = cryptoService.getTrustStore();
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
+
+            DynamicDiscoveryBuilder dynamicDiscoveryBuilder = DynamicDiscoveryBuilder.newInstance();
+            dynamicDiscoveryBuilder
+                    .locator(new DefaultBDXRLocator(smlInfo))
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)));
+
             if (defaultProxy != null) {
                 LOG.debug("Creating SMP client with proxy");
-                return DynamicDiscoveryBuilder.newInstance()
-                        .fetcher(new DefaultURLFetcher(defaultProxy))
-                        .locator(new DefaultBDXRLocator(smlInfo))
-                        //.reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, "^.*EHEALTH_SMP.*$")))
-                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
-                        .build();
+                dynamicDiscoveryBuilder
+                        .fetcher(new DefaultURLFetcher(defaultProxy));
+            } else {
+                LOG.debug("Creating SMP client without proxy");
+                // no proxy is configured
             }
 
-            LOG.debug("Creating SMP client without proxy");
-            // no proxy is configured
-            return DynamicDiscoveryBuilder.newInstance()
-                    .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
-                    .build();
-
+            return dynamicDiscoveryBuilder.build();
         } catch (TechnicalException exc) {
             throw new ConfigurationException("Could not create smp client to fetch metadata from SMP", exc);
         }
@@ -139,18 +138,32 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
-        String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-        String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-        String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-        String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+        if (useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
+            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
+            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
+            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
 
-        if(StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)) {
-            return null;
+            if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
+                    || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
+
+                return null;
+            }
+
+            LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
+                    httpProxyUser);
+
+            return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
+        return null;
+    }
 
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                httpProxyUser + " " + httpProxyPassword + " ");
-
-        return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
+    private boolean useProxy() {
+        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
+        if (StringUtils.isEmpty(useProxy)) {
+            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
+            return false;
+        }
+        return Boolean.parseBoolean(useProxy);
     }
 }

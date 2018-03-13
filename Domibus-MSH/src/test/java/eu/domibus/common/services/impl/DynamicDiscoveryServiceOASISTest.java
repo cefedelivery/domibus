@@ -6,14 +6,21 @@ import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
-import eu.europa.ec.dynamicdiscovery.model.*;
+import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
+import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
+import eu.europa.ec.dynamicdiscovery.model.DocumentIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ParticipantIdentifier;
+import eu.europa.ec.dynamicdiscovery.model.ServiceMetadata;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.oasis_open.docs.bdxr.ns.smp._2016._05.*;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
+import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
@@ -26,7 +33,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.Properties;
+
 /**
  * @author Ioana Dragusanu (idragusa)
  * @since 3.2.5
@@ -178,5 +185,207 @@ public class DynamicDiscoveryServiceOASISTest {
         System.out.println(endpointInfo.getCertificate());
         Assert.assertNotNull(endpointInfo);
         Assert.assertEquals("http://40.118.20.112:8995/domibus/services/msh", endpointInfo.getAddress());
+    }
+
+    @Test
+    public void testProxyConfigured() throws Exception {
+        // Given
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "192.168.0.0";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "1234";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "proxyUser";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "proxyPassword";
+        }};
+
+        //when
+        DefaultProxy defaultProxy = dynamicDiscoveryServiceOASIS.getConfiguredProxy();
+
+        //then
+        Assert.assertNotNull(defaultProxy);
+    }
+
+    @Test
+    public void testProxyNotConfigured() throws Exception {
+        // Given
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "false";
+        }};
+
+        //when
+        DefaultProxy defaultProxy = dynamicDiscoveryServiceOASIS.getConfiguredProxy();
+
+        //then
+        Assert.assertNull(defaultProxy);
+    }
+
+    @Test
+    public void testProxyConfigurationMissingHost() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = null;
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "8012";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "proxyUser";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "proxyPassword";
+        }};
+
+        assertNullForMissingParameters();
+    }
+
+    @Test
+    public void testProxyConfigurationMissingPort() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "192.168.1.1";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "proxyUser";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "proxyPassword";
+        }};
+
+        assertNullForMissingParameters();
+    }
+
+    @Test
+    public void testProxyConfigurationMissingUser() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "192.168.1.1";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "8012";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = null;
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "proxyPassword";
+        }};
+
+        assertNullForMissingParameters();
+    }
+
+    @Test
+    public void testProxyConfigurationMissingPassword() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "192.168.1.1";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "8012";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "proxyUser";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "";
+        }};
+
+        assertNullForMissingParameters();
+    }
+
+    @Test
+    public void testCreateDynamicDiscoveryClientWithProxy() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "true";
+
+            domibusProperties.getProperty("domibus.proxy.http.host");
+            result = "192.168.0.1";
+
+            domibusProperties.getProperty("domibus.proxy.http.port");
+            result = "8012";
+
+            domibusProperties.getProperty("domibus.proxy.user");
+            result = "proxyUser";
+
+            domibusProperties.getProperty("domibus.proxy.password");
+            result = "proxyPassword";
+
+            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            result = "domibus.domain.ec.europa.eu";
+
+            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            result = "^.*$";
+        }};
+
+        //when
+        DynamicDiscovery dynamicDiscovery = dynamicDiscoveryServiceOASIS.createDynamicDiscoveryClient();
+        Assert.assertNotNull(dynamicDiscovery);
+        DefaultProxy defaultProxy = (DefaultProxy) ReflectionTestUtils.getField(dynamicDiscovery.getService().getMetadataFetcher(), "proxyConfiguration");
+        Assert.assertNotNull(defaultProxy);
+    }
+
+    @Test
+    public void testCreateDynamicDiscoveryClientWithoutProxy() throws Exception {
+        // Given
+
+        new Expectations(dynamicDiscoveryServiceOASIS) {{
+            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            result = "false";
+
+            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            result = "domibus.domain.ec.europa.eu";
+
+            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            result = "^.*$";
+        }};
+
+        //when
+        DynamicDiscovery dynamicDiscovery = dynamicDiscoveryServiceOASIS.createDynamicDiscoveryClient();
+        Assert.assertNotNull(dynamicDiscovery);
+        DefaultProxy defaultProxy = (DefaultProxy) ReflectionTestUtils.getField(dynamicDiscovery.getService().getMetadataFetcher(), "proxyConfiguration");
+        Assert.assertNull(defaultProxy);
+    }
+
+    private void assertNullForMissingParameters() throws ConnectionException {
+        //when
+        DefaultProxy defaultProxy = dynamicDiscoveryServiceOASIS.getConfiguredProxy();
+
+        //then
+        Assert.assertNull(defaultProxy);
     }
 }
