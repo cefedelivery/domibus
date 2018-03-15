@@ -200,13 +200,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             Timer.Context getSoapMessageContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.getSoapMessage")).time();
             SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
             getSoapMessageContext.stop();
+            Timer.Context handleResponseContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.handleResponse")).time();
             isOk = responseHandler.handle(request);
+            handleResponseContext.stop();
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
+            Timer.Context reliabilityCheckContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.reliabilityCheck")).time();
             reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, request, pModeKey, pullReceiptMatcher);
+            reliabilityCheckContext.stop();
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
@@ -218,7 +222,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
+            Timer.Context receiptReliabilityContext = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull.handlePullRequestReceipt.receiptReliability")).time();
             reliabilityService.handlePullReceiptReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            receiptReliabilityContext.stop();
             handlePullRequestReceiptContext.stop();
         }
         return null;
