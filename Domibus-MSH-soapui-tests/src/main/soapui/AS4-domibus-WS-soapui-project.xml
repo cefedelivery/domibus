@@ -1308,8 +1308,15 @@ test.cleanDBMessageID(msgID)
 test.finalize()
 </con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="4e0191a1-8ef4-4c7c-b98e-cf5217d19398" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom102-Push-Test Experience-Several payloads" searchProperties="true"><con:settings/><con:testStep type="groovy" name="Groovy Script" id="44e5ded1-91dd-412f-b31f-91fdaa5c444c"><con:settings/><con:config><script>def path = context.expand('${#Project#pdfAttachment}')
-log.warn path
+def projectPath = context.expand('${projectDir}')
+log.warn "path: $path"
+log.warn "projectPath: $projectPath"
 def file = new File(path)
+
+new File(projectPath).traverse(type: groovy.io.FileType.FILES) { it ->
+    log.warn it
+}
+
 if (!file.exists() || file.isDirectory()) {
 			log.error "Error: file doesn't exist or is directory on path:" + path
 			return
@@ -1318,6 +1325,8 @@ if (!file.exists() || file.isDirectory()) {
 
 log.warn  "file has ${file.length()} bytes"
 log.warn "file absolutPath is: " + file.getAbsolutePath()
+
+
 </script></con:config></con:testStep><con:testStep type="request" id="32187c3e-10a4-4f74-bb76-0024b1cf6dc0" name="Submit Message"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
