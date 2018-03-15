@@ -75,17 +75,10 @@ public class PullRequestHandler {
     @Autowired
     private MessagingLockService messagingLockService;
 
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
-
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
-            SOAPMessage soapMessage = handleRequest(messageId, pullContext);
-            if(soapMessage!=null) {
-                return soapMessage;
-            }
-            return notifyNoMessage(pullContext);
+            return handleRequest(messageId, pullContext);
         } else {
             return notifyNoMessage(pullContext);
         }
@@ -118,14 +111,6 @@ public class PullRequestHandler {
         boolean abortSending = false;
         SOAPMessage soapMessage = null;
         LOG.debug("Retrieved message with id:[{}]",messageId);
-
-        //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
-        //when trying to delete it.
-        MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId);
-        if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
-            messagingLockService.delete(messageId);
-            return null;
-        }
         try {
 
             UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);

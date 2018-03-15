@@ -13,11 +13,13 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -112,6 +114,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Autowired
     private MessagingLockService messagingLockService;
+
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
 
 
     /**
@@ -221,7 +226,19 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         String partyId = identifiers.iterator().next().getPartyId();
         String pullMessageToProcess = messagingLockService.getPullMessageToProcess(partyId, mpc);
+        if(pullMessageToProcess==null){
+            return pullMessageToProcess;
+        }
         retrieveReadyToPullUserMessageId.close();
+        //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
+        //when trying to delete it.
+        Timer.Context checkPullMessageStatus = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.check.pull.message.status")).time();
+        MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageToProcess);
+        checkPullMessageStatus.stop();
+        if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
+            messagingLockService.delete(pullMessageToProcess);
+            return null;
+        }
         return pullMessageToProcess;
     }
 
