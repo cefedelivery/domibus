@@ -63,11 +63,11 @@ sudo sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
 ########## Create domibus tables ########
 mysql -h localhost -u root --password=root domibus < $TOMCAT_FULL_DISTRIBUTION/sql-scripts/mysql5innoDb-3.3.2.ddl
 
-sudo sed -i 's/gateway_truststore.jks/ceftestparty8gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
-sudo sed -i 's/gateway_keystore.jks/ceftestparty8gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
-sudo sed -i 's/blue_gw/ceftestparty8gw/g' $CATALINA_HOME/conf/domibus/domibus.properties
+sudo sed -i 's/gateway_truststore.jks/ceftestparty9gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
+sudo sed -i 's/gateway_keystore.jks/ceftestparty9gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
+sudo sed -i 's/blue_gw/ceftestparty9gw/g' $CATALINA_HOME/conf/domibus/domibus.properties
 sudo tar xzf data.tgz
-sudo mv data/domibus-ceftestparty8gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
+sudo mv data/domibus-ceftestparty9gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
 sudo mv data/* $CATALINA_HOME/conf/domibus/keystores/
 
 sudo chown -R ubuntu:ubuntu $CATALINA_HOME
@@ -129,5 +129,5 @@ curl http://localhost:8080/domibus/rest/pmode \
 -b cookie.txt \
 -v \
 -H "X-XSRF-TOKEN: ${XSRFTOKEN}" \
--F  file=@"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty8gw-pmode.xml" \
+-F  file=@"$DOMIBUS_DIST/conf/pmodes/domibus-ceftestparty9gw-pmode.xml" \
 -F  description="Connectivity Test Platform"
