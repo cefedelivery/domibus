@@ -32,6 +32,7 @@ public class MessageLogRO implements Serializable {
     private String refToMessageId;
     private Date failed;
     private Date restored;
+    private boolean isTestMessage;
 
     public String getMessageId() {
         return messageId;
@@ -176,4 +177,13 @@ public class MessageLogRO implements Serializable {
     public void setRestored(Date restored) {
         this.restored = restored;
     }
+
+    public boolean isTestMessage() {
+        return isTestMessage;
+    }
+
+    public void setTestMessage(boolean testMessage) {
+        isTestMessage = testMessage;
+    }
+
 }

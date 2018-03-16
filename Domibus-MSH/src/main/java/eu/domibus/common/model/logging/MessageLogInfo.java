@@ -52,6 +52,8 @@ public class MessageLogInfo {
 
     private final Date restored;
 
+    private final boolean isTestMessage;
+
 
     public MessageLogInfo(final String messageId,
                           final MessageStatus messageStatus,
@@ -70,7 +72,8 @@ public class MessageLogInfo {
                           final String finalRecipient,
                           final String refToMessageId,
                           final Date failed,
-                          final Date restored) {
+                          final Date restored,
+                          final boolean isTestMessage) {
         //message log information.
         this.messageId = messageId;
         this.messageStatus = messageStatus;
@@ -92,6 +95,7 @@ public class MessageLogInfo {
         // rest of message log information.
         this.failed = failed;
         this.restored = restored;
+        this.isTestMessage = isTestMessage;
     }
 
 
@@ -192,6 +196,10 @@ public class MessageLogInfo {
         return restored;
     }
 
+    public boolean isTestMessage() {
+        return isTestMessage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -203,20 +211,21 @@ public class MessageLogInfo {
         return new EqualsBuilder()
                 .append(sendAttempts, that.sendAttempts)
                 .append(sendAttemptsMax, that.sendAttemptsMax)
-                .append(conversationId, that.conversationId)
+                .append(isTestMessage, that.isTestMessage)
+                .append(messageId, that.messageId)
                 .append(fromPartyId, that.fromPartyId)
                 .append(toPartyId, that.toPartyId)
+                .append(messageStatus, that.messageStatus)
+                .append(notificationStatus, that.notificationStatus)
+                .append(received, that.received)
+                .append(mshRole, that.mshRole)
+                .append(nextAttempt, that.nextAttempt)
+                .append(conversationId, that.conversationId)
+                .append(messageType, that.messageType)
+                .append(deleted, that.deleted)
                 .append(originalSender, that.originalSender)
                 .append(finalRecipient, that.finalRecipient)
                 .append(refToMessageId, that.refToMessageId)
-                .append(messageId, that.messageId)
-                .append(messageStatus, that.messageStatus)
-                .append(notificationStatus, that.notificationStatus)
-                .append(mshRole, that.mshRole)
-                .append(messageType, that.messageType)
-                .append(deleted, that.deleted)
-                .append(received, that.received)
-                .append(nextAttempt, that.nextAttempt)
                 .append(failed, that.failed)
                 .append(restored, that.restored)
                 .isEquals();
@@ -225,24 +234,25 @@ public class MessageLogInfo {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(conversationId)
+                .append(messageId)
                 .append(fromPartyId)
                 .append(toPartyId)
-                .append(originalSender)
-                .append(finalRecipient)
-                .append(refToMessageId)
-                .append(messageId)
                 .append(messageStatus)
                 .append(notificationStatus)
-                .append(mshRole)
-                .append(messageType)
-                .append(deleted)
                 .append(received)
+                .append(mshRole)
                 .append(sendAttempts)
                 .append(sendAttemptsMax)
                 .append(nextAttempt)
+                .append(conversationId)
+                .append(messageType)
+                .append(deleted)
+                .append(originalSender)
+                .append(finalRecipient)
+                .append(refToMessageId)
                 .append(failed)
                 .append(restored)
+                .append(isTestMessage)
                 .toHashCode();
     }
 }

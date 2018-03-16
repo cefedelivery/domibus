@@ -253,7 +253,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
@@ -273,7 +273,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(withAny(messaging));
             result = any;
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = true;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();
@@ -293,7 +293,7 @@ public class UserMessageHandlerServiceTest {
         Assert.assertNotNull(userMessageHandlerContext.getLegConfiguration());
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             times = 0;
@@ -734,12 +734,12 @@ public class UserMessageHandlerServiceTest {
     public void testCheckPingMessage() {
 
         UserMessage userMessage = createSampleUserMessage();
-        Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkPingMessage(userMessage));
+        Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkTestMessage(userMessage));
 
 
         userMessage.getCollaborationInfo().getService().setValue(Ebms3Constants.TEST_SERVICE);
         userMessage.getCollaborationInfo().setAction(Ebms3Constants.TEST_ACTION);
-        Assert.assertTrue("Expecting true for Check Ping Message with modified data", userMessageHandlerService.checkPingMessage(userMessage));
+        Assert.assertTrue("Expecting true for Check Ping Message with modified data", userMessageHandlerService.checkTestMessage(userMessage));
     }
 
     @Test
@@ -811,7 +811,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(withAny(messaging));
             result = any;
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = false;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();
@@ -828,7 +828,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             times = 0;
@@ -854,7 +854,7 @@ public class UserMessageHandlerServiceTest {
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = false;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();

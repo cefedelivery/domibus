@@ -282,4 +282,10 @@
             ORDER BY VAD.AUDIT_DATE DESC;
         </createView>
     </changeSet>
+
+    <changeSet author="migueti" id="EDELIVERY-1169">
+        <addColumn tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

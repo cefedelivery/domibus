@@ -57,6 +57,8 @@ export class MessageLogComponent {
 
   messageResent = new EventEmitter(false);
 
+  showTestMessages: boolean = false;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
@@ -206,6 +208,10 @@ export class MessageLogComponent {
 
     if (this.filter.receivedTo) {
       searchParams.set('receivedTo', this.filter.receivedTo.getTime());
+    }
+
+    if(this.filter.isTestMessage) {
+      searchParams.set('isTestMessage', this.filter.isTestMessage)
     }
 
     if (asc != null) {

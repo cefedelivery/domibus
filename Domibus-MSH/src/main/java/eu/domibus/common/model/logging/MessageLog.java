@@ -4,6 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseAuditEntity;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -35,6 +36,10 @@ public abstract class MessageLog extends AbstractBaseAuditEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "MESSAGE_TYPE")
     private MessageType messageType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MESSAGE_SUBTYPE")
+    private MessageSubtype messageSubtype;
 
     @Column(name = "MPC")
     private String mpc;
@@ -107,6 +112,14 @@ public abstract class MessageLog extends AbstractBaseAuditEntity {
 
     public void setMessageType(final MessageType messageType) {
         this.messageType = messageType;
+    }
+
+    public MessageSubtype getMessageSubtype() {
+        return messageSubtype;
+    }
+
+    public void setMessageSubtype(MessageSubtype messageSubtype) {
+        this.messageSubtype = messageSubtype;
     }
 
     public String getMessageId() {

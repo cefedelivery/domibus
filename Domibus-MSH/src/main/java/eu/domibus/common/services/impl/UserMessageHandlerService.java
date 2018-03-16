@@ -14,6 +14,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
@@ -52,6 +53,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Iterator;
+
+import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_ACTION;
+import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
 
 /**
  * @author Thomas Dussart
@@ -142,19 +146,24 @@ public class UserMessageHandlerService {
             userMessageHandlerContext.setMessageId(messageId);
 
             checkCharset(messaging);
-            pingMessage = checkPingMessage(messaging.getUserMessage());
+            pingMessage = checkTestMessage(messaging.getUserMessage());
             userMessageHandlerContext.setPingMessage(pingMessage);
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
-            if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
+            if (!messageExists) {
                 final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
                 String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
-                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, backendName);
-                try {
-                    backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-                } catch (SubmissionValidationException e) {
-                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                if(pingMessage) {
+                    // ping messages are only stored and not notified to the plugins
+                    persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, null);
+                } else {
+                    persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, backendName);
+                    try {
+                        backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
+                    } catch (SubmissionValidationException e) {
+                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                    }
                 }
             }
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
@@ -186,12 +195,12 @@ public class UserMessageHandlerService {
     }
 
     /**
-     * Check if this message is a ping message
+     * Check if this message is a test message
      *
      * @param message the message
-     * @return result of ping service and action handle
+     * @return result of test service and action handle
      */
-    Boolean checkPingMessage(final UserMessage message) {
+    Boolean checkTestMessage(final UserMessage message) {
         LOG.debug("Checking if it is a ping message");
         return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
@@ -245,7 +254,8 @@ public class UserMessageHandlerService {
                 0,
                 StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc(),
                 backendName,
-                to.getEndpoint());
+                to.getEndpoint(),
+                checkTestMessage(messaging.getUserMessage()) ? MessageSubtype.TEST.toString() : null);
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
@@ -395,7 +405,12 @@ public class UserMessageHandlerService {
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
             Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+            MessageSubtype messageSubtype = null;
             if (sentMessage != null) {
+                if (sentMessage.getUserMessage().getCollaborationInfo().getService().getValue().equals(TEST_SERVICE) &&
+                        sentMessage.getUserMessage().getCollaborationInfo().getAction().equals(TEST_ACTION)) {
+                    messageSubtype = MessageSubtype.TEST;
+                }
                 sentMessage.setSignalMessage(signalMessage);
                 messagingDao.update(sentMessage);
             }
@@ -406,7 +421,9 @@ public class UserMessageHandlerService {
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log
-            signalMessageLogDao.create(smlBuilder.build());
+            SignalMessageLog signalMessageLog = smlBuilder.build();
+            signalMessageLog.setMessageSubtype(messageSubtype);
+            signalMessageLogDao.create(signalMessageLog);
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }

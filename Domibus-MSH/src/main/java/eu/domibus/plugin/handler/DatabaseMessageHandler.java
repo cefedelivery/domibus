@@ -42,6 +42,9 @@ import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
 
+import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_ACTION;
+import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
+
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
  * During submit, it manages the user authentication and the AS4 message's validation, compression and saving.
@@ -300,7 +303,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
 
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
+            if(messageData.getAction().equals(TEST_ACTION) && messageData.getService().equals(TEST_SERVICE)) {
+                userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint(), MessageSubtype.TEST.toString());
+            } else {
+                userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
+            }
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();

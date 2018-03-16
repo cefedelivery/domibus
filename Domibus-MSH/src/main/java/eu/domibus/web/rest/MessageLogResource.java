@@ -95,7 +95,8 @@ public class MessageLogResource {
             @RequestParam(value = "originalSender", required = false) String originalSender,
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
             @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
-            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo,
+            @RequestParam(value = "isTestMessage", required = false) boolean isTestMessage) {
 
         LOGGER.debug("Getting message log");
 
@@ -262,6 +263,7 @@ public class MessageLogResource {
         result.setNextAttempt(messageLogInfo.getNextAttempt());
         result.setFailed(messageLogInfo.getFailed());
         result.setRestored(messageLogInfo.getRestored());
+        result.setTestMessage(messageLogInfo.isTestMessage());
         return result;
     }
 }
