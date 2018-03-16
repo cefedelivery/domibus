@@ -793,7 +793,7 @@ Domibus.uploadPmode("receiver","default","\\red\\domibus-pmode-red.xml",context,
             
             
             <con:testStep type="groovy" name="Set custom properties" id="a54afde9-4f74-472a-b265-db3c073a4f4d"><con:settings/><con:config><script>// blue: weblogic (edeltest1)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest4.westeurope.cloudapp.azure.com:7005/domibus-weblogic");
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest4.westeurope.cloudapp.azure.com:7003/domibus-weblogic");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "oracle");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "oracle.jdbc.OracleDriver");
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:oracle:thin:@localhost:11521/xe");
@@ -886,6 +886,43 @@ log.info "Update done.";
 </script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="f3649904-524d-4247-ac56-165045265460"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
 Domibus.uploadPmode("sender","default","\\cloud\\tomcat\\blue\\domibus-pmode-blue.xml",context,log);
 Domibus.uploadPmode("receiver","default","\\cloud\\tomcat\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:tearDownScript/><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Configuration-localhost-tomcat-tomcat-bugfix" searchProperties="true" id="709740f4-55e6-4cb8-99e2-ec66d7e81f9c">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Set custom properties" id="b1dbab6a-92de-4719-b758-7f19611ef681"><con:settings/><con:config><script>// blue: tomcat (localhost)
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://localhost:8080/domibus");
+testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
+testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
+testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:3306/domibus_blue_alt");
+testRunner.testCase.testSuite.project.setPropertyValue("blueDbUser", "root");
+testRunner.testCase.testSuite.project.setPropertyValue("blueDbPassword", "root");
+
+// red: tomcat (localhost)
+testRunner.testCase.testSuite.project.setPropertyValue("remoteUrl", "http://localhost:8180/domibus");
+testRunner.testCase.testSuite.project.setPropertyValue("databaseRed", "mysql");
+testRunner.testCase.testSuite.project.setPropertyValue("driverRed", "com.mysql.jdbc.Driver");
+testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlRed", "jdbc:mysql://localhost:3306/domibus_red_alt");
+testRunner.testCase.testSuite.project.setPropertyValue("redDbUser", "root");
+testRunner.testCase.testSuite.project.setPropertyValue("redDbPassword", "root");
+
+testRunner.testCase.testSuite.project.setPropertyValue("thirdGateway", "false");
+
+log.info "Update done.";
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="Upload default PModes Blue-Red" id="8643c684-8fd8-4038-bcbe-56df90e97205"><con:settings/><con:config><script>// Upload PModes: default Pmodes (blue for sender and red for receiver)  
+Domibus.uploadPmode("sender","default","\\blue\\domibus-pmode-blue.xml",context,log);
+Domibus.uploadPmode("receiver","default","\\red\\domibus-pmode-red.xml",context,log);</script></con:config></con:testStep><con:tearDownScript/><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Configuration-cloud-weblogic-tomcat-bugfix" searchProperties="true" id="f37e4ca9-1e67-4c6d-8efd-75ae4869d186">
             <con:settings/>
             
@@ -901,7 +938,7 @@ Domibus.uploadPmode("receiver","default","\\cloud\\tomcat\\red\\domibus-pmode-re
             
             
             <con:testStep type="groovy" name="Set custom properties" id="939170e7-f476-41fd-abaa-fb3b8a2a363d"><con:settings/><con:config><script>// blue: weblogic (edeltest1)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest4.westeurope.cloudapp.azure.com:7005/domibus-weblogic");
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest4.westeurope.cloudapp.azure.com:7003/domibus-weblogic");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "oracle");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "oracle.jdbc.OracleDriver");
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:oracle:thin:@localhost:41521/xe");
