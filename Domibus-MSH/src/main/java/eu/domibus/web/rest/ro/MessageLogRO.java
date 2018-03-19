@@ -3,6 +3,7 @@ package eu.domibus.web.rest.ro;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import java.io.Serializable;
@@ -32,7 +33,7 @@ public class MessageLogRO implements Serializable {
     private String refToMessageId;
     private Date failed;
     private Date restored;
-    private boolean isTestMessage;
+    private MessageSubtype messageSubtype;
 
     public String getMessageId() {
         return messageId;
@@ -178,12 +179,11 @@ public class MessageLogRO implements Serializable {
         this.restored = restored;
     }
 
-    public boolean isTestMessage() {
-        return isTestMessage;
+    public MessageSubtype getMessageSubtype() {
+        return messageSubtype;
     }
 
-    public void setTestMessage(boolean testMessage) {
-        isTestMessage = testMessage;
+    public void setMessageSubtype(MessageSubtype messageSubtype) {
+        this.messageSubtype = messageSubtype;
     }
-
 }

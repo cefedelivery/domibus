@@ -12,9 +12,10 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_ACTION;
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -79,8 +77,7 @@ public class ResponseHandler {
         Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
         MessageSubtype messageSubtype = null;
         if (sentMessage != null) {
-            if (sentMessage.getUserMessage().getCollaborationInfo().getService().getValue().equals(TEST_SERVICE) &&
-                    sentMessage.getUserMessage().getCollaborationInfo().getAction().equals(TEST_ACTION)) {
+            if(UserMessageHandlerService.checkTestMessage(sentMessage.getUserMessage())) {
                 messageSubtype = MessageSubtype.TEST;
             }
             sentMessage.setSignalMessage(signalMessage);

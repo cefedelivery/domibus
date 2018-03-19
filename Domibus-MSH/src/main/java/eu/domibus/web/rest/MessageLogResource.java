@@ -263,7 +263,7 @@ public class MessageLogResource {
         result.setNextAttempt(messageLogInfo.getNextAttempt());
         result.setFailed(messageLogInfo.getFailed());
         result.setRestored(messageLogInfo.getRestored());
-        result.setTestMessage(messageLogInfo.isTestMessage());
+        result.setMessageSubtype(messageLogInfo.getMessageSubtype());
         return result;
     }
 }

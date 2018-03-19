@@ -66,7 +66,7 @@ public class CsvServiceImplTest {
         MessageLogInfo messageLog = new MessageLogInfo("messageId", MessageStatus.ACKNOWLEDGED,
                 NotificationStatus.NOTIFIED, MSHRole.RECEIVING, messageType, date, date, 1, 5, date,
                 "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient",
-                "refToMessageId", date, date, false);
+                "refToMessageId", date, date, null);
         result.add(messageLog);
         return result;
     }

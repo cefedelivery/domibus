@@ -200,8 +200,8 @@ public class UserMessageHandlerService {
      * @param message the message
      * @return result of test service and action handle
      */
-    Boolean checkTestMessage(final UserMessage message) {
-        LOG.debug("Checking if it is a ping message");
+    public static Boolean checkTestMessage(final UserMessage message) {
+        LOG.debug("Checking if it is a test message");
         return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
 
@@ -407,8 +407,7 @@ public class UserMessageHandlerService {
             Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
             MessageSubtype messageSubtype = null;
             if (sentMessage != null) {
-                if (sentMessage.getUserMessage().getCollaborationInfo().getService().getValue().equals(TEST_SERVICE) &&
-                        sentMessage.getUserMessage().getCollaborationInfo().getAction().equals(TEST_ACTION)) {
+                if (checkTestMessage(sentMessage.getUserMessage())) {
                     messageSubtype = MessageSubtype.TEST;
                 }
                 sentMessage.setSignalMessage(signalMessage);

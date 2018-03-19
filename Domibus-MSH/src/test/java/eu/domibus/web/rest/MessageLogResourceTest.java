@@ -14,7 +14,6 @@ import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
-import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -104,7 +103,7 @@ public class MessageLogResourceTest {
                 "refToMessageId",
                 userMessageLog.getFailed(),
                 userMessageLog.getRestored(),
-                userMessageLog.getMessageSubtype().equals(MessageSubtype.TEST));
+                userMessageLog.getMessageSubtype());
         final List<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
@@ -154,7 +153,7 @@ public class MessageLogResourceTest {
                 "refToMessageId",
                 signalMessageLog.getFailed(),
                 signalMessageLog.getRestored(),
-                signalMessageLog.getMessageSubtype().equals(MessageSubtype.TEST));
+                signalMessageLog.getMessageSubtype());
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
@@ -186,7 +185,7 @@ public class MessageLogResourceTest {
         MessageLogInfo messageLog = new MessageLogInfo("messageId", MessageStatus.ACKNOWLEDGED,
                 NotificationStatus.NOTIFIED, MSHRole.RECEIVING, messageType, date, date, 1, 5, date,
                 "conversationId", "fromPartyId", "toPartyId", "originalSender", "finalRecipient",
-                "refToMessageId", date, date, false);
+                "refToMessageId", date, date, null);
         result.add(messageLog);
         return result;
     }

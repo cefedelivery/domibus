@@ -3,6 +3,7 @@ package eu.domibus.common.model.logging;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -52,7 +53,7 @@ public class MessageLogInfo {
 
     private final Date restored;
 
-    private final boolean isTestMessage;
+    private final MessageSubtype messageSubtype;
 
 
     public MessageLogInfo(final String messageId,
@@ -73,7 +74,7 @@ public class MessageLogInfo {
                           final String refToMessageId,
                           final Date failed,
                           final Date restored,
-                          final boolean isTestMessage) {
+                          final MessageSubtype messageSubtype) {
         //message log information.
         this.messageId = messageId;
         this.messageStatus = messageStatus;
@@ -95,7 +96,7 @@ public class MessageLogInfo {
         // rest of message log information.
         this.failed = failed;
         this.restored = restored;
-        this.isTestMessage = isTestMessage;
+        this.messageSubtype = messageSubtype;
     }
 
 
@@ -196,8 +197,8 @@ public class MessageLogInfo {
         return restored;
     }
 
-    public boolean isTestMessage() {
-        return isTestMessage;
+    public MessageSubtype getMessageSubtype() {
+        return messageSubtype;
     }
 
     @Override
@@ -211,7 +212,7 @@ public class MessageLogInfo {
         return new EqualsBuilder()
                 .append(sendAttempts, that.sendAttempts)
                 .append(sendAttemptsMax, that.sendAttemptsMax)
-                .append(isTestMessage, that.isTestMessage)
+                .append(messageSubtype, that.messageSubtype)
                 .append(messageId, that.messageId)
                 .append(fromPartyId, that.fromPartyId)
                 .append(toPartyId, that.toPartyId)
@@ -252,7 +253,7 @@ public class MessageLogInfo {
                 .append(refToMessageId)
                 .append(failed)
                 .append(restored)
-                .append(isTestMessage)
+                .append(messageSubtype)
                 .toHashCode();
     }
 }
