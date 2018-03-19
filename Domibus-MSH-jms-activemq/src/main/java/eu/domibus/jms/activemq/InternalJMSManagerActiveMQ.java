@@ -9,16 +9,21 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
+import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.jms.*;
+import javax.jms.Queue;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
@@ -48,6 +53,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     BrokerViewMBean brokerViewMBean;
 
     @Autowired
+    BrokerService brokerService;
+
+    @Autowired
     JMSDestinationHelper jmsDestinationHelper;
 
     @Resource(name = "jmsSender")
@@ -63,7 +71,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
         try {
             for (ObjectName name : getQueueMap().values()) {
-                QueueViewMBean queueMbean = getQueue(name);
+                QueueViewMBean queueMbean = getQueueViewMBean(name);
                 InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
                 destinationMap.put(queueMbean.getName(), internalJmsDestination);
             }
@@ -84,13 +92,13 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return internalJmsDestination;
     }
 
-    protected QueueViewMBean getQueue(ObjectName objectName) {
+    protected QueueViewMBean getQueueViewMBean(ObjectName objectName) {
         return MBeanServerInvocationHandler.newProxyInstance(mBeanServerConnection, objectName, QueueViewMBean.class, true);
     }
 
-    protected QueueViewMBean getQueue(String name) {
+    protected QueueViewMBean getQueueViewMBean(String name) {
         ObjectName objectName = getQueueMap().get(name);
-        return getQueue(objectName);
+        return getQueueViewMBean(objectName);
     }
 
     protected Map<String, ObjectName> getQueueMap() {
@@ -100,7 +108,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
         queueMap = new HashMap<>();
         for (ObjectName name : brokerViewMBean.getQueues()) {
-            QueueViewMBean queueMbean = getQueue(name);
+            QueueViewMBean queueMbean = getQueueViewMBean(name);
             queueMap.put(queueMbean.getName(), name);
         }
 
@@ -114,14 +122,14 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     @Override
-    public void sendMessage(InternalJmsMessage message, javax.jms.Destination destination) {
+    public void sendMessage(InternalJmsMessage message, Destination destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
     @Override
     public void deleteMessages(String source, String[] messageIds) {
         try {
-            QueueViewMBean queue = getQueue(source);
+            QueueViewMBean queue = getQueueViewMBean(source);
             queue.removeMatchingMessages(jmsSelectorUtil.getSelector(messageIds));
         } catch (Exception e) {
             throw new InternalJMSException("Failed to delete messages from source [" + source + "]:" + messageIds, e);
@@ -131,7 +139,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Override
     public InternalJmsMessage getMessage(String source, String messageId) {
         try {
-            QueueViewMBean queue = getQueue(source);
+            QueueViewMBean queue = getQueueViewMBean(source);
             CompositeData messageMetaData = queue.getMessage(messageId);
             return convertCompositeData(messageMetaData);
         } catch (OpenDataException e) {
@@ -175,7 +183,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
                 selector = "true";
             }
             try {
-                QueueViewMBean queue = getQueue(source);
+                QueueViewMBean queue = getQueueViewMBean(source);
                 CompositeData[] browse = queue.browse(selector);
                 internalJmsMessages.addAll(convertCompositeData(browse));
             } catch (Exception e) {
@@ -250,7 +258,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Override
     public void moveMessages(String source, String destination, String[] messageIds) {
         try {
-            QueueViewMBean queue = getQueue(source);
+            QueueViewMBean queue = getQueueViewMBean(source);
             queue.moveMatchingMessagesTo(jmsSelectorUtil.getSelector(messageIds), destination);
         } catch (Exception e) {
             throw new InternalJMSException("Failed to move messages from source [" + source + "] to destination [" + destination + "]:" + messageIds, e);
@@ -264,17 +272,68 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
         InternalJmsMessage intJmsMsg = null;
         try {
-            QueueViewMBean queue = getQueue(source);
-            CompositeData[] browse = queue.browse(selector);
-            List<InternalJmsMessage> messages = convertCompositeData(browse);
+            QueueViewMBean queueViewMBean = getQueueViewMBean(source);
+            List<InternalJmsMessage> messages = getMessagesFromDestination(source, selector);
             if (!messages.isEmpty()) {
                 intJmsMsg = messages.get(0);
                 // Deletes it
-                queue.removeMatchingMessages(selector);
+                queueViewMBean.removeMatchingMessages(selector);
             }
         } catch (Exception ex) {
             throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
         }
         return intJmsMsg;
     }
+
+    //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
+    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
+        Queue queue = getQueue(destination);
+        return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
+            @Override
+            public List<InternalJmsMessage> doInJms(Session session, QueueBrowser browser) throws JMSException {
+                List<InternalJmsMessage> result = new ArrayList<>();
+                Enumeration enumeration = browser.getEnumeration();
+                while (enumeration.hasMoreElements()) {
+                    TextMessage textMessage = null;
+                    try {
+                        textMessage = (TextMessage) enumeration.nextElement();
+                        result.add(convert(textMessage));
+                    } catch (Exception e) {
+                        LOG.error("Error converting message [" + textMessage + "]", e);
+                    }
+
+                }
+                return result;
+            }
+        });
+    }
+
+    protected InternalJmsMessage convert(TextMessage textMessage) throws JMSException {
+        InternalJmsMessage result = new InternalJmsMessage();
+        result.setContent(textMessage.getText());
+        result.setId(textMessage.getJMSMessageID());
+        result.setTimestamp(new Date(textMessage.getJMSTimestamp()));
+        result.setType(textMessage.getJMSType());
+        Enumeration propertyNames = textMessage.getPropertyNames();
+
+        Map<String, Object> properties = new HashMap<>();
+        while (propertyNames.hasMoreElements()) {
+            String name = (String) propertyNames.nextElement();
+            Object objectProperty = textMessage.getObjectProperty(name);
+            properties.put(name, objectProperty);
+        }
+        result.setProperties(properties);
+        return result;
+    }
+
+    protected Queue getQueue(String queueName) throws Exception {
+        final ActiveMQDestination[] destinations = brokerService.getBroker().getDestinations();
+        for(ActiveMQDestination destination : destinations) {
+            if(queueName.equals(destination.getPhysicalName())) {
+                return (Queue) destination;
+            }
+        }
+        return null;
+    }
+
 }

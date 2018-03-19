@@ -325,13 +325,13 @@ public class CertificateServiceImplTest {
 
         Calendar c = Calendar.getInstance();
         c.setTime(now);
-        c.add(Calendar.DATE, 11);
+        c.add(Calendar.DATE, 16);
         CertificateStatus certificateStatus = certificateService.getCertificateStatus(c.getTime());
         assertEquals(CertificateStatus.OK,certificateStatus);
 
         c = Calendar.getInstance();
         c.setTime(now);
-        c.add(Calendar.DATE, 9);
+        c.add(Calendar.DATE, 14);
         certificateStatus = certificateService.getCertificateStatus(c.getTime());
         assertEquals(CertificateStatus.SOON_REVOKED,certificateStatus);
 

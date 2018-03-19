@@ -39,12 +39,14 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
 
     public List<String> findRetryMessages() {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findRetryMessages", String.class);
+        query.setParameter("CURRENT_TIMESTAMP", new Date(System.currentTimeMillis()));
 
         return query.getResultList();
     }
 
     public List<String> findPullWaitingForReceiptMessages() {
         TypedQuery<String> query = this.em.createNamedQuery("UserMessageLog.findPullWaitingForReceiptMessages", String.class);
+        query.setParameter("CURRENT_TIMESTAMP", new Date(System.currentTimeMillis()));
         return query.getResultList();
     }
 

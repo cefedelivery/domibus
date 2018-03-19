@@ -108,6 +108,10 @@ public class FSFilesManager {
     public FileObject[] findAllDescendantFiles(FileObject folder) throws FileSystemException {
         return folder.findFiles(new FileTypeSelector(FileType.FILE));
     }
+
+    public FileObject[] findAllDescendantFiles(FileObject folder, FileType fileType) throws FileSystemException {
+        return folder.findFiles(new FileTypeSelector(fileType));
+    }
     
     public DataHandler getDataHandler(FileObject file) {
         return new DataHandler(new FileObjectDataSource(file));
@@ -143,6 +147,10 @@ public class FSFilesManager {
 
     public boolean deleteFile(FileObject file) throws FileSystemException {
         return file.delete();
+    }
+
+    public boolean deleteFolder(FileObject file) throws FileSystemException {
+        return (file.deleteAll() > 0L);
     }
 
     public FileObject setUpFileSystem(String domain) throws FileSystemException {
