@@ -51,14 +51,11 @@ public class PullRequestHandler {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
 
-
     @Autowired
     private ReliabilityMatcher pullRequestMatcher;
 
     @Autowired
     private MessageAttemptService messageAttemptService;
-
-
 
     @Autowired
     private MessageExchangeService messageExchangeService;
@@ -74,7 +71,6 @@ public class PullRequestHandler {
 
     @Autowired
     private MessagingLockService messagingLockService;
-
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
