@@ -61,7 +61,8 @@ public interface MessageExchangeService {
      * @param rawXml the soap envelope
      * @param messageId the user message
      */
-    void savePulledMessageRawXml(String rawXml, String messageId);
+
+    void removeAndSaveRawXml(String rawXml, String messageId);
 
     /**
      * Retrieve the unique raw message of UserMessage. Enforce that it is unique.
@@ -70,9 +71,6 @@ public interface MessageExchangeService {
      * @return the raw soap envelop.
      */
     RawEnvelopeDto findPulledMessageRawXmlByMessageId(String messageId);
-
-    //@thom test this method.
-    void removeRawMessageIssuedByPullRequest(String messageId);
 
     void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId);
 

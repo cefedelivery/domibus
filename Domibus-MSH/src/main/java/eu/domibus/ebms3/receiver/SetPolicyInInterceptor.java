@@ -11,6 +11,8 @@ import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.pki.PolicyService;
+import eu.domibus.wss4j.common.crypto.BlockUtil;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -68,6 +70,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     @Autowired
     private SoapService soapService;
 
+    @Autowired
+    private PolicyService policyService;
+
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
     public SetPolicyInInterceptor() {
@@ -118,10 +123,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             if(legConfigurationExtractor ==null)return;
 
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
-            final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
-            final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
-            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
+            Policy policy = policyService.parsePolicy("policies"+File.separator + policyName);
+
+            LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);

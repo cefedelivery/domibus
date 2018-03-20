@@ -12,6 +12,10 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.ToExtractor;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.To;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -63,6 +67,9 @@ public class RetryService {
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private MessagingLockService messagingLockService;
 
     @Autowired
     private JMSManager jmsManager;
@@ -117,6 +124,7 @@ public class RetryService {
     protected void purgePullMessage() {
         List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
+            messagingLockService.delete(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
         }
     }
@@ -129,15 +137,24 @@ public class RetryService {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
                 }
+                addPullMessageLockEntry(messagedId, userMessageLog);
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Pull Message with " + messagedId + " marked as send failure after max retry attempt reached");
                 }
                 userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
+                messagingLockService.delete(messagedId);
             }
             userMessageLogDao.update(userMessageLog);
         }
+    }
+
+    private void addPullMessageLockEntry(String messagedId, UserMessageLog userMessageLog) {
+        Messaging messageByMessageId = messagingDao.findMessageByMessageId(userMessageLog.getMessageId());
+        To to = messageByMessageId.getUserMessage().getPartyInfo().getTo();
+        messagingLockService.delete(messagedId);
+        messagingLockService.addLockingInformation(new ToExtractor(to),messagedId,messageByMessageId.getUserMessage().getMpc());
     }
 
 

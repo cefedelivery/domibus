@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import java.util.List;
 
 /**
  * @author idragusa
@@ -19,6 +18,7 @@ import java.util.List;
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(RawEnvelopeLogDao.class);
+    public static final String MESSAGE_ID = "messageId";
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
@@ -42,12 +42,10 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
      * @param messageId the id of the message.
      */
     public void deleteUserMessageRawEnvelope(final String messageId) {
-        TypedQuery<RawEnvelopeLog> namedQuery = em.createNamedQuery("Raw.findByMessageId", RawEnvelopeLog.class);
-        namedQuery.setParameter("MESSAGE_ID", messageId);
-        final List<RawEnvelopeLog> resultList = namedQuery.getResultList();
-        for (RawEnvelopeLog rawEnvelopeLog : resultList) {
-            delete(rawEnvelopeLog);
-        }
+        em.createQuery("DELETE FROM RawEnvelopeLog r where r.messageId= :messageId").
+                setParameter(MESSAGE_ID,messageId)
+                .executeUpdate();
+
     }
 
 
