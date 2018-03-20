@@ -6,10 +6,10 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
@@ -25,9 +25,11 @@ import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.DelayedDispatchMessageCreator;
 import eu.domibus.messaging.DispatchMessageCreator;
 import eu.domibus.plugin.NotificationListener;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -232,8 +234,15 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void deleteMessage(String messageId) {
         LOG.debug("Deleting message [{}]", messageId);
+
+        //add messageId to MDC map
+        if (StringUtils.isNotBlank(messageId)) {
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+        }
+
         if (backendNotificationService.getNotificationListenerServices() != null) {
             for (NotificationListener notificationListener : backendNotificationService.getNotificationListenerServices()) {
                 try {
