@@ -1,11 +1,9 @@
 package eu.domibus.common.services.impl;
 
-import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
@@ -24,14 +22,10 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
-import eu.domibus.core.pull.MessagingLockException;
 import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.receiver.MSHWebservice;
-import eu.domibus.ebms3.sender.SaveRawPulledMessageInterceptor;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -52,13 +46,10 @@ import javax.jms.Message;
 import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.codahale.metrics.MetricRegistry.name;
-import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
 import static eu.domibus.common.services.impl.PullContext.*;
@@ -220,7 +211,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
-        Timer.Context retrieveReadyToPullUserMessageId = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.retrieveReadyToPullUserMessageId")).time();
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.size() == 0) {
             LOG.warn("No identifier found for party:[{}]", initiator.getName());
@@ -231,12 +221,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(pullMessageToProcess==null){
             return pullMessageToProcess;
         }
-        retrieveReadyToPullUserMessageId.close();
         //this code is needed as set pull failed occurs in another transaction, creating a lock on the message
         //when trying to delete it.
-        Timer.Context checkPullMessageStatus = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.check.pull.message.status")).time();
         MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageToProcess);
-        checkPullMessageStatus.stop();
         if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
             messagingLockService.delete(pullMessageToProcess);
             return null;
@@ -249,7 +236,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
-        Timer.Context extractProcessOnMpc = METRIC_REGISTRY.timer(name(MessageExchangeService.class, "pull.extractProcessOnMpc")).time();
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
@@ -259,7 +245,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 }
             }
             processValidator.validatePullProcess(processes);
-            extractProcessOnMpc.stop();
             return new PullContext(processes.get(0), gatewayParty, mpcQualifiedName);
         } catch (IllegalArgumentException e) {
             throw new PModeException(DomibusCoreErrorCode.DOM_003, "No pmode configuration found");
@@ -290,15 +275,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void removeAndSaveRawXml(String rawXml, String messageId) {
-        final Timer.Context removeRawMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageExchangeServiceImpl.class, "rawxml.deleteUserMessageRawEnvelope")).time();
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-        removeRawMessageContext.stop();
-        final Timer.Context saveRawMessageContext = Metrics.METRIC_REGISTRY.timer(name(MessageExchangeServiceImpl.class, "rawxml.savePulledMessage")).time();
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXml);
         rawEnvelopeLog.setMessageId(messageId);
         rawEnvelopeLogDao.create(rawEnvelopeLog);
-        saveRawMessageContext.stop();
 
     }
 
