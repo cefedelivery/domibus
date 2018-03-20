@@ -14,6 +14,7 @@ import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -61,7 +62,7 @@ public class MessageLogResourceTest {
      * @param user true if UserMessageLog, false if SignalMessageLog
      * @return
      */
-    public static MessageLog createMessageLog(boolean user) {
+    public static MessageLog createMessageLog(boolean user, boolean test) {
         MessageLog messageLog = user ? new UserMessageLog() : new SignalMessageLog();
         messageLog.setEntityId(1);
         messageLog.setBackend("backend");
@@ -72,6 +73,7 @@ public class MessageLogResourceTest {
         messageLog.setMessageId("messageId");
         messageLog.setMessageStatus(MessageStatus.ACKNOWLEDGED);
         messageLog.setMessageType(user ? MessageType.USER_MESSAGE : MessageType.SIGNAL_MESSAGE);
+        messageLog.setMessageSubtype(test ? MessageSubtype.TEST : null);
         messageLog.setMpc("mpc");
         messageLog.setMshRole(MSHRole.RECEIVING);
         messageLog.setNextAttempt(new Date());
@@ -80,10 +82,9 @@ public class MessageLogResourceTest {
         return messageLog;
     }
 
-    @Test
-    public void testUserMessageLog() {
+    private void testUserMessageLog(boolean test) {
         // Given
-        UserMessageLog userMessageLog = (UserMessageLog) createMessageLog(true);
+        UserMessageLog userMessageLog = (UserMessageLog) createMessageLog(true, test);
         final MessageLogInfo messageLogInfo = new MessageLogInfo(
                 userMessageLog.getMessageId(),
                 userMessageLog.getMessageStatus(),
@@ -112,7 +113,7 @@ public class MessageLogResourceTest {
         }};
 
         // When
-        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.USER_MESSAGE);
+        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.USER_MESSAGE, test ? MessageSubtype.TEST : null);
 
         // Then
         Assert.assertNotNull(messageLogResultRO);
@@ -128,12 +129,22 @@ public class MessageLogResourceTest {
         Assert.assertEquals(userMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
         Assert.assertEquals(userMessageLog.getReceived(), messageLogRO.getReceived());
         Assert.assertEquals(userMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
+        Assert.assertEquals(userMessageLog.getMessageSubtype(), messageLogRO.getMessageSubtype());
     }
 
     @Test
-    public void testSignalMessageLog() {
+    public void testUserMessageLog() {
+        testUserMessageLog(false);
+    }
+
+    @Test
+    public void testUserTestMessageLog() {
+        testUserMessageLog(true);
+    }
+
+    private void testSignalMessage(boolean test) {
         // Given
-        SignalMessageLog signalMessageLog = (SignalMessageLog) createMessageLog(false);
+        SignalMessageLog signalMessageLog = (SignalMessageLog) createMessageLog(false, test);
         final MessageLogInfo messageLogInfo = new MessageLogInfo(
                 signalMessageLog.getMessageId(),
                 signalMessageLog.getMessageStatus(),
@@ -157,12 +168,12 @@ public class MessageLogResourceTest {
         final ArrayList<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
         new Expectations() {{
-           signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
-           result = resultList;
+            signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = resultList;
         }};
 
         // When
-        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.SIGNAL_MESSAGE);
+        final MessageLogResultRO messageLogResultRO = getMessageLog(MessageType.SIGNAL_MESSAGE, test ? MessageSubtype.TEST : null);
 
         // Then
         Assert.assertNotNull(messageLogResultRO);
@@ -178,6 +189,17 @@ public class MessageLogResourceTest {
         Assert.assertEquals(signalMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
         Assert.assertEquals(signalMessageLog.getReceived(), messageLogRO.getReceived());
         Assert.assertEquals(signalMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
+        Assert.assertEquals(signalMessageLog.getMessageSubtype(), messageLogRO.getMessageSubtype());
+    }
+
+    @Test
+    public void testSignalMessageLog() {
+        testSignalMessage(false);
+    }
+
+    @Test
+    public void testSignalTestMessageLog() {
+        testSignalMessage(true);
     }
 
     private List<MessageLogInfo> getMessageList(MessageType messageType, Date date) {
@@ -219,7 +241,7 @@ public class MessageLogResourceTest {
         // When
         final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.USER_MESSAGE, null,
                 null, null, null, null, null,
-                null, null, null);
+                null, null, null, null);
 
         // Then
         assertCsvResult(MessageType.USER_MESSAGE, date, csv);
@@ -246,7 +268,7 @@ public class MessageLogResourceTest {
         // When
         final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.SIGNAL_MESSAGE, null,
                 null, null, null, null, null,
-                null, null, null);
+                null, null, null, null);
 
         // Then
         assertCsvResult(MessageType.SIGNAL_MESSAGE, date, csv);
@@ -265,16 +287,16 @@ public class MessageLogResourceTest {
         // When
         final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, MessageType.USER_MESSAGE, null,
                 null, null, null, null, null,
-                null, null, null);
+                null, null, null, null);
 
         // Then
         Assert.assertEquals(HttpStatus.NO_CONTENT, csv.getStatusCode());
     }
 
-    private MessageLogResultRO getMessageLog(MessageType messageType) {
+    private MessageLogResultRO getMessageLog(MessageType messageType, MessageSubtype messageSubtype) {
         return messageLogResource.getMessageLog(1, 10, 10, "MessageId", true,
                 null, null, null, messageType, null,
                 null, null, null, null, null, null,
-                null, null, false);
+                null, null, messageSubtype);
     }
 }

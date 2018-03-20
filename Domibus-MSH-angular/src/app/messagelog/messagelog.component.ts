@@ -56,8 +56,6 @@ export class MessageLogComponent {
 
   advancedSearch: boolean;
 
-  isTestMessage: boolean;
-
   messageResent = new EventEmitter(false);
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
@@ -111,6 +109,10 @@ export class MessageLogComponent {
       {
         name: 'Message Type',
         width: 130
+      },
+      {
+        name: 'Message Subtype',
+        width: 100
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
@@ -212,7 +214,7 @@ export class MessageLogComponent {
     }
 
     if(this.filter.isTestMessage) {
-      searchParams.set('isTestMessage', this.filter.isTestMessage)
+      searchParams.set('messageSubtype', this.filter.isTestMessage ? "TEST" : null)
     }
 
     if (asc != null) {

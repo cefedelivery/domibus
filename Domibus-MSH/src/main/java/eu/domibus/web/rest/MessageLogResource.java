@@ -97,14 +97,14 @@ public class MessageLogResource {
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
             @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
             @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo,
-            @RequestParam(value = "isTestMessage", required = false) boolean isTestMessage) {
+            @RequestParam(value = "messageSubtype", required = false) MessageSubtype messageSubtype) {
 
         LOGGER.debug("Getting message log");
 
         MessageLogResultRO result = new MessageLogResultRO();
 
         //TODO why are those filters send back to the GUI??
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, isTestMessage);
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
 
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
@@ -172,8 +172,9 @@ public class MessageLogResource {
             @RequestParam(value = "originalSender", required = false) String originalSender,
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
             @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
-            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, false); //TODO: Tiago!
+            @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo,
+            @RequestParam(value = "messageSubtype", required = false) MessageSubtype messageSubtype) {
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
             from = defaultFrom;
@@ -225,7 +226,7 @@ public class MessageLogResource {
         return result;
     }
 
-    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "isTestMessage")Boolean isTestMessage) {
+    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype")MessageSubtype messageSubtype) {
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);
@@ -237,7 +238,7 @@ public class MessageLogResource {
         filters.put("refToMessageId", refToMessageId);
         filters.put("originalSender", originalSender);
         filters.put("finalRecipient", finalRecipient);
-        filters.put("messageSubtype", isTestMessage ? MessageSubtype.TEST : null);
+        filters.put("messageSubtype", messageSubtype);
         return filters;
     }
 

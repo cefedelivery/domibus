@@ -296,7 +296,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
-            times = 0;
+            times = 1;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);

@@ -303,7 +303,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
 
-            if(messageData.getAction().equals(TEST_ACTION) && messageData.getService().equals(TEST_SERVICE)) {
+            if(TEST_ACTION.equals(messageData.getAction()) && TEST_SERVICE.equals(messageData.getService())) {
                 userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint(), MessageSubtype.TEST.toString());
             } else {
                 userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
