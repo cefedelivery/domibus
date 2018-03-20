@@ -52,6 +52,8 @@
                     <printReport>true</printReport>
                     <testSuite>WS-Auto-for-Bamboo</testSuite>
                     <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
+                    <testCase>Dom158-EDELIVERY-977-Adding irrelevant attributes</testCase>
+                    <testCase>Dom458-EDELIVERY-977-Adding irrelevant attributes</testCase>
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
