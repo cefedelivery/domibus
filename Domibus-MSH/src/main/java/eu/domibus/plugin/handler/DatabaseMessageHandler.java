@@ -106,6 +106,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private MessageExchangeService messageExchangeService;
 
     @Autowired
+    private MessagingLockService messagingLockService;
+
+    @Autowired
     AuthUtils authUtils;
 
     @Autowired

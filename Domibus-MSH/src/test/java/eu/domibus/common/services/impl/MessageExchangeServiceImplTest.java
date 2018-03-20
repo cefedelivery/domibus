@@ -14,6 +14,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
@@ -34,6 +35,7 @@ import org.springframework.jms.core.MessagePostProcessor;
 import javax.jms.Destination;
 import java.util.*;
 
+import static eu.domibus.common.services.impl.MessageExchangeServiceImpl.DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -63,6 +65,12 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private UserMessageLogService messageLogService;
+
+    @Mock
+    private MessagingLockService messagingLockService;
+
+    @Mock
+    private java.util.Properties domibusProperties;
 
     @Spy
     private ProcessValidator processValidator;
@@ -137,10 +145,11 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
+        when(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE,"1")).thenReturn("10");
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
-        verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
+        verify(jmsPullTemplate,times(20)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
         TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
