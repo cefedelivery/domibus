@@ -10,6 +10,7 @@ import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
 import {AlertComponent} from "../alert/alert.component";
+import {isNullOrUndefined} from "util";
 
 @Component({
   moduleId: module.id,
@@ -55,9 +56,9 @@ export class MessageLogComponent {
 
   advancedSearch: boolean;
 
-  messageResent = new EventEmitter(false);
+  isTestMessage: boolean;
 
-  showTestMessages: boolean = false;
+  messageResent = new EventEmitter(false);
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
@@ -253,6 +254,8 @@ export class MessageLogComponent {
       if (result.filter.receivedTo != null) {
         result.filter.receivedTo = new Date(result.filter.receivedTo);
       }
+
+      result.filter.isTestMessage = !isNullOrUndefined(result.filter.messageSubtype);
 
       this.filter = result.filter;
       this.mshRoles = result.mshRoles;

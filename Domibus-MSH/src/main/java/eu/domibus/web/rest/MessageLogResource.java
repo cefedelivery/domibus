@@ -10,6 +10,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -103,7 +104,7 @@ public class MessageLogResource {
         MessageLogResultRO result = new MessageLogResultRO();
 
         //TODO why are those filters send back to the GUI??
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, isTestMessage);
 
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
@@ -172,7 +173,7 @@ public class MessageLogResource {
             @RequestParam(value = "finalRecipient", required = false) String finalRecipient,
             @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
             @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo) {
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, false); //TODO: Tiago!
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
             from = defaultFrom;
@@ -224,7 +225,7 @@ public class MessageLogResource {
         return result;
     }
 
-    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient) {
+    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "isTestMessage")Boolean isTestMessage) {
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);
@@ -236,6 +237,7 @@ public class MessageLogResource {
         filters.put("refToMessageId", refToMessageId);
         filters.put("originalSender", originalSender);
         filters.put("finalRecipient", finalRecipient);
+        filters.put("messageSubtype", isTestMessage ? MessageSubtype.TEST : null);
         return filters;
     }
 

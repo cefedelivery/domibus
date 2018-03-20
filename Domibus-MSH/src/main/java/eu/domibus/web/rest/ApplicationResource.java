@@ -23,7 +23,7 @@ import java.util.Properties;
 public class ApplicationResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationResource.class);
-    protected static final String DOMIBUS_CUSTOM_NAME = "domibus.custom.name";
+    protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
     protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
     @Autowired

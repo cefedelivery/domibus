@@ -83,10 +83,10 @@
                           [type]="'datetime'"
                           #timestampControl="ngModel" id="receivedto_id" *ngIf="advancedSearch">
           </md2-datepicker>
-          <input type="checkbox" name="showTestMessages" [checked]="showTestMessages" [(ngModel)]="filter.isTestMessage"
-                 #showTestMessages="ngModel" id="showTestMessages_id">
-          <ng-container>
-            <span>Show Test Messages</span>
+          <ng-container *ngIf="advancedSearch">
+            <input type="checkbox" name="showTestMessages" [(ngModel)]="filter.isTestMessage"
+                   #showTestMessages="ngModel" id="showTestMessages_id">
+            <span>Show Only Test Messages</span>
           </ng-container>
 
           <div class="searchArea">
