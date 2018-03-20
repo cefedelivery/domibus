@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration" party="ceftestparty8gw">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="ceftestparty9gw">
 
 	<mpcs>
 		<mpc name="defaultMpc"
@@ -20,10 +20,10 @@
 			<partyIdTypes>
 				<partyIdType name="unregisteredParty" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
-			<party name="ceftestparty8gw" 
+			<party name="ceftestparty9gw"
 					endpoint="http://localhost:8080/services/msh" 
 					allowChunking="false">
-				<identifier partyId="ceftestparty8gw" partyIdType="unregisteredParty"/>
+				<identifier partyId="ceftestparty9gw" partyIdType="unregisteredParty"/>
 			</party>
 			<party name="cefsupportgw" 
 					endpoint="http://40.115.23.114:8080/domibus/services/msh" 
@@ -55,8 +55,8 @@
 		<payloadProfiles>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy"
-					policy="eDeliveryPolicy.xml"
+			<security name="eSensPolicy.v2.0"
+					policy="eSensPolicy.v2.0.xml"
 					signatureMethod="RSA_SHA256" />	
 			<security name="noSigNoEnc"
 					policy="doNothingPolicy.xml"
@@ -89,7 +89,7 @@
 					action="submitMessage" 
 					defaultMpc="defaultMpc" 
 					reliability="AS4Reliability" 
-					security="eDeliveryPolicy"
+					security="eSensPolicy.v2.0"
 					receptionAwareness="receptionAwareness" 
 					propertySet="edeliveryPropertySet"
 					payloadProfile="MessageProfile"
@@ -103,11 +103,11 @@
 		initiatorRole="defaultInitiatorRole" 
 		responderRole="defaultResponderRole">
 	<initiatorParties>
-		<initiatorParty name="ceftestparty8gw"/>
+		<initiatorParty name="ceftestparty9gw"/>
 		<initiatorParty name="cefsupportgw"/>
 	</initiatorParties>
 	<responderParties>
-		<responderParty name="ceftestparty8gw"/>
+		<responderParty name="ceftestparty9gw"/>
 		<responderParty name="cefsupportgw"/>
 	</responderParties>
 	<legs>

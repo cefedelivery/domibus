@@ -29,10 +29,10 @@
 			<party name="red_gw" endpoint="http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="blue_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:7005/domibus-weblogic/services/msh" allowChunking="false">
+			<party name="blue_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:7003/domibus-weblogic/services/msh" allowChunking="false">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="white_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:7005/domibus-weblogic/services/msh" allowChunking="false">
+			<party name="white_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:7003/domibus-weblogic/services/msh" allowChunking="false">
 				<identifier partyId="domibus-white" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="black_gw" endpoint="http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus/services/msh" allowChunking="false">
@@ -52,9 +52,13 @@
 		<properties>
 			<property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
 			<property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+			<property name="propWithoutTypeProperty" key="propWithoutType" datatype="string" required="false"/>
+			<property name="propWithTypeProperty" key="propWithType" datatype="string" required="false"/>
 			<propertySet name="ecodexPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
+				<propertyRef property="propWithoutTypeProperty"/>
+				<propertyRef property="propWithTypeProperty"/>
 			</propertySet>
 		</properties>
 		<payloadProfiles>

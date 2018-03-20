@@ -100,6 +100,7 @@ public class CertificateDaoImplTest {
         secondCertificate.setNotAfter(notAfter);
         secondCertificate.setCertificateType(CertificateType.PUBLIC);
         secondCertificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
+        secondCertificate.setLastNotification(notBefore);
 
         em.persist(secondCertificate);
 
@@ -119,6 +120,7 @@ public class CertificateDaoImplTest {
         certificate = certificateDao.getByAliasAndType(secondCertificateName, CertificateType.PUBLIC);
         assertEquals(notBeforeChanged, certificate.getNotBefore());
         assertEquals(notAfterChanged, certificate.getNotAfter());
+        assertEquals(notBefore,certificate.getLastNotification());
 
     }
 

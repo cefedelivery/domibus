@@ -3,11 +3,15 @@ package eu.domibus.plugin.fs;
 import eu.domibus.common.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.fs.ebms3.CollaborationInfo;
+import eu.domibus.plugin.fs.ebms3.Property;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
 import eu.domibus.plugin.fs.exception.FSPluginException;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +22,10 @@ import org.apache.tika.mime.MimeTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
+import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -37,6 +44,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final String LS = System.lineSeparator();
     private static final String ERROR_EXTENSION = ".error";
 
+    private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
+    private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
+
     private static final Set<MessageStatus> SENDING_MESSAGE_STATUSES = EnumSet.of(
             READY_TO_SEND, SEND_ENQUEUED, SEND_IN_PROGRESS, WAITING_FOR_RECEIPT,
             WAITING_FOR_RETRY, SEND_ATTEMPT_FAILED
@@ -49,6 +59,8 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final Set<MessageStatus> SEND_FAILED_MESSAGE_STATUSES = EnumSet.of(
             SEND_FAILURE
     );
+
+
 
     // receiving statuses should be REJECTED, RECEIVED_WITH_WARNINGS, DOWNLOADED, DELETED, RECEIVED
 
@@ -108,41 +120,62 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
             throw new FSPluginException("Unable to download message " + messageId, e);
         }
 
+        //extract final recipient
+        final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
+        if (StringUtils.isBlank(finalRecipient)) {
+            throw new FSPluginException("Unable to extract finalRecipinet from message " + messageId);
+        }
+        final String finalRecipientFolder = sanitizeFileName(finalRecipient);
+
+
         // Persist message
         String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
-                FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER)) {
-            
-            boolean multiplePayloads = fsMessage.getPayloads().size() > 1;
+             FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+             FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
+             FileObject incomingFolderByMessageId = fsFilesManager.getEnsureChildFolder(incomingFolderByRecipient, messageId)) {
 
+            //let's write the metadata file first
+            try (FileObject fileObject = incomingFolderByMessageId.resolveFile(FSSendMessagesService.METADATA_FILE_NAME);
+                 FileContent fileContent = fileObject.getContent()) {
+
+                writeMetadata(fileContent.getOutputStream(), fsMessage.getMetadata());
+                LOG.info("Message metadata file written at: [{}]", fileObject.getName().getURI());
+            }
+
+            //write payloads
             for (Map.Entry<String, FSPayload> entry : fsMessage.getPayloads().entrySet()) {
                 FSPayload fsPayload = entry.getValue();
                 DataHandler dataHandler = fsPayload.getDataHandler();
-                String contentId  = entry.getKey();
-                String fileName = getFileName(multiplePayloads, messageId, contentId, fsPayload.getMimeType());
+                String contentId = entry.getKey();
+                String fileName = getFileName(contentId, fsPayload);
 
-                try (FileObject fileObject = incomingFolder.resolveFile(fileName);
+                try (FileObject fileObject = incomingFolderByMessageId.resolveFile(fileName);
                      FileContent fileContent = fileObject.getContent()) {
                     dataHandler.writeTo(fileContent.getOutputStream());
                     LOG.info("Message payload received: [{}]", fileObject.getName());
                 }
             }
+        } catch (JAXBException ex) {
+            throw new FSPluginException("An error occurred while writing metadata for downloaded message " + messageId, ex);
         } catch (IOException | FSSetUpException ex) {
             throw new FSPluginException("An error occurred persisting downloaded message " + messageId, ex);
         }
     }
 
-    private String getFileName(boolean multiplePayloads, String messageId, String contentId, String mimeType) {
-        String fileName = messageId;
-        if (multiplePayloads) {
-            fileName += "_" + contentId.replaceFirst("cid:", "");
+    private String getFileName(String contentId, FSPayload fsPayload) {
+        //original name + extension
+        String fileName = fsPayload.getFileName();
+
+        //if empty, we compose it - based on cid and extension
+        if (StringUtils.isBlank(fileName)) {
+            fileName = contentId.replaceFirst("cid:", StringUtils.EMPTY) + getFileNameExtension(fsPayload.getMimeType());
         }
-        fileName += getFileNameExtension(mimeType);
         return fileName;
     }
 
     private String getFileNameExtension(String mimeType) {
-        String extension = "";
+        String extension = StringUtils.EMPTY;
         try {
             extension = FSMimeTypeHelper.getExtension(mimeType);
         } catch (MimeTypeException ex) {
@@ -373,6 +406,45 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } catch (FSSetUpException ex) {
             LOG.error("Error setting up folders for domain [" + domain + "]", ex);
         }
+    }
+
+    /**
+     * extracts finalRecipient from message properties
+     *
+     * @see UserMessage
+     * @param userMessage Object which contains finalRecipient info
+     * @return finalRecipient String
+     */
+    protected String getFinalRecipient(final UserMessage userMessage) {
+        String finalRecipient = null;
+        for (final Property p : userMessage.getMessageProperties().getProperty()) {
+            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+                finalRecipient = p.getValue();
+                break;
+            }
+        }
+        return finalRecipient;
+    }
+
+    /**
+     * replacing all non [a-zA-z0-9] characters with _ from a fileName
+     *
+     * @param fileName filename to be sanitized
+     * @return sanitized fileName
+     */
+    protected String sanitizeFileName(@NotNull final String fileName) {
+        return fileName.replaceAll(FILENAME_SANITIZE_REGEX, FILENAME_SANITIZE_REPLACEMENT);
+    }
+
+    /**
+     * Writes metadata file
+     *
+     * @param outputStream {@link OutputStream} to write the xml
+     * @param userMessage  Object which contains metadata to be printed
+     * @throws JAXBException exception thrown
+     */
+    private void writeMetadata(OutputStream outputStream, UserMessage userMessage) throws JAXBException {
+        FSXMLHelper.writeXML(outputStream, UserMessage.class, userMessage);
     }
 
 }

@@ -1,12 +1,11 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.activation.DataHandler;
-import javax.annotation.Resource;
-import javax.xml.bind.JAXBException;
-
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.ebms3.UserMessage;
+import eu.domibus.plugin.fs.exception.FSPluginException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.BackendFSImpl;
-import eu.domibus.plugin.fs.FSFileNameHelper;
-import eu.domibus.plugin.fs.FSFilesManager;
-import eu.domibus.plugin.fs.FSMessage;
-import eu.domibus.plugin.fs.FSPayload;
-import eu.domibus.plugin.fs.FSXMLHelper;
-import eu.domibus.plugin.fs.ebms3.UserMessage;
-import eu.domibus.plugin.fs.exception.FSPluginException;
+import javax.activation.DataHandler;
+import javax.annotation.Resource;
+import javax.xml.bind.JAXBException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -52,7 +45,9 @@ public class FSProcessFileService {
 
                 DataHandler dataHandler = fsFilesManager.getDataHandler(processableFile);
                 Map<String, FSPayload> fsPayloads = new HashMap<>(1);
-                fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, dataHandler));
+
+                //we add mimetype later, base name and dataHandler now
+                fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, processableFile.getName().getBaseName(), dataHandler));
                 FSMessage message= new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.info("Message submitted: [{}]", processableFile.getName());

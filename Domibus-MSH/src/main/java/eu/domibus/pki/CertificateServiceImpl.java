@@ -43,7 +43,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.offset";
 
-    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "10";
+    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "15";
 
     @Autowired
     CRLService crlService;
@@ -304,9 +304,11 @@ public class CertificateServiceImpl implements CertificateService {
         }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
-        if (now.isAfter(LocalDateTime.fromDateFields(notAfter))) {
+        LocalDateTime certificateEnd = LocalDateTime.fromDateFields(notAfter);
+        LOG.debug("Current date[{}], offset date[{}], certificate end date:[{}]",now,offsetDate,certificateEnd);
+        if (now.isAfter(certificateEnd)) {
             return CertificateStatus.REVOKED;
-        } else if (offsetDate.isAfter(LocalDateTime.fromDateFields(notAfter))) {
+        } else if (offsetDate.isAfter(certificateEnd)) {
             return CertificateStatus.SOON_REVOKED;
         }
         return CertificateStatus.OK;

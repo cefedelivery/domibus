@@ -59,12 +59,18 @@ public class DomibusLoggerTest {
         domibusLogger.businessWarn(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, charset);
         domibusLogger.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, charset);
 
-        String businessMessageLogSuffix = "[BUSINESS - BUS-005] Invalid charset [UTF-8] used";
+        String domibusMessageLogSuffix = "[BUS-005] Invalid charset [UTF-8] used";
+        final String businessMessageLogSuffix = "[BUSINESS - BUS-005] Invalid charset [UTF-8] used";
         List<String> expectedLogs = new ArrayList<>();
+        expectedLogs.add("[TRACE] " + domibusMessageLogSuffix);
         expectedLogs.add("[TRACE] " + businessMessageLogSuffix);
+        expectedLogs.add("[DEBUG] " + domibusMessageLogSuffix);
         expectedLogs.add("[DEBUG] " + businessMessageLogSuffix);
+        expectedLogs.add("[INFO] " + domibusMessageLogSuffix);
         expectedLogs.add("[INFO] " + businessMessageLogSuffix);
+        expectedLogs.add("[WARN] " + domibusMessageLogSuffix);
         expectedLogs.add("[WARN] " + businessMessageLogSuffix);
+        expectedLogs.add("[ERROR] " + domibusMessageLogSuffix);
         expectedLogs.add("[ERROR] " + businessMessageLogSuffix);
 
         final List<ILoggingEvent> list = listAppender.list;
@@ -72,11 +78,17 @@ public class DomibusLoggerTest {
 
         expectedLogs.clear();
         list.clear();
-        String securityMessageLogSuffix = "[SECURITY - SEC-002] Basic authentication is used";
+        domibusMessageLogSuffix = "[SEC-002] Basic authentication is used";
+        final String securityMessageLogSuffix = "[SECURITY - SEC-002] Basic authentication is used";
+        expectedLogs.add("[TRACE] " + domibusMessageLogSuffix);
         expectedLogs.add("[TRACE] " + securityMessageLogSuffix);
+        expectedLogs.add("[DEBUG] " + domibusMessageLogSuffix);
         expectedLogs.add("[DEBUG] " + securityMessageLogSuffix);
+        expectedLogs.add("[INFO] " + domibusMessageLogSuffix);
         expectedLogs.add("[INFO] " + securityMessageLogSuffix);
+        expectedLogs.add("[WARN] " + domibusMessageLogSuffix);
         expectedLogs.add("[WARN] " + securityMessageLogSuffix);
+        expectedLogs.add("[ERROR] " + domibusMessageLogSuffix);
         expectedLogs.add("[ERROR] " + securityMessageLogSuffix);
         domibusLogger.securityTrace(DomibusMessageCode.SEC_BASIC_AUTHENTICATION_USE);
         domibusLogger.securityDebug(DomibusMessageCode.SEC_BASIC_AUTHENTICATION_USE);

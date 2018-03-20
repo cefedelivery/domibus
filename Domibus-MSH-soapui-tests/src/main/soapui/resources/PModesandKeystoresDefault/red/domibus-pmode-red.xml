@@ -52,9 +52,13 @@
 		<properties>
 			<property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
 			<property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+			<property name="propWithoutTypeProperty" key="propWithoutType" datatype="string" required="false"/>
+			<property name="propWithTypeProperty" key="propWithType" datatype="string" required="false"/>
 			<propertySet name="ecodexPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
+				<propertyRef property="propWithoutTypeProperty"/>
+				<propertyRef property="propWithTypeProperty"/>
 			</propertySet>
 		</properties>
 		<payloadProfiles>
