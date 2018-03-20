@@ -138,6 +138,12 @@ public class UserMessageHandlerService {
                 }
             }
 
+            final boolean selfSendingFlag = amISendingToMySelf(pmodeKey);
+            if (selfSendingFlag) {
+                messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + "_");
+                messaging.getSignalMessage().getMessageInfo().setRefToMessageId();
+            }
+
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             userMessageHandlerContext.setMessageId(messageId);
 
@@ -158,8 +164,17 @@ public class UserMessageHandlerService {
                 }
             }
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
-            return generateReceipt(request, legConfiguration, messageExists);
+            return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
         }
+    }
+
+    protected boolean amISendingToMySelf(String pmodeKey) {
+        final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
+        final Party sender = pModeProvider.getSenderParty(pmodeKey);
+        if (receiver.getEndpoint().trim().equals(sender.getEndpoint().trim())) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -328,10 +343,12 @@ public class UserMessageHandlerService {
      * @param request          the incoming message
      * @param legConfiguration processing information of the message
      * @param duplicate        indicates whether or not the message is a duplicate
+     * @param selfSendingFlag
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
+    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate,
+                                boolean selfSendingFlag) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
         assert legConfiguration != null;
@@ -356,7 +373,7 @@ public class UserMessageHandlerService {
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
-                saveResponse(responseMessage);
+                saveResponse(responseMessage, selfSendingFlag);
 
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
@@ -387,10 +404,15 @@ public class UserMessageHandlerService {
         return result;
     }
 
-    void saveResponse(final SOAPMessage responseMessage) {
+    void saveResponse(final SOAPMessage responseMessage, boolean selfSendingFlag) {
         try {
             Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
+
+            if (selfSendingFlag) {
+                //do the nasty thing here
+                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + "_");
+            }
             // Stores the signal message
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
