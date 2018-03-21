@@ -52,8 +52,6 @@
                     <printReport>true</printReport>
                     <testSuite>WS-Auto-for-Bamboo</testSuite>
                     <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
-					<testCase>Dom102-Push-Test Experience-Several payloads</testCase>
-					<testCase>Dom402-Pull-Test Experience-Several payloads</testCase>
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
