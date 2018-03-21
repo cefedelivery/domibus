@@ -106,6 +106,7 @@ public class MessageLogResourceTest {
                 createdMessageLog.getMessageSubtype());
         final List<MessageLogInfo> resultList = new ArrayList<>();
         resultList.add(messageLogInfo);
+        // Expectations doesn't allow if's inside
         if(messageType.equals(MessageType.USER_MESSAGE)) {
             new Expectations() {{
                 userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
@@ -144,7 +145,7 @@ public class MessageLogResourceTest {
         Date date = new Date();
         List<MessageLogInfo> messageList = getMessageList(messageType, date, messageSubtype);
 
-        // Expectations doesn't allow
+        // Expectations doesn't allow if's inside
         if(messageType.equals(MessageType.USER_MESSAGE)) {
             new Expectations() {{
                 domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
