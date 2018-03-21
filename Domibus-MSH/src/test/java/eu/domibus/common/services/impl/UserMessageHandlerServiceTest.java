@@ -211,7 +211,7 @@ public class UserMessageHandlerServiceTest {
         }
 
         new Verifications() {{
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage),false  );
             times = 1;
         }};
     }
@@ -245,7 +245,7 @@ public class UserMessageHandlerServiceTest {
             pModeProvider.getReceiverParty(pmodeKey);
             result = receiverParty;
 
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false );
             result = soapResponseMessage;
         }};
 
@@ -257,7 +257,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false );
         }};
     }
 
@@ -282,7 +282,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = false;
 
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false );
             result = soapResponseMessage;
         }};
 
@@ -299,7 +299,7 @@ public class UserMessageHandlerServiceTest {
             times = 0;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false );
         }};
     }
 
@@ -475,13 +475,13 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, );
+            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, false );
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
 
         new Verifications() {{
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false );
             times = 0;
         }};
     }
@@ -507,14 +507,14 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, );
+            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, false );
             Assert.fail("Expected Transformer exception to be raised !!!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0201, e.getErrorCode());
         }
 
         new Verifications() {{
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false );
             times = 0;
         }};
     }
@@ -534,7 +534,7 @@ public class UserMessageHandlerServiceTest {
             result = receiptMessage;
         }};
 
-        userMessageHandlerService.saveResponse(soapResponseMessage, );
+        userMessageHandlerService.saveResponse(soapResponseMessage, false );
 
         new Verifications() {{
             signalMessageDao.create(responseSignalMessage);
@@ -560,7 +560,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.saveResponse(soapResponseMessage, );
+            userMessageHandlerService.saveResponse(soapResponseMessage, false );
         } catch (Exception e) {
             Assert.fail("No exception is expected to be raised.");
         }
@@ -592,7 +592,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.saveResponse(soapResponseMessage, );
+            userMessageHandlerService.saveResponse(soapResponseMessage, false );
             Assert.fail("Expected failure propagation during DB commit failure!");
         } catch (Exception e) {
             Assert.assertTrue("Expected Runtime exception mocked!", e instanceof RuntimeException);
@@ -756,14 +756,14 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, );
+            userMessageHandlerService.generateReceipt(soapRequestMessage, legConfiguration, false, false);
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
 
         new Verifications() {{
             //verify that saveResponse is not invoked
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false );
             times = 0;
         }};
     }
@@ -820,7 +820,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = true;
 
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false);
             result = soapResponseMessage;
         }};
 
@@ -834,7 +834,7 @@ public class UserMessageHandlerServiceTest {
             times = 0;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false);
             backendNotificationService.notifyMessageReceivedFailure(withAny(new UserMessage()), (ErrorResult) any);
             times = 0;
         }};
@@ -882,7 +882,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false);
             times = 0;
             //        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), (ErrorResult) any);
         }};

@@ -141,7 +141,6 @@ public class UserMessageHandlerService {
             final boolean selfSendingFlag = amISendingToMySelf(pmodeKey);
             if (selfSendingFlag) {
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + "_");
-                messaging.getSignalMessage().getMessageInfo().setRefToMessageId();
             }
 
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
@@ -412,6 +411,7 @@ public class UserMessageHandlerService {
             if (selfSendingFlag) {
                 //do the nasty thing here
                 signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + "_");
+                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + "_");
             }
             // Stores the signal message
             signalMessageDao.create(signalMessage);
