@@ -50,12 +50,8 @@
                     <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
                     <junitReport>true</junitReport>
                     <printReport>true</printReport>
-                    <!--<testSuite>WS-Auto-for-Bamboo</testSuite>-->
-                    <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
-					<testSuite>ToBeAdded</testSuite>
-					<testCase>Dom102-Push-Test Experience-Several payloads</testCase>
-					<testCase>Dom110-Push-payload conversion-EDELIVERY-1436</testCase>
-					<testCase>Dom402-Pull-Test Experience-Several payloads</testCase>				
+                    <testSuite>WS-Auto-for-Bamboo</testSuite>
+                    <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->				
                     <projectProperties>
                         <value>${localUrl}</value>
                         <value>${remoteUrl}</value>
@@ -72,6 +68,8 @@
                         <value>updateReport=false</value>
                         <value>thirdGateway=false</value>
 						<value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
+						<value>defaultPModesPath=${soapui.root.folder}/resources/PModesandKeystoresDefault</value>
+						<value>specialPModesPath=${soapui.root.folder}/resources/PModesandKeystoresSpecialTests</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
