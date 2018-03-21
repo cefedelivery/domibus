@@ -7,7 +7,6 @@ export class MessageLogResult {
               public filter: any,
               public mshRoles: Array<string>,
               public msgTypes: Array<string>,
-              public msgSubtypes: Array<string>,
               public msgStatus: Array<string>,
               public notifStatus: Array<string>
               ) {
