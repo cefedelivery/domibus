@@ -11,7 +11,8 @@ export class MessageLogEntry {
               finalRecipient: string,
               refToMessageId: string,
               receivedFrom: Date,
-              receivedTo: Date
+              receivedTo: Date,
+              isTestMessage: boolean
   ) {
 
   }
