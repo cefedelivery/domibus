@@ -41,6 +41,8 @@ public class MessageLogInfo {
 
     private final MessageType messageType;
 
+    private final MessageSubtype messageSubtype;
+
     private final Date deleted;
 
     private String originalSender;
@@ -52,8 +54,6 @@ public class MessageLogInfo {
     private final Date failed;
 
     private final Date restored;
-
-    private final MessageSubtype messageSubtype;
 
 
     public MessageLogInfo(final String messageId,

@@ -67,8 +67,8 @@ public class CsvServiceImplTest {
         final String exportToCSV = csvServiceImpl.exportToCSV(messageLogInfoList);
 
         // Then
-        Assert.assertTrue(exportToCSV.contains("Message Id,From Party Id,To Party Id,Message Status,Notification Status,Received,Msh Role,Send Attempts,Send Attempts Max,Next Attempt,Conversation Id,Message Type,Deleted,Original Sender,Final Recipient,Ref To Message Id,Failed,Restored,Message Subtype"));
-        Assert.assertTrue(exportToCSV.contains("messageId,fromPartyId,toPartyId,ACKNOWLEDGED,NOTIFIED,"+date+",RECEIVING,1,5,"+date+",conversationId,USER_MESSAGE,"+date+",originalSender,finalRecipient,refToMessageId,"+date+","+date+","+(messageSubtype!=null?messageSubtype.toString():"")));
+        Assert.assertTrue(exportToCSV.contains("Message Id,From Party Id,To Party Id,Message Status,Notification Status,Received,Msh Role,Send Attempts,Send Attempts Max,Next Attempt,Conversation Id,Message Type,Message Subtype,Deleted,Original Sender,Final Recipient,Ref To Message Id,Failed,Restored"));
+        Assert.assertTrue(exportToCSV.contains("messageId,fromPartyId,toPartyId,ACKNOWLEDGED,NOTIFIED,"+date+",RECEIVING,1,5,"+date+",conversationId,USER_MESSAGE,"+(messageSubtype!=null?messageSubtype.toString():"")+","+date+",originalSender,finalRecipient,refToMessageId,"+date+","+date));
     }
 
     private List<MessageLogInfo> getMessageList(MessageType messageType, Date date, MessageSubtype messageSubtype) {
