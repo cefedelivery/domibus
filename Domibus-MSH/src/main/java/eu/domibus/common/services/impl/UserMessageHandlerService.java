@@ -249,7 +249,7 @@ public class UserMessageHandlerService {
         handlePayloads(request, userMessage);
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
-        LOG.debug("Compression for message with id: {} applied: ", userMessage.getMessageInfo().getMessageId(), compressed);
+        LOG.debug("Compression for message with id: {} applied: {}", userMessage.getMessageInfo().getMessageId(), compressed);
         try {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
