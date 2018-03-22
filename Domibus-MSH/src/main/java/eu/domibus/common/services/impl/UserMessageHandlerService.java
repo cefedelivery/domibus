@@ -64,7 +64,7 @@ public class UserMessageHandlerService {
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
 
-
+    /** to be appended to messageId when saving to DB on receiver side */
     public static final String SELF_SENDING_SUFFIX = "_self";
 
 
@@ -137,10 +137,11 @@ public class UserMessageHandlerService {
                 LOG.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    LOG.debug("attachment: " + i.next());
+                    LOG.debug("attachment: {}", i.next());
                 }
             }
 
+            //check if the message is sent to the same Domibus instance
             final boolean selfSendingFlag = amISendingToMySelf(pmodeKey);
             if (selfSendingFlag) {
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
@@ -170,10 +171,16 @@ public class UserMessageHandlerService {
         }
     }
 
+    /**
+     * It will check if sender and receiver parties have the same url
+     *
+     * @param pmodeKey pmode key
+     * @return boolean
+     */
     protected boolean amISendingToMySelf(String pmodeKey) {
         final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
         final Party sender = pModeProvider.getSenderParty(pmodeKey);
-        if (receiver.getEndpoint().trim().equals(sender.getEndpoint().trim())) {
+        if (receiver.getEndpoint().trim().equalsIgnoreCase(sender.getEndpoint().trim())) {
             return true;
         }
         return false;
@@ -234,7 +241,7 @@ public class UserMessageHandlerService {
         handlePayloads(request, userMessage);
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
-        LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
+        LOG.debug("Compression for message with id: {} applied: ", userMessage.getMessageInfo().getMessageId(), compressed);
         try {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
@@ -286,7 +293,7 @@ public class UserMessageHandlerService {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
-            LOG.debug("looking for attachment with cid: " + cid);
+            LOG.debug("looking for attachment with cid: {}", cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
@@ -345,7 +352,7 @@ public class UserMessageHandlerService {
      * @param request          the incoming message
      * @param legConfiguration processing information of the message
      * @param duplicate        indicates whether or not the message is a duplicate
-     * @param selfSendingFlag
+     * @param selfSendingFlag indicates that the message is sent to the same Domibus instance
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
@@ -406,6 +413,12 @@ public class UserMessageHandlerService {
         return result;
     }
 
+    /**
+     * save response in the DB before sending it back
+     *
+     * @param responseMessage SOAP response message
+     * @param selfSendingFlag indicates that the message is sent to the same Domibus instance
+     */
     void saveResponse(final SOAPMessage responseMessage, boolean selfSendingFlag) {
         try {
             Messaging messaging = getMessaging(responseMessage);
