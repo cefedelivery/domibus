@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 3.3.4
  */
 public interface MessagingLockDao {
 

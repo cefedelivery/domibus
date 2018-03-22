@@ -7,6 +7,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
+/**
+ * @author Thomas Dussart
+ * @since 3.3.4
+ *
+ * {@inheritDoc}
+ *
+ */
 public class ToExtractor implements PartyIdExtractor {
 
     private final static Logger LOG = LoggerFactory.getLogger(ToExtractor.class);
@@ -17,6 +24,9 @@ public class ToExtractor implements PartyIdExtractor {
         this.to = to;
     }
 
+    /**
+     * @return the first identifier of the list. Throw IllegalStateException if none exists.
+     */
     @Override
     public String getPartyId() {
         Set<PartyId> identifiers = to.getPartyId();

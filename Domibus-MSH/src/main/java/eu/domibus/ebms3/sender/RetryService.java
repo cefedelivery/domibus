@@ -137,7 +137,7 @@ public class RetryService {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
                 }
-                addPullMessageLockEntry(messagedId, userMessageLog);
+                addPullMessageSearchInformation(messagedId);
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -150,8 +150,14 @@ public class RetryService {
         }
     }
 
-    private void addPullMessageLockEntry(String messagedId, UserMessageLog userMessageLog) {
-        Messaging messageByMessageId = messagingDao.findMessageByMessageId(userMessageLog.getMessageId());
+    /**
+     * When a message has been set in waiting_for_receipt state its locking record has been deleted. When the retry
+     * service set timed_out waiting_for_receipt messages back in ready_to_pull state, the search and lock system has to be fed again
+     * with the message information.
+     * @param messagedId the id of the message to reset
+     */
+    private void addPullMessageSearchInformation(final String messagedId) {
+        Messaging messageByMessageId = messagingDao.findMessageByMessageId(messagedId);
         To to = messageByMessageId.getUserMessage().getPartyInfo().getTo();
         messagingLockService.delete(messagedId);
         messagingLockService.addSearchInFormation(new ToExtractor(to),messagedId,messageByMessageId.getUserMessage().getMpc());

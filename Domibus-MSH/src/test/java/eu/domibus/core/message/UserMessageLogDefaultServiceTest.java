@@ -144,13 +144,4 @@ public class UserMessageLogDefaultServiceTest {
         }};
     }
 
-  /*  @Test
-    public void tesSetIntermediaryPullStatus() throws Exception {
-        final String messageId = "1";
-        userMessageLogDefaultService.setIntermediaryPullStatus(messageId);
-
-        new Verifications() {{
-            userMessageLogDefaultService.updateMessageStatus(messageId, MessageStatus.BEING_PULLED);
-        }};
-    }*/
 }

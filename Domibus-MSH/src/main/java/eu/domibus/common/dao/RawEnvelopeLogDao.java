@@ -7,6 +7,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -18,12 +19,12 @@ import javax.persistence.TypedQuery;
 public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(RawEnvelopeLogDao.class);
-    public static final String MESSAGE_ID = "messageId";
+
+    public static final String MESSAGE_ID = "MESSAGE_ID";
 
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
     }
-
 
     public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
         TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("RawDto.findByMessageId", RawEnvelopeDto.class);
@@ -42,11 +43,9 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
      * @param messageId the id of the message.
      */
     public void deleteUserMessageRawEnvelope(final String messageId) {
-        em.createQuery("DELETE FROM RawEnvelopeLog r where r.messageId= :messageId").
-                setParameter(MESSAGE_ID,messageId)
-                .executeUpdate();
-
+        Query query = em.createNamedQuery("Raw.deleteByMessageID");
+        query.setParameter(MESSAGE_ID,messageId);
+        query.executeUpdate();
     }
-
 
 }

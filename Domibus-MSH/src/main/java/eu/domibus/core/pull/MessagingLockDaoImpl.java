@@ -12,13 +12,12 @@ import javax.persistence.Query;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 3.3.4
  */
-@Repository(value = "dMessagingLock")
+@Repository
 public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockDaoImpl.class);
-
 
     public static final String MPC = "MPC";
 
@@ -40,7 +39,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     }
 
-
     @Override
     public void save(MessagingLock messagingLock) {
         entityManager.persist(messagingLock);
@@ -52,7 +50,5 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         query.setParameter(MESSAGE_ID,messageId);
         query.executeUpdate();
     }
-
-
 
 }
