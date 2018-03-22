@@ -217,7 +217,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageToProcess = messagingLockService.getPullMessageToProcess(partyId, mpc);
+        String pullMessageToProcess = messagingLockService.getPullMessageId(partyId, mpc);
         if(pullMessageToProcess==null){
             return null;
         }
@@ -228,6 +228,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             messagingLockService.delete(pullMessageToProcess);
             return null;
         }
+        //userMessageLogService.setIntermediaryPullStatus(pullMessageToProcess);
         return pullMessageToProcess;
     }
 

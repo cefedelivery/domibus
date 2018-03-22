@@ -20,5 +20,5 @@ public interface UserMessageLogService {
 
     void setMessageAsSendFailure(String messageId);
 
-    void setIntermediaryPullStatus(String messageId);
+    /*void setIntermediaryPullStatus(String messageId);*/
 }

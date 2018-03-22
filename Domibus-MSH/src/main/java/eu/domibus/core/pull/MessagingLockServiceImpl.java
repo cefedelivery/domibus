@@ -11,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
- * @since 4.0
+ * @since 3.3.3
+ *
+ *{@inheritDoc}
+ *
  */
 @Service
 public class MessagingLockServiceImpl implements MessagingLockService {
@@ -23,45 +26,37 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     private MessagingLockDao messagingLockDao;
 
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public String getPullMessageToProcess(final String initiator, final String mpc) {
+    public String getPullMessageId(final String initiator, final String mpc) {
 
         return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
 
     }
 
-    /*private String tryAnotherMessage(final String initiator, final String mpc, final List<Integer> lockedIds) {
-        if (lockedIds.size() >= maxTentative) {
-            LOG.error("Max tentative:[{}] to lock a message has been reached for initiator:[{}] and mpc:[{}]"+ maxTentative,initiator,mpc);
-            throw new MessagingLockException("Max tentative to lock a message has been reached:" + maxTentative);
-        }
-        try {
-            return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc, lockedIds);
-        } catch (MessagingLockException e) {
-            assert e.getMessageAlreadyLockedId() != null;
-            lockedIds.add(e.getMessageAlreadyLockedId());
-            LOG.error("Messaging locking mechanism for initiator:[{}] and mpc:[{}], retrying without ids[{}]", initiator,mpc,StringUtils.join(lockedIds, ","));
-            return tryAnotherMessage(initiator, mpc, lockedIds);
-        }
-    }*/
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
-    public void addLockingInformation(final PartyIdExtractor partyIdExtractor, final String messageId, final String mpc) {
-
+    public void addSearchInFormation(final PartyIdExtractor partyIdExtractor, final String messageId, final String mpc) {
         String partyId = partyIdExtractor.getPartyId();
         LOG.debug("Saving messagelock with id:[{}],partyID:[{}], mpc:[{}]",messageId, partyId,mpc);
         MessagingLock messagingLock = new MessagingLock(messageId, partyId, mpc);
         messagingLockDao.save(messagingLock);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void delete(final String messageId) {
         messagingLockDao.delete(messageId);
     }
-
-
 
 }

@@ -86,8 +86,8 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
         updateMessageStatus(messageId, MessageStatus.SEND_FAILURE);
     }
 
-    @Override
+   /* @Override
     public void setIntermediaryPullStatus(String messageId) {
         updateMessageStatus(messageId, MessageStatus.BEING_PULLED);
-    }
+    }*/
 }

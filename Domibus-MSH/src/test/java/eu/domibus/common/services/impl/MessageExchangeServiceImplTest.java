@@ -3,16 +3,17 @@ package eu.domibus.common.services.impl;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -23,7 +24,6 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +64,7 @@ public class MessageExchangeServiceImplTest {
     private MessagingDao messagingDao;
 
     @Mock
-    private UserMessageLogService messageLogService;
+    private UserMessageLogDao userMessageLogDao;
 
     @Mock
     private MessagingLockService messagingLockService;
@@ -235,13 +235,64 @@ public class MessageExchangeServiceImplTest {
         when(party.getIdentifiers()).thenReturn(identifiers);
 
         final String testMessageId = "testMessageId";
-        final List<MessagePullDto> messagePullDtos = Lists.newArrayList(new MessagePullDto(testMessageId, DateTime.now().toDate()), new MessagePullDto("messageID2", DateTime.now().toDate()));
-        when(messagingDao.findMessagingOnStatusReceiverAndMpc(eq("party1"), eq(MessageStatus.READY_TO_PULL), eq(mpc))).thenReturn(messagePullDtos);
+        when(messagingLockService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
+        UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+        when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
 
         final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
-        verify(messageLogService, times(1)).setIntermediaryPullStatus(eq(testMessageId));
         assertEquals(testMessageId, messageId);
 
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageIdWithMessageWithEmptyIdentifier() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
+
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageINoMessage() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        when(messagingLockService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(null);
+        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
+
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageIdWithWrongStatusMessage() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        final String testMessageId = "testMessageId";
+        when(messagingLockService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
+        UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageStatus(MessageStatus.BEING_PULLED);
+        when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
+        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
+        verify(messagingLockService,times(1)).delete(eq(testMessageId));
     }
 
     @Test

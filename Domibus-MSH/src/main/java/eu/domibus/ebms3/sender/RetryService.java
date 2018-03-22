@@ -154,7 +154,7 @@ public class RetryService {
         Messaging messageByMessageId = messagingDao.findMessageByMessageId(userMessageLog.getMessageId());
         To to = messageByMessageId.getUserMessage().getPartyInfo().getTo();
         messagingLockService.delete(messagedId);
-        messagingLockService.addLockingInformation(new ToExtractor(to),messagedId,messageByMessageId.getUserMessage().getMpc());
+        messagingLockService.addSearchInFormation(new ToExtractor(to),messagedId,messageByMessageId.getUserMessage().getMpc());
     }
 
 
