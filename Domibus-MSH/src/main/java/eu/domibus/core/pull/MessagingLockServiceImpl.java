@@ -25,7 +25,6 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     @Qualifier("dMessagingLock")
     private MessagingLockDao messagingLockDao;
 
-
     /**
      * {@inheritDoc}
      */
@@ -36,7 +35,6 @@ public class MessagingLockServiceImpl implements MessagingLockService {
         return messagingLockDao.getNextPullMessageToProcess(MessagingLock.PULL, initiator, mpc);
 
     }
-
 
     /**
      * {@inheritDoc}
