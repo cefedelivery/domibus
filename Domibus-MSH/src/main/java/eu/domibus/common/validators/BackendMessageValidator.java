@@ -131,7 +131,7 @@ public class BackendMessageValidator {
      * @param to
      * @throws EbMS3Exception
      */
-    public void validateParties(Party from, Party to) throws EbMS3Exception {
+    public void validateParties(Party from, Party to) {
 
         Validate.notNull(from, "Initiator party was not found");
         Validate.notNull(to, "Responder party was not found");
@@ -162,7 +162,7 @@ public class BackendMessageValidator {
      * @param to
      * @throws EbMS3Exception
      */
-    public void validateResponderParty(Party gatewayParty, Party to) throws EbMS3Exception {
+    public void validateResponderParty(Party gatewayParty, Party to) {
 
         Validate.notNull(gatewayParty, "Access point party was not found");
         Validate.notNull(to, "Responder party was not found");

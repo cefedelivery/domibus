@@ -56,6 +56,7 @@ import java.util.List;
 
 /**
  * @author Thomas Dussart
+ * @author Catalin Enache
  * @since 3.3
  */
 @RunWith(JMockit.class)

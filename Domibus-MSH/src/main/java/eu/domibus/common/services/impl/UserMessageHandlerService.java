@@ -55,6 +55,7 @@ import java.util.Iterator;
 
 /**
  * @author Thomas Dussart
+ * @author Catalin Enache
  * @since 3.3
  *
  */
