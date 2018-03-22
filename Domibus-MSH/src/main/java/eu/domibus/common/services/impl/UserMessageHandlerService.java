@@ -65,6 +65,9 @@ public class UserMessageHandlerService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
 
 
+    public static final String SELF_SENDING_SUFFIX = "_self";
+
+
     private byte[] as4ReceiptXslBytes;
 
     @Autowired
@@ -140,7 +143,7 @@ public class UserMessageHandlerService {
 
             final boolean selfSendingFlag = amISendingToMySelf(pmodeKey);
             if (selfSendingFlag) {
-                messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + "_");
+                messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
 
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
@@ -410,8 +413,8 @@ public class UserMessageHandlerService {
 
             if (selfSendingFlag) {
                 //do the nasty thing here
-                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + "_");
-                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + "_");
+                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + SELF_SENDING_SUFFIX);
+                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
             // Stores the signal message
             signalMessageDao.create(signalMessage);
