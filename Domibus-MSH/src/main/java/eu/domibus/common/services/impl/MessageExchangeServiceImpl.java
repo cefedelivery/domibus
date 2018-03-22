@@ -148,9 +148,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
-        //TODO taxud change this behavior as the pull request do not start if not incoming message has been pushed
-        final boolean configurationLoaded = pModeProvider.isConfigurationLoaded();
-        if (!configurationLoaded) {
+        if (!pModeProvider.isConfigurationLoaded()) {
             LOG.debug("A configuration problem occurred while initiating the pull request. Probably no configuration is loaded.");
             return;
         }
@@ -190,7 +188,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         };
 
                         final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
-                        LOG.debug("Sending:[{}] pull request for mpc:[{}]",numberOfPullRequestPerMpc,mpcQualifiedName);
+                        LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
                         }
@@ -215,7 +213,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         String partyId = identifiers.iterator().next().getPartyId();
         String pullMessageId = messagingLockService.getPullMessageId(partyId, mpc);
-        if(pullMessageId==null){
+        if (pullMessageId == null) {
             return null;
         }
         //this code is needed because setting the message in pull failed occurs in another transaction, meaning that
@@ -223,7 +221,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         //and the set pull failed transaction are completed, the message is unlocked and can be retrieved again to be pulled, but because
         //the status is now pull failed, the message is deleted.
         MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
-        if(MessageStatus.READY_TO_PULL!=userMessageLog.getMessageStatus()){
+        if (MessageStatus.READY_TO_PULL != userMessageLog.getMessageStatus()) {
             messagingLockService.delete(pullMessageId);
             return null;
         }
@@ -238,9 +236,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();
             List<Process> processes = pModeProvider.findPullProcessByMpc(mpcQualifiedName);
-            if(LOG.isDebugEnabled()){
+            if (LOG.isDebugEnabled()) {
                 for (Process process : processes) {
-                    LOG.debug("Process:[{}] correspond to mpc:[{}]",process.getName(),mpcQualifiedName);
+                    LOG.debug("Process:[{}] correspond to mpc:[{}]", process.getName(), mpcQualifiedName);
                 }
             }
             processValidator.validatePullProcess(processes);
@@ -284,7 +282,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
@@ -305,7 +303,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(senderName);

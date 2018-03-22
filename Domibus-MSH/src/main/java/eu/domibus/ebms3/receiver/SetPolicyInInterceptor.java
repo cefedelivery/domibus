@@ -55,8 +55,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
 
-//    private JAXBContext jaxbContext;
-
     @Autowired
     private SoapService soapService;
 
@@ -74,10 +72,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         this.addBefore(PolicyInInterceptor.class.getName());
         this.addAfter(AttachmentInInterceptor.class.getName());
     }
-
-  /*  public void setJaxbContext(final JAXBContext jaxbContext) {
-        this.jaxbContext = jaxbContext;
-    }*/
 
     public void setMessageLegConfigurationFactory(MessageLegConfigurationFactory messageLegConfigurationFactory) {
         this.messageLegConfigurationFactory = messageLegConfigurationFactory;

@@ -22,7 +22,6 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockServiceImpl.class);
 
     @Autowired
-    @Qualifier("dMessagingLock")
     private MessagingLockDao messagingLockDao;
 
     /**
