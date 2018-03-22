@@ -67,6 +67,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private MessagingDao messagingDao;
 
+    private JAXBContext jaxbContext;
+
     @Autowired
     private PModeProvider pModeProvider;
 
@@ -98,6 +100,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private ReliabilityService reliabilityService;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
+        this.jaxbContext = jaxbContext;
     }
 
     @Override
