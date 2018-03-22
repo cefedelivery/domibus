@@ -404,6 +404,10 @@ export class MessageLogComponent {
       result += 'messageType=' + this.filter.messageType + '&';
     }
 
+    if (this.filter.messageSubtype) {
+      result += 'messageSubtype=' + this.filter.messageSubtype + '&';
+    }
+
     if (this.filter.messageStatus) {
       result += 'messageStatus=' + this.filter.messageStatus + '&';
     }
