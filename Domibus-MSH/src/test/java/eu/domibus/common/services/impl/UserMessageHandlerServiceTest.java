@@ -249,7 +249,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
-            userMessageHandlerService.amISendingToMySelf(pmodeKey);
+            userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
         }};
 
@@ -262,6 +262,58 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, false );
+        }};
+    }
+
+    @Test
+    public void testInvoke_tc1Process_SelfSending_HappyFlow(@Injectable final BackendFilter matchingBackendFilter)
+            throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final LegConfiguration legConfiguration = getLegFromConfiguration(configuration, PUSH_TESTCASE1_TC1ACTION);
+        final Messaging messaging = createDummyRequestMessaging();
+        final UserMessage userMessage = messaging.getUserMessage();
+        final Party receiverParty = getPartyFromConfiguration(configuration, RED);
+
+        new Expectations(userMessageHandlerService) {{
+            backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+            result = matchingBackendFilter;
+
+            pModeProvider.getLegConfiguration(withSubstring(PUSH_TESTCASE1_TC1ACTION));
+            result = legConfiguration;
+
+            userMessageHandlerService.checkDuplicate(messaging);
+            result = false;
+
+            userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
+            result = any;
+
+            compressionService.handleDecompression(userMessage, legConfiguration);
+            result = true;
+
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, anyBoolean);
+            result = soapResponseMessage;
+
+            userMessageHandlerService.checkSelfSending(pmodeKey);
+            result = true;
+        }};
+
+        userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, new UserMessageHandlerContext());
+
+        new Verifications() {{
+            Assert.assertEquals("1234" + UserMessageHandlerService.SELF_SENDING_SUFFIX, messaging.getUserMessage().getMessageInfo().getMessageId());
+            userMessageHandlerService.checkCharset(messaging);
+            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkDuplicate(messaging);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
+            boolean selfSendingFlagActual;
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, selfSendingFlagActual = withCapture() );
+            Assert.assertEquals(true, selfSendingFlagActual);
         }};
     }
 
@@ -291,7 +343,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, anyBoolean);
             result = soapResponseMessage;
 
-            userMessageHandlerService.amISendingToMySelf(pmodeKey);
+            userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
         }};
 
@@ -708,7 +760,6 @@ public class UserMessageHandlerServiceTest {
         }
     }
 
-
     @Test
     public void test_HandlePayLoads_NoPayloadFound(@Injectable final UserMessage userMessage, @Injectable final AttachmentPart attachmentPart1, @Injectable final AttachmentPart attachmentPart2) {
 
@@ -844,7 +895,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = true;
 
-            userMessageHandlerService.amISendingToMySelf(pmodeKey);
+            userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
 
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean, anyBoolean);
@@ -868,7 +919,8 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration,
+                                                           @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -892,7 +944,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             result = any;
 
-            userMessageHandlerService.amISendingToMySelf(pmodeKey);
+            userMessageHandlerService.checkSelfSending(pmodeKey);
             result = false;
 
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, withAny(userMessage));
@@ -939,6 +991,72 @@ public class UserMessageHandlerServiceTest {
         }};
 
         Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), userMessageHandlerService.getMessaging(soapRequestMessage));
+    }
+
+    @Test
+    public void test_checkSelfSending_DifferentAPs_False() throws Exception {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final Party senderParty = getPartyFromConfiguration(configuration, BLUE);
+        final Party receiverParty = getPartyFromConfiguration(configuration, RED);
+
+        new Expectations() {{
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            pModeProvider.getSenderParty(pmodeKey);
+            result = senderParty;
+
+        }};
+
+        //tested method
+        boolean selfSendingFlag = userMessageHandlerService.checkSelfSending(pmodeKey);
+        Assert.assertFalse("expected result should be false", selfSendingFlag);
+    }
+
+    @Test
+    public void test_checkSelfSending_SameAPs_True() throws Exception {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final Party senderParty = getPartyFromConfiguration(configuration, BLUE);
+        final Party receiverParty = getPartyFromConfiguration(configuration, BLUE);
+
+        new Expectations() {{
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            pModeProvider.getSenderParty(pmodeKey);
+            result = senderParty;
+
+        }};
+
+        //tested method
+        boolean selfSendingFlag = userMessageHandlerService.checkSelfSending(pmodeKey);
+        Assert.assertTrue("expected result should be true", selfSendingFlag);
+    }
+
+    @Test
+    public void test_checkSelfSending_DifferentAPsSameEndpoint_True() throws Exception {
+        final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+
+        final Configuration configuration = loadSamplePModeConfiguration(VALID_PMODE_CONFIG_URI);
+        final Party senderParty = getPartyFromConfiguration(configuration, BLUE);
+        final Party receiverParty = getPartyFromConfiguration(configuration, RED);
+        receiverParty.setEndpoint(senderParty.getEndpoint().toLowerCase());
+
+        new Expectations() {{
+            pModeProvider.getReceiverParty(pmodeKey);
+            result = receiverParty;
+
+            pModeProvider.getSenderParty(pmodeKey);
+            result = senderParty;
+        }};
+
+        //tested method
+        boolean selfSendingFlag = userMessageHandlerService.checkSelfSending(pmodeKey);
+        Assert.assertTrue("expected result should be true", selfSendingFlag);
     }
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

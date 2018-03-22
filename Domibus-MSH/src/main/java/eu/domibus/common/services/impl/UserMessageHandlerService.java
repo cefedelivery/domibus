@@ -142,7 +142,7 @@ public class UserMessageHandlerService {
             }
 
             //check if the message is sent to the same Domibus instance
-            final boolean selfSendingFlag = amISendingToMySelf(pmodeKey);
+            final boolean selfSendingFlag = checkSelfSending(pmodeKey);
             if (selfSendingFlag) {
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
@@ -172,17 +172,25 @@ public class UserMessageHandlerService {
     }
 
     /**
-     * It will check if sender and receiver parties have the same url
+     * It will check if the messages are sent to the same Domibus instance
      *
      * @param pmodeKey pmode key
      * @return boolean
      */
-    protected boolean amISendingToMySelf(String pmodeKey) {
+    protected boolean checkSelfSending(String pmodeKey) {
         final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
         final Party sender = pModeProvider.getSenderParty(pmodeKey);
+
+        //check endpoint
         if (receiver.getEndpoint().trim().equalsIgnoreCase(sender.getEndpoint().trim())) {
             return true;
         }
+
+        //check party names
+        if (receiver.getName().equalsIgnoreCase(sender.getName())) {
+            return true;
+        }
+
         return false;
     }
 
