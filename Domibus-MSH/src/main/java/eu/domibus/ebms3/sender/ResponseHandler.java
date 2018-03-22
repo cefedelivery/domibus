@@ -2,20 +2,17 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.SignalMessageLog;
-import eu.domibus.common.model.logging.SignalMessageLogBuilder;
-import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.message.SignalMessageLogDefaultService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.ebms3.common.model.Error;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +46,13 @@ public class ResponseHandler {
     private SignalMessageDao signalMessageDao;
 
     @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Autowired
     private NonRepudiationService nonRepudiationService;
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private SignalMessageLogDefaultService signalMessageLogDefaultService;
 
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
 
@@ -75,26 +72,19 @@ public class ResponseHandler {
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
         Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
-        MessageSubtype messageSubtype = null;
+        String userMessageService = null;
+        String userMessageAction = null;
         if (sentMessage != null) {
-            if(UserMessageHandlerService.checkTestMessage(sentMessage.getUserMessage())) {
-                messageSubtype = MessageSubtype.TEST;
-            }
+            userMessageService = sentMessage.getUserMessage().getCollaborationInfo().getService().getValue();
+            userMessageAction = sentMessage.getUserMessage().getCollaborationInfo().getAction();
             sentMessage.setSignalMessage(signalMessage);
             messagingDao.update(sentMessage);
         }
         // Builds the signal message log
-        SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
-                .setMessageId(signalMessage.getMessageInfo().getMessageId())
-                .setMessageStatus(MessageStatus.RECEIVED)
-                .setMshRole(MSHRole.RECEIVING)
-                .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
-        // Saves an entry of the signal message log
-        SignalMessageLog signalMessageLog = smlBuilder.build();
-        signalMessageLog.setMessageSubtype(messageSubtype);
-        signalMessageLogDao.create(signalMessageLog);
+        signalMessageLogDefaultService.save(signalMessage.getMessageInfo().getMessageId(), userMessageService, userMessageAction);
+
         // Checks if the signal message is Ok
-        if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
+        if (signalMessage.getError() == null || signalMessage.getError().isEmpty()) {
             return CheckResult.OK;
         }
         return handleErrors(signalMessage);

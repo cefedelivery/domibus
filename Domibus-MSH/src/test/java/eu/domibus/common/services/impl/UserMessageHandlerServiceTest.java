@@ -262,7 +262,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_PingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_TestMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
@@ -288,7 +288,7 @@ public class UserMessageHandlerServiceTest {
 
         userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
 
-        Assert.assertTrue(userMessageHandlerContext.isPingMessage());
+        Assert.assertTrue(userMessageHandlerContext.isTestMessage());
         Assert.assertEquals("TestMessage123", userMessageHandlerContext.getMessageId());
         Assert.assertNotNull(userMessageHandlerContext.getLegConfiguration());
         new Verifications() {{
@@ -731,7 +731,7 @@ public class UserMessageHandlerServiceTest {
 
 
     @Test
-    public void testCheckPingMessage() {
+    public void testCheckTestMessage() {
 
         UserMessage userMessage = createSampleUserMessage();
         Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkTestMessage(userMessage));
@@ -873,7 +873,7 @@ public class UserMessageHandlerServiceTest {
         }};
         try {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
-            userMessageHandlerContext.setPingMessage(true);
+            userMessageHandlerContext.setTestMessage(true);
             userMessageHandlerContext.setLegConfiguration(legConfiguration);
             userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
         } catch (Exception e) {

@@ -54,9 +54,6 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Iterator;
 
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_ACTION;
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
-
 /**
  * @author Thomas Dussart
  * @since 3.3
@@ -127,7 +124,6 @@ public class UserMessageHandlerService {
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
-        boolean pingMessage;
         String messageId;
         try (StringWriter sw = new StringWriter()) {
             if (LOG.isDebugEnabled()) {
@@ -146,12 +142,12 @@ public class UserMessageHandlerService {
             userMessageHandlerContext.setMessageId(messageId);
 
             checkCharset(messaging);
-            pingMessage = checkTestMessage(messaging.getUserMessage());
-            userMessageHandlerContext.setPingMessage(pingMessage);
+            boolean testMessage = checkTestMessage(messaging.getUserMessage());
+            userMessageHandlerContext.setTestMessage(testMessage);
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists) {
-                if(pingMessage) {
+                if(testMessage) {
                     // ping messages are only stored and not notified to the plugins
                     persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, null);
                 } else {
@@ -200,7 +196,7 @@ public class UserMessageHandlerService {
      * @param message the message
      * @return result of test service and action handle
      */
-    public static Boolean checkTestMessage(final UserMessage message) {
+    public Boolean checkTestMessage(final UserMessage message) {
         LOG.debug("Checking if it is a test message");
         return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
                 && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
@@ -255,7 +251,8 @@ public class UserMessageHandlerService {
                 StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc(),
                 backendName,
                 to.getEndpoint(),
-                checkTestMessage(messaging.getUserMessage()) ? MessageSubtype.TEST.toString() : null);
+                userMessage.getCollaborationInfo().getService().getValue(),
+                userMessage.getCollaborationInfo().getAction());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 

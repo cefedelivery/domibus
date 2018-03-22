@@ -5,6 +5,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import mockit.Injectable;
@@ -36,13 +37,16 @@ public class UserMessageLogDefaultServiceParameterizedTest {
     UserMessageLogDefaultService userMessageLogDefaultService;
 
     @Parameterized.Parameter(0)
-    public MessageSubtype messageSubtype;
+    public String service;
 
-    @Parameterized.Parameters(name = "{index}: messageSubtype=\"{0}\"")
+    @Parameterized.Parameter(1)
+    public String action;
+
+    @Parameterized.Parameters(name = "{index}: service=\"{0}\" action=\"{1}\"")
     public static Collection<Object[]> values() {
         return Arrays.asList(new Object[][]{
-                {null},
-                {MessageSubtype.TEST}
+                {"service","action"},
+                {Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION}
         });
     }
 
@@ -57,10 +61,11 @@ public class UserMessageLogDefaultServiceParameterizedTest {
         final String backendName = "JMS";
         final String endpoint = "http://localhost";
 
-        userMessageLogDefaultService.save(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint, messageSubtype != null ? messageSubtype.toString() : null);
+        userMessageLogDefaultService.save(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint, service, action);
 
         new Verifications() {{
             backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+            times = userMessageLogDefaultService.checkTestMessage(service,action)?0:1;
 
             UserMessageLog userMessageLog;
             userMessageLogDao.create(userMessageLog = withCapture());
@@ -72,7 +77,7 @@ public class UserMessageLogDefaultServiceParameterizedTest {
             Assert.assertEquals(mpc, userMessageLog.getMpc());
             Assert.assertEquals(backendName, userMessageLog.getBackend());
             Assert.assertEquals(endpoint, userMessageLog.getEndpoint());
-            Assert.assertEquals(messageSubtype, userMessageLog.getMessageSubtype());
+            Assert.assertEquals(userMessageLogDefaultService.checkTestMessage(service,action)? MessageSubtype.TEST : null, userMessageLog.getMessageSubtype());
         }};
     }
 }
