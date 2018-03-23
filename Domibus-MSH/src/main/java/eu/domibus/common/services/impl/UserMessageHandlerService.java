@@ -79,7 +79,7 @@ public class UserMessageHandlerService {
 
     @Autowired
     private CompressionService compressionService;
-¡
+
     @Autowired
     private BackendNotificationService backendNotificationService;
 
