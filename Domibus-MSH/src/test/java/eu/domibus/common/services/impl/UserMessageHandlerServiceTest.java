@@ -614,6 +614,31 @@ public class UserMessageHandlerServiceTest {
         }};
     }
 
+    @Test
+    public void testSaveResponse_SendToSameAP(@Injectable final Messaging receiptMessage) throws SOAPException, ParserConfigurationException, JAXBException, SAXException, IOException {
+
+        final Messaging responseMessaging = createValidSampleResponseMessaging();
+        final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
+        new Expectations(userMessageHandlerService) {{
+
+            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
+            result = responseMessaging;
+
+            messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
+            result = receiptMessage;
+        }};
+
+        userMessageHandlerService.saveResponse(soapResponseMessage, true );
+
+        new Verifications() {{
+            signalMessageDao.create(responseSignalMessage);
+            times = 1;
+
+            messagingDao.update(receiptMessage);
+            times = 1;
+        }};
+    }
+
 
     @Test
     public void testSaveResponse_SuppressedExceptionFlow(@Injectable final SOAPHeader soapHeader, @Injectable final Messaging receiptMessage)

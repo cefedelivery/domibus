@@ -66,7 +66,7 @@ public class UserMessageHandlerService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
 
     /** to be appended to messageId when saving to DB on receiver side */
-    public static final String SELF_SENDING_SUFFIX = "_self";
+    public static final String SELF_SENDING_SUFFIX = "_1";
 
 
     private byte[] as4ReceiptXslBytes;
@@ -79,7 +79,7 @@ public class UserMessageHandlerService {
 
     @Autowired
     private CompressionService compressionService;
-
+¡
     @Autowired
     private BackendNotificationService backendNotificationService;
 
@@ -145,6 +145,9 @@ public class UserMessageHandlerService {
             //check if the message is sent to the same Domibus instance
             final boolean selfSendingFlag = checkSelfSending(pmodeKey);
             if (selfSendingFlag) {
+                /* we add a defined suffix in order to assure DB integrity - messageId unicity
+                basically we are generating another messageId for Signal Message on receievr side
+                */
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
 
@@ -176,7 +179,7 @@ public class UserMessageHandlerService {
      * It will check if the messages are sent to the same Domibus instance
      *
      * @param pmodeKey pmode key
-     * @return boolean
+     * @return boolean true if there is the same AP
      */
     protected boolean checkSelfSending(String pmodeKey) {
         final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
@@ -184,11 +187,6 @@ public class UserMessageHandlerService {
 
         //check endpoint
         if (receiver.getEndpoint().trim().equalsIgnoreCase(sender.getEndpoint().trim())) {
-            return true;
-        }
-
-        //check party names
-        if (receiver.getName().equalsIgnoreCase(sender.getName())) {
             return true;
         }
 
@@ -434,7 +432,9 @@ public class UserMessageHandlerService {
             final SignalMessage signalMessage = messaging.getSignalMessage();
 
             if (selfSendingFlag) {
-                //do the nasty thing here
+                /*we add a defined suffix in order to assure DB integrity - messageId unicity
+                basically we are generating another messageId for Signal Message on receievr side
+                */
                 signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + SELF_SENDING_SUFFIX);
                 signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
