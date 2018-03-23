@@ -131,7 +131,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 LOG.info("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
-                LOG.info("Ping message " + userMessageHandlerContext.isTestMessage());
+                LOG.info("Ping message {}", userMessageHandlerContext.isTestMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {
