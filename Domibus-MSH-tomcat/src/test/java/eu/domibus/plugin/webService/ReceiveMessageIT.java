@@ -139,8 +139,8 @@ public class ReceiveMessageIT extends AbstractIT {
 
     @Test
     @Transactional
-    public void testReceivePingMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
-        String filename = "SOAPPingMessage.xml";
+    public void testReceiveTestMessage() throws IOException, SOAPException, SQLException, ParserConfigurationException, SAXException {
+        String filename = "SOAPTestMessage.xml";
         String messageId = "ping123@domibus.eu";
         SOAPMessage soapMessage = createSOAPMessage(filename);
         SOAPMessage responseMessage = mshWebservice.invoke(soapMessage);

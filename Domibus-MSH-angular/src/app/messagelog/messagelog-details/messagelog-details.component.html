@@ -1,5 +1,5 @@
 <h2 md-dialog-title>Message details</h2>
-<md-dialog-content style="height:450px;width:650px">
+<md-dialog-content style="height:460px;width:650px">
   <md-card>
     <md-card-content>
       <md-input-container style="width:100%">
@@ -48,6 +48,10 @@
 
       <md-input-container style="width:100%">
         <input mdInput placeholder="Message Type" value="{{message.messageType}}" readonly/>
+      </md-input-container>
+
+      <md-input-container style="width:100%">
+        <input mdInput placeholder="Message Subtype" value="{{message.messageSubtype}}" readonly/>
       </md-input-container>
 
       <md-input-container style="width:100%">

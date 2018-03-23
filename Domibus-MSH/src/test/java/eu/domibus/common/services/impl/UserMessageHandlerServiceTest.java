@@ -253,7 +253,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
@@ -262,7 +262,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_PingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_TestMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
@@ -273,7 +273,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(withAny(messaging));
             result = any;
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = true;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();
@@ -288,15 +288,15 @@ public class UserMessageHandlerServiceTest {
 
         userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
 
-        Assert.assertTrue(userMessageHandlerContext.isPingMessage());
+        Assert.assertTrue(userMessageHandlerContext.isTestMessage());
         Assert.assertEquals("TestMessage123", userMessageHandlerContext.getMessageId());
         Assert.assertNotNull(userMessageHandlerContext.getLegConfiguration());
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
-            times = 0;
+            times = 1;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), legConfiguration, anyBoolean);
@@ -731,15 +731,15 @@ public class UserMessageHandlerServiceTest {
 
 
     @Test
-    public void testCheckPingMessage() {
+    public void testCheckTestMessage() {
 
         UserMessage userMessage = createSampleUserMessage();
-        Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkPingMessage(userMessage));
+        Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkTestMessage(userMessage));
 
 
         userMessage.getCollaborationInfo().getService().setValue(Ebms3Constants.TEST_SERVICE);
         userMessage.getCollaborationInfo().setAction(Ebms3Constants.TEST_ACTION);
-        Assert.assertTrue("Expecting true for Check Ping Message with modified data", userMessageHandlerService.checkPingMessage(userMessage));
+        Assert.assertTrue("Expecting true for Check Ping Message with modified data", userMessageHandlerService.checkTestMessage(userMessage));
     }
 
     @Test
@@ -811,7 +811,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(withAny(messaging));
             result = any;
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = false;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();
@@ -828,7 +828,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             userMessageHandlerService.checkCharset(messaging);
-            userMessageHandlerService.checkPingMessage(messaging.getUserMessage());
+            userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             times = 0;
@@ -854,7 +854,7 @@ public class UserMessageHandlerServiceTest {
             messaging.getUserMessage().getMessageInfo().getMessageId();
             result = "TestMessage123";
 
-            userMessageHandlerService.checkPingMessage(withAny(userMessage));
+            userMessageHandlerService.checkTestMessage(withAny(userMessage));
             result = false;
 
             legConfiguration.getReceptionAwareness().getDuplicateDetection();
@@ -873,7 +873,7 @@ public class UserMessageHandlerServiceTest {
         }};
         try {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
-            userMessageHandlerContext.setPingMessage(true);
+            userMessageHandlerContext.setTestMessage(true);
             userMessageHandlerContext.setLegConfiguration(legConfiguration);
             userMessageHandlerService.handleNewUserMessage(pmodeKey, soapRequestMessage, messaging, userMessageHandlerContext);
         } catch (Exception e) {

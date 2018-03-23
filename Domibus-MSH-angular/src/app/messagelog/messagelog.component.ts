@@ -10,6 +10,7 @@ import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
 import {AlertComponent} from "../alert/alert.component";
+import {isNullOrUndefined} from "util";
 
 @Component({
   moduleId: module.id,
@@ -110,6 +111,10 @@ export class MessageLogComponent {
         width: 130
       },
       {
+        name: 'Message Subtype',
+        width: 100
+      },
+      {
         cellTemplate: this.rowWithDateFormatTpl,
         name: 'Deleted',
         width: 155
@@ -208,6 +213,10 @@ export class MessageLogComponent {
       searchParams.set('receivedTo', this.filter.receivedTo.getTime());
     }
 
+    if(this.filter.isTestMessage) {
+      searchParams.set('messageSubtype', this.filter.isTestMessage ? "TEST" : null)
+    }
+
     if (asc != null) {
       searchParams.set('asc', asc.toString());
     }
@@ -247,6 +256,8 @@ export class MessageLogComponent {
       if (result.filter.receivedTo != null) {
         result.filter.receivedTo = new Date(result.filter.receivedTo);
       }
+
+      result.filter.isTestMessage = !isNullOrUndefined(result.filter.messageSubtype);
 
       this.filter = result.filter;
       this.mshRoles = result.mshRoles;
@@ -391,6 +402,10 @@ export class MessageLogComponent {
 
     if (this.filter.messageType) {
       result += 'messageType=' + this.filter.messageType + '&';
+    }
+
+    if (this.filter.messageSubtype) {
+      result += 'messageSubtype=' + this.filter.messageSubtype + '&';
     }
 
     if (this.filter.messageStatus) {
