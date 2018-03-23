@@ -55,7 +55,7 @@ public class SignalMessageLogDefaultService implements SignalMessageLogService {
      * @param action Action
      * @return True, if it's a test message and false otherwise
      */
-    private Boolean checkTestMessage(final String service, final String action) {
+    protected Boolean checkTestMessage(final String service, final String action) {
         return Ebms3Constants.TEST_SERVICE.equals(service)
                 && Ebms3Constants.TEST_ACTION.equals(action);
 
