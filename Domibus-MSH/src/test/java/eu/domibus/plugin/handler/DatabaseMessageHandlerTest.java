@@ -263,7 +263,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
 
@@ -343,8 +343,7 @@ public class DatabaseMessageHandlerTest {
             assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
             assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            UserMessageLog userMessageLog;
-            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
         }};
@@ -403,7 +402,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
         }};
 
     }

@@ -1,9 +1,9 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -42,9 +42,6 @@ import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
 
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_ACTION;
-import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
-
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
  * During submit, it manages the user authentication and the AS4 message's validation, compression and saving.
@@ -57,6 +54,10 @@ import static eu.domibus.ebms3.common.model.Ebms3Constants.TEST_SERVICE;
 public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
+    private static final String MESSAGE_WITH_ID_STR = "Message with id [";
+    private static final String WAS_NOT_FOUND_STR = "] was not found";
+    private static final String ERROR_SUBMITTING_THE_MESSAGE_STR = "Error submitting the message [";
+    private static final String TO_STR = "] to [";
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
@@ -129,11 +130,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
-                throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
+                throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
             }
         } catch (final NoResultException nrEx) {
-            LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
-            throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
+            LOG.debug(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR, nrEx);
+            throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
         }
 
         userMessageLogService.setMessageAsDownloaded(messageId);
@@ -269,7 +270,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
             // handle if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
-                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
+                throw new DuplicateMessageException(MESSAGE_WITH_ID_STR + messageId + "] already exists. Message identifiers must be unique");
             }
 
             Messaging message = ebMS3Of.createMessaging();
@@ -303,21 +304,19 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
 
-            if(TEST_ACTION.equals(messageData.getAction()) && TEST_SERVICE.equals(messageData.getService())) {
-                userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint(), MessageSubtype.TEST.toString());
-            } else {
-                userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
-            }
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+                    MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
+                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (EbMS3Exception ebms3Ex) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
         } catch (PModeException p) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]" + p.getMessage());
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
@@ -336,7 +335,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             return to;
         } catch (IllegalArgumentException runTimEx) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", runTimEx);
             throw MessagingExceptionFactory.transform(runTimEx, ErrorCode.EBMS_0003);
         }
     }

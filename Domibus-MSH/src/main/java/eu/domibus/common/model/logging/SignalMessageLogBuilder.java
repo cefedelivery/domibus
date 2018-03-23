@@ -3,6 +3,7 @@ package eu.domibus.common.model.logging;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 
 /**
  * @author Federico Martini
@@ -41,6 +42,11 @@ public class SignalMessageLogBuilder {
 
     public SignalMessageLogBuilder setMshRole(MSHRole mshRole) {
         signalMessageLog.setMshRole(mshRole);
+        return this;
+    }
+
+    public SignalMessageLogBuilder setMessageSubtype(MessageSubtype messageSubtype) {
+        signalMessageLog.setMessageSubtype(messageSubtype);
         return this;
     }
 
