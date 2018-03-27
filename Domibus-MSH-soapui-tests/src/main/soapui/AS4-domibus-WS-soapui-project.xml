@@ -23668,7 +23668,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 {
 	log.info "script aborted";
 	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom180-EDELIVERY-973-Sending a message to the same Access Point" searchProperties="true" id="3ad188eb-a160-41c5-bc7e-772d3c7044ad">
+}</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom180-EDELIVERY-973-Sending a message to the same Access Point-ws filter" searchProperties="true" id="d337ce6b-5196-4e9b-b81c-60396fb773d3">
             <con:settings/>
             
             
@@ -23682,14 +23682,14 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
             
             
             
-            <con:testStep type="groovy" name="Set Message Filters to WS for Blue" id="c1b55c79-423e-4c80-b24c-4aea10dab76f"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendWebservice",context,log);
+            <con:testStep type="groovy" name="Set Message Filters to WS for Blue" id="7fa9a38a-dfe7-48e9-be51-44423d4b4007"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendWebservice",context,log);
 
-</script></con:config></con:testStep><con:testStep type="request" id="e56ba89a-fc77-4237-a867-16a291baef6c" name="Submit Message wsTOws"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOws" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+</script></con:config></con:testStep><con:testStep type="request" id="70e74672-a7de-46a3-896e-6b715e6df731" name="Submit Message wsTOws 1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOws 1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
    <soap:Header>\r
       <ns:Messaging>\r
          <ns:UserMessage>\r
             <ns:MessageInfo>\r
-               <ns:MessageId>-Dom180-1-</ns:MessageId>\r
+               <ns:MessageId>-Dom180-1-1-</ns:MessageId>\r
                <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
             </ns:MessageInfo>\r
             <ns:PartyInfo>\r
@@ -23728,9 +23728,55 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
       </_1:submitRequest>\r
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-1-");
-test.waitForStatus("RECEIVED","","-Dom180-1-_1");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOws" id="66c34534-a70d-47fc-9928-e17e46e416d9"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+test.waitForStatus("ACKNOWLEDGED","","-Dom180-1-1-");
+test.waitForStatus("RECEIVED","","-Dom180-1-1-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="50983939-022c-41cc-b850-42266ed02fc5" name="Submit Message wsTOws 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOws 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+            <ns:MessageInfo>\r
+               <ns:MessageId>-Dom180-1-2-</ns:MessageId>\r
+               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
+            </ns:MessageInfo>\r
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-white</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc2">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC2Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","","-Dom180-1-2-");
+test.waitForStatus("RECEIVED","","-Dom180-1-2-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOws 1" id="926bf950-94ab-46e3-abb5-898969306e48"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
 import javax.jms.*;
 import javax.naming.NamingException;
 
@@ -23760,7 +23806,7 @@ messageMap.setStringProperty("protocol", "AS4");
 
 
 // Optional
-messageMap.setStringProperty("messageId", "-Dom180-2-");
+messageMap.setStringProperty("messageId", "-Dom180-2-1-");
 // messageMap.setStringProperty("conversationId", "123");
 // messageMap.setStringProperty("refToMessageId", "11");
  
@@ -23779,10 +23825,62 @@ log.info "sending message"
 producer.send(messageMap);
 log.info "message sent"
 
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOws" id="4693cc4a-c6a6-4b6f-a92b-9b9f99a1fe89"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-2-");
-test.waitForStatus("RECEIVED","","-Dom180-2-_1");
-test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOws" id="4ea7c7e9-c3a0-4955-b1fe-41cdfc3f5607"><con:settings/><con:config><script>// Copy xml payload
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOws 1" id="fe3ea582-4eef-4f5f-8545-4941d0a04f57"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom180-2-1-");
+test.waitForStatus("RECEIVED","","-Dom180-2-1-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOws 2" id="fb2148cf-9240-450a-9f21-d93411bc7dc9"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc2");
+messageMap.setStringProperty("action", "TC2Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-white");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-Dom180-2-2-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOws 2" id="1a51efaa-c3f8-4ef7-a81e-66e30efa1e51"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom180-2-2-");
+test.waitForStatus("RECEIVED","","-Dom180-2-2-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOws 1" id="1ca7cf1a-e2f6-4837-9699-2ffb57146b56"><con:settings/><con:config><script>// Copy xml payload
 def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
 def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
 Domibus.copyFile(source,dest,log);
@@ -23796,9 +23894,9 @@ Domibus.copyFile(source,dest,log);
 source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\metadata.xml";
 dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
 Domibus.copyFile(source,dest,log);
-</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOws" id="713aea31-b938-42b0-86ba-8ea5f6ca5929"><con:settings/><con:config><script>// TODO: investigate automation
+</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOws 1" id="e2c74346-adc8-4200-8ff9-a5864e7dc7f0"><con:settings/><con:config><script>// TODO: investigate automation
 
-def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/recieved in the sender side."); 
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -23807,107 +23905,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 {
 	log.info "script aborted";
 	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="delay" name="D1" id="72356ccc-c4ed-48af-95c4-24757400661c"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to JMS for Blue" id="5610b0a8-df33-4231-911f-16ff42247175"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","Jms",context,log);
-
-</script></con:config></con:testStep><con:testStep type="request" id="6ae04b12-b318-4eb4-aca8-4ad89ebde2b2" name="Submit Message wsTOjms"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOjms" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
-   <soap:Header>\r
-      <ns:Messaging>\r
-         <ns:UserMessage>\r
-            <ns:MessageInfo>\r
-               <ns:MessageId>-Dom180-3-</ns:MessageId>\r
-               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
-            </ns:MessageInfo>\r
-            <ns:PartyInfo>\r
-               <ns:From>\r
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
-               </ns:From>\r
-               <ns:To>\r
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
-               </ns:To>\r
-            </ns:PartyInfo>\r
-            <ns:CollaborationInfo>\r
-               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
-               <ns:Action>TC1Leg1</ns:Action>\r
-            </ns:CollaborationInfo>\r
-            <ns:MessageProperties>\r
-               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
-               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
-            </ns:MessageProperties>\r
-            <ns:PayloadInfo>\r
-               <ns:PartInfo href="cid:message">\r
-                  <ns:PartProperties>\r
-                     <ns:Property name="MimeType">text/xml</ns:Property>\r
-                  </ns:PartProperties>\r
-               </ns:PartInfo>\r
-            </ns:PayloadInfo>\r
-         </ns:UserMessage>\r
-      </ns:Messaging>\r
-   </soap:Header>\r
-   <soap:Body>\r
-      <_1:submitRequest>\r
-         <payload payloadId="cid:message">\r
-            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
-         </payload>\r
-      </_1:submitRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-3-");
-test.waitForStatus("DOWNLOADED","","-Dom180-3-_1");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOjms" id="6e789924-e3ba-4d87-ac05-5c1ffee7c80d"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-blue");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-Dom180-4-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOjms" id="b1695fff-0c4a-4efb-a29d-21d5b9b317a3"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-4-");
-test.waitForStatus("DOWNLOADED","","-Dom180-4-_1");
-test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOjms" id="a92084a4-2437-4db8-b854-9b02eef997ae"><con:settings/><con:config><script>// Copy xml payload
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOws 2" id="aab07fd6-3c9a-4aa9-93bd-c8027e5b5ea2"><con:settings/><con:config><script>// Copy xml payload
 def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
 def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
 Domibus.copyFile(source,dest,log);
@@ -23918,135 +23916,12 @@ dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf";
 Domibus.copyFile(source,dest,log);
 
 // Copy metadata file
-source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\metadata.xml";
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\doNothingPolicy\\metadata.xml";
 dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
-Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOjms" id="ebe3128a-cc54-4e5b-a471-def3b64f52ae"><con:settings/><con:config><script>// TODO: investigate automation
-
-def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/recieved in the sender side."); 
-if(result == javax.swing.JOptionPane.YES_OPTION)
-{
-	log.info "continuing the test";
-}
-else if(result == javax.swing.JOptionPane.NO_OPTION)
-{
-	log.info "script aborted";
-	testRunner.fail("Test aborted by user");
-}</script></con:config></con:testStep><con:testStep type="delay" name="D2" id="89d8641f-e8d1-4de4-b50a-46e2f46f8533"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to FS for Blue" id="e4f06b7b-8aba-4d13-8135-7e4b917fa5ef"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendFSPlugin",context,log);
-
-</script></con:config></con:testStep><con:testStep type="request" id="3403003b-5b1d-49b2-ad86-8582b7211d5c" name="Submit Message wsTOfs"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOfs" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
-   <soap:Header>\r
-      <ns:Messaging>\r
-         <ns:UserMessage>\r
-            <ns:MessageInfo>\r
-               <ns:MessageId>-Dom180-5-</ns:MessageId>\r
-               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
-            </ns:MessageInfo>\r
-            <ns:PartyInfo>\r
-               <ns:From>\r
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
-               </ns:From>\r
-               <ns:To>\r
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
-               </ns:To>\r
-            </ns:PartyInfo>\r
-            <ns:CollaborationInfo>\r
-               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
-               <ns:Action>TC1Leg1</ns:Action>\r
-            </ns:CollaborationInfo>\r
-            <ns:MessageProperties>\r
-               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
-               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
-            </ns:MessageProperties>\r
-            <ns:PayloadInfo>\r
-               <ns:PartInfo href="cid:message">\r
-                  <ns:PartProperties>\r
-                     <ns:Property name="MimeType">text/xml</ns:Property>\r
-                  </ns:PartProperties>\r
-               </ns:PartInfo>\r
-            </ns:PayloadInfo>\r
-         </ns:UserMessage>\r
-      </ns:Messaging>\r
-   </soap:Header>\r
-   <soap:Body>\r
-      <_1:submitRequest>\r
-         <payload payloadId="cid:message">\r
-            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
-         </payload>\r
-      </_1:submitRequest>\r
-   </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-5-");
-test.waitForStatus("DOWNLOADED","","-Dom180-5-_1");
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOfs" id="3eb4031c-3723-451e-8f24-d37a456e0de4"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
-import javax.jms.*;
-import javax.naming.NamingException;
-
-ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-Connection connection = null;
-MessageProducer producer = null;
-connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
-Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-Destination destination = session.createQueue("domibus.backend.jms.inQueue");
-producer = session.createProducer(destination);
-producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-MapMessage messageMap = session.createMapMessage();
-
-messageMap.setStringProperty("messageType", "submitMessage");
-messageMap.setStringProperty("service", "bdx:noprocess");
-messageMap.setStringProperty("serviceType", "tc10");
-messageMap.setStringProperty("action", "TC10Leg1");
-messageMap.setStringProperty("fromPartyId", "domibus-blue");
-messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("toPartyId", "domibus-blue");
-messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
-messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
-messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
-messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
-messageMap.setStringProperty("protocol", "AS4");
-
-
-// Optional
-messageMap.setStringProperty("messageId", "-Dom180-6-");
-// messageMap.setStringProperty("conversationId", "123");
-// messageMap.setStringProperty("refToMessageId", "11");
- 
-
-// messageMap.setJMSCorrelationID("12345");
-
-messageMap.setStringProperty("totalNumberOfPayloads", "1");
-messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
-messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-messageMap.setStringProperty("payload_1_description", "message");
-String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
-byte[] payload = pay1.getBytes();
-messageMap.setBytes("payload_1", payload);
-
-log.info "sending message"
-producer.send(messageMap);
-log.info "message sent"
-
-connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOfs" id="f1635ba4-24ae-4085-990d-0d4789e4469e"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
-test.waitForStatus("ACKNOWLEDGED","","-Dom180-6-");
-test.waitForStatus("DOWNLOADED","","-Dom180-6-_1");
-test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOfs" id="c324966f-e6f2-40e8-a081-8dd83a6f2663"><con:settings/><con:config><script>// Copy xml payload
-def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
-def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
 Domibus.copyFile(source,dest,log);
+</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOws 2" id="8e1903af-6f60-461a-afd3-daef08cf8c29"><con:settings/><con:config><script>// TODO: investigate automation
 
-// Copy pdf payload
-source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\fileSmall.pdf";
-dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf"; 
-Domibus.copyFile(source,dest,log);
-
-// Copy metadata file
-source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\metadata.xml";
-dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
-Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOfs" id="71a5aea5-83c2-49db-a33b-f2672b90b6dc"><con:settings/><con:config><script>// TODO: investigate automation
-
-def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/recieved in the sender side."); 
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -24057,6 +23932,540 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
 	testRunner.fail("Test aborted by user");
 }</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
 test.cleanDBMessageIDStartsWith('-Dom180-');
+test.finalize();	
+
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom181-EDELIVERY-973-Sending a message to the same Access Point-jms filter" searchProperties="true" id="78df5e5a-d3c5-45af-ba65-e11fc256b19c">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Set Message Filters to JMS for Blue" id="f5514d51-69e5-4eef-b921-bb11fca4692c"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","Jms",context,log);
+
+</script></con:config></con:testStep><con:testStep type="request" id="8869e248-f404-4c62-b987-fdac031870cc" name="Submit Message wsTOjms 1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOjms 1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+            <ns:MessageInfo>\r
+               <ns:MessageId>-Dom181-1-1-</ns:MessageId>\r
+               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
+            </ns:MessageInfo>\r
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC1Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","","-Dom181-1-1-");
+test.waitForStatus("DOWNLOADED","","-Dom181-1-1-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="938467d8-2648-41dd-a7dc-404d3dc5a6c5" name="Submit Message wsTOjms 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOjms 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+            <ns:MessageInfo>\r
+               <ns:MessageId>-Dom181-1-2-</ns:MessageId>\r
+               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
+            </ns:MessageInfo>\r
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-white</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc2">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC2Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","","-Dom181-1-2-");
+test.waitForStatus("DOWNLOADED","","-Dom181-1-2-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOjms 1" id="de753018-6d5c-4154-9b4e-407a2ddb8979"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-blue");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-Dom181-2-1-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOjms 1" id="2fd251f5-d6a3-4614-a57b-dc2fda548b69"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom181-2-1-");
+test.waitForStatus("DOWNLOADED","","-Dom181-2-1-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOjms 2" id="89f15149-103d-4696-b574-f2d12340dc43"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc2");
+messageMap.setStringProperty("action", "TC2Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-white");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-Dom181-2-2-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOjms 2" id="4428cc8f-b51f-43f7-b627-13c878e4ff7f"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom181-2-2-");
+test.waitForStatus("DOWNLOADED","","-Dom181-2-2-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOjms 1" id="735bfeed-5170-49a7-a2e5-5d7174de7041"><con:settings/><con:config><script>// Copy xml payload
+def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
+def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy pdf payload
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\fileSmall.pdf";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy metadata file
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\metadata.xml";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
+Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOjms 1" id="cf389be3-df0e-4ba8-a147-d8997bef0289"><con:settings/><con:config><script>// TODO: investigate automation
+
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOjms 2" id="83f87802-3396-4c66-aadc-90f566d5df97"><con:settings/><con:config><script>// Copy xml payload
+def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
+def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy pdf payload
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\fileSmall.pdf";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy metadata file
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\doNothingPolicy\\metadata.xml";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
+Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOjms 2" id="88785172-8535-45c3-bfb1-b2d414b33410"><con:settings/><con:config><script>// TODO: investigate automation
+
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to WS for Blue" id="a6a79693-6a54-4a3f-ab23-0eeb6ac4f979" disabled="true"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendWebservice",context,log);
+
+</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
+test.cleanDBMessageIDStartsWith('-Dom181-');
+test.finalize();	
+
+//ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom182-EDELIVERY-973-Sending a message to the same Access Point-fs filter" searchProperties="true" id="07437a91-fcdb-443d-ab75-7ca7387ca9a1">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="groovy" name="Set Message Filters to FS for Blue" id="29b64ab9-c0a0-48ea-9b22-d5b43a9da503"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendFSPlugin",context,log);
+
+</script></con:config></con:testStep><con:testStep type="request" id="c8a43945-333a-4a1f-9610-436cc267edca" name="Submit Message wsTOfs 1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOfs 1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+            <ns:MessageInfo>\r
+               <ns:MessageId>-Dom182-1-1-</ns:MessageId>\r
+               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
+            </ns:MessageInfo>\r
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC1Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","","-Dom182-1-1-");
+test.waitForStatus("DOWNLOADED","","-Dom182-1-1-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="request" id="024527f0-11c7-47b5-a283-813c879ae166" name="Submit Message wsTOfs 2"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message wsTOfs 2" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">\r
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+            <ns:MessageInfo>\r
+               <ns:MessageId>-Dom182-1-2-</ns:MessageId>\r
+               <ns:RefToMessageId>12349999</ns:RefToMessageId>\r
+            </ns:MessageInfo>\r
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-white</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc2">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC2Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","","-Dom182-1-2-");
+test.waitForStatus("DOWNLOADED","","-Dom182-1-2-_1");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOfs 1" id="e1bd7341-e191-4152-a9bc-88d24afde87f"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc10");
+messageMap.setStringProperty("action", "TC10Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-blue");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-Dom182-2-1-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOfs 1" id="6a7b2a00-c44c-4635-9788-88301907f200"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom182-2-1-");
+test.waitForStatus("DOWNLOADED","","-Dom182-2-1-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message jmsTOfs 2" id="6bdb6ca2-ad91-4de6-ab25-f9914dd8e2a3"><con:settings/><con:config><script>import org.apache.activemq.ActiveMQConnectionFactory;
+import javax.jms.*;
+import javax.naming.NamingException;
+
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = null;
+MessageProducer producer = null;
+connection = connectionFactory.createConnection("domibus", "changeit"); //username and password of the default JMS broker
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("domibus.backend.jms.inQueue");
+producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+MapMessage messageMap = session.createMapMessage();
+
+messageMap.setStringProperty("messageType", "submitMessage");
+messageMap.setStringProperty("service", "bdx:noprocess");
+messageMap.setStringProperty("serviceType", "tc2");
+messageMap.setStringProperty("action", "TC2Leg1");
+messageMap.setStringProperty("fromPartyId", "domibus-blue");
+messageMap.setStringProperty("fromPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("toPartyId", "domibus-white");
+messageMap.setStringProperty("toPartyType", "urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+messageMap.setStringProperty("fromRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
+messageMap.setStringProperty("toRole", "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
+messageMap.setStringProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1");
+messageMap.setStringProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4");
+messageMap.setStringProperty("protocol", "AS4");
+
+
+// Optional
+messageMap.setStringProperty("messageId", "-Dom182-2-2-");
+// messageMap.setStringProperty("conversationId", "123");
+// messageMap.setStringProperty("refToMessageId", "11");
+ 
+
+// messageMap.setJMSCorrelationID("12345");
+
+messageMap.setStringProperty("totalNumberOfPayloads", "1");
+messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
+messageMap.setStringProperty("payload_1_mimeType", "text/xml");
+messageMap.setStringProperty("payload_1_description", "message");
+String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+byte[] payload = pay1.getBytes();
+messageMap.setBytes("payload_1", payload);
+
+log.info "sending message"
+producer.send(messageMap);
+log.info "message sent"
+
+connection.close();</script></con:config></con:testStep><con:testStep type="groovy" name="Test jmsTOfs 2" id="0a6ca5f1-e00e-433c-a658-5c9a252d0a9b"><con:settings/><con:config><script>def test = new Domibus(log,null,context)
+test.waitForStatus("ACKNOWLEDGED","","-Dom182-2-2-");
+test.waitForStatus("DOWNLOADED","","-Dom182-2-2-_1");
+test.finalize()</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOfs 1" id="eb8e7384-949a-4159-875f-c22eccb3fe68"><con:settings/><con:config><script>// Copy xml payload
+def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
+def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy pdf payload
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\fileSmall.pdf";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy metadata file
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\metadata.xml";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
+Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOfs 1" id="e4e7189e-a9dd-48e3-b613-5cf51e0f4e0b"><con:settings/><con:config><script>// TODO: investigate automation
+
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Submit Message fsTOfs 2" id="39b93b88-b08e-41d0-a4a7-c38776edff99"><con:settings/><con:config><script>// Copy xml payload
+def source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\Test_file.xml";
+def dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\Test_file.xml"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy pdf payload
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\fileSmall.pdf";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\fileSmall.pdf"; 
+Domibus.copyFile(source,dest,log);
+
+// Copy metadata file
+source = context.expand('${projectDir}')+"\\resources\\PModesandKeystoresSpecialTests\\fsPlugin\\self\\doNothingPolicy\\metadata.xml";
+dest = "C:\\domibus\\sender\\fs_plugin_data\\MAIN\\OUT\\metadata.xml"; 
+Domibus.copyFile(source,dest,log);</script></con:config></con:testStep><con:testStep type="groovy" name="Test fsTOfs 2" id="610329c6-7986-415c-b96b-7f5c51a5b751"><con:settings/><con:config><script>// TODO: investigate automation
+
+def result=javax.swing.JOptionPane.showConfirmDialog( null,"Check that the messages are correctly sent/received in the sender side."); 
+if(result == javax.swing.JOptionPane.YES_OPTION)
+{
+	log.info "continuing the test";
+}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+{
+	log.info "script aborted";
+	testRunner.fail("Test aborted by user");
+}</script></con:config></con:testStep><con:testStep type="groovy" name="Set Message Filters to WS for Blue" id="2abc0f8c-341f-4381-adc9-0ae5b77f428d" disabled="true"><con:settings/><con:config><script>Domibus.setMessageFilters("sender","backendWebservice",context,log);
+
+</script></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context);
+test.cleanDBMessageIDStartsWith('-Dom182-');
 test.finalize();	
 
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
