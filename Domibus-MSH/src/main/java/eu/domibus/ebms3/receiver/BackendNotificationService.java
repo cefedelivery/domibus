@@ -261,8 +261,12 @@ public class BackendNotificationService {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        if(NotificationType.MESSAGE_STATUS_CHANGE == notificationType && BackendConnector.Mode.PULL == notificationListener.getMode()) {
-            LOG.debug("No plugin notification sent for message [{}]. Notification type [{}] suppressed for mode [{}]", messageId, NotificationType.MESSAGE_STATUS_CHANGE, BackendConnector.Mode.PULL);
+
+        // debug
+        LOG.info("Required notifications [{}]", notificationListener.getRequiredNotificationTypeList());
+        if (!notificationListener.getRequiredNotificationTypeList().contains(notificationType)) {
+            // debug
+            LOG.info("No plugin notification sent for message [{}]. Notification type [{}], mode [{}]", messageId, notificationType, notificationListener.getMode());
             return;
         }
 

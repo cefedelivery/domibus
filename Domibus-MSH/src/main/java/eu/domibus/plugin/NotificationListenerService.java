@@ -64,10 +64,37 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
     private BackendConnector backendConnector;
+    private List<NotificationType> requiredNotifications;
 
-    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode) {
+    /* Default notifications sent to the plugins, depending on their MODE (PULL or PUSH)
+     * On PULL mode we do not notify for MESSAGE_SEND_SUCCESS and
+     * MESSAGE_STATUS_CHANGE as there are too many notifications that pile up in the queue
+     * This default list is used only when there is no requiredNotifications list declared in the plugin xml
+     */
+    protected List<NotificationType> getDefaultNotificationsList() {
+        List<NotificationType> defaultNotifications = new ArrayList<>();
+        defaultNotifications.add(NotificationType.MESSAGE_RECEIVED);
+        defaultNotifications.add(NotificationType.MESSAGE_SEND_FAILURE);
+        defaultNotifications.add(NotificationType.MESSAGE_RECEIVED_FAILURE);
+
+        if (BackendConnector.Mode.PUSH.equals(getMode())) {
+            defaultNotifications.add(NotificationType.MESSAGE_SEND_SUCCESS);
+            defaultNotifications.add(NotificationType.MESSAGE_STATUS_CHANGE);
+        }
+
+        return defaultNotifications;
+    }
+
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode ) {
         backendNotificationQueue = queue;
         this.mode = mode;
+        this.requiredNotifications = getDefaultNotificationsList();
+    }
+
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications ) {
+        backendNotificationQueue = queue;
+        this.mode = mode;
+        this.requiredNotifications = requiredNotifications;
     }
 
     public void setBackendConnector(final BackendConnector backendConnector) {
@@ -287,4 +314,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     public BackendConnector.Mode getMode() {
         return this.mode;
     }
+
+    @Override
+    public List<NotificationType> getRequiredNotificationTypeList() {return this.requiredNotifications; }
 }
