@@ -262,10 +262,8 @@ public class BackendNotificationService {
             return;
         }
 
-        // debug
         LOG.info("Required notifications [{}]", notificationListener.getRequiredNotificationTypeList());
         if (!notificationListener.getRequiredNotificationTypeList().contains(notificationType)) {
-            // debug
             LOG.info("No plugin notification sent for message [{}]. Notification type [{}], mode [{}]", messageId, notificationType, notificationListener.getMode());
             return;
         }
