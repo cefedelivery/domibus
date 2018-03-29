@@ -12,23 +12,6 @@
     http://www.springframework.org/schema/security/spring-security.xsd">
 
 
-    <!-- Passwordcallback for private key access. By default a simple
-         implementation which stores the password in plaintext is used.
-         THIS IS NOT SAFE FOR PRODUCTION PURPOSES please switch to
-         your own implementation
-    -->
-    <bean id="keystorePasswordCallback"
-          class="eu.domibus.ebms3.security.SimpleKeystorePasswordCallback">
-        <!-- Map with "alias" as key and "password" as value.
-             This map will be used by the passwordcallback to
-             retrieve the private key password for a given alias -->
-        <property name="passwordStore">
-            <util:map>
-                <entry key="${domibus.security.key.private.alias}" value="${domibus.security.key.private.password}"/>
-            </util:map>
-        </property>
-    </bean>
-
     <!-- Properties for keystore with private key -->
     <util:properties id="keystoreProperties">
         <!-- The crypto provider to be used -->

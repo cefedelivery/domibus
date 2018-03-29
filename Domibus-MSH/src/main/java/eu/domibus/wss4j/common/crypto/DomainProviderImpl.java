@@ -8,10 +8,11 @@ import org.springframework.stereotype.Service;
  * @since 3.3
  */
 @Service
-public class DefaultDomainProviderImpl implements DomainProvider {
+public class DomainProviderImpl implements DomainProvider {
 
     @Override
     public String getCurrentDomain() {
+        //TODO get the domain from MDC
         return null;
     }
 }

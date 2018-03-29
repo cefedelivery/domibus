@@ -11,6 +11,8 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.ws.security.wss4j.CXFRequestData;
+import org.dom4j.dom.DOMElement;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsOperations;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -70,15 +73,6 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     PKIUtil pkiUtil = new PKIUtil();
 
     @Test
-    public void testHandleMessageKeyIdentifier(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
-        Document doc = readDocument("dataset/as4/SoapRequest.xml");
-        String trustoreFilename = RESOURCE_PATH + "gateway_truststore.jks";
-        String trustorePassword = "test123";
-
-        testHandleMessage(doc, trustoreFilename, trustorePassword);
-    }
-
-    @Test
     public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
@@ -94,7 +88,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         String trustorePassword = "1234";
 
         new Expectations() {{
-            certificateService.isCertificateValid((X509Certificate)any);
+            certificateService.isCertificateValid((X509Certificate) any);
             result = false;
             domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = true;
@@ -114,19 +108,17 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
         new Verifications() {{
-            certificateService.isCertificateValid((X509Certificate)any); times = 0;
+            certificateService.isCertificateValid((X509Certificate) any);
+            times = 0;
         }};
     }
 
-    protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+    protected void testHandleMessage(Document doc, String trustoreFilename, String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
         Properties properties = createTruststoreProperties(trustoreFilename, trustorePassword);
-        trustSenderInterceptor.setSecurityEncryptionProp(properties);
+
         byte[] sourceTrustore = FileUtils.readFileToByteArray(new File(trustoreFilename));
-        CryptoService cryptoService = createCryptoService(sourceTrustore, trustorePassword, properties);
-        new Expectations() {{
-            SpringContextProvider.getApplicationContext().getBean("cryptoService");
-            result = cryptoService;
+        new Expectations(trustSenderInterceptor) {{
             domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = true;
         }};
@@ -200,7 +192,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         return prop;
     }
 
-    protected CryptoService createCryptoService(byte[] sourceTrustore, String trustorePassword, Properties properties ) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
+    protected CryptoService createCryptoService(byte[] sourceTrustore, String trustorePassword, Properties properties) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
         CryptoService cryptoService = new CryptoService();
         cryptoService.setTrustStoreProperties(properties);
         cryptoService.setJmsOperations(jmsOperations());

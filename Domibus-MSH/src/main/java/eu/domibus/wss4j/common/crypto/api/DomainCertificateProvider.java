@@ -32,4 +32,6 @@ public interface DomainCertificateProvider {
 
     String getDefaultX509Identifier() throws WSSecurityException;
 
+    String getPrivateKeyPassword(String alias);
+
 }

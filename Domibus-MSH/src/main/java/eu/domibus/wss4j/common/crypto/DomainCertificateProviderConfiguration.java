@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
-import java.util.Properties;
-
 /**
  * @author Cosmin Baciu
  * @since 3.3
@@ -20,9 +18,10 @@ public class DomainCertificateProviderConfiguration {
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-    public DomainCertificateProviderImpl domainCertificateProviderImpl(Properties keystoreProperties, Properties trustStoreProperties) {
+    public DomainCertificateProviderImpl domainCertificateProviderImpl(String domain) {
+        LOG.debug("Instantiating the certificate provider for domain [{}]", domain);
+
         final DomainCertificateProviderImpl domainCertificateProvider = new DomainCertificateProviderImpl();
-        domainCertificateProvider.init(keystoreProperties, trustStoreProperties);
         return domainCertificateProvider;
     }
 

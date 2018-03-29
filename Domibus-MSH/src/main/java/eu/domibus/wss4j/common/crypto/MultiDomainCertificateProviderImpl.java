@@ -40,7 +40,7 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
         return domainCertificateProvider.getX509Certificates(cryptoType);
     }
 
-    protected DomainCertificateProvider getDomainCertificateProvider(String domain) throws WSSecurityException {
+    protected DomainCertificateProvider getDomainCertificateProvider(String domain)  {
         LOG.debug("Get domain CertificateProvider for domain [{}]", domain);
         DomainCertificateProvider domainCertificateProvider = domainCertificateProviderMap.get(domain);
         if (domainCertificateProvider == null) {
@@ -95,5 +95,11 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
     public String getDefaultX509Identifier(String domain) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getDefaultX509Identifier();
+    }
+
+    @Override
+    public String getPrivateKeyPassword(String domain, String privateKeyAlias) {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.getPrivateKeyPassword(privateKeyAlias);
     }
 }
