@@ -55,9 +55,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
         String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
         try {
             final LookupClient smpClient = LookupClientBuilder.forMode(mode)
-                .locator(new BusdoxLocator(smlInfo))
-                .fetcher(new BasicApacheFetcher(Mode.of(mode)))
-                .build();
+                    .locator(new BusdoxLocator(smlInfo))
+                    .fetcher(new BasicApacheFetcher(Mode.of(mode)))
+                    .build();
 
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
             final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
