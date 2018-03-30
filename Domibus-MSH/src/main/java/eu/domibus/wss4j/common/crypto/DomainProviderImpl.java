@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author Cosmin Baciu
- * @since 3.3
+ * @since 4.0
  */
 @Service
 public class DomainProviderImpl implements DomainProvider {

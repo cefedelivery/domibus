@@ -45,7 +45,7 @@
     </bean>
 
     <bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
-        <property name="securityEncryptionProp" ref="trustStoreProperties"/>
+        <property name="crypto" ref="Wss4JMultiDomainCryptoProvider"/>
     </bean>
 
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
@@ -68,6 +68,11 @@
         <constructor-arg ref="cxf"/>
     </bean>
 
+    <bean id="Wss4JMultiDomainCryptoProvider" class="eu.domibus.wss4j.common.crypto.Wss4JMultiDomainCryptoProvider"/>
+
+    <!-- Passwordcallback for private key access -->
+    <bean id="keystorePasswordCallback" class="eu.domibus.ebms3.security.SimpleKeystorePasswordCallback"/>
+
     <!--MSH Webservice endpoint-->
     <jaxws:endpoint id="msh" address="/msh">
         <jaxws:implementor>
@@ -76,8 +81,8 @@
         <jaxws:properties>
             <entry key="ws-security.cache.config.file" value="/cxf-ehcache.xml"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
-            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
+            <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <!--use the alias from the request-->
             <entry key="ws-security.encryption.username" value="useReqSigCert"/>
             <entry key="faultStackTraceEnabled" value="false"/>
@@ -115,9 +120,9 @@
         </jaxws:handlers>
 
         <jaxws:properties>
-            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
+            <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

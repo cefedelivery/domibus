@@ -2,15 +2,21 @@ package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.DomibusCertificateException;
+import eu.domibus.wss4j.common.crypto.api.CryptoException;
 import eu.domibus.wss4j.common.crypto.api.DomainCertificateProvider;
 import eu.domibus.wss4j.common.crypto.api.DomainCertificateProviderFactory;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.security.auth.callback.CallbackHandler;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -20,8 +26,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * @author baciu
- * @since 3.3
+ * @author Cosmin Baciu
+ * @since 4.0
  */
 @Service
 public class MultiDomainCertificateProviderImpl implements MultiDomainCertificateProvider {
@@ -101,5 +107,43 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
     public String getPrivateKeyPassword(String domain, String privateKeyAlias) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getPrivateKeyPassword(privateKeyAlias);
+    }
+
+    @Override
+    public void refreshTrustStore(String domain) {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        domainCertificateProvider.refreshTrustStore();
+    }
+
+    @Override
+    public void replaceTrustStore(String domain, byte[] store, String password) throws CryptoException {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        domainCertificateProvider.replaceTrustStore(store, password);
+    }
+
+    @Override
+    public KeyStore getKeyStore(String domain) {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.getKeyStore();
+    }
+
+    @Override
+    public KeyStore getTrustStore(String domain) {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.getTrustStore();
+    }
+
+    @Override
+    @Transactional(noRollbackFor = DomibusCertificateException.class)
+    @Cacheable(value = "certValidationByAlias", key = "#domain + #alias")
+    public boolean isCertificateChainValid(String domain, String alias) throws DomibusCertificateException {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.isCertificateChainValid(alias);
+    }
+
+    @Override
+    public X509Certificate getCertificateFromKeystore(String domain, String alias) throws KeyStoreException {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.getCertificateFromKeystore(alias);
     }
 }

@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Thomas Dussart
  * @since 3.3
  */
-public class UserDaoImplTest extends AbstractIT{
+public class UserDaoImplTestIT extends AbstractIT{
     @Autowired
     private UserDao userDao;
 

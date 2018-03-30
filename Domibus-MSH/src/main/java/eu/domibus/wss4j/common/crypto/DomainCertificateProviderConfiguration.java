@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Scope;
 
 /**
  * @author Cosmin Baciu
- * @since 3.3
+ * @since 4.0
  */
 @Configuration
 public class DomainCertificateProviderConfiguration {

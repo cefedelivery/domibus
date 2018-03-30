@@ -1,26 +1,18 @@
 package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsOperations;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -107,71 +99,6 @@ public class CryptoService {
         String trustStorePassword = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password");
         try (final FileInputStream strustStoreStream = new FileInputStream(trustStoreFilename)) {
             trustStore.load(strustStoreStream, trustStorePassword.toCharArray());
-        }
-    }
-
-    public void refreshTrustStore() {
-        try {
-            loadTrustStore();
-            // After startup and before the first message is sent the crypto is not initialized yet, so there is no need to refresh the trustStore in it!
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | WSSecurityException ex) {
-            if (LOG.isDebugEnabled()) {
-                LOG.warn("Failed to reload certificates due to: " + ex);
-            } else {
-                LOG.warn("Failed to reload certificates due to: " + ex.getCause());
-            }
-        }
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void updateTrustStore() {
-        // Sends a message into the topic queue in order to refresh all the singleton instances of the CryptoService.
-        jmsOperations.send(new ReloadTrustStoreMessageCreator());
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void replaceTruststore(byte[] store, String password) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        if (trustStore == null) {
-            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        }
-        String trustStoreFileValue = trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file");
-        File trustStoreFile = new File(trustStoreFileValue);
-        if (!trustStoreFile.getParentFile().exists()) {
-            LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
-            FileUtils.forceMkdir(trustStoreFile.getParentFile());
-        }
-
-        LOG.debug("Replacing the existing truststore file [" + trustStoreFileValue + "] with the provided one");
-        FileOutputStream fileOutputStream = null;
-        try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
-            validateLoadOperation(newTrustStoreBytes, password);
-            fileOutputStream = new FileOutputStream(trustStoreFile);
-            trustStore.load(newTrustStoreBytes, password.toCharArray());
-            trustStore.store(fileOutputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-        } finally {
-            if (fileOutputStream != null) {
-                fileOutputStream.close();
-            }
-        }
-
-        updateTrustStore();
-    }
-
-    // This method verifies in a temporary variable that the load of the new truststore is possible,
-    // because load() method is loading the content in memory even if the password does not match.
-    protected void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException {
-        KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
-        newTrustStoreBytes.reset();
-    }
-
-    class ReloadTrustStoreMessageCreator implements MessageCreator {
-        @Override
-        public Message createMessage(Session session) throws JMSException {
-            Message m = session.createMessage();
-            m.setStringProperty(Command.COMMAND, Command.RELOAD_TRUSTSTORE);
-            return m;
         }
     }
 

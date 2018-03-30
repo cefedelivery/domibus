@@ -4,6 +4,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,9 @@ public class ControllerListenerService implements MessageListener {
     @Autowired
     private CryptoService cryptoService;
 
+    @Autowired
+    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+
     @Override
     @Transactional
     public void onMessage(Message message) {
@@ -47,10 +51,19 @@ public class ControllerListenerService implements MessageListener {
             LOG.error("Received null command");
             return;
         }
+
+        String domain = null;
+        try {
+            domain = message.getStringProperty("domain");
+        } catch (JMSException e) {
+            LOG.error("Could not get the domain", e);
+            return;
+        }
+
         switch (command) {
             case Command.RELOAD_PMODE:
                 pModeProvider.refresh();
-                cryptoService.refreshTrustStore();
+                multiDomainCertificateProvider.refreshTrustStore(domain);
                 break;
             case Command.EVICT_CACHES:
                 Collection<String> cacheNames = cacheManager.getCacheNames();
@@ -59,7 +72,7 @@ public class ControllerListenerService implements MessageListener {
                 }
                 break;
             case Command.RELOAD_TRUSTSTORE:
-                cryptoService.refreshTrustStore();
+                multiDomainCertificateProvider.refreshTrustStore(domain);
                 break;
             default:
                 LOG.error("Unknown command received: " + command);

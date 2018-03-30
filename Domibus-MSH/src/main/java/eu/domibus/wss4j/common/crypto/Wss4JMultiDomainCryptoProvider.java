@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Cosmin Baciu
- * @since 3.3
+ * @since 4.0
  */
 public class Wss4JMultiDomainCryptoProvider extends CryptoBase {
 

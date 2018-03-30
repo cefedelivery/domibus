@@ -3,6 +3,8 @@ package eu.domibus.pki;
 import eu.domibus.api.security.TrustStoreEntry;
 
 import javax.naming.InvalidNameException;
+import java.io.ByteArrayInputStream;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -14,9 +16,7 @@ public interface CertificateService {
 
     boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException;
 
-    boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
-
-    boolean isCertificateValid(String alias) throws DomibusCertificateException;
+    boolean isCertificateChainValid(KeyStore trustStore, String alias);
 
     String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
 
@@ -27,10 +27,12 @@ public interface CertificateService {
      *
      * @return a list of certificate
      */
-    List<TrustStoreEntry> getTrustStoreEntries();
+    List<TrustStoreEntry> getTrustStoreEntries(final KeyStore trustStore);
 
     /**
      * Save certificate data in the database, and use this data to display a revocation warning when needed.
      */
     void saveCertificateAndLogRevocation();
+
+    void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
 }
