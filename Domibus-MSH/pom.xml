@@ -211,7 +211,7 @@
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
-            <version>0.9.6</version>
+            <version>1.0.1</version>
         </dependency>
 
         <!-- e-SENS OASIS BDX SMP  -->
