@@ -68,11 +68,11 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
-    protected Properties securityEncryptionProp;
-
     @Autowired
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
+
+    protected Crypto crypto;
 
     @Qualifier("jaxbContextEBMS")
     @Autowired
@@ -83,10 +83,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public TrustSenderInterceptor() {
         super(false);
-    }
-
-    public void setSecurityEncryptionProp(Properties securityEncryptionProp) {
-        this.securityEncryptionProp = securityEncryptionProp;
     }
 
     /**
@@ -231,8 +227,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         try {
             requestData.setMsgContext(msg);
             decodeAlgorithmSuite(requestData);
-            Crypto secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
-            requestData.setDecCrypto(secCrypto);
+            requestData.setDecCrypto(crypto);
             // extract certificate from KeyInfo
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
@@ -273,7 +268,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
 
-    private X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
+    protected X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
 
         X509Certificate[] certs;
 
@@ -309,6 +304,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             }
         }
         return null;
+    }
+
+    public void setCrypto(Crypto crypto) {
+        this.crypto = crypto;
     }
 
 }

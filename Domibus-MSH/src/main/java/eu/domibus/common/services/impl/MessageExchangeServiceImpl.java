@@ -30,6 +30,8 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
 import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -93,7 +95,13 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private PolicyService policyService;
 
     @Autowired
-    private CertificateService certificateService;
+    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+
+    @Autowired
+    protected CertificateService certificateService;
+
+    @Autowired
+    protected DomainProvider domainProvider;
 
     @Autowired
     private CryptoService cryptoService;
@@ -269,7 +277,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
-                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
+                boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
                 if (!certificateChainValid) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
@@ -290,7 +298,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
-                X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(senderName);
+                X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);
                 if (certificate == null) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender[" + senderName + "] certificate not found in Keystore");
                 }
