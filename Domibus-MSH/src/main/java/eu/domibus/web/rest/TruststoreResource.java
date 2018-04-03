@@ -9,7 +9,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,7 +36,7 @@ public class TruststoreResource {
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Autowired
-    protected DomainProvider domainProvider;
+    protected DomainContextProvider domainProvider;
 
     @Autowired
     private DomibusCacheService domibusCacheService;

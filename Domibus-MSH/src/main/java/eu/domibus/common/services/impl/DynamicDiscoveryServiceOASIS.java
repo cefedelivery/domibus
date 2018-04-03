@@ -7,7 +7,7 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
@@ -53,7 +53,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     private Properties domibusProperties;
 
     @Autowired
-    protected DomainProvider domainProvider;
+    protected DomainContextProvider domainProvider;
 
     @Autowired
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;

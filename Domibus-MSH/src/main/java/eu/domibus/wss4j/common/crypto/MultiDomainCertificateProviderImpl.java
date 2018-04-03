@@ -1,5 +1,6 @@
 package eu.domibus.wss4j.common.crypto;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
@@ -34,19 +35,19 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MultiDomainCertificateProviderImpl.class);
 
-    protected volatile Map<String, DomainCertificateProvider> domainCertificateProviderMap = new HashMap<>();
+    protected volatile Map<Domain, DomainCertificateProvider> domainCertificateProviderMap = new HashMap<>();
 
     @Autowired
     DomainCertificateProviderFactory domainCertificateProviderFactory;
 
     @Override
-    public X509Certificate[] getX509Certificates(String domain, CryptoType cryptoType) throws WSSecurityException {
+    public X509Certificate[] getX509Certificates(Domain domain, CryptoType cryptoType) throws WSSecurityException {
         LOG.debug("Get certificates for domain [{}] and cryptoType [{}]", domain, cryptoType);
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getX509Certificates(cryptoType);
     }
 
-    protected DomainCertificateProvider getDomainCertificateProvider(String domain)  {
+    protected DomainCertificateProvider getDomainCertificateProvider(Domain domain)  {
         LOG.debug("Get domain CertificateProvider for domain [{}]", domain);
         DomainCertificateProvider domainCertificateProvider = domainCertificateProviderMap.get(domain);
         if (domainCertificateProvider == null) {
@@ -62,93 +63,93 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
     }
 
     @Override
-    public String getX509Identifier(String domain, X509Certificate cert) throws WSSecurityException {
+    public String getX509Identifier(Domain domain, X509Certificate cert) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getX509Identifier(cert);
     }
 
     @Override
-    public PrivateKey getPrivateKey(String domain, X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException {
+    public PrivateKey getPrivateKey(Domain domain, X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getPrivateKey(certificate, callbackHandler);
     }
 
     @Override
-    public PrivateKey getPrivateKey(String domain, PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException {
+    public PrivateKey getPrivateKey(Domain domain, PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getPrivateKey(publicKey, callbackHandler);
     }
 
     @Override
-    public PrivateKey getPrivateKey(String domain, String identifier, String password) throws WSSecurityException {
+    public PrivateKey getPrivateKey(Domain domain, String identifier, String password) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getPrivateKey(identifier, password);
     }
 
     @Override
-    public void verifyTrust(String domain, X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
+    public void verifyTrust(Domain domain, X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.verifyTrust(certs, enableRevocation, subjectCertConstraints, issuerCertConstraints);
     }
 
     @Override
-    public void verifyTrust(String domain, PublicKey publicKey) throws WSSecurityException {
+    public void verifyTrust(Domain domain, PublicKey publicKey) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain) ;
         domainCertificateProvider.verifyTrust(publicKey);
     }
 
     @Override
-    public String getDefaultX509Identifier(String domain) throws WSSecurityException {
+    public String getDefaultX509Identifier(Domain domain) throws WSSecurityException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getDefaultX509Identifier();
     }
 
     @Override
-    public String getPrivateKeyPassword(String domain, String privateKeyAlias) {
+    public String getPrivateKeyPassword(Domain domain, String privateKeyAlias) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getPrivateKeyPassword(privateKeyAlias);
     }
 
     @Override
-    public void refreshTrustStore(String domain) {
+    public void refreshTrustStore(Domain domain) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.refreshTrustStore();
     }
 
     @Override
-    public void replaceTrustStore(String domain, byte[] store, String password) throws CryptoException {
+    public void replaceTrustStore(Domain domain, byte[] store, String password) throws CryptoException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         domainCertificateProvider.replaceTrustStore(store, password);
     }
 
     @Override
-    public KeyStore getKeyStore(String domain) {
+    public KeyStore getKeyStore(Domain domain) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getKeyStore();
     }
 
     @Override
-    public KeyStore getTrustStore(String domain) {
+    public KeyStore getTrustStore(Domain domain) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getTrustStore();
     }
 
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
-    @Cacheable(value = "certValidationByAlias", key = "#domain + #alias")
-    public boolean isCertificateChainValid(String domain, String alias) throws DomibusCertificateException {
+    @Cacheable(value = "certValidationByAlias", key = "#domain.code + #alias")
+    public boolean isCertificateChainValid(Domain domain, String alias) throws DomibusCertificateException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.isCertificateChainValid(alias);
     }
 
     @Override
-    public X509Certificate getCertificateFromKeystore(String domain, String alias) throws KeyStoreException {
+    public X509Certificate getCertificateFromKeystore(Domain domain, String alias) throws KeyStoreException {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromKeystore(alias);
     }
 
     @Override
-    public boolean addCertificate(String domain, X509Certificate certificate, String alias, boolean overwrite) {
+    public boolean addCertificate(Domain domain, X509Certificate certificate, String alias, boolean overwrite) {
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.addCertificate(certificate, alias, overwrite);
     }

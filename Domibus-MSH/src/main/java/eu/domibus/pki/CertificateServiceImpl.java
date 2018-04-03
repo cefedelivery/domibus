@@ -1,13 +1,14 @@
 package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class CertificateServiceImpl implements CertificateService {
     MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Autowired
-    DomainProvider domainProvider;
+    DomainContextProvider domainProvider;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -192,7 +193,7 @@ public class CertificateServiceImpl implements CertificateService {
      */
     @Override
     public void saveCertificateAndLogRevocation() {
-        final String currentDomain = domainProvider.getCurrentDomain();
+        final Domain currentDomain = domainProvider.getCurrentDomain();
         final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(currentDomain);
         final KeyStore keyStore = multiDomainCertificateProvider.getKeyStore(currentDomain);
         saveCertificateData(trustStore, keyStore);

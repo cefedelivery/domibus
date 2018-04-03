@@ -1,8 +1,9 @@
 package eu.domibus.wss4j.common.crypto;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.property.PropertyResolver;
 import eu.domibus.wss4j.common.crypto.api.DomainPropertyProvider;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,22 +25,22 @@ public class DomainPropertyProviderImpl implements DomainPropertyProvider {
     PropertyResolver propertyResolver;
 
     @Override
-    public String getPropertyName(String domain, String propertyName) {
+    public String getPropertyName(Domain domain, String propertyName) {
         String prefix = "";
-        if (StringUtils.isNotEmpty(domain)) {
-            prefix = domain + ".";
+        if (!DomainService.DEFAULT_DOMAIN.equals(domain)) {
+            prefix = domain.getCode() + ".";
         }
         return prefix + propertyName;
     }
 
     @Override
-    public String getPropertyValue(String domain, String propertyName) {
+    public String getPropertyValue(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         return domibusProperties.getProperty(domainPropertyName);
     }
 
     @Override
-    public String getResolvedPropertyValue(String domain, String propertyName) {
+    public String getResolvedPropertyValue(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         return propertyResolver.getResolvedProperty(domainPropertyName, domibusProperties, true);
     }

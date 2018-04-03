@@ -15,7 +15,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Autowired
-    protected DomainProvider domainProvider;
+    protected DomainContextProvider domainProvider;
 
     @Autowired
     @Qualifier("domibusProperties")

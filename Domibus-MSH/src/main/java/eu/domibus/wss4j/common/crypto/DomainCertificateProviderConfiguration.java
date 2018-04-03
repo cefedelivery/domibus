@@ -1,5 +1,6 @@
 package eu.domibus.wss4j.common.crypto;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -18,10 +19,10 @@ public class DomainCertificateProviderConfiguration {
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-    public DomainCertificateProviderImpl domainCertificateProviderImpl(String domain) {
+    public DomainCertificateProviderImpl domainCertificateProviderImpl(Domain domain) {
         LOG.debug("Instantiating the certificate provider for domain [{}]", domain);
 
-        final DomainCertificateProviderImpl domainCertificateProvider = new DomainCertificateProviderImpl();
+        final DomainCertificateProviderImpl domainCertificateProvider = new DomainCertificateProviderImpl(domain);
         return domainCertificateProvider;
     }
 

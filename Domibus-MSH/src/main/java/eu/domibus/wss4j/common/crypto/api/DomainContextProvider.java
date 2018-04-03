@@ -6,7 +6,7 @@ import eu.domibus.api.multitenancy.Domain;
  * @author Cosmin Baciu
  * @since 4.0
  */
-public interface DomainCertificateProviderFactory {
+public interface DomainContextProvider {
 
-    DomainCertificateProvider createDomainCertificateProvider(Domain domain);
+    Domain getCurrentDomain();
 }

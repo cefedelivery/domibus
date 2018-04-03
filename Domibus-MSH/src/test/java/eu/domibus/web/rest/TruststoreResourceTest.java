@@ -1,5 +1,7 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DomibusCacheService;
@@ -7,7 +9,7 @@ import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -45,7 +47,7 @@ public class TruststoreResourceTest {
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Injectable
-    protected DomainProvider domainProvider;
+    protected DomainContextProvider domainProvider;
 
     @Injectable
     DomibusCacheService domibusCacheService;
@@ -92,7 +94,7 @@ public class TruststoreResourceTest {
         // Given
         MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[] {1,0,1});
 
-        String domain = "default";
+        final Domain domain = DomainService.DEFAULT_DOMAIN;
 
         new Expectations() {{
             domainProvider.getCurrentDomain();
@@ -131,7 +133,7 @@ public class TruststoreResourceTest {
         TrustStoreEntry trustStoreEntry = new TrustStoreEntry("Name", "Subject", "Issuer", date, date);
         trustStoreEntryList.add(trustStoreEntry);
 
-        String domain = "default";
+        final Domain domain = DomainService.DEFAULT_DOMAIN;
 
         new Expectations() {{
             domainProvider.getCurrentDomain();

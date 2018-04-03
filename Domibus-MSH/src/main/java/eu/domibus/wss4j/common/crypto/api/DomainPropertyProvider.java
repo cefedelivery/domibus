@@ -1,14 +1,16 @@
 package eu.domibus.wss4j.common.crypto.api;
 
+import eu.domibus.api.multitenancy.Domain;
+
 /**
  * @author Cosmin Baciu
  * @since 4.0
  */
 public interface DomainPropertyProvider {
 
-    String getPropertyName(String domain, String propertyName);
+    String getPropertyName(Domain domain, String propertyName);
 
-    String getPropertyValue(String domain, String propertyName);
+    String getPropertyValue(Domain domain, String propertyName);
 
-    String getResolvedPropertyValue(String domain, String propertyName);
+    String getResolvedPropertyValue(Domain domain, String propertyName);
 }

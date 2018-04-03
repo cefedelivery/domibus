@@ -1,6 +1,7 @@
 package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
@@ -40,12 +41,12 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainCertificateProviderImpl.class);
 
-    protected String domain;
+    protected Domain domain;
 
     public DomainCertificateProviderImpl() {
     }
 
-    public DomainCertificateProviderImpl(String domain) {
+    public DomainCertificateProviderImpl(Domain domain) {
         this.domain = domain;
     }
 
@@ -173,7 +174,7 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
         throw new CryptoException("Could not load truststore, truststore location is empty");
     }
 
-    protected Properties getKeystoreProperties(String domain) {
+    protected Properties getKeystoreProperties(Domain domain) {
         final String keystoreType = domainPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.type");
         final String keystorePassword = domainPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.password");
         final String privateKeyAlias = domainPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.alias");
@@ -190,7 +191,7 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
         return result;
     }
 
-    protected Properties getTrustStoreProperties(String domain) {
+    protected Properties getTrustStoreProperties(Domain domain) {
         final String trustStoreType = getTrustStoreType();
         final String trustStorePassword = getTrustStorePassword();
         final String trustStoreLocation = getTrustStoreLocation();
@@ -228,7 +229,7 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
         public Message createMessage(Session session) throws JMSException {
             Message m = session.createMessage();
             m.setStringProperty(Command.COMMAND, Command.RELOAD_TRUSTSTORE);
-            m.setStringProperty("domain", domain);
+            m.setStringProperty("domain", domain.getCode());
             return m;
         }
     }

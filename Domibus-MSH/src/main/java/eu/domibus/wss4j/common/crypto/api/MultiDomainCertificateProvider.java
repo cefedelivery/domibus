@@ -1,5 +1,6 @@
 package eu.domibus.wss4j.common.crypto.api;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.pki.DomibusCertificateException;
 import org.apache.wss4j.common.crypto.CryptoType;
 import org.apache.wss4j.common.ext.WSSecurityException;
@@ -19,35 +20,35 @@ import java.util.regex.Pattern;
  */
 public interface MultiDomainCertificateProvider {
 
-    X509Certificate[] getX509Certificates(String domain, CryptoType cryptoType) throws WSSecurityException;
+    X509Certificate[] getX509Certificates(Domain domain, CryptoType cryptoType) throws WSSecurityException;
 
-    String getX509Identifier(String domain, X509Certificate cert) throws WSSecurityException;
+    String getX509Identifier(Domain domain, X509Certificate cert) throws WSSecurityException;
 
-    PrivateKey getPrivateKey(String domain, X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException;
+    PrivateKey getPrivateKey(Domain domain, X509Certificate certificate, CallbackHandler callbackHandler) throws WSSecurityException;
 
-    PrivateKey getPrivateKey(String domain, PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException;
+    PrivateKey getPrivateKey(Domain domain, PublicKey publicKey, CallbackHandler callbackHandler) throws WSSecurityException;
 
-    PrivateKey getPrivateKey(String domain, String identifier, String password) throws WSSecurityException;
+    PrivateKey getPrivateKey(Domain domain, String identifier, String password) throws WSSecurityException;
 
-    void verifyTrust(String domain, X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException;
+    void verifyTrust(Domain domain, X509Certificate[] certs, boolean enableRevocation, Collection<Pattern> subjectCertConstraints, Collection<Pattern> issuerCertConstraints) throws WSSecurityException;
 
-    void verifyTrust(String domain, PublicKey publicKey) throws WSSecurityException;
+    void verifyTrust(Domain domain, PublicKey publicKey) throws WSSecurityException;
 
-    String getDefaultX509Identifier(String domain) throws WSSecurityException;
+    String getDefaultX509Identifier(Domain domain) throws WSSecurityException;
 
-    String getPrivateKeyPassword(String domain, String privateKeyAlias);
+    String getPrivateKeyPassword(Domain domain, String privateKeyAlias);
 
-    void refreshTrustStore(String domain);
+    void refreshTrustStore(Domain domain);
 
-    void replaceTrustStore(String domain, byte[] store, String password) throws CryptoException;
+    void replaceTrustStore(Domain domain, byte[] store, String password) throws CryptoException;
 
-    KeyStore getKeyStore(String domain);
+    KeyStore getKeyStore(Domain domain);
 
-    KeyStore getTrustStore(String domain);
+    KeyStore getTrustStore(Domain domain);
 
-    boolean isCertificateChainValid(String domain, String alias) throws DomibusCertificateException;
+    boolean isCertificateChainValid(Domain domain, String alias) throws DomibusCertificateException;
 
-    X509Certificate getCertificateFromKeystore(String currentDomain, String senderName) throws KeyStoreException;
+    X509Certificate getCertificateFromKeystore(Domain domain, String senderName) throws KeyStoreException;
 
-    boolean addCertificate(String domain, final X509Certificate certificate, final String alias, final boolean overwrite);
+    boolean addCertificate(Domain domain, final X509Certificate certificate, final String alias, final boolean overwrite);
 }
