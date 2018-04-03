@@ -7,20 +7,24 @@
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
                            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
                            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
                            http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd" >
 
     <import resource="classpath*:config/ext-services-delegate-domibusContext.xml"/>
 
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus">
-        <context:exclude-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>
+        <!--<context:exclude-filter type="annotation" expression="org.springframework.context.annotation.Configuration"/>-->
     </context:component-scan>
-    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="false"/>
+    <util:properties id="domibusProperties" ignore-resource-not-found="true"
+                     location="classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties"/>
+    <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
 
     <jms:annotation-driven/>
 
