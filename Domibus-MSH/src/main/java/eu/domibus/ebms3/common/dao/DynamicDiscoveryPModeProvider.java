@@ -5,6 +5,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Property;
@@ -13,18 +15,20 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.util.EndpointInfo;
 
 import javax.naming.InvalidNameException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /* This class is used for dynamic discovery of the parties participating in a message exchange.
  *
@@ -50,8 +54,13 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     private static final String DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION = "domibus.dynamic.discovery.client.specification";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
+
     @Autowired
-    protected CryptoService cryptoService;
+    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+
+    @Autowired
+    protected DomainProvider domainProvider;
+
     @Autowired
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
@@ -65,8 +74,10 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     private DynamicDiscoveryService dynamicDiscoveryServicePEPPOL;
 
     protected DynamicDiscoveryService dynamicDiscoveryService = null;
+
     @Autowired
     protected CertificateService certificateService;
+
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicResponderProcesses;
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
@@ -328,7 +339,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         LOG.debug("Add public certificate to the truststore");
         //add certificate to Truststore
-        cryptoService.addCertificate(certificate, cn, true);
+        multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), certificate, cn, true);
         LOG.debug("Certificate added");
 
     }

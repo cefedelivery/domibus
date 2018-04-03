@@ -48,4 +48,6 @@ public interface MultiDomainCertificateProvider {
     boolean isCertificateChainValid(String domain, String alias) throws DomibusCertificateException;
 
     X509Certificate getCertificateFromKeystore(String currentDomain, String senderName) throws KeyStoreException;
+
+    boolean addCertificate(String domain, final X509Certificate certificate, final String alias, final boolean overwrite);
 }

@@ -1,7 +1,6 @@
 package eu.domibus.clustering;
 
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
@@ -30,9 +29,6 @@ public class ControllerListenerService implements MessageListener {
 
     @Autowired
     private CacheManager cacheManager;
-
-    @Autowired
-    private CryptoService cryptoService;
 
     @Autowired
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;

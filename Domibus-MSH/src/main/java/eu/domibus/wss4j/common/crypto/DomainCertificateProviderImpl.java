@@ -2,6 +2,7 @@ package eu.domibus.wss4j.common.crypto;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.clustering.Command;
+import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -125,6 +126,28 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
         return certificateService.isCertificateChainValid(trustStore, alias);
     }
 
+    @Override
+    public synchronized boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
+        boolean containsAlias;
+        try {
+            containsAlias = getTrustStore().containsAlias(alias);
+        } catch (final KeyStoreException e) {
+            throw new CryptoException("Error while trying to get the alias from the truststore. This should never happen", e);
+        }
+        if (containsAlias && !overwrite) {
+            return false;
+        }
+        try {
+            if (containsAlias) {
+                getTrustStore().deleteEntry(alias);
+            }
+            getTrustStore().setCertificateEntry(alias, certificate);
+            return true;
+        } catch (final KeyStoreException e) {
+            throw new ConfigurationException(e);
+        }
+    }
+
     protected KeyStore loadTrustStore() {
         String trustStoreLocation = getTrustStoreLocation();
         if (trustStoreLocation != null) {
@@ -196,7 +219,7 @@ public class DomainCertificateProviderImpl extends Merlin implements DomainCerti
     }
 
     protected void signalTrustStoreUpdate() {
-        // Sends a message into the topic queue in order to refresh all the singleton instances of the CryptoService.
+        // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
         jmsOperations.send(new ReloadTrustStoreMessageCreator());
     }
 

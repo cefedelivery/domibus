@@ -51,4 +51,5 @@ public interface DomainCertificateProvider {
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
 
+    boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
 }

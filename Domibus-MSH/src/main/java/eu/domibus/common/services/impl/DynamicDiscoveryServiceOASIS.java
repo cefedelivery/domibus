@@ -7,7 +7,8 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
@@ -52,7 +53,10 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     private Properties domibusProperties;
 
     @Autowired
-    private CryptoService cryptoService;
+    protected DomainProvider domainProvider;
+
+    @Autowired
+    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
@@ -97,7 +101,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         }
 
         LOG.debug("Load trustore for the smpClient");
-        KeyStore truststore = cryptoService.getTrustStore();
+        KeyStore truststore = multiDomainCertificateProvider.getTrustStore(domainProvider.getCurrentDomain());
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
 
