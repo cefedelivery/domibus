@@ -29,7 +29,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.wss4j.common.crypto.api.DomainProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.neethi.Policy;
@@ -102,9 +101,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Autowired
     protected DomainProvider domainProvider;
-
-    @Autowired
-    private CryptoService cryptoService;
 
     @Autowired
     @Qualifier("domibusProperties")

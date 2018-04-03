@@ -3,7 +3,8 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -58,7 +59,10 @@ public class DynamicDiscoveryServiceOASISTest {
     private Properties domibusProperties;
 
     @Injectable
-    private CryptoService cryptoService;
+    private MultiDomainCertificateProvider multiDomainCertificateProvider;
+
+    @Injectable
+    protected DomainProvider domainProvider;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -171,7 +175,7 @@ public class DynamicDiscoveryServiceOASISTest {
             truststore = KeyStore.getInstance("JKS");
             truststore.load(getClass().getResourceAsStream("../ehealth_smp_acc_truststore.jks"), TEST_KEYSTORE_PASSWORD.toCharArray());
 
-            cryptoService.getTrustStore();
+            multiDomainCertificateProvider.getTrustStore(anyString);
             result = truststore;
 
         }};

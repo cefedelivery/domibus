@@ -146,4 +146,10 @@ public class MultiDomainCertificateProviderImpl implements MultiDomainCertificat
         final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromKeystore(alias);
     }
+
+    @Override
+    public boolean addCertificate(String domain, X509Certificate certificate, String alias, boolean overwrite) {
+        final DomainCertificateProvider domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.addCertificate(certificate, alias, overwrite);
+    }
 }
