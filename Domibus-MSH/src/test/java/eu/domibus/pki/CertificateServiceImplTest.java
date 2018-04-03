@@ -1,13 +1,15 @@
 package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -46,7 +48,7 @@ public class CertificateServiceImplTest {
     MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Injectable
-    DomainProvider domainProvider;
+    DomainContextProvider domainProvider;
 
     @Injectable
     CRLService crlService;
@@ -230,7 +232,7 @@ public class CertificateServiceImplTest {
 
     @Test
     public void saveCertificateAndLogRevocation(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore){
-        final String currentDomain = "default";
+        final Domain currentDomain = DomainService.DEFAULT_DOMAIN;
 
         new Expectations() {{
             domainProvider.getCurrentDomain();

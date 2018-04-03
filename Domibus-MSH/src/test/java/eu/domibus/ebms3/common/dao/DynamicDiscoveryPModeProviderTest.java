@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
@@ -18,7 +19,7 @@ import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.wss4j.common.crypto.api.DomainProvider;
+import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
@@ -106,7 +107,7 @@ public class DynamicDiscoveryPModeProviderTest {
     MultiDomainCertificateProvider multiDomainCertificateProvider;
 
     @Mock
-    DomainProvider domainProvider;
+    DomainContextProvider domainProvider;
 
     @Spy
     private Properties domibusProperties;
@@ -168,7 +169,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
         EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(multiDomainCertificateProvider).getTrustStore(anyString());
+        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(multiDomainCertificateProvider).getTrustStore(DomainService.DEFAULT_DOMAIN);
         doReturn(true).when(multiDomainCertificateProvider).addCertificate(null, testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);

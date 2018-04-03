@@ -1,7 +1,10 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
@@ -16,6 +19,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -34,10 +38,16 @@ public class GatewayConfigurationValidator {
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
+    @Autowired
+    protected DomainService domainService;
+
+    @Autowired
+    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+
     @PostConstruct
     public void validateConfiguration() {
         LOG.info("Checking gateway configuration ...");
-        validateCerts();
+        validateCertificates();
 
         try {
             try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
@@ -49,7 +59,17 @@ public class GatewayConfigurationValidator {
 
     }
 
-    private void validateCerts() {
+    protected void validateCertificates() {
+        final List<Domain> domains = domainService.getDomains();
+        for (Domain domain : domains) {
+            validateCerts(domain);
+        }
+
+    }
+
+    private void validateCerts(Domain domain) {
+        multiDomainCertificateProvider.getTrustStore(domain);
+
         final KeyStore ks;
         try {
             ks = KeyStore.getInstance(KeyStore.getDefaultType());

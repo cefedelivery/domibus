@@ -1,5 +1,7 @@
 package eu.domibus.clustering;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -33,6 +35,9 @@ public class ControllerListenerService implements MessageListener {
     @Autowired
     protected MultiDomainCertificateProvider multiDomainCertificateProvider;
 
+    @Autowired
+    protected DomainService domainService;
+
     @Override
     @Transactional
     public void onMessage(Message message) {
@@ -48,9 +53,10 @@ public class ControllerListenerService implements MessageListener {
             return;
         }
 
-        String domain = null;
+        Domain domain = null;
         try {
-            domain = message.getStringProperty("domain");
+            String domainCode = message.getStringProperty("domain");
+            domain = domainService.getDomain(domainCode);
         } catch (JMSException e) {
             LOG.error("Could not get the domain", e);
             return;
