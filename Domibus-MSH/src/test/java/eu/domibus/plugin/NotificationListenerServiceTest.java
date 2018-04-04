@@ -70,15 +70,23 @@ public class NotificationListenerServiceTest {
     NotificationListenerService objNotificationListenerService;
 
     @Test
-    public void testDefaultConstructor() {
+    public void testConstructor() {
         NotificationListenerService nls = new NotificationListenerService(null, BackendConnector.Mode.PULL);
-        Assert.assertTrue(nls.getDefaultNotificationsList().size() == 3);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().size() == 3);
         Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED));
         Assert.assertTrue(!nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_SUCCESS));
         nls = new NotificationListenerService(null, BackendConnector.Mode.PUSH);
-        Assert.assertTrue(nls.getDefaultNotificationsList().size() == 5);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().size() == 5);
         Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED));
         Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_SUCCESS));
+        List<NotificationType> rn = new ArrayList<>();
+        rn.add(NotificationType.MESSAGE_RECEIVED);
+        rn.add(NotificationType.MESSAGE_SEND_FAILURE);
+        nls = new NotificationListenerService(null, BackendConnector.Mode.PUSH, rn);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().size() == 2);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED));
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_FAILURE));
+        Assert.assertTrue(!nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_SUCCESS));
     }
 
     @Test
