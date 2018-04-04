@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface DomainService {
 
-    Domain DEFAULT_DOMAIN = new Domain("DEFAULT", "Default");
+    Domain DEFAULT_DOMAIN = new Domain("default", "Default");
 
     List<Domain> getDomains();
 

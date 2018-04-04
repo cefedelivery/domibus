@@ -47,6 +47,10 @@
         <property name="crypto" ref="Wss4JMultiDomainCryptoProvider"/>
     </bean>
 
+    <bean id="setDomainInInterceptor" class="eu.domibus.ebms3.receiver.SetDomainInInterceptor">
+
+    </bean>
+
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
     <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
         <property name="jaxbContext" ref="jaxbContextEBMS"/>
@@ -97,6 +101,7 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="setDomainInInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>

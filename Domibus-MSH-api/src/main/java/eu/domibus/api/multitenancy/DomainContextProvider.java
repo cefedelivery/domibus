@@ -7,4 +7,6 @@ package eu.domibus.api.multitenancy;
 public interface DomainContextProvider {
 
     Domain getCurrentDomain();
+
+    void setCurrentDomain(String domainCode);
 }

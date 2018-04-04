@@ -4,8 +4,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 /**
  * @author Cosmin Baciu
@@ -14,15 +14,24 @@ import java.util.List;
 @Service
 public class DomainServiceImpl implements DomainService {
 
+    protected Map<String, Domain> domains = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        domains.put(DomainService.DEFAULT_DOMAIN.getCode(), DomainService.DEFAULT_DOMAIN);
+    }
+
+    //TODO add caching
     @Override
     public List<Domain> getDomains() {
         //TODO get the domains from the database/properties
-        return Arrays.asList(DEFAULT_DOMAIN);
-    }
+        return new ArrayList<>(domains.values());
+}
 
+    //TODO add caching
     @Override
     public Domain getDomain(String code) {
         //TODO get the domains from the database/properties
-        return DEFAULT_DOMAIN;
+        return domains.get(code);
     }
 }
