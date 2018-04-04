@@ -1,12 +1,11 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -61,7 +60,7 @@ public class DynamicDiscoveryServiceOASISTest {
     private Properties domibusProperties;
 
     @Injectable
-    private MultiDomainCertificateProvider multiDomainCertificateProvider;
+    private MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Injectable
     protected DomainContextProvider domainProvider;

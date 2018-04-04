@@ -8,8 +8,8 @@ import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class CertificateServiceImpl implements CertificateService {
     CRLService crlService;
 
     @Autowired
-    MultiDomainCertificateProvider multiDomainCertificateProvider;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
     DomainContextProvider domainProvider;

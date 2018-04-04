@@ -8,7 +8,6 @@ import eu.domibus.pki.PKIUtil;
 import eu.domibus.spring.SpringContextProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.io.FileUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -25,14 +24,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
 /**
  * @author idragusa
@@ -105,9 +102,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
     protected void testHandleMessage(Document doc, String trustoreFilename, String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
-        Properties properties = createTruststoreProperties(trustoreFilename, trustorePassword);
 
-        byte[] sourceTrustore = FileUtils.readFileToByteArray(new File(trustoreFilename));
         new Expectations(trustSenderInterceptor) {{
             domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = true;
@@ -169,17 +164,4 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
         Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
     }
-
-    protected Properties createTruststoreProperties(final String filename, final String password) {
-        Properties prop = new Properties();
-
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.type", "jks");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.load.cacerts", "false");
-        prop.setProperty("org.apache.ws.security.crypto.provider", "eu.domibus.wss4j.common.crypto.Merlin");
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.file", filename);
-        prop.setProperty("org.apache.ws.security.crypto.merlin.trustStore.password", password);
-
-        return prop;
-    }
-
 }

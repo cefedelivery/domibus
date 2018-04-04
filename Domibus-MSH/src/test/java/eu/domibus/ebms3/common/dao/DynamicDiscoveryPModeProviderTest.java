@@ -19,8 +19,8 @@ import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
@@ -104,7 +104,7 @@ public class DynamicDiscoveryPModeProviderTest {
     ConfigurationDAO configurationDAO;
 
     @Mock
-    MultiDomainCertificateProvider multiDomainCertificateProvider;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Mock
     DomainContextProvider domainProvider;

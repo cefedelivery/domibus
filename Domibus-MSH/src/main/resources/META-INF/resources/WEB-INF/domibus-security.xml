@@ -11,51 +11,6 @@
     http://www.springframework.org/schema/security
     http://www.springframework.org/schema/security/spring-security.xsd">
 
-
-    <!-- Properties for keystore with private key -->
-    <util:properties id="keystoreProperties">
-        <!-- The crypto provider to be used -->
-        <prop key="org.apache.ws.security.crypto.provider">
-            org.apache.wss4j.common.crypto.Merlin
-        </prop>
-        <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">${domibus.security.keystore.type}</prop>
-        <!-- The password used to load the keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.keystore.password">
-            ${domibus.security.keystore.password}
-        </prop>
-        <!-- The keystore alias to use for decryption and signing. -->
-        <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">
-            ${domibus.security.key.private.alias}
-        </prop>
-        <!-- The location of the keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.file">
-            ${domibus.security.keystore.location}
-        </prop>
-    </util:properties>
-
-    <!-- Properties for trustStore with public keys for the partners -->
-    <util:properties id="trustStoreProperties">
-        <!-- The crypto provider to be used -->
-        <prop key="org.apache.ws.security.crypto.provider">
-            eu.domibus.wss4j.common.crypto.Merlin
-        </prop>
-        <!-- Type of the used keystore -->
-        <prop key="org.apache.ws.security.crypto.merlin.trustStore.type">${domibus.security.truststore.type}</prop>
-
-        <!-- The password used to load the trustStore -->
-        <prop key="org.apache.ws.security.crypto.merlin.trustStore.password">
-            ${domibus.security.truststore.password}
-        </prop>
-        <prop key="org.apache.ws.security.crypto.merlin.load.cacerts">
-            false
-        </prop>
-        <!-- The location and name of the trustStore -->
-        <prop key="org.apache.ws.security.crypto.merlin.trustStore.file">
-            ${domibus.security.truststore.location}
-        </prop>
-    </util:properties>
-
     <!-- Administration GUI user credentials-->
     <bean name="bcryptEncoder"
           class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
