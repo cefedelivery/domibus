@@ -24,9 +24,10 @@ public class DomainContextProviderImpl implements DomainContextProvider {
 
     @Override
     public Domain getCurrentDomain() {
-        final String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
+        String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
         if (StringUtils.isEmpty(domainCode)) {
-            throw new DomainException("Could get current domain: domain is not set");
+            LOG.debug("No domain code set, using the default domain");
+            domainCode = DomainService.DEFAULT_DOMAIN.getCode();
         }
         final Domain domain = domainService.getDomain(domainCode);
         if(domain == null) {
