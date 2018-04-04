@@ -6,7 +6,7 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class GatewayConfigurationValidator {
     protected DomainService domainService;
 
     @Autowired
-    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @PostConstruct
     public void validateConfiguration() {

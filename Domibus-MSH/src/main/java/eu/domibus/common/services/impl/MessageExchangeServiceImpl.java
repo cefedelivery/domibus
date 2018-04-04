@@ -29,8 +29,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -94,7 +94,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private PolicyService policyService;
 
     @Autowired
-    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
     protected CertificateService certificateService;

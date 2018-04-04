@@ -2,8 +2,8 @@
 package eu.domibus.ebms3.security;
 
 import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +20,7 @@ public class SimpleKeystorePasswordCallback implements CallbackHandler {
     DomainContextProvider domainProvider;
 
     @Autowired
-    MultiDomainCertificateProvider multiDomainCertificateProvider;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
 
     @Override

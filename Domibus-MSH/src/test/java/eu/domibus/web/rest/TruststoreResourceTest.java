@@ -9,8 +9,8 @@ import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mocked;
@@ -44,7 +44,7 @@ public class TruststoreResourceTest {
     TruststoreResource truststoreResource;
 
     @Injectable
-    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Injectable
     protected DomainContextProvider domainProvider;

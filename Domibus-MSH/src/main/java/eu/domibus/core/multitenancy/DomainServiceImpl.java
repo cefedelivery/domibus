@@ -1,4 +1,4 @@
-package eu.domibus.multitenancy;
+package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;

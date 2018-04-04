@@ -1,4 +1,4 @@
-package eu.domibus.wss4j.common.crypto.api;
+package eu.domibus.api.crypto;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;

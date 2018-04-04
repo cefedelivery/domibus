@@ -1,8 +1,8 @@
-package eu.domibus.wss4j.common.crypto;
+package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import org.springframework.stereotype.Service;
 
 /**

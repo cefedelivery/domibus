@@ -7,8 +7,8 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
@@ -56,7 +56,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     protected DomainContextProvider domainProvider;
 
     @Autowired
-    protected MultiDomainCertificateProvider multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,

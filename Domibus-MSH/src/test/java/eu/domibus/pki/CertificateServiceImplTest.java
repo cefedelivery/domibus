@@ -9,8 +9,8 @@ import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.logging.DomibusLogger;
-import eu.domibus.wss4j.common.crypto.api.DomainContextProvider;
-import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
@@ -45,7 +45,7 @@ public class CertificateServiceImplTest {
     private Properties domibusProperties;
 
     @Injectable
-    MultiDomainCertificateProvider multiDomainCertificateProvider;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Injectable
     DomainContextProvider domainProvider;
