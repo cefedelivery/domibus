@@ -1,5 +1,5 @@
+Domibus 3.3.4
 Domibus 3.3.3
-
 Domibus 3.3.2
 - Add certificate revocation logging.
     When a certificate is about to expire a warning message will be displayed in the logs.
