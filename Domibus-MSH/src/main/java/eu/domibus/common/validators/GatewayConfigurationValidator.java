@@ -4,23 +4,22 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.api.MultiDomainCertificateProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Created by idragusa on 4/14/16.
@@ -31,9 +30,6 @@ public class GatewayConfigurationValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
-
-    @Resource(name = "trustStoreProperties")
-    private Properties trustStoreProperties;
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -68,31 +64,25 @@ public class GatewayConfigurationValidator {
     }
 
     private void validateCerts(Domain domain) {
-        multiDomainCertificateProvider.getTrustStore(domain);
-
-        final KeyStore ks;
+        KeyStore trustStore = null;
         try {
-            ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        } catch (KeyStoreException e) {
-            LOG.warn("Failed to get keystore instance! " + e.getMessage());
+            trustStore = multiDomainCertificateProvider.getTrustStore(domain);
+        } catch (Exception e) {
+            LOG.warn("Failed to load certificates for domain [{}]! : [{}]", domain.getCode(), e.getMessage());
+            warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
+        }
+        if(trustStore == null) {
+            LOG.warn("Failed to load certificates for domain [{}]", domain.getCode());
             return;
         }
 
-        try (FileInputStream fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"))) {
-            ks.load(fileInputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-            LOG.warn("Failed to load certificates! " + e.getMessage());
-            warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
-        }
-
         try {
-            if (ks.containsAlias(BLUE_GW_ALIAS)) {
-                warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
+            if (trustStore.containsAlias(BLUE_GW_ALIAS)) {
+                warnOutput(domain,"SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
             }
-
         } catch (KeyStoreException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
+            warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
     }
 
@@ -113,6 +103,10 @@ public class GatewayConfigurationValidator {
 
     private void warnOutput(String message) {
         LOG.warn(WarningUtil.warnOutput(message));
+    }
+
+    private void warnOutput(Domain domain, String message) {
+        LOG.warn(WarningUtil.warnOutput("Domain [" + domain.getCode() + "]:" + message));
     }
 
 }
