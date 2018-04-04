@@ -26,6 +26,7 @@ import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -71,9 +72,10 @@ public class NotificationListenerService implements MessageListener, JmsListener
      * MESSAGE_STATUS_CHANGE as there are too many notifications that pile up in the queue
      * This default list is used only when there is no requiredNotifications list declared in the plugin xml
      */
+    @PostConstruct
     protected void initRequiredNotificationsList() {
         if (requiredNotifications != null) {
-            LOG.info("Required notifications already initialized [{}]", requiredNotifications);
+            LOG.debug("Required notifications already initialized [{}]", requiredNotifications);
             return;
         }
         requiredNotifications = new ArrayList<>();
@@ -90,7 +92,6 @@ public class NotificationListenerService implements MessageListener, JmsListener
     public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode ) {
         backendNotificationQueue = queue;
         this.mode = mode;
-        initRequiredNotificationsList();
     }
 
     public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications ) {
