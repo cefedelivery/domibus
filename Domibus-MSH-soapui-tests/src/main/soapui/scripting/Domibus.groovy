@@ -24,7 +24,7 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false";
 	static def backup_file_sufix = "_backup_for_soapui_tests";
-	static def defaultLogLevel = 0;
+	static def defaultLogLevel = 1;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 	static def MAX_LOGIN_BEFORE_LOCK = 5;
 	static def CLEAR_CACHE_COMMAND_TOMCAT = $/rmdir /S /Q ..\work & rmdir /S /Q ..\logs & del /S /Q ..\temp\* & FOR /D %p IN ("..\temp\*.*") DO rmdir /s /q "%p"  & rmdir /S /Q ..\webapps\domibus & rmdir /S /Q ..\conf\domibus\work/$;
