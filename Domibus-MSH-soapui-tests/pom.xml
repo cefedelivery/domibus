@@ -67,6 +67,9 @@
                         <value>${redDbPassword}</value>
                         <value>updateReport=false</value>
                         <value>thirdGateway=false</value>
+                        <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
+                        <value>defaultPModesPath=${soapui.root.folder}/resources/PModesandKeystoresDefault</value>
+                        <value>specialPModesPath=${soapui.root.folder}/resources/PModesandKeystoresSpecialTests</value>
                     </projectProperties>
                     <soapuiProperties>
                         <property>
