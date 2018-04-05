@@ -20,6 +20,7 @@
         <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
         <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
 
+        <sonar.jacoco.reportPath>../target/jacoco-ut.exec</sonar.jacoco.reportPath>
         <!-- jacoco agent remote addresses and ports -->
         <sonar.jacoco.remotePort.blue>${jacocoRemotePortBlue}</sonar.jacoco.remotePort.blue>
         <sonar.jacoco.remoteAddress.blue>${jacocoRemoteAddressBlue}</sonar.jacoco.remoteAddress.blue>
