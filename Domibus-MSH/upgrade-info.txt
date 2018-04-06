@@ -1,5 +1,5 @@
 Domibus 3.3.3 (from 3.3.2):
-
+                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
 Domibus 3.3.2 (from 3.3.1):
                 - In the file "\conf\domibus\domibus.properties" add the following properties :
                     o in the security section:
