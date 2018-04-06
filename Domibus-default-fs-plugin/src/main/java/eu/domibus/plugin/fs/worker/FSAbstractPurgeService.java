@@ -1,16 +1,15 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.util.Arrays;
-
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -42,7 +41,7 @@ public abstract class FSAbstractPurgeService {
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject targetFolder = fsFilesManager.getEnsureChildFolder(rootDir, getTargetFolderName())) {
 
-            contentFiles = fsFilesManager.findAllDescendantFiles(targetFolder);
+            contentFiles = findAllDescendants(targetFolder);
             LOG.debug(Arrays.toString(contentFiles));
             
             Integer expirationLimit = getExpirationLimit(domain);
@@ -67,10 +66,16 @@ public abstract class FSAbstractPurgeService {
     private void checkAndPurge(FileObject file, Integer expirationLimit) {
         try {
             if (expirationLimit != null && isFileOlder(file, expirationLimit)) {
-                LOG.debug("File [{}] is too old. Deleting", file.getName());
-                fsFilesManager.deleteFile(file);
+                if (file.isFile()) {
+                    LOG.debug("File [{}] is too old. Deleting", file.getName());
+                    fsFilesManager.deleteFile(file);
+                } else {
+                    //it's folder
+                    LOG.debug("Folder [{}] is too old. Deleting", file.getName());
+                    fsFilesManager.deleteFolder(file);
+                }
             } else {
-                LOG.debug("File [{}] is young enough. Keeping it", file.getName());
+                LOG.debug("File/folder [{}] is young enough. Keeping it", file.getName());
             }
         } catch (FileSystemException ex) {
             LOG.error("Error processing file " + file.getName().getURI(), ex);
@@ -85,6 +90,17 @@ public abstract class FSAbstractPurgeService {
         long fileAgeSeconds = (currentMillis - modifiedMillis) / 1000;
 
         return fileAgeSeconds > expirationLimit;
+    }
+
+    /**
+     * Returns all the files (or folders) to be deleted after a period ot time
+     *
+     * @param targetFolder folder to read all descendants
+     * @return array of {@link FileObject}
+     * @throws FileSystemException VFS exception
+     */
+    public FileObject[] findAllDescendants(final FileObject targetFolder) throws FileSystemException {
+        return fsFilesManager.findAllDescendantFiles(targetFolder);
     }
 
 }

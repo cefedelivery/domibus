@@ -24,8 +24,6 @@ public class DomibusLogger extends CategoryLogger {
     public static final Marker BUSINESS_MARKER = MarkerFactory.getMarker("BUSINESS");
     public static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
 
-    private static final Marker LOGGED_MARKER = MarkerFactory.getMarker("LOGGED_MARKER");
-
     public DomibusLogger(Logger logger, MessageConverter messageConverter) {
         super(logger, DomibusLogger.class.getName(),messageConverter, "d_");
     }
@@ -35,15 +33,15 @@ public class DomibusLogger extends CategoryLogger {
     }
 
     public void businessTrace(DomibusMessageCode key, Object... args) {
-        trace(BUSINESS_MARKER, key, args);
+        markerTrace(BUSINESS_MARKER, key, null, args);
     }
 
     public void businessDebug(DomibusMessageCode key, Object... args) {
-        debug(BUSINESS_MARKER, key, args);
+        markerDebug(BUSINESS_MARKER, key, null, args);
     }
 
     public void businessInfo(DomibusMessageCode key, Object... args) {
-        info(BUSINESS_MARKER, key, args);
+        markerInfo(BUSINESS_MARKER, key, null, args);
     }
 
     public void businessWarn(DomibusMessageCode key, Object... args) {
@@ -63,15 +61,15 @@ public class DomibusLogger extends CategoryLogger {
     }
 
     public void securityTrace(DomibusMessageCode key, Object... args) {
-        trace(SECURITY_MARKER, key, args);
+        markerTrace(SECURITY_MARKER, key, null, args);
     }
 
     public void securityDebug(DomibusMessageCode key, Object... args) {
-        debug(SECURITY_MARKER, key, args);
+        markerDebug(SECURITY_MARKER, key, null, args);
     }
 
     public void securityInfo(DomibusMessageCode key, Object... args) {
-        info(SECURITY_MARKER, key, args);
+        markerInfo(SECURITY_MARKER, key, null, args);
     }
 
     public void securityWarn(DomibusMessageCode key, Object... args) {
@@ -90,22 +88,43 @@ public class DomibusLogger extends CategoryLogger {
         markerError(SECURITY_MARKER, key, t, args);
     }
 
-    protected void markerWarn(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
-        warn(marker, key, args);
+    protected void markerTrace(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        // log with no marker and stacktrace (if there is one)
+        trace(null, key, t, args);
 
-        if (t != null) {
-            final String message = formatMessage(marker, key, args);
-            warn(message, t);
-        }
+        //log with marker and without stacktrace
+        trace(marker, key, args);
+    }
+
+    protected void markerDebug(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        // log with no marker and stacktrace (if there is one)
+        debug(null, key, t, args);
+
+        //log with marker and without stacktrace
+        debug(marker, key, args);
+    }
+
+    protected void markerInfo(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        // log with no marker and stacktrace (if there is one)
+        info(null, key, t, args);
+
+        //log with marker and without stacktrace
+        info(marker, key, args);
+    }
+
+    protected void markerWarn(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
+        // log with no marker and stacktrace (if there is one)
+        warn(null, key, t, args);
+
+        //log with marker and without stacktrace
+        warn(marker, key, args);
     }
 
     protected void markerError(Marker marker, DomibusMessageCode key, Throwable t, Object... args) {
-        if (t != null) {
-            final String message = formatMessage(marker, key, args);
-            logError(null, message, t, args);
-            marker.add(LOGGED_MARKER);
-        }
+        // log with no marker and stacktrace (if there is one)
+        error(null, key, t, args);
 
+        //log with marker and without stacktrace
         error(marker, key, args);
     }
 

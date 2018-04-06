@@ -263,7 +263,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
 
@@ -343,8 +343,7 @@ public class DatabaseMessageHandlerTest {
             assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
             assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            UserMessageLog userMessageLog;
-            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
         }};
@@ -403,7 +402,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
         }};
 
     }
@@ -1197,6 +1196,55 @@ public class DatabaseMessageHandlerTest {
             ErrorResult errRes = results.iterator().next();
             Assert.assertEquals(ErrorCode.EBMS_0008, errRes.getErrorCode());
         }};
+
+    }
+
+    @Test
+    public void testGetStatus() {
+        // Given
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.ACKNOWLEDGED;
+        }};
+
+        // When
+        final MessageStatus status = dmh.getStatus(MESS_ID);
+
+        // Then
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            Assert.assertEquals(MessageStatus.ACKNOWLEDGED, status);
+        }};
+    }
+
+    @Test
+    public void testGetStatusAccessDenied() {
+        // Given
+        new Expectations(dmh) {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            dmh.validateOriginalUser((UserMessage)any, anyString, anyString);
+            result = new AccessDeniedException("");
+        }};
+
+        // When
+        MessageStatus status = null;
+        try {
+            status = dmh.getStatus(MESS_ID);
+            Assert.fail("It should throw " + AccessDeniedException.class.getCanonicalName());
+        } catch (AccessDeniedException ex) {
+            // Then
+            MessageStatus finalStatus = status;
+            new Verifications() {{
+                authUtils.hasUserOrAdminRole();
+                Assert.assertNull(finalStatus);
+            }};
+        }
+
 
     }
 

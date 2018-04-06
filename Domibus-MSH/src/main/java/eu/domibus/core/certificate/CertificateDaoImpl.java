@@ -37,6 +37,7 @@ public class CertificateDaoImpl extends BasicDao<Certificate> implements Certifi
         if (byAliasAndType != null) {
             LOG.debug("Updating certificate [{}]", certificate);
             certificate.setEntityId(byAliasAndType.getEntityId());
+            certificate.setLastNotification(byAliasAndType.getLastNotification());
             em.merge(certificate);
             return;
         }

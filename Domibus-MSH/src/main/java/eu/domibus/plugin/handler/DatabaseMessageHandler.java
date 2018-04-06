@@ -1,9 +1,9 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -54,6 +54,10 @@ import java.util.Map;
 public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
+    private static final String MESSAGE_WITH_ID_STR = "Message with id [";
+    private static final String WAS_NOT_FOUND_STR = "] was not found";
+    private static final String ERROR_SUBMITTING_THE_MESSAGE_STR = "Error submitting the message [";
+    private static final String TO_STR = "] to [";
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
@@ -111,9 +115,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
-
+        }
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
         LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
 
@@ -126,11 +130,11 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING);
             if (userMessageLog == null) {
-                throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
+                throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
             }
         } catch (final NoResultException nrEx) {
-            LOG.debug("Message with id [" + messageId + "] was not found", nrEx);
-            throw new MessageNotFoundException("Message with id [" + messageId + "] was not found");
+            LOG.debug(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR, nrEx);
+            throw new MessageNotFoundException(MESSAGE_WITH_ID_STR + messageId + WAS_NOT_FOUND_STR);
         }
 
         userMessageLogService.setMessageAsDownloaded(messageId);
@@ -156,7 +160,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         return transformer.transformFromMessaging(userMessage);
     }
 
-    private void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
+    protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
             LOG.debug("OriginalUser is [" + authOriginalUser + "]");
             /* check the message belongs to the authenticated user */
@@ -184,9 +188,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getMessageStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasAdminRole();
-
+        }
         return convertMessageStatus(userMessageLogDao.getMessageStatus(messageId));
     }
 
@@ -201,8 +205,14 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public MessageStatus getStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
-            authUtils.hasAdminRole();
+        if (!authUtils.isUnsecureLoginAllowed()) {
+            authUtils.hasUserOrAdminRole();
+        }
+
+        // check if user can get the status of that message (only admin or original users are authorized to do that)
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        String originalUser = authUtils.getOriginalUserFromSecurityContext();
+        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
 
         return userMessageLogDao.getMessageStatus(messageId);
     }
@@ -210,9 +220,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed())
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasAdminRole();
-
+        }
         return errorLogDao.getErrorsForMessage(messageId);
     }
 
@@ -260,7 +270,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
             // handle if the messageId is unique. This should only fail if the ID is set from the outside
             if (!MessageStatus.NOT_FOUND.equals(userMessageLogDao.getMessageStatus(messageId))) {
-                throw new DuplicateMessageException("Message with id [" + messageId + "] already exists. Message identifiers must be unique");
+                throw new DuplicateMessageException(MESSAGE_WITH_ID_STR + messageId + "] already exists. Message identifiers must be unique");
             }
 
             Messaging message = ebMS3Of.createMessaging();
@@ -294,17 +304,19 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
 
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(), MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(), backendName, to.getEndpoint());
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+                    MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
+                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
         } catch (EbMS3Exception ebms3Ex) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", ebms3Ex);
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", ebms3Ex);
             errorLogDao.create(new ErrorLogEntry(ebms3Ex));
             throw MessagingExceptionFactory.transform(ebms3Ex);
         } catch (PModeException p) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]" + p.getMessage());
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]" + p.getMessage());
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
@@ -323,7 +335,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
             return to;
         } catch (IllegalArgumentException runTimEx) {
-            LOG.error("Error submitting the message [" + userMessage.getMessageInfo().getMessageId() + "] to [" + backendName + "]", runTimEx);
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", runTimEx);
             throw MessagingExceptionFactory.transform(runTimEx, ErrorCode.EBMS_0003);
         }
     }

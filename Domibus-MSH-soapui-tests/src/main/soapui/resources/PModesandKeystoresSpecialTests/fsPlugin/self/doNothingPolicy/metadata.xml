@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UserMessage xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+    <PartyInfo>
+        <From>
+            <PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</PartyId>
+            <Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</Role>
+        </From>
+        <!--Optional:-->
+        <To>
+            <PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-white</PartyId>
+            <Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</Role>
+        </To>
+    </PartyInfo>
+    <CollaborationInfo>
+        <!--You may enter the following 4 items in any order-->
+        <!--Optional:-->
+        <!-- <AgreementRef type="">A1</AgreementRef> -->
+        <Service type="tc21">bdx:noprocess</Service>
+        <Action>TC21Leg1</Action>        
+    </CollaborationInfo>
+    <MessageProperties>
+        <!--1 or more repetitions:-->
+        <!--originalSender and finalRecipient are mandatory-->
+        <Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</Property>
+        <Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</Property>
+    </MessageProperties>    
+</UserMessage>

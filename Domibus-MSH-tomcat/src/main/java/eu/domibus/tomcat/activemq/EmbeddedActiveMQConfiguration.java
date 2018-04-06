@@ -32,7 +32,7 @@ public class EmbeddedActiveMQConfiguration implements Condition {
     @Conditional(EmbeddedActiveMQConfiguration.class)
     public BrokerFactoryBean activeMQBroker() {
         LOGGER.debug("Creating the embedded Active MQ broker from [{}]", activeMQConfiguration);
-        final BrokerFactoryBean brokerFactoryBean = new BrokerFactoryBean();
+        final DomibusBrokerFactoryBean brokerFactoryBean = new DomibusBrokerFactoryBean();
         brokerFactoryBean.setConfig(activeMQConfiguration);
         return brokerFactoryBean;
 
