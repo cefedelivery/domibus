@@ -42,7 +42,7 @@
     </bean>
 
 
-    <bean id="autowiringSpringBeanJobFactory"
+    <!--<bean id="autowiringSpringBeanJobFactory"
           class="eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory">
     </bean>
 
@@ -86,5 +86,5 @@
         <property name="triggers">
             <ref bean="domibusStandardTriggerList"/>
         </property>
-    </bean>
+    </bean>-->
 </beans>

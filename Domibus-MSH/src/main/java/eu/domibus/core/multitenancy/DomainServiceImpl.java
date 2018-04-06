@@ -24,7 +24,7 @@ public class DomainServiceImpl implements DomainService {
     @PostConstruct
     public void init() {
         domains.put(DomainService.DEFAULT_DOMAIN.getCode(), DomainService.DEFAULT_DOMAIN);
-        domains.put("taxud", new Domain("taxud", "Taxud") );
+//        domains.put("taxud", new Domain("taxud", "Taxud") );
     }
 
     //TODO add caching
