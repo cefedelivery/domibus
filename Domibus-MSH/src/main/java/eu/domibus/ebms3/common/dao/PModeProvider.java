@@ -9,7 +9,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
-import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -312,5 +311,6 @@ public abstract class PModeProvider {
 
     public abstract List<Party> findAllParties();
 
+    public abstract List<String> findPartyNamesByServiceAndAction(final String service, final String action) throws EbMS3Exception;
 
 }

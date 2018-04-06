@@ -77,6 +77,15 @@ public class ProcessDaoImpl implements ProcessDao{
         return processQuery.getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public List<Process> findProcessByLegName(String legName) {
+        final TypedQuery<Process> processQuery = this.entityManager.createNamedQuery(Process.FIND_PROCESS_FROM_LEG_NAME, Process.class);
+        processQuery.setParameter("legName", legName);
+        return processQuery.getResultList();
+    }
+
     @Override
     public List<Process> findAllProcesses() {
         return this.entityManager.createQuery(FIND_ALL_PROCESSES,Process.class).getResultList();

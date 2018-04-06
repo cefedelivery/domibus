@@ -1,1 +1,161 @@
 <h1 id="messagesheader_id">Test Service</h1>
+
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="test()">
+          <!-- Receiver Party -->
+          <div *ngIf="!dynamicDiscoveryEnabled">
+            <md-select placeholder="Receiver Party Id" name="receiverPartyId" [(ngModel)]="filter.receiverPartyId" #receiverPartyId="ngModel" id="receiverPartyId_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let receiverParty of receiverParties" [value]="receiverParty">
+              {{receiverParty}}
+            </md-option>
+          </md-select>
+          </div>
+
+          <div *ngIf="dynamicDiscoveryEnabled">
+            <div>Dynamic Discovery</div>
+            <md-input-container>
+              <input mdInput placeholder="Final Recipient" name="finalRecipient" id="finalRecipient_id">
+            </md-input-container>
+            <md-input-container>
+              <input mdInput placeholder="Final Recipient Type" name="finalRecipientType" id="finalRecipientType_id">
+            </md-input-container>
+            <md-input-container>
+              <input mdInput placeholder="Service Type" name="serviceType" id="serviceType_id">
+            </md-input-container>
+          </div>
+
+          <!-- Test Button -->
+          <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="testbutton_id">
+            <md-icon>import_export</md-icon>
+            <span>Test</span>
+          </button>
+        </form>
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+<div>
+  <md-card>
+    <md-card-header>
+      <md-card-title>Last Sent Echo Request</md-card-title>
+    </md-card-header>
+    <md-card-content>
+      <div class="panel">
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" disabled>
+          </md-input-container>
+        </div>
+      </div>
+    </md-card-content>
+  </md-card>
+  <md-card>
+    <md-card-header>
+      <md-card-title>Last Received Echo Reply</md-card-title>
+    </md-card-header>
+    <md-card-content>
+      <div class="panel">
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" disabled>
+          </md-input-container>
+        </div>
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" disabled>
+          </md-input-container>
+        </div>
+      </div>
+    </md-card-content>
+  </md-card>
+  <!--<tr>
+    &lt;!&ndash; Last sent &ndash;&gt;
+    <td>
+      <md-card>
+        <md-card-header>
+          <md-card-title>Last Sent</md-card-title>
+        </md-card-header>
+        <md-card-content>
+          <div>
+            <div>
+              <md-input-container>
+                <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" disabled>
+              </md-input-container>
+            </div>
+            <div>
+              <md-input-container>
+                <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" disabled>
+              </md-input-container>
+            </div>
+            <div>
+              <md-input-container>
+                <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" disabled>
+              </md-input-container>
+            </div>
+            <div>
+              <md-input-container>
+                <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" disabled>
+              </md-input-container>
+            </div>
+          </div>
+        </md-card-content>
+      </md-card>
+    </td>
+    <td></td>
+
+    &lt;!&ndash; Last received &ndash;&gt;
+    <td>
+      <div>
+        <md-input-container>
+          <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" disabled>
+        </md-input-container>
+      </div>
+      <div>
+        <md-input-container>
+          <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" disabled>
+        </md-input-container>
+      </div>
+      <div>
+        <md-input-container>
+          <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" disabled>
+        </md-input-container>
+      </div>
+      <div>
+        <md-input-container>
+          <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" disabled>
+        </md-input-container>
+      </div>
+    </td>
+
+  </tr>-->
+</div>

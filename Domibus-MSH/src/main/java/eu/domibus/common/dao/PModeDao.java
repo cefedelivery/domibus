@@ -18,6 +18,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,9 @@ public class PModeDao extends PModeProvider {
 
     @Autowired
     private PartyDao partyDao;
+
+    @Autowired
+    private ProcessDao processDao;
 
     @Override
     public Party getGatewayParty() {
@@ -393,6 +397,30 @@ public class PModeDao extends PModeProvider {
     @Override
     public List<Party> findAllParties() {
         return partyDao.getParties();
+    }
+
+    @Override
+    public List<String> findPartyNamesByServiceAndAction(final String service, final String action) throws EbMS3Exception {
+        LegConfiguration legConfiguration;
+        // get the leg which contains the service and action
+        final TypedQuery<LegConfiguration> query = this.entityManager.createNamedQuery("LegConfiguration.findForTestService", LegConfiguration.class);
+        query.setParameter("SERVICE", service);
+        query.setParameter("ACTION", action);
+        try {
+            legConfiguration = query.getSingleResult();
+        } catch (final NoResultException e) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+        }
+
+        final List<Process> processByLegName = processDao.findProcessByLegName(legConfiguration.getName());
+
+        List<String> result = new ArrayList<>();
+        for (Process process : processByLegName) {
+            for(Party party : process.getResponderParties()) {
+                result.add(party.getName());
+            }
+        }
+        return result;
     }
 
 }

@@ -12,6 +12,7 @@ import {JmsComponent} from "./jms/jms.component";
 import {DirtyGuard} from "./common/dirty.guard";
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
+import {TestServiceComponent} from "./testservice/testservice.component";
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
@@ -45,6 +46,7 @@ const appRoutes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
 

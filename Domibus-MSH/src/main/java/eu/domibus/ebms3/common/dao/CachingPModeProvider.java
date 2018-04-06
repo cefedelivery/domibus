@@ -405,4 +405,10 @@ public class CachingPModeProvider extends PModeProvider {
             return Lists.newArrayList();
         }
     }
+
+    @Override
+    public List<String> findPartyNamesByServiceAndAction(final String service, final String action) {
+        //TODO: TM
+        return new ArrayList<>();
+    }
 }
