@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author Christian Koch, Stefan Mueller, Cosmin Baciu
  */
-@Service
+@Service("springContextProvider")
 public class SpringContextProvider implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;

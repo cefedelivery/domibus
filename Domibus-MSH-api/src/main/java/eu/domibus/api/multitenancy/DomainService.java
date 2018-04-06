@@ -13,4 +13,6 @@ public interface DomainService {
     List<Domain> getDomains();
 
     Domain getDomain(String code);
+
+    String getDatabaseSchema(Domain domain);
 }

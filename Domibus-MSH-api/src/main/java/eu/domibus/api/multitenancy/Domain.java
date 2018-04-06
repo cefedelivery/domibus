@@ -39,6 +39,14 @@ public class Domain {
                 .toHashCode();
     }
 
+    @Override
+    public String toString() {
+        return new org.apache.commons.lang3.builder.ToStringBuilder(this)
+                .append("code", code)
+                .append("name", name)
+                .toString();
+    }
+
     public String getCode() {
         return code;
     }

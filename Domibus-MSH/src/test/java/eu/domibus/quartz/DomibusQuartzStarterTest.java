@@ -74,7 +74,7 @@ public class DomibusQuartzStarterTest {
         }};
 
         //tested method
-        domibusQuartzStarter.checkSchedulerJobs();
+        domibusQuartzStarter.checkSchedulerJobs(scheduler);
 
         new FullVerifications() {{
         }};
@@ -103,7 +103,7 @@ public class DomibusQuartzStarterTest {
         }};
 
         //tested method
-        domibusQuartzStarter.checkSchedulerJobs();
+        domibusQuartzStarter.checkSchedulerJobs(scheduler);
 
         new FullVerifications() {{
             JobKey jobKeyActual;
