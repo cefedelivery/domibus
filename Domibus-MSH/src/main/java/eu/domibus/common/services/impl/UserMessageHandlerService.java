@@ -55,6 +55,7 @@ import java.util.Iterator;
 
 /**
  * @author Thomas Dussart
+ * @author Catalin Enache
  * @since 3.3
  *
  */
@@ -63,6 +64,9 @@ public class UserMessageHandlerService {
 
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
+
+    /** to be appended to messageId when saving to DB on receiver side */
+    public static final String SELF_SENDING_SUFFIX = "_1";
 
 
     private byte[] as4ReceiptXslBytes;
@@ -134,8 +138,17 @@ public class UserMessageHandlerService {
                 LOG.debug("received attachments:");
                 final Iterator i = request.getAttachments();
                 while (i.hasNext()) {
-                    LOG.debug("attachment: " + i.next());
+                    LOG.debug("attachment: {}", i.next());
                 }
+            }
+
+            //check if the message is sent to the same Domibus instance
+            final boolean selfSendingFlag = checkSelfSending(pmodeKey);
+            if (selfSendingFlag) {
+                /* we add a defined suffix in order to assure DB integrity - messageId unicity
+                basically we are generating another messageId for Signal Message on receievr side
+                */
+                messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
 
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
@@ -158,8 +171,26 @@ public class UserMessageHandlerService {
                 }
             }
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
-            return generateReceipt(request, legConfiguration, messageExists);
+            return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
         }
+    }
+
+    /**
+     * It will check if the messages are sent to the same Domibus instance
+     *
+     * @param pmodeKey pmode key
+     * @return boolean true if there is the same AP
+     */
+    protected boolean checkSelfSending(String pmodeKey) {
+        final Party receiver = pModeProvider.getReceiverParty(pmodeKey);
+        final Party sender = pModeProvider.getSenderParty(pmodeKey);
+
+        //check endpoint
+        if (receiver.getEndpoint().trim().equalsIgnoreCase(sender.getEndpoint().trim())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -217,7 +248,7 @@ public class UserMessageHandlerService {
         handlePayloads(request, userMessage);
 
         boolean compressed = compressionService.handleDecompression(userMessage, legConfiguration);
-        LOG.debug("Compression for message with id: " + userMessage.getMessageInfo().getMessageId() + " applied: " + compressed);
+        LOG.debug("Compression for message with id: {} applied: {}", userMessage.getMessageInfo().getMessageId(), compressed);
         try {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
@@ -269,7 +300,7 @@ public class UserMessageHandlerService {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
-            LOG.debug("looking for attachment with cid: " + cid);
+            LOG.debug("looking for attachment with cid: {}", cid);
             boolean payloadFound = false;
             if (cid == null || cid.isEmpty() || cid.startsWith("#")) {
                 if (bodyloadFound) {
@@ -328,10 +359,12 @@ public class UserMessageHandlerService {
      * @param request          the incoming message
      * @param legConfiguration processing information of the message
      * @param duplicate        indicates whether or not the message is a duplicate
+     * @param selfSendingFlag indicates that the message is sent to the same Domibus instance
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate) throws EbMS3Exception {
+    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate,
+                                boolean selfSendingFlag) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
         assert legConfiguration != null;
@@ -356,7 +389,7 @@ public class UserMessageHandlerService {
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
-                saveResponse(responseMessage);
+                saveResponse(responseMessage, selfSendingFlag);
 
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
@@ -387,10 +420,24 @@ public class UserMessageHandlerService {
         return result;
     }
 
-    void saveResponse(final SOAPMessage responseMessage) {
+    /**
+     * save response in the DB before sending it back
+     *
+     * @param responseMessage SOAP response message
+     * @param selfSendingFlag indicates that the message is sent to the same Domibus instance
+     */
+    void saveResponse(final SOAPMessage responseMessage, boolean selfSendingFlag) {
         try {
             Messaging messaging = getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
+
+            if (selfSendingFlag) {
+                /*we add a defined suffix in order to assure DB integrity - messageId unicity
+                basically we are generating another messageId for Signal Message on receievr side
+                */
+                signalMessage.getMessageInfo().setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId() + SELF_SENDING_SUFFIX);
+                signalMessage.getMessageInfo().setMessageId(signalMessage.getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
+            }
             // Stores the signal message
             signalMessageDao.create(signalMessage);
             // Updating the reference to the signal message
