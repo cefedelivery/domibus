@@ -60,7 +60,8 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 " propsTo.value," +
                 " info.refToMessageId," +
                 "log.failed," +
-                "log.restored" +
+                "log.restored," +
+                "log.messageSubtype" +
                 ")" + QUERY_BODY;
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();

@@ -1,6 +1,7 @@
 
 package eu.domibus.submission;
 
+import eu.domibus.common.NotificationType;
 import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListenerService;
 import eu.domibus.logging.DomibusLogger;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -27,6 +29,10 @@ public class WeblogicNotificationListenerService extends NotificationListenerSer
 
     public WeblogicNotificationListenerService(final Queue queue, final BackendConnector.Mode mode) {
         super(queue, mode);
+    }
+
+    public WeblogicNotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications) {
+        super(queue, mode, requiredNotifications);
     }
 
     protected String getQueueName(Queue queue) throws JMSException {
