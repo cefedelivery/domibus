@@ -9,6 +9,7 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
@@ -17,13 +18,14 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.jms.*;
+import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.jms.TextMessage;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
@@ -161,10 +163,15 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         if (destination == null) {
             throw new InternalJMSException("Could not find destination for [" + source + "]");
         }
+
+        return getInternalJmsMessages(source, jmsType, fromDate, toDate, selectorClause, destination.getType());
+
+    }
+
+    private List<InternalJmsMessage> getInternalJmsMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause, String destinationType) {
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        String destinationType = destination.getType();
         if (QUEUE.equals(destinationType)) {
-            Map<String, Object> criteria = new HashMap<String, Object>();
+            Map<String, Object> criteria = new HashMap<>();
             if (jmsType != null) {
                 criteria.put("JMSType", jmsType);
             }
@@ -197,7 +204,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
     protected List<InternalJmsMessage> convertCompositeData(CompositeData[] browse) {
         if (browse == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<InternalJmsMessage> result = new ArrayList<>();
         for (CompositeData compositeData : browse) {
@@ -286,25 +293,28 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
-    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
-        Queue queue = getQueue(destination);
-        return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
-            @Override
-            public List<InternalJmsMessage> doInJms(Session session, QueueBrowser browser) throws JMSException {
-                List<InternalJmsMessage> result = new ArrayList<>();
-                Enumeration enumeration = browser.getEnumeration();
-                while (enumeration.hasMoreElements()) {
-                    TextMessage textMessage = null;
-                    try {
-                        textMessage = (TextMessage) enumeration.nextElement();
-                        result.add(convert(textMessage));
-                    } catch (Exception e) {
-                        LOG.error("Error converting message [" + textMessage + "]", e);
-                    }
+    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws JMSActiveMQException {
+        Queue queue;
 
+        try {
+            queue = getQueue(destination);
+        } catch (Exception ex) {
+            throw new JMSActiveMQException(ex);
+        }
+        return jmsOperations.browseSelected(queue, selector, (session, browser) -> {
+            List<InternalJmsMessage> result = new ArrayList<>();
+            Enumeration enumeration = browser.getEnumeration();
+            while (enumeration.hasMoreElements()) {
+                TextMessage textMessage = null;
+                try {
+                    textMessage = (TextMessage) enumeration.nextElement();
+                    result.add(convert(textMessage));
+                } catch (Exception e) {
+                    LOG.error("Error converting message [" + textMessage + "]", e);
                 }
-                return result;
+
             }
+            return result;
         });
     }
 
@@ -326,8 +336,15 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return result;
     }
 
-    protected Queue getQueue(String queueName) throws Exception {
-        final ActiveMQDestination[] destinations = brokerService.getBroker().getDestinations();
+    protected Queue getQueue(String queueName) throws JMSActiveMQException {
+        final ActiveMQDestination[] destinations;
+        try {
+            Broker broker = brokerService.getBroker();
+            destinations = broker.getDestinations();
+        } catch (Exception ex) {
+            throw new JMSActiveMQException(ex);
+        }
+
         for(ActiveMQDestination destination : destinations) {
             if(queueName.equals(destination.getPhysicalName())) {
                 return (Queue) destination;

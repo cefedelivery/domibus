@@ -110,6 +110,7 @@
 			<service name="testService18" value="bdx:noprocess" type="tc18"/>
 			<service name="testService19" value="bdx:noprocess" type="tc19"/>
 			<service name="testService20" value="bdx:noprocess" type="tc20"/>
+			<service name="testService21" value="bdx:noprocess" type="tc21"/>
 			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="edelivery"/>				
 		</services>
 		<actions>
@@ -133,6 +134,7 @@
 			<action name="tc18Action" value="TC18Leg1"/>
 			<action name="tc19Action" value="TC19Leg1"/>
 			<action name="tc20Action" value="TC20Leg1"/>
+			<action name="tc21Action" value="TC21Leg1"/>
 			<action name="submitMessage" value="submitMessage"/>			
 		</actions>
 		<as4>
@@ -162,6 +164,7 @@
 			<legConfiguration name="pullTestcase18tc18Action" service="testService18" action="tc18Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase19tc19Action" service="testService19" action="tc19Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase20tc20Action" service="testService20" action="tc20Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
+			<legConfiguration name="pushTestcase21tc21Action" service="testService21" action="tc21Action" defaultMpc="defaultMpcSeven" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -434,6 +437,21 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase20tc20Action"/>
+			</legs>
+		</process>
+		<process name="tc21Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+				<initiatorParty name="white_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+				<responderParty name="white_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase21tc21Action"/>
 			</legs>
 		</process>
 		</businessProcesses>
