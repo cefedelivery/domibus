@@ -4,6 +4,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.crypto.api.DomainPropertyProvider;
 import eu.domibus.property.PropertyResolver;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,20 @@ public class DomainPropertyProviderImpl implements DomainPropertyProvider {
     public String getPropertyValue(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         return domibusProperties.getProperty(domainPropertyName);
+    }
+
+    @Override
+    public String getPropertyValue(Domain domain, String propertyName, String defaultValue) {
+        String propertyValue = getPropertyValue(domain, propertyName);
+        if(StringUtils.isEmpty(propertyValue)) {
+            propertyValue = defaultValue;
+        }
+        return propertyValue;
+    }
+
+    @Override
+    public String getPropertyValue(String propertyName) {
+        return getPropertyValue(DomainService.DEFAULT_DOMAIN, propertyName);
     }
 
     @Override

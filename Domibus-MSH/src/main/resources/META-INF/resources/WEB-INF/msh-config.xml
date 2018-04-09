@@ -38,11 +38,11 @@
     </bean>
 
 
-    <bean id="autowiringSpringBeanJobFactory"
-          class="eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory">
-    </bean>
+    <!--<bean id="autowiringSpringBeanJobFactory"-->
+          <!--class="eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory">-->
+    <!--</bean>-->
 
-    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <!--<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="taskExecutor" ref="taskExecutor"/>
         <property name="autoStartup" value="false"/>
         <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
@@ -72,9 +72,9 @@
         <property name="triggers">
             <ref bean="domibusStandardTriggerList"/>
         </property>
-    </bean>
+    </bean>-->
 
-    <bean id="domibusQuartzStarter" class="eu.domibus.quartz.DomibusQuartzStarter">
+    <!--<bean id="domibusQuartzStarter" class="eu.domibus.quartz.DomibusQuartzStarter">
         <property name="scheduler" ref="schedulerFactoryBean"/>
-    </bean>
+    </bean>-->
 </beans>

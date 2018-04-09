@@ -1,5 +1,7 @@
 package eu.domibus.quartz;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -7,8 +9,11 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 /**
  * Quartz scheduler starter class which:
@@ -23,33 +28,47 @@ import javax.annotation.PostConstruct;
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
  * @since 3.3.2
  */
+@Service
 public class DomibusQuartzStarter {
 
-    /** logger */
+    /**
+     * logger
+     */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusQuartzStarter.class);
 
-    /** injected scheduler by SchedulerFactoryBean */
-    private Scheduler scheduler;
+    @Autowired
+    protected DomibusSchedulerFactory domibusSchedulerFactory;
+
+    @Autowired
+    protected DomainService domainService;
+
+
+
+    @PostConstruct
+    public void initQuartzSchedulers() {
+        final List<Domain> domains = domainService.getDomains();
+        for (Domain domain : domains) {
+            try {
+                checkJobsAndStartScheduler(domain);
+            } catch (SchedulerException e) {
+                LOG.error("Could not initialize the Quartz Scheduler for domain [{}]", e, domain);
+            }
+        }
+    }
 
     /**
      * entry point method (post-construct)
      *
      * @throws SchedulerException Quartz scheduler exception
      */
-    @PostConstruct
-    public void checkJobsAndStartScheduler() throws SchedulerException {
+    public void checkJobsAndStartScheduler(Domain domain) throws SchedulerException {
+        Scheduler scheduler = domibusSchedulerFactory.createScheduler(domain);
 
         //check Quartz scheduler jobs first
-        checkSchedulerJobs();
+        checkSchedulerJobs(scheduler);
 
         scheduler.start();
         LOG.info("Quartz scheduler started.");
-    }
-
-
-    /** scheduler's setter */
-    public void setScheduler(Scheduler scheduler) {
-        this.scheduler = scheduler;
     }
 
 
@@ -58,11 +77,11 @@ public class DomibusQuartzStarter {
      *
      * @throws SchedulerException Qurtz scheduler exception
      */
-    protected void checkSchedulerJobs() throws SchedulerException {
+    protected void checkSchedulerJobs(Scheduler scheduler) throws SchedulerException {
         LOG.info("Start checking Quartz jobs...");
 
         for (String groupName : scheduler.getJobGroupNames()) {
-            checkSchedulerJobsFromGroup(groupName);
+            checkSchedulerJobsFromGroup(scheduler, groupName);
         }
     }
 
@@ -72,7 +91,7 @@ public class DomibusQuartzStarter {
      * @param groupName scheduler group name
      * @throws SchedulerException scheduler exception
      */
-    private void checkSchedulerJobsFromGroup(final String groupName) throws SchedulerException {
+    private void checkSchedulerJobsFromGroup(Scheduler scheduler, final String groupName) throws SchedulerException {
 
         //go through jobs to see which one throws ClassNotFoundException
         for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {

@@ -10,7 +10,11 @@ public interface DomainPropertyProvider {
 
     String getPropertyName(Domain domain, String propertyName);
 
+    String getPropertyValue(String propertyName);
+
     String getPropertyValue(Domain domain, String propertyName);
+
+    String getPropertyValue(Domain domain, String propertyName, String defaultValue);
 
     String getResolvedPropertyValue(Domain domain, String propertyName);
 }

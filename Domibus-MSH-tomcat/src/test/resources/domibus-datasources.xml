@@ -56,6 +56,8 @@
         <property name="username" value="sa"/>
         <property name="password" value=""/>
     </bean>
+    <alias name="dataSource" alias="domibusJDBC-XADataSource"/>
+    <alias name="dataSource" alias="domibusJDBC-nonXADataSource"/>
 
     <bean id="entityManagerFactory" primary="true"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
