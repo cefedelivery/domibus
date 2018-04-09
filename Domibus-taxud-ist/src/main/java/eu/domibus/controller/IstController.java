@@ -143,7 +143,7 @@ public class IstController {
         Messaging messaging = new Messaging();
         UserMessage userMessage = new UserMessage();
         MessageInfo responseMessageInfo = new MessageInfo();
-        responseMessageInfo.setMessageId(UUID.randomUUID() + "@domibus");
+        //responseMessageInfo.setMessageId(UUID.randomUUID() + "@domibus");
         responseMessageInfo.setRefToMessageId(submission.getMessageId());
 
         userMessage.setMessageInfo(responseMessageInfo);
