@@ -77,12 +77,16 @@ public class MessagingLock extends AbstractBaseEntity {
         return messageId;
     }
 
-    public void setMessageState(MessageState messageState) {
-        this.messageState = messageState;
-    }
-
     public MessageState getMessageState() {
         return messageState;
+    }
+
+    public String getInitiator() {
+        return initiator;
+    }
+
+    public String getMpc() {
+        return mpc;
     }
 
     @Override

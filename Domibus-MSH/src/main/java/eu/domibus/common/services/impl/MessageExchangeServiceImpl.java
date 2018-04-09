@@ -202,7 +202,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     }
 
-    //TODO change this mechanism.
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {

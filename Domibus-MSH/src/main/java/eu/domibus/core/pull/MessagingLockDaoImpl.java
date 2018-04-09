@@ -32,11 +32,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
         String messageId = getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
-        if(messageId!=null) {
-            LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]",messageId,messageType, initiator, mpc);
+        if (messageId != null) {
+            LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]", messageId, messageType, initiator, mpc);
         }
         return messageId;
-
     }
 
     @Override
@@ -47,7 +46,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Override
     public void delete(final String messageId) {
         Query query = entityManager.createNamedQuery("MessagingLock.delete");
-        query.setParameter(MESSAGE_ID,messageId);
+        query.setParameter(MESSAGE_ID, messageId);
         query.executeUpdate();
     }
 
