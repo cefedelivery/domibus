@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Quartz scheduler starter class which:
@@ -42,7 +45,7 @@ public class DomibusQuartzStarter {
     @Autowired
     protected DomainService domainService;
 
-
+    protected Map<Domain, Scheduler> schedulers = new HashMap<>();
 
     @PostConstruct
     public void initQuartzSchedulers() {
@@ -52,6 +55,21 @@ public class DomibusQuartzStarter {
                 checkJobsAndStartScheduler(domain);
             } catch (SchedulerException e) {
                 LOG.error("Could not initialize the Quartz Scheduler for domain [{}]", e, domain);
+            }
+        }
+    }
+
+    @PreDestroy
+    public void shutdownQuartzSchedulers() {
+        LOG.debug("Shutting down Quartz Schedulers");
+        for (Map.Entry<Domain, Scheduler> domainSchedulerEntry : schedulers.entrySet()) {
+            final Domain domain = domainSchedulerEntry.getKey();
+            LOG.debug("Shutting down Quartz Scheduler for domain [{}]", domain);
+            final Scheduler quartzScheduler = domainSchedulerEntry.getValue();
+            try {
+                quartzScheduler.shutdown(true);
+            } catch (SchedulerException e) {
+                LOG.error("Error while shutting down Quartz Scheduler for domain [{}]", e, domain);
             }
         }
     }
@@ -68,7 +86,8 @@ public class DomibusQuartzStarter {
         checkSchedulerJobs(scheduler);
 
         scheduler.start();
-        LOG.info("Quartz scheduler started.");
+        schedulers.put(domain, scheduler);
+        LOG.info("Quartz scheduler started for domain [{}]", domain);
     }
 
 
