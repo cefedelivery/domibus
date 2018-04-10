@@ -192,8 +192,7 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
-    public void saveCertificateAndLogRevocation() {
-        final Domain currentDomain = domainProvider.getCurrentDomain();
+    public void saveCertificateAndLogRevocation(final Domain currentDomain) {
         final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(currentDomain);
         final KeyStore keyStore = multiDomainCertificateProvider.getKeyStore(currentDomain);
         saveCertificateData(trustStore, keyStore);

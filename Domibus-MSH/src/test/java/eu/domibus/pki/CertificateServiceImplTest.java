@@ -235,9 +235,6 @@ public class CertificateServiceImplTest {
         final Domain currentDomain = DomainService.DEFAULT_DOMAIN;
 
         new Expectations() {{
-            domainProvider.getCurrentDomain();
-            result = currentDomain;
-
             multiDomainCertificateProvider.getTrustStore(currentDomain);
             result = keyStore;
 
@@ -245,7 +242,7 @@ public class CertificateServiceImplTest {
             result = trustStore;
         }};
 
-        certificateService.saveCertificateAndLogRevocation();
+        certificateService.saveCertificateAndLogRevocation(currentDomain);
         new Verifications(){{
            certificateService.saveCertificateData(trustStore, keyStore); times=1;
            certificateService.logCertificateRevocationWarning();times=1;

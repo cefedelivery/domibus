@@ -45,4 +45,27 @@ public class DomainServiceImpl implements DomainService {
     public String getDatabaseSchema(Domain domain) {
         return domainPropertyProvider.getPropertyValue(domain, "domibus.database.schema");
     }
+
+    @Override
+    public String getGeneralSchema() {
+        return domainPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY);
+    }
+
+    @Override
+    public String getSchedulerName(Domain domain) {
+        String result = domain.getCode();
+        if (DomainService.DEFAULT_DOMAIN.equals(domain)) {
+            //keep the same name used in Domibus 3.3.x in order not to break the backward compatibility; if scheduler name is changed, a DB migration script is needed
+            result = "SgsClusteredScheduler";
+        }
+        return result;
+    }
+
+    @Override
+    public Domain getDomainForScheduler(String schedulerName) {
+        if("SgsClusteredScheduler".equalsIgnoreCase(schedulerName)) {
+            return DomainService.DEFAULT_DOMAIN;
+        }
+        return getDomain(schedulerName);
+    }
 }

@@ -26,8 +26,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
     public Domain getCurrentDomain() {
         String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
         if (StringUtils.isEmpty(domainCode)) {
-            LOG.debug("No domain code set, using the default domain");
-            domainCode = DomainService.DEFAULT_DOMAIN.getCode();
+            return null;
         }
         final Domain domain = domainService.getDomain(domainCode);
         if(domain == null) {
@@ -42,5 +41,15 @@ public class DomainContextProviderImpl implements DomainContextProvider {
             throw new DomainException("Could not set current domain: domain is empty");
         }
         LOG.putMDC(DomibusLogger.MDC_DOMAIN, domainCode);
+    }
+
+    @Override
+    public void setCurrentDomain(Domain domain) {
+        setCurrentDomain(domain.getCode());
+    }
+
+    @Override
+    public void clearCurrentDomain() {
+        LOG.removeMDC(DomibusLogger.MDC_DOMAIN);
     }
 }
