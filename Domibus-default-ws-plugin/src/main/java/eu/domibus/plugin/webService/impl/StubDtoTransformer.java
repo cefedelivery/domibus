@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService.impl;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.Submission;
@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -26,6 +28,17 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(StubDtoTransformer.class);
+
+    private static final ThreadLocal<DatatypeFactory> DATATYPE_FACTORY = new ThreadLocal<DatatypeFactory>()  {
+        @Override
+        protected DatatypeFactory initialValue() {
+            try  {
+                return DatatypeFactory.newInstance();
+            } catch (DatatypeConfigurationException e) {
+                throw new IllegalStateException("failed to create " + DatatypeFactory.class.getSimpleName(), e);
+            }
+        }
+    };
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -83,7 +96,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         messageInfo.setMessageId(submission.getMessageId());
         LOG.debug("MESSAGE ID " + messageInfo.getMessageId());
         GregorianCalendar gc = new GregorianCalendar();
-        messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
+        messageInfo.setTimestamp(DATATYPE_FACTORY.get().newXMLGregorianCalendar(gc));
         LOG.debug("TIMESTAMP " + messageInfo.getTimestamp());
         messageInfo.setRefToMessageId(submission.getRefToMessageId());
         result.setMessageInfo(messageInfo);
@@ -239,11 +252,11 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
             if (errorResult.getNotified() != null) {
                 gc.setTime(errorResult.getNotified());
             }
-            errorResultImpl.setNotified(new XMLGregorianCalendarImpl(gc));
+            errorResultImpl.setNotified(DATATYPE_FACTORY.get().newXMLGregorianCalendar(gc));
             if (errorResult.getTimestamp() != null) {
                 gc.setTime(errorResult.getTimestamp());
             }
-            errorResultImpl.setTimestamp(new XMLGregorianCalendarImpl(gc));
+            errorResultImpl.setTimestamp(DATATYPE_FACTORY.get().newXMLGregorianCalendar(gc));
             errorList.getItem().add(errorResultImpl);
         }
         return errorList;

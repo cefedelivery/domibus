@@ -1,7 +1,6 @@
 
 package eu.domibus.plugin.webService.impl;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.ext.exceptions.AuthenticationException;
@@ -20,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
@@ -57,6 +58,17 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
+
+    private static final ThreadLocal<DatatypeFactory> DATATYPE_FACTORY = new ThreadLocal<DatatypeFactory>()  {
+        @Override
+        protected DatatypeFactory initialValue() {
+            try  {
+                return DatatypeFactory.newInstance();
+            } catch (DatatypeConfigurationException e) {
+                throw new IllegalStateException("failed to create " + DatatypeFactory.class.getSimpleName(), e);
+            }
+        }
+    };
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -130,8 +142,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     protected XMLGregorianCalendar getXMLTimeStamp() {
-        GregorianCalendar gc = new GregorianCalendar();
-        return new XMLGregorianCalendarImpl(gc);
+        GregorianCalendar gc = new GregorianCalendar();;
+        return DATATYPE_FACTORY.get().newXMLGregorianCalendar(gc);
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
