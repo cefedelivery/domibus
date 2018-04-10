@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -84,6 +86,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     MessageExchangeService messageExchangeService;
+
+    @Injectable
+    DomainContextProvider domainContextProvider;
 
 
     @Test
@@ -301,11 +306,11 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testScheduleSending(@Injectable final JmsMessage jmsMessage, final @Mocked DispatchMessageCreator dispatchMessageCreator) throws Exception {
+    public void testScheduleSending(@Injectable final JmsMessage jmsMessage, final @Mocked DispatchMessageCreator dispatchMessageCreator, @Mocked Domain domain) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
-            new DispatchMessageCreator(messageId);
+            new DispatchMessageCreator(messageId, domain);
             result = dispatchMessageCreator;
 
             dispatchMessageCreator.createMessage();

@@ -1,5 +1,6 @@
 package eu.domibus.pki;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.TrustStoreEntry;
 
 import javax.naming.InvalidNameException;
@@ -32,7 +33,7 @@ public interface CertificateService {
     /**
      * Save certificate data in the database, and use this data to display a revocation warning when needed.
      */
-    void saveCertificateAndLogRevocation();
+    void saveCertificateAndLogRevocation(Domain domain);
 
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
 }

@@ -1,6 +1,7 @@
 package eu.domibus.messaging;
 
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -10,8 +11,8 @@ public class DelayedDispatchMessageCreator extends DispatchMessageCreator {
 
     private final long delay;
 
-    public DelayedDispatchMessageCreator(final String messageId, final long delay) {
-        super(messageId);
+    public DelayedDispatchMessageCreator(final String messageId, final Domain domain, final long delay) {
+        super(messageId, domain);
         this.delay = delay;
     }
 

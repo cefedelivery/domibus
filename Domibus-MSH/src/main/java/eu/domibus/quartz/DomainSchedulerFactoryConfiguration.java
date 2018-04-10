@@ -77,7 +77,7 @@ public class DomainSchedulerFactoryConfiguration {
 
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
 
-        final String schedulerName = getSchedulerName(domain);
+        final String schedulerName = domainService.getSchedulerName(domain);
         scheduler.setSchedulerName(schedulerName);
         scheduler.setTaskExecutor(executor);
         scheduler.setAutoStartup(false);
@@ -112,14 +112,6 @@ public class DomainSchedulerFactoryConfiguration {
         return scheduler;
     }
 
-    protected String getSchedulerName(Domain domain) {
-        String result = domain.getCode();
-        if (DomainService.DEFAULT_DOMAIN.equals(domain)) {
-            //keep the same name used in Domibus 3.3.x in order not to break the backward compatibility; if scheduler name is changed, a DB migration script is needed
-            result = "SgsClusteredScheduler";
-        }
-        return result;
-    }
 
     protected String getTablePrefix(Domain domain) {
         final String databaseSchema = domainService.getDatabaseSchema(domain);

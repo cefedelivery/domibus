@@ -9,4 +9,8 @@ public interface DomainContextProvider {
     Domain getCurrentDomain();
 
     void setCurrentDomain(String domainCode);
+
+    void setCurrentDomain(Domain domain);
+
+    void clearCurrentDomain();
 }

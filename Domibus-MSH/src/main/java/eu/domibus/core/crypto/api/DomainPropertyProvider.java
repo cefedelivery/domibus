@@ -8,9 +8,9 @@ import eu.domibus.api.multitenancy.Domain;
  */
 public interface DomainPropertyProvider {
 
-    String getPropertyName(Domain domain, String propertyName);
-
     String getPropertyValue(String propertyName);
+
+    String getPropertyValue(String propertyName, String defaultValue);
 
     String getPropertyValue(Domain domain, String propertyName);
 

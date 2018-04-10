@@ -6,6 +6,7 @@ import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class ControllerListenerService implements MessageListener {
 
         Domain domain = null;
         try {
-            String domainCode = message.getStringProperty("domain");
+            String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
             domain = domainService.getDomain(domainCode);
         } catch (JMSException e) {
             LOG.error("Could not get the domain", e);

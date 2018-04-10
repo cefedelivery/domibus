@@ -6,6 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -87,8 +88,12 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    //TODO remove the ext converter and replace it with DomainCoreConverter
     @Autowired
     private DomainExtConverter domainExtConverter;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     @Override
     public String getFinalRecipient(String messageId) {
@@ -163,12 +168,12 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleSending(String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, domainContextProvider.getCurrentDomain()).createMessage(), sendMessageQueue);
     }
 
     @Override
     public void scheduleSending(String messageId, Long delay) {
-        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, domainContextProvider.getCurrentDomain(), delay).createMessage(), sendMessageQueue);
     }
 
     @Override
