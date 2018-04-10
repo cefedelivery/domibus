@@ -41,10 +41,7 @@ public class Domain {
 
     @Override
     public String toString() {
-        return new org.apache.commons.lang3.builder.ToStringBuilder(this)
-                .append("code", code)
-                .append("name", name)
-                .toString();
+        return code;
     }
 
     public String getCode() {

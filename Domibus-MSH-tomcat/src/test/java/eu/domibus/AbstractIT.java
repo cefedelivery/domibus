@@ -1,5 +1,7 @@
 package eu.domibus;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.NotificationType;
 import eu.domibus.configuration.Storage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
@@ -19,6 +21,7 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +105,9 @@ public abstract class AbstractIT {
     @Autowired
     private Storage storage;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @BeforeClass
     public static void init() throws IOException {
         if (!initialized) {
@@ -114,6 +120,11 @@ public abstract class AbstractIT {
                         "test_user",
                         "test_password",
                         Collections.singleton(new SimpleGrantedAuthority(eu.domibus.api.security.AuthRole.ROLE_ADMIN.name()))));
+    }
+
+    @Before
+    public void setDomain() {
+        domainContextProvider.setCurrentDomain(DomainService.DEFAULT_DOMAIN);
     }
 
     /**
