@@ -550,17 +550,12 @@
                 <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
                     <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
                     <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
-                    <connection-factory name="edeliveryConnectionFactory">
-                        <connectors>
-                            <connector-ref connector-name="in-vm"/>
-                        </connectors>
-                        <entries>
-                            <entry name="java:/jms/ConnectionFactory"/>
-                        </entries>
+                    <connection-factory name="edeliveryConnectionFactory" entries="java:/jms/ConnectionFactory" connectors="in-vm"  />
+                    <!--
                         <compress-large-messages>false</compress-large-messages>
                         <failover-on-initial-connection>false</failover-on-initial-connection>
                         <use-global-pools>true</use-global-pools>
-                    </connection-factory>
+                    </connection-factory>-->
                 <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
 
             </server>
