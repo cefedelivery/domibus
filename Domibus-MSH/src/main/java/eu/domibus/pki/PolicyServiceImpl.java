@@ -11,6 +11,7 @@ import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
@@ -24,6 +25,7 @@ import java.io.IOException;
  * @since 3.3
  */
 @Service
+@DependsOn("cryptoService")
 public class PolicyServiceImpl implements PolicyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
