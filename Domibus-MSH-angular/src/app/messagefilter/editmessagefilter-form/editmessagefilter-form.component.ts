@@ -1,11 +1,12 @@
-import {Component, Inject} from "@angular/core";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
-import {BackendFilterEntry} from "../backendfilterentry";
-import {isNullOrUndefined} from "util";
+import {Component, Inject} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
+import {BackendFilterEntry} from '../backendfilterentry';
+import {isNullOrUndefined} from 'util';
 
 let NEW_MODE = 'New Message Filter';
 let EDIT_MODE = 'Message Filter Edit';
+let MAX_LENGTH = 255;
 
 @Component({
   selector: 'editmessagefilter-form',
@@ -19,15 +20,16 @@ export class EditMessageFilterComponent {
   service: string;
   action: string;
   formTitle: string = EDIT_MODE;
+  textMaxLength = MAX_LENGTH;
 
-  backendFilterNames : Array<String> = [];
+  backendFilterNames: Array<String> = [];
 
-  messageFilterForm:FormGroup;
+  messageFilterForm: FormGroup;
 
   constructor(public dialogRef: MdDialogRef<EditMessageFilterComponent>,
               @Inject(MD_DIALOG_DATA) public data: any,
               fb: FormBuilder) {
-    if(isNullOrUndefined(data.edit)) {
+    if (isNullOrUndefined(data.edit)) {
       this.formTitle = NEW_MODE;
       this.backendFilterNames = data.backendFilterNames;
       this.plugin = this.backendFilterNames[0].toString();
