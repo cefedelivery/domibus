@@ -26,7 +26,7 @@ export class DatePipe implements PipeTransform {
         let mm = ("0"+d.getMinutes()).slice(-2); //minutes
         let ss = ("0"+d.getSeconds()).slice(-2); //seconds
         let currentTimezone = (d.getTimezoneOffset()/60) * -1;
-        let gmt = '';
+        let gmt = 'GMT';
         if (currentTimezone !== 0) {
           gmt += currentTimezone > 0 ? '+' : ' ';
           gmt += currentTimezone;
