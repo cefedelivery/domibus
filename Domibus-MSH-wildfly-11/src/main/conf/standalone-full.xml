@@ -546,16 +546,43 @@
                 <in-vm-acceptor name="in-vm" server-id="0">
                     <param name="buffer-pooling" value="false"/>
                 </in-vm-acceptor>
+
                 <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                 <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
-                    <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
-                    <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
-                    <connection-factory name="edeliveryConnectionFactory" entries="java:/jms/ConnectionFactory" connectors="in-vm"  />
-                    <!--
-                        <compress-large-messages>false</compress-large-messages>
-                        <failover-on-initial-connection>false</failover-on-initial-connection>
-                        <use-global-pools>true</use-global-pools>
-                    </connection-factory>-->
+
+                <jms-queue name="DomibusBusinessMessageOutQueue" entries="java:/jms/domibus.backend.jms.outQueue java:/jms/queue/DomibusBusinessMessageOutQueue" durable="true" />
+
+                <jms-queue name="DomibusNotifyBackendJmsQueue" entries="java:/jms/domibus.notification.jms java:/jms/queue/DomibusNotifyBackendJmsQueue" durable="true" />
+
+                <jms-queue name="DomibusErrorNotifyConsumerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyConsumer java:/jms/queue/DomibusErrorNotifyConsumerQueue" durable="true" />
+
+                <jms-queue name="DomibusErrorNotifyProducerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyProducer java:/jms/queue/DomibusErrorNotifyProducerQueue" durable="true" />
+
+                <jms-queue name="DomibusBusinessMessageInQueue" entries="java:/jms/domibus.backend.jms.inQueue java:/jms/queue/DomibusBusinessMessageInQueue" durable="true"/>
+
+                <jms-queue name="DomibusPluginToBackendQueue" entries="java:/jms/domibus.backend.jms.replyQueue java:/jms/queue/DomibusPluginToBackendQueue" durable="true"/>
+
+                <jms-queue name="DomibusSendMessageQueue" entries="java:/jms/domibus.internal.dispatch.queue java:/jms/queue/DomibusSendMessageQueue" durable="true" />
+
+                <jms-queue name="DomibusPullMessageQueue" entries="java:/jms/domibus.internal.pull.queue java:/jms/queue/DomibusPullMessageQueue" durable="true" />
+
+                <jms-queue name="DomibusNotifyBackendWebServiceQueue" entries="java:/jms/domibus.notification.webservice java:/jms/queue/DomibusNotifyBackendWebServiceQueue" durable="true" />
+
+                <jms-queue name="DomibusNotifyBackendFileSystemQueue" entries="java:/jms/domibus.notification.filesystem java:/jms/queue/DomibusNotifyBackendFileSystemQueue" durable="true"/>
+
+                <jms-queue name="DomibusUnknownReceiverQueue" entries="java:/jms/domibus.internal.notification.unknown java:/jms/queue/DomibusUnknownReceiverQueue" durable="true" />
+
+                <jms-queue name="DomibusNotifyBackendQueue" entries="java:/jms/domibus.internal.notification.queue java:/jms/queue/DomibusNotifyBackendQueue" />
+
+                <jms-queue name="DomibusDLQ" entries="java:/jms/domibus.DLQ java:/jms/queue/DomibusDLQ" durable="true"/>
+
+                <jms-topic name="DomibusClusterCommandTopic" entries="java:/jms/domibus.internal.command java:/jms/topic/DomibusClusterCommandTopic" />
+
+                <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
+                <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
+                <connection-factory name="edeliveryConnectionFactory" entries="java:/jms/ConnectionFactory" connectors="in-vm" compress-large-messages="false"
+                                    failover-on-initial-connection="false" use-global-pools="true"/>
+
                 <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
 
             </server>
