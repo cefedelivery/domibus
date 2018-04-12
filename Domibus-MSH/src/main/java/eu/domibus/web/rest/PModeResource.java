@@ -114,12 +114,7 @@ public class PModeResource {
     public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
         ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
         rawConfiguration.setEntityId(0);
-
-/*
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
-        rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
-*/
-
+        
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
         ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
         rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
