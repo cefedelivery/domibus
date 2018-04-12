@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.receiver;
 
-import com.sun.org.apache.xerces.internal.dom.TextImpl;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -259,12 +258,25 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
             return null;
 
-        Node binarySecurityTokenTag = binarySecurityTokenElement.item(0).getFirstChild();
-        if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
+        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
+
+        StringBuffer buf = new StringBuffer();
+        NodeList list = binarySecurityTokenTag.getChildNodes();
+        boolean found = false;
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                buf.append(node.getNodeValue());
+                found = true;
+            }
+        }
+        String certString = buf.toString();
+
+        if(!found ||  certString.isEmpty() ) {
             return null;
         }
 
-        String certStr = ( "-----BEGIN CERTIFICATE-----\n" + ((TextImpl)binarySecurityTokenTag).getData() + "\n-----END CERTIFICATE-----\n" );
+        String certStr = ( "-----BEGIN CERTIFICATE-----\n" +  certString + "\n-----END CERTIFICATE-----\n" );
         InputStream in = new ByteArrayInputStream(certStr.getBytes());
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
@@ -274,7 +286,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
 
     private X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
-
         X509Certificate[] certs;
 
         EncryptedKeySTRParser decryptedBytes;
