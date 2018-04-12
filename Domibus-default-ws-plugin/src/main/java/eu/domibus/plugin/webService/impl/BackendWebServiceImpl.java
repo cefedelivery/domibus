@@ -18,14 +18,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -59,16 +56,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
 
-    private static final ThreadLocal<DatatypeFactory> DATATYPE_FACTORY = new ThreadLocal<DatatypeFactory>()  {
-        @Override
-        protected DatatypeFactory initialValue() {
-            try  {
-                return DatatypeFactory.newInstance();
-            } catch (DatatypeConfigurationException e) {
-                throw new IllegalStateException("failed to create " + DatatypeFactory.class.getSimpleName(), e);
-            }
-        }
-    };
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -125,7 +112,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         partInfoList.addAll(partInfosToAdd);
         if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
             MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setTimestamp(getXMLTimeStamp());
+            messageInfo.setTimestamp(LocalDateTime.now());
             ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
         }
         final String messageId;
@@ -139,11 +126,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
-    }
-
-    protected XMLGregorianCalendar getXMLTimeStamp() {
-        GregorianCalendar gc = new GregorianCalendar();;
-        return DATATYPE_FACTORY.get().newXMLGregorianCalendar(gc);
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
