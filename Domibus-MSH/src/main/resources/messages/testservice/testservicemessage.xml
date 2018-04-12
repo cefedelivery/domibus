@@ -1,0 +1,40 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/">
+    <soap:Header>
+        <ns:Messaging>
+            <ns:UserMessage>
+                <ns:PartyInfo>
+                    <ns:From>
+                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                        <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+                    </ns:From>
+                    <ns:To>
+                        <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                        <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+                    </ns:To>
+                </ns:PartyInfo>
+                <ns:CollaborationInfo>
+                    <ns:Service type="tc2">http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service</ns:Service>
+                    <ns:Action>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test</ns:Action>
+                </ns:CollaborationInfo>
+                <ns:MessageProperties>
+                    <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+                    <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+                </ns:MessageProperties>
+                <ns:PayloadInfo>
+                    <ns:PartInfo href="cid:message">
+                        <ns:PartProperties>
+                            <ns:Property name="MimeType">text/xml</ns:Property>
+                        </ns:PartProperties>
+                    </ns:PartInfo>
+                </ns:PayloadInfo>
+            </ns:UserMessage>
+        </ns:Messaging>
+    </soap:Header>
+    <soap:Body>
+        <_1:submitRequest>
+            <payload payloadId="cid:message" contentType="text/xml">
+                <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+            </payload>
+        </_1:submitRequest>
+    </soap:Body>
+</soap:Envelope>
