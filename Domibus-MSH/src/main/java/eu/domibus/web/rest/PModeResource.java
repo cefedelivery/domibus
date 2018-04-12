@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -112,8 +115,15 @@ public class PModeResource {
         ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
         rawConfiguration.setEntityId(0);
 
+/*
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
         rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
+*/
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
+
         rawConfiguration.setConfigurationDate(new Date());
 
         String message = "PMode was successfully uploaded";
