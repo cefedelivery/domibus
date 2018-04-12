@@ -241,8 +241,8 @@
             rc.MODIFICATION_TYPE as ACTION_TYPE,
             ri.USER_NAME as USER_NAME ,
             ri.REVISION_DATE as AUDIT_DATE,
-            CAST(rc.ENTITY_ID AS CHAR(255)) AS ID,
-            CAST(ri.ID AS CHAR(11)) AS REV_ID
+            '' || rc.ENTITY_ID as ID,
+            '' || ri.ID as REV_ID
             FROM TB_REV_INFO ri, TB_REV_CHANGES rc
             WHERE ri.ID=rc.REV
             UNION
