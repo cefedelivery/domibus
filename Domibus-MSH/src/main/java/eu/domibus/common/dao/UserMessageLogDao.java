@@ -6,6 +6,8 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
+import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -229,10 +231,61 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         final List<MessageLogInfo> resultList = queryParameterized.getResultList();
         if (LOG.isDebugEnabled()) {
             final long endTime = System.currentTimeMillis();
-            LOG.debug(endTime - startTime + "milliscond to execute query for " + resultList.size() + " resuts");
+            LOG.debug(endTime - startTime + "millisecond to execute query for " + resultList.size() + " results");
         }
         return resultList;
     }
 
+        // OLD IMPLEMENTATION BEGIN
+    /*public MessageLogInfo findLastTestMessage(String party, MSHRole mshRole) {
+        HashMap<String, Object> filters = new HashMap<>();
+        filters.put("messageSubtype",MessageSubtype.TEST);
+        filters.put("mshRole",mshRole);
+        filters.put("toPartyId", party);
+        if(mshRole.equals(MSHRole.RECEIVING)) {
+            filters.put("messageType", MessageType.SIGNAL_MESSAGE);
+        } else {
+            filters.put("messageType", MessageType.USER_MESSAGE);
+        }
+        String filteredUserMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery("received", false, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(0);
+        queryParameterized.setMaxResults(1);
+        long startTime = 0;
+        if (LOG.isDebugEnabled()) {
+            startTime = System.currentTimeMillis();
+        }
+        final List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        if (LOG.isDebugEnabled()) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug(endTime - startTime + "millisecond to execute query for " + resultList.size() + " results");
+        }
+        return resultList.isEmpty() ? null :resultList.get(0);
+    }*/
+    // OLD IMPLEMENTATION END
+
+    public String findLastUserTestMessageId(String party) {
+        HashMap<String, Object> filters = new HashMap<>();
+        filters.put("messageSubtype",MessageSubtype.TEST);
+        filters.put("mshRole", MSHRole.SENDING);
+        filters.put("toPartyId", party);
+        filters.put("messageType", MessageType.USER_MESSAGE);
+        String filteredUserMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery("received", false, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(0);
+        queryParameterized.setMaxResults(1);
+        long startTime = 0;
+        if (LOG.isDebugEnabled()) {
+            startTime = System.currentTimeMillis();
+        }
+        final List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        if (LOG.isDebugEnabled()) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug(endTime - startTime + "millisecond to execute query for " + resultList.size() + " results");
+        }
+        return resultList.isEmpty() ? null : resultList.get(0).getMessageId();
+    }
 
 }

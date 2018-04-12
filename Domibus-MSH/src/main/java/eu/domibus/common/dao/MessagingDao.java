@@ -1,10 +1,7 @@
 package eu.domibus.common.dao;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.ebms3.common.model.MessagePullDto;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PartInfo;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -45,6 +42,13 @@ public class MessagingDao extends BasicDao<Messaging> {
     public UserMessage findUserMessageByMessageId(final String messageId) {
 
         final TypedQuery<UserMessage> query = this.em.createNamedQuery("Messaging.findUserMessageByMessageId", UserMessage.class);
+        query.setParameter("MESSAGE_ID", messageId);
+
+        return DataAccessUtils.singleResult(query.getResultList());
+    }
+
+    public SignalMessage findSignalMessageByMessageId(final String messageId) {
+        final TypedQuery<SignalMessage> query = this.em.createNamedQuery("Messaging.findSignalMessageByMessageId", SignalMessage.class);
         query.setParameter("MESSAGE_ID", messageId);
 
         return DataAccessUtils.singleResult(query.getResultList());

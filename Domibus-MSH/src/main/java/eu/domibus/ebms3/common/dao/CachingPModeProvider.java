@@ -407,8 +407,8 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    public List<String> findPartyNamesByServiceAndAction(final String service, final String action) {
-        //TODO: TM
+    public List<String> findPartyNamesByServiceAndAction(String service, String action) {
+        // not used
         return new ArrayList<>();
     }
 }

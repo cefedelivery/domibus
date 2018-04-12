@@ -5,15 +5,18 @@ import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
-import eu.domibus.ebms3.common.model.MessageSubtype;
-import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
+import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,12 @@ public class MessageLogResource {
 
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
+
+    @Autowired
+    private MessagingDao messagingDao;
+
+    @Autowired
+    private PartyDao partyDao;
 
     @Autowired
     DateUtil dateUtil;
@@ -213,6 +222,41 @@ public class MessageLogResource {
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("messages"))
                 .body(resultText);
+    }
+
+    @RequestMapping(value = "lastTestSent", method = RequestMethod.GET)
+    public TestServiceMessageInfoRO getLastTestSent(@RequestParam(value = "partyId") String partyId) {
+        LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
+
+        String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
+        UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(userMessageId);
+
+        TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+        testServiceMessageInfoRO.setMessageId(userMessageId);
+        testServiceMessageInfoRO.setTimeReceived(userMessageByMessageId.getMessageInfo().getTimestamp());
+        testServiceMessageInfoRO.setPartyId(partyId);
+        Party party = partyDao.findById(partyId);
+        testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+        return testServiceMessageInfoRO;
+    }
+
+    @RequestMapping(value = "lastTestReceived", method = RequestMethod.GET)
+    public TestServiceMessageInfoRO getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
+        LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
+        Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
+        String signalMessageId = messaging.getSignalMessage().getMessageInfo().getMessageId();
+        SignalMessage signalMessage = messagingDao.findSignalMessageByMessageId(signalMessageId);
+
+        TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+        testServiceMessageInfoRO.setMessageId(signalMessageId);
+        testServiceMessageInfoRO.setTimeReceived(signalMessage.getMessageInfo().getTimestamp());
+
+        Party party = partyDao.findById(partyId);
+        testServiceMessageInfoRO.setPartyId(partyId);
+        testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+        return testServiceMessageInfoRO;
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {

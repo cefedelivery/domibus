@@ -399,6 +399,7 @@ public class PModeDao extends PModeProvider {
         return partyDao.getParties();
     }
 
+
     @Override
     public List<String> findPartyNamesByServiceAndAction(final String service, final String action) throws EbMS3Exception {
         LegConfiguration legConfiguration;
@@ -417,7 +418,9 @@ public class PModeDao extends PModeProvider {
         List<String> result = new ArrayList<>();
         for (Process process : processByLegName) {
             for(Party party : process.getResponderParties()) {
-                result.add(party.getName());
+                for(Identifier identifier : party.getIdentifiers()) {
+                    result.add(identifier.getPartyId());
+                }
             }
         }
         return result;

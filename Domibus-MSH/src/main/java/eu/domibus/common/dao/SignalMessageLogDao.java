@@ -120,4 +120,31 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         return singleResult.intValue();
     }
 
+    //public MessageLogInfo findLastTestMessage(String party, MSHRole mshRole) {
+        /*HashMap<String, Object> filters = new HashMap<>();
+        filters.put("messageSubtype",MessageSubtype.TEST);
+        filters.put("mshRole",mshRole);
+        filters.put("toPartyId", party);
+        if(mshRole.equals(MSHRole.RECEIVING)) {
+            filters.put("messageType", MessageType.SIGNAL_MESSAGE);
+        } else {
+            filters.put("messageType", MessageType.USER_MESSAGE);
+        }
+        String filteredUserMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery("received", false, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(0);
+        queryParameterized.setMaxResults(1);
+        long startTime = 0;
+        if (LOG.isDebugEnabled()) {
+            startTime = System.currentTimeMillis();
+        }
+        final List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        if (LOG.isDebugEnabled()) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug(endTime - startTime + "millisecond to execute query for " + resultList.size() + " results");
+        }
+        return resultList.isEmpty() ? null :resultList.get(0);*/
+    //}
+
 }

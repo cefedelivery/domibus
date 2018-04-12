@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -38,6 +39,9 @@ public class PartyServiceImpl implements PartyService {
 
     @Autowired
     private PModeProvider pModeProvider;
+
+    @Autowired
+    private PartyDao partyDao;
 
     private final static Predicate<Party> DEFAULT_PREDICATE = condition -> true;
 

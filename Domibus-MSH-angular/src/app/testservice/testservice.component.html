@@ -7,7 +7,7 @@
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="test()">
           <!-- Receiver Party -->
           <div *ngIf="!dynamicDiscoveryEnabled">
-            <md-select placeholder="Receiver Party Id" name="receiverPartyId" [(ngModel)]="filter.receiverPartyId" #receiverPartyId="ngModel" id="receiverPartyId_id">
+            <md-select placeholder="Receiver Party Id" name="receiverPartyId" [(ngModel)]="filter.receiverPartyId" #receiverPartyId="ngModel" id="receiverPartyId_id" (ngModelChange)="onChangeParties()">
             <md-option [value]="''">
             </md-option>
             <md-option *ngFor="let receiverParty of receiverParties" [value]="receiverParty">
@@ -48,22 +48,22 @@
       <div class="panel">
         <div>
           <md-input-container>
-            <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" disabled>
+            <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" [(ngModel)]="messageInfoSent.toPartyId" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" disabled>
+            <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" [(ngModel)]="messageInfoSent.finalRecipient" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" disabled>
+            <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" [(ngModel)]="messageInfoSent.receivedTo" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" disabled>
+            <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" [(ngModel)]="messageInfoSent.messageId" disabled>
           </md-input-container>
         </div>
       </div>
@@ -77,22 +77,22 @@
       <div class="panel">
         <div>
           <md-input-container>
-            <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" disabled>
+            <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" [(ngModel)]="messageInfoReceived.fromPartyId" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" disabled>
+            <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" [(ngModel)]="messageInfoReceived.originalSender" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" disabled>
+            <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" [(ngModel)]="messageInfoReceived.receivedFrom" disabled>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" disabled>
+            <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" [(ngModel)]="messageInfoReceived.messageId" disabled>
           </md-input-container>
         </div>
       </div>
