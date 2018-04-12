@@ -127,7 +127,10 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             messaging=soapService.getMessage(message);
             soapServiceContext.stop();
             LegConfigurationExtractor legConfigurationExtractor = messageLegConfigurationFactory.extractMessageConfiguration(message, messaging);
-            if(legConfigurationExtractor ==null)return;
+            if(legConfigurationExtractor ==null){
+                LOG.error("legConfigurationExtractor is null");
+                return;
+            }
 
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
             policyName = legConfiguration.getSecurity().getPolicy();
@@ -147,12 +150,14 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         } catch (EbMS3Exception e) {
             setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
+            LOG.error(e.getMessage(),e);
             throw new Fault(e);
         } catch (IOException | JAXBException e) {
             setBindingOperation(message);
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);
             ex.setMshRole(MSHRole.RECEIVING);
+            LOG.error(e.getMessage(),e);
             throw new Fault(ex);
         } finally {
             handleMessageContext.stop();
