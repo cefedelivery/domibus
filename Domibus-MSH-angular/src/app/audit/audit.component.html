@@ -14,14 +14,14 @@
         <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="actions">
           <md2-option *ngFor="let item of existingActions" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <md2-datepicker placeholder="From:"
+        <md2-datepicker placeholder="Changed from:"
                         [(ngModel)]="from"
                         name="from"
                         [type]="'datetime'"
                         #timestampControl="ngModel" id="from_id" *ngIf="advancedSearch">
           <!--(change)='onTimestampFromChange($event)'-->
         </md2-datepicker>
-        <md2-datepicker placeholder="To:"
+        <md2-datepicker placeholder=" Changed to:"
                         [(ngModel)]="to"
                         name="to"
                         [type]="'datetime'"
@@ -81,6 +81,16 @@
   <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
     <span class="text-select">{{value | domibusDate: dateFormat}}</span>
   </ng-template>
+
+  <ng-template #rowWithActionMapTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span *ngIf="value === 'ADD'">Created</span>
+    <span *ngIf="value === 'MOD'">Modified</span>
+    <span *ngIf="value === 'DEL'">Deleted</span>
+    <span *ngIf="value === 'DOWNLOADED'">Downloaded</span>
+    <span *ngIf="value === 'RESENT'">Resent</span>
+    <span *ngIf="value === 'MOVED'">Moved</span>
+  </ng-template>
+
 </ngx-datatable>
 
 
