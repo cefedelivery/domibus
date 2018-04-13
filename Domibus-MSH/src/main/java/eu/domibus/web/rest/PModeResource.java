@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -111,9 +114,11 @@ public class PModeResource {
     public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
         ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
         rawConfiguration.setEntityId(0);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
-        rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
         rawConfiguration.setConfigurationDate(new Date());
 
         String message = "PMode was successfully uploaded";
