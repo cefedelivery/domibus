@@ -252,16 +252,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
-    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
-
-        NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
-        if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
-            return null;
-
-        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
-
+    protected String getTextFromElement(Element element) {
         StringBuffer buf = new StringBuffer();
-        NodeList list = binarySecurityTokenTag.getChildNodes();
+        NodeList list = element.getChildNodes();
         boolean found = false;
         for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
@@ -270,9 +263,19 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 found = true;
             }
         }
-        String certString = buf.toString();
+        return found? buf.toString():null;
+    }
 
-        if(!found ||  certString.isEmpty() ) {
+    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+
+        NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
+        if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
+            return null;
+
+        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
+        String certString = getTextFromElement(binarySecurityTokenTag);
+
+        if(certString==null ||  certString.isEmpty() ) {
             return null;
         }
 
