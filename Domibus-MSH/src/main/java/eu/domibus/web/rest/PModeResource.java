@@ -11,6 +11,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -84,10 +85,10 @@ public class PModeResource {
             return ResponseEntity.ok(message);
         } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage() + "\n" + StringUtils.join(e.getErrors(), "\n"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e) + "\n" + StringUtils.join(e.getErrors(), "\n"));
         } catch (Exception e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e));
         }
     }
 
