@@ -10,6 +10,7 @@ import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.taxud.IdentifierUtil;
 import eu.domibus.taxud.PayloadLogging;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Thomas Dussart
@@ -56,12 +59,6 @@ public class IstController {
     @Value("${domibus.pull.user.identifier}")
     private String pullUserIdentifier;
 
-/*    @Value("${domibus.pull.action}")
-    private String pullAction;
-
-    @Value("${domibus.pull.service}")
-    private String pullService;*/
-
     @Value("${domibus.pull.service.type}")
     private String pullServiceType;
 
@@ -72,7 +69,10 @@ public class IstController {
 
     private WebserviceExample webserviceExample;
 
-    private Observable<Submission> quoteObservable = null;
+
+    private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(20);
+
+    private Scheduler scheduler;
 
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<response_to_message_id>\n" +
@@ -97,6 +97,7 @@ public class IstController {
     protected void init(){
         doNotPushBack=Boolean.valueOf(doNotPushBackProperty);
         LOG.warn("Do not push to c3:[{}]",doNotPushBack);
+        scheduler = Schedulers.from(threadPoolExecutor);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
@@ -108,7 +109,7 @@ public class IstController {
                 Submission submission = prepareSubmission(jsonSubmission);
                 subscriber.onNext(submission);
                 subscriber.onComplete();
-            }).subscribeOn(Schedulers.io());
+            }).subscribeOn(scheduler);
             quoteObservable.subscribe(this::sendMessage);
         }
     }
