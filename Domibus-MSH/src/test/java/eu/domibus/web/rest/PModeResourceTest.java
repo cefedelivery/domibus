@@ -222,7 +222,6 @@ public class PModeResourceTest {
         Assert.assertEquals("Impossible to delete PModes due to \nMocked exception", stringResponseEntity.getBody());
     }
 
-
     @Test
     public void testUploadPmodeSuccess() {
         // Given
@@ -251,6 +250,25 @@ public class PModeResourceTest {
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
         Assert.assertEquals("Impossible to upload PModes due to \nMocked exception", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeNestedException() throws XmlProcessingException {
+        // Given
+        final Exception exception = new Exception(new Exception("Nested mocked exception"));
+
+        new Expectations(pModeResource) {{
+            pModeProvider.updatePModes((byte[]) any, anyString);
+            result = exception;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Impossible to upload PModes due to \njava.lang.Exception: Nested mocked exception", stringResponseEntity.getBody());
     }
 
     @Test
