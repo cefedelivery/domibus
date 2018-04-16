@@ -1,5 +1,6 @@
 package eu.domibus.configuration;
 
+import eu.domibus.common.util.WarningUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +88,13 @@ public class Storage {
             if (Files.notExists(payloadPath)) {
                 try {
                     Files.createDirectories(payloadPath);
-                    LOG.info(payloadPath.toAbsolutePath() + " has been created!");
+                    LOG.warn(WarningUtil.warnOutput(payloadPath.toAbsolutePath() + " has been created!"));
                 } catch (FileSystemException exc) {
                     LOG.error("Error creating/accessing the payload folder [{}]", path, exc);
 
                     // Takes temporary folder by default if it faces any issue while creating defined path.
                     payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
-                    LOG.info("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!");
+                    LOG.warn(WarningUtil.warnOutput("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!"));
                 }
             }
 
@@ -102,14 +103,14 @@ public class Storage {
             }
 
             if (!Files.isWritable(payloadPath)) {
-                throw new IOException("Write permission for payload path is not granted.");
+                throw new IOException("Write permission for payload path " + payloadPath.toAbsolutePath() + " is not granted.");
             }
         } catch (IOException ioEx) {
             LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
 
             // Takes temporary folder by default if it faces any issue while creating defined path.
             payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
-            LOG.info("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!");
+            LOG.warn(WarningUtil.warnOutput("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!"));
         }
         return payloadPath;
     }
