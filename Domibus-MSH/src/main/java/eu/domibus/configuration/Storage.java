@@ -86,7 +86,7 @@ public class Storage {
             // Checks if the path exists, if not it creates it
             if (Files.notExists(payloadPath)) {
                 Files.createDirectories(payloadPath);
-                LOG.warn(WarningUtil.warnOutput("The payload folder " + payloadPath.toAbsolutePath() + " has been created!"));
+                LOG.info("The payload folder " + payloadPath.toAbsolutePath() + " has been created!");
             } else {
                 if (Files.isSymbolicLink(payloadPath)) {
                     payloadPath = Files.readSymbolicLink(payloadPath);
