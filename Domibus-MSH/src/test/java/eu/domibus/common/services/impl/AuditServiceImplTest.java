@@ -7,6 +7,7 @@ import eu.domibus.common.dao.AuditDao;
 import eu.domibus.common.model.audit.Audit;
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.AnnotationsUtil;
@@ -124,6 +125,19 @@ public class AuditServiceImplTest {
         ArgumentCaptor<MessageAudit> messageAuditCaptor = ArgumentCaptor.forClass(MessageAudit.class);
         verify(auditDao, times(1)).saveMessageAudit(messageAuditCaptor.capture());
         MessageAudit value = messageAuditCaptor.getValue();
+        assertEquals("resendMessageId", value.getId());
+        assertEquals("thomas", value.getUserName());
+        assertEquals(ModificationType.DOWNLOADED, value.getModificationType());
+        assertNotNull(value.getRevisionDate());
+    }
+
+    @Test
+    public void addPModeDownloadedAudit() {
+        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        auditService.addPModeDownloadedAudit("resendMessageId");
+        ArgumentCaptor<PModeAudit> messageAuditCaptor = ArgumentCaptor.forClass(PModeAudit.class);
+        verify(auditDao, times(1)).savePModeAudit(messageAuditCaptor.capture());
+        PModeAudit value = messageAuditCaptor.getValue();
         assertEquals("resendMessageId", value.getId());
         assertEquals("thomas", value.getUserName());
         assertEquals(ModificationType.DOWNLOADED, value.getModificationType());

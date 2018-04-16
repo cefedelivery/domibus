@@ -3,6 +3,7 @@ package eu.domibus.common.dao;
 import eu.domibus.common.model.audit.Audit;
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.collections.CollectionUtils;
@@ -158,6 +159,11 @@ public class AuditDaoImpl implements AuditDao {
     @Override
     public void saveMessageAudit(final MessageAudit messageAudit) {
         entityManager.persist(messageAudit);
+    }
+
+    @Override
+    public void savePModeAudit(final PModeAudit pmodeAudit) {
+        entityManager.persist(pmodeAudit);
     }
 
     @Override
