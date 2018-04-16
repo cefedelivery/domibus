@@ -11,6 +11,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,7 +58,7 @@ public class Storage {
         final String location = domibusProperties.getProperty(ATTACHMENT_STORAGE_LOCATION);
         if (location != null && !location.isEmpty()) {
             if (storageDirectory == null) {
-                Path path = createLocation(location);
+                Path path = pathValidation(location);
                 if (path != null) {
                     storageDirectory = path.toFile();
                     LOG.info("Initialized payload folder on path [{}]", path);
@@ -78,20 +79,38 @@ public class Storage {
      * @param path
      * @return Path
      */
-    private Path createLocation(String path) {
+    private Path pathValidation(String path) {
+        Path payloadPath = null;
         try {
-            Path payloadPath = Paths.get(path).normalize();
+            payloadPath = Paths.get(path).normalize();
             // Checks if the path exists, if not it creates it
             if (Files.notExists(payloadPath)) {
-                Files.createDirectories(payloadPath);
-                LOG.debug(payloadPath.toAbsolutePath() + "has been created!");
+                try {
+                    Files.createDirectories(payloadPath);
+                    LOG.info(payloadPath.toAbsolutePath() + " has been created!");
+                } catch (FileSystemException exc) {
+                    LOG.error("Error creating/accessing the payload folder [{}]", path, exc);
+
+                    // Takes temporary folder by default if it faces any issue while creating defined path.
+                    payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
+                    LOG.info("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!");
+                }
             }
+
             if (Files.isSymbolicLink(payloadPath)) {
                 payloadPath = Files.readSymbolicLink(payloadPath);
+            }
+
+            if (!Files.isWritable(payloadPath)) {
+                throw new IOException("Write permission for payload path is not granted.");
             }
             return payloadPath;
         } catch (IOException ioEx) {
             LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
+
+            // Takes temporary folder by default if it faces any issue while creating defined path.
+            payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
+            LOG.info("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!");
         }
         return null;
     }
