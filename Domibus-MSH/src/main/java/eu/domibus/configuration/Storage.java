@@ -58,7 +58,7 @@ public class Storage {
         final String location = domibusProperties.getProperty(ATTACHMENT_STORAGE_LOCATION);
         if (location != null && !location.isEmpty()) {
             if (storageDirectory == null) {
-                Path path = pathValidation(location);
+                Path path = createLocation(location);
                 if (path != null) {
                     storageDirectory = path.toFile();
                     LOG.info("Initialized payload folder on path [{}]", path);
@@ -79,7 +79,7 @@ public class Storage {
      * @param path
      * @return Path
      */
-    private Path pathValidation(String path) {
+    private Path createLocation(String path) {
         Path payloadPath = null;
         try {
             payloadPath = Paths.get(path).normalize();
