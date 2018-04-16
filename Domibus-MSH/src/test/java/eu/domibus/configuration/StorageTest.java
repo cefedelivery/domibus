@@ -51,7 +51,7 @@ public class StorageTest {
     }
 
     @Test
-    public void testWrongPayloadFolder() throws IOException {
+    public void testWrongPayloadFolder() throws Exception {
         Path tempPath = Paths.get("src", "test", "resources");
         new Expectations(storage) {{
             domibusProperties.getProperty(Storage.ATTACHMENT_STORAGE_LOCATION);
@@ -69,7 +69,7 @@ public class StorageTest {
         return (osName.toLowerCase().startsWith("windows"));
     }
 
-    private String getWindowsFileSystemIncorrectPath(String path) {
+    private String getWindowsFileSystemIncorrectPath(String path) throws Exception {
         //Select a non existent windows file system drive to mock an incorrect path
         char[] possibleDriveLetters = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         List<File> availableDriveLetters = new ArrayList<>(Arrays.asList(File.listRoots()));
@@ -78,7 +78,7 @@ public class StorageTest {
                 return possibleDriveLetters[i] + ":\\" + path;
             }
         }
-        return null;
+        throw new Exception("Available (not used) drive not found in the file system.");
     }
 
     private String getLinuxFileSystemIncorrectPath(String path) {
