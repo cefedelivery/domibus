@@ -87,14 +87,14 @@ public class Storage {
             if (Files.notExists(payloadPath)) {
                 Files.createDirectories(payloadPath);
                 LOG.warn(WarningUtil.warnOutput("The payload folder " + payloadPath.toAbsolutePath() + " has been created!"));
-            }
+            } else {
+                if (Files.isSymbolicLink(payloadPath)) {
+                    payloadPath = Files.readSymbolicLink(payloadPath);
+                }
 
-            if (Files.isSymbolicLink(payloadPath)) {
-                payloadPath = Files.readSymbolicLink(payloadPath);
-            }
-
-            if (!Files.isWritable(payloadPath)) {
-                throw new IOException("Write permission for payload folder " + payloadPath.toAbsolutePath() + " is not granted.");
+                if (!Files.isWritable(payloadPath)) {
+                    throw new IOException("Write permission for payload folder " + payloadPath.toAbsolutePath() + " is not granted.");
+                }
             }
         } catch (IOException ioEx) {
             LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
