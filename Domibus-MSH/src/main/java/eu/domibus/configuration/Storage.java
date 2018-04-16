@@ -104,7 +104,6 @@ public class Storage {
             if (!Files.isWritable(payloadPath)) {
                 throw new IOException("Write permission for payload path is not granted.");
             }
-            return payloadPath;
         } catch (IOException ioEx) {
             LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
 
@@ -112,7 +111,7 @@ public class Storage {
             payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
             LOG.info("The temporary path " + payloadPath.toAbsolutePath() + " has been selected!");
         }
-        return null;
+        return payloadPath;
     }
 
 }
