@@ -146,7 +146,7 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest1\n",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n XmlProcessingException: UnitTest1\n",
                 stringResponseEntity.getBody());
     }
 
@@ -166,7 +166,7 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest2",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n Exception: UnitTest2",
                 stringResponseEntity.getBody());
 
     }
