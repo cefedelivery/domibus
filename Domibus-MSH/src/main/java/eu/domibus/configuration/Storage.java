@@ -12,7 +12,6 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,16 +85,8 @@ public class Storage {
             payloadPath = Paths.get(path).normalize();
             // Checks if the path exists, if not it creates it
             if (Files.notExists(payloadPath)) {
-                try {
-                    Files.createDirectories(payloadPath);
-                    LOG.warn(WarningUtil.warnOutput("The payload folder " + payloadPath.toAbsolutePath() + " has been created!"));
-                } catch (FileSystemException exc) {
-                    LOG.error("Error creating/accessing the payload folder [{}]", path, exc);
-
-                    // Takes temporary folder by default if it faces any issue while creating defined path.
-                    payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
-                    LOG.warn(WarningUtil.warnOutput("The temporary payload folder " + payloadPath.toAbsolutePath() + " has been selected!"));
-                }
+                Files.createDirectories(payloadPath);
+                LOG.warn(WarningUtil.warnOutput("The payload folder " + payloadPath.toAbsolutePath() + " has been created!"));
             }
 
             if (Files.isSymbolicLink(payloadPath)) {
