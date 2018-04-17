@@ -14,14 +14,14 @@
         <md2-select mdInput placeholder="Action" id="user_id" multiple [(ngModel)]="actions">
           <md2-option *ngFor="let item of existingActions" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <md2-datepicker placeholder="From:"
+        <md2-datepicker placeholder="From:" appClearInvalid
                         [(ngModel)]="from"
                         name="from"
                         [type]="'datetime'"
                         #timestampControl="ngModel" id="from_id" *ngIf="advancedSearch">
           <!--(change)='onTimestampFromChange($event)'-->
         </md2-datepicker>
-        <md2-datepicker placeholder="To:"
+        <md2-datepicker placeholder="To:" appClearInvalid
                         [(ngModel)]="to"
                         name="to"
                         [type]="'datetime'"
