@@ -1,7 +1,9 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.LoginRO;
@@ -9,7 +11,10 @@ import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.SchedulingTaskExecutor;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -24,6 +29,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Cosmin Baciu
@@ -38,6 +47,16 @@ public class AuthenticationResource {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @Qualifier("taskExecutor")
+    @Autowired
+    protected SchedulingTaskExecutor schedulingTaskExecutor;
+
+    @Autowired
+    protected UserDomainDao userDomainDao;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
     public ErrorRO handleException(Exception ex) {
@@ -47,10 +66,13 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
+        String domain = getDomainForUser(loginRO.getUsername());
+        LOG.debug("Determined domain [{}] for user [{}]", domain, loginRO.getUsername());
+
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
-        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
-        if(principal.isDefaultPasswordUsed()){
-            LOG.warn(WarningUtil.warnOutput(principal.getUsername()+" is using default password."));
+        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domain);
+        if (principal.isDefaultPasswordUsed()) {
+            LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
 
         //Parse Granted authorities to a list of string authorities
@@ -85,6 +107,24 @@ public class AuthenticationResource {
     public String getUser() {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser.getUsername();
+    }
+
+    /**
+     * Get the domain associated to the provided user from the general schema. <br/>
+     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
+     *
+     * @return
+     */
+    protected String getDomainForUser(String user) {
+        Future<String> utrFuture = schedulingTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
+        String domain = null;
+        try {
+            domain = utrFuture.get(3000L, TimeUnit.SECONDS);
+            domainContextProvider.setCurrentDomain(domain);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new AuthenticationServiceException("Could not determine the domain for user [" + user + "]", e);
+        }
+        return domain;
     }
 
 

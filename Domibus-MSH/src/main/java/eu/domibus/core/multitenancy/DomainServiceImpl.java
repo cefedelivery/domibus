@@ -3,11 +3,12 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.core.multitenancy.dao.DomainDao;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.List;
 
 /**
  * @author Cosmin Baciu
@@ -16,29 +17,39 @@ import java.util.*;
 @Service
 public class DomainServiceImpl implements DomainService {
 
-    protected Map<String, Domain> domains = new HashMap<>();
-
     @Autowired
     protected DomainPropertyProvider domainPropertyProvider;
 
-    @PostConstruct
-    public void init() {
-        domains.put(DomainService.DEFAULT_DOMAIN.getCode(), DomainService.DEFAULT_DOMAIN);
-        //domains.put("taxud", new Domain("taxud", "Taxud") );
-    }
+    @Autowired
+    protected DomainDao domainDao;
 
     //TODO add caching
     @Override
     public List<Domain> getDomains() {
-        //TODO get the domains from the database/properties
-        return new ArrayList<>(domains.values());
-}
+        return domainDao.findAll();
+    }
 
     //TODO add caching
     @Override
     public Domain getDomain(String code) {
-        //TODO get the domains from the database/properties
-        return domains.get(code);
+        final List<Domain> domains = domainDao.findAll();
+        if (domains == null) {
+            return null;
+        }
+        for (Domain domain : domains) {
+            if (StringUtils.equalsIgnoreCase(code, domain.getCode())) {
+                return domain;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Domain getDomainForScheduler(String schedulerName) {
+        if ("SgsClusteredScheduler".equalsIgnoreCase(schedulerName)) {
+            return DomainService.DEFAULT_DOMAIN;
+        }
+        return getDomain(schedulerName);
     }
 
     @Override
@@ -61,11 +72,4 @@ public class DomainServiceImpl implements DomainService {
         return result;
     }
 
-    @Override
-    public Domain getDomainForScheduler(String schedulerName) {
-        if("SgsClusteredScheduler".equalsIgnoreCase(schedulerName)) {
-            return DomainService.DEFAULT_DOMAIN;
-        }
-        return getDomain(schedulerName);
-    }
 }

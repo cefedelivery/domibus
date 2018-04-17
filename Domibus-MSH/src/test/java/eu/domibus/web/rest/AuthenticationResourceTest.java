@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -33,7 +34,7 @@ public class AuthenticationResourceTest {
         loginRO.setPassword("user");
         final UserDetail userDetail=new UserDetail(user,true);
         new Expectations(){{
-            authenticationService.authenticate("user","user"); result=userDetail;
+            authenticationService.authenticate("user","user", DomainService.DEFAULT_DOMAIN.getCode()); result=userDetail;
         }};
         authenticationResource.authenticate(loginRO,new MockHttpServletResponse());
         new Verifications(){{

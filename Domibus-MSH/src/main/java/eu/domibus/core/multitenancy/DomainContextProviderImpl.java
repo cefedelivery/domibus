@@ -40,7 +40,9 @@ public class DomainContextProviderImpl implements DomainContextProvider {
         if (StringUtils.isEmpty(domainCode)) {
             throw new DomainException("Could not set current domain: domain is empty");
         }
+
         LOG.putMDC(DomibusLogger.MDC_DOMAIN, domainCode);
+        LOG.trace("Set domain to [{}]", domainCode);
     }
 
     @Override
