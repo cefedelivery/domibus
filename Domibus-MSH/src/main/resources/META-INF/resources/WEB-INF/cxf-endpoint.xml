@@ -92,6 +92,7 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="domibusReadyInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>

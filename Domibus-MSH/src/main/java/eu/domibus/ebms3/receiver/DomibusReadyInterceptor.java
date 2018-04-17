@@ -22,7 +22,7 @@ public class DomibusReadyInterceptor extends AbstractPhaseInterceptor {
 
     @Override
     public void handleMessage(Message message) throws Fault {
-        if (!system.isReady()) {
+        if (system.isNotReady()) {
             throw new Fault(new IllegalStateException("Server starting"));
         }
     }
