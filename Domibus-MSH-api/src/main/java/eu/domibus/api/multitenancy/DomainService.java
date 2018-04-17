@@ -16,11 +16,11 @@ public interface DomainService {
 
     Domain getDomain(String code);
 
+    Domain getDomainForScheduler(String schedulerName);
+
     String getDatabaseSchema(Domain domain);
 
     String getGeneralSchema();
 
     String getSchedulerName(Domain domain);
-
-    Domain getDomainForScheduler(String schedulerName);
 }

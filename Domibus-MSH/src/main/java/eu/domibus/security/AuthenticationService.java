@@ -31,7 +31,7 @@ public class AuthenticationService {
     private UserService userService;
 
     @Transactional(noRollbackFor = AuthenticationException.class)
-    public UserDetail authenticate(String username, String password) {
+    public UserDetail authenticate(String username, String password, String domain) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         Authentication authentication = null;
         try {
@@ -47,8 +47,9 @@ public class AuthenticationService {
             }
             throw ae;
         }
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         final UserDetail principal = (UserDetail) authentication.getPrincipal();
+        principal.setDomain(domain);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         return principal;
     }
 
