@@ -11,6 +11,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,10 +85,10 @@ public class PModeResource {
             return ResponseEntity.ok(message);
         } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage() + "\n" + StringUtils.join(e.getErrors(), "\n"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e) + "\n" + StringUtils.join(e.getErrors(), "\n"));
         } catch (Exception e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e));
         }
     }
 
@@ -111,9 +115,11 @@ public class PModeResource {
     public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
         ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
         rawConfiguration.setEntityId(0);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ssZ");
-        rawConfiguration.setDescription("Reverted to version of " + sdf.format(rawConfiguration.getConfigurationDate()));
         rawConfiguration.setConfigurationDate(new Date());
 
         String message = "PMode was successfully uploaded";

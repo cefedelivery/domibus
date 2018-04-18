@@ -227,10 +227,14 @@ public class BackendNotificationServiceTest {
             @Injectable final Queue queue) throws Exception {
 
         final String backendName = "customPlugin";
-
+        List<NotificationType> requiredNotifications = new ArrayList<>();
+        requiredNotifications.add(NotificationType.MESSAGE_RECEIVED);
         new Expectations(backendNotificationService) {{
             backendNotificationService.getNotificationListener(backendName);
             result = notificationListener;
+
+            notificationListener.getRequiredNotificationTypeList();
+            result = requiredNotifications;
 
             notificationListener.getBackendNotificationQueue();
             result = queue;

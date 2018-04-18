@@ -54,7 +54,7 @@ public class EbMS3Exception extends Exception {
      */
     //private final String description;
     public EbMS3Exception(final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
-        super(cause);
+        super(errorDetail, cause);
         this.ebMS3ErrorCode = ebMS3ErrorCode;
         this.errorDetail = errorDetail;
         this.refToMessageId = refToMessageId;
