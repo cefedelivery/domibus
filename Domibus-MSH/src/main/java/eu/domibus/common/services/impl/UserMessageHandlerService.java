@@ -67,7 +67,7 @@ public class UserMessageHandlerService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
 
     /** to be appended to messageId when saving to DB on receiver side */
-    public static final String SELF_SENDING_SUFFIX = "_1";
+    static final String SELF_SENDING_SUFFIX = "_1";
 
 
     private byte[] as4ReceiptXslBytes;
