@@ -298,6 +298,10 @@ export class PModeComponent implements OnInit, DirtyOperations {
     this.tableRows = array.slice();
     this.count--;
 
+    if (this.offset > 0 && this.isPageEmpty()) {
+      this.page(this.offset-1,this.rowLimiter.pageSize);
+    }
+
     setTimeout(() => {
       this.selected = [];
       this.enableSaveAndCancelButtons();
@@ -319,8 +323,28 @@ export class PModeComponent implements OnInit, DirtyOperations {
       this.count--;
     }
 
+    if (this.offset > 0 && this.isPageEmpty()) {
+      this.page(this.offset-1,this.rowLimiter.pageSize);
+    }
+
     this.enableSaveAndCancelButtons();
     this.selected = [];
+  }
+
+  /**
+   * Method return true if all elements this.tableRows
+   * are null or undefined or if is empty.
+   *
+   */
+  isPageEmpty() : boolean {
+    if (this.tableRows || this.tableRows.length) {
+      for (let i =0; i <this.tableRows.length; i++) {
+        if (this.tableRows[i]) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**

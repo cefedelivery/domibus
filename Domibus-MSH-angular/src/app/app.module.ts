@@ -68,6 +68,7 @@ import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
+import {ClearInvalidDirective} from "./customDate/clearInvalid.directive"
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -111,7 +112,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PmodeDirtyUploadComponent,
     AuditComponent,
     PartyComponent,
-    PartyDetailsComponent
+    PartyDetailsComponent,
+    ClearInvalidDirective
   ],
   entryComponents: [
     AppComponent,
