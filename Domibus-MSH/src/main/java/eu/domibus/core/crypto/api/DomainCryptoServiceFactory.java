@@ -8,5 +8,5 @@ import eu.domibus.api.multitenancy.Domain;
  */
 public interface DomainCryptoServiceFactory {
 
-    DomainCryptoService createDomainCertificateProvider(Domain domain);
+    DomainCryptoService createDomainCryptoService(Domain domain);
 }

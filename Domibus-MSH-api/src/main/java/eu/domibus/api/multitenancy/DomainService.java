@@ -23,4 +23,5 @@ public interface DomainService {
     String getGeneralSchema();
 
     String getSchedulerName(Domain domain);
+
 }

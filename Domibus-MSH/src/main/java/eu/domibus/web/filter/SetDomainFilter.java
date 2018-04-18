@@ -1,6 +1,8 @@
 package eu.domibus.web.filter;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.model.security.UserDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,16 +28,27 @@ public class SetDomainFilter extends GenericFilterBean {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated() && (authentication.getPrincipal() instanceof UserDetail)) {
             UserDetail securityUser = (UserDetail) authentication.getPrincipal();
-            domainContextProvider.setCurrentDomain(securityUser.getDomain());
+            domainContextProvider.setCurrentDomain(getCurrentDomain(securityUser));
 
         }
         chain.doFilter(request, response);
+    }
 
+    protected String getCurrentDomain(UserDetail securityUser) {
+        final boolean multiTenantAware = domibusConfigurationService.isMultiTenantAware();
+        String result = DomainService.DEFAULT_DOMAIN.getCode();
+        if (multiTenantAware) {
+            result = securityUser.getDomain();
+        }
+        return result;
     }
 }

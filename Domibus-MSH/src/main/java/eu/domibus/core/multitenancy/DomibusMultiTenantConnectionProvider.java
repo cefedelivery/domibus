@@ -52,7 +52,7 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
 
     @Override
     public Connection getConnection(String identifier) throws SQLException {
-        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         String databaseSchema = null;
         if (currentDomain != null) {
             LOG.debug("Getting schema for domain [{}]", currentDomain);

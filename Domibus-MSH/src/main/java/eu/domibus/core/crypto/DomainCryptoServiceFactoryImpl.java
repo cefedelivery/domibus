@@ -26,7 +26,7 @@ public class DomainCryptoServiceFactoryImpl implements DomainCryptoServiceFactor
     protected ApplicationContext applicationContext;
 
     @Override
-    public DomainCryptoService createDomainCertificateProvider(Domain domain) {
+    public DomainCryptoService createDomainCryptoService(Domain domain) {
         LOG.debug("Creating the certificate provider for domain [{}]", domain);
 
         return applicationContext.getBean(DomainCryptoServiceImpl.class, domain);

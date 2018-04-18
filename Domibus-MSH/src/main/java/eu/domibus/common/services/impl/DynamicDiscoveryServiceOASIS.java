@@ -101,14 +101,14 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         }
 
         LOG.debug("Load trustore for the smpClient");
-        KeyStore truststore = multiDomainCertificateProvider.getTrustStore(domainProvider.getCurrentDomain());
+        KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(domainProvider.getCurrentDomain());
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
 
             DynamicDiscoveryBuilder dynamicDiscoveryBuilder = DynamicDiscoveryBuilder.newInstance();
             dynamicDiscoveryBuilder
                     .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)));
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(trustStore, certRegex)));
 
             if (defaultProxy != null) {
                 dynamicDiscoveryBuilder
