@@ -6,9 +6,12 @@ import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Conditional(MultiTenantAwareEntityManagerCondition.class)
 @Component
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DomibusTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
 
     public static final String GENERAL_SCHEMA = "general_schema";
@@ -18,7 +21,7 @@ public class DomibusTenantIdentifierResolver implements CurrentTenantIdentifierR
 
     @Override
     public String resolveCurrentTenantIdentifier() {
-        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         if (currentDomain != null) {
             return currentDomain.getCode();
         }

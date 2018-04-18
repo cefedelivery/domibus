@@ -1,6 +1,8 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
@@ -45,7 +47,7 @@ public class AuthenticationResource {
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 
     @Autowired
-    private AuthenticationService authenticationService;
+    protected AuthenticationService authenticationService;
 
     @Qualifier("taskExecutor")
     @Autowired
@@ -56,6 +58,10 @@ public class AuthenticationResource {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
@@ -68,6 +74,7 @@ public class AuthenticationResource {
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
         String domain = getDomainForUser(loginRO.getUsername());
         LOG.debug("Determined domain [{}] for user [{}]", domain, loginRO.getUsername());
+        domainContextProvider.setCurrentDomain(domain);
 
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
         final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domain);
@@ -116,11 +123,15 @@ public class AuthenticationResource {
      * @return
      */
     protected String getDomainForUser(String user) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            LOG.debug("Using default domain for user [{}]", user);
+            return DomainService.DEFAULT_DOMAIN.getCode();
+        }
+        LOG.debug("Searching domain for user [{}]", user);
         Future<String> utrFuture = schedulingTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
         String domain = null;
         try {
             domain = utrFuture.get(3000L, TimeUnit.SECONDS);
-            domainContextProvider.setCurrentDomain(domain);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AuthenticationServiceException("Could not determine the domain for user [" + user + "]", e);
         }

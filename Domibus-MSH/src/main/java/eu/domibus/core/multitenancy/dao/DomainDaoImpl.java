@@ -29,17 +29,25 @@ public class DomainDaoImpl implements DomainDao {
     @Autowired
     protected DomainPropertyProvider domainPropertyProvider;
 
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public List<Domain> findAll() {
+        List<Domain> result = new ArrayList<>();
+        result.add(DomainService.DEFAULT_DOMAIN);
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return result;
+        }
+
         final String propertyValue = domainPropertyProvider.getPropertyValue(DomibusConfigurationService.DOMIBUS_CONFIG_LOCATION);
         File confDirectory = new File(propertyValue);
         final Collection<File> propertyFiles = FileUtils.listFiles(confDirectory, DOMAIN_FILE_EXTENSION, false);
 
-        List<Domain> result = new ArrayList<>();
+
         if (propertyFiles == null) {
             return result;
         }
-        result.add(DomainService.DEFAULT_DOMAIN);
         for (File propertyFile : propertyFiles) {
             final String fileName = propertyFile.getName();
             if (StringUtils.containsIgnoreCase(fileName, DOMAIN_FILE_SUFFIX)) {

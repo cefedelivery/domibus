@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.ErrorCode;
@@ -7,6 +8,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
 import org.apache.cxf.interceptor.Fault;
@@ -30,7 +32,10 @@ public class SetDomainInInterceptor extends AbstractSoapInterceptor {
     }
 
     @Autowired
-    DomainContextProvider domainContextProvider;
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
 
     protected SetDomainInInterceptor(String phase) {
         super(phase);
@@ -47,6 +52,16 @@ public class SetDomainInInterceptor extends AbstractSoapInterceptor {
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
         HttpServletRequest httpRequest = (HttpServletRequest) message.get("HTTP.REQUEST");
+        String domainCode = getDomainCode(httpRequest);
+        LOG.debug("Using domain [{}]", domainCode);
+        domainContextProvider.setCurrentDomain(domainCode);
+    }
+
+    protected String getDomainCode(HttpServletRequest httpRequest) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            LOG.debug("Domibus is not configured for multi-tenancy, using the default domain [{}]", DomainService.DEFAULT_DOMAIN.getCode());
+            return DomainService.DEFAULT_DOMAIN.getCode();
+        }
         String domainCode = null;
         try {
             domainCode = ServletRequestUtils.getStringParameter(httpRequest, "domain");
@@ -55,14 +70,14 @@ public class SetDomainInInterceptor extends AbstractSoapInterceptor {
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
         }
-        if (org.apache.commons.lang3.StringUtils.isEmpty(domainCode)) {
+        if (StringUtils.isEmpty(domainCode)) {
             LOG.debug("No domain specified. Using the default domain");
             domainCode = DomainService.DEFAULT_DOMAIN.getCode();
         }
-
-        LOG.debug("Using domain [{}]", domainCode);
-        domainContextProvider.setCurrentDomain(domainCode);
+        return domainCode;
     }
+
+
 }
 
 
