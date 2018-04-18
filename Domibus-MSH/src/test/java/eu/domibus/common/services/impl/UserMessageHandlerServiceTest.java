@@ -833,11 +833,11 @@ public class UserMessageHandlerServiceTest {
     public void testCheckTestMessage() {
 
         UserMessage userMessage = createSampleUserMessage();
-        Assert.assertFalse("Expecting false in test for ping message as valid data message is supplied ", userMessageHandlerService.checkTestMessage(userMessage));
+        Assert.assertFalse("Expecting false for test message as valid data message is supplied ", userMessageHandlerService.checkTestMessage(userMessage));
 
         userMessage.getCollaborationInfo().getService().setValue(Ebms3Constants.TEST_SERVICE);
         userMessage.getCollaborationInfo().setAction(Ebms3Constants.TEST_ACTION);
-        Assert.assertTrue("Expecting true for Check Ping Message with modified data", userMessageHandlerService.checkTestMessage(userMessage));
+        Assert.assertTrue("Expecting true for Check Test Message with modified data", userMessageHandlerService.checkTestMessage(userMessage));
     }
 
     @Test
