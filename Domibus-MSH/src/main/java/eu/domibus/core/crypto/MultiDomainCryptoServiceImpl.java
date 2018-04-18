@@ -54,7 +54,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
             synchronized (domainCertificateProviderMap) {
                 if (domainCertificateProvider == null) {
                     LOG.debug("Creating domain CertificateProvider for domain [{}]", domain);
-                    domainCertificateProvider = domainCertificateProviderFactory.createDomainCertificateProvider(domain);
+                    domainCertificateProvider = domainCertificateProviderFactory.createDomainCryptoService(domain);
                     domainCertificateProviderMap.put(domain, domainCertificateProvider);
                 }
             }

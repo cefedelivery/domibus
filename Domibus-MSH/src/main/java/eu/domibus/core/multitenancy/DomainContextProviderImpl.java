@@ -26,7 +26,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
     public Domain getCurrentDomain() {
         String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
         if (StringUtils.isEmpty(domainCode)) {
-            return null;
+            throw new DomainException("Could get current domain");
         }
         final Domain domain = domainService.getDomain(domainCode);
         if(domain == null) {
