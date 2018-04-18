@@ -410,7 +410,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
    */
   getActivePMode() {
     if (!isNullOrUndefined(PModeComponent.PMODE_URL)) {
-      this.http.get(PModeComponent.PMODE_URL + "/" + this.actualId).subscribe(res => {
+      this.http.get(PModeComponent.PMODE_URL + "/" + this.actualId + "?noAudit=true ").subscribe(res => {
 
         const HTTP_OK = 200;
         if (res.status == HTTP_OK) {
