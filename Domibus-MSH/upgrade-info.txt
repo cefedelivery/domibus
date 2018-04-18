@@ -23,6 +23,8 @@ Domibus 4.0 (from 3.3):
                      o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
                         - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+Domibus 3.3.3 (from 3.3.2):
+                - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
 Domibus 3.3.2 (from 3.3.1):
                 - In the file "\conf\domibus\domibus.properties" add the following properties :
                     o in the security section:

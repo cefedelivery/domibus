@@ -131,14 +131,10 @@ public class BackendMessageValidator {
      * @param to
      * @throws EbMS3Exception
      */
-    public void validateParties(Party from, Party to) throws EbMS3Exception {
+    public void validateParties(Party from, Party to) {
 
         Validate.notNull(from, "Initiator party was not found");
         Validate.notNull(to, "Responder party was not found");
-
-        if (from.equals(to)) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "The initiator party's name is the same as the responder party's one[" + from.getName() + "]", null, null);
-        }
     }
 
 
@@ -166,14 +162,10 @@ public class BackendMessageValidator {
      * @param to
      * @throws EbMS3Exception
      */
-    public void validateResponderParty(Party gatewayParty, Party to) throws EbMS3Exception {
+    public void validateResponderParty(Party gatewayParty, Party to) {
 
         Validate.notNull(gatewayParty, "Access point party was not found");
         Validate.notNull(to, "Responder party was not found");
-
-        if (gatewayParty.equals(to)) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "It is forbidden to submit a message to the sending access point[" + to.getName() + "]", null, null);
-        }
     }
 
     /**
