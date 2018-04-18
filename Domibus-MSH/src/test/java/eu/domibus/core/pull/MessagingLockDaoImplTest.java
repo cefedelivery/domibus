@@ -9,13 +9,11 @@ import org.junit.runner.RunWith;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import static org.junit.Assert.*;
-
 @RunWith(JMockit.class)
 public class MessagingLockDaoImplTest {
 
     @Injectable
-    private GetNextMessageProcedure getNextMessageProcedure;
+    private NextPullMessageProcedure nextPullMessageProcedure;
 
     @Injectable
     private EntityManager entityManager;
@@ -32,7 +30,7 @@ public class MessagingLockDaoImplTest {
         messagingLockDao.getNextPullMessageToProcess(messageType, initiator, mpc);
 
         new Verifications(){{
-            getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
+            nextPullMessageProcedure.callProcedure(messageType, initiator, mpc);
         }};
     }
 

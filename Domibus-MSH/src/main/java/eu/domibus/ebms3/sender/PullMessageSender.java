@@ -4,7 +4,7 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.System;
+import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -76,13 +76,13 @@ public class PullMessageSender {
     private PolicyService policyService;
 
     @Autowired
-    private System system;
+    private DomibusInitializationHelper domibusInitializationHelper;
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
-        if(system.isNotReady()){
+        if(domibusInitializationHelper.isNotReady()){
             return;
         }
         boolean notifiyBusinessOnError = false;

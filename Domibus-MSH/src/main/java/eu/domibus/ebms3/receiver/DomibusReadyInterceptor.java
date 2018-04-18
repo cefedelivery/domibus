@@ -1,6 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.common.System;
+import eu.domibus.common.DomibusInitializationHelper;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DomibusReadyInterceptor extends AbstractPhaseInterceptor {
 
     @Autowired
-    private System system;
+    private DomibusInitializationHelper domibusInitializationHelper;
 
     public DomibusReadyInterceptor() {
         super("receive");
@@ -22,7 +22,7 @@ public class DomibusReadyInterceptor extends AbstractPhaseInterceptor {
 
     @Override
     public void handleMessage(Message message) throws Fault {
-        if (system.isNotReady()) {
+        if (domibusInitializationHelper.isNotReady()) {
             throw new Fault(new IllegalStateException("Server starting"));
         }
     }

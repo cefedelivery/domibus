@@ -27,11 +27,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     private EntityManager entityManager;
 
     @Autowired
-    private GetNextMessageProcedure getNextMessageProcedure;
+    private NextPullMessageProcedure nextPullMessageProcedure;
 
     @Override
     public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
-        String messageId = getNextMessageProcedure.callProcedure(messageType, initiator, mpc);
+        String messageId = nextPullMessageProcedure.callProcedure(messageType, initiator, mpc);
         if (messageId != null) {
             LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]", messageId, messageType, initiator, mpc);
         }
