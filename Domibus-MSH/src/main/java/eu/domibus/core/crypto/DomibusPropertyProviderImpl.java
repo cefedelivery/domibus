@@ -2,7 +2,7 @@ package eu.domibus.core.crypto;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.property.PropertyResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,8 @@ import java.util.Properties;
  * @author Cosmin Baciu
  * @since 4.0
  */
-@Service("domainPropertyProvider")
-public class DomainPropertyProviderImpl implements DomainPropertyProvider {
+@Service
+public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
     @Autowired
     @Qualifier("domibusProperties")

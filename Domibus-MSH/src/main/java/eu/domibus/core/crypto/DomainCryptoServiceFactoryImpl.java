@@ -5,7 +5,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.DomainCryptoServiceFactory;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class DomainCryptoServiceFactoryImpl implements DomainCryptoServiceFactor
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainCryptoServiceFactoryImpl.class);
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected ApplicationContext applicationContext;

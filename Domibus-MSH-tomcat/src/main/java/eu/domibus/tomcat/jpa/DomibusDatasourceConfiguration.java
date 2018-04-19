@@ -1,7 +1,7 @@
 package eu.domibus.tomcat.jpa;
 
 import com.atomikos.jdbc.AtomikosDataSourceBean;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.spring.PrefixedProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,21 +23,21 @@ public class DomibusDatasourceConfiguration {
     protected Properties domibusProperties;
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Bean(name = "domibusJDBC-XADataSource", initMethod = "init", destroyMethod = "close")
     @DependsOn("userTransactionService")
     public AtomikosDataSourceBean domibusXADatasource() {
         AtomikosDataSourceBean dataSource = new AtomikosDataSourceBean();
         dataSource.setUniqueResourceName("domibusJDBC-XA");
-        final String xaDataSourceClassName = domainPropertyProvider.getPropertyValue("domibus.datasource.xa.xaDataSourceClassName");
+        final String xaDataSourceClassName = domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.xaDataSourceClassName");
         dataSource.setXaDataSourceClassName(xaDataSourceClassName);
         dataSource.setXaProperties(xaProperties());
-        final Integer minPoolSize = Integer.parseInt(domainPropertyProvider.getPropertyValue("domibus.datasource.xa.minPoolSize", "5"));
+        final Integer minPoolSize = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.minPoolSize", "5"));
         dataSource.setMinPoolSize(minPoolSize);
-        final Integer maxPoolSize = Integer.parseInt(domainPropertyProvider.getPropertyValue("domibus.datasource.xa.maxPoolSize", "100"));
+        final Integer maxPoolSize = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.maxPoolSize", "100"));
         dataSource.setMaxPoolSize(maxPoolSize);
-        final Integer maxLifeTime = Integer.parseInt(domainPropertyProvider.getPropertyValue("domibus.datasource.xa.maxLifetime", "60"));
+        final Integer maxLifeTime = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.maxLifetime", "60"));
         dataSource.setMaxLifetime(maxLifeTime);
 
         return dataSource;

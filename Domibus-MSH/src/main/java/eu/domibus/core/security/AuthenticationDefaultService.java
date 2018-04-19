@@ -27,9 +27,9 @@ public class AuthenticationDefaultService implements AuthenticationService {
     protected static final String CLIENT_CERT_HEADER_KEY = "Client-Cert";
     protected static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
+
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected AuthUtils authUtils;
 
     @Autowired
     @Qualifier("securityCustomAuthenticationProvider")
@@ -40,7 +40,7 @@ public class AuthenticationDefaultService implements AuthenticationService {
         LOG.debug("Authenticating for " + httpRequest.getRequestURI());
 
         /* id domibus allows unsecure login, do not authenticate anymore, just go on */
-        if ("true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"))) {
+        if(authUtils.isUnsecureLoginAllowed()) {
             LOG.securityInfo(DomibusMessageCode.SEC_UNSECURED_LOGIN_ALLOWED);
             return;
         }

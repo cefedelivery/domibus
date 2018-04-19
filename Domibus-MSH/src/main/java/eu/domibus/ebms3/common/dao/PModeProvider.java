@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
@@ -9,7 +10,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
-import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -24,6 +24,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +82,9 @@ public abstract class PModeProvider {
     private JmsOperations jmsOperations;
 
     @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
     XMLUtil xmlUtil;
 
     @Autowired
@@ -97,7 +101,7 @@ public abstract class PModeProvider {
 
     public byte[] getPModeFile(int id) {
         final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
-        if(rawConfiguration != null) {
+        if (rawConfiguration != null) {
             return rawConfiguration.getXml();
         }
         return new byte[0];
@@ -193,7 +197,7 @@ public abstract class PModeProvider {
         final String action;
         final String leg;
 
-        final String messageId =  userMessage.getMessageInfo().getMessageId();
+        final String messageId = userMessage.getMessageInfo().getMessageId();
         //add messageId to MDC map
         if (StringUtils.isNotBlank(messageId)) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
@@ -234,6 +238,7 @@ public abstract class PModeProvider {
         public Message createMessage(Session session) throws JMSException {
             Message m = session.createMessage();
             m.setStringProperty(Command.COMMAND, Command.RELOAD_PMODE);
+            m.setStringProperty(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode());
             return m;
         }
     }

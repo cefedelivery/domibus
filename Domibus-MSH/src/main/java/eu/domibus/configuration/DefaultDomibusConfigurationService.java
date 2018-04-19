@@ -2,7 +2,7 @@ package eu.domibus.configuration;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class DefaultDomibusConfigurationService implements DomibusConfigurationService {
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public String getConfigLocation() {
@@ -25,6 +25,6 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     //TODO add caching
     @Override
     public boolean isMultiTenantAware() {
-        return StringUtils.isNotEmpty(domainPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY));
+        return StringUtils.isNotEmpty(domibusPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY));
     }
 }

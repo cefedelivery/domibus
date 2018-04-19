@@ -5,6 +5,7 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
@@ -62,6 +63,9 @@ public class NotificationListenerService implements MessageListener, JmsListener
     @Autowired
     private Properties domibusProperties;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
     private BackendConnector backendConnector;
@@ -104,6 +108,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         this.backendConnector = backendConnector;
     }
 
+    @MDCKey({DomibusLogger.MDC_MESSAGE_ID, DomibusLogger.MDC_DOMAIN})
     @Transactional
     public void onMessage(final Message message) {
         if (!authUtils.isUnsecureLoginAllowed()) {
@@ -112,6 +117,12 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
+            final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
+            LOG.debug("Processing message ID [{}] for domain [{}]", messageId, domainCode);
+            domainContextProvider.setCurrentDomain(domainCode);
+
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
 
             LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");

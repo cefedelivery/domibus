@@ -4,7 +4,7 @@ package eu.domibus.core.multitenancy.dao;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class DomainDaoImpl implements DomainDao {
     private static final String DOMAIN_FILE_SUFFIX = "-domibus";
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
@@ -40,7 +40,7 @@ public class DomainDaoImpl implements DomainDao {
             return result;
         }
 
-        final String propertyValue = domainPropertyProvider.getPropertyValue(DomibusConfigurationService.DOMIBUS_CONFIG_LOCATION);
+        final String propertyValue = domibusPropertyProvider.getPropertyValue(DomibusConfigurationService.DOMIBUS_CONFIG_LOCATION);
         File confDirectory = new File(propertyValue);
         final Collection<File> propertyFiles = FileUtils.listFiles(confDirectory, DOMAIN_FILE_EXTENSION, false);
 

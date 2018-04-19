@@ -1,10 +1,13 @@
 package eu.domibus.ebms3.security.util;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,10 +16,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Properties;
 
 @Component(value = "authUtils")
 public class AuthUtilsImpl implements AuthUtils {
@@ -25,8 +26,11 @@ public class AuthUtilsImpl implements AuthUtils {
 
     private static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
 
     /**
      * Returns the original user passed via the security context OR
@@ -70,8 +74,12 @@ public class AuthUtilsImpl implements AuthUtils {
 
     @Override
     public boolean isUnsecureLoginAllowed() {
+        if(domibusConfigurationService.isMultiTenantAware()) {
+            LOG.debug("Unsecured login not allowed: Domibus is running in multi-tenancy mode");
+            return false;
+        }
         /* unsecured login allowed */
-        return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
+        return "true".equals(domibusPropertyProvider.getPropertyValue(UNSECURE_LOGIN_ALLOWED, "true"));
     }
 
     @Override

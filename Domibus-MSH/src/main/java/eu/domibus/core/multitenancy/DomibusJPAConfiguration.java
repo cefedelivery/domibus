@@ -1,6 +1,6 @@
 package eu.domibus.core.multitenancy;
 
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.spring.PrefixedProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.MultiTenancyStrategy;
@@ -32,7 +32,7 @@ public class DomibusJPAConfiguration {
     protected Properties domibusProperties;
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Qualifier("domibusJDBC-XADataSource")
     @Autowired
@@ -49,7 +49,7 @@ public class DomibusJPAConfiguration {
                                                                        Optional<CurrentTenantIdentifierResolver> tenantIdentifierResolver)  {
         LocalContainerEntityManagerFactoryBean result = new LocalContainerEntityManagerFactoryBean();
         result.setPersistenceUnitName("domibusJTA");
-        final String packagesToScanString = domainPropertyProvider.getPropertyValue("domibus.entityManagerFactory.packagesToScan");
+        final String packagesToScanString = domibusPropertyProvider.getPropertyValue("domibus.entityManagerFactory.packagesToScan");
         if(StringUtils.isNotEmpty(packagesToScanString)) {
             final String[] packagesToScan = StringUtils.split(packagesToScanString, ",");
             result.setPackagesToScan(packagesToScan);

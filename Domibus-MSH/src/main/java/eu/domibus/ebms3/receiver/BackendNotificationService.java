@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
@@ -94,6 +95,9 @@ public class BackendNotificationService {
     @Autowired
     private DomainCoreConverter coreConverter;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
 
@@ -143,7 +147,7 @@ public class BackendNotificationService {
             LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
             String finalRecipient = getFinalRecipient(userMessage);
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
-            jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties).createMessage(), unknownReceiverQueue);
+            jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties, domainContextProvider.getCurrentDomain()).createMessage(), unknownReceiverQueue);
             return;
         }
 
@@ -273,7 +277,7 @@ public class BackendNotificationService {
             LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
         }
         LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties, domainContextProvider.getCurrentDomain()).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
     public void notifyOfSendFailure(final String messageId) {

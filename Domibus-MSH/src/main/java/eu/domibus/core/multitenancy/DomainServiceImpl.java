@@ -2,7 +2,7 @@ package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.multitenancy.dao.DomainDao;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.List;
 public class DomainServiceImpl implements DomainService {
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected DomainDao domainDao;
@@ -54,12 +54,12 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public String getDatabaseSchema(Domain domain) {
-        return domainPropertyProvider.getPropertyValue(domain, "domibus.database.schema");
+        return domibusPropertyProvider.getPropertyValue(domain, "domibus.database.schema");
     }
 
     @Override
     public String getGeneralSchema() {
-        return domainPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY);
+        return domibusPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY);
     }
 
     @Override

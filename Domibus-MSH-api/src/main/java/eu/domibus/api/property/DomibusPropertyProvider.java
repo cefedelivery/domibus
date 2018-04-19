@@ -1,4 +1,4 @@
-package eu.domibus.core.crypto.api;
+package eu.domibus.api.property;
 
 import eu.domibus.api.multitenancy.Domain;
 
@@ -6,7 +6,7 @@ import eu.domibus.api.multitenancy.Domain;
  * @author Cosmin Baciu
  * @since 4.0
  */
-public interface DomainPropertyProvider {
+public interface DomibusPropertyProvider {
 
     String getPropertyValue(String propertyName);
 

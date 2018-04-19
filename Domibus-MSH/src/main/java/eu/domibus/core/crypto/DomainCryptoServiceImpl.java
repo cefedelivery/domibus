@@ -10,7 +10,7 @@ import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.core.crypto.api.DomainCryptoService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
@@ -51,7 +51,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Autowired
-    DomainPropertyProvider domainPropertyProvider;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     CertificateService certificateService;
@@ -81,7 +81,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public String getPrivateKeyPassword(String alias) {
-        return domainPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.password");
+        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.password");
     }
 
     @Override
@@ -175,10 +175,10 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     protected Properties getKeystoreProperties(Domain domain) {
-        final String keystoreType = domainPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.type");
-        final String keystorePassword = domainPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.password");
-        final String privateKeyAlias = domainPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.alias");
-        final String keystoreLocation = domainPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.keystore.location");
+        final String keystoreType = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.type");
+        final String keystorePassword = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.password");
+        final String privateKeyAlias = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.alias");
+        final String keystoreLocation = domibusPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.keystore.location");
 
         Properties result = new Properties();
         result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_TYPE, keystoreType);
@@ -208,15 +208,15 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     protected String getTrustStoreLocation() {
-        return domainPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.truststore.location");
+        return domibusPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.truststore.location");
     }
 
     protected String getTrustStorePassword() {
-        return domainPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.password");
+        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.password");
     }
 
     protected String getTrustStoreType() {
-        return domainPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.type");
+        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.type");
     }
 
     protected void signalTrustStoreUpdate() {
