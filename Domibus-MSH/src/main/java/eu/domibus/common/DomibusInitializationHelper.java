@@ -37,7 +37,7 @@ public class DomibusInitializationHelper {
             return true;
         }
         final AssertionBuilderFactory assertionBuilderFactory = extension.getAssertionBuilderFactory();
-        cxfInitiated = (assertionBuilderFactory == null);
-        return cxfInitiated;
+        cxfInitiated = (assertionBuilderFactory != null);
+        return !cxfInitiated;
     }
 }
