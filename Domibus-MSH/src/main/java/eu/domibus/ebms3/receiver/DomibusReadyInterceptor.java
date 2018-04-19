@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * @author Thomas Dussart
  * @since 3.3.4
+ *
+ * First in interceptor, verifies that the system is ready for incoming request.
+ * @see DomibusInitializationHelper for more details.
  */
 
 public class DomibusReadyInterceptor extends AbstractPhaseInterceptor {

@@ -52,7 +52,6 @@ public class MessagingLock extends AbstractBaseEntity {
     @NotNull
     private String mpc;
 
-
     public MessagingLock(final String messageId,final String initiator,final String mpc) {
         this.received = new Date();
         this.messageId = messageId;
@@ -105,7 +104,6 @@ public class MessagingLock extends AbstractBaseEntity {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(super.hashCode(), messageType, received, messageState, messageId, initiator, mpc);
     }
 

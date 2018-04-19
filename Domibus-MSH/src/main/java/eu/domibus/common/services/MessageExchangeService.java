@@ -18,6 +18,7 @@ public interface MessageExchangeService {
     /**
      * This method with analyse the messageExchange in order to find if the message should be pushed of pulled.
      * The status will be set in messageExchangeContext.
+     *
      * @param messageExchangeConfiguration the message configuration used to retrieve the associated process.
      * @return the status of the message.
      */
@@ -50,6 +51,7 @@ public interface MessageExchangeService {
     /**
      * When a pull request comes in, there is very litle information.  From this information we retrieve
      * the initiator, the responder and the pull process leg configuration from wich we can retrieve security information
+     *
      * @param mpcQualifiedName the mpc attribute within the pull request.
      * @return a pullcontext with all the information needed to continue with the pull process.
      */
@@ -58,7 +60,8 @@ public interface MessageExchangeService {
     /**
      * In case of a pull message, the output soap envelope needs to be saved in order to be saved in order to check the
      * non repudiation.
-     * @param rawXml the soap envelope
+     *
+     * @param rawXml    the soap envelope
      * @param messageId the user message
      */
 

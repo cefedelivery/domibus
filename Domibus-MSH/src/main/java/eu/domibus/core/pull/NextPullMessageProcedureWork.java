@@ -35,9 +35,6 @@ public class NextPullMessageProcedureWork implements Work {
             stmt.registerOutParameter(4, Types.VARCHAR);
             stmt.executeUpdate();
             messageId = stmt.getString(4);
-            /*if (stmt.wasNull()) {
-                messageId = null;
-            }*/
         }
     }
 

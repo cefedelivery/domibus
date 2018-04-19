@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 /**
  * @author Thomas Dussart
+ * @see org.apache.cxf.ws.policy.PolicyBuilderImpl
  * @since 3.3.4
  * <p>
  * This class ensure that the system is ready to start sending and receiving.
@@ -19,8 +20,6 @@ import javax.annotation.PostConstruct;
  * the setBus method which will set the factory (protected member of superclass). If messages are received between
  * the two operations, a nullpointer is triggered. This class ensure that the system is properly initialize before sending
  * or receiving messages.
- *
- * @see org.apache.cxf.ws.policy.PolicyBuilderImpl
  */
 
 @Component
@@ -38,7 +37,7 @@ public class DomibusInitializationHelper {
             return true;
         }
         final AssertionBuilderFactory assertionBuilderFactory = extension.getAssertionBuilderFactory();
-        cxfInitiated= (assertionBuilderFactory == null);
+        cxfInitiated = (assertionBuilderFactory == null);
         return cxfInitiated;
     }
 }

@@ -110,7 +110,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             policyName = legConfiguration.getSecurity().getPolicy();
             Policy policy = policyService.parsePolicy("policies"+File.separator + policyName);
 
-            LOG.businessDebug(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
+            LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
             message.put(PolicyConstants.POLICY_OVERRIDE, policy);

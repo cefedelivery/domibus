@@ -39,7 +39,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     }
 
     @Override
-    public void save(MessagingLock messagingLock) {
+    public void save(final MessagingLock messagingLock) {
         entityManager.persist(messagingLock);
     }
 

@@ -28,7 +28,7 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
         TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("RawDto.findByMessageId", RawEnvelopeDto.class);
-        namedQuery.setParameter("MESSAGE_ID",messageId);
+        namedQuery.setParameter("MESSAGE_ID", messageId);
         try {
             return namedQuery.getSingleResult();
         } catch (NoResultException nr) {
@@ -44,7 +44,7 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
      */
     public void deleteUserMessageRawEnvelope(final String messageId) {
         Query query = em.createNamedQuery("Raw.deleteByMessageID");
-        query.setParameter(MESSAGE_ID,messageId);
+        query.setParameter(MESSAGE_ID, messageId);
         query.executeUpdate();
     }
 
