@@ -216,7 +216,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         //this code is needed because setting the message in pull failed occurs in another transaction, meaning that
-        //the locked message can not be deleted in the new transaction. Once the both the pull
+        //the locked message can not be deleted in the new transaction. Once both the pull
         //and the set pull failed transaction are completed, the message is unlocked and can be retrieved again to be pulled, but because
         //the status is now pull failed, the message is deleted.
         MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
@@ -263,6 +263,15 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         return rawXmlByMessageId;
     }
 
+    /**
+     * This method is a bit weird as we delete and save a xml message for the same message id.
+     * Saving the raw xml message in the case of the pull is occuring on the last outgoing interceptor in order
+     * to have all the cxf message modification saved (reliability check.) Unfortunately this saving is not done in the
+     * same transaction.
+     *
+     * @param rawXml    the soap envelope
+     * @param messageId the user message
+     */
     @Override
     @Transactional
     public void removeAndSaveRawXml(String rawXml, String messageId) {
