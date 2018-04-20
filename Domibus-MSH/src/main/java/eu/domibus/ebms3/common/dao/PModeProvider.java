@@ -107,7 +107,7 @@ public abstract class PModeProvider {
     }
 
     public void removePMode(int id) {
-        LOG.debug("Removing PMode with id:" + id);
+        LOG.debug("Removing PMode with id: [{}]", id);
         configurationRawDAO.deleteById(id);
     }
 
@@ -311,6 +311,6 @@ public abstract class PModeProvider {
 
     public abstract List<Party> findAllParties();
 
-    public abstract List<String> findPartyNamesByServiceAndAction(final String service, final String action) throws EbMS3Exception;
+    public abstract List<String> findPartyIdByServiceAndAction(final String service, final String action) throws EbMS3Exception;
 
 }

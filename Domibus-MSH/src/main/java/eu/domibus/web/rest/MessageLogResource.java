@@ -225,38 +225,45 @@ public class MessageLogResource {
     }
 
     @RequestMapping(value = "lastTestSent", method = RequestMethod.GET)
-    public TestServiceMessageInfoRO getLastTestSent(@RequestParam(value = "partyId") String partyId) {
+    public ResponseEntity<TestServiceMessageInfoRO> getLastTestSent(@RequestParam(value = "partyId") String partyId) {
         LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
 
         String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
         UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(userMessageId);
 
-        TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
-        testServiceMessageInfoRO.setMessageId(userMessageId);
-        testServiceMessageInfoRO.setTimeReceived(userMessageByMessageId.getMessageInfo().getTimestamp());
-        testServiceMessageInfoRO.setPartyId(partyId);
-        Party party = partyDao.findById(partyId);
-        testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+        if (userMessageByMessageId != null) {
+            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+            testServiceMessageInfoRO.setMessageId(userMessageId);
+            testServiceMessageInfoRO.setTimeReceived(userMessageByMessageId.getMessageInfo().getTimestamp());
+            testServiceMessageInfoRO.setPartyId(partyId);
+            Party party = partyDao.findById(partyId);
+            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
 
-        return testServiceMessageInfoRO;
+            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @RequestMapping(value = "lastTestReceived", method = RequestMethod.GET)
-    public TestServiceMessageInfoRO getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
+    public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
         String signalMessageId = messaging.getSignalMessage().getMessageInfo().getMessageId();
-        SignalMessage signalMessage = messagingDao.findSignalMessageByMessageId(signalMessageId);
+        SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
 
-        TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
-        testServiceMessageInfoRO.setMessageId(signalMessageId);
-        testServiceMessageInfoRO.setTimeReceived(signalMessage.getMessageInfo().getTimestamp());
+        if(signalMessageByMessageId != null) {
+            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+            testServiceMessageInfoRO.setMessageId(signalMessageId);
+            testServiceMessageInfoRO.setTimeReceived(signalMessageByMessageId.getMessageInfo().getTimestamp());
+            Party party = partyDao.findById(partyId);
+            testServiceMessageInfoRO.setPartyId(partyId);
+            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
 
-        Party party = partyDao.findById(partyId);
-        testServiceMessageInfoRO.setPartyId(partyId);
-        testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+        }
 
-        return testServiceMessageInfoRO;
+        return ResponseEntity.notFound().build();
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {

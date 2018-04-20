@@ -271,7 +271,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcName);
 
         return 0;
     }
@@ -284,7 +284,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcURI);
 
         return 0;
     }
@@ -297,7 +297,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcName);
 
         return -1;
     }
@@ -310,7 +310,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
+        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcURI);
 
         return -1;
     }
@@ -407,8 +407,25 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    public List<String> findPartyNamesByServiceAndAction(String service, String action) {
-        // not used
-        return new ArrayList<>();
+    public List<String> findPartyIdByServiceAndAction(String service, String action) {
+        List result = new ArrayList<String>();
+        for(Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+            for(LegConfiguration legConfiguration : process.getLegs()) {
+                result.addAll(handleLegConfiguration(legConfiguration, process, service, action));
+            }
+        }
+        return result;
+    }
+
+    private List<String> handleLegConfiguration(LegConfiguration legConfiguration, Process process, String service, String action) {
+        List result = new ArrayList<String>();
+        if (legConfiguration.getService().getValue().equals(service) && legConfiguration.getAction().getValue().equals(action)) {
+            for (Party party : process.getResponderParties()) {
+                for(Identifier identifier : party.getIdentifiers()) {
+                    result.add(identifier.getPartyId());
+                }
+            }
+        }
+        return result;
     }
 }

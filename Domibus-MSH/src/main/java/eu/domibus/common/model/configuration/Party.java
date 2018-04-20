@@ -107,6 +107,10 @@ public class Party extends AbstractBaseEntity {
         return this.identifiers;
     }
 
+    public void setIdentifiers(Set<Identifier> identifiers) {
+        this.identifiers = identifiers;
+    }
+
     /**
      * Gets the value of the name property.
      *

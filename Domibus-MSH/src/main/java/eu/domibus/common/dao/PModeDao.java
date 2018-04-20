@@ -30,6 +30,9 @@ import java.util.List;
 public class PModeDao extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PModeDao.class);
+    private static final String STR_ACTION = "ACTION";
+    private static final String STR_SERVICE = "SERVICE";
+    private static final String STR_NO_MATCHING_LEG_FOUND = "No matching leg found";
 
     @Autowired
     private PartyDao partyDao;
@@ -102,9 +105,9 @@ public class PModeDao extends PModeProvider {
     }
 
 
-    @Override //nothing to init here
+    @Override
     public void init() {
-
+        //nothing to init here
     }
 
     protected String findLegName(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action) throws EbMS3Exception {
@@ -119,7 +122,7 @@ public class PModeDao extends PModeProvider {
                 final List<Process> resultList = processDao.findPullProcessByLegName(legNameInPullProcess);
                 //if not pull process found then this is a miss configuration.
                 if (resultList.isEmpty()) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
                 }
                 return legNameInPullProcess;
             } catch (EbMS3Exception e1) {
@@ -164,8 +167,8 @@ public class PModeDao extends PModeProvider {
             }
         }
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
-        query.setParameter("SERVICE", service);
-        query.setParameter("ACTION", action);
+        query.setParameter(STR_SERVICE, service);
+        query.setParameter(STR_ACTION, action);
         final Collection<String> candidateIds = new HashSet<>();
         for (final LegConfiguration candidate : candidates) {
             candidateIds.add(candidate.getName());
@@ -174,7 +177,7 @@ public class PModeDao extends PModeProvider {
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
         }
     }
 
@@ -201,7 +204,7 @@ public class PModeDao extends PModeProvider {
         }
 
         final TypedQuery<String> query = this.entityManager.createNamedQuery("Action.findByAction", String.class);
-        query.setParameter("ACTION", action);
+        query.setParameter(STR_ACTION, action);
         try {
             return query.getSingleResult();
         } catch (final NoResultException e) {
@@ -218,14 +221,14 @@ public class PModeDao extends PModeProvider {
             try {
                 URI.create(value); //if not an URI an IllegalArgumentException will be thrown
                 query = entityManager.createNamedQuery("Service.findWithoutType", String.class);
-                query.setParameter("SERVICE", value);
+                query.setParameter(STR_SERVICE, value);
             } catch (final IllegalArgumentException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SERVICE_INVALID_URI, value);
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Service " + value + " is not a valid URI [CORE]", null, e);
             }
         } else {
             query = this.entityManager.createNamedQuery("Service.findByServiceAndType", String.class);
-            query.setParameter("SERVICE", value);
+            query.setParameter(STR_SERVICE, value);
             query.setParameter("TYPE", type);
         }
         try {
@@ -239,7 +242,7 @@ public class PModeDao extends PModeProvider {
     protected String findPartyName(final Collection<PartyId> partyIds) throws EbMS3Exception {
         Identifier identifier;
         for (final PartyId partyId : partyIds) {
-            LOG.debug("Trying to find party [" + partyId + "]");
+            LOG.debug("Trying to find party [{}]", partyId);
             try {
                 String type = partyId.getType();
                 if (type == null || type.isEmpty()) { //PartyId must be an URI
@@ -256,7 +259,7 @@ public class PModeDao extends PModeProvider {
                 identifierQuery.setParameter("PARTY_ID", partyId.getValue());
                 identifierQuery.setParameter("PARTY_ID_TYPE", type);
                 identifier = identifierQuery.getSingleResult();
-                LOG.debug("Found identifier [" + identifier + "]");
+                LOG.debug("Found identifier [{}]", identifier);
                 final TypedQuery<String> query = this.entityManager.createNamedQuery("Party.findPartyByIdentifier", String.class);
                 query.setParameter("PARTY_IDENTIFIER", identifier);
 
@@ -284,7 +287,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcName);
             return 0;
         }
 
@@ -300,7 +303,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
+            LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcURI);
             return 0;
         }
 
@@ -316,7 +319,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcName);
             return 0;
         }
 
@@ -332,7 +335,7 @@ public class PModeDao extends PModeProvider {
         final Mpc result = query.getSingleResult();
 
         if (result == null) {
-            LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
+            LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcURI);
             return 0;
         }
 
@@ -401,16 +404,16 @@ public class PModeDao extends PModeProvider {
 
 
     @Override
-    public List<String> findPartyNamesByServiceAndAction(final String service, final String action) throws EbMS3Exception {
+    public List<String> findPartyIdByServiceAndAction(final String service, final String action) throws EbMS3Exception {
         LegConfiguration legConfiguration;
         // get the leg which contains the service and action
         final TypedQuery<LegConfiguration> query = this.entityManager.createNamedQuery("LegConfiguration.findForTestService", LegConfiguration.class);
-        query.setParameter("SERVICE", service);
-        query.setParameter("ACTION", action);
+        query.setParameter(STR_SERVICE, service);
+        query.setParameter(STR_ACTION, action);
         try {
             legConfiguration = query.getSingleResult();
         } catch (final NoResultException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No matching leg found", null, null);
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
         }
 
         final List<Process> processByLegName = processDao.findProcessByLegName(legConfiguration.getName());

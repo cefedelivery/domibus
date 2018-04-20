@@ -146,7 +146,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "No matching dynamic discovery processes found for message.", userMessage.getMessageInfo().getMessageId(), null);
         }
 
-        LOG.info("Found " + candidates.size() + " dynamic discovery candidates. MSHRole: " + mshRole);
+        LOG.info("Found [{}] dynamic discovery candidates. MSHRole: [{}]", candidates.size(), mshRole);
 
         if(MSHRole.RECEIVING.equals(mshRole)) {
             PartyId fromPartyId = getFromPartyId(userMessage);
@@ -197,7 +197,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     protected synchronized Party updateConfigurationParty(String name, String type, String endpoint) {
-        LOG.info("Update the configuration party with: " + name + " " + type + " " + endpoint);
+        LOG.info("Update the configuration party with [{}] [{}] [{}]", name, type, endpoint);
         // update the list of party types
         PartyIdType configurationType = updateConfigurationType(type);
 
@@ -225,7 +225,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             }
         }
 
-        LOG.debug("New endpoint is " + newEndpoint);
+        LOG.debug("New endpoint is [{}]", newEndpoint);
         Party newConfigurationParty = buildNewConfigurationParty(name, configurationType, newEndpoint);
         LOG.debug("Add new configuration party: " + newConfigurationParty.getName());
         getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
@@ -255,13 +255,13 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         PartyIdType configurationType = null;
         for (final PartyIdType t : partyIdTypes) {
             if (StringUtils.equalsIgnoreCase(t.getValue(), type)) {
-                LOG.debug("PartyIdType exists in the pmode: " + type);
+                LOG.debug("PartyIdType exists in the pmode [{}]", type);
                 configurationType = t;
             }
         }
         // add to partyIdType list
         if (configurationType == null) {
-            LOG.debug("Add new PartyIdType: " + type);
+            LOG.debug("Add new PartyIdType [{}]", type);
             configurationType = new PartyIdType();
             configurationType.setName(type);
             configurationType.setValue(type);
@@ -310,7 +310,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             //parse certificate for common name = toPartyId
             cn = certificateService.extractCommonName(certificate);
-            LOG.debug("Extracted the common name: " + cn);
+            LOG.debug("Extracted the common name [{}]", cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Error while extracting CommonName from certificate", null, e);
@@ -364,7 +364,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         for (final Process process : processes) {
             if (matchProcess(process, mshRole)) {
-                LOG.debug("Process matched: " + process.getName() + "  " + mshRole);
+                LOG.debug("Process matched: [{}] [{}]", process.getName(), mshRole);
                 for (final LegConfiguration legConfiguration : process.getLegs()) {
                     if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), userMessage.getCollaborationInfo().getService().getValue()) &&
                             StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), userMessage.getCollaborationInfo().getAction())) {
@@ -403,5 +403,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             LOG.debug("Property: " + p.getName());
         }
         return null;
+    }
+
+    @Override
+    public List<String> findPartyIdByServiceAndAction(String service, String action) {
+        // not used in DynamicDiscoveryPModeProvider
+        return Collections.emptyList();
     }
 }
