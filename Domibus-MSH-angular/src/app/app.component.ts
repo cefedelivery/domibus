@@ -63,7 +63,11 @@ export class AppComponent implements OnInit {
 
   logout(event: Event): void {
     event.preventDefault();
-    this.securityService.logout();
+    this.router.navigate(['/login']).then((ok) => {
+      if (ok) {
+        this.securityService.logout();
+      }
+    })
   }
 
   toggleMenu() {

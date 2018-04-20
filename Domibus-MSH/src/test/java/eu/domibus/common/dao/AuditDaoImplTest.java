@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import eu.domibus.common.model.audit.Audit;
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.audit.PModeAudit;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.hibernate.internal.SessionFactoryImpl;
@@ -165,6 +166,16 @@ public class AuditDaoImplTest {
         auditDao.saveMessageAudit(messageAudit);
         new Verifications() {{
             entityManager.persist(messageAudit);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void savePModeAudit() {
+        PModeAudit pModeAudit = new PModeAudit();
+        auditDao.savePModeAudit(pModeAudit);
+        new Verifications() {{
+            entityManager.persist(pModeAudit);
             times = 1;
         }};
     }

@@ -249,7 +249,7 @@
             <version>0.9.6</version>
         </dependency>
 
-        <!-- e-SENS OASIS BDX SMP  -->
+        <!-- eDelivery SMP profile  -->
         <dependency>
             <groupId>eu.europa.ec.dynamic-discovery</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
