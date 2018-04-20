@@ -1,4 +1,5 @@
 Domibus 3.3.4
+- Change the pulling mechanism in order to have a better message per second throughput.
 Domibus 3.3.3
 Domibus 3.3.2
 - Add certificate revocation logging.
