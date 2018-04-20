@@ -53,9 +53,7 @@
     </bean>
 
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
-    <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
-        <property name="jaxbContext" ref="jaxbContextEBMS"/>
-    </bean>
+    <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
 
     <bean id="setSignatureAlgorithmInInterceptor"
           class="eu.domibus.ebms3.sender.SetSignatureAlgorithmInInterceptor"/>
