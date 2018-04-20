@@ -108,7 +108,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         this.backendConnector = backendConnector;
     }
 
-    @MDCKey({DomibusLogger.MDC_MESSAGE_ID, DomibusLogger.MDC_DOMAIN})
+    @MDCKey({DomibusLogger.MDC_MESSAGE_ID})
     @Transactional
     public void onMessage(final Message message) {
         if (!authUtils.isUnsecureLoginAllowed()) {

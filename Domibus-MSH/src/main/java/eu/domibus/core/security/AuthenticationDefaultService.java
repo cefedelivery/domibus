@@ -1,6 +1,8 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
 @Component(value = "domibusAuthenticationService")
 public class AuthenticationDefaultService implements AuthenticationService {
@@ -25,7 +26,6 @@ public class AuthenticationDefaultService implements AuthenticationService {
     protected static final String BASIC_HEADER_KEY = "Authorization";
     protected static final String CLIENT_CERT_ATTRIBUTE_KEY = "javax.servlet.request.X509Certificate";
     protected static final String CLIENT_CERT_HEADER_KEY = "Client-Cert";
-    protected static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
 
     @Autowired
@@ -35,12 +35,18 @@ public class AuthenticationDefaultService implements AuthenticationService {
     @Qualifier("securityCustomAuthenticationProvider")
     private AuthenticationProvider authenticationProvider;
 
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @Override
     public void authenticate(HttpServletRequest httpRequest) throws AuthenticationException {
         LOG.debug("Authenticating for " + httpRequest.getRequestURI());
 
         /* id domibus allows unsecure login, do not authenticate anymore, just go on */
-        if(authUtils.isUnsecureLoginAllowed()) {
+        if (authUtils.isUnsecureLoginAllowed()) {
             LOG.securityInfo(DomibusMessageCode.SEC_UNSECURED_LOGIN_ALLOWED);
             return;
         }
@@ -66,6 +72,8 @@ public class AuthenticationDefaultService implements AuthenticationService {
             String basicAuthCredentials = new String(Base64.decode(basicHeaderValue.substring("Basic ".length())));
             int index = basicAuthCredentials.indexOf(":");
             String user = basicAuthCredentials.substring(0, index);
+            final String domainForUser = userDomainService.getDomainForUser(user);
+            domainContextProvider.setCurrentDomain(domainForUser);
             String password = basicAuthCredentials.substring(index + 1);
             BasicAuthentication authentication = new BasicAuthentication(user, password);
             authenticate(authentication, httpRequest);
