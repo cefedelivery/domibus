@@ -91,13 +91,13 @@ public class MessageLogResource {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
 
         Date from = dateUtil.fromString(receivedFrom);
-        if (from == null) {
-            from = defaultFrom;
-        }
+//        if (from == null) {
+//            from = defaultFrom;
+//        }
         Date to = dateUtil.fromString(receivedTo);
-        if (to == null) {
-            to = defaultTo;
-        }
+//        if (to == null) {
+//            to = defaultTo;
+//        }
         filters.put("receivedFrom", from);
         filters.put("receivedTo", to);
 

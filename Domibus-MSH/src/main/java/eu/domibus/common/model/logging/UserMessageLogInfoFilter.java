@@ -41,15 +41,21 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
                 "info.refToMessageId," +
                 "log.failed," +
                 "log.restored" +
-                ")" + QUERY_BODY;
+                ")" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }
 
     public String countUserMessageLogQuery(boolean asc, Map<String, Object> filters) {
-        String query = "select count(message.id)" + QUERY_BODY;
+        String query = "select count(message.id)" + getQueryBody(filters);
 
         StringBuilder result = filterQuery(query, null, asc, filters);
         return result.toString();
+    }
+
+    private String getQueryBody(Map<String, Object> filters) {
+
+
+        return QUERY_BODY;
     }
 }
