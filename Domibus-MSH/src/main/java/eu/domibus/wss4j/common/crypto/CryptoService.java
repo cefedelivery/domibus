@@ -190,13 +190,14 @@ public class CryptoService {
             try {
                 synchronized (kestoreLock) {
                     if (keyStore != null) return;
-                    keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    KeyStore keyStoreTemp = KeyStore.getInstance(KeyStore.getDefaultType());
 
                     String keyStoreFilename = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.file");
                     String keyStorePassword = keystoreProperties.getProperty("org.apache.ws.security.crypto.merlin.keystore.password");
                     try (FileInputStream fileInputStream = new FileInputStream(keyStoreFilename)) {
-                        keyStore.load(fileInputStream, keyStorePassword.toCharArray());
+                        keyStoreTemp.load(fileInputStream, keyStorePassword.toCharArray());
                     }
+                    keyStore = keyStoreTemp;
                 }
             } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
                 throw new KeyStoreException(ex);
