@@ -3,6 +3,7 @@ package eu.domibus.api.usermessage.domain;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,23 +13,23 @@ import java.util.Set;
 public class PayloadInfo {
 
     /**
-     * {@link Set} of Part Info {@link PartInfo}
+     * {@link List} of Part Info {@link PartInfo}
      */
-    protected Set<PartInfo> partInfo;
+    protected List<PartInfo> partInfo;
 
     /**
-     * Gets the Set of Part Info
-     * @return {@link Set} of Part Info {@link PartInfo}
+     * Gets the List of Part Info
+     * @return {@link List} of Part Info {@link PartInfo}
      */
-    public Set<PartInfo> getPartInfo() {
+    public List<PartInfo> getPartInfo() {
         return partInfo;
     }
 
     /**
-     * Sets the Set of Part Info
-     * @param partInfo {@link Set} of Part Info {@link PartInfo}
+     * Sets the List of Part Info
+     * @param partInfo {@link List} of Part Info {@link PartInfo}
      */
-    public void setPartInfo(Set<PartInfo> partInfo) {
+    public void setPartInfo(List<PartInfo> partInfo) {
         this.partInfo = partInfo;
     }
 
