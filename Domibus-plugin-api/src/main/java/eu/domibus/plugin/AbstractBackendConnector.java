@@ -33,9 +33,9 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
     private final String name;
     @Autowired
-    protected MessageRetriever<Submission> messageRetriever;
+    protected MessageRetriever messageRetriever;
     @Autowired
-    protected MessageSubmitter<Submission> messageSubmitter;
+    protected MessageSubmitter messageSubmitter;
     private MessageLister lister;
 
     public AbstractBackendConnector(final String name) {
@@ -79,19 +79,6 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
         return lister.listPendingMessages();
     }
 
-
-    /**
-     * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
-     * the backwards compatibility. Use {@link AbstractBackendConnector#getStatus(String)} instead
-     * @param messageId id of the message the status is requested for
-     * @return the message status
-     */
-    @Override
-    @Deprecated
-    public MessageStatus getMessageStatus(final String messageId) {
-        return this.messageRetriever.getMessageStatus(messageId);
-    }
-
     @Override
     public MessageStatus getStatus(final String messageId) {
         return this.messageRetriever.getStatus(messageId);
@@ -100,17 +87,6 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Override
     public List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
-    }
-
-    /**
-     * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
-     * @param messageId the Id of the failed message
-     * @param ednpoint  the endpoint that tried to send the message or null if unknown
-     */
-    @Override
-    @Deprecated
-    public void messageReceiveFailed(String messageId, String ednpoint) {
-        throw new UnsupportedOperationException("Method [messageReceiveFailed(String messageId, String endpoint)] is deprecated");
     }
 
     @Override

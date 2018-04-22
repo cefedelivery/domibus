@@ -51,7 +51,7 @@ import java.util.Map;
  * @Since 3.0
  */
 @Service
-public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
+public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
     private static final String MESSAGE_WITH_ID_STR = "Message with id [";

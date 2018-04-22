@@ -4,6 +4,7 @@ package eu.domibus.plugin.handler;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.Submission;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ import java.util.List;
  * @since 3.0
  */
 @Deprecated
-public interface MessageRetriever<T> {
+public interface MessageRetriever {
 
     /**
      * provides the message with the corresponding messageId
@@ -31,7 +32,7 @@ public interface MessageRetriever<T> {
      * @return the message object with the given messageId
      */
     @Deprecated
-    T downloadMessage(String messageId) throws MessageNotFoundException;
+    Submission downloadMessage(String messageId) throws MessageNotFoundException;
 
     /**
      * Returns message status {@link eu.domibus.common.MessageStatus} for message with messageid
