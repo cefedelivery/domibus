@@ -232,7 +232,7 @@ export class MessageLogComponent {
     this.loading = true;
 
     this.getMessageLogEntries(offset, pageSize, orderBy, asc).subscribe((result: MessageLogResult) => {
-      console.log("messageLog response:" + result);
+      console.log("messageLog response:" , result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
