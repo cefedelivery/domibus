@@ -124,7 +124,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             authUtils.hasUserOrAdminRole();
         }
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.debug("Authorized as [{}]", (originalUser == null ? "super user" : originalUser));
+        String displayUser = originalUser == null ? "super user" : originalUser;
+        LOG.debug("Authorized as [{}]", displayUser);
 
         UserMessage userMessage;
         try {
@@ -245,7 +246,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.debug("Authorized as [{}]", (originalUser == null ? "super user" : originalUser));
+        String displayUser = originalUser == null ? "super user" : originalUser;
+        LOG.debug("Authorized as [{}]", displayUser);
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 

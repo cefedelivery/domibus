@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     private static final String PARTY_ID = "PARTY_ID";
     private static final String MESSAGE_STATUS = "MESSAGE_STATUS";
     private static final String MPC = "MPC";
+    private static final String STR_MESSAGE_ID = "MESSAGE_ID";
 
     public MessagingDao() {
         super(Messaging.class);
@@ -42,14 +45,14 @@ public class MessagingDao extends BasicDao<Messaging> {
     public UserMessage findUserMessageByMessageId(final String messageId) {
 
         final TypedQuery<UserMessage> query = this.em.createNamedQuery("Messaging.findUserMessageByMessageId", UserMessage.class);
-        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter(STR_MESSAGE_ID, messageId);
 
         return DataAccessUtils.singleResult(query.getResultList());
     }
 
     public SignalMessage findSignalMessageByMessageId(final String messageId) {
         final TypedQuery<SignalMessage> query = this.em.createNamedQuery("Messaging.findSignalMessageByMessageId", SignalMessage.class);
-        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter(STR_MESSAGE_ID, messageId);
 
         return DataAccessUtils.singleResult(query.getResultList());
     }
@@ -57,7 +60,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     public Messaging findMessageByMessageId(final String messageId) {
         try {
             final TypedQuery<Messaging> query = em.createNamedQuery("Messaging.findMessageByMessageId", Messaging.class);
-            query.setParameter("MESSAGE_ID", messageId);
+            query.setParameter(STR_MESSAGE_ID, messageId);
             return query.getSingleResult();
         } catch (NoResultException nrEx) {
             LOG.debug("Could not find any message for message id[" + messageId + "]");
@@ -79,7 +82,7 @@ public class MessagingDao extends BasicDao<Messaging> {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
         }
         Query payloadsQuery = em.createNamedQuery("Messaging.findPartInfosForMessage");
-        payloadsQuery.setParameter("MESSAGE_ID", messageId);
+        payloadsQuery.setParameter(STR_MESSAGE_ID, messageId);
         List<PartInfo> results = payloadsQuery.getResultList();
         if (results.isEmpty()) {
             return;
@@ -88,7 +91,9 @@ public class MessagingDao extends BasicDao<Messaging> {
 
         for (PartInfo result : results) {
             if (hasLength(result.getFileName())) {
-                if (!new File(result.getFileName()).delete()) {
+                try {
+                    Files.delete(Paths.get(result.getFileName()));
+                } catch (IOException e) {
                     LOG.warn("Problem deleting payload data files");
                 }
             } else {

@@ -37,9 +37,6 @@ public class PModeDao extends PModeProvider {
     @Autowired
     private PartyDao partyDao;
 
-    @Autowired
-    private ProcessDao processDao;
-
     @Override
     public Party getGatewayParty() {
         //TODO check if it can be optimized

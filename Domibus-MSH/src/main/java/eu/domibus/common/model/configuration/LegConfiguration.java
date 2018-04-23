@@ -117,9 +117,7 @@ public class LegConfiguration extends AbstractBaseEntity {
 
         final LegConfiguration that = (LegConfiguration) o;
 
-        if (!name.equals(that.name)) return false;
-
-        return true;
+        return name.equals(that.name);
     }
 
     @Override

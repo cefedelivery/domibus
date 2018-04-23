@@ -17,7 +17,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +55,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         }
     }
 
-    public Long countMessages(HashMap<String, Object> filters) {
+    public Long countMessages(Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<SignalMessageLog> mle = cq.from(SignalMessageLog.class);
@@ -67,7 +66,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         return query.getSingleResult();
     }
 
-    public List<SignalMessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<SignalMessageLog> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<SignalMessageLog> cq = cb.createQuery(SignalMessageLog.class);
         Root<SignalMessageLog> mle = cq.from(SignalMessageLog.class);
@@ -88,13 +87,8 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         return query.getResultList();
     }
 
-    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
-        final Map<String, Object> filteredEntries = Maps.filterEntries(filters, new com.google.common.base.Predicate<Map.Entry<String, Object>>() {
-            @Override
-            public boolean apply(Map.Entry<String, Object> input) {
-                return input.getValue() != null;
-            }
-        });
+    public int countAllInfo(boolean asc, Map<String, Object> filters) {
+        final Map<String, Object> filteredEntries = Maps.filterEntries(filters, input -> input.getValue() != null);
         if (filteredEntries.size() == 0) {
             return countAll();
         }
@@ -105,7 +99,7 @@ public class SignalMessageLogDao extends MessageLogDao<SignalMessageLog> {
         return count.intValue();
     }
 
-    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         String filteredSignalMessageLogQuery = signalMessageLogInfoFilter.filterSignalMessageLogQuery(column, asc, filters);
         TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredSignalMessageLogQuery, MessageLogInfo.class);
         TypedQuery<MessageLogInfo> queryParameterized = signalMessageLogInfoFilter.applyParameters(typedQuery, filters);

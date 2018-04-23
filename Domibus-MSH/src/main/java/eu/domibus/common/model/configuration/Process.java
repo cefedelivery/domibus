@@ -31,12 +31,12 @@ import static eu.domibus.common.model.configuration.Process.*;
 public class Process extends AbstractBaseEntity {
     @Transient
     @XmlTransient
-    public final static String RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT = "Process.retrievePullProcessFromMessageContext";
-    public final static String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
-    public final static String FIND_PULL_PROCESS_FROM_MPC = "Process.findPullProcessFromMpc";
-    public final static String FIND_PULL_PROCESS_FROM_LEG_NAME = "Process.findPullProcessFromLegName";
-    public final static String FIND_PROCESS_FROM_LEG_NAME = "Process.findProcessFromLegName";
-    public final static String FIND_ALL_PROCESSES = "Process.findAllProcesses";
+    public static final String RETRIEVE_PULL_PROCESS_FROM_MESSAGE_CONTEXT = "Process.retrievePullProcessFromMessageContext";
+    public static final String FIND_PULL_PROCESS_TO_INITIATE = "Process.findPullProcessToInitiate";
+    public static final String FIND_PULL_PROCESS_FROM_MPC = "Process.findPullProcessFromMpc";
+    public static final String FIND_PULL_PROCESS_FROM_LEG_NAME = "Process.findPullProcessFromLegName";
+    public static final String FIND_PROCESS_FROM_LEG_NAME = "Process.findProcessFromLegName";
+    public static final String FIND_ALL_PROCESSES = "Process.findAllProcesses";
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
     protected String name;
@@ -195,9 +195,7 @@ public class Process extends AbstractBaseEntity {
 
         final Process process = (Process) o;
 
-        if (!name.equals(process.name)) return false;
-
-        return true;
+        return name.equals(process.name);
     }
 
     @Override
