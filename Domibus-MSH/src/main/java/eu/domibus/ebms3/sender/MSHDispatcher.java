@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -9,7 +10,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import java.net.ConnectException;
-import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -36,8 +35,7 @@ public class MSHDispatcher {
     private DispatchClientProvider dispatchClientProvider;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
@@ -60,7 +58,7 @@ public class MSHDispatcher {
     }
 
     protected boolean isDispatchClientCacheActivated() {
-        String dispatchClientCacheable = domibusProperties.getProperty("domibus.dispatcher.cacheable", "false");
+        String dispatchClientCacheable = domibusPropertyProvider.getProperty("domibus.dispatcher.cacheable", "false");
         return Boolean.valueOf(dispatchClientCacheable);
     }
 

@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import com.sun.org.apache.xerces.internal.dom.TextImpl;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -23,7 +24,6 @@ import org.apache.cxf.ws.security.wss4j.CXFRequestData;
 import org.apache.cxf.ws.security.wss4j.StaxSerializer;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.wss4j.common.crypto.Crypto;
-import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDocInfo;
@@ -49,7 +49,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This interceptor is responsible of the trust of an incoming messages.
@@ -69,8 +68,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     protected Crypto crypto;
 
@@ -132,7 +130,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
+        if (Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
             try {
                 if (!certificateService.isCertificateValid(certificate)) {
                     LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
@@ -152,7 +150,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId, boolean isPullMessage) {
-        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+        if (!Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }

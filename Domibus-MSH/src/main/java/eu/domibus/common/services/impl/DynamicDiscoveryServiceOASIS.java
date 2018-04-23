@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -49,8 +50,8 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(?<scheme>.+?)::(?<value>.+)$");
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected DomainContextProvider domainProvider;
@@ -90,12 +91,12 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DynamicDiscovery createDynamicDiscoveryClient() {
-        final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
+        final String smlInfo = domibusPropertyProvider.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
-        final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        final String certRegex = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
         if(StringUtils.isEmpty(certRegex)) {
             LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
         }
@@ -141,10 +142,10 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
         if (useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+            String httpProxyHost = domibusPropertyProvider.getProperty("domibus.proxy.http.host");
+            String httpProxyPort = domibusPropertyProvider.getProperty("domibus.proxy.http.port");
+            String httpProxyUser = domibusPropertyProvider.getProperty("domibus.proxy.user");
+            String httpProxyPassword = domibusPropertyProvider.getProperty("domibus.proxy.password");
 
             if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
                     || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
@@ -161,7 +162,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     private boolean useProxy() {
-        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
+        String useProxy = domibusPropertyProvider.getProperty("domibus.proxy.enabled", "false");
         if (StringUtils.isEmpty(useProxy)) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;

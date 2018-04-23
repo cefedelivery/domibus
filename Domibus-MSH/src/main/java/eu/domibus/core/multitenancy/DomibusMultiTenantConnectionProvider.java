@@ -3,7 +3,7 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.crypto.api.DomainPropertyProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.hibernate.HibernateException;
@@ -38,7 +38,7 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
     protected DomainService domainService;
 
     @Autowired
-    protected DomainPropertyProvider domainPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public Connection getAnyConnection() throws SQLException {

@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -9,13 +10,11 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This service class is responsible for the retention and clean up of Domibus messages, including signal messages.
@@ -38,8 +37,7 @@ public class MessageRetentionService {
     private CollectionUtil collectionUtil;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -89,7 +87,7 @@ public class MessageRetentionService {
     protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
-        String fileLocation = domibusProperties.getProperty("domibus.attachment.storage.location");
+        String fileLocation = domibusPropertyProvider.getProperty("domibus.attachment.storage.location");
         // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
         if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
@@ -115,7 +113,7 @@ public class MessageRetentionService {
     }
 
     protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
-        final String propertyValueString = domibusProperties.getProperty(propertyName);
+        final String propertyValueString = domibusPropertyProvider.getProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
             return defaultValue;

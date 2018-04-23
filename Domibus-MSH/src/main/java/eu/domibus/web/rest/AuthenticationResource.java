@@ -2,7 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -31,10 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Cosmin Baciu
@@ -62,6 +57,9 @@ public class AuthenticationResource {
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
 
+    @Autowired
+    protected UserDomainService userDomainService;
+
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
@@ -72,7 +70,7 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
-        String domain = getDomainForUser(loginRO.getUsername());
+        String domain = userDomainService.getDomainForUser(loginRO.getUsername());
         LOG.debug("Determined domain [{}] for user [{}]", domain, loginRO.getUsername());
         domainContextProvider.setCurrentDomain(domain);
 
@@ -115,28 +113,4 @@ public class AuthenticationResource {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser.getUsername();
     }
-
-    /**
-     * Get the domain associated to the provided user from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
-     *
-     * @return
-     */
-    protected String getDomainForUser(String user) {
-        if (!domibusConfigurationService.isMultiTenantAware()) {
-            LOG.debug("Using default domain for user [{}]", user);
-            return DomainService.DEFAULT_DOMAIN.getCode();
-        }
-        LOG.debug("Searching domain for user [{}]", user);
-        Future<String> utrFuture = schedulingTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
-        String domain = null;
-        try {
-            domain = utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new AuthenticationServiceException("Could not determine the domain for user [" + user + "]", e);
-        }
-        return domain;
-    }
-
-
 }

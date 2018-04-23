@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
@@ -40,8 +41,7 @@ public class BackendMessageValidator {
     protected static final String KEY_MESSAGEID_PATTERN = "domibus.sendMessage.messageIdPattern";
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
 
     /**
@@ -83,7 +83,7 @@ public class BackendMessageValidator {
         }
 
         //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-        String messageIdPattern = domibusProperties.getProperty(KEY_MESSAGEID_PATTERN);
+        String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
         LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
         if (StringUtils.isNotBlank(messageIdPattern)) {
             Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
@@ -111,7 +111,7 @@ public class BackendMessageValidator {
             }
 
             //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-            String messageIdPattern = domibusProperties.getProperty(KEY_MESSAGEID_PATTERN);
+            String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
             LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
             if (StringUtils.isNotBlank(messageIdPattern)) {
                 Pattern patternNoControlChar = Pattern.compile(messageIdPattern);

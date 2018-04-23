@@ -205,7 +205,7 @@ public class MessageSender implements MessageListener {
     }
 
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
-    @MDCKey({DomibusLogger.MDC_MESSAGE_ID, DomibusLogger.MDC_DOMAIN})
+    @MDCKey({DomibusLogger.MDC_MESSAGE_ID})
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
         Long delay;
@@ -213,7 +213,7 @@ public class MessageSender implements MessageListener {
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
             final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
-            LOG.debug("Message ID [{}] belongs to domain [{}]", messageId, domainCode);
+            LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
             domainContextProvider.setCurrentDomain(domainCode);
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);

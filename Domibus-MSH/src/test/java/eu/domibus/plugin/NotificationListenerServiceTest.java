@@ -2,13 +2,15 @@ package eu.domibus.plugin;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.common.NotificationType;
-import eu.domibus.api.security.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -27,7 +29,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * // TODO reach 70% coverage.
@@ -58,7 +59,10 @@ public class NotificationListenerServiceTest {
     private JmsListenerContainerFactory internalJmsListenerContainerFactory;
 
     @Injectable
-    private Properties domibusProperties;
+    private DomainContextProvider domainContextProvider;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     BackendConnectorDelegate backendConnectorDelegate;
@@ -87,7 +91,7 @@ public class NotificationListenerServiceTest {
 
         new Expectations() {{
 
-            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
             result = 5;
 
             jmsManager.browseMessages(withAny(new String()));
@@ -115,7 +119,7 @@ public class NotificationListenerServiceTest {
 
         new Expectations() {{
 
-            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
             result = 500;
 
             jmsManager.browseMessages(withAny(new String()));

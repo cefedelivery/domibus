@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -62,8 +63,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected DomainContextProvider domainProvider;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private java.util.Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     @Qualifier("dynamicDiscoveryServiceOASIS")
@@ -92,7 +92,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
-        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusProperties.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
+        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
             dynamicDiscoveryService = dynamicDiscoveryServicePEPPOL;
         } else { // OASIS client is used by default
             dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;

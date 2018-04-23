@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
@@ -14,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +41,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
     @Injectable
-    private Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private CertificateService certificateService;
@@ -52,10 +52,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Test
     public void testLookupInformationMock(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -76,10 +76,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -110,10 +110,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
         }};
 

@@ -1,11 +1,11 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Party;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -16,33 +16,23 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.cxf.BusFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
-import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Arun Raj
@@ -85,7 +75,7 @@ public class MSHDispatcherTest {
     LegConfiguration legConfiguration;
 
     @Injectable
-    Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     Configuration configuration;

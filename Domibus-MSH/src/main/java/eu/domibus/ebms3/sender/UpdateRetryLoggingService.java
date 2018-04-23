@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -13,14 +14,12 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Properties;
 
 @Service
 public class UpdateRetryLoggingService {
@@ -41,8 +40,7 @@ public class UpdateRetryLoggingService {
     private MessagingDao messagingDao;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     /**
      * This method is responsible for the handling of retries for a given sent message.
@@ -87,7 +85,7 @@ public class UpdateRetryLoggingService {
             }
             userMessageLogService.setMessageAsSendFailure(messageId);
 
-            if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+            if ("true".equals(domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
                 messagingDao.clearPayloadData(messageId);
             }
         }

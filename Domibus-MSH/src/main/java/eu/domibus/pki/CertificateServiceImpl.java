@@ -2,6 +2,7 @@ package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
@@ -57,8 +58,7 @@ public class CertificateServiceImpl implements CertificateService {
     DomainContextProvider domainProvider;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private CertificateDao certificateDao;
@@ -281,7 +281,7 @@ public class CertificateServiceImpl implements CertificateService {
     protected CertificateStatus getCertificateStatus(Date notAfter) {
         int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
-            revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+            revocationOffsetInDays = Integer.valueOf(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
 
         }

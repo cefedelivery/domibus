@@ -108,7 +108,7 @@
         </jaxws:inInterceptors>
 
         <jaxws:outInterceptors>
-            <ref bean="clearMDCInterceptor"/>
+           <ref bean="clearMDCInterceptor"/>
            <ref bean="setPolicyOutInterceptorServer"/>
            <ref bean="saveRawPulledMessageInterceptor"/>
         </jaxws:outInterceptors>

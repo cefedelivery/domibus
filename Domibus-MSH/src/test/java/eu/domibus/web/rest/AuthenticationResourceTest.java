@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -43,6 +44,9 @@ public class AuthenticationResourceTest {
     DomainContextProvider domainContextProvider;
 
     @Injectable
+    UserDomainService userDomainService;
+
+    @Injectable
     protected DomibusConfigurationService domibusConfigurationService;
 
     @Mocked
@@ -56,8 +60,8 @@ public class AuthenticationResourceTest {
         loginRO.setUsername("user");
         loginRO.setPassword("user");
         final UserDetail userDetail = new UserDetail(user, true);
-        new Expectations(authenticationResource) {{
-            authenticationResource.getDomainForUser(loginRO.getUsername());
+        new Expectations() {{
+            userDomainService.getDomainForUser(loginRO.getUsername());
             result = DomainService.DEFAULT_DOMAIN.getCode();
 
             authenticationService.authenticate("user", "user", DomainService.DEFAULT_DOMAIN.getCode());
