@@ -21,6 +21,4 @@ public interface UserMessageLogService {
     void setMessageAsWaitingForReceipt(String messageId);
 
     void setMessageAsSendFailure(String messageId);
-
-    void setIntermediaryPullStatus(String messageId);
 }
