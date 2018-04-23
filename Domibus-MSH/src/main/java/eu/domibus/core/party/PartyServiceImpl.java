@@ -9,7 +9,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
-import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -85,9 +84,9 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public List<String> findPartyNamesByServiceAndAction(String service, String action) {
         try {
-            return pModeProvider.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+            return pModeProvider.findPartyIdByServiceAndAction(service, action);
         } catch (EbMS3Exception e) {
-            LOG.warn("Exception while trying to find OartyId by Service and Action");
+            LOG.warn("Exception while trying to find PartyId by Service and Action");
         }
         return Collections.emptyList();
     }

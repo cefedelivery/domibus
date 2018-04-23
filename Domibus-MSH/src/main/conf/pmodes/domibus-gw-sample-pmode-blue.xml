@@ -93,10 +93,12 @@
 		</agreements>
 		<services>
 			<service name="testService1" value="bdx:noprocess" type="tc1"/>
+			<service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tc2"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="TC1Leg1"/>
 			<action name="tc2Action" value="TC2Leg1"/>
+			<action name="testAction" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -126,6 +128,17 @@
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
+			<legConfiguration name="testTestcase"
+							  service="testServiceTest"
+							  action="testAction"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="eDeliveryPolicy"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="ecodexPropertySet"
+							  payloadProfile="MessageProfile"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true"/>
 		</legConfigurations>
 <process name="tc1Process"
          agreement=""
@@ -144,6 +157,7 @@
 	<legs>
 		<leg name="pushTestcase1tc1Action"/>
 		<leg name="pushTestcase1tc2Action"/>
+		<leg name="testTestcase"/>
 	</legs>
 </process>
 	</businessProcesses>

@@ -6,8 +6,11 @@ import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
@@ -16,10 +19,14 @@ import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
+import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,6 +58,14 @@ public class MessageLogResourceTest {
 
     // needed Injectable
     @Injectable
+    MessagingDao messagingDao;
+
+    // needed Injectable
+    @Injectable
+    PartyDao partyDao;
+
+    // needed Injectable
+    @Injectable
     DateUtil dateUtil;
 
     // needed Injectable
@@ -69,6 +84,9 @@ public class MessageLogResourceTest {
 
     @Parameterized.Parameter(2)
     public MessageSubtype messageSubtype;
+
+    @Mocked
+    SignalMessage signalMessage;
 
     @Parameterized.Parameters(name = "{index}: messageType=\"{0}\" messageSubtype=\"{2}\"")
     public static Collection<Object[]> values() {
@@ -202,6 +220,85 @@ public class MessageLogResourceTest {
 
         // Then
         Assert.assertEquals(HttpStatus.NO_CONTENT, csv.getStatusCode());
+    }
+
+    @Test
+    public void testGetLastTestSent() {
+        // Given
+        String partyId = "test";
+        String userMessageId = "testmessageid";
+        UserMessage userMessage = new UserMessage();
+        new Expectations() {{
+            userMessageLogDao.findLastUserTestMessageId(partyId);
+            result=userMessageId;
+            messagingDao.findUserMessageByMessageId(userMessageId);
+            result=userMessage;
+        }};
+
+        // When
+        ResponseEntity<TestServiceMessageInfoRO> lastTestSent = messageLogResource.getLastTestSent(partyId);
+
+        // Then
+        TestServiceMessageInfoRO testServiceMessageInfoRO = lastTestSent.getBody();
+        Assert.assertEquals(partyId, testServiceMessageInfoRO.getPartyId());
+        Assert.assertEquals(userMessageId, testServiceMessageInfoRO.getMessageId());
+    }
+
+    @Test
+    public void testGetLastTestSent_NotFound() {
+        // Given
+        new Expectations() {{
+            messagingDao.findUserMessageByMessageId(anyString);
+            result = null;
+        }};
+
+        // When
+        ResponseEntity<TestServiceMessageInfoRO> lastTestSent = messageLogResource.getLastTestSent("test");
+
+        // Then
+        Assert.assertEquals(HttpStatus.NOT_FOUND, lastTestSent.getStatusCode());
+    }
+
+    @Test
+    public void testGetLastTestReceived() {
+        // Given
+        String partyId = "partyId";
+        String userMessageId = "userMessageId";
+
+        Party party = new Party();
+        party.setEndpoint("testEndpoint");
+
+        new Expectations() {{
+            messagingDao.findSignalMessageByMessageId(anyString);
+            result = signalMessage;
+            partyDao.findById(partyId);
+            result = party;
+        }};
+
+        // When
+        ResponseEntity<TestServiceMessageInfoRO> lastTestReceived = messageLogResource.getLastTestReceived(partyId, userMessageId);
+
+        // Then
+        TestServiceMessageInfoRO testServiceMessageInfoRO = lastTestReceived.getBody();
+        Assert.assertEquals(testServiceMessageInfoRO.getMessageId(), signalMessage.getMessageInfo().getMessageId());
+        Assert.assertEquals(testServiceMessageInfoRO.getPartyId(), partyId);
+        Assert.assertEquals(testServiceMessageInfoRO.getTimeReceived(), signalMessage.getMessageInfo().getTimestamp());
+        Assert.assertEquals(testServiceMessageInfoRO.getAccessPoint(), party.getEndpoint());
+    }
+
+    @Test
+    public void testGetLastTestReceived_NotFound() {
+        // Given
+        new Expectations() {{
+            messagingDao.findSignalMessageByMessageId(anyString);
+            result = null;
+        }};
+
+        // When
+        ResponseEntity<TestServiceMessageInfoRO> lastTestReceived = messageLogResource.getLastTestReceived("test", "test");
+
+        // Then
+        Assert.assertEquals(HttpStatus.NOT_FOUND, lastTestReceived.getStatusCode());
     }
 
     /**

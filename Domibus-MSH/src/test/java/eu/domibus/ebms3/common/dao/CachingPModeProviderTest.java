@@ -12,6 +12,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Role;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
@@ -33,10 +34,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Arun Raj
@@ -48,6 +46,7 @@ public class CachingPModeProviderTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProviderTest.class);
 
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
+    private static final String VALID_PMODE_TEST_CONFIG_URI = "samplePModes/domibus-configuration-valid-testservice.xml";
     private static final String PULL_PMODE_CONFIG_URI = "samplePModes/domibus-pmode-with-pull-processes.xml";
     private static final String DEFAULT_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc";
     private static final String ANOTHER_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc";
@@ -327,6 +326,25 @@ public class CachingPModeProviderTest {
             processDao.findPullProcessByMpc(emptyMpc);
             times = 1;
         }};
+    }
+
+    @Test
+    public void testFindPartyIdByServiceAndAction() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        List<String> expectedList = new ArrayList<>();
+        expectedList.add("domibus-blue");
+        expectedList.add("domibus-red");
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+        }};
+
+        // When
+        List<String> partyIdByServiceAndAction = cachingPModeProvider.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+
+        // Then
+        Assert.assertEquals(expectedList, partyIdByServiceAndAction);
     }
 
 

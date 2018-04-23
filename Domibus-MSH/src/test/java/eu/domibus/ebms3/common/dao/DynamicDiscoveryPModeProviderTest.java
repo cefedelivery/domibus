@@ -23,6 +23,7 @@ import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,19 +36,13 @@ import org.mockito.Spy;
 import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
+import java.util.*;
 import java.util.Properties;
-import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -318,6 +313,19 @@ public class DynamicDiscoveryPModeProviderTest {
         assertNotNull(testData);
 
         certificateService.extractCommonName(testData);
+    }
+
+    @Test
+    public void testFindPartyIdByServiceAndAction() {
+        // Given
+        String service = "service";
+        String action = "action";
+
+        // When
+        List<String> partyIdByServiceAndAction = dynamicDiscoveryPModeProvider.findPartyIdByServiceAndAction(service, action);
+
+        // Then
+        Assert.assertEquals(Collections.emptyList(), partyIdByServiceAndAction);
     }
 
 
