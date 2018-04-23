@@ -28,7 +28,7 @@ public class Submission {
     private final Set<Submission.Party> toParties = new HashSet<>();
     //TODO: MessageProperties have an optional attribute type which is not covered yet
 
-    private final List<Submission.Payload> payloads = new ArrayList<>();
+    private final Set<Submission.Payload> payloads = new LinkedHashSet<>();
     private final Collection<TypedProperty> messageProperties = new ArrayList<>();
     private String action;
     private String service;
@@ -431,7 +431,7 @@ public class Submission {
      *
      * @return a {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Payload} elements representing the payloads of this plugin
      */
-    public List<Submission.Payload> getPayloads() {
+    public Set<Submission.Payload> getPayloads() {
         return this.payloads;
     }
 

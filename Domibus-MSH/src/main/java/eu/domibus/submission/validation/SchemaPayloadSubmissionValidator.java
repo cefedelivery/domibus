@@ -14,7 +14,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,7 +30,7 @@ public class SchemaPayloadSubmissionValidator implements SubmissionValidator {
     public void validate(Submission submission) throws SubmissionValidationException {
         LOG.debug("Validating submission");
 
-        List<Submission.Payload> payloads = submission.getPayloads();
+        Set<Submission.Payload> payloads = submission.getPayloads();
         if (payloads == null) {
             LOG.debug("There are no payloads to validate");
             return;
