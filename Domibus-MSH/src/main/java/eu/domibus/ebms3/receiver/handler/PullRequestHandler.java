@@ -117,8 +117,6 @@ public class PullRequestHandler {
                         leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
-
-                messagingLockService.delete(messageId);
                 checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {
@@ -148,6 +146,7 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
+            messagingLockService.delete(messageId);
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
