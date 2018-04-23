@@ -1,8 +1,9 @@
 Domibus 3.3.4
-- Replace the Set of PartInfo with List in the coresponding entity class in order to keep the order between C1 and C2 when deserializing.
-- Replace the Set of PartInfo with List in JMS Plugin to keep the order between C1 and C2.
-- Add a new property/db column: PART_ORDER for Hybernate to keep the order of PartInfo in database between c2 and c3.
-- Add a script to populate PART_ORDER column with appropriate values for existing messages.
+- The order of the PartInfo payloads sent by the backend is preserved
+    - Replace the Set of PartInfo with List in the coresponding entity class in order to keep the order between C1 and C2 when deserializing.
+    - Replace the Set of PartInfo with List in JMS Plugin to keep the order between C1 and C2.
+    - Add a new property/db column: PART_ORDER for Hybernate to keep the order of PartInfo in database between c2 and c3.
+    - Add a script to populate PART_ORDER column with appropriate values for existing messages.
 Domibus 3.3.3
 Domibus 3.3.2
 - Add certificate revocation logging.
