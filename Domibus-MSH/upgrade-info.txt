@@ -1,7 +1,7 @@
 Domibus 4.0 (from 3.3):
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
 
-               - in file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the of caches definition:
+               - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the of caches definition:
                     <ehcache>
                     ........................
                     <cache name="auditTarget"
@@ -11,7 +11,7 @@ Domibus 4.0 (from 3.3):
                      </cache>
                   ........................
                   </ehcache>
-                -Modify file "\conf\domibus\domibus.properties":
+                - Modify file "\conf\domibus\domibus.properties":
                     o update all the cron expressions from 0/60 * * * * ? to 0 0/1 * * * ?
                     o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class and replace it by:
                       - [WebLogic only]
