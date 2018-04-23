@@ -1,5 +1,8 @@
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -91,20 +94,33 @@ public class MessagingLock extends AbstractBaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
+
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+
         MessagingLock that = (MessagingLock) o;
-        return Objects.equals(messageType, that.messageType) &&
-                Objects.equals(received, that.received) &&
-                messageState == that.messageState &&
-                Objects.equals(messageId, that.messageId) &&
-                Objects.equals(initiator, that.initiator) &&
-                Objects.equals(mpc, that.mpc);
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(messageType, that.messageType)
+                .append(received, that.received)
+                .append(messageState, that.messageState)
+                .append(messageId, that.messageId)
+                .append(initiator, that.initiator)
+                .append(mpc, that.mpc)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), messageType, received, messageState, messageId, initiator, mpc);
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(messageType)
+                .append(received)
+                .append(messageState)
+                .append(messageId)
+                .append(initiator)
+                .append(mpc)
+                .toHashCode();
     }
 
     @Override
