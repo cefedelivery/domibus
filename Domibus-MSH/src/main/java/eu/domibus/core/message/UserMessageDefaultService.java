@@ -168,12 +168,12 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleSending(String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId, domainContextProvider.getCurrentDomain()).createMessage(), sendMessageQueue);
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
     }
 
     @Override
     public void scheduleSending(String messageId, Long delay) {
-        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, domainContextProvider.getCurrentDomain(), delay).createMessage(), sendMessageQueue);
+        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
     }
 
     @Override

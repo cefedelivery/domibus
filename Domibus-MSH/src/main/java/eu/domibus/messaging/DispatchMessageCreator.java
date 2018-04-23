@@ -11,11 +11,9 @@ import eu.domibus.api.multitenancy.Domain;
 public class DispatchMessageCreator {
 
     private final String messageId;
-    private final Domain domain;
 
-    public DispatchMessageCreator(final String messageId, final Domain domain) {
+    public DispatchMessageCreator(final String messageId) {
         this.messageId = messageId;
-        this.domain = domain;
     }
 
     public JmsMessage createMessage() {
@@ -23,7 +21,6 @@ public class DispatchMessageCreator {
         return JMSMessageBuilder
                 .create()
                 .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domain.getCode())
                 .build();
     }
 }
