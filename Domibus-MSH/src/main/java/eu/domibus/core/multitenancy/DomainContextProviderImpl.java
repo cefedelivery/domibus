@@ -1,5 +1,6 @@
 package eu.domibus.core.multitenancy;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
@@ -23,10 +24,18 @@ public class DomainContextProviderImpl implements DomainContextProvider {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainContextProviderImpl.class);
 
     @Autowired
-    DomainService domainService;
+    protected DomainService domainService;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Override
     public Domain getCurrentDomain() {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            LOG.trace("No multi-tenancy aware: returning the default domain");
+            return DomainService.DEFAULT_DOMAIN;
+        }
+
         String domainCode = LOG.getMDC(DomibusLogger.MDC_DOMAIN);
         if (StringUtils.isEmpty(domainCode)) {
             throw new DomainException("Could not get current domain");

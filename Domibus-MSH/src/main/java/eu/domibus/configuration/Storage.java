@@ -1,20 +1,17 @@
 package eu.domibus.configuration;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 
 /**
  * @version 2.0
@@ -30,11 +27,8 @@ public class Storage {
 
     private File storageDirectory = null;
 
-    @Transient
-    @XmlTransient
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     public Storage() {
         storageDirectory = null;
@@ -54,7 +48,7 @@ public class Storage {
 
     @PostConstruct
     public void initFileSystemStorage() {
-        final String location = domibusProperties.getProperty(ATTACHMENT_STORAGE_LOCATION);
+        final String location = domibusPropertyProvider.getProperty(ATTACHMENT_STORAGE_LOCATION);
         if (location != null && !location.isEmpty()) {
             if (storageDirectory == null) {
                 Path path = createLocation(location);

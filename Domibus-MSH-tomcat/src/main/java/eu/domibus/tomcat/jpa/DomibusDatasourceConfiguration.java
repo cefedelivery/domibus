@@ -30,14 +30,14 @@ public class DomibusDatasourceConfiguration {
     public AtomikosDataSourceBean domibusXADatasource() {
         AtomikosDataSourceBean dataSource = new AtomikosDataSourceBean();
         dataSource.setUniqueResourceName("domibusJDBC-XA");
-        final String xaDataSourceClassName = domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.xaDataSourceClassName");
+        final String xaDataSourceClassName = domibusPropertyProvider.getProperty("domibus.datasource.xa.xaDataSourceClassName");
         dataSource.setXaDataSourceClassName(xaDataSourceClassName);
         dataSource.setXaProperties(xaProperties());
-        final Integer minPoolSize = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.minPoolSize", "5"));
+        final Integer minPoolSize = Integer.parseInt(domibusPropertyProvider.getProperty("domibus.datasource.xa.minPoolSize", "5"));
         dataSource.setMinPoolSize(minPoolSize);
-        final Integer maxPoolSize = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.maxPoolSize", "100"));
+        final Integer maxPoolSize = Integer.parseInt(domibusPropertyProvider.getProperty("domibus.datasource.xa.maxPoolSize", "100"));
         dataSource.setMaxPoolSize(maxPoolSize);
-        final Integer maxLifeTime = Integer.parseInt(domibusPropertyProvider.getPropertyValue("domibus.datasource.xa.maxLifetime", "60"));
+        final Integer maxLifeTime = Integer.parseInt(domibusPropertyProvider.getProperty("domibus.datasource.xa.maxLifetime", "60"));
         dataSource.setMaxLifetime(maxLifeTime);
 
         return dataSource;

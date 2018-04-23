@@ -30,7 +30,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     @Override
-    public String getPropertyValue(Domain domain, String propertyName) {
+    public String getProperty(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         String propertyValue = domibusProperties.getProperty(domainPropertyName);
         if(StringUtils.isEmpty(propertyValue) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
@@ -41,8 +41,8 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
 
     @Override
-    public String getPropertyValue(Domain domain, String propertyName, String defaultValue) {
-        String propertyValue = getPropertyValue(domain, propertyName);
+    public String getProperty(Domain domain, String propertyName, String defaultValue) {
+        String propertyValue = getProperty(domain, propertyName);
         if (StringUtils.isEmpty(propertyValue)) {
             propertyValue = defaultValue;
         }
@@ -50,13 +50,13 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     @Override
-    public String getPropertyValue(String propertyName) {
-        return getPropertyValue(DomainService.DEFAULT_DOMAIN, propertyName);
+    public String getProperty(String propertyName) {
+        return getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
     }
 
     @Override
-    public String getPropertyValue(String propertyName, String defaultValue) {
-        String propertyValue = getPropertyValue(propertyName);
+    public String getProperty(String propertyName, String defaultValue) {
+        String propertyValue = getProperty(propertyName);
         if(StringUtils.isEmpty(propertyValue)) {
             propertyValue = defaultValue;
         }
@@ -64,7 +64,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     @Override
-    public String getResolvedPropertyValue(Domain domain, String propertyName) {
+    public String getResolvedProperty(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         String resolvedProperty = propertyResolver.getResolvedProperty(domainPropertyName, domibusProperties, true);
         if(StringUtils.isEmpty(resolvedProperty) && DomainService.DEFAULT_DOMAIN.equals(domain)) {

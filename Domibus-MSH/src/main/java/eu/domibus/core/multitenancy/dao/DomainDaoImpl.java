@@ -40,7 +40,7 @@ public class DomainDaoImpl implements DomainDao {
             return result;
         }
 
-        final String propertyValue = domibusPropertyProvider.getPropertyValue(DomibusConfigurationService.DOMIBUS_CONFIG_LOCATION);
+        final String propertyValue = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_CONFIG_LOCATION);
         File confDirectory = new File(propertyValue);
         final Collection<File> propertyFiles = FileUtils.listFiles(confDirectory, DOMAIN_FILE_EXTENSION, false);
 

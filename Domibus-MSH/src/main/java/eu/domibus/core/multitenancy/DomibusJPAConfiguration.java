@@ -49,7 +49,7 @@ public class DomibusJPAConfiguration {
                                                                        Optional<CurrentTenantIdentifierResolver> tenantIdentifierResolver)  {
         LocalContainerEntityManagerFactoryBean result = new LocalContainerEntityManagerFactoryBean();
         result.setPersistenceUnitName("domibusJTA");
-        final String packagesToScanString = domibusPropertyProvider.getPropertyValue("domibus.entityManagerFactory.packagesToScan");
+        final String packagesToScanString = domibusPropertyProvider.getProperty("domibus.entityManagerFactory.packagesToScan");
         if(StringUtils.isNotEmpty(packagesToScanString)) {
             final String[] packagesToScan = StringUtils.split(packagesToScanString, ",");
             result.setPackagesToScan(packagesToScan);

@@ -25,6 +25,6 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     //TODO add caching
     @Override
     public boolean isMultiTenantAware() {
-        return StringUtils.isNotEmpty(domibusPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY));
+        return StringUtils.isNotEmpty(domibusPropertyProvider.getProperty(DomainService.GENERAL_SCHEMA_PROPERTY));
     }
 }

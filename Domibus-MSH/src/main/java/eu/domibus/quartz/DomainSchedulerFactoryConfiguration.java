@@ -90,7 +90,7 @@ public class DomainSchedulerFactoryConfiguration {
         Properties properties = new Properties();
         properties.setProperty("org.quartz.jobStore.misfireThreshold", "60000");
         properties.setProperty("org.quartz.jobStore.driverDelegateClass", "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-        properties.setProperty("org.quartz.jobStore.isClustered", domibusPropertyProvider.getPropertyValue("domibus.deployment.clustered"));
+        properties.setProperty("org.quartz.jobStore.isClustered", domibusPropertyProvider.getProperty("domibus.deployment.clustered"));
         properties.setProperty("org.quartz.jobStore.clusterCheckinInterval", "20000");
         properties.setProperty("org.quartz.jobStore.useProperties", "false");
         properties.setProperty("org.quartz.scheduler.instanceId", "AUTO");

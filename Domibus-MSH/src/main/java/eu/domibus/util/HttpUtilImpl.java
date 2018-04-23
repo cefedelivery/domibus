@@ -1,5 +1,6 @@
 package eu.domibus.util;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.HttpUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,16 +33,15 @@ public class HttpUtilImpl implements HttpUtil {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(HttpUtilImpl.class);
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
         if (useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+            String httpProxyHost = domibusPropertyProvider.getProperty("domibus.proxy.http.host");
+            String httpProxyPort = domibusPropertyProvider.getProperty("domibus.proxy.http.port");
+            String httpProxyUser = domibusPropertyProvider.getProperty("domibus.proxy.user");
+            String httpProxyPassword = domibusPropertyProvider.getProperty("domibus.proxy.password");
             LOG.info("Using proxy for downloading URL " + url);
             return downloadURLViaProxy(url, httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
@@ -49,7 +49,7 @@ public class HttpUtilImpl implements HttpUtil {
     }
 
     protected boolean useProxy() {
-        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
+        String useProxy = domibusPropertyProvider.getProperty("domibus.proxy.enabled", "false");
         if (StringUtils.isEmpty(useProxy)) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;

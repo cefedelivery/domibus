@@ -2,6 +2,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
@@ -89,8 +90,7 @@ public class BackendNotificationService {
     private ApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private DomainCoreConverter coreConverter;
@@ -341,7 +341,7 @@ public class BackendNotificationService {
     }
 
     protected boolean isPluginNotificationDisabled() {
-        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        String pluginNotificationEnabled = domibusPropertyProvider.getProperty("domibus.plugin.notification.active", "true");
         return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

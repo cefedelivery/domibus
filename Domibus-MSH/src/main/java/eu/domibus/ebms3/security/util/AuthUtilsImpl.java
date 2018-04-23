@@ -79,7 +79,7 @@ public class AuthUtilsImpl implements AuthUtils {
             return false;
         }
         /* unsecured login allowed */
-        return "true".equals(domibusPropertyProvider.getPropertyValue(UNSECURE_LOGIN_ALLOWED, "true"));
+        return "true".equals(domibusPropertyProvider.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
 
     @Override

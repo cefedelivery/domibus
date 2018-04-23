@@ -54,12 +54,12 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public String getDatabaseSchema(Domain domain) {
-        return domibusPropertyProvider.getPropertyValue(domain, "domibus.database.schema");
+        return domibusPropertyProvider.getProperty(domain, "domibus.database.schema");
     }
 
     @Override
     public String getGeneralSchema() {
-        return domibusPropertyProvider.getPropertyValue(DomainService.GENERAL_SCHEMA_PROPERTY);
+        return domibusPropertyProvider.getProperty(DomainService.GENERAL_SCHEMA_PROPERTY);
     }
 
     @Override

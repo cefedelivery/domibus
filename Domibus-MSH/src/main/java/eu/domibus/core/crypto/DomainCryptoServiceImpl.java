@@ -81,7 +81,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public String getPrivateKeyPassword(String alias) {
-        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.password");
+        return domibusPropertyProvider.getProperty(domain, "domibus.security.key.private.password");
     }
 
     @Override
@@ -175,10 +175,10 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     protected Properties getKeystoreProperties(Domain domain) {
-        final String keystoreType = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.type");
-        final String keystorePassword = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.keystore.password");
-        final String privateKeyAlias = domibusPropertyProvider.getPropertyValue(domain, "domibus.security.key.private.alias");
-        final String keystoreLocation = domibusPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.keystore.location");
+        final String keystoreType = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.type");
+        final String keystorePassword = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.password");
+        final String privateKeyAlias = domibusPropertyProvider.getProperty(domain, "domibus.security.key.private.alias");
+        final String keystoreLocation = domibusPropertyProvider.getResolvedProperty(domain, "domibus.security.keystore.location");
 
         Properties result = new Properties();
         result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_TYPE, keystoreType);
@@ -208,15 +208,15 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     protected String getTrustStoreLocation() {
-        return domibusPropertyProvider.getResolvedPropertyValue(domain, "domibus.security.truststore.location");
+        return domibusPropertyProvider.getResolvedProperty(domain, "domibus.security.truststore.location");
     }
 
     protected String getTrustStorePassword() {
-        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.password");
+        return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.password");
     }
 
     protected String getTrustStoreType() {
-        return domibusPropertyProvider.getPropertyValue(domain, "domibus.security.truststore.type");
+        return domibusPropertyProvider.getProperty(domain, "domibus.security.truststore.type");
     }
 
     protected void signalTrustStoreUpdate() {
