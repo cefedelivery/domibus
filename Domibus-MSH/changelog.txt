@@ -1,5 +1,7 @@
 Domibus 3.3.4
+- Change the pulling mechanism in order to have a better message per second throughput.
 Domibus 3.3.3
+- Possibility to send a message to the same Access Point
 Domibus 3.3.2
 - Add certificate revocation logging.
     When a certificate is about to expire a warning message will be displayed in the logs.

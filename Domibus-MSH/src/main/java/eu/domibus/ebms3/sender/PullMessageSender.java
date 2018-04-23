@@ -4,6 +4,7 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -51,26 +52,39 @@ import java.util.Set;
 public class PullMessageSender {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullMessageSender.class);
+
     @Autowired
     private MSHDispatcher mshDispatcher;
+
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
+
     @Qualifier("jaxbContextEBMS")
     @Autowired
     private JAXBContext jaxbContext;
+
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
+
     @Autowired
     private BackendNotificationService backendNotificationService;
+
     @Autowired
     private PModeProvider pModeProvider;
+
     @Autowired
     private PolicyService policyService;
 
+    @Autowired
+    private DomibusInitializationHelper domibusInitializationHelper;
+
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
-    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processPullRequest(final MapMessage map) {
+        if(domibusInitializationHelper.isNotReady()){
+            return;
+        }
         boolean notifiyBusinessOnError = false;
         Messaging messaging = null;
         String messageId = null;
