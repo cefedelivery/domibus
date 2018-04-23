@@ -1,5 +1,6 @@
 package eu.domibus.ebms3;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
@@ -29,7 +30,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import java.io.InputStream;
 import java.security.Security;
-import java.util.Properties;
 
 /**
  * @author idragusa
@@ -42,7 +42,7 @@ public class SoapInterceptorTest {
     protected static String MESSAGE_TYPE_OUT_TEST_VALUE = "MESSAGE_TYPE_OUT_TEST_VALUE";
 
     @Injectable
-    protected Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Before
     public void init() {

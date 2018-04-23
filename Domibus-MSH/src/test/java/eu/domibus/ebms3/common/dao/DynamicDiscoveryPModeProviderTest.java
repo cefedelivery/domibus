@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
@@ -13,14 +14,14 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.core.crypto.DomibusPropertyProviderImpl;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
@@ -43,7 +44,6 @@ import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -109,8 +109,8 @@ public class DynamicDiscoveryPModeProviderTest {
     @Mock
     DomainContextProvider domainProvider;
 
-    @Spy
-    private Properties domibusProperties;
+    @Mock
+    private DomibusPropertyProviderImpl domibusPropertyProvider;
 
     @Before
     public void initMocks() {
@@ -142,7 +142,7 @@ public class DynamicDiscoveryPModeProviderTest {
         assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServiceOASIS);
 
         /* test selection of dynamic discovery client Peppol compliant*/
-        doReturn(DynamicDiscoveryClientSpecification.PEPPOL.getName()).when(domibusProperties).getProperty(anyString(), anyString());
+        doReturn(DynamicDiscoveryClientSpecification.PEPPOL.getName()).when(domibusPropertyProvider).getProperty(anyString(), anyString());
         dynamicDiscoveryPModeProvider.init();
         assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServicePEPPOL);
     }

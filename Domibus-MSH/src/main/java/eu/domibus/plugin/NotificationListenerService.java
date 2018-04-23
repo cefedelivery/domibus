@@ -6,6 +6,7 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
@@ -61,7 +62,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private BackendConnectorDelegate backendConnectorDelegate;
 
     @Autowired
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -222,7 +223,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     protected Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
 
         final Collection<String> result = new ArrayList<>();
-        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+        final String strMaxPendingMessagesRetrieveCount = domibusPropertyProvider.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
         LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 

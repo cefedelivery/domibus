@@ -2,15 +2,16 @@ package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.logging.DomibusLogger;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
@@ -26,7 +27,10 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
@@ -42,7 +46,7 @@ public class CertificateServiceImplTest {
     CertificateServiceImpl certificateService;
 
     @Injectable
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     MultiDomainCryptoService multiDomainCertificateProvider;

@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -57,9 +58,8 @@ public class MessageLogResourceTest {
     @Injectable
     CsvServiceImpl csvServiceImpl;
 
-    // needed Injectable
     @Injectable
-    Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Parameterized.Parameter(0)
     public MessageType messageType;
@@ -148,7 +148,7 @@ public class MessageLogResourceTest {
         // Expectations doesn't allow if's inside
         if(messageType.equals(MessageType.USER_MESSAGE)) {
             new Expectations() {{
-                domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+                domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
                 result = CsvService.MAX_NUMBER_OF_ENTRIES;
                 userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
                 result = messageList;
@@ -160,7 +160,7 @@ public class MessageLogResourceTest {
             }};
         } else if(messageType.equals(MessageType.SIGNAL_MESSAGE)) {
             new Expectations() {{
-                domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+                domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
                 result = CsvService.MAX_NUMBER_OF_ENTRIES;
                 signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
                 result = messageList;
@@ -189,7 +189,7 @@ public class MessageLogResourceTest {
     public void testUserMessageGetCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
-            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
             result = CsvService.MAX_NUMBER_OF_ENTRIES;
             csvServiceImpl.exportToCSV((List<?>) any);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());

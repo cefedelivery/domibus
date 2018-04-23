@@ -1,22 +1,7 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.core.converter.DomainCoreConverter;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
-import mockit.integration.junit4.JMockit;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import com.google.common.collect.Lists;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
@@ -28,11 +13,12 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.LOGIN_SUSPENSION_TIME;
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.MAXIMUM_LOGIN_ATTEMPT;
@@ -47,6 +33,9 @@ public class UserManagementServiceImplTest {
 
     @Injectable
     private UserDao userDao;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private UserRoleDao userRoleDao;
@@ -81,9 +70,6 @@ public class UserManagementServiceImplTest {
         String loggedUserNamed = userService.getLoggedUserNamed();
         assertNull(loggedUserNamed);
     }
-
-    @Injectable
-    private Properties domibusProperties;
 
     @Tested
     private UserManagementServiceImpl userManagementService;
@@ -142,7 +128,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -163,7 +149,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyNotNumberProperty(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = "a";
             user.getAttemptCount();
@@ -184,7 +170,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -271,7 +257,7 @@ public class UserManagementServiceImplTest {
         final List<User> users = Lists.newArrayList(user);
 
         new Expectations() {{
-            domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600");
+            domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, "3600");
             times = 1;
             result = suspensionInterval;
             System.currentTimeMillis();
