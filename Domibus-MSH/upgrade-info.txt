@@ -1,6 +1,7 @@
 Domibus 4.0 (from 3.3):
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
-               - in file "\conf\domibus\internal\ehcache.xml" add the following cache defintion at the of caches definition:
+
+               - in file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the of caches definition:
                     <ehcache>
                     ........................
                     <cache name="auditTarget"
@@ -12,17 +13,29 @@ Domibus 4.0 (from 3.3):
                   </ehcache>
                 -Modify file "\conf\domibus\domibus.properties":
                     o update all the cron expressions from 0/60 * * * * ? to 0 0/1 * * * ?
-                    o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class
-                      and replace it by:
+                    o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class and replace it by:
                       - [WebLogic only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
                       - [Tomcat only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosJ2eePlatform
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
-                     o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
+                    o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
                         - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                    o add a new property "domibus.database.schema" for defining the database schema and modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties to re-use it
+                       Eg: #MySQL
+                           domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?pinGlobalTxToPhysicalConnection=true
+                           domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?useSSL=false
+               - Optional changes(only if Domibus is used in multi-tenancy mode):
+                    o [Tomcat only]
+                        -  Modify the file "/conf/domibus/domibus.properties":
+                           o add the new property "domibus.database.general.schema" Database section
+                           o modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties and set the default general schema in the URL
+                             Eg: #MySQL
+                                 domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?pinGlobalTxToPhysicalConnection=true
+                                 domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
+                    Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
 Domibus 3.3.2 (from 3.3.1):
                 - In the file "\conf\domibus\domibus.properties" add the following properties :
                     o in the security section:
