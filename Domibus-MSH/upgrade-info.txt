@@ -1,4 +1,5 @@
 Domibus 3.3.4 (from 3.3.3):
+                - Run the appropriate DB migration script(mysql5innoDb-3.3.3-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.3-to-3.3.4-migration.ddl for Oracle)
 Domibus 3.3.3 (from 3.3.2):
 Domibus 3.3.2 (from 3.3.1):
                 - In the file "\conf\domibus\domibus.properties" add the following properties :
@@ -394,7 +395,7 @@ Domibus 3.2 (from RC1):
                                                 maxBytesLocalHeap="5m" 
                                                 timeToLiveSeconds="3600" 
                                                 overflowToDisk="false">
-                                             </cache>
+ </cache>
                 -  in file conf/domibus/domibus-security.xml
                         o   replace all from the comment
                                  <!-- Administration GUI user credentials-->
