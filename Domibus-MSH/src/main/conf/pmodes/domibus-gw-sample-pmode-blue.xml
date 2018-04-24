@@ -128,7 +128,7 @@
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
-			<legConfiguration name="testTestcase"
+			<legConfiguration name="testServiceCase"
 							  service="testServiceTest"
 							  action="testAction"
 							  defaultMpc="defaultMpc"
@@ -157,7 +157,7 @@
 	<legs>
 		<leg name="pushTestcase1tc1Action"/>
 		<leg name="pushTestcase1tc2Action"/>
-		<leg name="testTestcase"/>
+		<leg name="testServiceCase"/>
 	</legs>
 </process>
 	</businessProcesses>

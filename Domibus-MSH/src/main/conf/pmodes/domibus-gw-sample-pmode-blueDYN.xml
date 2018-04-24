@@ -68,7 +68,7 @@
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="testTestcase" service="testServiceTest" action="testAction" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="testServiceCase" service="testServiceTest" action="testAction" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -76,7 +76,7 @@
 			</initiatorParties>
 			<legs>
 				<leg name="pushTestcase1tc1Action"/>
-				<leg name="testTestcase"/>
+				<leg name="testServiceCase"/>
 			</legs>
 		</process>
 	</businessProcesses>

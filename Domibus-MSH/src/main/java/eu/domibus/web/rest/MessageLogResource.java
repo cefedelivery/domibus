@@ -249,18 +249,21 @@ public class MessageLogResource {
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
-        String signalMessageId = messaging.getSignalMessage().getMessageInfo().getMessageId();
-        SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
+        SignalMessage signalMessage = messaging.getSignalMessage();
+        if(signalMessage != null) {
+            String signalMessageId = signalMessage.getMessageInfo().getMessageId();
+            SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
 
-        if(signalMessageByMessageId != null) {
-            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
-            testServiceMessageInfoRO.setMessageId(signalMessageId);
-            testServiceMessageInfoRO.setTimeReceived(signalMessageByMessageId.getMessageInfo().getTimestamp());
-            Party party = partyDao.findById(partyId);
-            testServiceMessageInfoRO.setPartyId(partyId);
-            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+            if (signalMessageByMessageId != null) {
+                TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+                testServiceMessageInfoRO.setMessageId(signalMessageId);
+                testServiceMessageInfoRO.setTimeReceived(signalMessageByMessageId.getMessageInfo().getTimestamp());
+                Party party = partyDao.findById(partyId);
+                testServiceMessageInfoRO.setPartyId(partyId);
+                testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
 
-            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+                return ResponseEntity.ok().body(testServiceMessageInfoRO);
+            }
         }
 
         return ResponseEntity.notFound().build();
