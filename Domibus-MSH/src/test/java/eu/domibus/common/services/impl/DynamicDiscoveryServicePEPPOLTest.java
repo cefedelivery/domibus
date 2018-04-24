@@ -7,13 +7,16 @@ import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.security.Mode;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -94,13 +97,17 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     private ServiceMetadata buildServiceMetadata() {
 
-        ServiceMetadata sm = new ServiceMetadata();
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
-        ProcessIdentifier processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, new Scheme(TEST_SERVICE_TYPE));
+        ProcessIdentifier processIdentifier = ProcessIdentifier.of(TEST_SERVICE_VALUE, Scheme.of(TEST_SERVICE_TYPE));
 
-        Endpoint endpoint = new Endpoint(processIdentifier, new TransportProfile(DynamicDiscoveryService.transportProfileAS4), ADDRESS, testData);
-        sm.addEndpoint(endpoint);
+        Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
+
+        List<ProcessMetadata<Endpoint>> processes = new ArrayList<>();
+        ProcessMetadata<Endpoint> process = ProcessMetadata.of(processIdentifier, endpoint);
+        processes.add(process);
+
+        ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
 
         return sm;
     }
