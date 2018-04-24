@@ -22,6 +22,7 @@ import java.util.Collection;
 public class DomibusCacheServiceImpl implements DomibusCacheService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusCacheServiceImpl.class);
+
     @Autowired
     private CacheManager cacheManager;
 

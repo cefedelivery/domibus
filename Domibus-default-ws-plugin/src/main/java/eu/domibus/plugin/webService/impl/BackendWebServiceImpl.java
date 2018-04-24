@@ -1,7 +1,6 @@
 
 package eu.domibus.plugin.webService.impl;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
 import eu.domibus.ext.exceptions.AuthenticationException;
@@ -19,12 +18,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -57,6 +55,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
+
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
@@ -113,7 +112,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         partInfoList.addAll(partInfosToAdd);
         if (ebMSHeaderInfo.getUserMessage().getMessageInfo() == null) {
             MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setTimestamp(getXMLTimeStamp());
+            messageInfo.setTimestamp(LocalDateTime.now());
             ebMSHeaderInfo.getUserMessage().setMessageInfo(messageInfo);
         }
         final String messageId;
@@ -127,11 +126,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
-    }
-
-    protected XMLGregorianCalendar getXMLTimeStamp() {
-        GregorianCalendar gc = new GregorianCalendar();
-        return new XMLGregorianCalendarImpl(gc);
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {

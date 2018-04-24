@@ -4,6 +4,7 @@ import eu.domibus.api.audit.AuditLog;
 import eu.domibus.common.dao.AuditDao;
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.common.services.AuditService;
@@ -98,6 +99,19 @@ public class AuditServiceImpl implements AuditService {
                         distinct().
                         collect(Collectors.toList());
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addPModeDownloadedAudit(final String messageId) {
+        auditDao.savePModeAudit(
+                new PModeAudit(messageId,
+                        userService.getLoggedUserNamed(),
+                        new Date(),
+                        ModificationType.DOWNLOADED));
+    }
+
 
     /**
      * {@inheritDoc}

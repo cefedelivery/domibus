@@ -306,11 +306,11 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testScheduleSending(@Injectable final JmsMessage jmsMessage, final @Mocked DispatchMessageCreator dispatchMessageCreator, @Mocked Domain domain) throws Exception {
+    public void testScheduleSending(@Injectable final JmsMessage jmsMessage, final @Mocked DispatchMessageCreator dispatchMessageCreator) throws Exception {
         final String messageId = "1";
 
         new Expectations(userMessageDefaultService) {{
-            new DispatchMessageCreator(messageId, domain);
+            new DispatchMessageCreator(messageId);
             result = dispatchMessageCreator;
 
             dispatchMessageCreator.createMessage();

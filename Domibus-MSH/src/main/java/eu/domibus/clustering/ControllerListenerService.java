@@ -34,7 +34,7 @@ public class ControllerListenerService implements MessageListener {
     private CacheManager cacheManager;
 
     @Autowired
-    protected MultiDomainCryptoService multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCryptoService;
 
     @Autowired
     protected DomainService domainService;
@@ -65,8 +65,9 @@ public class ControllerListenerService implements MessageListener {
 
         switch (command) {
             case Command.RELOAD_PMODE:
+                //TODO refresh the PMode associated to the domain
                 pModeProvider.refresh();
-                multiDomainCertificateProvider.refreshTrustStore(domain);
+                multiDomainCryptoService.refreshTrustStore(domain);
                 break;
             case Command.EVICT_CACHES:
                 Collection<String> cacheNames = cacheManager.getCacheNames();
@@ -75,7 +76,7 @@ public class ControllerListenerService implements MessageListener {
                 }
                 break;
             case Command.RELOAD_TRUSTSTORE:
-                multiDomainCertificateProvider.refreshTrustStore(domain);
+                multiDomainCryptoService.refreshTrustStore(domain);
                 break;
             default:
                 LOG.error("Unknown command received: " + command);

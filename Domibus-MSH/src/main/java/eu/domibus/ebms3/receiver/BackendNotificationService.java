@@ -1,7 +1,6 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
@@ -21,7 +20,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.BackendFilterEntity;
@@ -45,7 +43,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.Queue;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -95,8 +96,6 @@ public class BackendNotificationService {
     @Autowired
     private DomainCoreConverter coreConverter;
 
-    @Autowired
-    protected DomainContextProvider domainContextProvider;
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -147,7 +146,7 @@ public class BackendNotificationService {
             LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
             String finalRecipient = getFinalRecipient(userMessage);
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
-            jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties, domainContextProvider.getCurrentDomain()).createMessage(), unknownReceiverQueue);
+            jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties).createMessage(), unknownReceiverQueue);
             return;
         }
 
@@ -277,7 +276,7 @@ public class BackendNotificationService {
             LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
         }
         LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
-        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties, domainContextProvider.getCurrentDomain()).createMessage(), notificationListener.getBackendNotificationQueue());
+        jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 
     public void notifyOfSendFailure(final String messageId) {

@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -21,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,8 +52,11 @@ public class PModeResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
+    @Autowired
+    private AuditService auditService;
+
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
-    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id) {
+    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
 
         final byte[] rawConfiguration = pModeProvider.getPModeFile(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -61,6 +67,8 @@ public class PModeResource {
         HttpStatus status = HttpStatus.OK;
         if(resource.getByteArray().length == 0) {
             status = HttpStatus.NO_CONTENT;
+        } else if (!noAudit) {
+            auditService.addPModeDownloadedAudit( Integer.toString(id));
         }
 
         return ResponseEntity.status(status)

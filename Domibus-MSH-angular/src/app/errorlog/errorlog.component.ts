@@ -1,4 +1,4 @@
-﻿import {Component, TemplateRef, ViewChild} from "@angular/core";
+﻿import {Component, TemplateRef, ViewChild, Renderer2, AfterViewInit, ElementRef} from "@angular/core";
 import {Observable} from "rxjs";
 import {Http, Response, URLSearchParams} from "@angular/http";
 import {ErrorLogResult} from "./errorlogresult";
@@ -9,6 +9,7 @@ import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
 import {AlertComponent} from "../alert/alert.component";
+import { Md2Datepicker } from "md2";
 
 @Component({
   moduleId: module.id,
@@ -17,7 +18,7 @@ import {AlertComponent} from "../alert/alert.component";
   styleUrls: ['./errorlog.component.css']
 })
 
-export class ErrorLogComponent {
+export class ErrorLogComponent implements AfterViewInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -25,6 +26,7 @@ export class ErrorLogComponent {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('bibi') bibi: Md2Datepicker;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -52,7 +54,7 @@ export class ErrorLogComponent {
   static readonly ERROR_LOG_URL : string = 'rest/errorlogs';
   static readonly ERROR_LOG_CSV_URL : string = ErrorLogComponent.ERROR_LOG_URL + '/csv';
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService, public dialog: MdDialog, private renderer: Renderer2) {
   }
 
   ngOnInit() {
@@ -96,6 +98,21 @@ export class ErrorLogComponent {
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+
+    // this.bibi.registerOnValidatorChange(() => {
+    //   console.log('bau')
+    // })
+    // this.bibi.registerOnTouched(() => {
+    //   console.log('bau touch');
+    //   return {};
+    // });
+    //
+    // this.bibi._onTouched = () => {  console.log('wwwhat?')}
+  //  this.bibi._validatorOnChange
+  }
+
+  onTest() {
+    console.log('onTest')
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
@@ -303,6 +320,20 @@ export class ErrorLogComponent {
 
   saveAsCSV() {
     DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.getFilterPath());
+  }
+
+  ngAfterViewInit() {
+   // var inputs = this.elementRef.nativeElement.getElementsByTagName('input');
+   // console.log( 'inputs[0] ', inputs )
+   // inputs[2].onblur =  () => { console.log('on blur ');
+   //    if (!this.filter.timestampFrom)
+   //      inputs[2].value = '';
+   // }
+
+  }
+
+  onClick(event) {
+    console.log(event);
   }
 
 }
