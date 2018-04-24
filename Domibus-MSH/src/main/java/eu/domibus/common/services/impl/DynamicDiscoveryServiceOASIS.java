@@ -33,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Service to query a compliant e-SENS SMP profile based on the OASIS BDX Service Metadata Publishers
+ * Service to query a compliant eDelivery SMP profile based on the OASIS BDX Service Metadata Publishers
  * (SMP) to extract the required information about the unknown receiver AP.
  * The SMP Lookup is done using an SMP Client software, with the following input:
  *       The End Receiver Participant ID (C4)

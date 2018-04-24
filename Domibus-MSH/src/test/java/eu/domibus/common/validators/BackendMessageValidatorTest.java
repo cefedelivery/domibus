@@ -32,7 +32,6 @@ public class BackendMessageValidatorTest {
     private static final String INITIATOR_ROLE = "defaultInitiatorRole";
     private static final String RESPONDER_ROLE = "defaultResponderRole";
 
-
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;;
 
@@ -248,26 +247,6 @@ public class BackendMessageValidatorTest {
     }
 
     @Test
-    /* Verifies that the initiator and the responder parties are the same. */
-    public void validatePartiesNOk() throws Exception {
-
-        final Party from = new Party();
-        from.setName(BLUE);
-
-        final Party to = new Party();
-        to.setName(BLUE);
-
-        try {
-            backendMessageValidatorObj.validateParties(from, to);
-            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
-        } catch (EbMS3Exception ex) {
-            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
-            assert (ex.getErrorDetail().contains("The initiator party's name is the same as the responder party's one"));
-        }
-
-    }
-
-    @Test
     /* Verifies that the message is being sent by the same party as the one configured for the sending access point */
     public void validateInitiatorPartyOk() throws Exception {
 
@@ -322,27 +301,6 @@ public class BackendMessageValidatorTest {
         }};
 
     }
-
-    @Test
-    /* Verifies that the message is wrongly sent to current gateway.*/
-    public void validateResponderPartyNOk() throws Exception {
-
-        final Party gatewayParty = new Party();
-        gatewayParty.setName(BLUE);
-
-        final Party to = new Party();
-        to.setName(BLUE);
-
-        try {
-            backendMessageValidatorObj.validateResponderParty(gatewayParty, to);
-            Assert.fail("It should throw " + EbMS3Exception.class.getCanonicalName());
-        } catch (EbMS3Exception ex) {
-            assert (ex.getErrorCode().equals(ErrorCode.EbMS3ErrorCode.EBMS_0010));
-            assert (ex.getErrorDetail().contains("It is forbidden to submit a message to the sending access point"));
-        }
-
-    }
-
 
     @Test
     /* Verifies that the parties' roles are different. */

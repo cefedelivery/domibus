@@ -10,6 +10,7 @@ import eu.domibus.spring.SpringContextProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,6 +65,15 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     PKIUtil pkiUtil = new PKIUtil();
 
     @Test
+    public void testHandleMessageKeyIdentifier(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequest.xml");
+        String trustoreFilename = RESOURCE_PATH + "gateway_truststore.jks";
+        String trustorePassword = "test123";
+
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+    }
+
+    @Test
     public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
@@ -104,7 +114,15 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         }};
     }
 
-    protected void testHandleMessage(Document doc, String trustoreFilename, String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+    @Test
+    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException {
+        Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement());
+        Assert.assertNotNull(xc);
+        Assert.assertNotNull(xc.getIssuerDN());
+    }
+
+    protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
 
         new Expectations(trustSenderInterceptor) {{

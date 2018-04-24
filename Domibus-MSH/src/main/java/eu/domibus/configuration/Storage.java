@@ -1,6 +1,7 @@
 package eu.domibus.configuration;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.util.WarningUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,21 +74,30 @@ public class Storage {
      * @return Path
      */
     private Path createLocation(String path) {
+        Path payloadPath = null;
         try {
-            Path payloadPath = Paths.get(path).normalize();
+            payloadPath = Paths.get(path).normalize();
             // Checks if the path exists, if not it creates it
             if (Files.notExists(payloadPath)) {
                 Files.createDirectories(payloadPath);
-                LOG.debug(payloadPath.toAbsolutePath() + "has been created!");
+                LOG.info("The payload folder " + payloadPath.toAbsolutePath() + " has been created!");
+            } else {
+                if (Files.isSymbolicLink(payloadPath)) {
+                    payloadPath = Files.readSymbolicLink(payloadPath);
+                }
+
+                if (!Files.isWritable(payloadPath)) {
+                    throw new IOException("Write permission for payload folder " + payloadPath.toAbsolutePath() + " is not granted.");
+                }
             }
-            if (Files.isSymbolicLink(payloadPath)) {
-                payloadPath = Files.readSymbolicLink(payloadPath);
-            }
-            return payloadPath;
         } catch (IOException ioEx) {
             LOG.error("Error creating/accessing the payload folder [{}]", path, ioEx);
+
+            // Takes temporary folder by default if it faces any issue while creating defined path.
+            payloadPath = Paths.get(System.getProperty("java.io.tmpdir"));
+            LOG.warn(WarningUtil.warnOutput("The temporary payload folder " + payloadPath.toAbsolutePath() + " has been selected!"));
         }
-        return null;
+        return payloadPath;
     }
 
 }

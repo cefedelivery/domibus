@@ -246,18 +246,34 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
+    protected String getTextFromElement(Element element) {
+        StringBuffer buf = new StringBuffer();
+        NodeList list = element.getChildNodes();
+        boolean found = false;
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                buf.append(node.getNodeValue());
+                found = true;
+            }
+        }
+        return found? buf.toString():null;
+    }
+
     protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
 
         NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
         if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
             return null;
 
-        Node binarySecurityTokenTag = binarySecurityTokenElement.item(0).getFirstChild();
-        if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
+        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
+        String certString = getTextFromElement(binarySecurityTokenTag);
+
+        if(certString==null ||  certString.isEmpty() ) {
             return null;
         }
 
-        String certStr = ( "-----BEGIN CERTIFICATE-----\n" + ((TextImpl)binarySecurityTokenTag).getData() + "\n-----END CERTIFICATE-----\n" );
+        String certStr = ( "-----BEGIN CERTIFICATE-----\n" +  certString + "\n-----END CERTIFICATE-----\n" );
         InputStream in = new ByteArrayInputStream(certStr.getBytes());
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
