@@ -65,15 +65,6 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     PKIUtil pkiUtil = new PKIUtil();
 
     @Test
-    public void testHandleMessageKeyIdentifier(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
-        Document doc = readDocument("dataset/as4/SoapRequest.xml");
-        String trustoreFilename = RESOURCE_PATH + "gateway_truststore.jks";
-        String trustorePassword = "test123";
-
-        testHandleMessage(doc, trustoreFilename, trustorePassword);
-    }
-
-    @Test
     public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
@@ -125,7 +116,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
 
-        new Expectations(trustSenderInterceptor) {{
+        new Expectations() {{
             domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = true;
         }};
