@@ -46,7 +46,7 @@ bz4=</source>
   </messageProperties>
   <action>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test</action>
   <service>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service</service>
-  <serviceType>tc2</serviceType>
+  <serviceType>tctest</serviceType>
   <fromRole>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</fromRole>
   <toRole>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</toRole>
 </eu.domibus.plugin.Submission>
