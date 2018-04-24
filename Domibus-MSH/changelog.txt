@@ -6,6 +6,7 @@ Domibus 4.0
 - Possibility to have information of all PMode changes' history
 - Possibility to export the contents of a datatable to CSV
 - Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
+- Possibility to Test the connections for other Access Points
 Domibus 3.3.3
 - Possibility to send a message to the same Access Point
 Domibus 3.3.2

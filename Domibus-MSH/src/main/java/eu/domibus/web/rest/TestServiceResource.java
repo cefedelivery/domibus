@@ -36,13 +36,13 @@ public class TestServiceResource {
         return partyService.findPartyNamesByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
     }
 
-    @RequestMapping(value = "submit", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public String submitTest(@RequestBody TestServiceRequestRO testServiceRequestRO) throws IOException, MessagingProcessingException {
         return databaseMessageHandler.submitTestMessage(testServiceRequestRO.getSender(), testServiceRequestRO.getReceiver());
     }
 
-    @RequestMapping(value = "submitDynamicDiscovery", method = RequestMethod.POST)
+    @RequestMapping(value = "dynamicdiscovery", method = RequestMethod.POST)
     @ResponseBody
     public String submitTestDynamicDiscovery(@RequestBody TestServiceRequestRO testServiceRequestRO) throws IOException, MessagingProcessingException {
         return databaseMessageHandler.submitTestDynamicDiscoveryMessage(testServiceRequestRO.getSender(),

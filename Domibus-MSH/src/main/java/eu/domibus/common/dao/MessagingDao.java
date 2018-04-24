@@ -94,7 +94,7 @@ public class MessagingDao extends BasicDao<Messaging> {
                 try {
                     Files.delete(Paths.get(result.getFileName()));
                 } catch (IOException e) {
-                    LOG.warn("Problem deleting payload data files");
+                    LOG.debug("Problem deleting payload data files", e);
                 }
             } else {
                 databasePayloads.add(result);

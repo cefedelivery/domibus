@@ -295,6 +295,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- XStream -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.4</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -371,11 +378,6 @@
             <artifactId>jul-to-slf4j</artifactId>
             <version>1.7.25</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.4.4</version>
         </dependency>
         <!-- End Test dependencies -->
     </dependencies>

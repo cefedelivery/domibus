@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.common.dao.PartyDao;
-import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -15,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -83,12 +81,7 @@ public class PartyServiceImpl implements PartyService {
      */
     @Override
     public List<String> findPartyNamesByServiceAndAction(String service, String action) {
-        try {
-            return pModeProvider.findPartyIdByServiceAndAction(service, action);
-        } catch (EbMS3Exception e) {
-            LOG.warn("Exception while trying to find PartyId by Service and Action");
-        }
-        return Collections.emptyList();
+        return pModeProvider.findPartyIdByServiceAndAction(service, action);
     }
 
     /**

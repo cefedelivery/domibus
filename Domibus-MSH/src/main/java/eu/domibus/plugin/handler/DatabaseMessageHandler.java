@@ -329,14 +329,22 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
         }
     }
 
-    public String submitTestMessage(String sender, String receiver) throws IOException, MessagingProcessingException {
+    private Submission getSubmission() throws IOException {
         Resource testservicefile = new ClassPathResource("messages/testservice/testservicemessage.xml");
         XStream xstream = new XStream();
-        Submission messageData = (Submission)xstream.fromXML(testservicefile.getInputStream());
+        return (Submission)xstream.fromXML(testservicefile.getInputStream());
+    }
 
-        // Set Sender
+    private void setSender(String sender, Submission messageData) {
         messageData.getFromParties().clear();
         messageData.getFromParties().add(new Submission.Party(sender, URN_OASIS_NAMES_TC_EBCORE_PARTYID_TYPE_UNREGISTERED));
+    }
+
+    public String submitTestMessage(String sender, String receiver) throws IOException, MessagingProcessingException {
+        Submission messageData = getSubmission();
+
+        // Set Sender
+        setSender(sender, messageData);
 
         // Set Receiver
         messageData.getToParties().clear();
@@ -346,13 +354,10 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     }
 
     public String submitTestDynamicDiscoveryMessage(String sender, String finalRecipient, String finalRecipientType, String serviceType) throws IOException, MessagingProcessingException {
-        Resource testservicefile = new ClassPathResource("messages/testservice/testservicemessage.xml");
-        XStream xstream = new XStream();
-        Submission messageData = (Submission)xstream.fromXML(testservicefile.getInputStream());
+        Submission messageData = getSubmission();
 
         // Set Sender
-        messageData.getFromParties().clear();
-        messageData.getFromParties().add(new Submission.Party(sender, URN_OASIS_NAMES_TC_EBCORE_PARTYID_TYPE_UNREGISTERED));
+        setSender(sender, messageData);
 
         // Clears Receivers
         messageData.getToParties().clear();

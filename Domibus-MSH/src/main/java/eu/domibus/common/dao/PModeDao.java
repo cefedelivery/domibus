@@ -401,7 +401,8 @@ public class PModeDao extends PModeProvider {
 
 
     @Override
-    public List<String> findPartyIdByServiceAndAction(final String service, final String action) throws EbMS3Exception {
+    public List<String> findPartyIdByServiceAndAction(final String service, final String action) {
+        List<String> result = new ArrayList<>();
         LegConfiguration legConfiguration;
         // get the leg which contains the service and action
         final TypedQuery<LegConfiguration> query = this.entityManager.createNamedQuery("LegConfiguration.findForTestService", LegConfiguration.class);
@@ -410,12 +411,12 @@ public class PModeDao extends PModeProvider {
         try {
             legConfiguration = query.getSingleResult();
         } catch (final NoResultException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
+            LOG.debug("No matching leg was found", e);
+            return result;
         }
 
         final List<Process> processByLegName = processDao.findProcessByLegName(legConfiguration.getName());
 
-        List<String> result = new ArrayList<>();
         for (Process process : processByLegName) {
             for(Party party : process.getResponderParties()) {
                 for(Identifier identifier : party.getIdentifiers()) {

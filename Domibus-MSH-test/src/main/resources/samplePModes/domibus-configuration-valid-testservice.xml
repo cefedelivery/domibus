@@ -132,7 +132,7 @@
             <service name="testService2" value="bdx:noprocess" type="tc2"/>
             <service name="testService3" value="bdx:noprocess" type="tc3"/>
             <service name="noSecService" value="InternalTesting"/>
-            <service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tc4"/>
+            <service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tctest"/>
         </services>
         <actions>
             <action name="tc1Action" value="TC1Leg1"/>
@@ -203,7 +203,7 @@
                               errorHandling="demoErrorHandling"
                               compressPayloads="false"/>
             <legConfiguration name="legTestService"
-                              service="testServiceTest"
+                              service="testService"
                               action="testActionTest"
                               security="signAndEncrypt"
                               defaultMpc="defaultMpc"
@@ -297,7 +297,7 @@
                 <leg name="pushTestcase3Leg2tc3ActionLeg2"/>
             </legs>
         </process>
-        <process name="testServiceTest"
+        <process name="testService"
                  agreement="agreement1111"
                  mep="twoway"
                  binding="pushAndPush"

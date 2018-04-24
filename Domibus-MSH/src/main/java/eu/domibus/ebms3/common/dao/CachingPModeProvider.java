@@ -271,7 +271,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcName);
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcName);
 
         return 0;
     }
@@ -284,7 +284,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcURI);
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcURI);
 
         return 0;
     }
@@ -297,7 +297,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcName);
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcName);
 
         return -1;
     }
@@ -310,7 +310,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcURI);
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcURI);
 
         return -1;
     }

@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.process.Process;
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -19,9 +18,7 @@ import org.junit.runner.RunWith;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Dussart
@@ -253,21 +250,6 @@ public class PartyServiceImplTest {
 
         // Then
         Assert.assertEquals(parties, partyNamesByServiceAndAction);
-    }
-
-    @Test
-    public void testFindPartyNamesByServiceAndActionException() throws EbMS3Exception {
-        // Given
-        new Expectations() {{
-            pModeProvider.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
-            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "testDetail", "testRefToMessageId", new Exception());
-        }};
-
-        // When
-        List<String> partyNamesByServiceAndAction = partyService.findPartyNamesByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
-
-        // Then
-        Assert.assertEquals(Collections.emptyList(), partyNamesByServiceAndAction);
     }
 
     @Test

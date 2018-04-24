@@ -12,12 +12,13 @@ import {AlertService} from "../alert/alert.service";
 
 export class TestServiceComponent {
 
-  static readonly TEST_SERVICE_PARTIES_URL: string = 'rest/testservice/parties';
-  static readonly TEST_SERVICE_SENDER_URL: string = 'rest/testservice/sender';
-  static readonly TEST_SERVICE_SUBMIT_URL: string = 'rest/testservice/submit';
-  static readonly TEST_SERVICE_SUBMIT_DYNAMICDISCOVERY_URL: string = 'rest/testservice/submitDynamicDiscovery';
-  static readonly MESSAGE_LOG_LAST_TEST_SENT_URL: string = 'rest/messagelog/lastTestSent';
-  static readonly MESSAGE_LOG_LAST_TEST_RECEIVED_URL: string = 'rest/messagelog/lastTestReceived';
+  static readonly TEST_SERVICE_URL: string = 'rest/testservice';
+  static readonly TEST_SERVICE_PARTIES_URL: string = TestServiceComponent.TEST_SERVICE_URL + '/parties';
+  static readonly TEST_SERVICE_SENDER_URL: string = TestServiceComponent.TEST_SERVICE_URL + '/sender';
+  static readonly TEST_SERVICE_SUBMIT_DYNAMICDISCOVERY_URL: string = TestServiceComponent.TEST_SERVICE_URL + '/dynamicdiscovery';
+
+  static readonly MESSAGE_LOG_LAST_TEST_SENT_URL: string = 'rest/messagelog/test/outgoing/latest';
+  static readonly MESSAGE_LOG_LAST_TEST_RECEIVED_URL: string = 'rest/messagelog/test/incoming/latest';
 
   dynamicDiscoveryEnabled: boolean;
 
@@ -50,7 +51,7 @@ export class TestServiceComponent {
   test() {
     this.clearInfo();
     if(this.isPModeDaoOrCachingPModeProvider()) {
-      this.http.post(TestServiceComponent.TEST_SERVICE_SUBMIT_URL,
+      this.http.post(TestServiceComponent.TEST_SERVICE_URL,
         JSON.stringify({
           sender: this.sender,
           receiver: this.filter.receiverPartyId
@@ -115,9 +116,11 @@ export class TestServiceComponent {
     }
   }
 
-  find() {
+  update() {
     if(this.isDynamicDiscoveryPModeProvider()) {
       this.getLastSentRequest(this.filter.finalRecipient);
+    } else if(this.isPModeDaoOrCachingPModeProvider()) {
+      this.getLastSentRequest(this.filter.receiverPartyId);
     } else {
       this.disableButtonAndClearInfo();
     }

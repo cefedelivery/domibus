@@ -224,7 +224,7 @@ public class MessageLogResource {
                 .body(resultText);
     }
 
-    @RequestMapping(value = "lastTestSent", method = RequestMethod.GET)
+    @RequestMapping(value = "test/outgoing/latest", method = RequestMethod.GET)
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestSent(@RequestParam(value = "partyId") String partyId) {
         LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
 
@@ -245,7 +245,7 @@ public class MessageLogResource {
         return ResponseEntity.notFound().build();
     }
 
-    @RequestMapping(value = "lastTestReceived", method = RequestMethod.GET)
+    @RequestMapping(value = "test/incoming/latest", method = RequestMethod.GET)
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
