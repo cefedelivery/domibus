@@ -55,7 +55,7 @@
 		</agreements>
 		<services>
 			<service name="testService1" value="urn:www.cenbii.eu:profile:bii05:ver2.0" type="cenbii-procid-ubl"/>
-			<service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tc2"/>
+			<service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tctest"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>

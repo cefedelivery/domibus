@@ -93,7 +93,7 @@
 		</agreements>
 		<services>
 			<service name="testService1" value="bdx:noprocess" type="tc1"/>
-			<service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tc2"/>
+			<service name="testServiceTest" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tctest"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="TC1Leg1"/>
