@@ -12,11 +12,6 @@ import java.util.List;
  * Implementations of this interface handle the retrieval of messages from
  * Domibus to the backend.
  *
- * @deprecated generic type <T> is deprecated and will be replaced by <Submission> in Release 4.0
- *
- * @param <T> Data transfer object
- *            (http://en.wikipedia.org/wiki/Data_transfer_object) transported between the
- *            backend and Domibus
  * @author Christian Koch, Stefan Mueller
  * @since 3.0
  */
@@ -25,8 +20,6 @@ public interface MessageRetriever {
 
     /**
      * provides the message with the corresponding messageId
-     *
-     * @deprecated generic type <T> is deprecated and will be replaced by <Submission> in Release 4.0
      *
      * @param messageId the messageId of the message to retrieve
      * @return the message object with the given messageId
