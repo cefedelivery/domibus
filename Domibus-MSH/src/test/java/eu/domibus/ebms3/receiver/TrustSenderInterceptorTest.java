@@ -11,6 +11,7 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
@@ -116,6 +117,14 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         new Verifications() {{
             certificateService.isCertificateValid((X509Certificate)any); times = 0;
         }};
+    }
+
+    @Test
+    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException {
+        Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement());
+        Assert.assertNotNull(xc);
+        Assert.assertNotNull(xc.getIssuerDN());
     }
 
     protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {

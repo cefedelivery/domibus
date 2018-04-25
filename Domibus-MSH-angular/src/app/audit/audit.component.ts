@@ -41,6 +41,7 @@ export class AuditComponent implements OnInit {
   offset: number = 0;
   count: number = 0;
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowWithActionMapTpl') rowWithActionMapTpl: TemplateRef<any>;
 
 //--- hide/show binding ---
   advancedSearch: boolean;
@@ -148,6 +149,7 @@ export class AuditComponent implements OnInit {
         width: 20
       },
       {
+        cellTemplate: this.rowWithActionMapTpl,
         name: 'Action',
         prop: 'action',
         width: 20

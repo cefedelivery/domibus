@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -10,6 +11,7 @@ import eu.domibus.web.rest.ro.PModeResponseRO;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,6 +45,9 @@ public class PModeResourceTest {
     @Injectable
     private CsvServiceImpl csvServiceImpl;
 
+    @Injectable
+    private AuditService auditService;
+
     @Test
     public void testDownloadPmodes() {
         // Given
@@ -53,7 +58,7 @@ public class PModeResourceTest {
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0);
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.OK);
@@ -69,10 +74,37 @@ public class PModeResourceTest {
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0);
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void testDownloadPModesAudit() {
+        // Given
+        final byte[] byteA =new byte[]{1, 0, 1};
+        new Expectations() {{
+            pModeProvider.getPModeFile(0);
+            result = byteA;
+        }};
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
+        validateResponseEntity(responseEntity, HttpStatus.OK);
+
+        new Verifications() {{
+            // add audit must be called
+            auditService.addPModeDownloadedAudit("0"); times = 0;
+
+        }};
+
+        responseEntity = pModeResource.downloadPmode(0, false);
+        validateResponseEntity(responseEntity, HttpStatus.OK);
+
+        new Verifications() {{
+            // add audit must be called
+            auditService.addPModeDownloadedAudit("0"); times = 1;
+
+        }};
     }
 
     private void validateResponseEntity(ResponseEntity<? extends Resource> responseEntity, HttpStatus httpStatus) {
@@ -146,7 +178,7 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest1\n",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n XmlProcessingException: UnitTest1\n",
                 stringResponseEntity.getBody());
     }
 
@@ -166,7 +198,7 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest2",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n Exception: UnitTest2",
                 stringResponseEntity.getBody());
 
     }
@@ -222,7 +254,6 @@ public class PModeResourceTest {
         Assert.assertEquals("Impossible to delete PModes due to \nMocked exception", stringResponseEntity.getBody());
     }
 
-
     @Test
     public void testUploadPmodeSuccess() {
         // Given
@@ -251,6 +282,25 @@ public class PModeResourceTest {
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
         Assert.assertEquals("Impossible to upload PModes due to \nMocked exception", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeNestedException() throws XmlProcessingException {
+        // Given
+        final Exception exception = new Exception(new Exception("Nested mocked exception"));
+
+        new Expectations(pModeResource) {{
+            pModeProvider.updatePModes((byte[]) any, anyString);
+            result = exception;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Impossible to upload PModes due to \njava.lang.Exception: Nested mocked exception", stringResponseEntity.getBody());
     }
 
     @Test

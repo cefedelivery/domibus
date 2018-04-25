@@ -2,6 +2,7 @@ package eu.domibus.common.util;
 
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
+import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.common.model.configuration.BusinessProcesses;
 import eu.domibus.common.model.configuration.Configuration;
@@ -20,6 +21,7 @@ public class AnnotationsUtilTest {
     @Test
     public void getDefaultValue() throws Exception {
         AnnotationsUtil annotationsUtil = new AnnotationsUtil();
+        assertEquals("Pmode", annotationsUtil.getValue(PModeAudit.class, RevisionLogicalName.class).get());
         assertEquals("Pmode", annotationsUtil.getValue(Configuration.class, RevisionLogicalName.class).get());
         assertEquals("Message", annotationsUtil.getValue(MessageAudit.class, RevisionLogicalName.class).get());
         assertEquals("Party", annotationsUtil.getValue(Party.class, RevisionLogicalName.class).get());
