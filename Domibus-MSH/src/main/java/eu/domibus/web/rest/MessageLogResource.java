@@ -45,23 +45,6 @@ public class MessageLogResource {
     @Autowired
     DateUtil dateUtil;
 
-    //significant improvements to the query execution plan have been found by always passing the date.
-    //so we provide a default from and to.
-    Date defaultFrom;
-
-    Date defaultTo;
-
-    @PostConstruct
-    protected void init() {
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            defaultFrom = ft.parse("1977-10-25");
-            defaultTo = ft.parse("2977-10-25");
-        } catch (ParseException e) {
-            LOGGER.error("Impossible to initiate default dates");
-        }
-    }
-
     @RequestMapping(method = RequestMethod.GET)
     public MessageLogResultRO getMessageLog(
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -91,13 +74,8 @@ public class MessageLogResource {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient);
 
         Date from = dateUtil.fromString(receivedFrom);
-//        if (from == null) {
-//            from = defaultFrom;
-//        }
         Date to = dateUtil.fromString(receivedTo);
-//        if (to == null) {
-//            to = defaultTo;
-//        }
+
         filters.put("receivedFrom", from);
         filters.put("receivedTo", to);
 
@@ -120,6 +98,7 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
+
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
