@@ -1149,28 +1149,6 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    public void testGetMessageStatusOk() throws Exception {
-        new Expectations() {{
-
-            authUtils.isUnsecureLoginAllowed();
-            result = false;
-
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            result = MessageStatus.ACKNOWLEDGED;
-
-        }};
-
-        final MessageStatus msgStatus = dmh.getMessageStatus(MESS_ID);
-
-        new Verifications() {{
-            authUtils.hasAdminRole();
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            msgStatus.equals(MessageStatus.ACKNOWLEDGED);
-        }};
-
-    }
-
-    @Test
     public void testGetErrorsForMessageOk() throws Exception {
         new Expectations() {{
 

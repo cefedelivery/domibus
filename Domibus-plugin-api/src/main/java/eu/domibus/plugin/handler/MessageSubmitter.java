@@ -11,7 +11,6 @@ import eu.domibus.plugin.Submission;
  *
  * @author Christian Koch, Stefan Mueller
  */
-@Deprecated
 public interface MessageSubmitter {
 
     /**

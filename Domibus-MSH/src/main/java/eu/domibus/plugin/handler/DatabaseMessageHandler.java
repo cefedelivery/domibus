@@ -186,14 +186,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return originalUser;
     }
 
-    @Override
-    public MessageStatus getMessageStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed()) {
-            authUtils.hasAdminRole();
-        }
-        return convertMessageStatus(userMessageLogDao.getMessageStatus(messageId));
-    }
-
     protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
         if (MessageStatus.DOWNLOADED == messageStatus) {
             LOG.warn("Using deprecated method that converts DOWNLOADED status to RECEIVED");

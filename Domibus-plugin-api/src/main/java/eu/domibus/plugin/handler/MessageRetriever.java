@@ -15,7 +15,6 @@ import java.util.List;
  * @author Christian Koch, Stefan Mueller
  * @since 3.0
  */
-@Deprecated
 public interface MessageRetriever {
 
     /**
@@ -26,18 +25,6 @@ public interface MessageRetriever {
      */
     @Deprecated
     Submission downloadMessage(String messageId) throws MessageNotFoundException;
-
-    /**
-     * Returns message status {@link eu.domibus.common.MessageStatus} for message with messageid
-     *
-     * @param messageId id of the message the status is requested for
-     * @return the message status {@link eu.domibus.common.MessageStatus}
-     * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
-     * the backwards compatibility. Use {@link eu.domibus.plugin.handler.MessageRetriever#getStatus(String)} instead
-     *
-     */
-    @Deprecated
-    MessageStatus getMessageStatus(String messageId);
 
     /**
      * Returns message status {@link eu.domibus.common.MessageStatus} for message with messageid
