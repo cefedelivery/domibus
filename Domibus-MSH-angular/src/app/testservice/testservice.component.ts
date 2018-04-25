@@ -68,8 +68,7 @@ export class TestServiceComponent {
         JSON.stringify( {
           sender: this.sender,
           receiver: this.filter.finalRecipient,
-          receiverType: this.filter.finalRecipientType,
-          serviceType: this.filter.serviceType
+          receiverType: this.filter.finalRecipientType
         }), {
           headers: this.headers
         }).subscribe( () => {
@@ -87,8 +86,7 @@ export class TestServiceComponent {
 
   private isDynamicDiscoveryPModeProvider() {
     return (!isNullOrUndefined(this.filter.finalRecipient) && (this.filter.finalRecipient.length > 0) &&
-      !isNullOrUndefined(this.filter.finalRecipientType) && (this.filter.finalRecipientType.length > 0) &&
-      !isNullOrUndefined(this.filter.serviceType) && (this.filter.serviceType.length > 0));
+      !isNullOrUndefined(this.filter.finalRecipientType) && (this.filter.finalRecipientType.length > 0));
   }
 
   private disableButtonAndClearInfo() {

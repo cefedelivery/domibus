@@ -24,9 +24,6 @@
             <md-input-container>
               <input mdInput placeholder="Final Recipient Type" name="finalRecipientType" [(ngModel)]="filter.finalRecipientType" #finalRecipientType="ngModel" id="finalRecipientType_id" (ngModelChange)="onChangeInfo()">
             </md-input-container>
-            <md-input-container>
-              <input mdInput placeholder="Service Type" name="serviceType" [(ngModel)]="filter.serviceType" #serviceType="ngModel" id="serviceType_id" (ngModelChange)="onChangeInfo()">
-            </md-input-container>
           </div>
 
           <button md-raised-button color="primary" [disabled]="this.buttonDisabled" id="updatebutton_id" (click)="update()">
