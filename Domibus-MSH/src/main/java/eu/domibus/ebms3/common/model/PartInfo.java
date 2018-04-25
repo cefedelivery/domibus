@@ -79,10 +79,9 @@ public class PartInfo extends AbstractBaseEntity implements Comparable<PartInfo>
     @XmlTransient
     private long length = -1;
 
-    @Transient
     @XmlTransient
-    @Column(name="PART_ORDER", nullable = false)
-    private int partOrder;
+    @Column(name = "PART_ORDER", nullable = false)
+    private int partOrder = 0;
 
     public DataHandler getPayloadDatahandler() {
         return payloadDatahandler;
