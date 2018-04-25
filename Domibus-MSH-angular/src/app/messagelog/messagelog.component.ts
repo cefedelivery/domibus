@@ -238,6 +238,7 @@ export class MessageLogComponent {
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
+      this.selected = [];
 
       const start = offset * pageSize;
       const end = start + pageSize;
