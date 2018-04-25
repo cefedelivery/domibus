@@ -125,6 +125,7 @@
         </errorHandlings>
         <agreements>
             <agreement name="agreement1110" value="EDELIVERY-1110" type=""/>
+            <agreement name="agreement1111" value="TestServiceAgreement" type=""/>
             <agreement name="agreementEmpty" value="" type=""/>
         </agreements>
         <services>
@@ -132,7 +133,7 @@
             <service name="testService2" value="bdx:noprocess" type="tc2"/>
             <service name="testService3" value="bdx:noprocess" type="tc3"/>
             <service name="noSecService" value="InternalTesting"/>
-            <service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service" type="tctest"/>
+            <service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"/>
         </services>
         <actions>
             <action name="tc1Action" value="TC1Leg1"/>

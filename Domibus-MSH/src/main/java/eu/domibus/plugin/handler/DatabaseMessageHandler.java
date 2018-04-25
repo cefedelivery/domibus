@@ -1,6 +1,5 @@
 package eu.domibus.plugin.handler;
 
-import com.thoughtworks.xstream.XStream;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
@@ -34,15 +33,12 @@ import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +58,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private static final String WAS_NOT_FOUND_STR = "] was not found";
     private static final String ERROR_SUBMITTING_THE_MESSAGE_STR = "Error submitting the message [";
     private static final String TO_STR = "] to [";
-    private static final String URN_OASIS_NAMES_TC_EBCORE_PARTYID_TYPE_UNREGISTERED = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
@@ -327,53 +322,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
-    }
-
-    private Submission getSubmission() throws IOException {
-        Resource testservicefile = new ClassPathResource("messages/testservice/testservicemessage.xml");
-        XStream xstream = new XStream();
-        return (Submission)xstream.fromXML(testservicefile.getInputStream());
-    }
-
-    private void setSender(String sender, Submission messageData) {
-        messageData.getFromParties().clear();
-        messageData.getFromParties().add(new Submission.Party(sender, URN_OASIS_NAMES_TC_EBCORE_PARTYID_TYPE_UNREGISTERED));
-    }
-
-    public String submitTestMessage(String sender, String receiver) throws IOException, MessagingProcessingException {
-        Submission messageData = getSubmission();
-
-        // Set Sender
-        setSender(sender, messageData);
-
-        // Set Receiver
-        messageData.getToParties().clear();
-        messageData.getToParties().add(new Submission.Party(receiver, URN_OASIS_NAMES_TC_EBCORE_PARTYID_TYPE_UNREGISTERED));
-
-        return submit(messageData, "TestService");
-    }
-
-    public String submitTestDynamicDiscoveryMessage(String sender, String finalRecipient, String finalRecipientType, String serviceType) throws IOException, MessagingProcessingException {
-        Submission messageData = getSubmission();
-
-        // Set Sender
-        setSender(sender, messageData);
-
-        // Clears Receivers
-        messageData.getToParties().clear();
-
-        // Set Final Recipient Value and Type
-        for(Submission.TypedProperty property : messageData.getMessageProperties()) {
-            if(property.getKey().equals("finalRecipient")) {
-                property.setValue(finalRecipient);
-                property.setType(finalRecipientType);
-            }
-        }
-
-        // Set ServiceType
-        messageData.setServiceType(serviceType);
-
-        return submit(messageData, "TestService");
     }
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {

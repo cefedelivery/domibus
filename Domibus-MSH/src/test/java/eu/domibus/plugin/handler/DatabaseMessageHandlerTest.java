@@ -1247,43 +1247,4 @@ public class DatabaseMessageHandlerTest {
 
 
     }
-
-    @Test
-    public void testSubmitMessage() throws IOException, MessagingProcessingException {
-        // Given
-        String sender = "sender";
-        String receiver = "receiver";
-
-        new Expectations(dmh) {{
-            dmh.submit((Submission) any, "TestService");
-            result = "test";
-        }};
-
-        // When
-        String submitTestMessage = dmh.submitTestMessage(sender, receiver);
-
-        // Then
-        Assert.assertEquals("test", submitTestMessage);
-    }
-
-    @Test
-    public void testSubmitTestDynamicDiscoveryMessage() throws IOException, MessagingProcessingException {
-        // Given
-        String sender = "sender";
-        String finalRecipient = "finalRecipient";
-        String finalRecipientType = "finalRecipientType";
-        String serviceType = "serviceType";
-
-        new Expectations(dmh) {{
-            dmh.submit((Submission) any, "TestService");
-            result = "test";
-        }};
-
-        // When
-        String submitTestDynamicDiscoveryMessage = dmh.submitTestDynamicDiscoveryMessage(sender, finalRecipient, finalRecipientType, serviceType);
-
-        // Then
-        Assert.assertEquals("test", submitTestDynamicDiscoveryMessage);
-    }
-
 }

@@ -428,4 +428,70 @@ public class CachingPModeProvider extends PModeProvider {
         }
         return result;
     }
+
+    @Override
+    public String getPartyIdType(String partyIdentifier) {
+        for (Party party : getConfiguration().getBusinessProcesses().getParties()) {
+            for(Identifier identifier : party.getIdentifiers()) {
+                if(identifier.getPartyId().equals(partyIdentifier)) {
+                    return identifier.getPartyIdType().getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getServiceType(String serviceValue) {
+        for(Service service : getConfiguration().getBusinessProcesses().getServices()) {
+            if(service.getValue().equals(serviceValue)) {
+                return service.getServiceType();
+            }
+        }
+        return null;
+    }
+
+    protected List<Process> getProcessFromService(String serviceValue) {
+        List<Process> result = new ArrayList<>();
+        for(Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+            for(LegConfiguration legConfiguration : process.getLegs()) {
+                if(legConfiguration.getService().getValue().equals(serviceValue)) {
+                    result.add(process);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getRole(String roleType, String serviceValue) {
+        for(Process found : getProcessFromService(serviceValue)) {
+            for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+                if (process.getName().equals(found.getName())) {
+                    if (roleType.equalsIgnoreCase("initiator")) {
+                        return process.getInitiatorRole().getValue();
+                    }
+                    if (roleType.equalsIgnoreCase("responder")) {
+                        return process.getResponderRole().getValue();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getAgreementRef(String serviceValue) {
+        for(Process found : getProcessFromService(serviceValue)) {
+            for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+                if (process.getName().equals(found.getName())) {
+                    Agreement agreement = process.getAgreement();
+                    if (agreement != null) {
+                        return agreement.getValue();
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

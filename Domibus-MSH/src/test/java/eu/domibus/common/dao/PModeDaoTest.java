@@ -248,4 +248,24 @@ public class PModeDaoTest {
         Assert.assertEquals(expectedResult, partyIdByServiceAndAction);
     }
 
+    @Test
+    public void testGetPartyIdType() {
+        Assert.assertNull(pModeDao.getPartyIdType(""));
+    }
+
+    @Test
+    public void testGetServiceType() {
+        Assert.assertNull(pModeDao.getServiceType(""));
+    }
+
+    @Test
+    public void testGetRole() {
+        Assert.assertNull(pModeDao.getRole("", ""));
+    }
+
+    @Test
+    public void testGetAgreementRef() {
+        Assert.assertNull(pModeDao.getAgreementRef( ""));
+    }
+
 }

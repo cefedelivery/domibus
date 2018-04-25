@@ -2,13 +2,11 @@
   <fromParties>
     <eu.domibus.plugin.Submission_-Party>
       <partyId>_SENDER_</partyId>
-      <partyIdType>urn:oasis:names:tc:ebcore:partyid-type:unregistered</partyIdType>
     </eu.domibus.plugin.Submission_-Party>
   </fromParties>
   <toParties>
     <eu.domibus.plugin.Submission_-Party>
       <partyId>_RECEIVER_</partyId>
-      <partyIdType>urn:oasis:names:tc:ebcore:partyid-type:unregistered</partyIdType>
     </eu.domibus.plugin.Submission_-Party>
   </toParties>
   <payloads>
@@ -36,17 +34,12 @@ bz4=</source>
     <eu.domibus.plugin.Submission_-TypedProperty>
       <key>originalSender</key>
       <value>urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</value>
-      <type>string</type>
     </eu.domibus.plugin.Submission_-TypedProperty>
     <eu.domibus.plugin.Submission_-TypedProperty>
       <key>finalRecipient</key>
       <value>urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</value>
-      <type>string</type>
     </eu.domibus.plugin.Submission_-TypedProperty>
   </messageProperties>
   <action>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test</action>
   <service>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service</service>
-  <serviceType>tctest</serviceType>
-  <fromRole>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</fromRole>
-  <toRole>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</toRole>
 </eu.domibus.plugin.Submission>

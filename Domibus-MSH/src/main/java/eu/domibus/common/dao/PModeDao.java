@@ -160,7 +160,7 @@ public class PModeDao extends PModeProvider {
             candidates = candidatesQuery.getResultList();
             if (candidates == null || candidates.isEmpty()) {
                 LOG.businessError(DomibusMessageCode.BUS_LEG_NAME_NOT_FOUND, agreementName, senderParty, receiverParty, service, action);
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "No Candidates for Legs found", null, null);
+                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, STR_NO_MATCHING_LEG_FOUND, null, null);
             }
         }
         final TypedQuery<String> query = this.entityManager.createNamedQuery("LegConfiguration.findForPMode", String.class);
@@ -427,4 +427,27 @@ public class PModeDao extends PModeProvider {
         return result;
     }
 
+    @Override
+    public String getPartyIdType(String partyIdentifier) {
+        // Not implemented on purpose
+        return null;
+    }
+
+    @Override
+    public String getServiceType(String serviceValue) {
+        // Not implemented on purpose
+        return null;
+    }
+
+    @Override
+    public String getRole(String roleType, String serviceValue) {
+        // Not implemented on purpose
+        return null;
+    }
+
+    @Override
+    public String getAgreementRef(String serviceValue) {
+        // Not implemented on purpose
+        return null;
+    }
 }

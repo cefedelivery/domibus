@@ -1,8 +1,10 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.party.PartyService;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.web.rest.ro.TestServiceRequestRO;
 import mockit.Expectations;
@@ -33,6 +35,9 @@ public class TestServiceResourceTest {
 
     @Injectable
     DatabaseMessageHandler databaseMessageHandler;
+
+    @Injectable
+    PModeProvider pModeProvider;
 
     @Test
     public void testGetSenderParty() {
@@ -72,9 +77,21 @@ public class TestServiceResourceTest {
     public void testSubmitTest() throws IOException, MessagingProcessingException {
         // Given
         TestServiceRequestRO testServiceRequestRO = new TestServiceRequestRO();
+        testServiceRequestRO.setSender("sender");
+        testServiceRequestRO.setReceiver("receiver");
 
         new Expectations() {{
-            databaseMessageHandler.submitTestMessage(testServiceRequestRO.getSender(), testServiceRequestRO.getReceiver());
+            pModeProvider.getPartyIdType(anyString);
+            result = "partyIdType";
+            pModeProvider.getServiceType(anyString);
+            result = "serviceType";
+            pModeProvider.getRole("INITIATOR", anyString);
+            result = "initiator";
+            pModeProvider.getRole("RESPONDER", anyString);
+            result = "responder";
+            pModeProvider.getAgreementRef(anyString);
+            result = "agreementref";
+            databaseMessageHandler.submit((Submission) any, "TestService");
             result = "test";
         }};
 
@@ -89,19 +106,30 @@ public class TestServiceResourceTest {
     public void testSubmitTestDynamicDiscoveryMessage() throws IOException, MessagingProcessingException {
         // Given
         TestServiceRequestRO testServiceRequestRO = new TestServiceRequestRO();
+        testServiceRequestRO.setSender("sender");
+        testServiceRequestRO.setReceiver("receiver");
+        testServiceRequestRO.setReceiverType("receiverType");
+        testServiceRequestRO.setServiceType("servicetype");
 
         new Expectations() {{
-            databaseMessageHandler.submitTestDynamicDiscoveryMessage(testServiceRequestRO.getSender(),
-                                                                        testServiceRequestRO.getReceiver(),
-                                                                        testServiceRequestRO.getReceiverType(),
-                                                                        testServiceRequestRO.getServiceType());
-            result = "test";
+            pModeProvider.getPartyIdType(anyString);
+            result = "partyIdType";
+            pModeProvider.getServiceType(anyString);
+            result = "serviceType";
+            pModeProvider.getRole("INITIATOR", anyString);
+            result = "initiator";
+            pModeProvider.getRole("RESPONDER", anyString);
+            result = "responder";
+            pModeProvider.getAgreementRef(anyString);
+            result = "agreementref";
+            databaseMessageHandler.submit((Submission) any, "TestService");
+            result = "dynamicdiscovery";
         }};
 
         // When
         String submitTestDynamicDiscovery = testServiceResource.submitTestDynamicDiscovery(testServiceRequestRO);
 
         // Then
-        Assert.assertEquals("test" ,submitTestDynamicDiscovery);
+        Assert.assertEquals("dynamicdiscovery" ,submitTestDynamicDiscovery);
     }
 }
