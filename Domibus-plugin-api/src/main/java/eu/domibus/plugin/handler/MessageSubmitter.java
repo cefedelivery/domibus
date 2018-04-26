@@ -20,6 +20,5 @@ public interface MessageSubmitter {
      * @return the messageId of the submitted message
      *
      */
-    @Deprecated
     public String submit(Submission messageData, String submitterName) throws MessagingProcessingException;
 }

@@ -23,7 +23,6 @@ public interface MessageRetriever {
      * @param messageId the messageId of the message to retrieve
      * @return the message object with the given messageId
      */
-    @Deprecated
     Submission downloadMessage(String messageId) throws MessageNotFoundException;
 
     /**
