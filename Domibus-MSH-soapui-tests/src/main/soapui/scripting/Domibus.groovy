@@ -430,7 +430,8 @@ class Domibus
 				"delete from TB_SEND_ATTEMPT",
 				"delete from TB_MESSAGE_ACKNW_PROP",
 				"delete from TB_MESSAGE_ACKNW",
-                "delete from TB_MESSAGE_LOG"
+                "delete from TB_MESSAGE_LOG",
+				"delete from TB_MESSAGING_LOCK"
         ] as String[]
 
         executeListOfQueriesOnAllDB(sqlQueriesList)
@@ -472,7 +473,8 @@ class Domibus
 				"delete from TB_SEND_ATTEMPT where MESSAGE_ID " + messageIDCheck + "",
 				"delete from TB_MESSAGE_ACKNW_PROP where FK_MSG_ACKNOWLEDGE IN (select ID_PK from TB_MESSAGE_ACKNW where MESSAGE_ID " + messageIDCheck + ")",
 				"delete from TB_MESSAGE_ACKNW where MESSAGE_ID " + messageIDCheck + "",			
-                "delete from TB_MESSAGE_LOG where MESSAGE_ID " + messageIDCheck + ""
+                "delete from TB_MESSAGE_LOG where MESSAGE_ID " + messageIDCheck + "",
+                "delete from TB_MESSAGING_LOCK where MESSAGE_ID " + messageIDCheck + ""				
         ] as String[]
 
         executeListOfQueriesOnAllDB(sqlQueriesList)
