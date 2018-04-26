@@ -45,11 +45,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     public void setLister(final MessageLister lister) {
         this.lister = lister;
     }
-
-    public abstract MessageSubmissionTransformer<U> getMessageSubmissionTransformer();
-
-    public abstract MessageRetrievalTransformer<T> getMessageRetrievalTransformer();
-
+    
     @Override
     // The following does not have effect at this level since the transaction would have already been rolled back!
     // @Transactional(noRollbackFor = {IllegalArgumentException.class, IllegalStateException.class})
