@@ -2,6 +2,7 @@ Domibus 3.3.4 (from 3.3.3):
                  - Run the appropriate DB migration script (mysql5innoDb-3.3.3-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.3-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
                             domibus.pull.queue.concurency=1-1
+                            domibus.internal.queue.concurency=3-10
                             domibus.pull.request.send.per.job.cycle=1 (Optional default value to 1)
                  - [Mysql only]
                         - [Tomcat] Please add the following parameters at the end of the domibus.datasource.xa.property.url property in the file"/conf/domibus/domibus.properties"
