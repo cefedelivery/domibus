@@ -93,17 +93,10 @@ public class UpdateRetryLoggingService {
         }
     }
 
+    @Transactional
     public void updateWaitingReceiptMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
         LOG.debug("Updating waiting receipt retry for message");
-        MessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
-        userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
-        final MessageStatus messageStatus = MessageStatus.WAITING_FOR_RECEIPT;
-        userMessageLog.setMessageStatus(messageStatus);
-        userMessageLogDao.update(userMessageLog);
-        LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
-        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
-        }
+        updateRetryLogging(messageId,legConfiguration,MessageStatus.WAITING_FOR_RECEIPT);
     }
 
     private void increaseAttempAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {

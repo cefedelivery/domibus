@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="dussath" id="EDELIVERY-3053_1">
+        <createTable tableName="TB_MESSAGING_LOCK">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_TYPE" type="VARCHAR(10)"/>
+            <column name="MESSAGE_RECEIVED" type="DATETIME"/>
+            <column name="MESSAGE_STATE" type="VARCHAR(10)"/>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="INITIATOR" type="VARCHAR(255)"/>
+            <column name="MPC" type="VARCHAR(255)"/>
+        </createTable>
+        <createIndex indexName="IDX_MESSAGE_LOCK_SEARCH" tableName="TB_MESSAGING_LOCK">
+            <column name="MESSAGE_TYPE"/>
+            <column name="MESSAGE_STATE"/>
+            <column name="INITIATOR"/>
+            <column name="MPC"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOCK_UNIQUE_ID" tableName="TB_MESSAGING_LOCK" unique="true">
+            <column name="MESSAGE_ID" />
+        </createIndex>
+        <addColumn tableName="TB_RAWENVELOPE_LOG">
+            <column name="MESSAGE_ID" type="VARCHAR(255)" afterColumn="RAW_XML"/>
+        </addColumn>
+        <createIndex indexName="IDX_RAWENVELOPE_MESSAGE_ID" tableName="TB_RAWENVELOPE_LOG">
+            <column name="MESSAGE_ID" />
+        </createIndex>
+    </changeSet>
+    <changeSet id="EDELIVERY_3053_2" author="dussath" >
+        <createProcedure dbms="mysql">
+            DELIMITER $$
+            create procedure get_next(
+            in message_type_in VARCHAR(255),
+            in initiator_in VARCHAR(255),
+            in mpc_in VARCHAR(255),
+            out message_id_out VARCHAR(255))
+            BEGIN
+            DECLARE no_data_found INT DEFAULT 0;
+            DECLARE message_locked INT DEFAULT 0;
+            DECLARE reccord_id INT DEFAULT NULL;
+            DECLARE pull_reccord CURSOR FOR select ID_PK from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and MPC=mpc_in and INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK;
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_data_found = 1;
+            DECLARE CONTINUE HANDLER FOR 1205 SET message_locked = 1;
+            OPEN pull_reccord;
+            my_loop:LOOP
+            FETCH pull_reccord INTO reccord_id;
+            IF NOT no_data_found THEN
+            SELECT ml.MESSAGE_ID into message_id_out FROM TB_MESSAGING_LOCK ml where ml.ID_PK=reccord_id FOR UPDATE;
+            IF NOT message_locked THEN
+            LEAVE my_loop;
+            END IF;
+            IF NOT message_locked THEN
+            ITERATE my_loop;
+            END IF;
+            END IF;
+            IF no_data_found THEN
+            LEAVE my_loop;
+            END IF;
+            END LOOP;
+            CLOSE pull_reccord;
+            END$$
+            DELIMITER ;
+        </createProcedure>
+    </changeSet>
+    <changeSet id="EDELIVERY_3053_3" author="dussath" >
+        <createProcedure dbms="oracle">
+            create or replace procedure get_next(
+            message_type_in in VARCHAR2,
+            initiator_in in VARCHAR2,
+            mpc_in in VARCHAR2,
+            message_id_out out VARCHAR2)
+            is
+            resource_busy    EXCEPTION;
+            pragma exception_init( resource_busy, -54 );
+            begin
+            for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK)
+            loop
+            begin
+            select TB_MESSAGING_LOCK.MESSAGE_ID into message_id_out from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
+            exit;
+            exception
+            when resource_busy then
+            message_id_out:=null;
+            end;
+            end loop;
+            exception
+            when NO_DATA_FOUND then
+            message_id_out:=null;
+            end;
+        </createProcedure>
+    </changeSet>
+
+</databaseChangeLog>
