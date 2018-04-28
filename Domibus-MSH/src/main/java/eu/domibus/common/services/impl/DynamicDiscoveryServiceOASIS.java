@@ -47,6 +47,9 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(?<scheme>.+?)::(?<value>.+)$");
+    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
+
 
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
@@ -163,5 +166,15 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             return false;
         }
         return Boolean.parseBoolean(useProxy);
+    }
+
+    @Override
+    public String getPartyIdType() {
+        return URN_TYPE_VALUE;
+    }
+
+    @Override
+    public String getResponderRole(){
+        return DEFAULT_RESPONDER_ROLE;
     }
 }

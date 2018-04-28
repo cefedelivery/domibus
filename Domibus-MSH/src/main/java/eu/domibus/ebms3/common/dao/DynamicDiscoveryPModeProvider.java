@@ -318,12 +318,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         //set toPartyId in UserMessage
         final PartyId receiverParty = new PartyId();
         receiverParty.setValue(cn);
-        receiverParty.setType(URN_TYPE_VALUE);
+        receiverParty.setType(dynamicDiscoveryService.getPartyIdType());
 
         userMessage.getPartyInfo().getTo().getPartyId().clear();
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
         if(userMessage.getPartyInfo().getTo().getRole() == null) {
-            userMessage.getPartyInfo().getTo().setRole(DEFAULT_RESPONDER_ROLE);
+            userMessage.getPartyInfo().getTo().setRole(dynamicDiscoveryService.getResponderRole());
         }
 
         LOG.debug("Add public certificate to the truststore");

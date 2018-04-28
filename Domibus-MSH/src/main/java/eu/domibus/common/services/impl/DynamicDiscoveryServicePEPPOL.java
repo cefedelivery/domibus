@@ -5,6 +5,7 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
+import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.lookup.fetcher.BasicApacheFetcher;
 import no.difi.vefa.peppol.mode.*;
@@ -37,6 +38,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServicePEPPOL.class);
 
+    private static final String RESPONDER_ROLE = "urn:fdc:peppol.eu:2017:roles:ap:as4";
+    private static final String PARTYID_TYPE = "urn:fdc:peppol.eu:2017:identifiers:ap";
+
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
@@ -58,19 +62,29 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
             final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
 
-            final ProcessIdentifier processIdentifier = ProcessIdentifier.of(processId, Scheme.of(processIdType));
+            final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
             LOG.debug("smpClient.getServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
             LOG.debug("sm.getEndpoint");
-            final Endpoint endpoint;
-            endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
+            final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
 
             if (endpoint == null || endpoint.getAddress() == null) {
                 throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
             }
             return new EndpointInfo(endpoint.getAddress().toString(), endpoint.getCertificate());
-        } catch (final PeppolLoadingException | PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
+        } catch (final PeppolParsingException | PeppolLoadingException | PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
             throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId, e);
         }
     }
+
+    @Override
+    public String getPartyIdType() {
+        return PARTYID_TYPE;
+    }
+
+    @Override
+    public String getResponderRole(){
+        return RESPONDER_ROLE;
+    }
+
 }
