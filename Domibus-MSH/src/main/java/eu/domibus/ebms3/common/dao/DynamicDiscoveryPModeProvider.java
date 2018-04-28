@@ -71,8 +71,6 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
     // default type in e-SENS
-    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
-    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
     protected static final String MSH_ENDPOINT = "msh_endpoint";
 
     @Override
@@ -318,12 +316,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         //set toPartyId in UserMessage
         final PartyId receiverParty = new PartyId();
         receiverParty.setValue(cn);
-        receiverParty.setType(URN_TYPE_VALUE);
+        receiverParty.setType(dynamicDiscoveryService.getPartyIdType());
 
         userMessage.getPartyInfo().getTo().getPartyId().clear();
         userMessage.getPartyInfo().getTo().getPartyId().add(receiverParty);
         if(userMessage.getPartyInfo().getTo().getRole() == null) {
-            userMessage.getPartyInfo().getTo().setRole(DEFAULT_RESPONDER_ROLE);
+            userMessage.getPartyInfo().getTo().setRole(dynamicDiscoveryService.getResponderRole());
         }
 
         LOG.debug("Add public certificate to the truststore");

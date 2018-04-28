@@ -15,4 +15,7 @@ public interface DynamicDiscoveryService {
 
     EndpointInfo lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) throws EbMS3Exception;
 
+    String getPartyIdType();
+    String getResponderRole();
+
 }

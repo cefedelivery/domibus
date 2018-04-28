@@ -6,6 +6,7 @@ import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
@@ -30,6 +31,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String TEST_KEYSTORE = "testkeystore.jks";
 
     private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
+    //private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
@@ -37,7 +39,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String TEST_RECEIVER_ID = "0088:unknownRecipient";
     private static final String TEST_RECEIVER_ID_TYPE = "iso6523-actorid-upis";
     private static final String TEST_ACTION_VALUE = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1";
-    private static final String TEST_SERVICE_VALUE = "serviceValue";
+    private static final String TEST_SERVICE_VALUE = "scheme::serviceValue";
     private static final String TEST_SERVICE_TYPE = "serviceType";
     private static final String TEST_INVALID_SERVICE_VALUE = "invalidServiceValue";
 
@@ -98,8 +100,12 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private ServiceMetadata buildServiceMetadata() {
 
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
-
-        ProcessIdentifier processIdentifier = ProcessIdentifier.of(TEST_SERVICE_VALUE, Scheme.of(TEST_SERVICE_TYPE));
+        ProcessIdentifier processIdentifier;
+        try {
+            processIdentifier = ProcessIdentifier.parse(TEST_SERVICE_VALUE);
+        } catch (PeppolParsingException e) {
+            return null;
+        }
 
         Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
 
@@ -124,7 +130,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        //EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        //EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:2111100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());
 
