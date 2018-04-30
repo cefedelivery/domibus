@@ -6,21 +6,50 @@
  */
 export class PartyResponseRo {
 
-  entityId:string;
+  entityId:number;
 
-  identifiers; //NOSONAR
+  identifiers:Array<IdentifierRo>; //NOSONAR
 
   name:string;
 
   endpoint:string;
-
-  partyIDs:string;
 
   processes;
 
   joinedIdentifiers:string;
 
   joinedProcesses:string;
+
+  processesWithPartyAsInitiator:Array<ProcessRo>;
+
+  processesWithPartyAsResponder:Array<ProcessRo>;
+
+}
+
+export class IdentifierRo{
+
+
+  entityId:number;
+
+  partyId:string;
+
+  partyIdType:PartyIdTypeRo;
+
+}
+
+export class PartyIdTypeRo{
+
+  name:string;
+
+  value:string;
+
+}
+
+export class ProcessRo{
+
+  entityId:number;
+
+  name:string;
 
 }
 

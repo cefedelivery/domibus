@@ -1,5 +1,5 @@
 import {Component, OnInit} from "@angular/core";
-import {MdDialog} from "@angular/material";
+import {MdDialog, MdDialogRef} from "@angular/material";
 import {RowLimiterBase} from "app/common/row-limiter/row-limiter-base";
 import {ColumnPickerBase} from "app/common/column-picker/column-picker-base";
 import {PartyService} from "./party.service";
@@ -7,6 +7,7 @@ import {PartyResponseRo} from "./party";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
 import {AlertComponent} from "../alert/alert.component";
+import {PartyDetailsComponent} from "./party-details/party-details.component";
 
 /**
  * @author Thomas Dussart
@@ -38,9 +39,10 @@ export class PartyComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.initColumns();
     this.searchAndCount();
-    //let dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent);
+
   }
 
   searchAndCount() {
@@ -91,6 +93,7 @@ export class PartyComponent implements OnInit {
       pageStart,
       pageSize).subscribe((response) => {
         this.rows = response;
+        debugger;
         this.loading = false;
       },
       error => {
@@ -147,6 +150,15 @@ export class PartyComponent implements OnInit {
 
   saveAsCSV() {
     this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
+  }
+  onActivate(event) {
+    if ("dblclick" === event.type) {
+      let dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent,{
+        data: {
+          edit: event.row
+        }
+      });
+    }
   }
 
 }

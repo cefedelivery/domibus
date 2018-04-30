@@ -1,5 +1,5 @@
 <h2 md-dialog-title>Party</h2>
-<!--
+
 <md-dialog-content style="height:450px;width:650px">
   <form name="filterForm">
     <div>
@@ -7,10 +7,10 @@
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Name" name="name" id="name_id">
+              <input mdInput placeholder="Name" name="name" id="name_id" value="{{party.name}}">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id">
+              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id" value="{{party.endpoint}}">
             </md-input-container>
           </div>
         </md-card-content>
@@ -33,6 +33,12 @@
               <input mdInput placeholder="Valid to" name="validityTo" id="validityTo_id">
             </md-input-container>
             <md-input-container style="width:100%">
+              <input mdInput placeholder="Issuer" name="issuer" id="issuer_id">
+            </md-input-container>
+          <!--  <md-input-container style="width:100%">
+              <input mdInput placeholder="Issuer" name="issuer" id=issuer_id">
+            </md-input-container>-->
+            <md-input-container style="width:100%">
               <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
             </md-input-container>
           </div>
@@ -49,7 +55,7 @@
             <ngx-datatable
               id="identifierTable"
               class="material striped"
-              [rows]="identifiersRow"
+              [rows]="identifiers"
               [columnMode]="'force'"
               [columns]="identifiersRowColumnPicker.selectedColumns"
               [headerHeight]="50"
@@ -99,4 +105,4 @@
     </div>
   </form>
 </md-dialog-content>
--->
+

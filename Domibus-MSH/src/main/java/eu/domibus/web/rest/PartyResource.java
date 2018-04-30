@@ -7,6 +7,7 @@ import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.party.IdentifierRo;
+import eu.domibus.core.party.PartyProcessLinkRo;
 import eu.domibus.core.party.PartyResponseRo;
 import eu.domibus.core.party.ProcessRo;
 import eu.domibus.logging.DomibusLogger;
@@ -20,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -74,6 +78,25 @@ public class PartyResource {
         flattenIdentifiers(partyResponseRos);
 
         flattenProcesses(partyResponseRos);
+
+
+
+        partyResponseRos.forEach(partyResponseRo -> {
+            final List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo
+                    .getProcessesWithPartyAsInitiator();
+            final List<ProcessRo> processesWithPartyAsResponder = partyResponseRo.getProcessesWithPartyAsResponder();
+
+            final Set<ProcessRo> processRos = new HashSet<>(processesWithPartyAsInitiator);
+            processRos
+                    .addAll(processesWithPartyAsResponder);
+
+            processRos
+                    .stream()
+                    .map(item->new PartyProcessLinkRo(item.getName(),processesWithPartyAsInitiator.contains(item),processesWithPartyAsResponder.contains(item)))
+                    .collect(Collectors.toSet());
+
+
+        };
 
         return partyResponseRos;
     }
