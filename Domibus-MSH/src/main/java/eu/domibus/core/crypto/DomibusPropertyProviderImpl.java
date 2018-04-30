@@ -72,4 +72,9 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         }
         return resolvedProperty;
     }
+
+    @Override
+    public String getResolvedProperty(String propertyName) {
+        return getResolvedProperty(DomainService.DEFAULT_DOMAIN, propertyName);
+    }
 }

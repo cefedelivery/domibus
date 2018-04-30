@@ -95,6 +95,7 @@ public abstract class AbstractIT {
 
     protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
 
+    @Qualifier("domibusJDBC-XADataSource")
     @Autowired
     protected DataSource dataSource;
 

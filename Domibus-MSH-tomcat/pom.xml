@@ -234,6 +234,10 @@
             <testResource>
                 <directory>src/test/resources</directory>
             </testResource>
+            <testResource>
+                <directory>src/main/conf/domibus/internal</directory>
+                <targetPath>internal</targetPath>
+            </testResource>
         </testResources>
         <plugins>
             <plugin>
