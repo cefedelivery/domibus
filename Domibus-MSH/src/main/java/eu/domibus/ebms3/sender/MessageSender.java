@@ -200,7 +200,7 @@ public class MessageSender implements MessageListener {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
