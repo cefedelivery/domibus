@@ -5,6 +5,8 @@
     <md-card-content>
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+          <input type="checkbox" name="processed" [(ngModel)]="filter.processed" #processed="ngModel" id="processed_id">
+          <span>Processed</span>
           <!-- Alert Type (Basic) -->
           <md-select placeholder="Alert Type" [(ngModel)]="filter.alertType" name="alertType"
                      id="alerttype_id" (change)="onAlertTypeChanged(filter.alertType)">
@@ -70,14 +72,9 @@
           <!-- Alert Type Criteria -->
           <div>
             <md-card>
-              <div>
-              <md-card-subtitle>
-                {{filter.alertType}}
-              </md-card-subtitle>
-              </div>
               <md-card-content>
                 <md-input-container *ngFor="let item of items; let i = index">
-                  <input mdInput placeholder={{item}} name={{item}} [(ngModel)]="dynamicFilters[i]"
+                  <input mdInput placeholder={{filter.alertType}}:{{item}} name={{item}} [(ngModel)]="dynamicFilters[i]"
                      #{{item}}="ngModel" id={{item}}_id>
                 </md-input-container>
               </md-card-content>

@@ -39,6 +39,13 @@ export class AlertsComponent {
 
   items=[];
 
+  timestampCreationFromMaxDate: Date = new Date();
+  timestampCreationToMaxDate: Date = new Date();
+  timestampCreationToMinDate: Date = new Date();
+  timestampReportingFromMaxDate: Date = new Date();
+  timestampReportingToMinDate: Date = new Date();
+  timestampReportingToMaxDate: Date = new Date();
+
   ngOnInit() {
 
     this.rowLimiter.pageSize = 1;
@@ -81,14 +88,31 @@ export class AlertsComponent {
     }
   }
 
+  onTimestampCreationFromChange(event) {
+    this.timestampCreationFromMaxDate = event.value;
+  }
+
+  onTimestampCreationToChange(event) {
+    this.timestampCreationToMaxDate = event.value;
+  }
+
+  onTimestampReportingFromChange(event) {
+    this.timestampReportingFromMaxDate = event.value;
+  }
+
+  onTimestampReportingToChange(event) {
+    this.timestampReportingToMaxDate = event.value;
+  }
+
+
   // datatable methods
 
   onSelect({selected}) {
-    // console.log('Select Event', selected, this.selected);
+    console.log('Select Event', selected, this.selected);
   }
 
   onActivate(event) {
-    // console.log('Activate Event', event);
+    console.log('Activate Event', event);
 
     /*if ("dblclick" === event.type) {
       this.details(event.row);
