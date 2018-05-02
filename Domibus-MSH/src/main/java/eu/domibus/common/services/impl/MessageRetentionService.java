@@ -32,6 +32,7 @@ public class MessageRetentionService {
     public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
     public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.max.delete";
     public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.max.delete";
+    public static final String DOMIBUS_ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
 
     @Autowired
     private CollectionUtil collectionUtil;
@@ -87,7 +88,7 @@ public class MessageRetentionService {
     protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
-        String fileLocation = domibusPropertyProvider.getProperty("domibus.attachment.storage.location");
+        String fileLocation = domibusPropertyProvider.getProperty(DOMIBUS_ATTACHMENT_STORAGE_LOCATION);
         // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
         if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);

@@ -29,7 +29,7 @@ public class MultiTenantAwareEntityManagerCondition implements ConfigurationCond
             LOGGER.debug("Condition not matching: environment is null");
             return false;
         }
-        final boolean isMultiTenantAware = StringUtils.isNotEmpty(environment.getProperty(DomainService.GENERAL_SCHEMA_PROPERTY));
+        final boolean isMultiTenantAware = StringUtils.isNotBlank(environment.getProperty(DomainService.GENERAL_SCHEMA_PROPERTY));
         return isMultiTenantAware;
     }
 }

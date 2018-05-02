@@ -52,12 +52,17 @@ public class DomainDaoImpl implements DomainDao {
             final String fileName = propertyFile.getName();
             if (StringUtils.containsIgnoreCase(fileName, DOMAIN_FILE_SUFFIX)) {
                 String domainCode = StringUtils.substringBefore(fileName, DOMAIN_FILE_SUFFIX);
-                Domain domain = new Domain(domainCode, domainCode);
+
+                Domain domain = new Domain(domainCode, getDomainTitle(domainCode));
                 result.add(domain);
             }
 
         }
         return result;
+    }
+
+    protected String getDomainTitle(String domainCode) {
+        return domibusPropertyProvider.getProperty(domainCode + ".domain.title", domainCode);
     }
 }
 

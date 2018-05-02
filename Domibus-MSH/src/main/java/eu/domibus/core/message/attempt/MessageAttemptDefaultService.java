@@ -4,6 +4,7 @@ import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,7 +37,7 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void create(MessageAttempt attempt) {
-        if(isMessageAttemptAuditDisabled()) {
+        if (isMessageAttemptAuditDisabled()) {
             return;
         }
 
@@ -46,6 +47,6 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
 
     protected boolean isMessageAttemptAuditDisabled() {
         String messageAttemptAuditEnabled = domibusPropertyProvider.getProperty("domibus.sendMessage.attempt.audit.active", "true");
-        return !Boolean.valueOf(messageAttemptAuditEnabled);
+        return !BooleanUtils.toBoolean(messageAttemptAuditEnabled);
     }
 }

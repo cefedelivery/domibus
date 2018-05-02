@@ -48,7 +48,7 @@ public interface DomainCryptoService {
 
     KeyStore getTrustStore();
 
-    X509Certificate getCertificateFromKeystore(String alias) throws KeyStoreException;
+    X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException;
 
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
 
