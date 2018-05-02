@@ -3,6 +3,8 @@ package eu.domibus.api.usermessage.domain;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**

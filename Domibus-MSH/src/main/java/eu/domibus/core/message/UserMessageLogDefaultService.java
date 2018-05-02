@@ -41,10 +41,10 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
                 .setEndpoint(endpoint);
 
         final UserMessageLog userMessageLog = umlBuilder.build();
-        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
         //we set the status after we send the status change event; otherwise the old status and the new status would be the same
         userMessageLog.setMessageStatus(status);
         userMessageLogDao.create(userMessageLog);
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
 
     }
 
@@ -85,9 +85,5 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     public void setMessageAsSendFailure(String messageId) {
         updateMessageStatus(messageId, MessageStatus.SEND_FAILURE);
     }
-
-    @Override
-    public void setIntermediaryPullStatus(String messageId) {
-        updateMessageStatus(messageId, MessageStatus.BEING_PULLED);
-    }
+    
 }
