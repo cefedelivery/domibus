@@ -69,6 +69,7 @@ import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
 import {ClearInvalidDirective} from "./customDate/clearInvalid.directive"
+import {AlertsComponent} from "./alerts/alerts.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -113,7 +114,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuditComponent,
     PartyComponent,
     PartyDetailsComponent,
-    ClearInvalidDirective
+    ClearInvalidDirective,
+    AlertsComponent
   ],
   entryComponents: [
     AppComponent,
