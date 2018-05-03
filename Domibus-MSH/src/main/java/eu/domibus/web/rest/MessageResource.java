@@ -80,6 +80,8 @@ public class MessageResource {
     public ResponseEntity<ByteArrayResource> zipFiles(@PathVariable(value = "messageId") String messageId) throws IOException {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if (userMessage == null)
+            return ResponseEntity.notFound().build();
         final Map<String, InputStream> message = getMessageWithAttachments(userMessage);
         byte[] zip = zip(message);
         auditService.addMessageDownloadedAudit(messageId);
@@ -87,7 +89,6 @@ public class MessageResource {
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .header("content-disposition", "attachment; filename=" + messageId + ".zip")
                 .body(new ByteArrayResource(zip));
-
     }
 
     public InputStream getMessage(UserMessage userMessage) {

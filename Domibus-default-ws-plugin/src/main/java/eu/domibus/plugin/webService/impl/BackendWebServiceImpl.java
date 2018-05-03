@@ -304,11 +304,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     @Override
-    public void messageReceiveFailed(final String messageId, final String ednpoint) {
-        throw new UnsupportedOperationException("Operation not yet implemented");
-    }
-
-    @Override
     public void messageSendFailed(final String messageId) {
         throw new UnsupportedOperationException("Operation not yet implemented");
     }

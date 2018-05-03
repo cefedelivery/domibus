@@ -16,6 +16,9 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PartyExtractor;
+import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -72,6 +75,7 @@ public class UserMessageDefaultServiceTest {
     @Injectable
     private BackendNotificationService backendNotificationService;
 
+
     @Injectable
     private JMSManager jmsManager;
 
@@ -89,6 +93,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     DomainContextProvider domainContextProvider;
+
+    @Injectable
+    private MessagingLockService messagingLockService;
 
 
     @Test
@@ -219,10 +226,17 @@ public class UserMessageDefaultServiceTest {
     public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
+        final String mpc = "mpc";
 
         new Expectations(userMessageDefaultService) {{
             userMessageDefaultService.getFailedMessage(messageId);
             result = userMessageLog;
+
+            userMessageLog.getMpc();
+            result = mpc;
+
+            userMessageLog.getMessageId();
+            result = messageId;
 
             messageExchangeService.retrieveMessageRestoreStatus(messageId);
             result = MessageStatus.READY_TO_PULL;
@@ -250,6 +264,11 @@ public class UserMessageDefaultServiceTest {
             times = 1;
             userMessageDefaultService.scheduleSending(messageId);
             times = 0;
+            messagingDao.findUserMessageByMessageId(messageId);
+            times = 1;
+            ToExtractor toExtractor = null;
+            messagingLockService.addSearchInFormation(withAny(toExtractor), messageId, mpc);
+            times = 1;
         }};
     }
 

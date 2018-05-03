@@ -39,10 +39,10 @@ public class BackendFSImplTest {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Injectable
-    protected MessageRetriever<Submission> messageRetriever;
+    protected MessageRetriever messageRetriever;
 
     @Injectable
-    protected MessageSubmitter<Submission> messageSubmitter;
+    protected MessageSubmitter messageSubmitter;
 
     @Injectable
     private MessageLister lister;

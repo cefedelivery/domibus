@@ -51,6 +51,7 @@
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="pullRequestJob"/>
         <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
+        <property name="startDelay" value="30000"/>
     </bean>
 
     <bean id="activateSuspendedUserTrigger"

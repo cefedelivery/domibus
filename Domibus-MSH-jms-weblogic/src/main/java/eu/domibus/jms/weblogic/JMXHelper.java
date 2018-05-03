@@ -36,7 +36,7 @@ public class JMXHelper {
 
     private static final String ADMIN_URL_PROPERTY = "weblogic.management.server";
     private static final String DOMIBUS_JMX_USER_PROP = "domibus.jmx.user";
-    private static final String DOMIBUS_JMX_PWD_PROP = "domibus.jmx.password";
+    private static final String DOMIBUS_JMX_PWD_PROP = "domibus.jmx.password"; //NOSONAR
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMXHelper.class);
 
