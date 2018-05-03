@@ -68,7 +68,7 @@ public class SetDomainInInterceptor extends AbstractSoapInterceptor {
         } catch (ServletRequestBindingException e) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Could not determine the domain", null, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-            throw new Fault(ebMS3Ex);
+            throw new Fault(new Exception("Could not determine the domain", e));
         }
         if (StringUtils.isEmpty(domainCode)) {
             LOG.debug("No domain specified. Using the default domain");

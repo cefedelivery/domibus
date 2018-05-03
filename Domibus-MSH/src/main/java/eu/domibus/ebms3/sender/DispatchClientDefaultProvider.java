@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.sender;
 
 import com.google.common.base.Strings;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -21,7 +22,6 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.soap.SOAPBinding;
-import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
@@ -78,7 +78,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         }
         final SOAPMessage result;
 
-        String useProxy = domibusPropertyProvider.getProperty("domibus.proxy.enabled", "false");
+        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
         Boolean useProxyBool = Boolean.parseBoolean(useProxy);
         if (useProxyBool) {
             LOG.info("Usage of Proxy required");
@@ -98,11 +98,11 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        String httpProxyHost = domibusPropertyProvider.getProperty("domibus.proxy.http.host");
-        String httpProxyPort = domibusPropertyProvider.getProperty("domibus.proxy.http.port");
-        String httpProxyUser = domibusPropertyProvider.getProperty("domibus.proxy.user");
-        String httpProxyPassword = domibusPropertyProvider.getProperty("domibus.proxy.password");
-        String httpNonProxyHosts = domibusPropertyProvider.getProperty("domibus.proxy.nonProxyHosts");
+        String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+        String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+        String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+        String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
+        String httpNonProxyHosts = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_NON_PROXY_HOSTS);
         if (!Strings.isNullOrEmpty(httpProxyHost) && !Strings.isNullOrEmpty(httpProxyPort)) {
             httpClientPolicy.setProxyServer(httpProxyHost);
             httpClientPolicy.setProxyServerPort(Integer.valueOf(httpProxyPort));

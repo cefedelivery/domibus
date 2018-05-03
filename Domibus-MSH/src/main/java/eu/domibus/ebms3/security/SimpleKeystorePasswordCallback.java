@@ -17,10 +17,10 @@ import javax.security.auth.callback.CallbackHandler;
 public class SimpleKeystorePasswordCallback implements CallbackHandler {
 
     @Autowired
-    DomainContextProvider domainProvider;
+    protected DomainContextProvider domainProvider;
 
     @Autowired
-    MultiDomainCryptoService multiDomainCertificateProvider;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
 
     @Override

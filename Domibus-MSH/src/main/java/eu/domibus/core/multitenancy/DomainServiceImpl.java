@@ -17,6 +17,9 @@ import java.util.List;
 @Service
 public class DomainServiceImpl implements DomainService {
 
+    private  static final String SGS_CLUSTERED_SCHEDULER = "SgsClusteredScheduler";
+    private static final String DOMIBUS_DATABASE_SCHEMA = "domibus.database.schema";
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -46,7 +49,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public Domain getDomainForScheduler(String schedulerName) {
-        if ("SgsClusteredScheduler".equalsIgnoreCase(schedulerName)) {
+        if (SGS_CLUSTERED_SCHEDULER.equalsIgnoreCase(schedulerName)) {
             return DomainService.DEFAULT_DOMAIN;
         }
         return getDomain(schedulerName);
@@ -54,7 +57,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public String getDatabaseSchema(Domain domain) {
-        return domibusPropertyProvider.getProperty(domain, "domibus.database.schema");
+        return domibusPropertyProvider.getProperty(domain, DOMIBUS_DATABASE_SCHEMA);
     }
 
     @Override

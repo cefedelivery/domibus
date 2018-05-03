@@ -30,7 +30,6 @@ public class UserDomainEntity extends AbstractBaseEntity {
     private String userName;
 
     @Column(name = "DOMAIN")
-    @Email
     private String domain;
 
     public String getUserName() {

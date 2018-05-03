@@ -29,75 +29,11 @@ public class DefaultBackendConnectorDelegateTest {
 
     @Test
     public void testMessageReceive(@Injectable final BackendConnector backendConnector,
-                                    @Injectable final MessageReceiveFailureEvent event) throws Exception {
-
-        new Expectations(defaultBackendConnectorDelegate) {{
-            defaultBackendConnectorDelegate.isNewMessageReceiveFailureDefined(backendConnector);
-            result = true;
-        }};
-
+                                   @Injectable final MessageReceiveFailureEvent event) throws Exception {
         defaultBackendConnectorDelegate.messageReceiveFailed(backendConnector, event);
 
         new Verifications() {{
             backendConnector.messageReceiveFailed(event);
         }};
-    }
-
-    @Test
-    public void testMessageReceiveWithDeprecatedMethodBeingCalled(
-            @Injectable final BackendConnector backendConnector,
-            @Injectable final MessageReceiveFailureEvent event) throws Exception {
-
-        new Expectations(defaultBackendConnectorDelegate) {{
-            defaultBackendConnectorDelegate.isNewMessageReceiveFailureDefined(backendConnector);
-            result = false;
-        }};
-
-        defaultBackendConnectorDelegate.messageReceiveFailed(backendConnector, event);
-
-        new Verifications() {{
-            backendConnector.messageReceiveFailed(anyString, anyString);
-        }};
-    }
-
-    @Test
-    public void testMessageReceiveWhenCannotDetermineWhichMethodShouldBeCalled(
-            @Injectable final BackendConnector backendConnector,
-            @Injectable final MessageReceiveFailureEvent event) throws Exception {
-
-        new Expectations(defaultBackendConnectorDelegate) {{
-            defaultBackendConnectorDelegate.isNewMessageReceiveFailureDefined(backendConnector);
-            result = new RuntimeException();
-        }};
-
-        defaultBackendConnectorDelegate.messageReceiveFailed(backendConnector, event);
-
-        new Verifications() {{
-            backendConnector.messageReceiveFailed(anyString, anyString);
-        }};
-    }
-
-    @Test
-    public void testIsNewMessageReceiveFailureDefinedWith(@Injectable final BackendConnector backendConnector) throws Exception {
-        new Expectations(defaultBackendConnectorDelegate) {{
-            classUtil.getTargetObjectClass(backendConnector);
-            result = MessageReceivePluginImplementationTest.class;
-        }};
-
-        final boolean newMessageReceiveFailureDefined = defaultBackendConnectorDelegate.isNewMessageReceiveFailureDefined(backendConnector);
-
-        Assert.assertTrue(newMessageReceiveFailureDefined);
-    }
-
-    @Test
-    public void testIsNewMessageReceiveFailureDefinedWithDeprecatedMethod(@Injectable final BackendConnector backendConnector) throws Exception {
-        new Expectations(defaultBackendConnectorDelegate) {{
-            classUtil.getTargetObjectClass(backendConnector);
-            result = MessageReceiveDeprecatedPluginImplementationTest.class;
-        }};
-
-        final boolean newMessageReceiveFailureDefined = defaultBackendConnectorDelegate.isNewMessageReceiveFailureDefined(backendConnector);
-
-        assertFalse(newMessageReceiveFailureDefined);
     }
 }

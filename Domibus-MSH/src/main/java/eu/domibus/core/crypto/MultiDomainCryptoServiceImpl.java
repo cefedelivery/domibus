@@ -145,7 +145,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     @Override
     public X509Certificate getCertificateFromKeystore(Domain domain, String alias) throws KeyStoreException {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
-        return domainCertificateProvider.getCertificateFromKeystore(alias);
+        return domainCertificateProvider.getCertificateFromKeyStore(alias);
     }
 
     @Override

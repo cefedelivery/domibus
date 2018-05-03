@@ -65,8 +65,8 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         LOG.debug("Initializing the certificate provider");
 
         final Properties allProperties = new Properties();
-        allProperties.putAll(getKeystoreProperties(domain));
-        allProperties.putAll(getTrustStoreProperties(domain));
+        allProperties.putAll(getKeystoreProperties());
+        allProperties.putAll(getTrustStoreProperties());
         try {
             super.loadProperties(allProperties, Merlin.class.getClassLoader(), null);
         } catch (WSSecurityException | IOException e) {
@@ -75,7 +75,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Override
-    public X509Certificate getCertificateFromKeystore(String alias) throws KeyStoreException {
+    public X509Certificate getCertificateFromKeyStore(String alias) throws KeyStoreException {
         return (X509Certificate) getKeyStore().getCertificate(alias);
     }
 
@@ -104,7 +104,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             }
         }
 
-        LOG.debug("Replacing the existing trust store file [" + trustStoreFileValue + "] with the provided one");
+        LOG.debug("Replacing the existing trust store file [{}] with the provided one", trustStoreFileValue);
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
             certificateService.validateLoadOperation(newTrustStoreBytes, password);
 
@@ -122,7 +122,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
     public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        LOG.debug("Checking certificate validation for [" + alias + "]");
+        LOG.debug("Checking certificate validation for [{}]", alias);
         KeyStore trustStore = getTrustStore();
         return certificateService.isCertificateChainValid(trustStore, alias);
     }
@@ -174,7 +174,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         throw new CryptoException("Could not load truststore, truststore location is empty");
     }
 
-    protected Properties getKeystoreProperties(Domain domain) {
+    protected Properties getKeystoreProperties() {
         final String keystoreType = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.type");
         final String keystorePassword = domibusPropertyProvider.getProperty(domain, "domibus.security.keystore.password");
         final String privateKeyAlias = domibusPropertyProvider.getProperty(domain, "domibus.security.key.private.alias");
@@ -191,7 +191,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         return result;
     }
 
-    protected Properties getTrustStoreProperties(Domain domain) {
+    protected Properties getTrustStoreProperties() {
         final String trustStoreType = getTrustStoreType();
         final String trustStorePassword = getTrustStorePassword();
         final String trustStoreLocation = getTrustStoreLocation();

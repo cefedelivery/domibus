@@ -8,6 +8,10 @@ public interface DomainContextProvider {
 
     Domain getCurrentDomain();
 
+    /**
+     * Get the current domain. Does not throw exceptions in the attempt to get the domain.
+     * @return
+     */
     Domain getCurrentDomainSafely();
 
     void setCurrentDomain(String domainCode);

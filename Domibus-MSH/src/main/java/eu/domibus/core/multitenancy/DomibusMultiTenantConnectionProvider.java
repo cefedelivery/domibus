@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Cosmin Baciu
@@ -71,7 +72,9 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
     protected void setSchema(final Connection connection, String databaseSchema) throws SQLException {
         try {
             //TODO check how to set the schema dependent on MySQL or Oracle
-            connection.createStatement().execute("USE " + databaseSchema);
+            try(final Statement statement = connection.createStatement()) {
+                statement.execute("USE " + databaseSchema);
+            }
         } catch (final SQLException e) {
             throw new HibernateException("Could not alter JDBC connection to specified schema [" + databaseSchema + "]", e);
         }
