@@ -2031,15 +2031,8 @@
             ORDER BY VAD.AUDIT_DATE DESC;
         </createView>
 
-    <!--</changeSet>-->
-
-    <!--<changeSet id="EDELIVERY_3053_2" author="dussath" >-->
         <sqlFile path="./scripts/mysql_procedure.sql" endDelimiter="$$" dbms="mysql" relativeToChangelogFile="true"/>
-        <!--<rollback>-->
-            <!--DROP PROCEDURE get_next-->
-        <!--</rollback>-->
-    <!--</changeSet>-->
-    <!--<changeSet id="EDELIVERY_3053_3" author="dussath" >-->
+
         <createProcedure dbms="oracle">
             create or replace procedure get_next(
             message_type_in in VARCHAR2,
@@ -2065,5 +2058,42 @@
             message_id_out:=null;
             end;
         </createProcedure>
+
     </changeSet>
+
+    <changeSet author="thomas dussart" id="EDELIVERY-2144">
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="2" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_USER"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="USER_NAME" value="admin"/>
+            <column name="USER_PASSWORD" value="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="2" type="INT"/>
+            <column name="USER_NAME" value="user"/>
+            <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="1" type="INT"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="2" type="INT"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="2" type="INT"/>
+            <column name="ROLE_ID" value="2" type="INT"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
