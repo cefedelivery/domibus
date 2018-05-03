@@ -66,17 +66,6 @@ public interface BackendConnector<U, T> {
      *
      * @param messageId id of the message the status is requested for
      * @return the message status {@link eu.domibus.common.MessageStatus}
-     * @deprecated since 3.3-rc1; this method converts DOWNLOADED status to RECEIVED to maintain
-     * the backwards compatibility. Use {@link eu.domibus.plugin.BackendConnector#getStatus(String)} instead
-     */
-    @Deprecated
-    MessageStatus getMessageStatus(final String messageId);
-
-    /**
-     * Returns message status {@link eu.domibus.common.MessageStatus} for message with messageid
-     *
-     * @param messageId id of the message the status is requested for
-     * @return the message status {@link eu.domibus.common.MessageStatus}
      */
     MessageStatus getStatus(final String messageId);
 
@@ -103,19 +92,6 @@ public interface BackendConnector<U, T> {
      * @return the name of the plugin
      */
     String getName();
-
-    /**
-     * @deprecated Since 3.2.2 this method is deprecated. Use {@link #messageReceiveFailed(MessageReceiveFailureEvent)}
-     *
-     * This method gets called when an incoming message associated with a Mode.PUSH plugin and an associated
-     * PMode[1].errorHandling.Report.ProcessErrorNotifyConsumer=true is rejected by the MSH. The error details
-     * are provided by #getErrorsForMessage
-     *
-     * @param messageId the Id of the failed message
-     * @param ednpoint  the endpoint that tried to send the message or null if unknown
-     */
-    @Deprecated
-    void messageReceiveFailed(String messageId, String ednpoint);
 
     /**
      * This method gets called when an incoming message is rejected by the MSH

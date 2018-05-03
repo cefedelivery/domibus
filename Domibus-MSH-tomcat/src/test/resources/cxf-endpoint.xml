@@ -38,6 +38,10 @@
         <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
     </bean>
 
+    <bean id="domibusReadyInterceptor" class="eu.domibus.ebms3.receiver.DomibusReadyInterceptor">
+        <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
+    </bean>
+
     <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
         <property name="prettyLogging" value="true"/>
         <property name="showBinaryContent" value="false"/>
@@ -49,9 +53,7 @@
     </bean>
 
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
-    <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
-        <property name="jaxbContext" ref="jaxbContextEBMS"/>
-    </bean>
+    <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
 
     <bean id="setSignatureAlgorithmInInterceptor"
           class="eu.domibus.ebms3.sender.SetSignatureAlgorithmInInterceptor"/>
@@ -90,6 +92,7 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="domibusReadyInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>

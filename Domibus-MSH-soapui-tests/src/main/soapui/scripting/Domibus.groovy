@@ -241,7 +241,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
-		def MAX_WAIT_TIME=60_000; // Maximum time to wait to check the message status. 
+		def MAX_WAIT_TIME=80_000; // Maximum time to wait to check the message status. 
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
         def numberAttempts=0;
@@ -323,7 +323,7 @@ class Domibus
         }
         else
         {
-            MAX_WAIT_TIME=20_000
+            MAX_WAIT_TIME=30_000
         }
         messageStatus="INIT"
         if(RMSH){
@@ -430,6 +430,7 @@ class Domibus
 				"delete from TB_SEND_ATTEMPT",
 				"delete from TB_MESSAGE_ACKNW_PROP",
 				"delete from TB_MESSAGE_ACKNW",
+//				"delete from TB_MESSAGING_LOCK",
                 "delete from TB_MESSAGE_LOG"
         ] as String[]
 
@@ -472,8 +473,9 @@ class Domibus
 				"delete from TB_SEND_ATTEMPT where MESSAGE_ID " + messageIDCheck + "",
 				"delete from TB_MESSAGE_ACKNW_PROP where FK_MSG_ACKNOWLEDGE IN (select ID_PK from TB_MESSAGE_ACKNW where MESSAGE_ID " + messageIDCheck + ")",
 				"delete from TB_MESSAGE_ACKNW where MESSAGE_ID " + messageIDCheck + "",			
+//                "delete from TB_MESSAGING_LOCK where MESSAGE_ID " + messageIDCheck + "",				
                 "delete from TB_MESSAGE_LOG where MESSAGE_ID " + messageIDCheck + ""
-        ] as String[]
+				] as String[]
 
         executeListOfQueriesOnAllDB(sqlQueriesList)
 
@@ -552,7 +554,45 @@ class Domibus
     static def String locateTest(context){
         return("--"+context.testCase.name+"--"+context.testCase.getTestStepAt(context.getCurrentStepIndex()).getLabel()+"--  ");
     }
-
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	// Comapre payloads order
+	static def checkPayloadOrder(submitRequest, log, context, messageExchange){
+		def requestAtts = [];
+		def responseAtts = [];
+		def i = 0;
+		//def requestContent = messageExchange.getRequestContentAsXml();
+		def requestContent = submitRequest;
+		def responseContent = messageExchange.getResponseContentAsXml();;
+		assert (requestContent != null),locateTest(context)+"Error: request is empty.";
+		assert (responseContent != null),locateTest(context)+"Error: response is empty.";
+		def parserFile = new XmlSlurper().parseText(requestContent);
+		debugLog("===========================================",log);
+		debugLog("Attachments in request: ",log);
+		parserFile.depthFirst().each{
+            if(it.name()== "PartInfo"){
+                requestAtts[i]=it.@href.text();
+				debugLog("Attachment: "+requestAtts[i]+" in position "+(i+1)+".",log);
+				i++;
+            }
+        }
+		debugLog("===========================================",log);
+		debugLog("Attachments in response: ",log);
+		i = 0;
+		parserFile = new XmlSlurper().parseText(responseContent);
+		parserFile.depthFirst().each{
+            if(it.name()== "PartInfo"){
+                responseAtts[i]=it.@href.text();
+				debugLog("Attachment: "+responseAtts[i]+" in position "+(i+1)+".",log);
+				i++;
+            }
+        }
+		debugLog("===========================================",log);
+		assert (requestAtts.size() == responseAtts.size()),locateTest(context)+"Error: request has "+requestAtts.size()+" attachements wheras response has "+responseAtts.size()+" attachements.";
+		for(i=0;i<requestAtts.size();i++){
+			assert (requestAtts[i] == responseAtts[i]),locateTest(context)+"Error: in position "+(i+1)+" request has attachment "+requestAtts[i]+" wheras response has attachment "+responseAtts[i]+".";
+		}
+	}
+//IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     static def getStatusRetriveStatus(log, context, messageExchange) {
         def outStatus=null
         def responseContent = messageExchange.getResponseContentAsXml()
