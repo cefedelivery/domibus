@@ -10,7 +10,7 @@
             {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
           </md-option>
         </md-select>
-        <md2-datepicker id="jmsFromDatePicker"
+        <md2-datepicker id="jmsFromDatePicker" appClearInvalid
                         placeholder="Received From:"
                         [(ngModel)]="request.fromDate"
                         name="receivedFrom"
@@ -19,7 +19,7 @@
                         (change)='onTimestampFromChange($event)'
                         #timestampControl="ngModel">
         </md2-datepicker>
-        <md2-datepicker id="jmsToDatePicker"
+        <md2-datepicker id="jmsToDatePicker" appClearInvalid
                         placeholder="Received Up To:"
                         [(ngModel)]="request.toDate"
                         name="receivedTo"

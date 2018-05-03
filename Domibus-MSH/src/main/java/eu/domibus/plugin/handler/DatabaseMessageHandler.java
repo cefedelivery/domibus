@@ -21,6 +21,8 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -51,7 +53,7 @@ import java.util.Map;
  * @Since 3.0
  */
 @Service
-public class DatabaseMessageHandler implements MessageSubmitter<Submission>, MessageRetriever<Submission> {
+public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
     private static final String MESSAGE_WITH_ID_STR = "Message with id [";
@@ -105,6 +107,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
 
     @Autowired
     private MessageExchangeService messageExchangeService;
+
+    @Autowired
+    private MessagingLockService messagingLockService;
 
     @Autowired
     AuthUtils authUtils;
@@ -184,14 +189,6 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
         }
         return originalUser;
-    }
-
-    @Override
-    public MessageStatus getMessageStatus(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed()) {
-            authUtils.hasAdminRole();
-        }
-        return convertMessageStatus(userMessageLogDao.getMessageStatus(messageId));
     }
 
     protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
@@ -302,6 +299,9 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
+            }
+            else{
+                messagingLockService.addSearchInFormation(new PartyExtractor(to),messageId,message.getUserMessage().getMpc());
             }
 
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),

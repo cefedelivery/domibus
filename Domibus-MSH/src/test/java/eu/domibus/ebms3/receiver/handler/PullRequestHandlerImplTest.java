@@ -13,6 +13,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
@@ -56,6 +57,9 @@ public class PullRequestHandlerImplTest {
 
     @Injectable
     ReliabilityService reliabilityService;
+
+    @Injectable
+    MessagingLockService messagingLockService;
 
     @Tested
     PullRequestHandler pullRequestHandler;
@@ -144,6 +148,9 @@ public class PullRequestHandlerImplTest {
 
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
             times = 1;
+
+            messagingLockService.delete(messageId);
+            times=1;
 
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
@@ -239,7 +246,6 @@ public class PullRequestHandlerImplTest {
             messageAttemptService.create(withAny(attempt));
             times = 1;
 
-
         }};
     }
 
@@ -269,8 +275,6 @@ public class PullRequestHandlerImplTest {
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
             times = 0;
-
-
         }};
     }
 
