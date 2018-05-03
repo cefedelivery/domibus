@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-jms-wildfly</artifactId>
+            <artifactId>domibus-jms-activemq</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
