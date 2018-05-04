@@ -28,7 +28,7 @@
                   <span>Upload</span>
                 </button>
                 <button md-raised-button color="primary" (click)="download(actualId)" id="downloadbutton_id"
-                        [disabled]="!pModeExists">
+                        [disabled]="!canDownload()">
                   <md-icon>file_download</md-icon>
                   <span>Download</span>
                 </button>

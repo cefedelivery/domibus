@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MdDialogRef, MD_DIALOG_DATA} from "@angular/material";
-import {Http} from "@angular/http";
-import {AlertService} from "../../alert/alert.service";
+import {MdDialogRef, MD_DIALOG_DATA} from '@angular/material';
+import {Http} from '@angular/http';
+import {AlertService} from '../../alert/alert.service';
 
 @Component({
   selector: 'app-pmode-upload',
@@ -10,11 +10,11 @@ import {AlertService} from "../../alert/alert.service";
 })
 export class PmodeUploadComponent implements OnInit {
 
-  private url = "rest/pmode";
+  private url = 'rest/pmode';
 
   enableSubmit = false;
 
-  description: string = "";
+  description: string = '';
 
   useFileSelector: boolean = true;
 
@@ -42,23 +42,26 @@ export class PmodeUploadComponent implements OnInit {
     if (this.useFileSelector) {
       return this.fileInput.nativeElement.files[0];
     } else {
-      return new Blob([this.data.pModeContents], {type: "text/xml"});
+      return new Blob([this.data.pModeContents], {type: 'text/xml'});
     }
   }
-
 
   public submit() {
     let input = new FormData();
     input.append('file', this.getFile());
     input.append('description', this.description);
     this.http.post(this.url, input).subscribe(res => {
-          this.alertService.success(res.text(), false);
-          this.dialogRef.close();
-        }, err => {
-          this.alertService.error(err._body, false);
-          this.dialogRef.close();
-        }
-      );
+        this.alertService.success(res.text(), false);
+        this.dialogRef.close({done: true});
+      }, err => {
+        this.alertService.error(err._body, false);
+        this.dialogRef.close({done: false});
+      }
+    );
+  }
+
+  public cancel() {
+    this.dialogRef.close({done: false})
   }
 
 }
