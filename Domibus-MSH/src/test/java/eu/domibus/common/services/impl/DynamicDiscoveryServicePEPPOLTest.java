@@ -30,8 +30,8 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     private static final String TEST_KEYSTORE = "testkeystore.jks";
 
+    //The (sub)domain of the SML, e.g. acc.edelivery.tech.ec.europa.eu
     private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
-    //private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
@@ -130,13 +130,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-        //EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:9311100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
-        //EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:2111100000666", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
         EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
 
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());
-
     }
-
 }
