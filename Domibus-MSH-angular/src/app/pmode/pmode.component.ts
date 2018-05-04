@@ -38,6 +38,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
 
   public pModeExists = false;
   private pModeContents: string = '';
+  private pModeContentsDirty: boolean = false;
 
   allPModes = [];
   tableRows = [];
@@ -410,8 +411,8 @@ export class PModeComponent implements OnInit, DirtyOperations {
    */
   getActivePMode() {
     if (!isNullOrUndefined(PModeComponent.PMODE_URL)) {
+      this.pModeContentsDirty = false;
       this.http.get(PModeComponent.PMODE_URL + "/" + this.actualId + "?noAudit=true ").subscribe(res => {
-
         const HTTP_OK = 200;
         if (res.status == HTTP_OK) {
           this.pModeExists = true;
@@ -485,6 +486,47 @@ export class PModeComponent implements OnInit, DirtyOperations {
     } else {
       this.alertService.error(this.ERROR_PMODE_EMPTY)
     }
+  }
+
+  /**
+   * Method called when 'Save' button is clicked
+   */
+  save() {
+    const dialogRef = this.dialog.open(PmodeUploadComponent, { data: { pModeContents: this.pModeContents }});
+    dialogRef.afterClosed().subscribe(result => {
+      this.getAllPModeEntries();
+    });
+    this.uploaded = true;
+  }
+
+  /**
+   * Method called when 'Cancel' button is clicked
+   */
+  cancel() {
+    this.getActivePMode();
+  }
+
+  /**
+   * Method that checks if 'Save' button should be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  canSave(): boolean {
+    return this.pModeExists && this.pModeContentsDirty;
+  }
+
+  /**
+   * Method that checks if 'Cancel' button should be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  canCancel(): boolean {
+    return this.pModeExists && this.pModeContentsDirty;
+  }
+
+  /**
+   * Method called when the pmode text is changed by the user
+   */
+  textChanged() {
+    this.pModeContentsDirty = true;
   }
 
   /**
