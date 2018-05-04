@@ -39,7 +39,7 @@
         <prop key="domibus.dispatch.ebms.error.unrecoverable.retry">true</prop>
         <prop key="domibus.smlzone">acc.edelivery.tech.ec.europa.eu</prop>
         <!-- Select PEPPOL or OASIS specification for the dynamic discovery client. The OASIS compliant client is used by default. -->
-        <!-- <prop key="domibus.dynamic.discovery.client.specification">PEPPOL</prop> -->
+        <!-- <prop key="domibus.dynamicdiscovery.client.specification">PEPPOL</prop> -->
         <prop key="domibus.backend.jmsInQueue">domibus.backend.jms.inQueue</prop>
         <prop key="domibus.jms.queue.pull">domibus.internal.pull.queue</prop>
         <prop key="domibus.deployment.clustered">false</prop>

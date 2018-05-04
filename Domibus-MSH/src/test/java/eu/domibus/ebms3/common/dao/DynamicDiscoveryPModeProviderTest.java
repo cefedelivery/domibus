@@ -179,8 +179,8 @@ public class DynamicDiscoveryPModeProviderTest {
         Identifier expectedIdentifier = new Identifier();
         expectedIdentifier.setPartyId(EXPECTED_COMMON_NAME);
         PartyIdType expectedPartyIType = new PartyIdType();
-        expectedPartyIType.setName(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
-        expectedPartyIType.setValue(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
+        expectedPartyIType.setName(dynamicDiscoveryServiceOASIS.getPartyIdType());
+        expectedPartyIType.setValue(dynamicDiscoveryServiceOASIS.getPartyIdType());
         expectedIdentifier.setPartyIdType(expectedPartyIType);
         expectedParty.getIdentifiers().add(expectedIdentifier);
         assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
