@@ -63,9 +63,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
 
             final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
-            LOG.debug("smpClient.getServiceMetadata");
+            LOG.debug("Getting the ServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-            LOG.debug("sm.getEndpoint");
+            LOG.debug("Getting the Endpoint from ServiceMetadata");
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
 
             if (endpoint == null || endpoint.getAddress() == null) {
