@@ -47,7 +47,7 @@ import java.util.*;
  */
 public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
-    private static final String DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION = "domibus.dynamic.discovery.client.specification";
+    private static final String DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION = "domibus.dynamicdiscovery.client.specification";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryPModeProvider.class);
     @Autowired
