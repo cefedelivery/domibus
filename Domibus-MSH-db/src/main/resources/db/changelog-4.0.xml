@@ -2005,7 +2005,6 @@
 
         <addForeignKeyConstraint baseColumnNames="TO_ID" baseTableName="TB_PARTY_ID" constraintName="FK_ylub8lptgvsch02mj71euuil" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
 
-
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT_DETAIL">
@@ -2059,6 +2058,11 @@
             end;
         </createProcedure>
 
+    </changeSet>
+
+    <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta-1">
+        <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="1" maxValue="9999999999999999999999999999"
+                        incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
     </changeSet>
 
     <changeSet author="thomas dussart" id="EDELIVERY-2144">
