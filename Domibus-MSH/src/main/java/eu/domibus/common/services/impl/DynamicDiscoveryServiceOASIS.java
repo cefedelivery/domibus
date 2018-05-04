@@ -96,7 +96,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
         final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
         if(StringUtils.isEmpty(certRegex)) {
-            LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
+            LOG.debug("The value for property domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation is empty.");
         }
 
         LOG.debug("Load trustore for the smpClient");
@@ -163,6 +163,6 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     @Override
     public String getResponderRole(){
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_ROLE, DEFAULT_RESPONDER_ROLE);
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
     }
 }

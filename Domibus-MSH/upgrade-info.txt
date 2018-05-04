@@ -19,6 +19,10 @@ Domibus 3.3.4 (from 3.3.3):
                                                  </xa-datasource-property>
                                                  .......
                                              </xa-datasource>
+                 - If used, rename following properties ("." was removed between dynamic and discovery):
+                        domibus.dynamic.discovery.client.specification rename to domibus.dynamicdiscovery.client.specification
+                        domibus.dynamic.discovery.peppolclient.mode rename to domibus.dynamicdiscovery.peppolclient.mode
+                        domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation rename to domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation
 Domibus 3.3.3 (from 3.3.2):
                 - Replace the Domibus war and the plugin(s) jar(s) into "\domibus\conf\domibus\plugins\lib"
 Domibus 3.3.2 (from 3.3.1):

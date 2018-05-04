@@ -84,7 +84,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     @Override
     public String getResponderRole(){
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, RESPONDER_ROLE);
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
     }
 
 }

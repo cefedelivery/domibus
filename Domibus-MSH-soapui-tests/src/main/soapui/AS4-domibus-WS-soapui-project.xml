@@ -15469,7 +15469,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="2c8289fa-683a-4ce9-be18-d347f1f2aa73"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration" id="2c8289fa-683a-4ce9-be18-d347f1f2aa73"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamicdiscovery.client.specification=PEPPOL\ndomibus.dynamicdiscovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -15632,7 +15632,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="4154f327-2bd7-40d0-ac23-a0f7faec814a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration" id="4154f327-2bd7-40d0-ac23-a0f7faec814a"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -15795,7 +15795,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="ca2f73a5-3932-441a-813f-f10d63e065bc"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration" id="ca2f73a5-3932-441a-813f-f10d63e065bc"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -15873,7 +15873,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration 1" id="34d2f1b6-2e03-4cef-9cfb-d075508525ee"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=TEST\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration 1" id="34d2f1b6-2e03-4cef-9cfb-d075508525ee"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamicdiscovery.client.specification=PEPPOL\ndomibus.dynamicdiscovery.peppolclient.mode=TEST\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -15932,7 +15932,7 @@ Domibus.uploadTruststore("sender","special","\\DynamicDiscovery\\Sender\\gateway
          </payload>\r
       </_1:submitRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="0b78a91c-2d32-4a25-b4b2-6405b49a6f75"/><con:assertion type="Simple Contains" id="98e3ac09-e3ec-4cc4-9056-349735a251bc" name="Contains"><con:configuration><token>Could not fetch metadata from SMP</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Not SOAP Fault Assertion" id="c9cfa458-87d8-413d-99bb-29a582871cc2" name="SOAP Fault"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="443c6ef8-8296-4d9b-bd09-aa7511b93248"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Configuration 2" id="4efbe42e-a58e-494c-b910-26efa02735a8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=UNK\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu"); 
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="0b78a91c-2d32-4a25-b4b2-6405b49a6f75"/><con:assertion type="Simple Contains" id="98e3ac09-e3ec-4cc4-9056-349735a251bc" name="Contains"><con:configuration><token>Could not fetch metadata from SMP</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Not SOAP Fault Assertion" id="c9cfa458-87d8-413d-99bb-29a582871cc2" name="SOAP Fault"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="443c6ef8-8296-4d9b-bd09-aa7511b93248"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Configuration 2" id="4efbe42e-a58e-494c-b910-26efa02735a8"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamicdiscovery.client.specification=PEPPOL\ndomibus.dynamicdiscovery.peppolclient.mode=UNK\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -15998,7 +15998,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="7b7b918b-073d-499c-bc60-7f537a341ced"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration" id="7b7b918b-073d-499c-bc60-7f537a341ced"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=PEPPOL\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -16076,7 +16076,8 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="d01301c4-2083-46a8-b545-55272da6fc53"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nSet \"domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_Wrong_SMP.*\$."); 
+            <con:testStep type="groovy" name="Configuration" id="d01301c4-2083-46a8-b545-55272da6fc53"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic
+                discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nSet \"domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_Wrong_SMP.*\$.");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -16137,7 +16138,7 @@ Domibus.uploadTruststore("receivergreen","special","\\Threegateways\\green\\gate
          </payload>\r
       </_1:submitRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="6faa3bcb-86e2-48f4-9b6b-4864aa18291e"/><con:assertion type="Not SOAP Fault Assertion" id="ada9c3af-c48d-4d4c-9ed7-3bce91d19d83" name="SOAP Fault"/><con:assertion type="Simple Contains" id="cf4d8dbb-c10c-49bf-9840-5d825a6c1420" name="Contains"><con:configuration><token>Could not fetch metadata from SMP</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="4732a186-1b69-48a2-8738-017f85682957"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Modify configuration" id="caa2183c-0ed7-4ce1-bc74-aeba49c9023e"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set \"domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_SMP.*\$."); 
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="6faa3bcb-86e2-48f4-9b6b-4864aa18291e"/><con:assertion type="Not SOAP Fault Assertion" id="ada9c3af-c48d-4d4c-9ed7-3bce91d19d83" name="SOAP Fault"/><con:assertion type="Simple Contains" id="cf4d8dbb-c10c-49bf-9840-5d825a6c1420" name="Contains"><con:configuration><token>Could not fetch metadata from SMP</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="delay" name="D2" id="4732a186-1b69-48a2-8738-017f85682957"><con:settings/><con:config><delay>1000</delay></con:config></con:testStep><con:testStep type="groovy" name="Modify configuration" id="caa2183c-0ed7-4ce1-bc74-aeba49c9023e"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set \"domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_SMP.*\$.");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -16185,7 +16186,7 @@ else if(result == javax.swing.JOptionPane.NO_OPTION)
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="6faa3bcb-86e2-48f4-9b6b-4864aa18291e"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="38c27b97-a076-4cb7-91a6-a68ad470230a"/><con:assertion type="XPath Match" name="XPath Match" id="0f5620ca-b9c0-47b1-98ed-59dcf6b0cf67"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="44992428-0607-4393-a34c-5d2aef51169d"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.waitForStatus("ACKNOWLEDGED",null);
-test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Restore Metadata" id="532a619e-6020-4aa5-b00e-047fc6ff4626" disabled="true"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set \"domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_Wrong_SMP.*\$."); 
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Restore Metadata" id="532a619e-6020-4aa5-b00e-047fc6ff4626" disabled="true"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Set \"domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation\" property to ^.*EHEALTH_Wrong_SMP.*\$.");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -16212,7 +16213,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="12f9a688-a831-493b-90af-92ec3fbc6e6b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nRemove the trusted certificate of the SMP from the sender's truststore and put its\nissuer certificate."); 
+            <con:testStep type="groovy" name="Configuration" id="12f9a688-a831-493b-90af-92ec3fbc6e6b"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nRemove the trusted certificate of the SMP from the sender's truststore and put its\nissuer certificate.");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -22989,7 +22990,8 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="4c439c47-645e-4715-a631-01190c42538d"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamic.discovery.client.specification=PEPPOL\ndomibus.dynamic.discovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu"); 
+            <con:testStep type="groovy" name="Configuration" id="4c439c47-645e-4715-a631-01190c42538d"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the PEPPOL client for dynamic discovery. In the file domibus-configuration file add/replace properties:\ndomibus.dynamicdiscovery.client.specification=PEPPOL\ndomibus.dynamic
+                discovery.peppolclient.mode=TEST\ndomibus.smlzone=isaitb.acc.edelivery.tech.ec.europa.eu");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -23065,7 +23067,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="91808be5-cfd7-4918-a4e0-29fbf2e41060"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nRemove the trusted certificate of the SMP from the sender's truststore (upload a truststore without it)."); 
+            <con:testStep type="groovy" name="Configuration" id="91808be5-cfd7-4918-a4e0-29fbf2e41060"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nRemove the trusted certificate of the SMP from the sender's truststore (upload a truststore without it).");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
@@ -23142,7 +23144,7 @@ test.finalize();
             
             
             
-            <con:testStep type="groovy" name="Configuration" id="9f403c40-2ddb-4509-89d4-6e352ced5e7c"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamic.discovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nModify the metadata for participant 0007:9340033829test2: set certificate to empty."); 
+            <con:testStep type="groovy" name="Configuration" id="9f403c40-2ddb-4509-89d4-6e352ced5e7c"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog( null,"Apply the configuration to trigger the OASIS client for dynamic discovery. In the file domibus.properties file add/replace property:\ndomibus.dynamicdiscovery.client.specification=OASIS\ndomibus.smlzone=ehealth.acc.edelivery.tech.ec.europa.eu\n\nModify the metadata for participant 0007:9340033829test2: set certificate to empty.");
 if(result == javax.swing.JOptionPane.YES_OPTION)
 {
 	log.info "continuing the test";
