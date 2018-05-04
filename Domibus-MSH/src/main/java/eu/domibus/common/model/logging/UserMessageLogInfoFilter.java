@@ -52,4 +52,5 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
         StringBuilder result = filterQuery(query, null, asc, filters);
         return result.toString();
     }
+
 }

@@ -103,5 +103,20 @@
             end;
         </createProcedure>
     </changeSet>
+    <changeSet author="CatalinEnache" id="EDELIVERY-3234">
+        <createIndex indexName="IDX_PROPERTY_NAME_MESSAGEPROPERTIES_ID" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+        </createIndex>
 
+        <createIndex indexName="IDX_PROPERTY_NAME_MESSAGEPROPERTIES_ID_VALUE" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+            <column name="VALUE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MESSAGE_LOG_RECEIVED_MESSAGE_ID" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
