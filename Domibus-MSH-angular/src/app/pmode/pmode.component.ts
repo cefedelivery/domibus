@@ -17,6 +17,7 @@ import {Observable} from 'rxjs/Observable';
 import {DateFormatService} from '../customDate/dateformat.service';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
+import {ActionDirtyDialogComponent} from './action-dirty-dialog/action-dirty-dialog.component';
 
 @Component({
   moduleId: module.id,
@@ -381,6 +382,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
               this.deleteList = [];
               this.disableAllButtons();
               this.selected = [];
+
               this.allPModes[this.actualRow].current = false;
               this.http.put(PModeComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
                 this.actualRow = 0;
@@ -438,11 +440,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
               this.disableAllButtons();
               this.selected = [];
 
-              let dialogRef = this.dialog.open(PmodeUploadComponent);
-              dialogRef.afterClosed().subscribe(result => {
-                this.getAllPModeEntries();
-              });
-              this.uploaded = true;
+              this.uploadPmode();
             },
             error => {
               this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
@@ -451,20 +449,21 @@ export class PModeComponent implements OnInit, DirtyOperations {
             });
         } else if (result === 'upload_only') {
           this.deleteList = [];
-          let dialogRef = this.dialog.open(PmodeUploadComponent);
-          dialogRef.afterClosed().subscribe(result => {
-            this.getAllPModeEntries();
-          });
-          this.uploaded = true;
+
+          this.uploadPmode();
         }
       });
     } else {
-      let dialogRef = this.dialog.open(PmodeUploadComponent);
-      dialogRef.afterClosed().subscribe(result => {
-        this.getAllPModeEntries();
-      });
-      this.uploaded = true;
+      this.uploadPmode();
     }
+  }
+
+  private uploadPmode() {
+    this.dialog.open(PmodeUploadComponent)
+      .afterClosed().subscribe(result => {
+      this.getAllPModeEntries();
+    });
+    this.uploaded = true;
   }
 
   /**
@@ -493,8 +492,40 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Method called when 'Save' button is clicked
    */
   save() {
-    const dialogRef = this.dialog.open(PmodeUploadComponent, {data: {pModeContents: this.pModeContents}});
-    dialogRef.afterClosed().subscribe(result => {
+    if (this.isDirty()) {
+      this.dialog.open(ActionDirtyDialogComponent, {
+        data: {
+          actionTitle: 'You will now save the current PMode',
+          actionName: 'save',
+          actionIconName: 'file_upload'
+        }
+      }).afterClosed().subscribe(response => {
+        if (response === 'ok') {
+          this.http.delete(PModeComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
+              this.deleteList = [];
+              this.disableAllButtons();
+              this.selected = [];
+
+              this.uploadPmodeContent();
+            },
+            error => {
+              this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
+              this.enableSaveAndCancelButtons();
+              this.selected = [];
+            });
+        } else if (response === 'save') {
+          this.uploadPmodeContent();
+        }
+      });
+    } else {
+      this.uploadPmodeContent();
+    }
+  }
+
+  private uploadPmodeContent() {
+    this.dialog.open(PmodeUploadComponent, {
+      data: {pModeContents: this.pModeContents}
+    }).afterClosed().subscribe(result => {
       if (result.done) {
         this.uploaded = true;
         this.getAllPModeEntries();
@@ -506,7 +537,12 @@ export class PModeComponent implements OnInit, DirtyOperations {
    * Method called when 'Cancel' button is clicked
    */
   cancel() {
-    this.getActivePMode();
+    this.dialog.open(CancelDialogComponent)
+      .afterClosed().subscribe(response => {
+      if (response) {
+        this.getActivePMode();
+      }
+    });
   }
 
   /**
