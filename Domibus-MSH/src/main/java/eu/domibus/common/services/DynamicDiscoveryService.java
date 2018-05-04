@@ -12,6 +12,8 @@ public interface DynamicDiscoveryService {
     String transportProfileAS4 = "bdxr-transport-ebms3-as4-v1p0";
     String DYNAMIC_DISCOVERY_MODE = "domibus.dynamic.discovery.peppolclient.mode";
     String DYNAMIC_DISCOVERY_CERT_REGEX = "domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation";
+    String DYNAMIC_DISCOVERY_PARTYID_ROLE = "domibus.dynamic.discovery.partyid.role";
+    String DYNAMIC_DISCOVERY_PARTYID_TYPE = "domibus.dynamic.discovery.partyid.type";
 
     EndpointInfo lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) throws EbMS3Exception;
 
