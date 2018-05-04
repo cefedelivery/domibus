@@ -1,9 +1,11 @@
 package eu.domibus;
 
+import com.thoughtworks.xstream.XStream;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.NotificationType;
 import eu.domibus.configuration.Storage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -26,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -126,6 +129,11 @@ public abstract class AbstractIT {
     @Before
     public void setDomain() {
         domainContextProvider.setCurrentDomain(DomainService.DEFAULT_DOMAIN);
+    }
+
+    protected UserMessage getUserMessageTemplate() throws IOException {
+        XStream xStream = new XStream();
+        return (UserMessage) xStream.fromXML(new ClassPathResource("dataset/messages/UserMessage.xml").getInputStream());
     }
 
     /**
@@ -260,6 +268,7 @@ public abstract class AbstractIT {
 
     /**
      * The connection must be started and stopped before and after the method call.
+     *
      * @param connection
      * @param queueName
      * @param mSecs
