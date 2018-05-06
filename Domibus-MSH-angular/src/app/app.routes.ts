@@ -21,6 +21,7 @@ const appRoutes: Routes = [
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]
   },
+  {path: 'pmode/archive', component: PModeComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {
     path: 'jms',
     component: JmsComponent,
@@ -44,7 +45,7 @@ const appRoutes: Routes = [
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'pmode/party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
 

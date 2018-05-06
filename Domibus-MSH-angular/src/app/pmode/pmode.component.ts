@@ -526,7 +526,7 @@ export class PModeComponent implements OnInit, DirtyOperations {
     this.dialog.open(PmodeUploadComponent, {
       data: {pModeContents: this.pModeContents}
     }).afterClosed().subscribe(result => {
-      if (result.done) {
+      if (result && result.done) {
         this.uploaded = true;
         this.getAllPModeEntries();
       }

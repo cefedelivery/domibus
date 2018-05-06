@@ -43,6 +43,10 @@ html, body, material-app, .my-content {
   min-width: 0px !important;
 }
 
+.menu-expanded .sideNavSubmenu {
+  margin-left: 20px;
+}
+
 .menu-collapsed.mat-sidenav {
   min-width: 1vw !important;
 }
@@ -71,3 +75,6 @@ html, body, material-app, .my-content {
   min-width: 0
 }
 
+.menu-collapsed .sideNavButton span {
+  display: none;
+}

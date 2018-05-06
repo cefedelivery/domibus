@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
               private securityEventService: SecurityEventService,
               private http: Http,
               private titleService: Title) {
-    let applicationNameResponse: Observable<Response>  = this.http.get('rest/application/name');
+    let applicationNameResponse: Observable<Response> = this.http.get('rest/application/name');
 
     applicationNameResponse.subscribe((name: Response) => {
       this.titleService.setTitle(name.json());
@@ -68,6 +68,10 @@ export class AppComponent implements OnInit {
         this.securityService.logout();
       }
     })
+  }
+
+  showPmodeSubmenu(): boolean {
+    return this.router.url.startsWith('/pmode');
   }
 
   toggleMenu() {
