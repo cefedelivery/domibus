@@ -1,17 +1,19 @@
-import {RouterModule, Routes} from "@angular/router";
-import {LoginComponent} from "./login/login.component";
-import {AuthenticatedGuard} from "./guards/authenticated.guard";
-import {ErrorLogComponent} from "./errorlog/errorlog.component";
-import {PModeComponent} from "./pmode/pmode.component";
-import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
-import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
-import {MessageLogComponent} from "./messagelog/messagelog.component";
-import {UserComponent} from "./user/user.component";
-import {TruststoreComponent} from "app/truststore/truststore.component";
-import {JmsComponent} from "./jms/jms.component";
-import {DirtyGuard} from "./common/dirty.guard";
-import {AuditComponent} from "./audit/audit.component";
-import {PartyComponent} from "./party/party.component";
+import {RouterModule, Routes} from '@angular/router';
+import {LoginComponent} from './login/login.component';
+import {AuthenticatedGuard} from './guards/authenticated.guard';
+import {ErrorLogComponent} from './errorlog/errorlog.component';
+import {PModeComponent} from './pmode/pmode.component';
+import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
+import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
+import {AuthorizedAdminGuard} from './guards/authorized-admin.guard';
+import {MessageFilterComponent} from './messagefilter/messagefilter.component';
+import {MessageLogComponent} from './messagelog/messagelog.component';
+import {UserComponent} from './user/user.component';
+import {TruststoreComponent} from 'app/truststore/truststore.component';
+import {JmsComponent} from './jms/jms.component';
+import {DirtyGuard} from './common/dirty.guard';
+import {AuditComponent} from './audit/audit.component';
+import {PartyComponent} from './party/party.component';
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
@@ -21,7 +23,18 @@ const appRoutes: Routes = [
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]
   },
-  {path: 'pmode/archive', component: PModeComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {
+    path: 'pmode/current',
+    component: CurrentPModeComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
+  {
+    path: 'pmode/archive',
+    component: PModeArchiveComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
   {
     path: 'jms',
     component: JmsComponent,

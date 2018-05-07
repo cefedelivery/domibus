@@ -22,6 +22,8 @@ import {AppComponent} from "./app.component";
 import {LoginComponent} from "./login/login.component";
 import {HomeComponent} from "./home/home.component";
 import {PModeComponent} from "./pmode/pmode.component";
+import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
+import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
 import {AuthenticatedGuard} from "./guards/authenticated.guard";
 import {AuthorizedGuard} from "./guards/authorized.guard";
@@ -88,6 +90,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AlertComponent,
     FooterComponent,
     PModeComponent,
+    CurrentPModeComponent,
+    PModeArchiveComponent,
     IsAuthorized,
     TruststoreComponent,
     PmodeUploadComponent,

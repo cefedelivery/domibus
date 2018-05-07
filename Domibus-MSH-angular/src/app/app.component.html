@@ -27,7 +27,7 @@
       <span>PMode</span>
     </button>
     <div class="sideNavSubmenu" *ngIf="showPmodeSubmenu()">
-      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()">
+      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode/current']" *ngIf="hasAdmin()">
         <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
         <span>Current</span>
       </button>
@@ -91,7 +91,7 @@
   </md-sidenav>
 
   <!-- primary content -->
-  <div id=".my-content">
+  <div id=".my-content" style="overflow-x: hidden">
     <alert></alert>
 
     <div id="sandwichMenuHolder">
