@@ -8,6 +8,7 @@ import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.cxf.Bus;
 import org.apache.neethi.Policy;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,6 +25,9 @@ public class PolicyServiceImplTest {
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     @Injectable
     DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    Bus bus;
 
     @Tested
     PolicyServiceImpl policyService;

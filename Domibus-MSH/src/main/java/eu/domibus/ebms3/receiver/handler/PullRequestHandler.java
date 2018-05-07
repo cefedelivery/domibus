@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -47,14 +48,11 @@ public class PullRequestHandler {
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
 
-
     @Autowired
     private ReliabilityMatcher pullRequestMatcher;
 
     @Autowired
     private MessageAttemptService messageAttemptService;
-
-
 
     @Autowired
     private MessageExchangeService messageExchangeService;
@@ -68,6 +66,8 @@ public class PullRequestHandler {
     @Autowired
     private ReliabilityService reliabilityService;
 
+    @Autowired
+    private MessagingLockService messagingLockService;
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -146,6 +146,7 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
+            messagingLockService.delete(messageId);
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");

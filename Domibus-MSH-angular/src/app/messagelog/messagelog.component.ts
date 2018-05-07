@@ -359,7 +359,7 @@ export class MessageLogComponent {
   }
 
   isDownloadButtonEnabledAction(row): boolean {
-    return !row.deleted;
+    return !row.deleted && row.messageType !== "SIGNAL_MESSAGE";
   }
 
   isDownloadButtonEnabled(): boolean {

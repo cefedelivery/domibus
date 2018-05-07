@@ -49,10 +49,11 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
         final MessageStatus status = MessageStatus.valueOf(messageStatus);
         // Builds the user message log
         final UserMessageLog userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
-        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
+
         //we set the status after we send the status change event; otherwise the old status and the new status would be the same
         userMessageLog.setMessageStatus(status);
         userMessageLogDao.create(userMessageLog);
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
     }
 
     @Override
@@ -110,11 +111,6 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     @Override
     public void setMessageAsSendFailure(String messageId) {
         updateMessageStatus(messageId, MessageStatus.SEND_FAILURE);
-    }
-
-    @Override
-    public void setIntermediaryPullStatus(String messageId) {
-        updateMessageStatus(messageId, MessageStatus.BEING_PULLED);
     }
 
     /**
