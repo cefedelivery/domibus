@@ -12,12 +12,10 @@ import {RollbackDialogComponent} from 'app/pmode/rollback-dialog/rollback-dialog
 import {SaveDialogComponent} from 'app/common/save-dialog/save-dialog.component';
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {RollbackDirtyDialogComponent} from '../rollback-dirty-dialog/rollback-dirty-dialog.component';
-import {PmodeDirtyUploadComponent} from '../pmode-dirty-upload/pmode-dirty-upload.component';
 import {Observable} from 'rxjs/Observable';
 import {DateFormatService} from 'app/customDate/dateformat.service';
 import {DownloadService} from 'app/download/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
-import {ActionDirtyDialogComponent} from '../action-dirty-dialog/action-dirty-dialog.component';
 
 @Component({
   moduleId: module.id,
@@ -30,24 +28,23 @@ import {ActionDirtyDialogComponent} from '../action-dirty-dialog/action-dirty-di
  * PMode Component Typescript
  */
 export class PModeArchiveComponent implements OnInit, DirtyOperations {
+  static readonly PMODE_URL: string = 'rest/pmode';
+  static readonly PMODE_CSV_URL: string = PModeArchiveComponent.PMODE_URL + '/csv';
+
   private ERROR_PMODE_EMPTY = 'As PMode is empty, no file was downloaded.';
 
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  loading: boolean = false;
-
-  public pModeExists = false;
-  private pModeContents: string = '';
-  private pModeContentsDirty: boolean = false;
+  loading = false;
 
   allPModes = [];
   tableRows = [];
   selected = [];
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
-  count: number = 0;
-  offset: number = 0;
+  count = 0;
+  offset = 0;
 
   disabledSave = true;
   disabledCancel = true;
@@ -55,8 +52,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   disabledDelete = true;
   disabledRollback = true;
 
-  actualId: number = 0;
-  actualRow: number = 0;
+  actualId = 0;
+  actualRow = 0;
 
   deleteList = [];
 
@@ -68,8 +65,6 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
 
   private headers = new Headers({'Content-Type': 'application/json'});
 
-  static readonly PMODE_URL: string = 'rest/pmode';
-  static readonly PMODE_CSV_URL: string = PModeArchiveComponent.PMODE_URL + '/csv';
 
   /**
    * Constructor
@@ -77,20 +72,20 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {AlertService} alertService Alert Service object used for alerting success and error messages
    * @param {MdDialog} dialog Object used for opening dialogs
    */
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
   /**
    * NgOnInit method
    */
-  ngOnInit() {
+  ngOnInit () {
     this.initializeArchivePmodes();
   }
 
   /**
    * Initialize columns and gets all PMode entries from database
    */
-  initializeArchivePmodes() {
+  initializeArchivePmodes () {
     this.columnPicker.allColumns = [
       {
         cellTemplate: this.rowWithDateFormatTpl,
@@ -111,7 +106,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Configuration Date', 'Username', 'Description', 'Actions'].indexOf(col.name) != -1
+      return ['Configuration Date', 'Username', 'Description', 'Actions'].indexOf(col.name) !== -1
     });
 
     this.getAllPModeEntries();
@@ -121,7 +116,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Change Page size for a @newPageLimit value
    * @param {number} newPageLimit New value for page limit
    */
-  changePageSize(newPageLimit: number) {
+  changePageSize (newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.rowLimiter.pageSize = newPageLimit;
     this.page(0, newPageLimit);
@@ -131,7 +126,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Gets all the PMode
    * @returns {Observable<Response>}
    */
-  getResultObservable(): Observable<Response> {
+  getResultObservable (): Observable<Response> {
     return this.http.get(PModeArchiveComponent.PMODE_URL + '/list')
       .publishReplay(1).refCount();
   }
@@ -139,12 +134,12 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Gets all the PModes Entries
    */
-  getAllPModeEntries() {
+  //todo: move to a service and reuse in current pmode
+  getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
         this.allPModes = response.json();
         this.allPModes[0].current = true;
         this.actualId = this.allPModes[0].id;
-        this.getActivePMode();
         this.actualRow = 0;
         this.count = response.json().length;
         if (this.count > AlertComponent.MAX_COUNT_CSV) {
@@ -165,7 +160,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param offset
    * @param pageSize
    */
-  page(offset, pageSize) {
+  page (offset, pageSize) {
     this.loading = true;
 
     this.offset = offset;
@@ -180,7 +175,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    *
    * @param event
    */
-  onPage(event) {
+  onPage (event) {
     console.log('Page Event', event);
     this.page(event.offset, event.pageSize);
   }
@@ -189,7 +184,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Disable All the Buttons
    * used mainly when no row is selected
    */
-  private disableAllButtons() {
+  private disableAllButtons () {
     this.disabledSave = true;
     this.disabledCancel = true;
     this.disabledDownload = true;
@@ -201,7 +196,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Enable Save and Cancel buttons
    * used when changes occurred (deleted entries)
    */
-  private enableSaveAndCancelButtons() {
+  private enableSaveAndCancelButtons () {
     this.disabledSave = false;
     this.disabledCancel = false;
     this.disabledDownload = true;
@@ -213,30 +208,31 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called by NgxDatatable on selection/deselection
    * @param {any} selected selected/unselected object
    */
-  onSelect({selected}) {
+  onSelect ({selected}) {
     console.log('Select Event', selected, this.selected);
-    if (isNullOrUndefined(selected) || selected.length == 0) {
+    if (isNullOrUndefined(selected) || selected.length === 0) {
       this.disableAllButtons();
       return;
     }
 
-    this.disabledDownload = !(this.selected[0] != null && this.selected.length == 1);
-    this.disabledDelete = this.selected.findIndex(sel => sel.id === this.actualId) != -1;
-    this.disabledRollback = !(this.selected[0] != null && this.selected.length == 1 && this.selected[0].id !== this.actualId);
+    this.disabledDownload = !(this.selected[0] != null && this.selected.length === 1);
+    this.disabledDelete = this.selected.findIndex(sel => sel.id === this.actualId) !== -1;
+    this.disabledRollback = !(this.selected[0] != null && this.selected.length === 1 && this.selected[0].id !== this.actualId);
   }
 
   /**
    * Method used when button save is clicked
    */
-  saveButton(withDownloadCSV: boolean) {
-    let dialogRef = this.dialog.open(SaveDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+  saveButton (withDownloadCSV: boolean) {
+    this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(() => {
             this.alertService.success('The operation \'update pmodes\' completed successfully.', false);
+
             this.disableAllButtons();
             this.selected = [];
             this.deleteList = [];
+
             if (withDownloadCSV) {
               DownloadService.downloadNative(PModeArchiveComponent.PMODE_CSV_URL);
             }
@@ -258,9 +254,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Method used when Cancel button is clicked
    */
-  cancelButton() {
-    let dialogRef = this.dialog.open(CancelDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+  cancelButton () {
+    this.dialog.open(CancelDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.deleteList = [];
         this.initializeArchivePmodes();
@@ -281,7 +276,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button is clicked
    * @param row The selected row
    */
-  downloadArchive(row) {
+  downloadArchive (row) {
     this.download(this.tableRows[row].id);
   }
 
@@ -289,8 +284,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Action Delete icon is clicked
    * @param row Row where Delete icon is located
    */
-  deleteArchiveAction(row) {
-
+  deleteArchiveAction (row) {
     // workaround to delete one entry from the array
     // since "this.rows.splice(row, 1);" doesn't work...
     let array = this.tableRows.slice();
@@ -315,7 +309,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Delete button is clicked
    * All the selected rows will be deleted
    */
-  deleteArchive() {
+  deleteArchive () {
     for (let i = this.selected.length - 1; i >= 0; i--) {
       let array = this.tableRows.slice();
       array.splice(this.selected[i].$$index, 1);
@@ -339,7 +333,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * are null or undefined or if is empty.
    *
    */
-  isPageEmpty(): boolean {
+  isPageEmpty (): boolean {
     if (this.tableRows || this.tableRows.length) {
       for (let i = 0; i < this.tableRows.length; i++) {
         if (this.tableRows[i]) {
@@ -358,36 +352,38 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    *
    * @param selectedRow Selected Row
    */
-  rollbackArchive(selectedRow) {
+  rollbackArchive (selectedRow) {
     if (!this.isDirty()) {
-      let dialogRef = this.dialog.open(RollbackDialogComponent);
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.allPModes[this.actualRow].current = false;
-          this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-            this.actualRow = 0;
+      this.dialog.open(RollbackDialogComponent).afterClosed().subscribe(ok => {
+        if (ok) {
+          this.rollBack(selectedRow);
 
-            this.getAllPModeEntries();
-
-            this.disableAllButtons();
-            this.selected = [];
-          });
+          // this.allPModes[this.actualRow].current = false;
+          // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+          //   this.actualRow = 0;
+          //
+          //   this.getAllPModeEntries();
+          //
+          //   this.disableAllButtons();
+          //   this.selected = [];
+          // });
         }
       });
     } else {
-      let dialogRef = this.dialog.open(RollbackDirtyDialogComponent);
-      dialogRef.afterClosed().subscribe(result => {
+      this.dialog.open(RollbackDirtyDialogComponent).afterClosed().subscribe(result => {
         if (result === 'ok') {
           this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
-              this.deleteList = [];
-              this.disableAllButtons();
-              this.selected = [];
+              this.rollBack(selectedRow);
 
-              this.allPModes[this.actualRow].current = false;
-              this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-                this.actualRow = 0;
-                this.getAllPModeEntries();
-              });
+              // this.deleteList = [];
+              // this.disableAllButtons();
+              // this.selected = [];
+              //
+              // this.allPModes[this.actualRow].current = false;
+              // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+              //   this.actualRow = 0;
+              //   this.getAllPModeEntries();
+              // });
             },
             error => {
               this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
@@ -395,70 +391,38 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
               this.selected = [];
             });
         } else if (result === 'rollback_only') {
-          this.deleteList = [];
-          this.allPModes[this.actualRow].current = false;
-          this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-            this.actualRow = 0;
-            this.getAllPModeEntries();
-          });
-          this.disableAllButtons();
+          this.rollBack(selectedRow);
+
+          // this.deleteList = [];
+          // this.allPModes[this.actualRow].current = false;
+          // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+          //   this.actualRow = 0;
+          //   this.getAllPModeEntries();
+          // });
+          // this.disableAllButtons();
         }
-        this.selected = [];
+        // this.selected = [];
       });
     }
     this.page(0, this.rowLimiter.pageSize);
   }
 
-  /**
-   * Get Request for the Active PMode XML
-   */
-  getActivePMode() {
-    if (!isNullOrUndefined(PModeArchiveComponent.PMODE_URL)) {
-      this.pModeContentsDirty = false;
-      this.http.get(PModeArchiveComponent.PMODE_URL + '/' + this.actualId + '?noAudit=true ').subscribe(res => {
-        const HTTP_OK = 200;
-        if (res.status == HTTP_OK) {
-          this.pModeExists = true;
-          this.pModeContents = res.text();
-        }
-      }, err => {
-        this.pModeExists = false;
-      })
-    }
-  }
+  private rollBack (selectedRow) {
+    this.allPModes[this.actualRow].current = false;
+    this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+        this.deleteList = [];
+        this.disableAllButtons();
+        this.selected = [];
+        this.actualRow = 0;
 
-  /**
-   * Method called when Upload button is clicked
-   */
-  upload() {
-    if (this.isDirty()) {
-      let dialogRef = this.dialog.open(PmodeDirtyUploadComponent);
-      dialogRef.afterClosed().subscribe(result => {
-        if (result === 'ok') {
-          this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
-              this.deleteList = [];
-              this.disableAllButtons();
-              this.selected = [];
-
-              this.uploadPmode();
-            },
-            error => {
-              this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
-              this.enableSaveAndCancelButtons();
-              this.selected = [];
-            });
-        } else if (result === 'upload_only') {
-          this.deleteList = [];
-
-          this.uploadPmode();
-        }
+        this.getAllPModeEntries();
+      },
+      error => {
+        this.alertService.error('The operation \'rollback pmode\' not completed successfully.');
       });
-    } else {
-      this.uploadPmode();
-    }
   }
 
-  private uploadPmode() {
+  private uploadPmode () {
     this.dialog.open(PmodeUploadComponent)
       .afterClosed().subscribe(result => {
       this.getAllPModeEntries();
@@ -470,124 +434,36 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button or icon is clicked
    * @param id The id of the selected entry on the DB
    */
-  download(id) {
-    if (this.pModeExists) {
-      this.http.get(PModeArchiveComponent.PMODE_URL + '/' + id).subscribe(res => {
-        var uploadDateStr: string = '';
-        if (this.selected.length == 1 && this.selected[0].id == id) {
-          uploadDateStr = DateFormatService.format(new Date(this.selected[0].configurationDate));
-        } else {
-          uploadDateStr = DateFormatService.format(new Date(this.tableRows[0].configurationDate));
-        }
-        PModeArchiveComponent.downloadFile(res.text(), uploadDateStr);
-      }, err => {
-        this.alertService.error(err._body);
-      });
-    } else {
-      this.alertService.error(this.ERROR_PMODE_EMPTY)
-    }
-  }
-
-  /**
-   * Method called when 'Save' button is clicked
-   */
-  save() {
-    if (this.isDirty()) {
-      this.dialog.open(ActionDirtyDialogComponent, {
-        data: {
-          actionTitle: 'You will now save the current PMode',
-          actionName: 'save',
-          actionIconName: 'file_upload'
-        }
-      }).afterClosed().subscribe(response => {
-        if (response === 'ok') {
-          this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
-              this.deleteList = [];
-              this.disableAllButtons();
-              this.selected = [];
-
-              this.uploadPmodeContent();
-            },
-            error => {
-              this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
-              this.enableSaveAndCancelButtons();
-              this.selected = [];
-            });
-        } else if (response === 'save') {
-          this.uploadPmodeContent();
-        }
-      });
-    } else {
-      this.uploadPmodeContent();
-    }
-  }
-
-  private uploadPmodeContent() {
-    this.dialog.open(PmodeUploadComponent, {
-      data: {pModeContents: this.pModeContents}
-    }).afterClosed().subscribe(result => {
-      if (result && result.done) {
-        this.uploaded = true;
-        this.getAllPModeEntries();
+  download (id) {
+    // if (this.pModeExists) {
+    this.http.get(PModeArchiveComponent.PMODE_URL + '/' + id).subscribe(res => {
+      let uploadDateStr = '';
+      if (this.selected.length === 1 && this.selected[0].id === id) {
+        uploadDateStr = DateFormatService.format(new Date(this.selected[0].configurationDate));
+      } else {
+        uploadDateStr = DateFormatService.format(new Date(this.tableRows[0].configurationDate));
       }
+      PModeArchiveComponent.downloadFile(res.text(), uploadDateStr);
+    }, err => {
+      this.alertService.error(err._body);
     });
-  }
-
-  /**
-   * Method called when 'Cancel' button is clicked
-   */
-  cancel() {
-    this.dialog.open(CancelDialogComponent)
-      .afterClosed().subscribe(response => {
-      if (response) {
-        this.getActivePMode();
-      }
-    });
-  }
-
-  /**
-   * Method that checks if 'Save' button should be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  canSave(): boolean {
-    return this.pModeExists && this.pModeContentsDirty;
-  }
-
-  /**
-   * Method that checks if 'Cancel' button should be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  canCancel(): boolean {
-    return this.pModeExists && this.pModeContentsDirty;
-  }
-
-  /**
-   * Method that checks if 'Download' button should be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  canDownload(): boolean {
-    return this.pModeExists && !this.pModeContentsDirty;
-  }
-
-  /**
-   * Method called when the pmode text is changed by the user
-   */
-  textChanged() {
-    this.pModeContentsDirty = true;
+    // } else {
+    //   this.alertService.error(this.ERROR_PMODE_EMPTY)
+    // }
   }
 
   /**
    * Method that checks if CSV Button export can be enabled
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
-  isSaveAsCSVButtonEnabled(): boolean {
+  isSaveAsCSVButtonEnabled (): boolean {
     return this.allPModes.length < AlertComponent.MAX_COUNT_CSV;
   }
 
   /**
    * Saves the content of the datatable into a CSV file
    */
-  saveAsCSV() {
+  saveAsCSV () {
     if (this.isDirty()) {
       this.saveButton(true);
     } else {
@@ -599,10 +475,10 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Downloader for the XML file
    * @param data
    */
-  private static downloadFile(data: any, date: string) {
+  private static downloadFile (data: any, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
-    let filename: string = 'PMode';
-    if (date != '') {
+    let filename = 'PMode';
+    if (date !== '') {
       filename += '-' + date;
     }
     filename += '.xml';
@@ -613,7 +489,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * IsDirty method used for the IsDirtyOperations
    * @returns {boolean}
    */
-  isDirty(): boolean {
+  isDirty (): boolean {
     return !this.disabledCancel;
   }
 
@@ -621,11 +497,11 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called every time a tab changes
    * @param value Tab Position
    */
-  selectedIndexChange(value) {
-    if (value == 1 && this.uploaded) { // Archive Tab
+  selectedIndexChange (value) {
+    if (value === 1 && this.uploaded) { // Archive Tab
       this.getResultObservable().map((response: Response) => response.json()).map((response) => response.slice(this.offset * this.rowLimiter.pageSize, (this.offset + 1) * this.rowLimiter.pageSize)).subscribe((response) => {
           this.tableRows = response;
-          if (this.offset == 0) {
+          if (this.offset === 0) {
             this.tableRows[0].current = true;
             this.tableRows[0].description = '[CURRENT]: ' + response[0].description;
           }
