@@ -2,7 +2,6 @@ import {RouterModule, Routes} from '@angular/router';
 import {LoginComponent} from './login/login.component';
 import {AuthenticatedGuard} from './guards/authenticated.guard';
 import {ErrorLogComponent} from './errorlog/errorlog.component';
-import {PModeComponent} from './pmode/pmode.component';
 import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
 import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
 import {AuthorizedAdminGuard} from './guards/authorized-admin.guard';
@@ -19,7 +18,7 @@ const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
   {
     path: 'pmode',
-    component: PModeComponent,
+    component: CurrentPModeComponent,
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]
   },
