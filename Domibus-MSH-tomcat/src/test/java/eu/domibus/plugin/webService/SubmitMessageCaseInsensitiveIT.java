@@ -1,15 +1,26 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractSendMessageIT;
+import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.SubmitResponse;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.SchedulingTaskExecutor;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -20,18 +31,29 @@ import java.sql.SQLException;
 
 public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
 
-    private static boolean initialized;
-
     @Autowired
     BackendInterface backendWebService;
 
+    @Autowired
+    PModeProvider pModeProvider;
+
+    @Autowired
+    protected ConfigurationDAO configurationDAO;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Qualifier("taskExecutor")
+    @Autowired
+    protected SchedulingTaskExecutor schedulingTaskExecutor;
+
+
     @Before
-    public void before() throws IOException {
-        if (!initialized) {
-            // The dataset is executed only once for each class
-            insertDataset("sendMessageDataset.sql");
-            initialized = true;
-        }
+    @Transactional
+    public void updatePMode() throws IOException, XmlProcessingException {
+        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
+        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
+        configurationDAO.updateConfiguration(pModeConfiguration);
     }
 
     /**
@@ -41,57 +63,56 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
      * @throws SubmitMessageFault
      * @throws InterruptedException
      */
+
+
     @Test
     public void testSubmitMessageOK() throws SubmitMessageFault, SQLException, InterruptedException {
-
-        String payloadHref = "SBDH-ORDER";
+        String payloadHref = "cid:message";
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
 
         Messaging ebMSHeaderInfo = new Messaging();
         UserMessage userMessage = new UserMessage();
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageId("IT31-363a-4328-9f81-8d84bf2da59f@domibus.eu");
+        userMessage.setMessageInfo(messageInfo);
         CollaborationInfo collaborationInfo = new CollaborationInfo();
-        collaborationInfo.setAction("TC3LEG1");
-        AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setValue("edelivery-1110");
-        collaborationInfo.setAgreementRef(agreementRef);
+        collaborationInfo.setAction("TC3Leg1");
         Service service = new Service();
-        service.setValue("BDX:NOPROCESS");
-        service.setType("TC3");
+        service.setValue("bdx:noprocess");
+        service.setType("tc1");
         collaborationInfo.setService(service);
         userMessage.setCollaborationInfo(collaborationInfo);
         MessageProperties messageProperties = new MessageProperties();
-        messageProperties.getProperty().add(createProperty("originalSender", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C1", STRING_TYPE));
-        messageProperties.getProperty().add(createProperty("finalRecipient", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C41", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4", STRING_TYPE));
         userMessage.setMessageProperties(messageProperties);
         PartyInfo partyInfo = new PartyInfo();
         From from = new From();
-        from.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/INITIATOR");
+        from.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
         PartyId sender = new PartyId();
-        sender.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-BLUE");
+        sender.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        sender.setValue("domibus-blue");
         from.setPartyId(sender);
         partyInfo.setFrom(from);
         To to = new To();
-        to.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/RESPONDER");
+        to.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
         PartyId receiver = new PartyId();
-        receiver.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-RED");
+        receiver.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        receiver.setValue("domibus-red");
         to.setPartyId(receiver);
         partyInfo.setTo(to);
         userMessage.setPartyInfo(partyInfo);
         PayloadInfo payloadInfo = new PayloadInfo();
         PartInfo partInfo = new PartInfo();
-        Description description = new Description();
-        description.setValue("e-sens-sbdh-order");
-        description.setLang("en-US");
         partInfo.setHref(payloadHref);
-        String mimeType = "TEXT/XML";
+        String mimeType = "text/xml";
         if (mimeType != null) {
             PartProperties partProperties = new PartProperties();
             partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);
         }
-        partInfo.setDescription(description);
         payloadInfo.getPartInfo().add(partInfo);
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);

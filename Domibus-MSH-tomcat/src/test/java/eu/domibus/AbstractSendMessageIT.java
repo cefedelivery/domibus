@@ -2,6 +2,7 @@ package eu.domibus;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -18,9 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +38,11 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     @Autowired
     BackendInterface backendWebService;
+
+    @Autowired
+    UserMessageLogDao userMessageLogDao;
+
+
 
     /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
     @Autowired
@@ -66,7 +69,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException{
         // Required in order to let time to the message to be consumed
-        TimeUnit.SECONDS.sleep(4);
+        TimeUnit.SECONDS.sleep(5);
 
         Assert.assertNotNull(response);
         String messageId = response.getMessageID().get(0);
@@ -75,14 +78,11 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
                 .withRequestBody(matching(".*"))
                 .withHeader("Content-Type", notMatching("application/soap+xml")));
 
-        Connection con = dataSource.getConnection();
-        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_ID = ?";
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setString(1, messageId);
-        ResultSet resultSet = pstmt.executeQuery();
-        resultSet.next();
-        Assert.assertEquals(MessageStatus.ACKNOWLEDGED.name(), resultSet.getString("MESSAGE_STATUS"));
-        pstmt.close();
+
+
+        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+        Assert.assertEquals(MessageStatus.ACKNOWLEDGED, messageStatus);
+
     }
 
     protected Messaging createMessageHeader(String payloadHref) {

@@ -1,7 +1,18 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractIT;
+import eu.domibus.common.MSHRole;
+import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.common.services.MessagingService;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.webService.generated.*;
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -9,29 +20,57 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.activation.DataHandler;
 import javax.jms.ConnectionFactory;
+import javax.mail.util.ByteArrayDataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.xml.ws.Holder;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Date;
 
 public class RetrieveMessageIT extends AbstractIT {
 
     protected static ConnectionFactory connectionFactory;
-    private static boolean initialized;
 
     @Autowired
     BackendInterface backendWebService;
 
+    @Autowired
+    MessagingService messagingService;
+
+    @Autowired
+    protected MessageRetriever messageRetriever;
+
+    @Autowired
+    UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    PModeProvider pModeProvider;
+
+    @Autowired
+    protected ConfigurationDAO configurationDAO;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @BeforeClass
+    public static void before() throws IOException {
+        connectionFactory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
+    }
+
     @Before
-    public void before() throws IOException {
-        if (!initialized) {
-            insertDataset("downloadMessage.sql");
-            initialized = true;
-            connectionFactory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
-        }
+    public void updatePMode() throws IOException, XmlProcessingException {
+        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
+        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
+        configurationDAO.updateConfiguration(pModeConfiguration);
     }
 
     @Test(expected = RetrieveMessageFault.class)
@@ -84,6 +123,25 @@ public class RetrieveMessageIT extends AbstractIT {
     }
 
     private void retrieveMessage(String messageId) throws Exception {
+        final UserMessage userMessage = getUserMessageTemplate();
+        String messagePayload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>";
+        userMessage.getPayloadInfo().getPartInfo().iterator().next().setBinaryData(messagePayload.getBytes());
+        userMessage.getPayloadInfo().getPartInfo().iterator().next().setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(messagePayload.getBytes(), "text/xml")));
+        userMessage.getMessageInfo().setMessageId(messageId);
+        eu.domibus.ebms3.common.model.Messaging messaging = new eu.domibus.ebms3.common.model.Messaging();
+        messaging.setUserMessage(userMessage);
+        messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+
+        UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageStatus(eu.domibus.common.MessageStatus.RECEIVED);
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setMessageType(MessageType.USER_MESSAGE);
+        userMessageLog.setMshRole(MSHRole.RECEIVING);
+        userMessageLog.setReceived(new Date());
+        userMessageLogDao.create(userMessageLog);
+
+        entityManager.flush();
+
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
         pushMessage(connection, StringUtils.trim(messageId).replace("\t", ""));
 
@@ -100,9 +158,8 @@ public class RetrieveMessageIT extends AbstractIT {
         }
         Assert.assertFalse(retrieveMessageResponse.value.getPayload().isEmpty());
         LargePayloadType payloadType = retrieveMessageResponse.value.getPayload().iterator().next();
-        String payload = IOUtils.toString(payloadType.getValue().getDataSource().getInputStream());
-        System.out.println("Payload returned [" + payload +"]");
-        Assert.assertEquals(payload, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>");
+        String payload = IOUtils.toString(payloadType.getValue().getDataSource().getInputStream(), Charset.defaultCharset());
+        Assert.assertEquals(payload, messagePayload);
     }
 
     private void pushMessage(ActiveMQConnection connection, String messageId) throws Exception {

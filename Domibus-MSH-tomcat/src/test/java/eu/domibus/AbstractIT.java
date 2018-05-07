@@ -133,7 +133,7 @@ public abstract class AbstractIT {
 
     protected UserMessage getUserMessageTemplate() throws IOException {
         XStream xStream = new XStream();
-        return (UserMessage) xStream.fromXML(new ClassPathResource("dataset/messages/UserMessage.xml").getInputStream());
+        return (UserMessage) xStream.fromXML(new ClassPathResource("dataset/messages/UserMessageTemplate.xml").getInputStream());
     }
 
     /**
