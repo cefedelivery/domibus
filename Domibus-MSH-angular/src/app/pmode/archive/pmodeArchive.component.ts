@@ -8,14 +8,14 @@ import {isNullOrUndefined} from 'util';
 import {PmodeUploadComponent} from '../pmode-upload/pmode-upload.component';
 import * as FileSaver from 'file-saver';
 import {CancelDialogComponent} from 'app/common/cancel-dialog/cancel-dialog.component';
-import {RollbackDialogComponent} from 'app/pmode/rollback-dialog/rollback-dialog.component';
+import {ActionDirtyDialogComponent} from 'app/pmode/action-dirty-dialog/action-dirty-dialog.component';
 import {SaveDialogComponent} from 'app/common/save-dialog/save-dialog.component';
 import {DirtyOperations} from 'app/common/dirty-operations';
-import {RollbackDirtyDialogComponent} from '../rollback-dirty-dialog/rollback-dirty-dialog.component';
 import {Observable} from 'rxjs/Observable';
 import {DateFormatService} from 'app/customDate/dateformat.service';
 import {DownloadService} from 'app/download/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
+import {RollbackDialogComponent} from '../rollback-dialog/rollback-dialog.component';
 
 @Component({
   moduleId: module.id,
@@ -357,33 +357,19 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
       this.dialog.open(RollbackDialogComponent).afterClosed().subscribe(ok => {
         if (ok) {
           this.rollBack(selectedRow);
-
-          // this.allPModes[this.actualRow].current = false;
-          // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-          //   this.actualRow = 0;
-          //
-          //   this.getAllPModeEntries();
-          //
-          //   this.disableAllButtons();
-          //   this.selected = [];
-          // });
         }
       });
     } else {
-      this.dialog.open(RollbackDirtyDialogComponent).afterClosed().subscribe(result => {
+      this.dialog.open(ActionDirtyDialogComponent, {
+        data: {
+          actionTitle: 'You will now rollback to an older PMode version',
+          actionName: 'rollback',
+          actionIconName: 'settings_backup_restore'
+        }
+      }).afterClosed().subscribe(result => {
         if (result === 'ok') {
           this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
               this.rollBack(selectedRow);
-
-              // this.deleteList = [];
-              // this.disableAllButtons();
-              // this.selected = [];
-              //
-              // this.allPModes[this.actualRow].current = false;
-              // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-              //   this.actualRow = 0;
-              //   this.getAllPModeEntries();
-              // });
             },
             error => {
               this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
@@ -392,16 +378,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
             });
         } else if (result === 'rollback_only') {
           this.rollBack(selectedRow);
-
-          // this.deleteList = [];
-          // this.allPModes[this.actualRow].current = false;
-          // this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
-          //   this.actualRow = 0;
-          //   this.getAllPModeEntries();
-          // });
-          // this.disableAllButtons();
         }
-        // this.selected = [];
       });
     }
     this.page(0, this.rowLimiter.pageSize);

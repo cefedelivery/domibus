@@ -65,9 +65,7 @@ import {ColumnPickerComponent} from "./common/column-picker/column-picker.compon
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
 import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
-import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
 import {ActionDirtyDialogComponent} from "./pmode/action-dirty-dialog/action-dirty-dialog.component";
-import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
@@ -113,9 +111,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     PageHelperComponent,
     RollbackDialogComponent,
-    RollbackDirtyDialogComponent,
     ActionDirtyDialogComponent,
-    PmodeDirtyUploadComponent,
     AuditComponent,
     PartyComponent,
     PartyDetailsComponent,
@@ -137,9 +133,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TruststoreDialogComponent,
     TrustStoreUploadComponent,
     RollbackDialogComponent,
-    RollbackDirtyDialogComponent,
     ActionDirtyDialogComponent,
-    PmodeDirtyUploadComponent,
     PartyDetailsComponent
   ],
   imports: [
