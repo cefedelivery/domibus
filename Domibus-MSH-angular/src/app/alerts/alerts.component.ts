@@ -31,13 +31,14 @@ export class AlertsComponent {
 
   // data table
   rows = [];
-  selected = [];
   count: number = 0;
   offset: number = 10;
   //default value
   orderBy: string = "creationTime";
   //default value
   asc: boolean = false;
+
+  buttonsDisabled: boolean = true;
 
   aTypes = ['MSG_COMMUNICATION_FAILURE','MSG_TEST'];
   aLevels = ['HIGH', 'MEDIUM', 'LOW'];
@@ -148,7 +149,7 @@ export class AlertsComponent {
 
     let newEntries: AlertsEntry[] = [];
     let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas']);
-    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', 'alertType2', this.aLevels[1], 'aText2', new Date(), new Date(), []);
+    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), []);
     let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', 'alertType3', this.aLevels[0], 'aText3', new Date(), new Date(), []);
 
 
@@ -164,7 +165,6 @@ export class AlertsComponent {
     this.rowLimiter.pageSize = pageSize;
     this.orderBy = orderBy;
     this.asc = asc;
-    this.selected = [];
     this.loading = false;
 
     /*this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
@@ -213,16 +213,20 @@ export class AlertsComponent {
   }
 
   onAlertTypeChanged(alertType: string) {
+    this.items = this.getDynamicParameters(alertType);
+  }
+
+  getDynamicParameters(alertType:string): string[] {
     if(!isNullOrUndefined(alertType) && alertType != '') {
       // just for testing begin
       if(alertType == 'MSG_COMMUNICATION_FAILURE') {
-        this.items = ['MSG_COMM1', 'MSG_COMM2', 'MSG_COMM3']
+        return ['MSG_COMM1', 'MSG_COMM2', 'MSG_COMM3']
       } else {
-        this.items = ['MSG_TEST1', 'MSG_TEST2'];
+        return ['MSG_TEST1', 'MSG_TEST2'];
       }
       // just for testing end
     } else {
-      this.items = [];
+      return [];
     }
   }
 
@@ -244,10 +248,6 @@ export class AlertsComponent {
 
 
   // datatable methods
-
-  onSelect({selected}) {
-    console.log('Select Event', selected, this.selected);
-  }
 
   onActivate(event) {
     console.log('Activate Event', event);
@@ -331,6 +331,18 @@ export class AlertsComponent {
 
   public isAlertTypeDefined(): boolean {
     return !isNullOrUndefined(this.filter.alertType) && this.filter.alertType != '';
+  }
+
+  cancel() {
+
+  }
+
+  save() {
+
+  }
+
+  setProcessedValue(row) {
+    this.buttonsDisabled = false;
   }
 
 }
