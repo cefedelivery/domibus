@@ -1100,73 +1100,73 @@
         </createTable>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_BLOB_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_01" tableName="QRTZ_BLOB_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, CALENDAR_NAME" constraintName="PRIMARY" tableName="QRTZ_CALENDARS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, CALENDAR_NAME" constraintName="PRIMARY_02" tableName="QRTZ_CALENDARS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_CRON_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_03" tableName="QRTZ_CRON_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, ENTRY_ID" constraintName="PRIMARY" tableName="QRTZ_FIRED_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, ENTRY_ID" constraintName="PRIMARY_04" tableName="QRTZ_FIRED_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, JOB_NAME, JOB_GROUP" constraintName="PRIMARY" tableName="QRTZ_JOB_DETAILS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, JOB_NAME, JOB_GROUP" constraintName="PRIMARY_05" tableName="QRTZ_JOB_DETAILS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, LOCK_NAME" constraintName="PRIMARY" tableName="QRTZ_LOCKS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, LOCK_NAME" constraintName="PRIMARY_06" tableName="QRTZ_LOCKS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_PAUSED_TRIGGER_GRPS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_GROUP" constraintName="PRIMARY_07" tableName="QRTZ_PAUSED_TRIGGER_GRPS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, INSTANCE_NAME, LAST_CHECKIN_TIME, CHECKIN_INTERVAL" constraintName="PRIMARY" tableName="QRTZ_SCHEDULER_STATE"/>
+        <addPrimaryKey columnNames="SCHED_NAME, INSTANCE_NAME, LAST_CHECKIN_TIME, CHECKIN_INTERVAL" constraintName="PRIMARY_08" tableName="QRTZ_SCHEDULER_STATE"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_SIMPLE_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_09" tableName="QRTZ_SIMPLE_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_SIMPROP_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_10" tableName="QRTZ_SIMPROP_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY" tableName="QRTZ_TRIGGERS"/>
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_11" tableName="QRTZ_TRIGGERS"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_BACK_RCRITERIA_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_BACK_RCRITERIA_AUD" tableName="TB_BACK_RCRITERIA_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_BACKEND_FILTER_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_BACKEND_FILTER_AUD" tableName="TB_BACKEND_FILTER_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_CONFIGURATION_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_CONFIGURATION_AUD" tableName="TB_CONFIGURATION_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_CONFIGURATION_RAW_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_CONFIGURATION_RAW_AUD" tableName="TB_CONFIGURATION_RAW_AUD"/>
 
 
-        <addPrimaryKey columnNames="LegConfiguration_ID_PK, partyMpcMap_KEY" constraintName="PRIMARY" tableName="TB_LEG_TB_MPC"/>
+        <addPrimaryKey columnNames="LegConfiguration_ID_PK, partyMpcMap_KEY" constraintName="PRIMARY_12" tableName="TB_LEG_TB_MPC"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_PARTY_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_AUD" tableName="TB_PARTY_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_PARTY_ID_TYPE_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_ID_TYPE_AUD" tableName="TB_PARTY_ID_TYPE_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_PARTY_IDENTIFIER_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_IDENTIFIER_AUD" tableName="TB_PARTY_IDENTIFIER_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_ROUTING_CRITERIA_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_ROUTING_CRITERIA_AUD" tableName="TB_ROUTING_CRITERIA_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_USER_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_USER_AUD" tableName="TB_USER_AUD"/>
 
 
-        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PRIMARY" tableName="TB_USER_ROLE_AUD"/>
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_USER_ROLE_AUD" tableName="TB_USER_ROLE_AUD"/>
 
 
-        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PRIMARY" tableName="TB_USER_ROLES"/>
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
 
 
         <addUniqueConstraint columnNames="CERTIFICATE_ALIAS, CERTIFICATE_TYPE" constraintName="CERTIFICATE_ALIAS" tableName="TB_CERTIFICATE"/>
@@ -2005,7 +2005,6 @@
 
         <addForeignKeyConstraint baseColumnNames="TO_ID" baseTableName="TB_PARTY_ID" constraintName="FK_ylub8lptgvsch02mj71euuil" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
 
-
         <createView
                 replaceIfExists="true"
                 viewName="V_AUDIT_DETAIL">
@@ -2059,6 +2058,11 @@
             end;
         </createProcedure>
 
+    </changeSet>
+
+    <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta-1">
+        <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="1" maxValue="9999999999999999999999999999"
+                        incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
     </changeSet>
 
     <changeSet author="thomas dussart" id="EDELIVERY-2144">

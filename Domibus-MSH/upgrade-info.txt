@@ -24,9 +24,11 @@ Domibus 4.0 (from 3.3):
                         - [Mysql only]
                              domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
 Domibus 3.3.4 (from 3.3.3):
-                 - In the file "/conf/domibus/domibus.properties" add the following properties :
-                            domibus.pull.queue.concurency=1-1
-                            domibus.pull.request.send.per.job.cycle=1 (Optional default value to 1)
+                  - In the file "/conf/domibus/domibus.properties" add the following properties :
+                                             domibus.pull.queue.concurency=1-1
+                                             domibus.internal.queue.concurency=3-10
+                                             domibus.pull.request.send.per.job.cycle=1 (Optional default value to 1)
+                                             domibus.internal.queue.concurency=3-10
                  - [Mysql only]
                         - [Tomcat] Please add the following parameters at the end of the domibus.datasource.xa.property.url property in the file"/conf/domibus/domibus.properties"
                              &noAccessToProcedureBodies=true&sessionVariables=innodb_lock_wait_timeout=1
