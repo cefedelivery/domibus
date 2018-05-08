@@ -69,15 +69,10 @@
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy"
-					policy="eDeliveryPolicy.xml"
-					signatureMethod="RSA_SHA256" />	
-			<security name="noSigNoEnc"
-					  policy="doNothingPolicy.xml"
-					  signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy"
-					  policy="eSensPolicy.v2.0.xml"
-					  signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256" />
+			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
+			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" 
@@ -98,6 +93,7 @@
 			<action name="tc1Action" value="TC1Leg1"/>
 			<action name="tc2Action" value="TC2Leg1"/>
 			<action name="tc3Action" value="TC3Leg1"/>
+			<action name="tc4Action" value="TC4Leg1"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -138,6 +134,17 @@
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
+			<legConfiguration name="pushTestcase1tc4Action"
+							  service="testService1"
+							  action="tc4Action"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="signOnly"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="ecodexPropertySet"
+							  payloadProfile="MessageProfile"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true"/>
 		</legConfigurations>
 <process name="tc1Process"
          agreement=""
@@ -157,6 +164,7 @@
 		<leg name="pushTestcase1tc1Action"/>
 		<leg name="pushTestcase1tc2Action"/>
 		<leg name="pushTestcase1tc3Action"/>
+		<leg name="pushTestcase1tc4Action"/>
 	</legs>
 </process>
 	</businessProcesses>
