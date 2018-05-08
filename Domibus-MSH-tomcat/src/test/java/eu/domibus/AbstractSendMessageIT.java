@@ -2,10 +2,7 @@ package eu.domibus;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.plugin.webService.generated.BackendInterface;
@@ -23,11 +20,8 @@ import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.awaitility.Awaitility.with;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -45,15 +39,6 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     @Autowired
     BackendInterface backendWebService;
-
-    @Autowired
-    UserMessageLogDao userMessageLogDao;
-
-    @Autowired
-    protected PModeProvider pModeProvider;
-
-    @Autowired
-    protected ConfigurationDAO configurationDAO;
 
     /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
     @Autowired
@@ -96,23 +81,6 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
 
     }
 
-    protected void waitUntilMessageIsAcknowledged(String messageId) {
-        //wait until the message has been sent and acknowledged
-        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageIsAcknowledged(messageId));
-    }
-
-    protected void waitUntilMessageIsInWaitingForRetry(String messageId) {
-        //wait until the message has been sent and acknowledged
-        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageIsInWaitingForRetry(messageId));
-    }
-
-    protected Callable<Boolean> messageIsAcknowledged(String messageId) {
-        return () -> MessageStatus.ACKNOWLEDGED == userMessageLogDao.getMessageStatus(messageId);
-    }
-
-    protected Callable<Boolean> messageIsInWaitingForRetry(String messageId) {
-        return () -> MessageStatus.WAITING_FOR_RETRY == userMessageLogDao.getMessageStatus(messageId);
-    }
 
     protected Messaging createMessageHeader(String payloadHref) {
         return createMessageHeader(payloadHref, "text/xml");

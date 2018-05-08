@@ -27,7 +27,7 @@
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="blue_gw" 
-					endpoint="http://localhost:8892/domibus/services/msh"
+					endpoint="http://localhost:8080/domibus/services/msh"
 					allowChunking="false"
 >
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>

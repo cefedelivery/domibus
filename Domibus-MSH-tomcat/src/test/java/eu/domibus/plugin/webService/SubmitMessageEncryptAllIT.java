@@ -30,8 +30,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class SubmitMessageEncryptAllIT extends AbstractSendMessageIT {
 
-    private static boolean initialized;
-
     @Autowired
     BackendInterface backendWebService;
 
