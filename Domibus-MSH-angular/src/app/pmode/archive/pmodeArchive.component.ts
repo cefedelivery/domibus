@@ -3,7 +3,7 @@ import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {Http, Headers, Response} from '@angular/http';
 import {AlertService} from 'app/alert/alert.service';
-import {MdDialog} from '@angular/material';
+import {MdDialog, MdDialogRef} from '@angular/material';
 import {isNullOrUndefined} from 'util';
 import {PmodeUploadComponent} from '../pmode-upload/pmode-upload.component';
 import * as FileSaver from 'file-saver';
@@ -16,6 +16,9 @@ import {DateFormatService} from 'app/customDate/dateformat.service';
 import {DownloadService} from 'app/download/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
 import {RollbackDialogComponent} from '../rollback-dialog/rollback-dialog.component';
+import {MessagelogDetailsComponent} from '../../messagelog/messagelog-details/messagelog-details.component';
+import {PmodeViewComponent} from './pmode-view/pmode-view.component';
+import {CurrentPModeComponent} from '../current/currentPMode.component';
 
 @Component({
   moduleId: module.id,
@@ -134,7 +137,6 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Gets all the PModes Entries
    */
-  //todo: move to a service and reuse in current pmode
   getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
         this.allPModes = response.json();
@@ -209,7 +211,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {any} selected selected/unselected object
    */
   onSelect ({selected}) {
-    console.log('Select Event', selected, this.selected);
+    // console.log('Select Event', selected, this.selected);
     if (isNullOrUndefined(selected) || selected.length === 0) {
       this.disableAllButtons();
       return;
@@ -476,22 +478,47 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   selectedIndexChange (value) {
     if (value === 1 && this.uploaded) { // Archive Tab
-      this.getResultObservable().map((response: Response) => response.json()).map((response) => response.slice(this.offset * this.rowLimiter.pageSize, (this.offset + 1) * this.rowLimiter.pageSize)).subscribe((response) => {
-          this.tableRows = response;
-          if (this.offset === 0) {
-            this.tableRows[0].current = true;
-            this.tableRows[0].description = '[CURRENT]: ' + response[0].description;
-          }
-          this.uploaded = false;
-        }, () => {
-        },
-        () => {
-          this.allPModes[0].current = true;
-          this.actualId = this.allPModes[0].id;
-          this.actualRow = 0;
-          this.count = this.allPModes.length;
-        });
+      this.getResultObservable().map((response: Response) => response.json()).map((response) => response.slice(this.offset * this.rowLimiter.pageSize, (this.offset + 1) * this.rowLimiter.pageSize))
+        .subscribe((response) => {
+            this.tableRows = response;
+            if (this.offset === 0) {
+              this.tableRows[0].current = true;
+              this.tableRows[0].description = '[CURRENT]: ' + response[0].description;
+            }
+            this.uploaded = false;
+          }, () => {
+          },
+          () => {
+            this.allPModes[0].current = true;
+            this.actualId = this.allPModes[0].id;
+            this.actualRow = 0;
+            this.count = this.allPModes.length;
+          });
     }
   }
+
+  onActivate (event) {
+    // console.log('activate', event.row)
+    if ('dblclick' === event.type) {
+      const current = event.row;
+      this.preview(current);
+    }
+  }
+
+  private preview (row) {
+    this.http.get(CurrentPModeComponent.PMODE_URL + '/' + row.id + '?noAudit=true ').subscribe(res => {
+      const HTTP_OK = 200;
+      if (res.status === HTTP_OK) {
+        const content = res.text();
+        this.dialog.open(PmodeViewComponent, {
+          data: {metadata: row, content: content}
+        }).afterClosed().subscribe(result => {
+        });
+      }
+    }, err => {
+
+    });
+  }
+
 }
 

@@ -38,6 +38,7 @@
           (page)='onPage($event)'
           [selected]="selected"
           [selectionType]="'multi'"
+          (activate)="onActivate($event)"
           (select)="onSelect($event)">
         </ngx-datatable>
 

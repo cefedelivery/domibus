@@ -23,13 +23,13 @@ const appRoutes: Routes = [
     canDeactivate: [DirtyGuard]
   },
   {
-    path: 'pmode/current',
+    path: 'pmode-current',
     component: CurrentPModeComponent,
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]
   },
   {
-    path: 'pmode/archive',
+    path: 'pmode-archive',
     component: PModeArchiveComponent,
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]

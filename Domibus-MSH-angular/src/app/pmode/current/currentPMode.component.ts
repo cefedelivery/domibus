@@ -129,34 +129,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * Method called when 'Save' button is clicked
    */
   save () {
-    // if (this.isDirty()) {
-    //   this.dialog.open(ActionDirtyDialogComponent, {
-    //     data: {
-    //       actionTitle: 'You will now save the current PMode',
-    //       actionName: 'save',
-    //       actionIconName: 'file_upload'
-    //     }
-    //   }).afterClosed().subscribe(response => {
-    //     if (response === 'ok') {
-    //       this.http.delete(CurrentPModeComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
-    //           // this.deleteList = [];
-    //           // this.disableAllButtons();
-    //           // this.selected = [];
-    //
-    //           this.uploadPmodeContent();
-    //         },
-    //         error => {
-    //           this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
-    //           // this.enableSaveAndCancelButtons();
-    //           // this.selected = [];
-    //         });
-    //     } else if (response === 'save') {
-    //       this.uploadPmodeContent();
-    //     }
-    //   });
-    // } else {
     this.uploadPmodeContent();
-    // }
   }
 
   private uploadPmodeContent () {
