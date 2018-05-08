@@ -23,17 +23,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.DirtiesContext;
 
 import javax.activation.DataHandler;
-import javax.jms.ConnectionFactory;
 import javax.mail.util.ByteArrayDataSource;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.xml.ws.Holder;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -41,8 +37,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class RetrieveMessageIT extends AbstractIT {
-
-    protected static ConnectionFactory connectionFactory;
 
     @Autowired
     JMSManager jmsManager;
