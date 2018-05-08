@@ -516,7 +516,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         });
       }
     }, err => {
-
+      this.alertService.error(err._body);
     });
   }
 

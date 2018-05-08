@@ -17,12 +17,6 @@ import {PartyComponent} from './party/party.component';
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
   {
-    path: 'pmode',
-    component: CurrentPModeComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
-    canDeactivate: [DirtyGuard]
-  },
-  {
     path: 'pmode-current',
     component: CurrentPModeComponent,
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
@@ -57,7 +51,7 @@ const appRoutes: Routes = [
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'pmode/party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'pmode-party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
 

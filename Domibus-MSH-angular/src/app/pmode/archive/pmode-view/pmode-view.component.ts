@@ -9,6 +9,7 @@ import {MdDialogRef, MD_DIALOG_DATA} from '@angular/material';
 export class PmodeViewComponent implements OnInit {
 
   public pMode: { metadata: any, content: string };
+  pModeType: string;
 
   constructor (@Inject(MD_DIALOG_DATA) public data: { metadata: any, content: string },
                public dialogRef: MdDialogRef<PmodeViewComponent>) {
@@ -16,6 +17,8 @@ export class PmodeViewComponent implements OnInit {
 
   ngOnInit () {
     this.pMode = this.data;
+    this.pModeType = this.pMode.metadata.current ? 'Current': 'Archive';
+    //console.log('view:', this.data)
   }
 
   ok () {

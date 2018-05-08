@@ -22,20 +22,20 @@
       <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode']" *ngIf="hasAdmin()" id="pmode_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-current']" *ngIf="hasAdmin()" id="pmode_id">
       <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
       <span>PMode</span>
     </button>
     <div class="sideNavSubmenu" *ngIf="showPmodeSubmenu()">
-      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode/current']" *ngIf="hasAdmin()">
+      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-current']" *ngIf="hasAdmin()">
         <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
         <span>Current</span>
       </button>
-      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode/archive']" *ngIf="hasAdmin()">
+      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-archive']" *ngIf="hasAdmin()">
         <md-icon md-tooltip="PMode Archive" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">history</md-icon>
         <span>Archive</span>
       </button>
-      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode/party']" *ngIf="hasAdmin()">
+      <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-party']" *ngIf="hasAdmin()">
         <md-icon md-tooltip="Party management" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">device_hub</md-icon>
         <span>Parties</span>
       </button>
