@@ -166,7 +166,7 @@ public abstract class AbstractIT {
     }
 
     protected void waitUntilMessageIsInWaitingForRetry(String messageId) {
-        waitUntilMessageHasStatus(messageId, MessageStatus.WAITING_FOR_RECEIPT);
+        waitUntilMessageHasStatus(messageId, MessageStatus.WAITING_FOR_RETRY);
     }
 
     protected Callable<Boolean> messageHasStatus(String messageId, MessageStatus messageStatus) {

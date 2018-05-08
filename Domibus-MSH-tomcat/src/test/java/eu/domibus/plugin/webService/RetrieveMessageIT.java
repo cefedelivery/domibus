@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.activation.DataHandler;
@@ -73,34 +74,42 @@ public class RetrieveMessageIT extends AbstractIT {
         configurationDAO.updateConfiguration(pModeConfiguration);
     }
 
+    @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
+    @Transactional
     public void testMessageIdEmpty() throws RetrieveMessageFault {
         retrieveMessageFail("", "MessageId is empty");
     }
 
+    @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
+    @Transactional
     public void testMessageNotFound() throws RetrieveMessageFault {
         retrieveMessageFail("notFound", "No message with id [notFound] pending for download");
     }
 
+    @DirtiesContext
     @Test
     @Transactional
     public void testMessageIdNeedsATrimSpaces() throws Exception {
         retrieveMessage("    2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu ");
     }
 
+    @DirtiesContext
     @Test
     @Transactional
     public void testMessageIdNeedsATrimTabs() throws Exception {
         retrieveMessage("\t2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu\t");
     }
 
+    @DirtiesContext
     @Test
     @Transactional
     public void testMessageIdNeedsATrimSpacesAndTabs() throws Exception {
         retrieveMessage(" \t 2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu \t ");
     }
 
+    @DirtiesContext
     @Test
     @Transactional
     public void testRetrieveMessageOk() throws Exception {
@@ -123,18 +132,19 @@ public class RetrieveMessageIT extends AbstractIT {
     }
 
     private void retrieveMessage(String messageId) throws Exception {
+        final String sanitazedMessageId = StringUtils.trim(messageId).replace("\t", "");
         final UserMessage userMessage = getUserMessageTemplate();
         String messagePayload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>";
         userMessage.getPayloadInfo().getPartInfo().iterator().next().setBinaryData(messagePayload.getBytes());
         userMessage.getPayloadInfo().getPartInfo().iterator().next().setPayloadDatahandler(new DataHandler(new ByteArrayDataSource(messagePayload.getBytes(), "text/xml")));
-        userMessage.getMessageInfo().setMessageId(messageId);
+        userMessage.getMessageInfo().setMessageId(sanitazedMessageId);
         eu.domibus.ebms3.common.model.Messaging messaging = new eu.domibus.ebms3.common.model.Messaging();
         messaging.setUserMessage(userMessage);
         messagingService.storeMessage(messaging, MSHRole.RECEIVING);
 
         UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(eu.domibus.common.MessageStatus.RECEIVED);
-        userMessageLog.setMessageId(messageId);
+        userMessageLog.setMessageId(sanitazedMessageId);
         userMessageLog.setMessageType(MessageType.USER_MESSAGE);
         userMessageLog.setMshRole(MSHRole.RECEIVING);
         userMessageLog.setReceived(new Date());
@@ -143,7 +153,7 @@ public class RetrieveMessageIT extends AbstractIT {
         entityManager.flush();
 
         ActiveMQConnection connection = (ActiveMQConnection) connectionFactory.createConnection("domibus", "changeit");
-        pushMessage(connection, StringUtils.trim(messageId).replace("\t", ""));
+        pushMessage(connection, sanitazedMessageId);
 
         RetrieveMessageRequest retrieveMessageRequest = createRetrieveMessageRequest(messageId);
         Holder<RetrieveMessageResponse> retrieveMessageResponse = new Holder<>();
