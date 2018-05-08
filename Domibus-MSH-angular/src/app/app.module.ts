@@ -11,7 +11,8 @@ import {
   MdMenuModule,
   MdSelectModule,
   MdSidenavModule,
-  MdTooltipModule
+  MdTooltipModule,
+  MdExpansionModule
 } from "@angular/material";
 import "hammerjs";
 
@@ -158,7 +159,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ReactiveFormsModule,
     Md2Module,
     Md2SelectModule,
-    SharedModule
+    SharedModule,
+    MdExpansionModule
   ],
   providers: [
     AuthenticatedGuard,

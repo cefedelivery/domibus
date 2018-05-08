@@ -43,8 +43,21 @@ html, body, material-app, .my-content {
   min-width: 0px !important;
 }
 
-.menu-expanded .sideNavSubmenu {
-  margin-left: 20px;
+.menu-collapsed .sideNavSubmenu {
+  margin-left: -10px;
+}
+
+.menu-collapsed span.mat-expansion-indicator {
+  display: none !important;
+}
+
+.mat-expansion-panel-header {
+  padding-left: 0;
+}
+
+.menu-collapsed .mat-expansion-panel-header {
+  padding-right: 0px;
+  margin-right: -10px;
 }
 
 .menu-collapsed.mat-sidenav {
