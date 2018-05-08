@@ -1,18 +1,18 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractIT;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.NotificationType;
+import eu.domibus.messaging.NotifyMessageCreator;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesResponse;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.jms.ConnectionFactory;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,15 +22,11 @@ import java.util.List;
  */
 public class PendingMessagesListIT extends AbstractIT {
 
-    private static ConnectionFactory connectionFactory;
+    @Autowired
+    JMSManager jmsManager;
 
     @Autowired
     BackendInterface backendWebService;
-
-    @BeforeClass
-    public static void before() throws IOException {
-        connectionFactory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
-    }
 
     @Test
     public void testListPendingMessagesOk() throws Exception {
@@ -39,13 +35,10 @@ public class PendingMessagesListIT extends AbstractIT {
         messageIds.add("78a1d578-0cc7-41fb-9f35-86a5b2769a14@domibus.eu");
         messageIds.add("2bbc05d8-b603-4742-a118-137898a81de3@domibus.eu");
 
-
-        javax.jms.Connection connection = connectionFactory.createConnection("domibus", "changeit");
-        connection.start();
         for (String messageId : messageIds) {
-            pushQueueMessage(messageId, connection, WS_NOT_QUEUE);
+            final JmsMessage message = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED, new HashMap<>()).createMessage();
+            jmsManager.sendMessageToQueue(message, WS_NOT_QUEUE);
         }
-        connection.close();
 
         String request = new String("<listPendingMessagesRequest></listPendingMessagesRequest>");
         ListPendingMessagesResponse response = backendWebService.listPendingMessages(request);
