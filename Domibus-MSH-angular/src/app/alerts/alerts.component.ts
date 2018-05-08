@@ -18,7 +18,8 @@ import {AlertsEntry} from "./alertsentry";
 
 export class AlertsComponent {
 
-  @ViewChild('rowActions') rowActions: TemplateRef<any>;
+  //@ViewChild('rowActions') rowActions: TemplateRef<any>;
+  @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
 
   static readonly ALERTS_URL: string = 'rest/alerts';
 
@@ -63,7 +64,7 @@ export class AlertsComponent {
     this.filter.alertType = null;
 
     this.columnPicker.allColumns = [
-      { name: 'Processed' },
+      { name: 'Processed', cellTemplate: this.rowProcessed },
       { name: 'Alert Id' },
       { name: 'Alert Type' },
       { name: 'Alert Level' },
@@ -71,11 +72,11 @@ export class AlertsComponent {
       { name: 'Creation Time' },
       { name: 'Reporting Time' },
       { name: 'Parameters', sortable: false },
-      { name: 'Actions', cellTemplate: this.rowActions, sortable: false }
+      //{ name: 'Actions', cellTemplate: this.rowActions, sortable: false }
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Processed", "ID", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters", "Actions"].indexOf(col.name) != -1
+      return ["Processed", "ID", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"/*, "Actions"*/].indexOf(col.name) != -1
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
@@ -146,9 +147,9 @@ export class AlertsComponent {
     this.loading = true;
 
     let newEntries: AlertsEntry[] = [];
-    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', 'alertType1', this.aLevels[0], 'aText1', new Date(), new Date(), new Date(), new Date(), []);
-    let entry2: AlertsEntry = new AlertsEntry(true, 'alertId2', 'alertType2', this.aLevels[1], 'aText2', new Date(), new Date(), new Date(), new Date(), []);
-    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', 'alertType3', this.aLevels[0], 'aText3', new Date(), new Date(), new Date(), new Date(), []);
+    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas']);
+    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', 'alertType2', this.aLevels[1], 'aText2', new Date(), new Date(), []);
+    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', 'alertType3', this.aLevels[0], 'aText3', new Date(), new Date(), []);
 
 
     newEntries[0] = entry1;

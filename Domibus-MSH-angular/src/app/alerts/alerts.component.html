@@ -103,6 +103,11 @@
       </div>
     </md-card-content>
   </md-card>
+
+  <ng-template #rowProcessed let-row="row" let-value="value" ngx-datatable-cell-template>
+    <input autofocus type="checkbox" [checked]="value" id="processed{{row.$$index}}_id"/>
+  </ng-template>
+
 </div>
 
 <div class="panel">

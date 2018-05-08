@@ -1,14 +1,12 @@
 export class AlertsEntry {
-  constructor(processed: boolean,
-              alertId: string,
-              alertType: string,
-              alertLevel: string,
-              alertText: string,
-              creationFrom: Date,
-              creationTo: Date,
-              reportingFrom: Date,
-              reportingTo: Date,
-              parameters: string[])
+  constructor(public processed: boolean,
+              public alertId: string,
+              public alertType: string,
+              public alertLevel: string,
+              public alertText: string,
+              public creationTime: Date,
+              public reportingTime: Date,
+              public parameters: string[])
   {
 
   }
