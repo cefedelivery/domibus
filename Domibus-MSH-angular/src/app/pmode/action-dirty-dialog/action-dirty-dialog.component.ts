@@ -8,7 +8,7 @@ import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 })
 export class ActionDirtyDialogComponent implements OnInit {
 
-  constructor(@Inject(MD_DIALOG_DATA) private data: { actionTitle: string, actionName: string, actionIconName: string },
+  constructor(@Inject(MD_DIALOG_DATA) public data: { actionTitle: string, actionName: string, actionIconName: string },
               public dialogRef: MdDialogRef<ActionDirtyDialogComponent>) {
   }
 
