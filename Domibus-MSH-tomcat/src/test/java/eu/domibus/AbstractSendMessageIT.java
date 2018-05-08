@@ -2,8 +2,10 @@ package eu.domibus;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.sender.NonRepudiationChecker;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.plugin.webService.generated.BackendInterface;
@@ -20,9 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.awaitility.Awaitility.with;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by draguio on 18/02/2016.
@@ -42,7 +49,11 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     @Autowired
     UserMessageLogDao userMessageLogDao;
 
+    @Autowired
+    protected PModeProvider pModeProvider;
 
+    @Autowired
+    protected ConfigurationDAO configurationDAO;
 
     /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
     @Autowired
@@ -68,21 +79,39 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     }
 
     protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException{
-        // Required in order to let time to the message to be consumed
-        TimeUnit.SECONDS.sleep(5);
+        final List<String> messageID = response.getMessageID();
+        assertNotNull(response);
+        assertNotNull(messageID);
+        assertTrue(messageID.size() == 1);
+        final String messageId = messageID.iterator().next();
 
-        Assert.assertNotNull(response);
-        String messageId = response.getMessageID().get(0);
+        waitUntilMessageIsAcknowledged(messageId);
 
         verify(postRequestedFor(urlMatching("/domibus/services/msh"))
                 .withRequestBody(matching(".*"))
                 .withHeader("Content-Type", notMatching("application/soap+xml")));
 
-
-
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
         Assert.assertEquals(MessageStatus.ACKNOWLEDGED, messageStatus);
 
+    }
+
+    protected void waitUntilMessageIsAcknowledged(String messageId) {
+        //wait until the message has been sent and acknowledged
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageIsAcknowledged(messageId));
+    }
+
+    protected void waitUntilMessageIsInWaitingForRetry(String messageId) {
+        //wait until the message has been sent and acknowledged
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageIsInWaitingForRetry(messageId));
+    }
+
+    protected Callable<Boolean> messageIsAcknowledged(String messageId) {
+        return () -> MessageStatus.ACKNOWLEDGED == userMessageLogDao.getMessageStatus(messageId);
+    }
+
+    protected Callable<Boolean> messageIsInWaitingForRetry(String messageId) {
+        return () -> MessageStatus.WAITING_FOR_RETRY == userMessageLogDao.getMessageStatus(messageId);
     }
 
     protected Messaging createMessageHeader(String payloadHref) {
@@ -92,11 +121,11 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     protected Messaging createMessageHeader(String payloadHref, String mimeType) {
         Messaging ebMSHeaderInfo = new Messaging();
         UserMessage userMessage = new UserMessage();
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageId("IT31-363a-4328-9f81-8d84bf2da59f@domibus.eu");
+        userMessage.setMessageInfo(messageInfo);
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC1Leg1");
-        AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setValue("EDELIVERY-1110");
-        collaborationInfo.setAgreementRef(agreementRef);
         Service service = new Service();
         service.setValue("bdx:noprocess");
         service.setType("tc1");
@@ -104,34 +133,33 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         userMessage.setCollaborationInfo(collaborationInfo);
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getProperty().add(createProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", STRING_TYPE));
-        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C41", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4", STRING_TYPE));
         userMessage.setMessageProperties(messageProperties);
         PartyInfo partyInfo = new PartyInfo();
         From from = new From();
         from.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
         PartyId sender = new PartyId();
-        sender.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue");
+        sender.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        sender.setValue("domibus-blue");
         from.setPartyId(sender);
         partyInfo.setFrom(from);
         To to = new To();
         to.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
         PartyId receiver = new PartyId();
-        receiver.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red");
+        receiver.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        receiver.setValue("domibus-red");
         to.setPartyId(receiver);
         partyInfo.setTo(to);
         userMessage.setPartyInfo(partyInfo);
         PayloadInfo payloadInfo = new PayloadInfo();
         PartInfo partInfo = new PartInfo();
-        Description description = new Description();
-        description.setValue("e-sens-sbdh-order");
-        description.setLang("en-US");
         partInfo.setHref(payloadHref);
         if(mimeType != null) {
             PartProperties partProperties = new PartProperties();
             partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);
         }
-        partInfo.setDescription(description);
+
         payloadInfo.getPartInfo().add(partInfo);
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);

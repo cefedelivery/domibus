@@ -1,10 +1,9 @@
 package eu.domibus.plugin.webService;
 
 import eu.domibus.AbstractSendMessageIT;
-import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
@@ -14,13 +13,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -35,21 +29,9 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
     BackendInterface backendWebService;
 
     @Autowired
-    PModeProvider pModeProvider;
-
-    @Autowired
-    protected ConfigurationDAO configurationDAO;
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Qualifier("taskExecutor")
-    @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor;
-
+    JMSManager jmsManager;
 
     @Before
-    @Transactional
     public void updatePMode() throws IOException, XmlProcessingException {
         final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
         final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
@@ -72,7 +54,10 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
 
         super.prepareSendMessage("validAS4Response.xml");
 
-        Messaging ebMSHeaderInfo = new Messaging();
+        final Messaging messaging = createMessageHeader(payloadHref);
+        messaging.getUserMessage().getCollaborationInfo().setAction("TC3Leg1");
+
+   /*     Messaging ebMSHeaderInfo = new Messaging();
         UserMessage userMessage = new UserMessage();
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId("IT31-363a-4328-9f81-8d84bf2da59f@domibus.eu");
@@ -115,9 +100,9 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
         }
         payloadInfo.getPartInfo().add(partInfo);
         userMessage.setPayloadInfo(payloadInfo);
-        ebMSHeaderInfo.setUserMessage(userMessage);
+        ebMSHeaderInfo.setUserMessage(userMessage);*/
 
-        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, messaging);
         verifySendMessageAck(response);
     }
 }
