@@ -8,6 +8,7 @@ import {Observable} from "rxjs/Observable";
 import {AlertsResult} from "./alertsresult";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
+import {AlertsEntry} from "./alertsentry";
 
 @Component({
   moduleId: module.id,
@@ -61,7 +62,6 @@ export class AlertsComponent {
   ngOnInit() {
     this.filter.alertType = null;
 
-    this.rowLimiter.pageSize = 1;
     this.columnPicker.allColumns = [
       { name: 'Processed' },
       { name: 'Alert Id' },
@@ -145,7 +145,28 @@ export class AlertsComponent {
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
 
-    this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
+    let newEntries: AlertsEntry[] = [];
+    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', 'alertType1', this.aLevels[0], 'aText1', new Date(), new Date(), new Date(), new Date(), []);
+    let entry2: AlertsEntry = new AlertsEntry(true, 'alertId2', 'alertType2', this.aLevels[1], 'aText2', new Date(), new Date(), new Date(), new Date(), []);
+    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', 'alertType3', this.aLevels[0], 'aText3', new Date(), new Date(), new Date(), new Date(), []);
+
+
+    newEntries[0] = entry1;
+    newEntries[1] = entry2;
+    newEntries[2] = entry3;
+
+
+    this.rows = newEntries;
+
+    this.count = 3;
+    this.offset = offset;
+    this.rowLimiter.pageSize = pageSize;
+    this.orderBy = orderBy;
+    this.asc = asc;
+    this.selected = [];
+    this.loading = false;
+
+    /*this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
       console.log("alerts response: " + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
@@ -177,7 +198,7 @@ export class AlertsComponent {
       console.log("error getting the alerts:" + error);
       this.loading = false;
       this.alertService.error("Error occured:" + error);
-    });
+    });*/
   }
 
   search() {
@@ -307,7 +328,7 @@ export class AlertsComponent {
 
   }
 
-  private isAlertTypeDefined(): boolean {
+  public isAlertTypeDefined(): boolean {
     return !isNullOrUndefined(this.filter.alertType) && this.filter.alertType != '';
   }
 
