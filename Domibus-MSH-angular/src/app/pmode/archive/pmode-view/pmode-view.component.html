@@ -4,7 +4,7 @@
     <md-card>
       <md-card-content>
         <div class="textarea">
-          <textarea class="textarea" style="resize: none" [(ngModel)]="pMode.content" readonly="readonly"></textarea>
+          <textarea #pmode_view_content [hidden]="!display" class="textarea" style="resize: none" readonly="readonly">{{pMode.content}}</textarea>
         </div>
         <table class="group-action-button" style="width: 100%; text-align: center;">
           <tr>

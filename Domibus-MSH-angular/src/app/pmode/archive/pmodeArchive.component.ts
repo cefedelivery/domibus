@@ -16,7 +16,6 @@ import {DateFormatService} from 'app/customDate/dateformat.service';
 import {DownloadService} from 'app/download/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
 import {RollbackDialogComponent} from '../rollback-dialog/rollback-dialog.component';
-import {MessagelogDetailsComponent} from '../../messagelog/messagelog-details/messagelog-details.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';
 import {CurrentPModeComponent} from '../current/currentPMode.component';
 
@@ -278,8 +277,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button is clicked
    * @param row The selected row
    */
-  downloadArchive (row) {
-    this.download(this.tableRows[row].id);
+  downloadArchive (rowIndex) {
+    this.download(this.tableRows[rowIndex]);
   }
 
   /**
@@ -378,7 +377,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
               this.enableSaveAndCancelButtons();
               this.selected = [];
             });
-        } else if (result === 'rollback_only') {
+        } else if (result === 'rollback') {
           this.rollBack(selectedRow);
         }
       });
@@ -413,22 +412,13 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Method called when Download button or icon is clicked
    * @param id The id of the selected entry on the DB
    */
-  download (id) {
-    // if (this.pModeExists) {
-    this.http.get(PModeArchiveComponent.PMODE_URL + '/' + id).subscribe(res => {
-      let uploadDateStr = '';
-      if (this.selected.length === 1 && this.selected[0].id === id) {
-        uploadDateStr = DateFormatService.format(new Date(this.selected[0].configurationDate));
-      } else {
-        uploadDateStr = DateFormatService.format(new Date(this.tableRows[0].configurationDate));
-      }
+  download (row) {
+    this.http.get(PModeArchiveComponent.PMODE_URL + '/' + row.id).subscribe(res => {
+      const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
       PModeArchiveComponent.downloadFile(res.text(), uploadDateStr);
     }, err => {
       this.alertService.error(err._body);
     });
-    // } else {
-    //   this.alertService.error(this.ERROR_PMODE_EMPTY)
-    // }
   }
 
   /**
@@ -498,7 +488,6 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   }
 
   onActivate (event) {
-    // console.log('activate', event.row)
     if ('dblclick' === event.type) {
       const current = event.row;
       this.preview(current);
