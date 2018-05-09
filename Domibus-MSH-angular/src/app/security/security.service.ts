@@ -1,19 +1,19 @@
-﻿import {Injectable} from "@angular/core";
-import {Http, Headers, Response} from "@angular/http";
-import {Observable} from "rxjs/Observable";
-import "rxjs/add/operator/map";
-import {User} from "./user";
-import {Router} from "@angular/router";
-import {ReplaySubject} from "rxjs";
-import {SecurityEventService} from "./security.event.service";
+﻿import {Injectable} from '@angular/core';
+import {Http, Headers, Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import {User} from './user';
+import {Router} from '@angular/router';
+import {ReplaySubject} from 'rxjs';
+import {SecurityEventService} from './security.event.service';
 
 @Injectable()
 export class SecurityService {
-  constructor(private http: Http, private router: Router, private securityEventService: SecurityEventService) {
+  constructor (private http: Http, private router: Router, private securityEventService: SecurityEventService) {
   }
 
-  login(username: string, password: string) {
-    let headers = new Headers({'Content-Type': 'application/json'});
+  login (username: string, password: string) {
+    const headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication',
       JSON.stringify({
         username: username,
@@ -21,54 +21,57 @@ export class SecurityService {
       }),
       {headers: headers})
       .subscribe((response: Response) => {
-          console.log("Login success");
-          localStorage.setItem('currentUser', JSON.stringify(response.json()));
+          const userInfo = response.json();
+          // temporary mock
+          userInfo.domain = 'default';
+          console.log('Login success', userInfo);
+          localStorage.setItem('currentUser', JSON.stringify(userInfo));
           this.securityEventService.notifyLoginSuccessEvent(response);
         },
         (error: any) => {
-          console.log("Login error");
+          console.log('Login error', error);
           this.securityEventService.notifyLoginErrorEvent(error);
         });
   }
 
-  logout() {
-    console.log("Logging out");
+  logout () {
+    console.log('Logging out');
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
         localStorage.removeItem('currentUser');
         this.securityEventService.notifyLogoutSuccessEvent(res);
       },
       (error: any) => {
-        console.debug("error logging out [" + error + "]");
+        console.debug('error logging out [' + error + ']');
         this.securityEventService.notifyLogoutErrorEvent(error);
       });
   }
 
-  getCurrentUser(): User {
+  getCurrentUser (): User {
     return JSON.parse(localStorage.getItem('currentUser'));
   }
 
-  getCurrentUsernameFromServer(): Observable<string> {
+  getCurrentUsernameFromServer (): Observable<string> {
     let subject = new ReplaySubject();
     this.http.get('rest/security/user')
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
-        console.log("getCurrentUsernameFromServer:" + error);
+        console.log('getCurrentUsernameFromServer:' + error);
         subject.next(null);
       });
     return subject.asObservable();
   }
 
-  isAuthenticated(callServer: boolean = false): Observable<boolean> {
+  isAuthenticated (callServer: boolean = false): Observable<boolean> {
     let subject = new ReplaySubject();
     if (callServer) {
       //we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
       this.getCurrentUsernameFromServer()
         .subscribe((user: string) => {
-          console.log("isAuthenticated: getCurrentUsernameFromServer [" + user + "]");
+          console.log('isAuthenticated: getCurrentUsernameFromServer [' + user + ']');
           subject.next(user !== null);
         }, (user: string) => {
-          console.log("isAuthenticated error" + user);
+          console.log('isAuthenticated error' + user);
           subject.next(false);
         });
 
@@ -79,11 +82,11 @@ export class SecurityService {
     return subject.asObservable();
   }
 
-  isCurrentUserAdmin(): boolean {
-    return this.isCurrentUserInRole(["ROLE_ADMIN"]);
+  isCurrentUserAdmin (): boolean {
+    return this.isCurrentUserInRole(['ROLE_ADMIN']);
   }
 
-  isCurrentUserInRole(roles: Array<string>): boolean {
+  isCurrentUserInRole (roles: Array<string>): boolean {
     let hasRole = false;
     let currentUser = this.getCurrentUser();
     if (currentUser && currentUser.authorities) {
@@ -96,7 +99,7 @@ export class SecurityService {
     return hasRole;
   }
 
-  isAuthorized(roles: Array<string>): Observable<boolean> {
+  isAuthorized (roles: Array<string>): Observable<boolean> {
     let subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
