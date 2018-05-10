@@ -46,7 +46,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   enableDelete = false;
   enableEdit = false;
 
-  multiDomain = false;
+  //multiDomain:boolean;
 
   rowNumber = -1;
 
@@ -67,7 +67,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
-    this.multiDomain = this.settingsService.isMultiDomain();
+    // this.multiDomain = this.settingsService.isMultiDomain();
+    //const showDomain =  this.userService.isDomainVisible(); // this.settingsService.isMultiDomain() && this.securityService.isCurrentUserSuperAdmin();
 
     this.columnPicker.allColumns = [
       {
@@ -78,20 +79,14 @@ export class UserComponent implements OnInit, DirtyOperations {
       },
       {
         cellTemplate: this.editableTpl,
-        name: 'Email',
-        prop: 'email',
-        canAutoResize: true
-      },
-      {
-        cellTemplate: this.editableTpl,
         name: 'Role(s)',
         prop: 'roles',
         canAutoResize: true
       },
       {
         cellTemplate: this.editableTpl,
-        name: 'Domain',
-        prop: 'domain',
+        name: 'Email',
+        prop: 'email',
         canAutoResize: true
       },
       {
@@ -115,7 +110,17 @@ export class UserComponent implements OnInit, DirtyOperations {
       }
     ];
 
-    this.columnPicker.allColumns = this.columnPicker.allColumns.filter(col => this.multiDomain || col.name !== 'Domain');
+    if (this.userService.isDomainVisible()) {
+      this.columnPicker.allColumns.splice(2, 0,
+        {
+          cellTemplate: this.editableTpl,
+          name: 'Domain',
+          prop: 'domain',
+          canAutoResize: true
+        });
+    }
+
+    //this.columnPicker.allColumns = this.columnPicker.allColumns.filter(col => this.multiDomain || col.name !== 'Domain');
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ['Username', 'Role(s)', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
@@ -146,8 +151,6 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   onSelect ({selected}) {
-    //console.log('Select Event', selected, this.selected);
-
     if (isNullOrUndefined(selected) || selected.length == 0) {
       // unselect
       this.enableDelete = false;
@@ -188,18 +191,9 @@ export class UserComponent implements OnInit, DirtyOperations {
       }
     });
     formRef.afterClosed().subscribe(result => {
-      if (result == true) {
-        this.updateUsername(formRef.componentInstance.userName);
-        this.updateEmail(formRef.componentInstance.email);
-        this.updateRoles(formRef.componentInstance.roles.toString());
-        this.updatePassword(formRef.componentInstance.password);
-        this.updateActive(formRef.componentInstance.active);
-        if (UserState[UserState.PERSISTED] === this.users[this.rowNumber].status) {
-          this.users[this.rowNumber].status = UserState[UserState.UPDATED]
-        }
-
-        this.enableSave = formRef.componentInstance.userForm.dirty;
-        this.enableCancel = formRef.componentInstance.userForm.dirty;
+      if (result === true) {
+        this.users[this.rowNumber].userName = formRef.componentInstance.userName;
+        this.onSaveEditForm(formRef);
       } else {
         this.users.pop();
         this.selected = [];
@@ -223,40 +217,27 @@ export class UserComponent implements OnInit, DirtyOperations {
       }
     });
     formRef.afterClosed().subscribe(result => {
-      if (result == true) {
-        //this.updateUsername(formRef.componentInstance.userName);
-        this.updateEmail(formRef.componentInstance.email);
-        this.updateRoles(formRef.componentInstance.roles.toString());
-        this.updatePassword(formRef.componentInstance.password);
-        this.updateActive(formRef.componentInstance.active);
-        if (UserState[UserState.PERSISTED] === this.users[this.rowNumber].status) {
-          this.users[this.rowNumber].status = UserState[UserState.UPDATED]
-        }
-
-        this.enableSave = formRef.componentInstance.userForm.dirty;
-        this.enableCancel = formRef.componentInstance.userForm.dirty;
+      if (result === true) {
+        this.onSaveEditForm(formRef);
       }
     });
   }
 
-  private updateUsername (value: string) {
-    this.users[this.rowNumber].userName = value;
-  }
+  private onSaveEditForm (formRef: MdDialogRef<EditUserComponent>) {
+    const editForm = formRef.componentInstance;
+    const user = this.users[this.rowNumber];
 
-  private updateEmail (value: string) {
-    this.users[this.rowNumber].email = value;
-  }
+    user.email = editForm.email;
+    user.roles = editForm.roles.toString();
+    user.domain = editForm.domain;
+    user.password = editForm.password;
+    user.active = editForm.active;
+    if (UserState[UserState.PERSISTED] === user.status) {
+      user.status = UserState[UserState.UPDATED]
+    }
 
-  private updateRoles (value: string) {
-    this.users[this.rowNumber].roles = value;
-  }
-
-  private updatePassword (value: string) {
-    this.users[this.rowNumber].password = value;
-  }
-
-  private updateActive (value: boolean) {
-    this.users[this.rowNumber].active = value;
+    this.enableSave = editForm.userForm.dirty;
+    this.enableCancel = editForm.userForm.dirty;
   }
 
   buttonDelete () {

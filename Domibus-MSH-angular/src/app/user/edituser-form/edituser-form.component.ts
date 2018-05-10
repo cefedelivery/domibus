@@ -4,20 +4,19 @@ import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from '../uservalidator.service';
 import {SecurityService} from '../../security/security.service';
 import {SettingsService} from '../../security/settings.service';
+import {UserService} from '../user.service';
 
-const ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
+const ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 const NEW_MODE = 'New User';
 const EDIT_MODE = 'User Edit';
 
 @Component({
   selector: 'edituser-form',
   templateUrl: 'edituser-form.component.html',
-  providers: [UserValidatorService]
+  providers: [UserService, UserValidatorService]
 })
 
 export class EditUserComponent {
-
-  public static ROLE_AP_ADMIN = ROLE_AP_ADMIN;
 
   existingRoles = [];
   existingDomains = [];
@@ -35,7 +34,9 @@ export class EditUserComponent {
   public passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
 
   editMode: boolean;
-  multiDomain: boolean;
+  canChangePassword: boolean;
+  //multiDomain: boolean;
+  isDomainVisible: boolean;
   isDomainDisabled = false;
 
   formTitle: string = EDIT_MODE;
@@ -46,11 +47,13 @@ export class EditUserComponent {
                @Inject(MD_DIALOG_DATA) public data: any,
                fb: FormBuilder,
                userValidatorService: UserValidatorService,
+               private userService: UserService,
                private securityService: SecurityService,
                private settingsService: SettingsService,
                private cdr: ChangeDetectorRef) {
 
-    this.multiDomain = this.settingsService.isMultiDomain();
+    //this.multiDomain = this.settingsService.isMultiDomain();
+    this.isDomainVisible = this.userService.isDomainVisible();
     this.existingRoles = data.userroles;
     this.existingDomains = data.userdomains;
 
@@ -58,7 +61,6 @@ export class EditUserComponent {
     this.userName = data.user.userName;
     this.email = data.user.email;
     this.domain = data.user.domain;
-    console.log('this.domain', this.domain);
     if (data.user.roles !== '') {
       this.roles = data.user.roles.split(',');
       this.oldRoles = this.roles;
@@ -67,12 +69,15 @@ export class EditUserComponent {
     this.confirmation = data.user.password;
     this.active = data.user.active;
 
+    this.canChangePassword = securityService.isCurrentUserSuperAdmin()
+      || (securityService.isCurrentUserAdmin() && this.isCurrentUser());
+
     if (this.editMode) {
       this.userForm = fb.group({
         'userName': new FormControl({value: this.userName, disabled: true}, Validators.nullValidator),
         'email': [null, Validators.pattern],
         'roles': new FormControl(this.roles, Validators.required),
-        'domain': this.multiDomain ? new FormControl(this.domain) : null,
+        'domain': this.isDomainVisible ? new FormControl(this.domain) : null,
         'password': [null, Validators.pattern],
         'confirmation': [null],
         'active': new FormControl({value: this.active, disabled: this.isCurrentUser()}, Validators.required)
@@ -85,7 +90,7 @@ export class EditUserComponent {
         'userName': new FormControl(this.userName, Validators.required),
         'email': [null, Validators.pattern],
         'roles': new FormControl(this.roles, Validators.required),
-        'domain': this.multiDomain ? new FormControl(this.domain) : null,
+        'domain': this.isDomainVisible ? new FormControl(this.domain) : null,
         'password': [Validators.required, Validators.pattern],
         'confirmation': [Validators.required],
         'active': [Validators.required]

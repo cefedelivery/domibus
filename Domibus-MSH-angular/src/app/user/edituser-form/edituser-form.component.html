@@ -16,7 +16,7 @@
         </md-input-container>
       </div>
 
-      <div style="margin-top:10px;" [hidden]="!multiDomain">
+      <div style="margin-top:10px;" [hidden]="!isDomainVisible">
         <md2-select mdInput placeholder="Domain" id="domain_id" [style.width]="'100%'" [formControl]="userForm.controls['domain']" [(ngModel)]="domain" [disabled]="isDomainDisabled">
           <md2-option *ngFor="let item of existingDomains" [value]="item">{{item}}</md2-option>
         </md2-select>
@@ -32,7 +32,7 @@
 
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" [pattern]=passwordPattern [required]="!editMode">
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" [pattern]=passwordPattern [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
             Password should follow all of these rules:<br>
@@ -48,7 +48,7 @@
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [value]="confirmation" [formControl]="userForm.controls['confirmation']" [required]="!editMode">
+          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [value]="confirmation" [formControl]="userForm.controls['confirmation']" [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['confirmation'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
         </md-input-container>

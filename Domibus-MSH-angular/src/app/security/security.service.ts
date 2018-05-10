@@ -9,6 +9,8 @@ import {SecurityEventService} from './security.event.service';
 
 @Injectable()
 export class SecurityService {
+  public static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
+
   constructor (private http: Http, private router: Router, private securityEventService: SecurityEventService) {
   }
 
@@ -22,8 +24,10 @@ export class SecurityService {
       {headers: headers})
       .subscribe((response: Response) => {
           const userInfo = response.json();
-          // temporary mock
-          userInfo.domain = 'default';
+
+          // temporary mock- TODO
+          userInfo.domain = 'MyDomain1';
+
           console.log('Login success', userInfo);
           localStorage.setItem('currentUser', JSON.stringify(userInfo));
           this.securityEventService.notifyLoginSuccessEvent(response);
@@ -76,7 +80,7 @@ export class SecurityService {
         });
 
     } else {
-      let currentUser = this.getCurrentUser();
+      const currentUser = this.getCurrentUser();
       subject.next(currentUser !== null);
     }
     return subject.asObservable();
@@ -86,9 +90,14 @@ export class SecurityService {
     return this.isCurrentUserInRole(['ROLE_ADMIN']);
   }
 
+  isCurrentUserSuperAdmin (): boolean {
+    //return true;
+    return this.isCurrentUserInRole([SecurityService.ROLE_AP_ADMIN]);
+  }
+
   isCurrentUserInRole (roles: Array<string>): boolean {
     let hasRole = false;
-    let currentUser = this.getCurrentUser();
+    const currentUser = this.getCurrentUser();
     if (currentUser && currentUser.authorities) {
       roles.forEach((role: string) => {
         if (currentUser.authorities.indexOf(role) !== -1) {

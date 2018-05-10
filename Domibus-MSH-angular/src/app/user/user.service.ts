@@ -3,12 +3,13 @@ import {Injectable} from '@angular/core';
 import {Http, Response} from '@angular/http';
 import {AlertService} from '../alert/alert.service';
 import {Observable} from 'rxjs/Observable';
+import {SecurityService} from '../security/security.service';
+import {SettingsService} from '../security/settings.service';
 
 @Injectable()
 export class UserService {
 
-  constructor (private http: Http, private alertService: AlertService) {
-
+  constructor (private http: Http, private alertService: AlertService, private securityService: SecurityService, private settingsService: SettingsService) {
   }
 
   getUsers (): Observable<UserResponseRO[]> {
@@ -80,6 +81,10 @@ export class UserService {
     return Promise.reject(errMsg);
   }
 
+  isDomainVisible (): boolean {
+    return this.settingsService.isMultiDomain() && this.securityService.isCurrentUserSuperAdmin();
+  }
+
   // temporary mock
   private mockDomains (res: Response) {
     return ['MyDomain1', 'MyDomain2', 'MyDomain3'];
@@ -89,6 +94,8 @@ export class UserService {
     for (const u of users) {
       if (u.userName == 'admin' || u.userName == 'user')
         u.domain = 'MyDomain1';
+      else if (u.userName == 'ap_admin')
+        u.domain = null;
       else
         u.domain = 'MyDomain2';
     }

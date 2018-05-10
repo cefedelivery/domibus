@@ -40,7 +40,9 @@ export class ColumnPickerComponent implements OnInit {
         return c.name !== col.name;
       });
     } else {
-      this.selectedColumns = [...this.selectedColumns, col];
+      //this.selectedColumns = [...this.selectedColumns, col];
+      this.selectedColumns.splice(this.allColumns.indexOf(col), 0, col);
+      this.selectedColumns = [...this.selectedColumns];
     }
 
     this.setLastColumn(this.selectedColumns, 'Actions');
