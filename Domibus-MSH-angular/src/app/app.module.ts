@@ -30,6 +30,7 @@ import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./http/extended-http-client";
 import {HttpEventService} from "./http/http.event.service";
 import {SecurityService} from "./security/security.service";
+import {SettingsService} from "./security/settings.service";
 import {SecurityEventService} from "./security/security.event.service";
 import {AlertComponent} from "./alert/alert.component";
 import {AlertService} from "./alert/alert.service";
@@ -163,6 +164,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DirtyGuard,
     HttpEventService,
     SecurityService,
+    SettingsService,
     SecurityEventService,
     DomibusInfoService,
     AlertService,

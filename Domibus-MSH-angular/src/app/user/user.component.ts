@@ -15,6 +15,7 @@ import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {SecurityService} from '../security/security.service';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
+import {SettingsService} from '../security/settings.service';
 
 @Component({
   moduleId: module.id,
@@ -45,6 +46,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   enableDelete = false;
   enableEdit = false;
 
+  multiDomain = false;
+
   rowNumber = -1;
 
   editedUser: UserResponseRO;
@@ -59,10 +62,13 @@ export class UserComponent implements OnInit, DirtyOperations {
                public dialog: MdDialog,
                private userValidatorService: UserValidatorService,
                private alertService: AlertService,
-               private securityService: SecurityService) {
+               private securityService: SecurityService,
+               private settingsService: SettingsService) {
   }
 
   ngOnInit (): void {
+    this.multiDomain = this.settingsService.isMultiDomain();
+
     this.columnPicker.allColumns = [
       {
         cellTemplate: this.editableTpl,
@@ -94,7 +100,6 @@ export class UserComponent implements OnInit, DirtyOperations {
         prop: 'password',
         canAutoResize: true,
         sortable: false
-
       },
       {
         cellTemplate: this.checkBoxTpl,
@@ -108,11 +113,12 @@ export class UserComponent implements OnInit, DirtyOperations {
         canAutoResize: true,
         sortable: false
       }
-
     ];
 
+    this.columnPicker.allColumns = this.columnPicker.allColumns.filter(col => this.multiDomain || col.name !== 'Domain');
+
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Username', 'Role(s)', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) != -1
+      return ['Username', 'Role(s)', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
     });
 
     this.getUsers();
@@ -124,6 +130,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error('Maximum number of rows reached for downloading CSV');
     }
+
   }
 
   getUsers (): void {
@@ -139,7 +146,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   onSelect ({selected}) {
-    console.log('Select Event', selected, this.selected);
+    //console.log('Select Event', selected, this.selected);
 
     if (isNullOrUndefined(selected) || selected.length == 0) {
       // unselect
@@ -168,7 +175,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    this.editedUser = new UserResponseRO('', '', '', true, UserState[UserState.NEW], [], false);
+    this.editedUser = new UserResponseRO('', '', '', true, UserState[UserState.NEW], [], false, null);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;

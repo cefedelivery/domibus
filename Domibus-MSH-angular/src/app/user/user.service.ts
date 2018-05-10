@@ -82,7 +82,7 @@ export class UserService {
 
   // temporary mock
   private mockDomains (res: Response) {
-    return ['Mydomain1', 'Mydomain2'];
+    return ['MyDomain1', 'MyDomain2', 'MyDomain3'];
   }
 
   private mockDomain (users: any[]) {
