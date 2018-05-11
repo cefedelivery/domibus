@@ -48,6 +48,9 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServiceOASIS.class);
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(?<scheme>.+?)::(?<value>.+)$");
+    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
+
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -97,7 +100,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
         final String certRegex = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
         if(StringUtils.isEmpty(certRegex)) {
-            LOG.debug("The value for property domibus.dynamic.discovery.oasisclient.regexCertificateSubjectValidation is empty.");
+            LOG.debug("The value for property domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation is empty.");
         }
 
         LOG.debug("Load trustore for the smpClient");
@@ -167,5 +170,15 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             return false;
         }
         return Boolean.parseBoolean(useProxy);
+    }
+
+    @Override
+    public String getPartyIdType() {
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, URN_TYPE_VALUE);
+    }
+
+    @Override
+    public String getResponderRole(){
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
     }
 }

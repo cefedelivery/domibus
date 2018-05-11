@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RollbackDirtyDialogComponent } from './rollback-dirty-dialog.component';
+import { ActionDirtyDialogComponent } from './action-dirty-dialog.component';
 
 describe('ActionDirtyDialogComponent', () => {
-  let component: RollbackDirtyDialogComponent;
-  let fixture: ComponentFixture<RollbackDirtyDialogComponent>;
+  let component: ActionDirtyDialogComponent;
+  let fixture: ComponentFixture<ActionDirtyDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RollbackDirtyDialogComponent ]
+      declarations: [ ActionDirtyDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RollbackDirtyDialogComponent);
+    fixture = TestBed.createComponent(ActionDirtyDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
