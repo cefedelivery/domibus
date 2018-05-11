@@ -1,20 +1,17 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
-import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.messaging.XmlProcessingException;
-import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.MessageStatus;
 import eu.domibus.plugin.webService.generated.StatusFault;
 import eu.domibus.plugin.webService.generated.StatusRequest;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
@@ -25,25 +22,19 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Provider;
 import java.io.IOException;
 
-public class GetStatusIT extends AbstractIT {
-
-    @Autowired
-    BackendInterface backendWebService;
+@DirtiesContext
+@Rollback
+public class GetStatusIT extends AbstractBackendWSIT {
 
     @Autowired
     MessagingService messagingService;
-
-    @Autowired
-    UserMessageLogDao userMessageLogDao;
 
     @Autowired
     Provider<SOAPMessage> mshWebservice;
 
     @Before
     public void before() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode(wireMockRule.port());
     }
 
     @Test

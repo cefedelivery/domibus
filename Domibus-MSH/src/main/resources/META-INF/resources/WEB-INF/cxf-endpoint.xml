@@ -94,8 +94,6 @@
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
             <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
-           <!-- <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
-            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>-->
             <!--use the alias from the request-->
             <entry key="ws-security.encryption.username" value="useReqSigCert"/>
             <entry key="faultStackTraceEnabled" value="false"/>
@@ -145,8 +143,6 @@
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
             <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
-            <!--<entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
-            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>-->
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

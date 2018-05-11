@@ -1,11 +1,9 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
-import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.ebms3.receiver.MessageLegConfigurationFactory;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import eu.domibus.messaging.XmlProcessingException;
-import org.apache.commons.io.IOUtils;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.security.SecurityConstants;
@@ -14,7 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import java.io.IOException;
 
@@ -24,7 +23,9 @@ import java.io.IOException;
  * @author draguio
  * @since 3.3
  */
-public class SetPolicyInInterceptorIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class SetPolicyInInterceptorIT extends AbstractBackendWSIT {
 
     @Autowired
     SetPolicyInInterceptor setPolicyInInterceptorServer;
@@ -34,9 +35,7 @@ public class SetPolicyInInterceptorIT extends AbstractIT {
 
     @Before
     public void before() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode(wireMockRule.port());
         setPolicyInInterceptorServer.setMessageLegConfigurationFactory(serverInMessageLegConfigurationFactory);
     }
 

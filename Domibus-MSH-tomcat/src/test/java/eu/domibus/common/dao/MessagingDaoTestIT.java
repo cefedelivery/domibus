@@ -10,11 +10,10 @@ import eu.domibus.common.model.logging.UserMessageLogBuilder;
 import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.util.PojoInstaciatorUtil;
+import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -31,12 +30,13 @@ public class MessagingDaoTestIT extends AbstractIT{
 
     @Autowired
     private MessagingDao messagingDao;
+
     @Autowired
     private PartyDao partyDao;
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
+
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
+
     @Test
     @Transactional
     @Rollback

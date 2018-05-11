@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
@@ -8,11 +8,9 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.NotifyMessageCreator;
@@ -25,8 +23,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
@@ -36,13 +34,12 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 
-public class RetrieveMessageIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class RetrieveMessageIT extends AbstractBackendWSIT {
 
     @Autowired
     JMSManager jmsManager;
-
-    @Autowired
-    BackendInterface backendWebService;
 
     @Autowired
     MessagingService messagingService;
@@ -54,17 +51,12 @@ public class RetrieveMessageIT extends AbstractIT {
     UserMessageLogService userMessageLogService;
 
     @Autowired
-    PModeProvider pModeProvider;
-
-    @Autowired
     protected ConfigurationDAO configurationDAO;
 
 
     @Before
     public void updatePMode() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode(wireMockRule.port());
     }
 
     @DirtiesContext

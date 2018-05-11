@@ -2,11 +2,10 @@
 package eu.domibus.plugin.jms;
 
 
-import eu.domibus.AbstractIT;
+import eu.domibus.AbstractBackendJMSIT;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -14,12 +13,12 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.webService.generated.MshRole;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,9 @@ import java.util.Date;
  *
  * @author martifp
  */
-public class DownloadMessageJMSIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class DownloadMessageJMSIT extends AbstractBackendJMSIT {
 
     @Autowired
     private ConnectionFactory xaJmsConnectionFactory;
@@ -53,9 +54,7 @@ public class DownloadMessageJMSIT extends AbstractIT {
 
     @Before
     public void before() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode();
     }
 
     /**
