@@ -70,10 +70,6 @@ export class AppComponent implements OnInit {
     })
   }
 
-  showPmodeSubmenu(): boolean {
-    return this.router.url.startsWith('/pmode');
-  }
-
   toggleMenu() {
     this.fullMenu = !this.fullMenu
     this.menuClass = this.fullMenu ? "menu-expanded" : "menu-collapsed"
