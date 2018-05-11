@@ -26,9 +26,9 @@
 					<eb:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</eb:Property>
 				</eb:MessageProperties>
 				<eb:PayloadInfo>
-					<eb:PartInfo href="sbdh-order">
+					<eb:PartInfo href="cid:message">
 						<eb:PartProperties>
-							<eb:Property name="MimeType">application/xml</eb:Property>
+                            <eb:Property name="MimeType">text/xml</eb:Property>
 							<eb:Property name="description">e-sens-sbdh-order</eb:Property>
 						</eb:PartProperties>
 					</eb:PartInfo>

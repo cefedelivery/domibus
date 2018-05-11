@@ -18,13 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by draguio on 18/02/2016.
@@ -65,25 +64,23 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     }
 
     protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException{
-        // Required in order to let time to the message to be consumed
-        TimeUnit.SECONDS.sleep(4);
+        final List<String> messageID = response.getMessageID();
+        assertNotNull(response);
+        assertNotNull(messageID);
+        assertTrue(messageID.size() == 1);
+        final String messageId = messageID.iterator().next();
 
-        Assert.assertNotNull(response);
-        String messageId = response.getMessageID().get(0);
+        waitUntilMessageIsAcknowledged(messageId);
 
         verify(postRequestedFor(urlMatching("/domibus/services/msh"))
                 .withRequestBody(matching(".*"))
                 .withHeader("Content-Type", notMatching("application/soap+xml")));
 
-        Connection con = dataSource.getConnection();
-        String sql = "SELECT MESSAGE_ID, MESSAGE_STATUS FROM TB_MESSAGE_LOG WHERE MESSAGE_ID = ?";
-        PreparedStatement pstmt = con.prepareStatement(sql);
-        pstmt.setString(1, messageId);
-        ResultSet resultSet = pstmt.executeQuery();
-        resultSet.next();
-        Assert.assertEquals(MessageStatus.ACKNOWLEDGED.name(), resultSet.getString("MESSAGE_STATUS"));
-        pstmt.close();
+        final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+        Assert.assertEquals(MessageStatus.ACKNOWLEDGED, messageStatus);
+
     }
+
 
     protected Messaging createMessageHeader(String payloadHref) {
         return createMessageHeader(payloadHref, "text/xml");
@@ -92,11 +89,11 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
     protected Messaging createMessageHeader(String payloadHref, String mimeType) {
         Messaging ebMSHeaderInfo = new Messaging();
         UserMessage userMessage = new UserMessage();
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageId("IT31-363a-4328-9f81-8d84bf2da59f@domibus.eu");
+        userMessage.setMessageInfo(messageInfo);
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         collaborationInfo.setAction("TC1Leg1");
-        AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setValue("EDELIVERY-1110");
-        collaborationInfo.setAgreementRef(agreementRef);
         Service service = new Service();
         service.setValue("bdx:noprocess");
         service.setType("tc1");
@@ -104,34 +101,33 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         userMessage.setCollaborationInfo(collaborationInfo);
         MessageProperties messageProperties = new MessageProperties();
         messageProperties.getProperty().add(createProperty("originalSender", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", STRING_TYPE));
-        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C41", STRING_TYPE));
+        messageProperties.getProperty().add(createProperty("finalRecipient", "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4", STRING_TYPE));
         userMessage.setMessageProperties(messageProperties);
         PartyInfo partyInfo = new PartyInfo();
         From from = new From();
         from.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator");
         PartyId sender = new PartyId();
-        sender.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue");
+        sender.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        sender.setValue("domibus-blue");
         from.setPartyId(sender);
         partyInfo.setFrom(from);
         To to = new To();
         to.setRole("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder");
         PartyId receiver = new PartyId();
-        receiver.setValue("urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red");
+        receiver.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        receiver.setValue("domibus-red");
         to.setPartyId(receiver);
         partyInfo.setTo(to);
         userMessage.setPartyInfo(partyInfo);
         PayloadInfo payloadInfo = new PayloadInfo();
         PartInfo partInfo = new PartInfo();
-        Description description = new Description();
-        description.setValue("e-sens-sbdh-order");
-        description.setLang("en-US");
         partInfo.setHref(payloadHref);
         if(mimeType != null) {
             PartProperties partProperties = new PartProperties();
             partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);
         }
-        partInfo.setDescription(description);
+
         payloadInfo.getPartInfo().add(partInfo);
         userMessage.setPayloadInfo(payloadInfo);
         ebMSHeaderInfo.setUserMessage(userMessage);

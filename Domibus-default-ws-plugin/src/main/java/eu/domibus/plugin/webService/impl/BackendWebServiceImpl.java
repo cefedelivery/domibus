@@ -122,7 +122,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
             throw new SubmitMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
-        LOG.info("Received message from backend to send, assigning messageID" + messageId);
+        LOG.info("Received message from backend to send, assigning messageID [{}]", messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;

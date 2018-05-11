@@ -1,9 +1,15 @@
 package eu.domibus;
 
+import com.thoughtworks.xstream.XStream;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
+import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.configuration.Storage;
+import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -26,6 +32,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,8 +63,11 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
+import static org.awaitility.Awaitility.with;
 
 /**
  * Created by feriaad on 02/02/2016.
@@ -89,12 +99,16 @@ public abstract class AbstractIT {
 
     private javax.jms.Connection connection;
 
+    @Autowired
+    UserMessageLogDao userMessageLogDao;
+
     private String queueName;
 
     private static boolean initialized;
 
     protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
 
+    @Qualifier("domibusJDBC-XADataSource")
     @Autowired
     protected DataSource dataSource;
 
@@ -104,6 +118,12 @@ public abstract class AbstractIT {
 
     @Autowired
     private Storage storage;
+
+    @Autowired
+    protected PModeProvider pModeProvider;
+
+    @Autowired
+    protected ConfigurationDAO configurationDAO;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -126,6 +146,33 @@ public abstract class AbstractIT {
     public void setDomain() {
         domainContextProvider.setCurrentDomain(DomainService.DEFAULT_DOMAIN);
     }
+
+    protected UserMessage getUserMessageTemplate() throws IOException {
+        XStream xStream = new XStream();
+        return (UserMessage) xStream.fromXML(new ClassPathResource("dataset/messages/UserMessageTemplate.xml").getInputStream());
+    }
+
+
+    protected void waitUntilMessageHasStatus(String messageId, MessageStatus messageStatus) {
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
+    }
+
+    protected void waitUntilMessageIsAcknowledged(String messageId) {
+        waitUntilMessageHasStatus(messageId, MessageStatus.ACKNOWLEDGED);
+    }
+
+    protected void waitUntilMessageIsReceived(String messageId) {
+        waitUntilMessageHasStatus(messageId, MessageStatus.RECEIVED);
+    }
+
+    protected void waitUntilMessageIsInWaitingForRetry(String messageId) {
+        waitUntilMessageHasStatus(messageId, MessageStatus.WAITING_FOR_RETRY);
+    }
+
+    protected Callable<Boolean> messageHasStatus(String messageId, MessageStatus messageStatus) {
+        return () -> messageStatus == userMessageLogDao.getMessageStatus(messageId);
+    }
+
 
     /**
      * Execute the given input stream in the given database connection
@@ -246,6 +293,7 @@ public abstract class AbstractIT {
         // Creates the Message using Spring MessageCreator
 //        NotifyMessageCreator messageCreator = new NotifyMessageCreator(messageId, NotificationType.MESSAGE_RECEIVED);
         Message msg = session.createTextMessage();
+        msg.setStringProperty(MessageConstants.DOMAIN, DomainService.DEFAULT_DOMAIN.getCode());
         msg.setStringProperty(MessageConstants.MESSAGE_ID, messageId);
         msg.setObjectProperty(MessageConstants.NOTIFICATION_TYPE, NotificationType.MESSAGE_RECEIVED.name());
         msg.setStringProperty(MessageConstants.ENDPOINT, "backendInterfaceEndpoint");
@@ -259,6 +307,7 @@ public abstract class AbstractIT {
 
     /**
      * The connection must be started and stopped before and after the method call.
+     *
      * @param connection
      * @param queueName
      * @param mSecs
@@ -287,7 +336,7 @@ public abstract class AbstractIT {
     //TODO move this method into a class in the domibus-MSH-test module in order to be reused
     public SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
 
-        MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);
+        MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage message = factory.createMessage();
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -300,15 +349,10 @@ public abstract class AbstractIT {
 
         AttachmentPart attachment = message.createAttachmentPart();
         attachment.setContent(Base64.decodeBase64("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=".getBytes()), "text/xml");
-        attachment.setContentId("sbdh-order");
+        attachment.setContentId("cid:message");
         message.addAttachmentPart(attachment);
 
         message.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
-        try {
-            SOAPHeader soapHeader = message.getSOAPHeader();
-        } catch (Exception e) {
-            LOG.error("Could not get SOAPHeader", e);
-        }
         return message;
     }
 

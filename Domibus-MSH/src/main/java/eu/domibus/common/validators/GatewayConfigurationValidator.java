@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.util.List;
@@ -30,6 +27,7 @@ public class GatewayConfigurationValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
+    private static final String DOMIBUS_PROPERTIES_SHA256 = "domibus.properties.sha256";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
@@ -46,11 +44,16 @@ public class GatewayConfigurationValidator {
         validateCertificates();
 
         try {
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
+            final InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(DOMIBUS_PROPERTIES_SHA256);
+            if(resourceAsStream == null) {
+                WarningUtil.warnOutput("Could not verify the configuration file hash [" + DOMIBUS_PROPERTIES_SHA256 + "]");
+                return;
+            }
+            try (BufferedReader br = new BufferedReader((new InputStreamReader(resourceAsStream)))) {
                 validateFileHash("domibus.properties", br.readLine());
             }
         } catch (Exception e) {
-            LOG.warn("Could not verify the configuration files hash", e);
+            LOG.warn("Could not verify the configuration file hash", e);
         }
 
     }

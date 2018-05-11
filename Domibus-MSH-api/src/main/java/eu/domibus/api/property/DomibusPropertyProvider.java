@@ -17,4 +17,7 @@ public interface DomibusPropertyProvider {
     String getProperty(Domain domain, String propertyName, String defaultValue);
 
     String getResolvedProperty(Domain domain, String propertyName);
+
+    String getResolvedProperty(String propertyName);
+
 }

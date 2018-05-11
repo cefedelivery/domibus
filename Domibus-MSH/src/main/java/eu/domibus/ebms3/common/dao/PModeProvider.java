@@ -120,11 +120,7 @@ public abstract class PModeProvider {
         return this.configurationRawDAO.getDetailedConfigurationRaw();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
-        LOG.debug("Updating the PMode");
-
+    public UnmarshallerResult parsePMode(byte[] bytes) throws XmlProcessingException {
         //unmarshall the PMode with whitespaces ignored
         UnmarshallerResult unmarshalledConfigurationWithWhiteSpacesIgnored = unmarshall(bytes, true);
 
@@ -135,9 +131,22 @@ public abstract class PModeProvider {
             throw xmlProcessingException;
         }
 
-        List<String> resultMessage = new ArrayList<>();
         //unmarshall the PMode taking into account the whitespaces
-        UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
+        return  unmarshall(bytes, false);
+
+    }
+    public Configuration getPModeConfiguration(byte[] bytes) throws XmlProcessingException {
+        final UnmarshallerResult unmarshallerResult = parsePMode(bytes);
+        return unmarshallerResult.getResult();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
+        LOG.debug("Updating the PMode");
+
+        List<String> resultMessage = new ArrayList<>();
+        final UnmarshallerResult unmarshalledConfiguration = parsePMode(bytes);
         if (!unmarshalledConfiguration.isValid()) {
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());

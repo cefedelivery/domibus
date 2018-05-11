@@ -18,7 +18,7 @@
     <context:annotation-config/>
 
     <util:properties id="domibusProperties" ignore-resource-not-found="true"
-                     location="classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties,file:///${domibus.config.location}/*-domibus.properties"/>
+                     location="classpath:application.properties,classpath:domibus-default.properties,classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties,file:///${domibus.config.location}/*-domibus.properties"/>
 
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
 
@@ -65,14 +65,6 @@
                 <value>config/DomainCoreBeanMapping.xml</value>
             </list>
         </property>
-    </bean>
-
-    <!-- Security Policy caching -->
-    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
-        <property name="cacheManager" ref="ehcache"/>
-    </bean>
-    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="file:///${domibus.config.location}/internal/ehcache.xml"/>
     </bean>
 
     <!-- JAXB Context for mapping of ebMS3 schema -->

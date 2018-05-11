@@ -1,4 +1,4 @@
-package eu.domibus.common.services.impl;
+package eu.domibus.core.cache;
 
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.logging.DomibusLogger;
