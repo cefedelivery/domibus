@@ -119,7 +119,7 @@
 				<leg name="pushTestcase4tc1Action"/>
 			</legs>
 		</process>
-		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="peppolDefaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="senderalias"/>
 			</initiatorParties>

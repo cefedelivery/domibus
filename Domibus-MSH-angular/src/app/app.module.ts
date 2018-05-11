@@ -49,6 +49,7 @@ import {RowLimiterComponent} from "./common/row-limiter/row-limiter.component";
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessageDialogComponent} from "./jms/message-dialog/message-dialog.component";
 import {DatePipe} from "./customDate/datePipe";
+import {CapitalizeFirstPipe} from "./common/capitalizefirst.pipe";
 import {DefaultPasswordDialogComponent} from "./security/default-password-dialog/default-password-dialog.component";
 import {MessagelogDetailsComponent} from "./messagelog/messagelog-details/messagelog-details.component";
 import {ErrorlogDetailsComponent} from "./errorlog/errorlog-details/errorlog-details.component";
@@ -64,6 +65,7 @@ import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
 import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
 import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
+import {ActionDirtyDialogComponent} from "./pmode/action-dirty-dialog/action-dirty-dialog.component";
 import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
@@ -98,6 +100,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MoveDialogComponent,
     MessageDialogComponent,
     DatePipe,
+    CapitalizeFirstPipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,
@@ -110,6 +113,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PageHelperComponent,
     RollbackDialogComponent,
     RollbackDirtyDialogComponent,
+    ActionDirtyDialogComponent,
     PmodeDirtyUploadComponent,
     AuditComponent,
     PartyComponent,
@@ -134,6 +138,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     RollbackDialogComponent,
     RollbackDirtyDialogComponent,
+    ActionDirtyDialogComponent,
     PmodeDirtyUploadComponent,
     PartyDetailsComponent
   ],

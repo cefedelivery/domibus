@@ -18,9 +18,10 @@
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 				<partyIdType name="partyTypeiso" value="iso6523-actorid-upis"/>
 				<partyIdType name="partyTypeEmpty" value=""/>
+				<partyIdType name="partyTypePeppol" value="urn:fdc:peppol.eu:2017:identifiers:ap"/>
 			</partyIdTypes>
 			<party name="red_gw" endpoint="http://40.118.20.112:8995/domibus/services/msh" allowChunking="false">
-				<identifier partyId="red_gw" partyIdType="partyTypeUrn"/>
+				<identifier partyId="red_gw" partyIdType="partyTypePeppol"/>
 			</party>
 			<party name="minder" 
 					endpoint="http://mindertestbed.org:15001/corner1" 
@@ -314,7 +315,7 @@
 				<leg name="pushTestcase4tc1Action"/>
 			</legs>
 		</process>
-		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="peppolDefaultResponderRole">
 			<responderParties>
 				<responderParty name="red_gw"/>
 			</responderParties>

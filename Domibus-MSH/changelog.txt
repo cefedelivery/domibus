@@ -8,6 +8,8 @@ Domibus 4.0
 - Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
 Domibus 3.3.4
 - Change the pulling mechanism in order to have a better message per second throughput.
+- Changes to support the fixed values of PEPPOL AS4 profile in the dynamic discovery lookup.
+- Added new truststore entries for OASIS SMP.
 Domibus 3.3.3
 - Possibility to send a message to the same Access Point
 Domibus 3.3.2

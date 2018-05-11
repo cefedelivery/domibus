@@ -4,16 +4,18 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
+import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
+import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.lookup.fetcher.BasicApacheFetcher;
+import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.api.LookupException;
-import no.difi.vefa.peppol.lookup.fetcher.ApacheFetcher;
 import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
-import no.difi.vefa.peppol.security.Mode;
-import no.difi.vefa.peppol.security.api.PeppolSecurityException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DynamicDiscoveryServicePEPPOL.class);
 
+    private static final String RESPONDER_ROLE = "urn:fdc:peppol.eu:2017:roles:ap:as4";
+    private static final String PARTYID_TYPE = "urn:fdc:peppol.eu:2017:identifiers:ap";
+
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
@@ -48,27 +53,38 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
         String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
-        final LookupClient smpClient = LookupClientBuilder.forMode(mode)
-                .locator(new BusdoxLocator(smlInfo))
-                .fetcher(new ApacheFetcher())
-                .build();
         try {
-            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, new Scheme(receiverIdType));
-            final DocumentTypeIdentifier documentIdentifier = new DocumentTypeIdentifier(documentId);
+            final LookupClient smpClient = LookupClientBuilder.forMode(mode)
+                    .locator(new BusdoxLocator(smlInfo))
+                    .fetcher(new BasicApacheFetcher(Mode.of(mode)))
+                    .build();
 
-            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, new Scheme(processIdType));
-            LOG.debug("smpClient.getServiceMetadata");
+            final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
+            final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
+
+            final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
+            LOG.debug("Getting the ServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-            LOG.debug("sm.getEndpoint");
-            final Endpoint endpoint;
-            endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4), TransportProfile.AS4);
+            LOG.debug("Getting the Endpoint from ServiceMetadata");
+            final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
 
-            if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
+            if (endpoint == null || endpoint.getAddress() == null) {
                 throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
             }
-            return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
-        } catch (final PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
+            return new EndpointInfo(endpoint.getAddress().toString(), endpoint.getCertificate());
+        } catch (final PeppolParsingException | PeppolLoadingException | PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
             throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId, e);
         }
     }
+
+    @Override
+    public String getPartyIdType() {
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, PARTYID_TYPE);
+    }
+
+    @Override
+    public String getResponderRole(){
+        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
+    }
+
 }

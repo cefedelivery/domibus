@@ -17,13 +17,13 @@
 			<partyIdTypes>
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
-			<party name="blue_gw" endpoint="http://edeltest1.westeurope.cloudapp.azure.com:7005/domibus/services/msh" allowChunking="false">
+			<party name="blue_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:7005/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="red_gw" endpoint="http://edeltest2.westeurope.cloudapp.azure.com:9080/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="green_gw" endpoint="http://edeltest1.westeurope.cloudapp.azure.com:9080/domibus/services/msh" allowChunking="false">
+			<party name="green_gw" endpoint="http://edeltest4.westeurope.cloudapp.azure.com:9080/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-green" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
