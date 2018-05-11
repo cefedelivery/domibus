@@ -77,9 +77,9 @@
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" 
 					errorAsResponse="true" 
-					businessErrorNotifyProducer="false"
-					businessErrorNotifyConsumer="false" 
-					deliveryFailureNotifyProducer="false"/>
+					businessErrorNotifyProducer="true"
+					businessErrorNotifyConsumer="true"
+					deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
 		<agreements>
             <agreement name="agreement1" value="A1" type=""/>
@@ -109,7 +109,6 @@
 					security="eDeliveryPolicy"
 					receptionAwareness="receptionAwareness" 
 					propertySet="ecodexPropertySet"
-					payloadProfile="MessageProfile"
 					errorHandling="demoErrorHandling"
 					compressPayloads="true"/>
 			<legConfiguration name="pushTestcase1tc2Action"
@@ -120,7 +119,6 @@
 							  security="eSensPolicy"
 							  receptionAwareness="receptionAwareness"
 							  propertySet="ecodexPropertySet"
-							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
 			<legConfiguration name="pushTestcase1tc3Action"
@@ -131,7 +129,6 @@
 							  security="noSigNoEnc"
 							  receptionAwareness="receptionAwareness"
 							  propertySet="ecodexPropertySet"
-							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
 			<legConfiguration name="pushTestcase1tc4Action"
@@ -142,7 +139,6 @@
 							  security="signOnly"
 							  receptionAwareness="receptionAwareness"
 							  propertySet="ecodexPropertySet"
-							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
 		</legConfigurations>

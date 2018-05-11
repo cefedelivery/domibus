@@ -63,7 +63,7 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
 
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     public T downloadMessage(final String messageId, final T target) throws MessageNotFoundException {
         lister.removeFromPending(messageId);
         return this.getMessageRetrievalTransformer().transformFromSubmission(this.messageRetriever.downloadMessage(messageId), target);

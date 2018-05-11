@@ -13,6 +13,7 @@
             <partyId>
                 <eu.domibus.ebms3.common.model.PartyId>
                     <value>domibus-red</value>
+                    <type>urn:oasis:names:tc:ebcore:partyid-type:unregistered</type>
                 </eu.domibus.ebms3.common.model.PartyId>
             </partyId>
             <role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</role>
