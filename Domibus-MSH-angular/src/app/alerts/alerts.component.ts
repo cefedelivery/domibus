@@ -6,11 +6,12 @@ import {DownloadService} from "../download/download.service";
 import {AlertComponent} from "../alert/alert.component";
 import {Observable} from "rxjs/Observable";
 import {AlertsResult} from "./alertsresult";
-import {Http, URLSearchParams, Response} from "@angular/http";
+import {Http, URLSearchParams, Response, Headers} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {AlertsEntry} from "./alertsentry";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {MdDialog} from "@angular/material";
+import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 
 @Component({
   moduleId: module.id,
@@ -20,7 +21,6 @@ import {MdDialog} from "@angular/material";
 
 export class AlertsComponent {
 
-  //@ViewChild('rowActions') rowActions: TemplateRef<any>;
   @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
 
   static readonly ALERTS_URL: string = 'rest/alerts';
@@ -42,8 +42,10 @@ export class AlertsComponent {
 
   buttonsDisabled: boolean = true;
 
+  // Mocked values
   aTypes = ['MSG_COMMUNICATION_FAILURE','MSG_TEST'];
   aLevels = ['HIGH', 'MEDIUM', 'LOW'];
+
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
 
   filter: any = {};
@@ -53,10 +55,10 @@ export class AlertsComponent {
   items=[];
 
   timestampCreationFromMaxDate: Date = new Date();
+  timestampCreationToMinDate: Date = null;
   timestampCreationToMaxDate: Date = new Date();
-  timestampCreationToMinDate: Date = new Date();
   timestampReportingFromMaxDate: Date = new Date();
-  timestampReportingToMinDate: Date = new Date();
+  timestampReportingToMinDate: Date = null;
   timestampReportingToMaxDate: Date = new Date();
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
@@ -74,12 +76,11 @@ export class AlertsComponent {
       { name: 'Alert Text' },
       { name: 'Creation Time' },
       { name: 'Reporting Time' },
-      { name: 'Parameters', sortable: false },
-      //{ name: 'Actions', cellTemplate: this.rowActions, sortable: false }
+      { name: 'Parameters', sortable: false }
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Processed", "ID", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"/*, "Actions"*/].indexOf(col.name) != -1
+      return ["Processed", "ID", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"].indexOf(col.name) != -1
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
@@ -93,7 +94,7 @@ export class AlertsComponent {
 
     // filters
     if(this.filter.processed) {
-      searchParams.set('processed', this.filter.processed);
+      searchParams.set('processed', this.filter.processed==='PROCESSED'?'true':'false');
     }
 
     if(this.filter.alertType) {
@@ -146,31 +147,28 @@ export class AlertsComponent {
     );
   }
 
-  /*parametersResults(parameters: string[]): string[] {
-    for(let value : )
-  }*/
-
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
 
     let newEntries: AlertsEntry[] = [];
-    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas','ddsdsd','ddd']);
+
+    // MOCK info
+    /*let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas','ddsdsd','ddd']);
     let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), ['tryrty','trurutru']);
     let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', this.aTypes[0], this.aLevels[0], 'aText3', new Date(), new Date(), ['aaaaa','bbbbb','cccccc']);
-
-
     newEntries[0] = entry1;
     newEntries[1] = entry2;
     newEntries[2] = entry3;
 
+    // information of parameters and values
     let entry: any;
     for(entry in newEntries) {
-      let params = this.getDynamicParameters(entry.alertType);
+      let buildParams = [], pos = 0, params = this.getDynamicParameters(newEntries[entry].alertType);
       for(let param in params) {
-
+        buildParams[pos] = params[param] + '=' + newEntries[entry].parameters[pos++];
       }
+      newEntries[entry].parameters = buildParams;
     }
-
 
     this.rows = newEntries;
 
@@ -179,16 +177,15 @@ export class AlertsComponent {
     this.rowLimiter.pageSize = pageSize;
     this.orderBy = orderBy;
     this.asc = asc;
-    this.loading = false;
+    this.loading = false;*/
 
-    /*this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
+    this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
       console.log("alerts response: " + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
-      this.selected = [];
 
       const start = offset * pageSize;
       const end = start + pageSize;
@@ -198,6 +195,17 @@ export class AlertsComponent {
       for(let i = start; i <end; i++) {
         newRows[i] = result.alertsEntries[index++];
       }
+
+      // information of parameters and values
+      let entry: any;
+      for(entry in newRows) {
+        let buildParams = [], pos = 0, params = this.getDynamicParameters(newRows[entry].alertType);
+        for(let param in params) {
+          buildParams[pos] = params[param] + '=' + newRows[entry].parameters[pos++];
+        }
+        newRows[entry].parameters = buildParams;
+      }
+
       this.rows = newRows;
 
       this.filter = result.filter;
@@ -213,7 +221,7 @@ export class AlertsComponent {
       console.log("error getting the alerts:" + error);
       this.loading = false;
       this.alertService.error("Error occured:" + error);
-    });*/
+    });
   }
 
   search() {
@@ -232,7 +240,7 @@ export class AlertsComponent {
 
   getDynamicParameters(alertType:string): string[] {
     if(!isNullOrUndefined(alertType) && alertType != '') {
-      // just for testing begin
+      // just for testing begin: MOCK
       if(alertType == 'MSG_COMMUNICATION_FAILURE') {
         return ['MSG_COMM1', 'MSG_COMM2', 'MSG_COMM3']
       } else {
@@ -245,19 +253,19 @@ export class AlertsComponent {
   }
 
   onTimestampCreationFromChange(event) {
-    this.timestampCreationFromMaxDate = event.value;
+    this.timestampCreationToMinDate = event.value;
   }
 
   onTimestampCreationToChange(event) {
-    this.timestampCreationToMaxDate = event.value;
+    this.timestampCreationFromMaxDate = event.value;
   }
 
   onTimestampReportingFromChange(event) {
-    this.timestampReportingFromMaxDate = event.value;
+    this.timestampReportingToMinDate = event.value;
   }
 
   onTimestampReportingToChange(event) {
-    this.timestampReportingToMaxDate = event.value;
+    this.timestampReportingFromMaxDate = event.value;
   }
 
 
@@ -301,14 +309,18 @@ export class AlertsComponent {
   }
 
   saveAsCSV() {
-    DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv" + this.getFilterPath());
+    if(!this.buttonsDisabled) {
+      this.save(true);
+    } else {
+      DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv" + this.getFilterPath());
+    }
   }
 
   private getFilterPath() {
     let result = '?';
     //filters
-    if(this.filter.processed) {
-      result += 'processed=' + this.filter.processed + '&';
+    if(this.filter.processed != null) {
+      result += 'processed=' + (this.filter.processed==='PROCESSED') + '&';
     }
 
     if(this.filter.alertType) {
@@ -357,12 +369,33 @@ export class AlertsComponent {
     });
   }
 
-  save() {
-
+  save(withDownloadCSV: boolean) {
+    let headers = new Headers({'Content-Type': 'application/json'});
+    let dialogRef = this.dialog.open(SaveDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+          this.alertService.success("The operation 'update alerts' completed successfully.", false);
+          this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+          if(withDownloadCSV) {
+            DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv");
+          }
+        }, err => {
+          this.alertService.error("The operation 'update alerts' not completed successfully.", false);
+          this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+        });
+      } else {
+        if(withDownloadCSV) {
+          DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv");
+        }
+      }
+    });
   }
 
   setProcessedValue(row) {
     this.buttonsDisabled = false;
+    row.processed = !row.processed;
+    this.rows[row.$$index] = row;
   }
 
 }
