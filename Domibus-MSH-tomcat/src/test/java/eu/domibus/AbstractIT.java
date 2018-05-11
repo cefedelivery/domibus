@@ -7,15 +7,17 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.configuration.Storage;
+import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.Bus;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.bus.extension.ExtensionManagerBus;
@@ -31,7 +33,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -44,7 +45,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.jms.*;
-import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,18 +54,15 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Collections;
-import java.util.Properties;
-import java.util.Scanner;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static org.awaitility.Awaitility.with;
 
@@ -78,46 +75,12 @@ import static org.awaitility.Awaitility.with;
 @Rollback
 public abstract class AbstractIT {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
+
     protected static final int SERVICE_PORT = 8892;
-    protected static final String BACKEND_SERVICE_ENDPOINT = "http://localhost:" + SERVICE_PORT + "/domibus/services/backend";
-
-    public enum Mode {DATABASE, FILESYSTEM}
-
-    protected static final String WS_NOT_QUEUE = "domibus.notification.webservice";
-
-    protected static final String JMS_NOT_QUEUE_NAME = "domibus.notification.jms";
-
-    protected static final String JMS_BACKEND_IN_QUEUE_NAME = "domibus.backend.jms.inQueue";
-
-    protected static final String JMS_BACKEND_OUT_QUEUE_NAME = "domibus.backend.jms.outQueue";
-
-    protected static final String JMS_BACKEND_REPLY_QUEUE_NAME = "domibus.backend.jms.replyQueue";
-
-    protected static final String JMS_DISPATCH_QUEUE_NAME = "domibus.internal.dispatch.queue";
-
-    private Message message;
-
-    private javax.jms.Connection connection;
 
     @Autowired
-    UserMessageLogDao userMessageLogDao;
-
-    private String queueName;
-
-    private static boolean initialized;
-
-    protected static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractIT.class);
-
-    @Qualifier("domibusJDBC-XADataSource")
-    @Autowired
-    protected DataSource dataSource;
-
-    @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
-
-    @Autowired
-    private Storage storage;
+    protected UserMessageLogDao userMessageLogDao;
 
     @Autowired
     protected PModeProvider pModeProvider;
@@ -130,11 +93,10 @@ public abstract class AbstractIT {
 
     @BeforeClass
     public static void init() throws IOException {
-        if (!initialized) {
-            FileUtils.deleteDirectory(new File("target/temp"));
-            System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
-            initialized = true;
-        }
+
+        FileUtils.deleteDirectory(new File("target/temp"));
+        System.setProperty("domibus.config.location", new File("target/test-classes").getAbsolutePath());
+
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken(
                         "test_user",
@@ -147,6 +109,22 @@ public abstract class AbstractIT {
         domainContextProvider.setCurrentDomain(DomainService.DEFAULT_DOMAIN);
     }
 
+    protected void uploadPmode(Integer redHttpPort) throws IOException, XmlProcessingException {
+        final InputStream inputStream = new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream();
+        String pmodeText = IOUtils.toString(inputStream, "UTF-8");
+        if(redHttpPort != null) {
+            LOG.info("Using wiremock http port [{}]", redHttpPort);
+            pmodeText = pmodeText.replace(String.valueOf(SERVICE_PORT), String.valueOf(redHttpPort));
+        }
+
+        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeText.getBytes("UTF-8"));
+        configurationDAO.updateConfiguration(pModeConfiguration);
+    }
+
+    protected void uploadPmode() throws IOException, XmlProcessingException {
+        uploadPmode(null);
+    }
+
     protected UserMessage getUserMessageTemplate() throws IOException {
         XStream xStream = new XStream();
         return (UserMessage) xStream.fromXML(new ClassPathResource("dataset/messages/UserMessageTemplate.xml").getInputStream());
@@ -154,7 +132,7 @@ public abstract class AbstractIT {
 
 
     protected void waitUntilMessageHasStatus(String messageId, MessageStatus messageStatus) {
-        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(10, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
     }
 
     protected void waitUntilMessageIsAcknowledged(String messageId) {
@@ -171,55 +149,6 @@ public abstract class AbstractIT {
 
     protected Callable<Boolean> messageHasStatus(String messageId, MessageStatus messageStatus) {
         return () -> messageStatus == userMessageLogDao.getMessageStatus(messageId);
-    }
-
-
-    /**
-     * Execute the given input stream in the given database connection
-     *
-     * @param conn
-     * @param in
-     * @throws SQLException
-     */
-    private void importSQL(Connection conn, InputStream in, Mode mode) throws SQLException, IOException {
-        Scanner s = new Scanner(in);
-        s.useDelimiter("(;(\r)?\n)|(--\n)");
-        Statement st = null;
-        try {
-            st = conn.createStatement();
-            while (s.hasNext()) {
-                String line = s.next();
-                if (line.startsWith("/*!") && line.endsWith("*/")) {
-                    int i = line.indexOf(' ');
-                    line = line.substring(i + 1, line.length() - " */".length());
-                }
-
-                if (line.trim().length() > 0) {
-                    st.execute(line);
-                }
-            }
-        } finally {
-            if (st != null) st.close();
-        }
-
-        if (Mode.FILESYSTEM.equals(mode)) {
-            //write to FS
-            String readPayloads = "SELECT * FROM TB_PART_INFO";
-            st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            ResultSet rs = st.executeQuery(readPayloads);
-            while (rs.next()) {
-                String filename = domibusProperties.getProperty(Storage.ATTACHMENT_STORAGE_LOCATION) + "/" + UUID.randomUUID().toString() + ".payload";
-                FileOutputStream f = new FileOutputStream(filename);
-                f.write(rs.getBytes("BINARY_DATA"));
-                f.close();
-                rs.updateNull("BINARY_DATA");
-                rs.updateString("FILENAME", filename);
-                rs.updateRow();
-
-
-            }
-            st.close();
-        }
     }
 
     /**
@@ -247,35 +176,6 @@ public abstract class AbstractIT {
         return null;
     }
 
-
-    protected void insertDataset(String dataset) throws IOException {
-        this.insertDataset(dataset, this.getMode());
-    }
-
-
-    /**
-     * Insert the given dataset inside the database
-     *
-     * @param dataset
-     */
-    protected void insertDataset(String dataset, Mode mode) throws IOException {
-        if (Mode.FILESYSTEM.equals(mode)) {
-            File target = new File("target/test-classes/dataset/storage");
-            if (!target.exists()) {
-                target.mkdirs();
-            }
-            domibusProperties.put(Storage.ATTACHMENT_STORAGE_LOCATION, new File("target/test-classes/dataset/storage").getAbsolutePath());
-            storage.initFileSystemStorage();
-        }
-
-        try {
-            FileInputStream fis = new FileInputStream(new File("target/test-classes/dataset/database/" + dataset).getAbsolutePath());
-            importSQL(dataSource.getConnection(), fis, mode);
-        } catch (final Exception exc) {
-            Assert.fail(exc.getMessage());
-            exc.printStackTrace();
-        }
-    }
 
     /**
      * The connection must be started and stopped before and after the method call.
@@ -328,11 +228,6 @@ public abstract class AbstractIT {
         return message;
     }
 
-
-    protected Mode getMode() {
-        return Mode.valueOf(System.getProperty("attachment.mode", Mode.DATABASE.name()));
-    }
-
     //TODO move this method into a class in the domibus-MSH-test module in order to be reused
     public SOAPMessage createSOAPMessage(String dataset) throws SOAPException, IOException, ParserConfigurationException, SAXException {
 
@@ -370,6 +265,20 @@ public abstract class AbstractIT {
         sm.setExchange(exchange);
 
         return sm;
+    }
+
+    public void prepareSendMessage(String responseFileName) {
+        /* Initialize the mock objects */
+//        MockitoAnnotations.initMocks(this);
+
+        String body = getAS4Response(responseFileName);
+
+        // Mock the response from the recipient MSH
+        stubFor(post(urlEqualTo("/domibus/services/msh"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/soap+xml")
+                        .withBody(body)));
     }
 
 }

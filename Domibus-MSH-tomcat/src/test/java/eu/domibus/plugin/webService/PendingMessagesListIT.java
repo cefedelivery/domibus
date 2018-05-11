@@ -1,15 +1,16 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.NotificationType;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.ListPendingMessagesResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,13 +21,13 @@ import java.util.List;
  *
  * @author martifp
  */
-public class PendingMessagesListIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class PendingMessagesListIT extends AbstractBackendWSIT {
 
     @Autowired
     JMSManager jmsManager;
 
-    @Autowired
-    BackendInterface backendWebService;
 
     @Test
     public void testListPendingMessagesOk() throws Exception {

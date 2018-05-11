@@ -1,13 +1,12 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
-import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.messaging.XmlProcessingException;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
@@ -26,16 +25,16 @@ import java.sql.SQLException;
  * @author draguio
  * @author martifp
  */
-public class ReceiveMessageIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class ReceiveMessageIT extends AbstractBackendWSIT {
 
     @Autowired
     Provider<SOAPMessage> mshWebservice;
 
     @Before
     public void before() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode(wireMockRule.port());
     }
 
     /**

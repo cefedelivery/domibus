@@ -3,8 +3,8 @@ package eu.domibus;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.ebms3.sender.NonRepudiationChecker;
-import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
@@ -12,8 +12,6 @@ import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
@@ -22,48 +20,29 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created by draguio on 18/02/2016.
  */
-public abstract class AbstractSendMessageIT extends AbstractIT{
+public abstract class AbstractBackendWSIT extends AbstractIT {
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractBackendWSIT.class);
 
     public static final String STRING_TYPE = "string";
-    public static final String INT_TYPE = "int";
-    public static final String BOOLEAN_TYPE = "boolean";
+
+
+    protected static final String WS_NOT_QUEUE = "domibus.notification.webservice";
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(SERVICE_PORT);
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().dynamicPort().dynamicHttpsPort());
 
     @Autowired
-    BackendInterface backendWebService;
+    protected BackendInterface backendWebService;
 
-    /* Mock the nonRepudiationChecker, it fails because security in/out policy interceptors are not ran */
-    @Autowired
-    NonRepudiationChecker nonRepudiationChecker;
-
-    @InjectMocks
-    @Autowired
-    private ReliabilityChecker reliabilityChecker;
-
-
-    public void prepareSendMessage(String responseFileName) {
-        /* Initialize the mock objects */
-        MockitoAnnotations.initMocks(this);
-
-        String body = getAS4Response(responseFileName);
-
-        // Mock the response from the recipient MSH
-        stubFor(post(urlEqualTo("/domibus/services/msh"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/soap+xml")
-                        .withBody(body)));
-    }
-
-    protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException{
+    protected void verifySendMessageAck(SubmitResponse response) throws InterruptedException, SQLException {
         final List<String> messageID = response.getMessageID();
         assertNotNull(response);
         assertNotNull(messageID);
@@ -122,7 +101,7 @@ public abstract class AbstractSendMessageIT extends AbstractIT{
         PayloadInfo payloadInfo = new PayloadInfo();
         PartInfo partInfo = new PartInfo();
         partInfo.setHref(payloadHref);
-        if(mimeType != null) {
+        if (mimeType != null) {
             PartProperties partProperties = new PartProperties();
             partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
             partInfo.setPartProperties(partProperties);

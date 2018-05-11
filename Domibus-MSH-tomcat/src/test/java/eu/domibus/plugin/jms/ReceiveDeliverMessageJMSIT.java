@@ -1,11 +1,11 @@
 
 package eu.domibus.plugin.jms;
 
-import eu.domibus.AbstractIT;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import eu.domibus.AbstractBackendJMSIT;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -15,13 +15,10 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.webService.generated.MshRole;
 import org.apache.activemq.command.ActiveMQMapMessage;
-import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import javax.activation.DataHandler;
 import javax.jms.ConnectionFactory;
@@ -33,6 +30,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.PAYLOAD_DESCRIPTION_FORMAT;
 
@@ -42,7 +40,8 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.PAYLOAD_DESCRIPTION_FORM
  *
  * @author martifp
  */
-public class ReceiveDeliverMessageJMSIT extends AbstractIT {
+@Ignore
+public class ReceiveDeliverMessageJMSIT extends AbstractBackendJMSIT {
 
 
     @Autowired
@@ -58,11 +57,12 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
     @Autowired
     UserMessageLogService userMessageLogService;
 
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().dynamicPort().dynamicHttpsPort());
+
     @Before
     public void before() throws IOException, XmlProcessingException {
-        final byte[] pmodeBytes = IOUtils.toByteArray(new ClassPathResource("dataset/pmode/PModeTemplate.xml").getInputStream());
-        final Configuration pModeConfiguration = pModeProvider.getPModeConfiguration(pmodeBytes);
-        configurationDAO.updateConfiguration(pModeConfiguration);
+        uploadPmode(wireMockRule.port());
     }
 
     /**
@@ -74,8 +74,11 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
      */
     @Test
     @DirtiesContext
+    @Rollback
     public void testReceiveMessage() throws Exception {
         final MapMessage mapMessage = prepareMessageForSubmit();
+
+//        super.prepareSendMessage("validAS4Response.xml");
 
         System.out.println("MapMessage: " + mapMessage);
         String messageId = UUID.randomUUID().toString();
@@ -97,6 +100,8 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
     protected MapMessage prepareMessageForSubmit() throws Exception {
         String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
         final UserMessage userMessage = getUserMessageTemplate();
+        userMessage.getCollaborationInfo().setAction("TC3Leg1");
+
         String messagePayload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<hello>world</hello>";
         final PartInfo partInfo = userMessage.getPayloadInfo().getPartInfo().iterator().next();
         partInfo.setBinaryData(messagePayload.getBytes());
@@ -141,8 +146,11 @@ public class ReceiveDeliverMessageJMSIT extends AbstractIT {
      */
     @Test
     @DirtiesContext
+    @Rollback
     public void testDuplicateMessage() throws Exception {
         final MapMessage mapMessage = prepareMessageForSubmit();
+//        super.prepareSendMessage("validAS4Response.xml");
+
         final String messageId = mapMessage.getStringProperty(MESSAGE_ID);
 
         System.out.println("MapMessage: " + mapMessage);

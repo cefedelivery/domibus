@@ -1,17 +1,18 @@
 
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
+import eu.domibus.AbstractBackendWSIT;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.ErrorResultImplArray;
 import eu.domibus.plugin.webService.generated.GetErrorsRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import java.util.Date;
 
@@ -21,10 +22,9 @@ import java.util.Date;
  *
  * @author martifp
  */
-public class GetMessageErrorsIT extends AbstractIT {
-
-    @Autowired
-    BackendInterface backendWebService;
+@DirtiesContext
+@Rollback
+public class GetMessageErrorsIT extends AbstractBackendWSIT {
 
     @Autowired
     ErrorLogDao errorLogDao;

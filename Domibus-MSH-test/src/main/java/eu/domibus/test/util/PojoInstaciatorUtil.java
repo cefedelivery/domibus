@@ -1,4 +1,4 @@
-package eu.domibus.util;
+package eu.domibus.test.util;
 
 
 import org.springframework.util.ClassUtils;
@@ -92,7 +92,7 @@ public class PojoInstaciatorUtil {
     }
 
 
-    static Map<String, Object> setUpParameters(String configuration) {
+    public static Map<String, Object> setUpParameters(String configuration) {
         Map<String, Object> configurationMap = new HashMap<>();
         return setUpParameters(configuration, configurationMap);
     }
