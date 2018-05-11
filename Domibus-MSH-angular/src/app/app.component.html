@@ -32,7 +32,7 @@
       <!--[ngClass]="{ 'alert': message, 'alert-success': message.type === 'success', 'alert-error': message.type === 'error' }"-->
       <div *ngIf="hasAdmin()" class="sideNavSubmenu">
         <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-current']" >
-          <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
+          <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">receipt</md-icon>
           <span>Current</span>
         </button>
         <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-archive']">

@@ -210,7 +210,6 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {any} selected selected/unselected object
    */
   onSelect ({selected}) {
-    // console.log('Select Event', selected, this.selected);
     if (isNullOrUndefined(selected) || selected.length === 0) {
       this.disableAllButtons();
       return;
