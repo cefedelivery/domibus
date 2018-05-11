@@ -9,6 +9,8 @@ import {AlertsResult} from "./alertsresult";
 import {Http, URLSearchParams, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {AlertsEntry} from "./alertsentry";
+import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
+import {MdDialog} from "@angular/material";
 
 @Component({
   moduleId: module.id,
@@ -57,7 +59,7 @@ export class AlertsComponent {
   timestampReportingToMinDate: Date = new Date();
   timestampReportingToMaxDate: Date = new Date();
 
-  constructor(private http: Http, private alertService: AlertService) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
 
   }
 
@@ -65,10 +67,10 @@ export class AlertsComponent {
     this.filter.alertType = null;
 
     this.columnPicker.allColumns = [
-      { name: 'Processed', cellTemplate: this.rowProcessed },
+      { name: 'Processed', cellTemplate: this.rowProcessed, width: 50 },
       { name: 'Alert Id' },
       { name: 'Alert Type' },
-      { name: 'Alert Level' },
+      { name: 'Alert Level', width: 50 },
       { name: 'Alert Text' },
       { name: 'Creation Time' },
       { name: 'Reporting Time' },
@@ -144,18 +146,30 @@ export class AlertsComponent {
     );
   }
 
+  /*parametersResults(parameters: string[]): string[] {
+    for(let value : )
+  }*/
+
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
 
     let newEntries: AlertsEntry[] = [];
-    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas']);
-    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), []);
-    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', 'alertType3', this.aLevels[0], 'aText3', new Date(), new Date(), []);
+    let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas','ddsdsd','ddd']);
+    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), ['tryrty','trurutru']);
+    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', this.aTypes[0], this.aLevels[0], 'aText3', new Date(), new Date(), ['aaaaa','bbbbb','cccccc']);
 
 
     newEntries[0] = entry1;
     newEntries[1] = entry2;
     newEntries[2] = entry3;
+
+    let entry: any;
+    for(entry in newEntries) {
+      let params = this.getDynamicParameters(entry.alertType);
+      for(let param in params) {
+
+      }
+    }
 
 
     this.rows = newEntries;
@@ -334,7 +348,13 @@ export class AlertsComponent {
   }
 
   cancel() {
-
+    let dialogRef = this.dialog.open(CancelDialogComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.buttonsDisabled = true;
+        this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+      }
+    });
   }
 
   save() {
