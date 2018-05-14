@@ -229,7 +229,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         final List<MessageLogInfo> resultList = queryParameterized.getResultList();
         if (LOG.isDebugEnabled()) {
             final long endTime = System.currentTimeMillis();
-            LOG.debug(endTime - startTime + "milliseconds to execute query for " + resultList.size() + " results");
+            LOG.debug( "{} milliseconds to execute query for {} results", endTime - startTime, resultList.size());
         }
         return resultList;
     }
