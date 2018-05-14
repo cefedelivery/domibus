@@ -15,11 +15,6 @@ public class MessageReceiveDeprecatedPluginImplementationTest extends AbstractBa
     }
 
     @Override
-    public void messageReceiveFailed(String messageId, String ednpoint) {
-        super.messageReceiveFailed(messageId, ednpoint);
-    }
-
-    @Override
     public MessageSubmissionTransformer getMessageSubmissionTransformer() {
         return null;
     }

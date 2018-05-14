@@ -10,10 +10,13 @@
 			<role name="defaultResponderRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
 			<role name="defaultInitiatorRoleEmpty" value=" "/>
 			<role name="defaultResponderRoleEmpty" value=" "/>
+			<role name="peppolDefaultInitiatorRole" value="urn:fdc:peppol.eu:2017:roles:ap:as4"/>
+			<role name="peppolDefaultResponderRole" value="urn:fdc:peppol.eu:2017:roles:ap:as4"/>
 		</roles>
 		<parties>
 			<partyIdTypes>
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+				<partyIdType name="partyTypePeppol" value="urn:fdc:peppol.eu:2017:identifiers:ap"/>
 			</partyIdTypes>
 			<party name="senderalias" endpoint="http://localhost:8080/domibus/services/msh" allowChunking="false">
 				<identifier partyId="senderalias" partyIdType="partyTypeUrn"/>
@@ -60,6 +63,7 @@
 		<services>
 			<service name="testService1" value="urn:www.cenbii.eu:profile:bii05:ver2.0" type="cenbii-procid-ubl"/>
 			<service name="testService2" value="bdx:noprocess" type="tc2"/>
+			<service name="testService3" value="cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii05:ver2.0" type="peppol-type"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>
@@ -76,7 +80,8 @@
 			<legConfiguration name="pushTestcase2tc2Action" service="testService2" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase3tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase4tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			</legConfigurations>
+			<legConfiguration name="pushTestcase5tc1Action" service="testService3" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+		</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="senderalias"/>
@@ -112,6 +117,14 @@
 			</initiatorParties>
 			<legs>
 				<leg name="pushTestcase4tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="senderalias"/>
+			</initiatorParties>
+			<legs>
+				<leg name="pushTestcase5tc1Action"/>
 			</legs>
 		</process>
 	</businessProcesses>

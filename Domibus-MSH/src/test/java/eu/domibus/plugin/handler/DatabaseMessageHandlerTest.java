@@ -23,6 +23,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -125,7 +126,10 @@ public class DatabaseMessageHandlerTest {
     private PropertyProfileValidator propertyProfileValidator;
 
     @Injectable
-    BackendMessageValidator backendMessageValidator;
+    private BackendMessageValidator backendMessageValidator;
+
+    @Injectable
+    private MessagingLockService messagingLockService;
 
     @Injectable
     AuthUtils authUtils;
@@ -1144,28 +1148,6 @@ public class DatabaseMessageHandlerTest {
             authUtils.getOriginalUserFromSecurityContext();
             messagingDao.findUserMessageByMessageId(MESS_ID);
             userMessageLogDao.findByMessageId(MESS_ID, MSHRole.RECEIVING);
-        }};
-
-    }
-
-    @Test
-    public void testGetMessageStatusOk() throws Exception {
-        new Expectations() {{
-
-            authUtils.isUnsecureLoginAllowed();
-            result = false;
-
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            result = MessageStatus.ACKNOWLEDGED;
-
-        }};
-
-        final MessageStatus msgStatus = dmh.getMessageStatus(MESS_ID);
-
-        new Verifications() {{
-            authUtils.hasAdminRole();
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            msgStatus.equals(MessageStatus.ACKNOWLEDGED);
         }};
 
     }

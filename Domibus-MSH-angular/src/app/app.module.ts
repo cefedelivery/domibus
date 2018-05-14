@@ -11,7 +11,8 @@ import {
   MdMenuModule,
   MdSelectModule,
   MdSidenavModule,
-  MdTooltipModule
+  MdTooltipModule,
+  MdExpansionModule
 } from "@angular/material";
 import "hammerjs";
 
@@ -21,7 +22,8 @@ import {Md2Module, Md2SelectModule} from "md2";
 import {AppComponent} from "./app.component";
 import {LoginComponent} from "./login/login.component";
 import {HomeComponent} from "./home/home.component";
-import {PModeComponent} from "./pmode/pmode.component";
+import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
+import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
 import {AuthenticatedGuard} from "./guards/authenticated.guard";
 import {AuthorizedGuard} from "./guards/authorized.guard";
@@ -49,6 +51,7 @@ import {RowLimiterComponent} from "./common/row-limiter/row-limiter.component";
 import {MoveDialogComponent} from "./jms/move-dialog/move-dialog.component";
 import {MessageDialogComponent} from "./jms/message-dialog/message-dialog.component";
 import {DatePipe} from "./customDate/datePipe";
+import {CapitalizeFirstPipe} from "./common/capitalizefirst.pipe";
 import {DefaultPasswordDialogComponent} from "./security/default-password-dialog/default-password-dialog.component";
 import {MessagelogDetailsComponent} from "./messagelog/messagelog-details/messagelog-details.component";
 import {ErrorlogDetailsComponent} from "./errorlog/errorlog-details/errorlog-details.component";
@@ -63,12 +66,12 @@ import {ColumnPickerComponent} from "./common/column-picker/column-picker.compon
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
 import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
-import {RollbackDirtyDialogComponent} from "./pmode/rollback-dirty-dialog/rollback-dirty-dialog.component";
-import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-upload.component";
+import {ActionDirtyDialogComponent} from "./pmode/action-dirty-dialog/action-dirty-dialog.component";
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
 import {ClearInvalidDirective} from "./customDate/clearInvalid.directive"
+import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {TestServiceComponent} from "./testservice/testservice.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
@@ -86,10 +89,12 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ErrorLogComponent,
     AlertComponent,
     FooterComponent,
-    PModeComponent,
+    CurrentPModeComponent,
+    PModeArchiveComponent,
     IsAuthorized,
     TruststoreComponent,
     PmodeUploadComponent,
+    PmodeViewComponent,
     SaveDialogComponent,
     MessagelogDialogComponent,
     CancelDialogComponent,
@@ -98,6 +103,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MoveDialogComponent,
     MessageDialogComponent,
     DatePipe,
+    CapitalizeFirstPipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,
@@ -109,8 +115,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     PageHelperComponent,
     RollbackDialogComponent,
-    RollbackDirtyDialogComponent,
-    PmodeDirtyUploadComponent,
+    ActionDirtyDialogComponent,
     AuditComponent,
     PartyComponent,
     PartyDetailsComponent,
@@ -120,6 +125,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
   entryComponents: [
     AppComponent,
     PmodeUploadComponent,
+    PmodeViewComponent,
     MessagelogDialogComponent,
     MoveDialogComponent,
     MessageDialogComponent,
@@ -133,8 +139,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TruststoreDialogComponent,
     TrustStoreUploadComponent,
     RollbackDialogComponent,
-    RollbackDirtyDialogComponent,
-    PmodeDirtyUploadComponent,
+    ActionDirtyDialogComponent,
     PartyDetailsComponent
   ],
   imports: [
@@ -156,7 +161,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ReactiveFormsModule,
     Md2Module,
     Md2SelectModule,
-    SharedModule
+    SharedModule,
+    MdExpansionModule
   ],
   providers: [
     AuthenticatedGuard,

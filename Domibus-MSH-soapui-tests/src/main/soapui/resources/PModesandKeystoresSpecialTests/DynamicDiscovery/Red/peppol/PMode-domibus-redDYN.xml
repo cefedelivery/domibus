@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="red_gw">
+	<mpcs>
+		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
+		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+	</mpcs>
+	<businessProcesses>
+		<roles>
+			<role name="defaultInitiatorRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+			<role name="defaultInitiatorRoleEmpty" value=" "/>
+			<role name="defaultResponderRoleEmpty" value=" "/>
+			<role name="peppolDefaultInitiatorRole" value="urn:fdc:peppol.eu:2017:roles:ap:as4"/>
+			<role name="peppolDefaultResponderRole" value="urn:fdc:peppol.eu:2017:roles:ap:as4"/>
+		</roles>
+		<parties>
+			<partyIdTypes>
+				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
+				<partyIdType name="partyTypeiso" value="iso6523-actorid-upis"/>
+				<partyIdType name="partyTypeEmpty" value=""/>
+				<partyIdType name="partyTypePeppol" value="urn:fdc:peppol.eu:2017:identifiers:ap"/>
+			</partyIdTypes>
+			<party name="red_gw" endpoint="http://40.118.20.112:8995/domibus/services/msh" allowChunking="false">
+				<identifier partyId="red_gw" partyIdType="partyTypePeppol"/>
+			</party>
+			<party name="minder" 
+					endpoint="http://mindertestbed.org:15001/corner1" 
+					allowChunking="false"
+>
+				<identifier partyId="minder" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="domibus-c2" 
+					endpoint="http://13.93.127.140:8080/domibus/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="domibus-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="domibus-c3" 
+					endpoint="http://13.93.127.140:8180/domibus/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="domibus-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="domibus-c2-notype" 
+					endpoint="http://13.93.127.140:8080/domibus/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="domibus-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="domibus-c3-notype" 
+					endpoint="http://13.93.127.140:8180/domibus/services/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="domibus-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="ibmgw-c2" 
+					endpoint="http://5.153.46.50:29010/interop" 
+					allowChunking="false"
+>
+				<identifier partyId="ibmgw-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="ibmgw-c3" 
+					endpoint="http://5.153.46.50:29010/interop" 
+					allowChunking="false"
+>
+				<identifier partyId="ibmgw-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="ibmgw-c2-notype" 
+					endpoint="http://5.153.46.50:29010/interop" 
+					allowChunking="false"
+>
+				<identifier partyId="ibmgw-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="ibmgw-c3-notype" 
+					endpoint="http://5.153.46.50:29010/interop" 
+					allowChunking="false"
+>
+				<identifier partyId="ibmgw-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="flame-c2" 
+					endpoint="http://fmstest.flame.co.za:8082/as4-c2" 
+					allowChunking="false"
+>
+				<identifier partyId="flame-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="flame-c3" 
+					endpoint="http://fmstest.flame.co.za:8083/as4-c3" 
+					allowChunking="false"
+>
+				<identifier partyId="flame-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="flame-c2-notype" 
+					endpoint="http://fmstest.flame.co.za:8082/as4-c2" 
+					allowChunking="false"
+>
+				<identifier partyId="flame-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="flame-c3-notype" 
+					endpoint="http://fmstest.flame.co.za:8083/as4-c3" 
+					allowChunking="false"
+>
+				<identifier partyId="flame-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="holodeck-c2" 
+					endpoint="http://interop.holodeck-b2b.com:8080/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="holodeck-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="holodeck-c3" 
+					endpoint="http://interop.holodeck-b2b.com:8080/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="holodeck-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="holodeck-c2-notype" 
+					endpoint="http://interop.holodeck-b2b.com:8080/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="holodeck-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="holodeck-c3-notype" 
+					endpoint="http://interop.holodeck-b2b.com:8080/msh" 
+					allowChunking="false"
+>
+				<identifier partyId="holodeck-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="as4.net-c2" 
+					endpoint="http://interas4.westeurope.cloudapp.azure.com:8080/as4-net-c2" 
+					allowChunking="false"
+>
+				<identifier partyId="as4.net-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="as4.net-c3" 
+					endpoint="http://interas4.westeurope.cloudapp.azure.com:9090/as4-net-c3" 
+					allowChunking="false"
+>
+				<identifier partyId="as4.net-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="as4.net-c2-notype" 
+					endpoint="http://interas4.westeurope.cloudapp.azure.com:8080/as4-net-c2" 
+					allowChunking="false"
+>
+				<identifier partyId="as4.net-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="as4.net-c3-notype" 
+					endpoint="http://interas4.westeurope.cloudapp.azure.com:9090/as4-net-c3" 
+					allowChunking="false"
+>
+				<identifier partyId="as4.net-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="rssbus-c2" 
+					endpoint="http://172.126.121.169:4080/pub/Receive.rsb" 
+					allowChunking="false"
+>
+				<identifier partyId="rssbus-c2" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="rssbus-c3" 
+					endpoint="http://172.126.121.169:4082/pub/Receive.rsb" 
+					allowChunking="false"
+>
+				<identifier partyId="rssbus-c3" partyIdType="partyTypeUrn"/>
+			</party>
+			<party name="rssbus-c2-notype" 
+					endpoint="http://172.126.121.169:4080/pub/Receive.rsb" 
+					allowChunking="false"
+>
+				<identifier partyId="rssbus-c2" partyIdType="partyTypeEmpty"/>
+			</party>
+			<party name="rssbus-c3-notype" 
+					endpoint="http://172.126.121.169:4082/pub/Receive.rsb" 
+					allowChunking="false"
+>
+				<identifier partyId="rssbus-c3" partyIdType="partyTypeEmpty"/>
+			</party>
+		</parties>
+		<meps>
+			<mep name="oneway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay"/>
+			<mep name="twoway" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay"/>
+			<binding name="push" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push"/>
+			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
+		</meps>
+		<properties>
+			<property name="originalSenderProperty" key="originalSender" datatype="string" required="true"/>
+			<property name="finalRecipientProperty" key="finalRecipient" datatype="string" required="true"/>
+			<propertySet name="ecodexPropertySet">
+				<propertyRef property="finalRecipientProperty"/>
+				<propertyRef property="originalSenderProperty"/>
+			</propertySet>
+		</properties>
+		<payloadProfiles>
+			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
+			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf"/>
+			<payloadProfile name="MessageProfile" maxSize="40894464">
+				<attachment name="businessContentPayload"/>
+				<attachment name="businessContentAttachment"/>
+			</payloadProfile>
+		</payloadProfiles>
+		<securities>
+			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryPolicy_CA" policy="eDeliveryPolicy_CA.xml" signatureMethod="RSA_SHA256"/>
+			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eSensPolicy_CA" policy="eSensPolicy.v2.0_CA.xml" signatureMethod="RSA_SHA256"/>
+		</securities>
+		<errorHandlings>
+			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
+		</errorHandlings>
+		<agreements>
+			<agreement name="agreementEmpty" value="" type=""/>
+		</agreements>
+		<services>
+			<service name="testService1" value="urn:www.cenbii.eu:profile:bii05:ver2.0" type="cenbii-procid-ubl"/>
+			<service name="SRV_SIMPLE_TWOWAY" value="SRV_SIMPLE_TWOWAY" />
+			<service name="testService3" value="cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii05:ver2.0" type="peppol-type"/>
+		</services>
+		<actions>
+			<action name="tc1Action" value="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>
+			<action name="tc2Action" value="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>
+			<action name="tc3Action" value="busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1"/>
+		</actions>
+		<as4>
+			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
+			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
+			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
+		</as4>
+		<legConfigurations>
+			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="simple_twowayACT_SIMPLE_TWOWAY" service="testService1" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" errorHandling="demoErrorHandling" compressPayloads="true"/>		
+			<legConfiguration name="pushTestcase3tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase4tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase5tc1Action" service="testService3" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+		</legConfigurations>							
+		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase1tc1Action"/>
+			</legs>
+		</process>	
+		<process name="tc2Process"	agreement="agreementEmpty"	mep="twoway"	binding="pushAndPush"	initiatorRole="defaultInitiatorRole"	responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="domibus-c2"/>
+				<initiatorParty name="domibus-c3"/>
+				<initiatorParty name="domibus-c2-notype"/>
+				<initiatorParty name="domibus-c3-notype"/>
+				<initiatorParty name="ibmgw-c2"/>
+				<initiatorParty name="ibmgw-c3"/>
+				<initiatorParty name="ibmgw-c2-notype"/>
+				<initiatorParty name="ibmgw-c3-notype"/>
+				<initiatorParty name="flame-c2"/>
+				<initiatorParty name="flame-c3"/>
+				<initiatorParty name="holodeck-c2"/>
+				<initiatorParty name="holodeck-c3"/>
+				<initiatorParty name="flame-c2-notype"/>
+				<initiatorParty name="flame-c3-notype"/>
+				<initiatorParty name="holodeck-c2-notype"/>
+				<initiatorParty name="holodeck-c3-notype"/>
+				<initiatorParty name="as4.net-c2"/>
+				<initiatorParty name="as4.net-c3"/>
+				<initiatorParty name="as4.net-c2-notype"/>
+				<initiatorParty name="as4.net-c3-notype"/>
+				<initiatorParty name="rssbus-c2"/>
+				<initiatorParty name="rssbus-c3"/>
+				<initiatorParty name="rssbus-c2-notype"/>
+				<initiatorParty name="rssbus-c3-notype"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="domibus-c2"/>
+				<responderParty name="domibus-c3"/>
+				<responderParty name="domibus-c2-notype"/>
+				<responderParty name="domibus-c3-notype"/>
+				<responderParty name="ibmgw-c2"/>
+				<responderParty name="ibmgw-c3"/>
+				<responderParty name="ibmgw-c2-notype"/>
+				<responderParty name="ibmgw-c3-notype"/>
+				<responderParty name="flame-c2"/>
+				<responderParty name="flame-c3"/>
+				<responderParty name="holodeck-c2"/>
+				<responderParty name="holodeck-c3"/>
+				<responderParty name="flame-c2-notype"/>
+				<responderParty name="flame-c3-notype"/>
+				<responderParty name="holodeck-c2-notype"/>
+				<responderParty name="holodeck-c3-notype"/>
+				<responderParty name="as4.net-c2"/>
+				<responderParty name="as4.net-c3"/>
+				<responderParty name="as4.net-c2-notype"/>
+				<responderParty name="as4.net-c3-notype"/>
+				<responderParty name="rssbus-c2"/>
+				<responderParty name="rssbus-c3"/>
+				<responderParty name="rssbus-c2-notype"/>
+				<responderParty name="rssbus-c3-notype"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="simple_twowayACT_SIMPLE_TWOWAY"/>
+			</legs>
+		</process>
+		<process name="tc3Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase3tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc4Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase4tc1Action"/>
+			</legs>
+		</process>
+		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="peppolDefaultResponderRole">
+			<responderParties>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase5tc1Action"/>
+			</legs>
+		</process>
+	</businessProcesses>
+</db:configuration>

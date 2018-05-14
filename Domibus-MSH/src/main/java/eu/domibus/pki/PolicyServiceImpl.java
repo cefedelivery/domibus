@@ -6,6 +6,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.neethi.Policy;
@@ -29,7 +30,10 @@ public class PolicyServiceImpl implements PolicyService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImpl.class);
 
     @Autowired
-    DomibusConfigurationService domibusConfigurationService;
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private Bus bus;
 
 
     /**
@@ -42,7 +46,7 @@ public class PolicyServiceImpl implements PolicyService {
     @Override
     @Cacheable("policyCache")
     public Policy parsePolicy(final String location) throws ConfigurationException {
-        final PolicyBuilder pb = BusFactory.getDefaultBus().getExtension(PolicyBuilder.class);
+        final PolicyBuilder pb = bus.getExtension(PolicyBuilder.class);
         try {
             return pb.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation(), location)));
         } catch (IOException | ParserConfigurationException | SAXException e) {

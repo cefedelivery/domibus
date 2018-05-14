@@ -1,24 +1,31 @@
-import {RouterModule, Routes} from "@angular/router";
-import {LoginComponent} from "./login/login.component";
-import {AuthenticatedGuard} from "./guards/authenticated.guard";
-import {ErrorLogComponent} from "./errorlog/errorlog.component";
-import {PModeComponent} from "./pmode/pmode.component";
-import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
-import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
-import {MessageLogComponent} from "./messagelog/messagelog.component";
-import {UserComponent} from "./user/user.component";
-import {TruststoreComponent} from "app/truststore/truststore.component";
-import {JmsComponent} from "./jms/jms.component";
-import {DirtyGuard} from "./common/dirty.guard";
-import {AuditComponent} from "./audit/audit.component";
-import {PartyComponent} from "./party/party.component";
-import {TestServiceComponent} from "./testservice/testservice.component";
+import {RouterModule, Routes} from '@angular/router';
+import {LoginComponent} from './login/login.component';
+import {AuthenticatedGuard} from './guards/authenticated.guard';
+import {ErrorLogComponent} from './errorlog/errorlog.component';
+import {CurrentPModeComponent} from './pmode/current/currentPMode.component';
+import {PModeArchiveComponent} from './pmode/archive/pmodeArchive.component';
+import {AuthorizedAdminGuard} from './guards/authorized-admin.guard';
+import {MessageFilterComponent} from './messagefilter/messagefilter.component';
+import {MessageLogComponent} from './messagelog/messagelog.component';
+import {UserComponent} from './user/user.component';
+import {TruststoreComponent} from 'app/truststore/truststore.component';
+import {JmsComponent} from './jms/jms.component';
+import {DirtyGuard} from './common/dirty.guard';
+import {AuditComponent} from './audit/audit.component';
+import {PartyComponent} from './party/party.component';
+import {TestServiceComponent} from './testservice/testservice.component';
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
   {
-    path: 'pmode',
-    component: PModeComponent,
+    path: 'pmode-current',
+    component: CurrentPModeComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canDeactivate: [DirtyGuard]
+  },
+  {
+    path: 'pmode-archive',
+    component: PModeArchiveComponent,
     canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
     canDeactivate: [DirtyGuard]
   },
@@ -45,7 +52,7 @@ const appRoutes: Routes = [
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
   {path: 'login', component: LoginComponent},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'pmode-party', component: PartyComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
