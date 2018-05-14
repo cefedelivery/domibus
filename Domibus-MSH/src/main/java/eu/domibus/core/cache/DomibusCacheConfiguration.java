@@ -57,7 +57,7 @@ public class DomibusCacheConfiguration {
     @Bean(name = "ehcache")
     public EhCacheManagerFactoryBean ehCacheManagerFactoryBean() {
         EhCacheManagerFactoryBean ehCacheManagerFactoryBean = new EhCacheManagerFactoryBean();
-        final ClassPathResource classPathResource = new ClassPathResource("config/ehcache/ehcache.xml");
+        final ClassPathResource classPathResource = new ClassPathResource("config/ehcache/ehcache-default.xml");
         ehCacheManagerFactoryBean.setConfigLocation(classPathResource);
         ehCacheManagerFactoryBean.setCacheManagerName("default");
         return ehCacheManagerFactoryBean;

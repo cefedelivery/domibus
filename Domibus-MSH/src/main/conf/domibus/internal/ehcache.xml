@@ -1,0 +1,49 @@
+<!-- Domibus cache configuration -->
+<ehcache>
+    <!-- Please find below in comments the cache entries used internally by Domibus. If needed one or multiple cache entries can be uncommented and customized -->
+    <!-- Additional cache entries can be added if needed by custom plugins -->
+    <!--
+    <cache name="policyCache"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false" >
+    </cache>
+    <cache name="backendFilterCache"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    <cache name="tlsCache"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    <cache name="certValidationByAlias"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    <cache name="crlByCert"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    <cache name="lookupInfo"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    <cache name="dispatchClient"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+        <sizeOfPolicy maxDepthExceededBehavior="abort"/>
+    </cache>
+    <cache name="auditTarget"
+           maxBytesLocalHeap="5m"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false">
+    </cache>
+    -->
+
+</ehcache>
