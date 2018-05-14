@@ -13,6 +13,7 @@ export class PmodeUploadComponent implements OnInit {
   private url = 'rest/pmode';
 
   enableSubmit = false;
+  submitInProgress = false;
 
   description: string = '';
 
@@ -47,17 +48,28 @@ export class PmodeUploadComponent implements OnInit {
   }
 
   public submit() {
-    let input = new FormData();
-    input.append('file', this.getFile());
-    input.append('description', this.description);
-    this.http.post(this.url, input).subscribe(res => {
-        this.alertService.success(res.text(), false);
-        this.dialogRef.close({done: true});
-      }, err => {
-        this.alertService.error(err._body, false);
-        this.dialogRef.close({done: false});
-      }
-    );
+    if(this.submitInProgress) return;
+
+    this.submitInProgress = true;
+
+    try {
+      let input = new FormData();
+      input.append('file', this.getFile());
+      input.append('description', this.description);
+      this.http.post(this.url, input).subscribe(res => {
+          this.alertService.success(res.text(), false);
+          this.dialogRef.close({done: true});
+        }, err => {
+          this.alertService.error(err._body, false);
+          this.dialogRef.close({done: false});
+        },
+        () => {
+          this.submitInProgress = false;
+        }
+      );
+    } catch(e) {
+      this.submitInProgress = false;
+    }
   }
 
   public cancel() {
