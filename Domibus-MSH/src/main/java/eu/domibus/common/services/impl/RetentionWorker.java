@@ -1,21 +1,22 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.quartz.DomibusQuartzJobBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 
 /**
  * @author Christian Koch, Stefan Mueller
  */
 @DisallowConcurrentExecution
-public class RetentionWorker extends QuartzJobBean {
+public class RetentionWorker extends DomibusQuartzJobBean {
 
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetentionWorker.class);
@@ -31,7 +32,7 @@ public class RetentionWorker extends QuartzJobBean {
     AuthUtils authUtils;
 
     @Override
-    protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
         LOG.debug("RetentionWorker executed");
         if(!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("retention_user", "retention_password");

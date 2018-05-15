@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
@@ -19,7 +20,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.BackendFilterEntity;
@@ -43,7 +43,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.Queue;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -88,11 +91,11 @@ public class BackendNotificationService {
     private ApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private DomainCoreConverter coreConverter;
+
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -337,7 +340,7 @@ public class BackendNotificationService {
     }
 
     protected boolean isPluginNotificationDisabled() {
-        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        String pluginNotificationEnabled = domibusPropertyProvider.getProperty("domibus.plugin.notification.active", "true");
         return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

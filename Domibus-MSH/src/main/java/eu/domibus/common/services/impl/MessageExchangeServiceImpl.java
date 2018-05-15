@@ -3,7 +3,10 @@ package eu.domibus.common.services.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.MSHRole;
@@ -21,6 +24,7 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -30,7 +34,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import eu.domibus.pki.PolicyService;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -94,14 +97,16 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private PolicyService policyService;
 
     @Autowired
-    private CertificateService certificateService;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
-    private CryptoService cryptoService;
+    protected CertificateService certificateService;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private java.util.Properties domibusProperties;
+    protected DomainContextProvider domainProvider;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private MessagingLockService messagingLockService;
@@ -187,7 +192,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                             }
                         };
 
-                        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+                        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
@@ -290,10 +295,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
-                boolean certificateChainValid = certificateService.isCertificateChainValid(receiverName);
+                boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
                 if (!certificateChainValid) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, chainExceptionMessage);
                 }
@@ -311,10 +316,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
-                X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(senderName);
+                X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);
                 if (certificate == null) {
                     throw new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "Cannot send message: sender[" + senderName + "] certificate not found in Keystore");
                 }

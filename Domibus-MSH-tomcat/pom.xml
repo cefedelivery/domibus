@@ -217,6 +217,19 @@
             <version>2.2.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- End Test dependencies -->
     </dependencies>
 
@@ -233,6 +246,10 @@
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/main/conf/domibus/internal</directory>
+                <targetPath>internal</targetPath>
             </testResource>
         </testResources>
         <plugins>

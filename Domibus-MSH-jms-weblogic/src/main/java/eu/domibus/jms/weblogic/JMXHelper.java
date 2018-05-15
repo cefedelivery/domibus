@@ -1,13 +1,13 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.jms.spi.InternalJMSException;
-import org.apache.commons.lang3.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -41,8 +40,8 @@ public class JMXHelper {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMXHelper.class);
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     SecurityHelper securityHelper;
@@ -112,12 +111,12 @@ public class JMXHelper {
     }
 
     protected Map<String, String> getJMSCredentials() {
-        String jmxUser = domibusProperties.getProperty(DOMIBUS_JMX_USER_PROP);
+        String jmxUser = domibusPropertyProvider.getProperty(DOMIBUS_JMX_USER_PROP);
         if (StringUtils.isEmpty(jmxUser)) {
             LOG.info("The property [" + DOMIBUS_JMX_USER_PROP + "] is not configured. Using the configuration from boot.properties ");
             return securityHelper.getBootIdentity();
         }
-        final String jmxPassword = domibusProperties.getProperty(DOMIBUS_JMX_PWD_PROP);
+        final String jmxPassword = domibusPropertyProvider.getProperty(DOMIBUS_JMX_PWD_PROP);
         Map<String, String> credentialsMap = new HashMap<>();
         credentialsMap.put("username", jmxUser);
         credentialsMap.put("password", jmxPassword);
