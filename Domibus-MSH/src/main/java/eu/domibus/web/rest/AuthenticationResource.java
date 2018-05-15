@@ -10,6 +10,7 @@ import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +59,20 @@ public class AuthenticationResource {
     protected UserDomainService userDomainService;
 
     @Autowired
+    protected DomainService domainService;
+
+    @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
     public ErrorRO handleException(Exception ex) {
+        return new ErrorRO(ex.getMessage());
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({DomainException.class})
+    public ErrorRO handleDomainException(Exception ex) {
         return new ErrorRO(ex.getMessage());
     }
 
@@ -122,6 +132,25 @@ public class AuthenticationResource {
         LOG.debug("Getting current domain");
         Domain domain = domainContextProvider.getCurrentDomainSafely();
         return domainCoreConverter.convert(domain, DomainRO.class);
+    }
+
+    /**
+     * Set the current domain of the current user (in multi-tenancy mode)
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
+    public void setCurrentDomain(@RequestBody String domainCode) {
+        LOG.debug("Setting current domain " + domainCode);
+        if (StringUtils.isEmpty(domainCode)) {
+            throw new DomainException("Could not set current domain: domain is empty");
+        }
+        if (!domainService.getDomains().stream().anyMatch(d -> domainCode.equalsIgnoreCase(d.getCode()))) {
+            throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
+        }
+
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetail securityUser = (UserDetail) authentication.getPrincipal();
+        securityUser.setDomain(domainCode);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 }

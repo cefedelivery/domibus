@@ -81,8 +81,12 @@ export class SecurityService {
     return subject.asObservable();
   }
 
+  isCurrentUserSuperAdmin(): boolean {
+    return this.isCurrentUserInRole(["ROLE_AP_ADMIN"]);
+  }
+
   isCurrentUserAdmin(): boolean {
-    return this.isCurrentUserInRole(["ROLE_ADMIN"]);
+    return this.isCurrentUserInRole(["ROLE_ADMIN", "ROLE_AP_ADMIN"]);
   }
 
   isCurrentUserInRole(roles: Array<string>): boolean {

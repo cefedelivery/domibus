@@ -54,11 +54,7 @@ export class AppComponent implements OnInit {
 
   get currentUser(): string {
     let user = this.securityService.getCurrentUser();
-    if (user != null) {
-      return user.username;
-    }
-    return "";
-
+    return user ? user.username : "";
   }
 
   logout(event: Event): void {
