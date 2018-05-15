@@ -1,6 +1,6 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {SecurityService} from "./security/security.service";
-import {Router} from "@angular/router";
+import {Router, RouterOutlet} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
 import {Title} from "@angular/platform-browser";
 import {Http, Response} from "@angular/http";
@@ -17,6 +17,9 @@ export class AppComponent implements OnInit {
   _currentUser: string;
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
+
+  @ViewChild(RouterOutlet)
+  outlet: RouterOutlet;
 
   constructor(private securityService: SecurityService,
               private router: Router,

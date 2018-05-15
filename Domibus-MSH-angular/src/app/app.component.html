@@ -98,7 +98,7 @@
 
     <div id="sandwichMenuHolder">
 
-      <domain-selector *ngIf="currentUser"></domain-selector>
+      <domain-selector *ngIf="currentUser" [currentComponent]="outlet.activated ? outlet.component : null"></domain-selector>
 
       <div class="helpMenu">
         <page-helper></page-helper>

@@ -56,7 +56,7 @@ export class DomainService {
   }
 
   setCurrentDomain(domain: Domain) {
-    this.http.put(DomainService.CURRENT_DOMAIN_URL, domain.code).subscribe(() => {
+    return this.http.put(DomainService.CURRENT_DOMAIN_URL, domain.code).toPromise().then(() => {
       if (this.domainSubject) {
         this.domainSubject.next(domain);
       }

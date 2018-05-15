@@ -1,4 +1,4 @@
-<md-select *ngIf="showDomains" [(ngModel)]="currentDomainCode" (change)="changeDomain()">
+<md-select *ngIf="showDomains" [(ngModel)]="domainCode" (change)="changeDomain()">
 	<md-option *ngFor="let d of domains" [value]="d.code">
 	  {{d.name}}
 	</md-option>
