@@ -65,6 +65,9 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * Gets all the PModes Entries
    */
   getAllPModeEntries () {
+    this.current = null;
+    this.pModeContents = null;
+    this.pModeExists = false;
     this.getResultObservable().subscribe((response: Response) => {
         const list: any[] = response.json();
         if (list && list.length) {
