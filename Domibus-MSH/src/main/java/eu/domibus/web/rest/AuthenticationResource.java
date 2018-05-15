@@ -138,6 +138,7 @@ public class AuthenticationResource {
      * Set the current domain of the current user (in multi-tenancy mode)
      */
     @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setCurrentDomain(@RequestBody String domainCode) {
         LOG.debug("Setting current domain " + domainCode);
         if (StringUtils.isEmpty(domainCode)) {
