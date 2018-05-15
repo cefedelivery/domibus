@@ -16,8 +16,12 @@ export class PageHeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => this.isMultiDomain = isMultiDomain);
-    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain ? domain.name : '');
+    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
+      this.isMultiDomain = isMultiDomain;
+      if (isMultiDomain) {
+        this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain ? domain.name : '');
+      }
+    });
   }
 
 }
