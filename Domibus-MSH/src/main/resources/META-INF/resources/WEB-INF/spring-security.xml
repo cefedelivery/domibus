@@ -29,6 +29,7 @@
         <intercept-url pattern="/rest/messagefilters/**" access="hasRole('ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/jms/**" access="hasRole('ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
+        <intercept-url pattern="/rest/application/multitenancy" access="permitAll"/>
 
         <!-- Enable CSRF protection -->
         <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>

@@ -1,13 +1,13 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
-import eu.domibus.core.multitenancy.dao.UserDomainDao;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
@@ -49,9 +49,6 @@ public class AuthenticationResource {
     protected SchedulingTaskExecutor schedulingTaskExecutor;
 
     @Autowired
-    protected UserDomainDao userDomainDao;
-
-    @Autowired
     protected DomainContextProvider domainContextProvider;
 
     @Autowired
@@ -60,6 +57,8 @@ public class AuthenticationResource {
     @Autowired
     protected UserDomainService userDomainService;
 
+    @Autowired
+    protected DomainCoreConverter domainCoreConverter;
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
@@ -113,4 +112,16 @@ public class AuthenticationResource {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser.getUsername();
     }
+
+    /**
+     * Retrieve the current domain of the current user (in multi-tenancy mode)
+     * @return the current domain
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.GET)
+    public DomainRO getCurrentDomain() {
+        LOG.debug("Getting current domain");
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
+        return domainCoreConverter.convert(domain, DomainRO.class);
+    }
+
 }

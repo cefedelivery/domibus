@@ -31,6 +31,7 @@ import {ExtendedHttpClient} from "./http/extended-http-client";
 import {HttpEventService} from "./http/http.event.service";
 import {SecurityService} from "./security/security.service";
 import {SecurityEventService} from "./security/security.event.service";
+import {DomainService} from "./security/domain.service";
 import {AlertComponent} from "./alert/alert.component";
 import {AlertService} from "./alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
@@ -70,7 +71,8 @@ import {PmodeDirtyUploadComponent} from "./pmode/pmode-dirty-upload/pmode-dirty-
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
-import {ClearInvalidDirective} from "./customDate/clearInvalid.directive"
+import {ClearInvalidDirective} from "./customDate/clearInvalid.directive";
+import {PageHeaderComponent} from "./common/page-header/page-header.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -117,7 +119,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuditComponent,
     PartyComponent,
     PartyDetailsComponent,
-    ClearInvalidDirective
+    ClearInvalidDirective,
+    PageHeaderComponent
   ],
   entryComponents: [
     AppComponent,
@@ -169,6 +172,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     HttpEventService,
     SecurityService,
     SecurityEventService,
+    DomainService,
     DomibusInfoService,
     AlertService,
     {
