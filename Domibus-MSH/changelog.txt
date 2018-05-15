@@ -1,4 +1,5 @@
 Domibus 4.0
+- Support for multi-tenancy
 - Each plugin can now specify its own list of notification types for which it expects notifications.
 - Upgrade the following libraries:hibernate, atomikos,spring,liquibase,junit
 - Upgrade the java version
@@ -6,6 +7,7 @@ Domibus 4.0
 - Possibility to have information of all PMode changes' history
 - Possibility to export the contents of a datatable to CSV
 - Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
+- Internalize EhCache configuration and give possibility to override it
 Domibus 3.3.4
 - Change the pulling mechanism in order to have a better message per second throughput.
 - Changes to support the fixed values of PEPPOL AS4 profile in the dynamic discovery lookup.

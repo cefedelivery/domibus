@@ -1,27 +1,26 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.fetcher.BasicApacheFetcher;
-import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.api.LookupException;
+import no.difi.vefa.peppol.lookup.fetcher.BasicApacheFetcher;
 import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
+import no.difi.vefa.peppol.mode.Mode;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.util.Properties;
 
 /**
  * Service to query the SMP to extract the required information about the unknown receiver AP.
@@ -41,18 +40,18 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
     private static final String RESPONDER_ROLE = "urn:fdc:peppol.eu:2017:roles:ap:as4";
     private static final String PARTYID_TYPE = "urn:fdc:peppol.eu:2017:identifiers:ap";
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
 
         LOG.info("[PEPPOL SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId + " " + processId + " " + processIdType);
-        final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
+        final String smlInfo = domibusPropertyProvider.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
-        String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
+        String mode = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
         try {
             final LookupClient smpClient = LookupClientBuilder.forMode(mode)
                     .locator(new BusdoxLocator(smlInfo))
@@ -79,12 +78,12 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     @Override
     public String getPartyIdType() {
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, PARTYID_TYPE);
+        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, PARTYID_TYPE);
     }
 
     @Override
     public String getResponderRole(){
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
+        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
     }
 
 }

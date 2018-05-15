@@ -1,5 +1,7 @@
 package eu.domibus.core.security;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -17,7 +19,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.POST;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -25,10 +26,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
+
 /**
  * @author idragusa
  * @since 4.0
@@ -51,7 +52,13 @@ public class AuthenticationDefaultServiceTest {
     private CertificateServiceImpl certificateService = new CertificateServiceImpl();
 
     @Injectable
-    private Properties domibusProperties;
+    private AuthUtils authUtils;
+
+    @Injectable
+    UserDomainService userDomainService;
+
+    @Injectable
+    DomainContextProvider domainContextProvider;
 
     @Tested
     AuthenticationService authenticationService = new AuthenticationDefaultService();
@@ -62,13 +69,13 @@ public class AuthenticationDefaultServiceTest {
         MockHttpServletRequest postProcessedRequest = createHttpRequest(certificate, "https");
 
         new Expectations() {{
-            domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
+            authUtils.isUnsecureLoginAllowed();
             result = false;
             X509Certificate[] certs = new X509Certificate[1];
             certs[0] = certificate;
             Authentication authentication = new X509CertificateAuthentication(certs);
             authentication.setAuthenticated(true);
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             result = authentication;
         }};
 
@@ -83,7 +90,7 @@ public class AuthenticationDefaultServiceTest {
         authenticationService.authenticate(request);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 0;
         }};
     }
@@ -93,7 +100,7 @@ public class AuthenticationDefaultServiceTest {
         X509Certificate certificate = createCertificate(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
 
         new Expectations() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             result = new AuthenticationCredentialsNotFoundException(anyString);
         }};
 
@@ -101,7 +108,7 @@ public class AuthenticationDefaultServiceTest {
         authenticationService.authenticate(postProcessedRequest);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 1;
         }};
     }
@@ -112,14 +119,14 @@ public class AuthenticationDefaultServiceTest {
         MockHttpServletRequest postProcessedRequest = createHttpRequest(certificate, "https");
 
         new Expectations() {{
-            domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
+            authUtils.isUnsecureLoginAllowed();
             result = true;
         }};
 
         authenticationService.authenticate(postProcessedRequest);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 0;
         }};
     }
@@ -131,14 +138,14 @@ public class AuthenticationDefaultServiceTest {
         new Expectations() {{
             Authentication authentication = new BasicAuthentication(AuthRole.ROLE_USER);
             authentication.setAuthenticated(true);
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             result = authentication;
         }};
 
         authenticationService.authenticate(request);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 1;
         }};
     }
@@ -150,14 +157,14 @@ public class AuthenticationDefaultServiceTest {
         new Expectations() {{
             Authentication authentication = new BasicAuthentication(AuthRole.ROLE_USER);
             authentication.setAuthenticated(false);
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             result = authentication;
         }};
 
         authenticationService.authenticate(request);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 1;
         }};
     }
@@ -169,14 +176,14 @@ public class AuthenticationDefaultServiceTest {
         new Expectations() {{
             Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
             authentication.setAuthenticated(true);
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             result = authentication;
         }};
 
         authenticationService.authenticate(request);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 1;
         }};
     }
@@ -186,14 +193,14 @@ public class AuthenticationDefaultServiceTest {
         MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
 
         new Expectations() {{
-            domibusProperties.getProperty(AuthenticationDefaultService.UNSECURE_LOGIN_ALLOWED, "true");
+            authUtils.isUnsecureLoginAllowed();
             result = false;
         }};
 
         authenticationService.authenticate(request);
 
         new Verifications() {{
-            securityCustomAuthenticationProvider.authenticate((Authentication)any);
+            securityCustomAuthenticationProvider.authenticate((Authentication) any);
             times = 0;
         }};
     }
@@ -206,7 +213,7 @@ public class AuthenticationDefaultServiceTest {
 
     private MockHttpServletRequest createHttpRequest(X509Certificate certificate, String scheme) {
         MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.POST, DOMIBUS_URL);
-        if(scheme != null) {
+        if (scheme != null) {
             request.setScheme(scheme);
         }
 
@@ -215,7 +222,7 @@ public class AuthenticationDefaultServiceTest {
         return postProcessedRequest;
     }
 
-    private X509Certificate createCertificate(String keystore, String alias, String password){
+    private X509Certificate createCertificate(String keystore, String alias, String password) {
         X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore, alias, password);
         assertNotNull(certificate);
         return certificate;
@@ -237,7 +244,7 @@ public class AuthenticationDefaultServiceTest {
         Date validFrom = df.parse("Jun 01 10:37:53 2015 CEST");
         Date validTo = df.parse("Jun 01 10:37:53 2035 CEST");
 
-        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom="+ df.format(validFrom) +"&validTo=" + df.format(validTo) +"&issuer=" + issuer;
+        String certHeaderValue = "serial=" + serial + "&subject=" + subject + "&validFrom=" + df.format(validFrom) + "&validTo=" + df.format(validTo) + "&issuer=" + issuer;
         return certHeaderValue;
     }
 

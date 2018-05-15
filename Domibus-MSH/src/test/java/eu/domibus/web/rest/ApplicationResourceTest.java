@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import mockit.Expectations;
@@ -9,8 +10,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -28,8 +27,8 @@ public class ApplicationResourceTest {
     @Injectable
     DomibusPropertiesService domibusPropertiesService;
 
-    @Injectable("domibusProperties")
-    Properties domibusProperties;
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Test
     public void testGetDomibusInfo() throws Exception {
@@ -50,7 +49,7 @@ public class ApplicationResourceTest {
     public void testDomibusName(String name) {
         // Given
         new Expectations(applicationResource) {{
-            domibusProperties.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
+            domibusPropertyProvider.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
             result = name;
         }};
 

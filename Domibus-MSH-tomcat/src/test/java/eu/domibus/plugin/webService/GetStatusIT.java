@@ -1,32 +1,52 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
-import eu.domibus.plugin.webService.generated.*;
+import eu.domibus.AbstractBackendWSIT;
+import eu.domibus.common.services.MessagingService;
+import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.plugin.webService.generated.MessageStatus;
+import eu.domibus.plugin.webService.generated.StatusFault;
+import eu.domibus.plugin.webService.generated.StatusRequest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.Provider;
 import java.io.IOException;
 
-public class GetStatusIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class GetStatusIT extends AbstractBackendWSIT {
 
     @Autowired
-    BackendInterface backendWebService;
+    MessagingService messagingService;
 
-    private static boolean initialized;
+    @Autowired
+    Provider<SOAPMessage> mshWebservice;
 
     @Before
-    public void before() throws IOException {
-        if (!initialized) {
-            insertDataset("getMessageStatus.sql");
-            initialized = true;
-        }
+    public void before() throws IOException, XmlProcessingException {
+        uploadPmode(wireMockRule.port());
     }
 
     @Test
-    public void testGetStatusReceived() throws StatusFault {
-        String messageId = "2809cef6-240f-4792-bec1-7cb300a34679@domibus.eu";
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void testGetStatusReceived() throws StatusFault, IOException, SOAPException, SAXException, ParserConfigurationException {
+        String filename = "SOAPMessage2.xml";
+        String messageId = "43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu";
+        SOAPMessage soapMessage = createSOAPMessage(filename);
+        mshWebservice.invoke(soapMessage);
+
+        waitUntilMessageIsReceived(messageId);
+
         StatusRequest messageStatusRequest = createMessageStatusRequest(messageId);
         MessageStatus response = backendWebService.getStatus(messageStatusRequest);
         Assert.assertEquals(MessageStatus.RECEIVED, response);

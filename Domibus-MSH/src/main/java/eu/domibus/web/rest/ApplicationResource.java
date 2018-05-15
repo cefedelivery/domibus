@@ -1,16 +1,14 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -30,8 +28,7 @@ public class ApplicationResource {
     private DomibusPropertiesService domibusPropertiesService;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     /**
      * Rest method for the Domibus Info (Version, Build Time, ...)
@@ -52,6 +49,6 @@ public class ApplicationResource {
     @RequestMapping(value = "name", method = RequestMethod.GET)
     public String getDomibusName() {
         LOG.debug("Getting application name");
-        return domibusProperties.getProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
+        return domibusPropertyProvider.getProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
     }
 }

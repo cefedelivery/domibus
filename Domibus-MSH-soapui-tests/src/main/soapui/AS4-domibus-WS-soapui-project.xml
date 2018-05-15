@@ -24032,6 +24032,148 @@ test.cleanDBMessageIDStartsWith('-Dom184-')
 test.finalize();	
 
 ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
+        <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="false" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom185-Push-Submit Message-ConversationId present" searchProperties="true" id="a7a18acd-a0c5-45a4-8629-75335afa0860" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="">
+            <con:settings/>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <con:testStep type="request" id="d1a8914b-71c1-4ece-9853-58bcf3eff7d2" name="Submit Message with conversationId"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message with conversationId" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>
+      <ns:Messaging>
+         <ns:UserMessage>
+            <ns:MessageInfo>
+            	<ns:MessageId>-Dom185-1-</ns:MessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>
+               <ns:From>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+               </ns:From>
+               <ns:To>
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
+               </ns:To>
+            </ns:PartyInfo>
+            <ns:CollaborationInfo>
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>
+               <ns:Action>TC1Leg1</ns:Action>
+               <ns:ConversationId>-Dom185-1-123456</ns:ConversationId>
+            </ns:CollaborationInfo>
+            <ns:MessageProperties>
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
+            </ns:MessageProperties>
+            <ns:PayloadInfo>
+               <ns:PartInfo href="cid:message">
+                  <ns:PartProperties>
+                     <ns:Property name="MimeType">text/xml</ns:Property>
+                  </ns:PartProperties>
+               </ns:PartInfo>
+            </ns:PayloadInfo>
+         </ns:UserMessage>
+      </ns:Messaging>
+   </soap:Header>
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message" contentType="text/xml">\r
+            <value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>\r
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="4aea63dd-430c-4d82-a99c-9857967d14c3"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="1f63c004-1775-41f1-adbf-4eec2cab64db"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="051886c9-4f86-4b14-8f9a-44b1a10b2c50"><con:configuration><codes>200</codes></con:configuration></con:assertion><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d4f20e22-9806-4d17-8433-5a346189b433"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check the log file 1" id="e22d2435-eef3-47e2-b861-66350d4cb934"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check the log file for message Sender (DEBUG logs option is on) (in \\Installation path\\domibus\\logs: in the AS4 created message,\n\"ConversationId\" element is present with value \"-Dom185-1-123456\"."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful by user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}</script></con:config></con:testStep><con:testStep type="request" id="f5ab4a1c-2dea-4ea7-adb0-b3376b26aece" name="Submit Message without conversationId"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message without conversationId" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
+   <soap:Header>\r
+      <ns:Messaging>\r
+         <ns:UserMessage>\r
+         	  <ns:MessageInfo>
+            	<ns:MessageId>-Dom185-2-</ns:MessageId>
+            </ns:MessageInfo>
+            <ns:PartyInfo>\r
+               <ns:From>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>\r
+               </ns:From>\r
+               <ns:To>\r
+                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>\r
+                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>\r
+               </ns:To>\r
+            </ns:PartyInfo>\r
+            <ns:CollaborationInfo>\r
+               <ns:Service type="tc1">bdx:noprocess</ns:Service>\r
+               <ns:Action>TC1Leg1</ns:Action>\r
+            </ns:CollaborationInfo>\r
+            <ns:MessageProperties>\r
+               <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>\r
+               <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>\r
+            </ns:MessageProperties>\r
+            <ns:PayloadInfo>\r
+               <ns:PartInfo href="cid:message">\r
+                  <ns:PartProperties>\r
+                     <ns:Property name="MimeType">text/xml</ns:Property>\r
+                  </ns:PartProperties>\r
+               </ns:PartInfo>\r
+            </ns:PayloadInfo>\r
+         </ns:UserMessage>\r
+      </ns:Messaging>\r
+   </soap:Header>\r
+   <soap:Body>\r
+      <_1:submitRequest>\r
+         <payload payloadId="cid:message" contentType="text/xml">
+         	<value>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=</value>
+         </payload>\r
+      </_1:submitRequest>\r
+   </soap:Body>\r
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response1" id="cd57a04c-25ec-4747-830d-3232f50acae3"/><con:assertion type="SOAP Fault Assertion" name="Not SOAP Fault" id="d660f0c2-2f39-442f-a5ad-ad89cee0da5f"/><con:assertion type="XPath Match" name="XPath Match" id="c8f079bd-9c98-4d03-9769-220891a40294"><con:configuration><path>exists(//messageID)</path><content>true</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5a19348e-d8bc-4594-80d4-adddb8be0d2a"><con:configuration><scriptText>
+
+def test = new Domibus(log,messageExchange,context);
+test.waitForStatus("ACKNOWLEDGED","RECEIVED");
+test.finalize();</scriptText></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:testStep type="groovy" name="Check the log file 2" id="f9e6d12e-07c1-4326-9ebb-cbcd18108c3d"><con:settings/><con:config><script>def result=javax.swing.JOptionPane.showConfirmDialog(null, """
+Check the log file for message Sender (DEBUG logs option is on) (in \\Installation path\\domibus\\logs: in the AS4 created message,\n\"ConversationId\" element is present (with an auto-generated value)."""); 
+
+if(result == javax.swing.JOptionPane.YES_OPTION)
+	{
+		log.info "PASS: Result as expected, continuing the test";
+	}
+else if(result == javax.swing.JOptionPane.NO_OPTION)
+	{
+		log.info "FAIL: Manual check unsuccessful";
+		testRunner.fail("Manual check indicated as unsuccessful by user");
+	}
+else if (result == javax.swing.JOptionPane.CANCEL_OPTION) 
+	{
+		log.info "SKIP: Check skipped bu user";
+	}</script></con:config></con:testStep><con:tearDownScript>
+ExcelReporting.reportTestCase(testRunner, log)
+
+def test = new Domibus(log,null,context);
+test.cleanDBMessageIDStartsWith("-Dom185-");
+test.finalize();	
+</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="ae4e77ca-fdef-4b3f-8deb-2cc1519b94b2" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom472-EDELIVERY-2995-Log every message status change" searchProperties="true"><con:settings/><con:testStep type="request" id="ef0bfdb1-98d6-4ed1-9d2f-8ea696cdb8c3" name="Submit Message1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="Submit Message1" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="e022ccff-cc86-4b74-9723-3e474bc04cd9"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
    <soap:Header>
       <ns:Messaging>
