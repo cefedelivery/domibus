@@ -37,7 +37,6 @@
         </createIndex>
         <createIndex indexName="IDX_MESSAGE_LOCK_UNIQUE_ID" tableName="TB_MESSAGING_LOCK" unique="true">
             <column name="MESSAGE_ID" />
-            <column name="NEXT_ATTEMPT"/>
         </createIndex>
         <addColumn tableName="TB_RAWENVELOPE_LOG">
             <column name="MESSAGE_ID" type="VARCHAR(255)" afterColumn="RAW_XML"/>

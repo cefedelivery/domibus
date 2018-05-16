@@ -18,7 +18,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.common.services.impl.PullService;
+import eu.domibus.common.services.impl.PullMessageService;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
@@ -105,7 +105,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    private PullService pullService;
+    private PullMessageService pullMessageService;
 
     @Autowired
     AuthUtils authUtils;
@@ -303,7 +303,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
             else{
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
-                pullService.addSearchInFormation(new PartyExtractor(to), userMessage, userMessageLog);
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
             LOG.info("Message submitted");

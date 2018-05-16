@@ -102,7 +102,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private java.util.Properties domibusProperties;
 
     @Autowired
-    private PullService pullService;
+    private PullMessageService pullMessageService;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -188,7 +188,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
                         }
 
@@ -210,7 +209,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = pullService.getPullMessageId(partyId, mpc);
+        String pullMessageId = pullMessageService.getPullMessageId(partyId, mpc);
         if (pullMessageId == null) {
             return null;
         }

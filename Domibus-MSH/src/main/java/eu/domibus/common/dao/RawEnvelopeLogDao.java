@@ -32,9 +32,7 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         try {
             return namedQuery.getSingleResult();
         } catch (NoResultException nr) {
-            //this happens the first time the message is pulled.
-            //if an execption
-
+            LOG.debug("The message with id[{}] has not associated raw xml saved in the database.",messageId);
             return null;
         }
     }

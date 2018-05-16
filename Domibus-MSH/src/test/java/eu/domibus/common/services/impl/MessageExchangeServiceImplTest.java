@@ -66,7 +66,7 @@ public class MessageExchangeServiceImplTest {
     private UserMessageLogDao userMessageLogDao;
 
     @Mock
-    private PullService pullService;
+    private PullMessageService pullMessageService;
 
     @Mock
     private java.util.Properties domibusProperties;
@@ -234,7 +234,7 @@ public class MessageExchangeServiceImplTest {
         when(party.getIdentifiers()).thenReturn(identifiers);
 
         final String testMessageId = "testMessageId";
-        when(pullService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
+        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
         UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
         when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
@@ -268,7 +268,7 @@ public class MessageExchangeServiceImplTest {
 
         when(party.getIdentifiers()).thenReturn(identifiers);
 
-        when(pullService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(null);
+        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(null);
         assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
 
     }
@@ -286,12 +286,12 @@ public class MessageExchangeServiceImplTest {
         when(party.getIdentifiers()).thenReturn(identifiers);
 
         final String testMessageId = "testMessageId";
-        when(pullService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
+        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
         UserMessageLog userMessageLog = new UserMessageLog();
         userMessageLog.setMessageStatus(MessageStatus.BEING_PULLED);
         when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
         assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
-        verify(pullService, times(1)).delete(eq(testMessageId));
+        verify(pullMessageService, times(1)).deletePullMessageLock(eq(testMessageId));
     }
 
     @Test

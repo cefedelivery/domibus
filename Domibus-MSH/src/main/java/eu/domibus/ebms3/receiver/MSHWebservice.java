@@ -14,7 +14,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.services.impl.PullServiceImpl;
+import eu.domibus.common.services.impl.PullMessageService;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -101,7 +101,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private ReliabilityService reliabilityService;
 
     @Autowired
-    private PullServiceImpl pullService;
+    private PullMessageService pullMessageService;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -187,7 +187,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            pullService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful,isOk,messageId,userMessage,legConfiguration);
+            pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful,isOk,messageId,userMessage,legConfiguration);
         }
         return null;
     }

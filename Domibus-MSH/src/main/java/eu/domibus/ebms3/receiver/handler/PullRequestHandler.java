@@ -13,7 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.services.impl.PullServiceImpl;
+import eu.domibus.common.services.impl.PullMessageService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -65,10 +65,7 @@ public class PullRequestHandler {
     private ReliabilityChecker reliabilityChecker;
 
     @Autowired
-    private UpdateRetryLoggingService updateRetryLoggingService;
-
-    @Autowired
-    private PullServiceImpl pullService;
+    private PullMessageService pullMessageService;
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -152,7 +149,7 @@ public class PullRequestHandler {
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
                 retryService.purgeTimedoutMessageInANewTransaction(messageId);
             } else {
-                pullService.updatePullMessageAfterRequest(userMessage,messageId,leg,checkResult);
+                pullMessageService.updatePullMessageAfterRequest(userMessage,messageId,leg,checkResult);
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)
