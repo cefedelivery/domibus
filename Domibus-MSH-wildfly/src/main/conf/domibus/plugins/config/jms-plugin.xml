@@ -89,8 +89,4 @@
           p:defaultDestination-ref="errorNotifyProducerQueue"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
-
-	<!--util:properties id="defaultValues" location="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/-->
-	<!-- Example ends here -->
-
 </beans>

@@ -8,14 +8,9 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-
-
-
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-    <!-- This is an example for the configuration of the domibus-default-jms-plugin -->
-    <!-- Example starts here -->
     <amq:queue id="notifyBackendJmsQueue"
                physicalName="domibus.notification.jms"/>
 
@@ -80,8 +75,5 @@
           p:defaultDestination-ref="errorNotifyProducerQueue"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
-
-    <!--util:properties id="defaultValues" location="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/-->
-    <!-- Example ends here -->
 
 </beans>
