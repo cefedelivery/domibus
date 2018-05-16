@@ -3,11 +3,20 @@ import {Injectable} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
 import {Observable} from "rxjs/Observable";
+import {SecurityService} from '../security/security.service';
+//import {Domain} from '../security/domain';
+import {DomainService} from '../security/domain.service';
+
 @Injectable()
 export class UserService {
-
-  constructor(private http: Http,private alertService: AlertService) {
-
+  isMultiDomain: boolean;
+  constructor(private http: Http,
+              private alertService: AlertService,
+              private securityService: SecurityService,
+              private domainService: DomainService) {
+    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
+      this.isMultiDomain = isMultiDomain;
+    });
   }
 
   getUsers():Observable<UserResponseRO[]>{
@@ -50,6 +59,10 @@ export class UserService {
       users[u].status="PERSISTED";
       users[u].password="";
     }
+  }
+
+  isDomainVisible (): boolean {
+    return this.isMultiDomain && this.securityService.isCurrentUserSuperAdmin();
   }
 
 private extractData(res: Response) {
