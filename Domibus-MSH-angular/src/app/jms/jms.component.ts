@@ -30,8 +30,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
   timestampToMinDate: Date = null;
   timestampToMaxDate: Date = new Date();
 
-  defaultQueueSet = new EventEmitter(false);
-  queuesInfoGot = new EventEmitter(false);
+  defaultQueueSet: EventEmitter<boolean>;
+  queuesInfoGot: EventEmitter<boolean>;
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
@@ -66,6 +66,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit() {
+
+    this.defaultQueueSet = new EventEmitter(false);
+    this.queuesInfoGot = new EventEmitter(false);
 
     this.columnPicker.allColumns = [
       {
@@ -130,9 +133,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   private getDestinations(): Observable<Response> {
-    let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
-
-
+    const observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
     observableResponse.subscribe(
       (response: Response) => {
         this.queues = [];
@@ -147,7 +148,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       }
     );
 
-    return observableResponse
+    return observableResponse;
   }
 
   private setDefaultQueue(queueName: string) {
@@ -164,14 +165,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   onSelect({selected}) {
-    console.log('Select Event');
     this.selectedMessages.splice(0, this.selectedMessages.length);
     this.selectedMessages.push(...selected);
   }
 
   onActivate(event) {
-    console.log('Activate Event', event);
-
     if ("dblclick" === event.type) {
       this.details(event.row);
     }
@@ -186,11 +184,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   updateQueuesInfo() {
-    let observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
+    const observableResponse: Observable<Response> = this.http.get("rest/jms/destinations");
 
     observableResponse.subscribe(
       (response: Response) => {
-        let destinations = response.json().jmsDestinations;
+        const destinations = response.json().jmsDestinations;
         for (let key in destinations) {
           if (key === this.selectedSource.name) {
             this.selectedSource.numberOfMessages = destinations[key].numberOfMessages;
@@ -202,7 +200,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       }
     );
 
-    return observableResponse
+    return observableResponse;
   }
 
   search() {
@@ -252,7 +250,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   move() {
-    let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
+    const dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
 
@@ -369,6 +367,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   serverMove(source: string, destination: string, messageIds: Array<any>) {
+    console.log('serverMove');
     this.http.post("rest/jms/messages/action", {
       source: source,
       destination: destination,
