@@ -3,6 +3,7 @@ package eu.domibus.ebms3.common.dao;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
@@ -69,7 +70,7 @@ public class CachingPModeProviderTest {
     JAXBContext jaxbContextConfig;
 
     @Injectable
-    JmsOperations jmsTemplateCommand;
+    JMSManager jmsManager;
 
     @Injectable
     XMLUtil xmlUtil;

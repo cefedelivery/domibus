@@ -1,6 +1,7 @@
 package eu.domibus.api.jms;
 
 import javax.jms.Queue;
+import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ public interface JMSManager {
     void sendMessageToQueue(JmsMessage message, String destination);
 
     void sendMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMessageToTopic(JmsMessage message, Topic destination);
 
     void deleteMessages(String source, String[] messageIds);
 

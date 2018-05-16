@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.jms.Topic;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +88,15 @@ public class JMSManagerImpl implements JMSManager {
         } catch (JMSException e) {
             LOG.warn("Could not add the property [" + JmsMessage.PROPERTY_ORIGINAL_QUEUE + "] on the destination", e);
         }
+        sendMessageToDestination(message, destination);
+    }
+
+    @Override
+    public void sendMessageToTopic(JmsMessage message, Topic destination) {
+        sendMessageToDestination(message, destination);
+    }
+
+    protected void sendMessageToDestination(JmsMessage message, Destination destination) {
         final Domain currentDomain = domainContextProvider.getCurrentDomain();
         message.getProperties().put(MessageConstants.DOMAIN, currentDomain.getCode());
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
