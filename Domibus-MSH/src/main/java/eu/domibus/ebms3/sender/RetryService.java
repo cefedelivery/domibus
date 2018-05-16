@@ -16,6 +16,7 @@ import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.To;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -73,6 +74,7 @@ public class RetryService {
 
     @Autowired
     private JMSManager jmsManager;
+
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -137,7 +139,7 @@ public class RetryService {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
                 }
-                addPullMessageSearchInformation(messagedId);
+                addPullMessageSearchInformation(userMessageLog);
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -154,13 +156,17 @@ public class RetryService {
      * When a message has been set in waiting_for_receipt state its locking record has been deleted. When the retry
      * service set timed_out waiting_for_receipt messages back in ready_to_pull state, the search and lock system has to be fed again
      * with the message information.
-     * @param messagedId the id of the message to reset
+     *
+     * @param userMessageLog the messageLod
      */
-    private void addPullMessageSearchInformation(final String messagedId) {
-        Messaging messageByMessageId = messagingDao.findMessageByMessageId(messagedId);
-        To to = messageByMessageId.getUserMessage().getPartyInfo().getTo();
-        messagingLockService.delete(messagedId);
-        messagingLockService.addSearchInFormation(new ToExtractor(to),messagedId,messageByMessageId.getUserMessage().getMpc());
+    private void addPullMessageSearchInformation(final UserMessageLog userMessageLog) {
+        final String messageId = userMessageLog.getMessageId();
+        Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
+        final UserMessage userMessage = messageByMessageId.getUserMessage();
+        To to = userMessage.getPartyInfo().getTo();
+        messagingLockService.delete(messageId);
+        messagingLockService.addSearchInFormation(new ToExtractor(to), userMessage, userMessageLog);
+
     }
 
 

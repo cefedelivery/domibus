@@ -47,7 +47,7 @@ public class MessagingLockServiceImplTest {
                 result=partyId;
             }
         };
-        messagingLockService.addSearchInFormation(partyIdExtractor, MESSAGE_ID, MPC);
+        messagingLockService.addSearchInFormation(partyIdExtractor, null, null);
         new Verifications(){{
             MessagingLock messagingLock;
            messagingLockDao.save(messagingLock=withCapture());

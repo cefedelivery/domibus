@@ -7,6 +7,7 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -14,6 +15,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.common.services.impl.PullServiceImpl;
 import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -30,6 +32,12 @@ import org.springframework.stereotype.Component;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
 import java.sql.Timestamp;
+
+import static eu.domibus.common.MessageStatus.READY_TO_PULL;
+import static eu.domibus.common.MessageStatus.SEND_FAILURE;
+import static eu.domibus.common.MessageStatus.WAITING_FOR_RECEIPT;
+import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.PULL_FAILED;
+import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
 
 /**
  * @author Thomas Dussart
@@ -64,10 +72,10 @@ public class PullRequestHandler {
     private ReliabilityChecker reliabilityChecker;
 
     @Autowired
-    private ReliabilityService reliabilityService;
+    private UpdateRetryLoggingService updateRetryLoggingService;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullServiceImpl pullService;
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -94,7 +102,6 @@ public class PullRequestHandler {
         }
     }
 
-
     SOAPMessage handleRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
         ReliabilityChecker.CheckResult checkResult = ReliabilityChecker.CheckResult.PULL_FAILED;
@@ -103,9 +110,10 @@ public class PullRequestHandler {
         final Timestamp startDate = new Timestamp(System.currentTimeMillis());
         boolean abortSending = false;
         SOAPMessage soapMessage = null;
+        UserMessage userMessage = null;
         try {
 
-            UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            userMessage = messagingDao.findUserMessageByMessageId(messageId);
             leg = pullContext.filterLegOnMpc();
             try {
                 messageExchangeService.verifyReceiverCertificate(leg, pullContext.getInitiator().getName());
@@ -117,7 +125,7 @@ public class PullRequestHandler {
                         leg.getReliability().isNonRepudiation()) {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
-                checkResult = ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
+                checkResult = WAITING_FOR_CALLBACK;
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {
                 LOG.error(dcEx.getMessage(), dcEx);
@@ -146,13 +154,12 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            messagingLockService.delete(messageId);
             if (abortSending) {
                 LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
                 retryService.purgeTimedoutMessageInANewTransaction(messageId);
             } else {
-                reliabilityService.handleReliability(messageId, checkResult, null, leg);
+                pullService.updatePullMessageAfterRequest(userMessage,messageId,leg,checkResult);
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)

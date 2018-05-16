@@ -1,10 +1,12 @@
 package eu.domibus.core.pull;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.sql.SQLException;
 
 /**
  * /**
@@ -33,7 +35,13 @@ public class NextPullMessageProcedure {
     public String callProcedure(final String messageType, final String initiator, final String mpc) {
         NextPullMessageProcedureWork storedProc = new NextPullMessageProcedureWork(messageType, initiator, mpc);
         final Session unwrap = entityManager.unwrap(Session.class);
-        unwrap.doWork(storedProc);
+        try {
+            unwrap.doWork(storedProc);
+            //sometimes mysql gives a deadlock.
+            //In that scenario we act as if there was no message.
+        }catch (HibernateException ex){
+            return null;
+        }
         return storedProc.getMessageId();
     }
 

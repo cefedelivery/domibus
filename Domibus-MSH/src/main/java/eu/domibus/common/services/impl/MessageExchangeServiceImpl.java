@@ -274,12 +274,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     @Transactional
-    public void removeAndSaveRawXml(String rawXml, String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+    public void saveRawXml(String rawXml, String messageId) {
+        //rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
         RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
         rawEnvelopeLog.setRawXML(rawXml);
         rawEnvelopeLog.setMessageId(messageId);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
+        if(!rawEnvelopeLogDao.messageExist(messageId)) {
+            rawEnvelopeLogDao.create(rawEnvelopeLog);
+        }
 
     }
 

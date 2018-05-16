@@ -302,7 +302,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
             else{
-                messagingLockService.addSearchInFormation(new PartyExtractor(to),messageId,message.getUserMessage().getMpc());
+                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                messagingLockService.addSearchInFormation(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
             LOG.info("Message submitted");

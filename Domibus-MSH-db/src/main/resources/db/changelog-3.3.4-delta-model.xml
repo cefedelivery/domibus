@@ -23,15 +23,21 @@
             <column name="MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="INITIATOR" type="VARCHAR(255)"/>
             <column name="MPC" type="VARCHAR(255)"/>
+            <column name="SEND_ATTEMPTS" type="INT"/>
+            <column name="SEND_ATTEMPTS_MAX" type="INT"/>
+            <column name="NEXT_ATTEMPT" type="DATETIME"/>
+            <column name="MESSAGE_STALED" type="DATETIME"/>
         </createTable>
         <createIndex indexName="IDX_MESSAGE_LOCK_SEARCH" tableName="TB_MESSAGING_LOCK">
             <column name="MESSAGE_TYPE"/>
             <column name="MESSAGE_STATE"/>
             <column name="INITIATOR"/>
             <column name="MPC"/>
+            <column name="NEXT_ATTEMPT"/>
         </createIndex>
         <createIndex indexName="IDX_MESSAGE_LOCK_UNIQUE_ID" tableName="TB_MESSAGING_LOCK" unique="true">
             <column name="MESSAGE_ID" />
+            <column name="NEXT_ATTEMPT"/>
         </createIndex>
         <addColumn tableName="TB_RAWENVELOPE_LOG">
             <column name="MESSAGE_ID" type="VARCHAR(255)" afterColumn="RAW_XML"/>
@@ -41,40 +47,10 @@
         </createIndex>
     </changeSet>
     <changeSet id="EDELIVERY_3053_2" author="dussath" >
-        <createProcedure dbms="mysql">
-            DELIMITER $$
-            create procedure get_next(
-            in message_type_in VARCHAR(255),
-            in initiator_in VARCHAR(255),
-            in mpc_in VARCHAR(255),
-            out message_id_out VARCHAR(255))
-            BEGIN
-            DECLARE no_data_found INT DEFAULT 0;
-            DECLARE message_locked INT DEFAULT 0;
-            DECLARE reccord_id INT DEFAULT NULL;
-            DECLARE pull_reccord CURSOR FOR select ID_PK from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and MPC=mpc_in and INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK;
-            DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_data_found = 1;
-            DECLARE CONTINUE HANDLER FOR 1205 SET message_locked = 1;
-            OPEN pull_reccord;
-            my_loop:LOOP
-            FETCH pull_reccord INTO reccord_id;
-            IF NOT no_data_found THEN
-            SELECT ml.MESSAGE_ID into message_id_out FROM TB_MESSAGING_LOCK ml where ml.ID_PK=reccord_id FOR UPDATE;
-            IF NOT message_locked THEN
-            LEAVE my_loop;
-            END IF;
-            IF NOT message_locked THEN
-            ITERATE my_loop;
-            END IF;
-            END IF;
-            IF no_data_found THEN
-            LEAVE my_loop;
-            END IF;
-            END LOOP;
-            CLOSE pull_reccord;
-            END$$
-            DELIMITER ;
-        </createProcedure>
+        <sqlFile path="./scripts/mysql_procedure.sql" endDelimiter="$$" dbms="mysql" relativeToChangelogFile="true"/>
+        <rollback>
+            DROP PROCEDURE get_next
+        </rollback>
     </changeSet>
     <changeSet id="EDELIVERY_3053_3" author="dussath" >
         <createProcedure dbms="oracle">

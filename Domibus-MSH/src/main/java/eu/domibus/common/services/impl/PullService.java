@@ -1,16 +1,11 @@
-package eu.domibus.core.pull;
+package eu.domibus.common.services.impl;
 
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.core.pull.PartyIdExtractor;
 import eu.domibus.ebms3.common.model.UserMessage;
 
-/**
- * @author Thomas Dussart
- * @since 4.0
- *
- * In the case of a pull mechanism when a message is retrieved, there is a need for a lock mechanism to occur in order
- * to avoid that a message is pulled twice. This service is in charge of this behavior.
- */
-public interface MessagingLockService {
+public interface PullService {
+
 
     /**
      * Search if a message ready for being pull exists for that initiator/mpc combination.
@@ -38,5 +33,4 @@ public interface MessagingLockService {
      * @param messageId the id of the message to be deleted;
      */
     void delete(String messageId);
-
 }

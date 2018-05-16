@@ -20,6 +20,8 @@ import javax.persistence.*;
         @NamedQuery(name = "Raw.findByMessageId", query = "SELECT l FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "Raw.deleteByMessageID",
                 query = "DELETE FROM RawEnvelopeLog r where r.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "Raw.messageExit",
+                query = "SELECT l.messageId FROM RawEnvelopeLog l where l.userMessage.messageInfo.messageId=:MESSAGE_ID"),
 })
 public class RawEnvelopeLog extends AbstractBaseEntity {
     @OneToOne

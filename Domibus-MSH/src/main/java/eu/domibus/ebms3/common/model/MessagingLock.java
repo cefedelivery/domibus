@@ -55,13 +55,39 @@ public class MessagingLock extends AbstractBaseEntity {
     @NotNull
     private String mpc;
 
-    public MessagingLock(final String messageId,final String initiator,final String mpc) {
-        this.received = new Date();
+    @Column(name = "MESSAGE_STALED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date staled;
+
+    @Column(name = "NEXT_ATTEMPT")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date nextAttempt;
+
+    @Column(name = "SEND_ATTEMPTS")
+    private int sendAttempts;
+
+    @Column(name = "SEND_ATTEMPTS_MAX")
+    private int sendAttemptsMax;
+
+    public MessagingLock(
+            final String messageId,
+            final String initiator,
+            final String mpc,
+            final Date received,
+            final Date staled,
+            final Date nextAttempt,
+            final int sendAttempts,
+            final int sendAttemptsMax) {
+        this.received = received;
+        this.staled=staled;
         this.messageId = messageId;
         this.initiator=initiator;
         this.mpc=mpc;
         this.messageType=PULL;
         this.messageState=READY;
+        this.nextAttempt=nextAttempt;
+        this.sendAttempts=sendAttempts;
+        this.sendAttemptsMax=sendAttemptsMax;
     }
 
     public MessagingLock() {
@@ -107,6 +133,8 @@ public class MessagingLock extends AbstractBaseEntity {
                 .append(messageId, that.messageId)
                 .append(initiator, that.initiator)
                 .append(mpc, that.mpc)
+                .append(staled, that.staled)
+                .append(nextAttempt, that.nextAttempt)
                 .isEquals();
     }
 
@@ -120,18 +148,8 @@ public class MessagingLock extends AbstractBaseEntity {
                 .append(messageId)
                 .append(initiator)
                 .append(mpc)
+                .append(staled)
+                .append(nextAttempt)
                 .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "MessagingLock{" +
-                "messageType='" + messageType + '\'' +
-                ", received=" + received +
-                ", messageState=" + messageState +
-                ", messageId='" + messageId + '\'' +
-                ", initiator='" + initiator + '\'' +
-                ", mpc='" + mpc + '\'' +
-                '}';
     }
 }

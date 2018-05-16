@@ -15,7 +15,6 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.MessagingLockService;
-import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -262,7 +261,7 @@ public class UserMessageDefaultServiceTest {
             messagingDao.findUserMessageByMessageId(messageId);
             times = 1;
             ToExtractor toExtractor = null;
-            messagingLockService.addSearchInFormation(withAny(toExtractor), messageId, mpc);
+            messagingLockService.addSearchInFormation(withAny(toExtractor), null, null);
             times = 1;
         }};
     }

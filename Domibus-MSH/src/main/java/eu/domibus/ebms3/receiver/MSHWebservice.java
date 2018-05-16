@@ -14,6 +14,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
+import eu.domibus.common.services.impl.PullServiceImpl;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -99,6 +100,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private ReliabilityService reliabilityService;
 
+    @Autowired
+    private PullServiceImpl pullService;
+
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
     }
@@ -157,8 +161,9 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
+        UserMessage userMessage=null;
         try {
-            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            userMessage = messagingDao.findUserMessageByMessageId(messageId);
             String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
@@ -182,7 +187,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            reliabilityService.handlePullReceiptReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            pullService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful,isOk,messageId,userMessage,legConfiguration);
         }
         return null;
     }
