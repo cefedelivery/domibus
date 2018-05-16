@@ -14,10 +14,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.ReliabilityService;
-import eu.domibus.common.services.impl.CompressionService;
-import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.common.services.impl.*;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -153,6 +150,10 @@ public class MSHWebServiceTest {
 
     @Injectable
     ReliabilityService reliabilityService;
+
+    @Injectable
+    PullService pullService;
+
 
 
     /**
@@ -327,7 +328,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, withAny(legConfiguration));
+            pullService.updatePullMessageAfterReceipt(null, null, null, null, null);
         }};
 
     }
@@ -354,7 +355,8 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
+            pullService.updatePullMessageAfterReceipt(null, null, null, null, null);
+            //pullService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
             times = 1;
 
         }};
@@ -383,7 +385,8 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
+            pullService.updatePullMessageAfterReceipt(null, null, null, null, null);
+            //reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
             times = 1;
 
         }};

@@ -13,7 +13,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.common.services.impl.PullService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
@@ -59,7 +59,7 @@ public class PullRequestHandlerImplTest {
     ReliabilityService reliabilityService;
 
     @Injectable
-    MessagingLockService messagingLockService;
+    PullService pullService;
 
     @Tested
     PullRequestHandler pullRequestHandler;
@@ -149,7 +149,7 @@ public class PullRequestHandlerImplTest {
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
             times = 1;
 
-            messagingLockService.delete(messageId);
+            pullService.delete(messageId);
             times=1;
 
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
@@ -270,7 +270,7 @@ public class PullRequestHandlerImplTest {
             times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.SEND_FAIL, null, legConfiguration);
+            pullService.updatePullMessageAfterRequest(null, null, legConfiguration, ReliabilityChecker.CheckResult.SEND_FAIL);
             times = 0;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));

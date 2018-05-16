@@ -1,8 +1,11 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.core.pull.PartyIdExtractor;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
+import eu.domibus.ebms3.sender.ResponseHandler;
 
 public interface PullService {
 
@@ -33,4 +36,17 @@ public interface PullService {
      * @param messageId the id of the message to be deleted;
      */
     void delete(String messageId);
+
+    void updatePullMessageAfterRequest(final UserMessage userMessage,
+                                       final String messageId,
+                                       final LegConfiguration legConfiguration,
+                                       final ReliabilityChecker.CheckResult state);
+
+    void updatePullMessageAfterReceipt(
+            ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
+            ResponseHandler.CheckResult isOk,
+            String messageId,
+            UserMessage userMessage,
+            LegConfiguration legConfiguration
+    );
 }

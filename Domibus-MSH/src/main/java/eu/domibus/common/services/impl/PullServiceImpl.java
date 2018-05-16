@@ -9,6 +9,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PartyIdExtractor;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -112,7 +113,7 @@ public class PullServiceImpl implements PullService {
 
     private void pullFailedOnReceipt(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
         if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));userMessageLog);
+            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
         }
         else{
             messagingLockService.delete(userMessageLog.getMessageId());
@@ -153,4 +154,18 @@ public class PullServiceImpl implements PullService {
         }
     }
 
+    @Override
+    public String getPullMessageId(String initiator, String mpc) {
+        return messagingLockService.getPullMessageId(initiator, mpc);
+    }
+
+    @Override
+    public void addSearchInFormation(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog) {
+        messagingLockService.addSearchInFormation(partyIdExtractor, userMessage, messageLog);
+    }
+
+    @Override
+    public void delete(String messageId) {
+        messagingLockService.delete(messageId);
+    }
 }

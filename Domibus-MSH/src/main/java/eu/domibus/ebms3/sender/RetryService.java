@@ -12,7 +12,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.common.services.impl.PullService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.To;
@@ -70,7 +70,7 @@ public class RetryService {
     private MessagingDao messagingDao;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullService pullService;
 
     @Autowired
     private JMSManager jmsManager;
@@ -126,7 +126,7 @@ public class RetryService {
     protected void purgePullMessage() {
         List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
-            messagingLockService.delete(timedoutPullMessage);
+            pullService.delete(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
         }
     }
@@ -146,7 +146,7 @@ public class RetryService {
                     LOG.debug("Pull Message with " + messagedId + " marked as send failure after max retry attempt reached");
                 }
                 userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
-                messagingLockService.delete(messagedId);
+                pullService.delete(messagedId);
             }
             userMessageLogDao.update(userMessageLog);
         }
@@ -164,8 +164,8 @@ public class RetryService {
         Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
         final UserMessage userMessage = messageByMessageId.getUserMessage();
         To to = userMessage.getPartyInfo().getTo();
-        messagingLockService.delete(messageId);
-        messagingLockService.addSearchInFormation(new ToExtractor(to), userMessage, userMessageLog);
+        pullService.delete(messageId);
+        pullService.addSearchInFormation(new ToExtractor(to), userMessage, userMessageLog);
 
     }
 

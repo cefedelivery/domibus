@@ -21,7 +21,6 @@ import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
-import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -104,7 +103,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private java.util.Properties domibusProperties;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullService pullService;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -211,7 +210,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = messagingLockService.getPullMessageId(partyId, mpc);
+        String pullMessageId = pullService.getPullMessageId(partyId, mpc);
         if (pullMessageId == null) {
             return null;
         }
@@ -221,7 +220,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         //the status is now pull failed, the message is deleted.
         MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
         if (MessageStatus.READY_TO_PULL != userMessageLog.getMessageStatus()) {
-            messagingLockService.delete(pullMessageId);
+            pullService.delete(pullMessageId);
             return null;
         }
         return pullMessageId;
