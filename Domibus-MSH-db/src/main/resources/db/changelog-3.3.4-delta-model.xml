@@ -45,39 +45,6 @@
             <column name="MESSAGE_ID" />
         </createIndex>
     </changeSet>
-    <changeSet id="EDELIVERY_3053_2" author="dussath" >
-        <sqlFile path="./scripts/mysql_procedure.sql" endDelimiter="$$" dbms="mysql" relativeToChangelogFile="true"/>
-        <rollback>
-            DROP PROCEDURE get_next
-        </rollback>
-    </changeSet>
-    <changeSet id="EDELIVERY_3053_3" author="dussath" >
-        <createProcedure dbms="oracle">
-            create or replace procedure get_next(
-            message_type_in in VARCHAR2,
-            initiator_in in VARCHAR2,
-            mpc_in in VARCHAR2,
-            message_id_out out VARCHAR2)
-            is
-            resource_busy    EXCEPTION;
-            pragma exception_init( resource_busy, -54 );
-            begin
-            for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK)
-            loop
-            begin
-            select TB_MESSAGING_LOCK.MESSAGE_ID into message_id_out from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
-            exit;
-            exception
-            when resource_busy then
-            message_id_out:=null;
-            end;
-            end loop;
-            exception
-            when NO_DATA_FOUND then
-            message_id_out:=null;
-            end;
-        </createProcedure>
-    </changeSet>
     <changeSet author="CatalinEnache" id="EDELIVERY-3234">
         <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
             <column name="NAME"/>
