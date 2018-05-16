@@ -39,9 +39,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
-    @Autowired
-    private NextPullMessageProcedure nextPullMessageProcedure;
-
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -52,7 +49,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public PullMessageId getNextPullMessageToProcess2final(final Long idPk) {
+    public PullMessageId getNextPullMessageToProcess(final Long idPk) {
         final Map<String, Long> params = new HashMap<>();
         params.put("idPk", idPk);
         try {
@@ -80,15 +77,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         return null;
     }
 
-
-    @Override
-    public String getNextPullMessageToProcess(final String messageType, final String initiator, final String mpc) {
-        String messageId = nextPullMessageProcedure.callProcedure(messageType, initiator, mpc);
-        if (messageId != null) {
-            LOG.debug("Retrieving messages with id[{}], type:[{}], inititator [{}], mpc:[{}]", messageId, messageType, initiator, mpc);
-        }
-        return messageId;
-    }
 
     @Override
     public void save(final MessagingLock messagingLock) {

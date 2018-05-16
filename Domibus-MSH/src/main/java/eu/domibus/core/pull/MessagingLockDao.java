@@ -8,9 +8,7 @@ import eu.domibus.ebms3.common.model.MessagingLock;
  */
 public interface MessagingLockDao {
 
-    String getNextPullMessageToProcess(String messageType, String initiator, String mpc);
-
-    PullMessageId getNextPullMessageToProcess2final(Long messageId);
+    PullMessageId getNextPullMessageToProcess(Long messageId);
 
     void save(MessagingLock messagingLock);
 

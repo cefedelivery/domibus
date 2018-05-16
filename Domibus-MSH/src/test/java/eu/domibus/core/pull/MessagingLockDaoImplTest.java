@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,8 +13,7 @@ import javax.persistence.Query;
 @RunWith(JMockit.class)
 public class MessagingLockDaoImplTest {
 
-    @Injectable
-    private NextPullMessageProcedure nextPullMessageProcedure;
+
 
     @Injectable
     private EntityManager entityManager;
@@ -26,11 +26,13 @@ public class MessagingLockDaoImplTest {
         final String messageType = "messageType";
         final String initiator = "initiator";
         final String mpc = "mpc";
+        final long idPk = 6;
 
-        messagingLockDao.getNextPullMessageToProcess(messageType, initiator, mpc);
+        messagingLockDao.getNextPullMessageToProcess(idPk);
 
         new Verifications(){{
-            nextPullMessageProcedure.callProcedure(messageType, initiator, mpc);
+            Assert.assertTrue(false);
+
         }};
     }
 
