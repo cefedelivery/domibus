@@ -30,16 +30,16 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
 
     @Qualifier("domibusJDBC-XADataSource")
     @Autowired
-    protected DataSource dataSource;
+    protected DataSource dataSource; //NOSONAR: not necessary to be transient or serializable
 
     @Autowired
-    protected DomainContextProvider domainContextProvider;
+    protected DomainContextProvider domainContextProvider; //NOSONAR: not necessary to be transient or serializable
 
     @Autowired
-    protected DomainService domainService;
+    protected DomainService domainService; //NOSONAR: not necessary to be transient or serializable
 
     @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider; //NOSONAR: not necessary to be transient or serializable
 
     @Override
     public Connection getAnyConnection() throws SQLException {
