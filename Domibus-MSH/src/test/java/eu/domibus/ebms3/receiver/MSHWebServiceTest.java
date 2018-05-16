@@ -328,7 +328,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            pullMessageService.updatePullMessageAfterReceipt(null, null, null, null, null);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, messageId, userMessage, legConfiguration);
         }};
 
     }
@@ -355,7 +355,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(null, null, null, null, null);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, messageId, userMessage, legConfiguration);
             //pullMessageService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
             times = 1;
 
@@ -385,8 +385,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(null, null, null, null, null);
-            //reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, messageId, userMessage, legConfiguration);
             times = 1;
 
         }};

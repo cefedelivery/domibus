@@ -14,7 +14,6 @@ import javax.persistence.Query;
 public class MessagingLockDaoImplTest {
 
 
-
     @Injectable
     private EntityManager entityManager;
 

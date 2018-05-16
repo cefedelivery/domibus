@@ -1,5 +1,7 @@
 package eu.domibus.core.pull;
 
+import eu.domibus.api.configuration.DataBaseEngine;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -42,6 +44,18 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
+    private final static Map<DataBaseEngine, String> databaseSpecificQueries = new HashMap<>();
+
+    static {
+        databaseSpecificQueries.put(DataBaseEngine.MYSQL, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
+        databaseSpecificQueries.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
+        databaseSpecificQueries.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
+    }
+
+
+    @Autowired
     @Qualifier("domibusJDBC-XADataSource")
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -53,7 +67,8 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         final Map<String, Long> params = new HashMap<>();
         params.put("idPk", idPk);
         try {
-            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params);
+            final String databaseSpecificQuery = databaseSpecificQueries.get(domibusConfigurationService.getDataBaseEngine());
+            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(databaseSpecificQuery, params);
             while (sqlRowSet.next()) {
                 final String messageId = sqlRowSet.getString(1);
                 final Date messageStaled = sqlRowSet.getDate(2);

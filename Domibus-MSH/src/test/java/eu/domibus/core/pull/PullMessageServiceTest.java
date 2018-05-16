@@ -1,8 +1,15 @@
 package eu.domibus.core.pull;
 
+import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.services.impl.PullMessageServiceImpl;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
+import eu.domibus.ebms3.receiver.BackendNotificationService;
+import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -13,18 +20,42 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JMockit.class)
 public class PullMessageServiceTest {
 
-    @Injectable
-    private MessagingLockDao messagingLockDao;
-
-    @Tested
-    private PullMessageServiceImpl pullService;
-
     private final static String MESSAGE_ID = "MESSAGE_ID";
 
     private final static String MPC = "MPC";
 
+    @Injectable
+    private MessagingLockDao messagingLockDao;
+
+    @Injectable
+    private UserMessageLogService userMessageLogService;
+
+    @Injectable
+    private BackendNotificationService backendNotificationService;
+
+    @Injectable
+    private MessagingDao messagingDao;
+
+    @Injectable
+    private PullMessageStateService pullMessageStateService;
+
+    @Injectable
+    private UpdateRetryLoggingService updateRetryLoggingService;
+
+    @Injectable
+    private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
+    @Injectable
+    private PModeProvider pModeProvider;
+
+    @Tested
+    private PullMessageServiceImpl pullService;
+
     @Test
-    public void getPullMessageId() {
+    public void pullMessageForTheFirstTime() {
         final String initiator = "initiator";
 
 

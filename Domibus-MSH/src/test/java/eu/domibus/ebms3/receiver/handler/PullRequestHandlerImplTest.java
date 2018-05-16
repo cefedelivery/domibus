@@ -102,7 +102,8 @@ public class PullRequestHandlerImplTest {
             error.equals(ebMS3Exception.getFaultInfoError());
             times = 1;
 
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, legConfiguration, ReliabilityChecker.CheckResult.PULL_FAILED);
+
             times = 1;
 
         }};
@@ -149,13 +150,10 @@ public class PullRequestHandlerImplTest {
             PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
             times = 1;
 
-            pullMessageService.deletePullMessageLock(messageId);
-            times=1;
-
             messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             times = 1;
 
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK, null, legConfiguration);
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, legConfiguration, ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK);
             times = 1;
 
         }};
@@ -182,6 +180,7 @@ public class PullRequestHandlerImplTest {
     public void testHandlePullRequestWithInvalidSenderCertificate(
             @Mocked final PhaseInterceptorChain pi,
             @Mocked final Process process,
+            @Mocked final UserMessage userMessage,
             @Mocked final LegConfiguration legConfiguration,
             @Mocked final PullContext pullContext) throws EbMS3Exception {
 
@@ -189,6 +188,8 @@ public class PullRequestHandlerImplTest {
 
         new Expectations() {{
 
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
             messageExchangeService.verifySenderCertificate(legConfiguration, pullContext.getResponder().getName());
             result = new DomibusCertificateException("test");
 
@@ -204,7 +205,8 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0101", faultInfo.getErrorCode());
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, legConfiguration, ReliabilityChecker.CheckResult.PULL_FAILED);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
@@ -217,13 +219,16 @@ public class PullRequestHandlerImplTest {
     @Test
     public void testHandlePullRequestConfigurationException(
             @Mocked final PhaseInterceptorChain pi,
-            @Mocked final Process process,
             @Mocked final LegConfiguration legConfiguration,
+            @Mocked final UserMessage userMessage,
             @Mocked final PullContext pullContext) throws EbMS3Exception {
 
         final String messageId = "whatEverId";
 
         new Expectations() {{
+
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
 
             messageExchangeService.verifySenderCertificate(legConfiguration, pullContext.getResponder().getName());
             result = new ConfigurationException();
@@ -240,7 +245,8 @@ public class PullRequestHandlerImplTest {
             messageBuilder.buildSOAPFaultMessage(faultInfo = withCapture());
             times = 1;
             Assert.assertEquals("EBMS:0010", faultInfo.getErrorCode());
-            reliabilityService.handleReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, legConfiguration);
+
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, legConfiguration, ReliabilityChecker.CheckResult.PULL_FAILED);
             times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
