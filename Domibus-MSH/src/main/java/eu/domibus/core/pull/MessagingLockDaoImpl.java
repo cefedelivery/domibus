@@ -5,6 +5,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,7 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static eu.domibus.core.pull.MessageStaledState.FURTHER_ATTEMPT;
 import static eu.domibus.core.pull.MessageStaledState.STALED;
 
 /**
@@ -51,22 +53,29 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullMessageId getNextPullMessageToProcess2final(final Long idPk) {
-        final Map<String,Long> params=new HashMap<>();
-        params.put("idPk",idPk);
-        final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params);
-        while (sqlRowSet.next()){
-            final String messageId=sqlRowSet.getString(1);
-            final Date messageStaled=sqlRowSet.getDate(2);
-            final int sendAttempts =sqlRowSet.getInt(3);
-            final int sendAttemptsMax =sqlRowSet.getInt(4);
-            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk",params);
-            if(messageStaled.compareTo(new Date(System.currentTimeMillis()))<0){
-                return new PullMessageId(messageId, STALED,String.format("Maximum time to send the message has been reached:[%t]", messageStaled));
+        final Map<String, Long> params = new HashMap<>();
+        params.put("idPk", idPk);
+        try {
+            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params);
+            while (sqlRowSet.next()) {
+                final String messageId = sqlRowSet.getString(1);
+                final Date messageStaled = sqlRowSet.getDate(2);
+                final int sendAttempts = sqlRowSet.getInt(3);
+                final int sendAttemptsMax = sqlRowSet.getInt(4);
+                jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params);
+                if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
+                    return new PullMessageId(messageId, STALED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
+                }
+                if (sendAttempts >= sendAttemptsMax) {
+                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts reached:[%d]", 35));
+                }
+                if (sendAttempts > 0) {
+                    return new PullMessageId(messageId, FURTHER_ATTEMPT, "");
+                }
+                return new PullMessageId(messageId);
             }
-            if(sendAttempts>=sendAttemptsMax){
-                return new PullMessageId(messageId, STALED,String.format("Maximum number of attempts reached:[%d]", 35));
-            }
-            return new PullMessageId(messageId);
+        } catch (CannotAcquireLockException ex) {
+
         }
         return null;
     }

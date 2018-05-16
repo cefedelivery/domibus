@@ -1,6 +1,7 @@
 package eu.domibus.core.pull;
 
 public enum MessageStaledState {
-    OK,
+    FIRST_ATTEMPT,
+    FURTHER_ATTEMPT,
     STALED
 }

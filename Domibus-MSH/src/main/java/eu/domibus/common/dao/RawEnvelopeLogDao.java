@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.List;
 
 /**
  * @author idragusa
@@ -33,7 +32,9 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         try {
             return namedQuery.getSingleResult();
         } catch (NoResultException nr) {
-            LOG.warn("The message should have an associate raw xml saved in the database.");
+            //this happens the first time the message is pulled.
+            //if an execption
+
             return null;
         }
     }
@@ -47,13 +48,6 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
         Query query = em.createNamedQuery("Raw.deleteByMessageID");
         query.setParameter(MESSAGE_ID, messageId);
         query.executeUpdate();
-    }
-
-    public boolean messageExist(final String messageId){
-        Query query = em.createNamedQuery("Raw.messageExit");
-        query.setParameter(MESSAGE_ID, messageId);
-        final List resultList = query.getResultList();
-        return resultList.size()>0;
     }
 
 }

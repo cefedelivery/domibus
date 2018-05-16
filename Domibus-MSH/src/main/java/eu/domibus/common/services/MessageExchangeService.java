@@ -75,9 +75,6 @@ public interface MessageExchangeService {
      */
     RawEnvelopeDto findPulledMessageRawXmlByMessageId(String messageId);
 
-    void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId);
-
-
     void verifyReceiverCertificate(final LegConfiguration legConfiguration, String receiverName);
 
     void verifySenderCertificate(LegConfiguration legConfiguration, String receiverName);

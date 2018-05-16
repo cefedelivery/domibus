@@ -3,7 +3,7 @@ package eu.domibus.core.pull;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
@@ -11,26 +11,17 @@ import eu.domibus.common.services.impl.PullServiceImpl;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +53,8 @@ public class MessagingLockServiceImpl implements MessagingLockService {
     @Autowired
     private PullServiceImpl pullService;
 
-
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     private NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -92,10 +84,13 @@ public class MessagingLockServiceImpl implements MessagingLockService {
                 final String messageId = pullMessageId.getMessageId();
                 switch (pullMessageId.getState()) {
                     case STALED:
-                        LOG.trace(pullMessageId.getStaledReason());
+                        LOG.debug("Message with id:[{}] is staled for reason:[{}]", pullMessageId.getMessageId(), pullMessageId.getStaledReason());
                         pullService.messageStaled(messageId);
                         break;
-                    case OK:
+                    case FIRST_ATTEMPT:
+                        return messageId;
+                    case FURTHER_ATTEMPT:
+                        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
                         return messageId;
                 }
             }

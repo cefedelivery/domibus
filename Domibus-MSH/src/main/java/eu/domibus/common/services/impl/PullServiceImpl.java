@@ -4,6 +4,7 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
@@ -50,10 +51,14 @@ public class PullServiceImpl implements PullService {
     @Autowired
     private UserMessageLogDao userMessageLogDao;
 
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void messageStaled(final String messageId){
+    public void messageStaled(final String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
         sendFailed(userMessageLog);
     }
 
@@ -91,31 +96,44 @@ public class PullServiceImpl implements PullService {
     }
 
 
-
-
+    /**
+     * This method is called when a message has been pulled successfully.
+     *
+     * @param userMessage
+     * @param legConfiguration
+     * @param userMessageLog
+     */
     private void waitingForCallBack(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
         if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.WAITING_FOR_RECEIPT, userMessageLog);
+            userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+
+        } else {
+            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
         }
-        messagingLockService.addSearchInFormation(new ToExtractor(userMessage.getPartyInfo().getTo()),userMessage,userMessageLog);
+        final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
+        userMessageLog.setMessageStatus(waitingForReceipt);
+        LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
+        userMessageLogDao.update(userMessageLog);
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
+        messagingLockService.addSearchInFormation(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
     }
 
     private void pullFailedOnRequest(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
         if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
             updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.READY_TO_PULL, userMessageLog);
-            messagingLockService.addSearchInFormation(new ToExtractor(userMessage.getPartyInfo().getTo()),userMessage,userMessageLog);
-        }
-        else{
+            messagingLockService.addSearchInFormation(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
+        } else {
             sendFailed(userMessageLog);
 
         }
     }
 
-    private void pullFailedOnReceipt(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+    private void pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
         if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
             backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
-        }
-        else{
+        } else {
             messagingLockService.delete(userMessageLog.getMessageId());
             sendFailed(userMessageLog);
         }
@@ -129,7 +147,7 @@ public class PullServiceImpl implements PullService {
             String messageId,
             UserMessage userMessage,
             LegConfiguration legConfiguration
-            ){
+    ) {
         switch (reliabilityCheckSuccessful) {
             case OK:
                 switch (isOk) {
@@ -149,7 +167,7 @@ public class PullServiceImpl implements PullService {
                 break;
             case PULL_FAILED:
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
-                pullFailedOnReceipt(userMessage,legConfiguration,userMessageLog);
+                pullFailedOnReceipt(legConfiguration, userMessageLog);
                 break;
         }
     }

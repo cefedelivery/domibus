@@ -16,7 +16,6 @@ import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -189,6 +188,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
+
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
                         }
 
@@ -214,15 +214,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (pullMessageId == null) {
             return null;
         }
-        //this code is needed because setting the message in pull failed occurs in another transaction, meaning that
-        //the locked message can not be deleted in the new transaction. Once both the pull
-        //and the set pull failed transaction are completed, the message is unlocked and can be retrieved again to be pulled, but because
-        //the status is now pull failed, the message is deleted.
-        MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
-        if (MessageStatus.READY_TO_PULL != userMessageLog.getMessageStatus()) {
-            pullService.delete(pullMessageId);
-            return null;
-        }
         return pullMessageId;
     }
 
@@ -246,11 +237,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-    }
 
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
@@ -274,14 +260,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void saveRawXml(String rawXml, String messageId) {
-        //rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXml);
-        rawEnvelopeLog.setMessageId(messageId);
-        if(!rawEnvelopeLogDao.messageExist(messageId)) {
-            rawEnvelopeLogDao.create(rawEnvelopeLog);
-        }
-
+        RawEnvelopeLog newRawEnvelopeLog = new RawEnvelopeLog();
+        newRawEnvelopeLog.setRawXML(rawXml);
+        newRawEnvelopeLog.setMessageId(messageId);
+        rawEnvelopeLogDao.create(newRawEnvelopeLog);
     }
 
     @Override

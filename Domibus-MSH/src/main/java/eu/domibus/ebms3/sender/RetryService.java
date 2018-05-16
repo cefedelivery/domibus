@@ -124,11 +124,11 @@ public class RetryService {
 
     //@thom test this
     protected void purgePullMessage() {
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        /*List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
             pullService.delete(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
-        }
+        }*/
     }
 
     protected void resetWaitingForReceiptPullMessages() {
@@ -139,7 +139,7 @@ public class RetryService {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
                 }
-                addPullMessageSearchInformation(userMessageLog);
+                //addPullMessageSearchInformation(userMessageLog);
                 userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
             } else {
                 if (LOG.isDebugEnabled()) {

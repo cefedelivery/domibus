@@ -8,10 +8,6 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.core.pull.MessagingLockService;
-import eu.domibus.core.pull.PartyIdExtractor;
-import eu.domibus.core.pull.ToExtractor;
-import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -48,8 +44,6 @@ public class UpdateRetryLoggingService {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
-    @Autowired
-    private MessagingLockService messagingLockService;
 
     /**
      * This method is responsible for the handling of retries for a given sent message.
@@ -82,7 +76,7 @@ public class UpdateRetryLoggingService {
         final String messageId = userMessageLog.getMessageId();
         LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
         if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
-            LOG.debug("Notifying backend for message failure");
+            LOG.info("Notifying backend for message failure");
             backendNotificationService.notifyOfSendFailure(messageId);
         }
         userMessageLogService.setMessageAsSendFailure(messageId);

@@ -1,6 +1,6 @@
 package eu.domibus.core.pull;
 
-import static eu.domibus.core.pull.MessageStaledState.OK;
+import static eu.domibus.core.pull.MessageStaledState.FIRST_ATTEMPT;
 
 public class PullMessageId {
 
@@ -17,7 +17,7 @@ public class PullMessageId {
     }
 
     public PullMessageId(final String messageId) {
-        this(messageId, OK,null);
+        this(messageId, FIRST_ATTEMPT, null);
     }
 
     public String getMessageId() {

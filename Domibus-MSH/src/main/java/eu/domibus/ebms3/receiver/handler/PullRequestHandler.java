@@ -7,16 +7,13 @@ import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.PullServiceImpl;
-import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -33,10 +30,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
 import java.sql.Timestamp;
 
-import static eu.domibus.common.MessageStatus.READY_TO_PULL;
-import static eu.domibus.common.MessageStatus.SEND_FAILURE;
-import static eu.domibus.common.MessageStatus.WAITING_FOR_RECEIPT;
-import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.PULL_FAILED;
 import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
 
 /**
