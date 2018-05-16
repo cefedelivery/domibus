@@ -14,7 +14,9 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pull.*;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.MessagingLock;
+import eu.domibus.ebms3.common.model.To;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -35,6 +37,7 @@ import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -271,5 +274,52 @@ public class PullMessageServiceImpl implements PullMessageService {
     @Transactional
     public void deletePullMessageLock(final String messageId) {
         messagingLockDao.delete(messageId);
+    }
+
+
+    @Override
+    public void resetWaitingForReceiptPullMessages() {
+        final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
+        for (String messagedId : messagesToReset) {
+            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messagedId);
+            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
+            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()) {
+                //retrive the message locK.
+                final MessagingLock messagingLock = messagingLockDao.findMessagingLockForMessageId(messagedId);
+                //could happen due to different transactions. So in oder to be resilient we check it.
+                if (messagingLock == null) {
+                    addPullMessageLock(userMessageLog);
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
+                }
+                userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+                //notify ??
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Pull Message with " + messagedId + " marked as send failure after max retry attempt reached");
+                }
+                userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
+                deletePullMessageLock(messagedId);
+                //notify.
+            }
+            userMessageLogDao.update(userMessageLog);
+        }
+    }
+
+
+    /**
+     * When a message has been set in waiting_for_receipt state its locking record has been deleted. When the retry
+     * service set timed_out waiting_for_receipt messages back in ready_to_pull state, the search and lock system has to be fed again
+     * with the message information.
+     *
+     * @param userMessageLog the messageLod
+     */
+    private void addPullMessageLock(final UserMessageLog userMessageLog) {
+        final String messageId = userMessageLog.getMessageId();
+        Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
+        final UserMessage userMessage = messageByMessageId.getUserMessage();
+        To to = userMessage.getPartyInfo().getTo();
+        addPullMessageLock(new ToExtractor(to), userMessage, userMessageLog);
     }
 }

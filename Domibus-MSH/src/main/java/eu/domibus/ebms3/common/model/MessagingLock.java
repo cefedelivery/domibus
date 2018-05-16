@@ -6,7 +6,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.Objects;
 
 import static eu.domibus.ebms3.common.model.MessageState.READY;
 
@@ -17,14 +16,10 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
 @Entity
 @Table(name = "TB_MESSAGING_LOCK")
 @NamedQueries({
-        @NamedQuery(name = "MessagingLock.findNexMessageToProcess",
-                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC ORDER BY m.received"),
-        @NamedQuery(name = "MessagingLock.findNexMessageToProcessExcludingLocked",
-                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC and m.entityId not in(:LOCKED_IDS) ORDER BY m.received"),
+        @NamedQuery(name = "MessagingLock.findForMessageId",
+                query = "select m from MessagingLock m where m.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "MessagingLock.delete",
                 query = "delete from MessagingLock m where m.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessagingLock.updateStatus",
-                query = "update MessagingLock m set m.messageState=:MESSAGE_STATE where m.messageId=:MESSAGE_ID")
 })
 public class MessagingLock extends AbstractBaseEntity {
 

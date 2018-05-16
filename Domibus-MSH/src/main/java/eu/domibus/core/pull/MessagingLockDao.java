@@ -14,4 +14,5 @@ public interface MessagingLockDao {
 
     void delete(String messageId);
 
+    MessagingLock findMessagingLockForMessageId(String messageId);
 }

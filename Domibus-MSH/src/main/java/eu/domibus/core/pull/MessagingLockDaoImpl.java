@@ -14,9 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 import javax.sql.DataSource;
 import java.sql.Date;
 import java.util.HashMap;
@@ -103,6 +101,17 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         Query query = entityManager.createNamedQuery("MessagingLock.delete");
         query.setParameter(MESSAGE_ID, messageId);
         query.executeUpdate();
+    }
+
+    @Override
+    public MessagingLock findMessagingLockForMessageId(final String messageId) {
+        TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findForMessageId", MessagingLock.class);
+        namedQuery.setParameter("MESSAGE_ID", messageId);
+        try {
+            return namedQuery.getSingleResult();
+        } catch (NoResultException nr) {
+            return null;
+        }
     }
 
 }

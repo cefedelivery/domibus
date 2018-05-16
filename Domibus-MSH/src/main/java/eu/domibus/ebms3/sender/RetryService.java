@@ -6,17 +6,13 @@ import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.impl.PullMessageService;
-import eu.domibus.core.pull.ToExtractor;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.To;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -75,6 +71,12 @@ public class RetryService {
     @Autowired
     private JMSManager jmsManager;
 
+    @Autowired
+    private MessagingLockDao messagingLockDao;
+
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -90,7 +92,7 @@ public class RetryService {
         }
 
         purgePullMessage();
-        resetWaitingForReceiptPullMessages();
+        pullMessageService.resetWaitingForReceiptPullMessages();
     }
 
     protected List<String> getMessagesNotAlreadyQueued() {
@@ -124,49 +126,11 @@ public class RetryService {
 
     //@thom test this
     protected void purgePullMessage() {
-        /*List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
-            pullMessageService.delete(timedoutPullMessage);
+            pullMessageService.deletePullMessageLock(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
-        }*/
-    }
-
-    protected void resetWaitingForReceiptPullMessages() {
-        final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
-        for (String messagedId : messagesToReset) {
-            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
-            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Message " + messagedId + " set back in READY_TO_PULL state.");
-                }
-                //addPullMessageSearchInformation(userMessageLog);
-                userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Pull Message with " + messagedId + " marked as send failure after max retry attempt reached");
-                }
-                userMessageLog.setMessageStatus(MessageStatus.SEND_FAILURE);
-                pullMessageService.deletePullMessageLock(messagedId);
-            }
-            userMessageLogDao.update(userMessageLog);
         }
-    }
-
-    /**
-     * When a message has been set in waiting_for_receipt state its locking record has been deleted. When the retry
-     * service set timed_out waiting_for_receipt messages back in ready_to_pull state, the search and lock system has to be fed again
-     * with the message information.
-     *
-     * @param userMessageLog the messageLod
-     */
-    private void addPullMessageSearchInformation(final UserMessageLog userMessageLog) {
-        final String messageId = userMessageLog.getMessageId();
-        Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
-        final UserMessage userMessage = messageByMessageId.getUserMessage();
-        To to = userMessage.getPartyInfo().getTo();
-        pullMessageService.deletePullMessageLock(messageId);
-        pullMessageService.addPullMessageLock(new ToExtractor(to), userMessage, userMessageLog);
-
     }
 
 

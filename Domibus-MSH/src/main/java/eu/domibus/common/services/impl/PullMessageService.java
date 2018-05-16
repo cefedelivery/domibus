@@ -68,4 +68,10 @@ public interface PullMessageService {
             UserMessage userMessage,
             LegConfiguration legConfiguration
     );
+
+    /**
+     * Retrieve waiting for receipt message for which next attempt date is passed.
+     * Etheir put them back in ready to pull or send failure.
+     */
+    void resetWaitingForReceiptPullMessages();
 }
