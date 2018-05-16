@@ -1,10 +1,6 @@
 package eu.domibus.core.pull;
 
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.model.UserMessage;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Thomas Dussart
@@ -17,11 +13,15 @@ public interface PullMessageStateService {
 
 
     /**
-     * Handle the state management of a staled pull message.
+     * Handle the state management of a staled pull message.²
      * @param messageId
      */
     void messageStaled(String messageId);
 
-    @Transactional
+    /**
+     * Reset the next attempt date, put the message in send_failure and notify if configure.
+     *
+     * @param userMessageLog
+     */
     void sendFailed(UserMessageLog userMessageLog);
 }

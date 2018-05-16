@@ -64,7 +64,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
                     return new PullMessageId(messageId, STALED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
                 }
                 if (sendAttempts >= sendAttemptsMax) {
-                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts reached:[%d]", 35));
+                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts to send the message has been reached:[%d]", 35));
                 }
                 if (sendAttempts > 0) {
                     return new PullMessageId(messageId, FURTHER_ATTEMPT, "");

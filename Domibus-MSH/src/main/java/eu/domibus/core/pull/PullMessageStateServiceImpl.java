@@ -31,7 +31,6 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
-
     /**
      * {@inheritDoc}
      */
