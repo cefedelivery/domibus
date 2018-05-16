@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-jms-activemq</artifactId>
+            <artifactId>domibus-jms-wildfly-artemis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -55,6 +55,28 @@
             <groupId>org.glassfish.main.javaee-api</groupId>
             <artifactId>javax.jws</artifactId>
             <version>3.1.2.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+        </dependency>
+        <!-- ActiveMQ -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-spring</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-jaas</artifactId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
         </dependency>
 
         <!-- Test dependencies -->

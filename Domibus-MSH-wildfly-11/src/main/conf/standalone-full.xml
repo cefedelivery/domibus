@@ -445,92 +445,27 @@
                 <smtp-server outbound-socket-binding-ref="mail-smtp"/>
             </mail-session>
         </subsystem>
-
         <subsystem xmlns="urn:jboss:domain:messaging-activemq:2.0">
             <server name="default">
+                <management jmx-enabled="true" />
                 <security-setting name="#">
                     <role name="guest" send="true" consume="true" create-non-durable-queue="true" delete-non-durable-queue="true"/>
                 </security-setting>
 
                 <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10"/>
-
-                    <address-setting name="jms.queue.DomibusSendMessageQueue" expiry-address="jms.queue.ExpiryQueue" />
-                        <!--
-                        <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>0</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusPullMessageQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>1000</redelivery-delay>
-                        <max-delivery-attempts>0</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusBusinessMessageOutQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusNotifyBackendJmsQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusErrorNotifyConsumerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusErrorNotifyProducerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusBusinessMessageInQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusPluginToBackendQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusNotifyBackendWebServiceQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusNotifyBackendFileSystemQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                       <!-- <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
-                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
-                        <redelivery-delay>300000</redelivery-delay>
-                        <max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusUnknownReceiverQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>-->
-                        <!--<expiry-address>jms.queue.ExpiryQueue</expiry-address>-->
-                        <!--<redelivery-delay>300000</redelivery-delay>-->
-                        <!--<max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusNotifyBackendQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>-->
-                        <!--<expiry-address>jms.queue.ExpiryQueue</expiry-address>-->
-                        <!--<redelivery-delay>300000</redelivery-delay>-->
-                        <!--<max-delivery-attempts>10</max-delivery-attempts>-->
-
-                    <address-setting name="jms.queue.DomibusClusterCommandTopic" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue"/>
-                        <!--<dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>-->
-                        <!--<expiry-address>jms.queue.ExpiryQueue</expiry-address>-->
-                        <!--<redelivery-delay>10000</redelivery-delay>-->
-                        <!--<max-delivery-attempts>3</max-delivery-attempts>-->
-
+                <address-setting name="jms.queue.DomibusSendMessageQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
+                <address-setting name="jms.queue.DomibusPullMessageQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
+                <address-setting name="jms.queue.DomibusBusinessMessageOutQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusNotifyBackendJmsQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusErrorNotifyConsumerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusErrorNotifyProducerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusBusinessMessageInQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusPluginToBackendQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusNotifyBackendWebServiceQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusNotifyBackendFileSystemQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusUnknownReceiverQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusNotifyBackendQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusClusterCommandTopic" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="10000" max-delivery-attempts="3"/>
                 <http-connector name="http-connector" socket-binding="http" endpoint="http-acceptor"/>
                 <http-connector name="http-connector-throughput" socket-binding="http" endpoint="http-acceptor-throughput">
                     <param name="batch-delay" value="50"/>
@@ -546,45 +481,26 @@
                 <in-vm-acceptor name="in-vm" server-id="0">
                     <param name="buffer-pooling" value="false"/>
                 </in-vm-acceptor>
-
                 <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                 <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
-
-                <jms-queue name="DomibusBusinessMessageOutQueue" entries="java:/jms/domibus.backend.jms.outQueue java:/jms/queue/DomibusBusinessMessageOutQueue" durable="true" />
-
-                <jms-queue name="DomibusNotifyBackendJmsQueue" entries="java:/jms/domibus.notification.jms java:/jms/queue/DomibusNotifyBackendJmsQueue" durable="true" />
-
-                <jms-queue name="DomibusErrorNotifyConsumerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyConsumer java:/jms/queue/DomibusErrorNotifyConsumerQueue" durable="true" />
-
-                <jms-queue name="DomibusErrorNotifyProducerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyProducer java:/jms/queue/DomibusErrorNotifyProducerQueue" durable="true" />
-
+                <jms-queue name="DomibusBusinessMessageOutQueue" entries="java:/jms/domibus.backend.jms.outQueue java:/jms/queue/DomibusBusinessMessageOutQueue" durable="true"/>
+                <jms-queue name="DomibusNotifyBackendJmsQueue" entries="java:/jms/domibus.notification.jms java:/jms/queue/DomibusNotifyBackendJmsQueue" durable="true"/>
+                <jms-queue name="DomibusErrorNotifyConsumerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyConsumer java:/jms/queue/DomibusErrorNotifyConsumerQueue" durable="true"/>
+                <jms-queue name="DomibusErrorNotifyProducerQueue" entries="java:/jms/domibus.backend.jms.errorNotifyProducer java:/jms/queue/DomibusErrorNotifyProducerQueue" durable="true"/>
                 <jms-queue name="DomibusBusinessMessageInQueue" entries="java:/jms/domibus.backend.jms.inQueue java:/jms/queue/DomibusBusinessMessageInQueue" durable="true"/>
-
                 <jms-queue name="DomibusPluginToBackendQueue" entries="java:/jms/domibus.backend.jms.replyQueue java:/jms/queue/DomibusPluginToBackendQueue" durable="true"/>
-
-                <jms-queue name="DomibusSendMessageQueue" entries="java:/jms/domibus.internal.dispatch.queue java:/jms/queue/DomibusSendMessageQueue" durable="true" />
-
-                <jms-queue name="DomibusPullMessageQueue" entries="java:/jms/domibus.internal.pull.queue java:/jms/queue/DomibusPullMessageQueue" durable="true" />
-
-                <jms-queue name="DomibusNotifyBackendWebServiceQueue" entries="java:/jms/domibus.notification.webservice java:/jms/queue/DomibusNotifyBackendWebServiceQueue" durable="true" />
-
+                <jms-queue name="DomibusSendMessageQueue" entries="java:/jms/domibus.internal.dispatch.queue java:/jms/queue/DomibusSendMessageQueue" durable="true"/>
+                <jms-queue name="DomibusPullMessageQueue" entries="java:/jms/domibus.internal.pull.queue java:/jms/queue/DomibusPullMessageQueue" durable="true"/>
+                <jms-queue name="DomibusNotifyBackendWebServiceQueue" entries="java:/jms/domibus.notification.webservice java:/jms/queue/DomibusNotifyBackendWebServiceQueue" durable="true"/>
                 <jms-queue name="DomibusNotifyBackendFileSystemQueue" entries="java:/jms/domibus.notification.filesystem java:/jms/queue/DomibusNotifyBackendFileSystemQueue" durable="true"/>
-
-                <jms-queue name="DomibusUnknownReceiverQueue" entries="java:/jms/domibus.internal.notification.unknown java:/jms/queue/DomibusUnknownReceiverQueue" durable="true" />
-
-                <jms-queue name="DomibusNotifyBackendQueue" entries="java:/jms/domibus.internal.notification.queue java:/jms/queue/DomibusNotifyBackendQueue" />
-
+                <jms-queue name="DomibusUnknownReceiverQueue" entries="java:/jms/domibus.internal.notification.unknown java:/jms/queue/DomibusUnknownReceiverQueue" durable="true"/>
+                <jms-queue name="DomibusNotifyBackendQueue" entries="java:/jms/domibus.internal.notification.queue java:/jms/queue/DomibusNotifyBackendQueue"/>
                 <jms-queue name="DomibusDLQ" entries="java:/jms/domibus.DLQ java:/jms/queue/DomibusDLQ" durable="true"/>
-
-                <jms-topic name="DomibusClusterCommandTopic" entries="java:/jms/domibus.internal.command java:/jms/topic/DomibusClusterCommandTopic" />
-
+                <jms-topic name="DomibusClusterCommandTopic" entries="java:/jms/domibus.internal.command java:/jms/topic/DomibusClusterCommandTopic"/>
                 <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
                 <connection-factory name="RemoteConnectionFactory" entries="java:jboss/exported/jms/RemoteConnectionFactory" connectors="http-connector"/>
-                <connection-factory name="edeliveryConnectionFactory" entries="java:/jms/ConnectionFactory" connectors="in-vm" compress-large-messages="false"
-                                    failover-on-initial-connection="false" use-global-pools="true"/>
-
+                <connection-factory name="edeliveryConnectionFactory" entries="java:/jms/ConnectionFactory" connectors="in-vm" compress-large-messages="false" failover-on-initial-connection="false" use-global-pools="true"/>
                 <pooled-connection-factory name="activemq-ra" entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory" connectors="in-vm" transaction="xa"/>
-
             </server>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
