@@ -86,26 +86,49 @@ export class UserValidatorService {
     return '';
   }
 
-  static matchPassword (form: AbstractControl) {
-    let password = form.get('password').value; // to get value in input tag
-    let confirmPassword = form.get('confirmation').value; // to get value in input tag
-    if (password != confirmPassword) {
+  matchPassword (form: AbstractControl) {
+    const password = form.get('password').value; // to get value in input tag
+    const confirmPassword = form.get('confirmation').value; // to get value in input tag
+    if (password !== confirmPassword) {
       form.get('confirmation').setErrors({confirmation: true})
     }
   }
 
-  static validateDomain (form: AbstractControl) {
-    const roles: string[] = form.get('roles').value;
-    if (!roles.includes('ROLE_AP_ADMIN')) {
-      const domain: string = form.get('domain').value;
-      if (!domain) {
-        form.get('domain').setErrors({required: true})
+  validateDomain (form: AbstractControl) {
+    //console.log('validateDomain');
+    const domain: string = form.get('domain').value;
+    //console.log('domain:', domain);
+    if (!domain) {
+      form.get('domain').setErrors({required: true})
+    }
+
+    // const roles: string[] = form.get('roles').value;
+    // if (!roles.includes('ROLE_AP_ADMIN')) {
+    //   const domain: string = form.get('domain').value;
+    //   if (!domain) {
+    //     form.get('domain').setErrors({required: true})
+    //   }
+    // }
+  }
+
+  validateForm (isDomainVisible: boolean) {
+    return (form: AbstractControl) => {
+      if (isDomainVisible) {
+        this.validateDomain(form);
       }
+      this.matchPassword(form);
     }
   }
 
-  validateForm (form: AbstractControl) {
-    UserValidatorService.validateDomain(form);
-    UserValidatorService.matchPassword(form);
-  }
+  // validateForm2 (form: AbstractControl, isDomainVisible: boolean) {
+  //   if (isDomainVisible) {
+  //     this.validateDomain(form);
+  //   }
+  //   this.matchPassword(form);
+  // }
+
+  // validateForm (form: AbstractControl) {
+  //   UserValidatorService.validateDomain(form);
+  //   UserValidatorService.matchPassword(form);
+  // }
 }

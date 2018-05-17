@@ -15,7 +15,7 @@ export class UserResponseRO {
   status: string;
   suspended: boolean;
 
-  constructor (userName: string, email: string, password: string, active: boolean, status: string, authorities: Array<string>, suspended: boolean, domain: string) {
+  constructor (userName: string, domain: string, email: string, password: string, active: boolean, status: string, authorities: Array<string>, suspended: boolean) {
     this.userName = userName;
     this.email = email;
     this.password = password;

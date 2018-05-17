@@ -39,6 +39,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   users: Array<UserResponseRO> = [];
   userRoles: Array<String> = [];
   domains: Domain[];
+  currentDomain: Domain;
 
   selected = [];
 
@@ -107,6 +108,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     ];
 
     if (this.userService.isDomainVisible()) {
+      this.getUserDomains();
+
       this.columnPicker.allColumns.splice(2, 0,
         {
           cellTemplate: this.editableTpl,
@@ -115,6 +118,7 @@ export class UserComponent implements OnInit, DirtyOperations {
           canAutoResize: true
         });
     }
+    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain =  domain);
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ['Username', 'Role', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
@@ -123,8 +127,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.getUsers();
 
     this.getUserRoles();
-
-    this.getUserDomains();
 
     if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error('Maximum number of rows reached for downloading CSV');
@@ -172,7 +174,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    this.editedUser = new UserResponseRO('', '', '', true, UserState[UserState.NEW], [], false, null);
+    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true, UserState[UserState.NEW], [], false);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
@@ -202,6 +204,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEditAction (rowNumber) {
+    console.log()
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
@@ -223,6 +226,7 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     user.email = editForm.email;
     user.roles = editForm.roles.toString();
+    console.log('onSaveEditForm', editForm.domain);
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
