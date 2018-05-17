@@ -217,7 +217,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog, @Injectable final UserMessage userMessage) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
         final String mpc = "mpc";
@@ -226,17 +226,14 @@ public class UserMessageDefaultServiceTest {
             userMessageDefaultService.getFailedMessage(messageId);
             result = userMessageLog;
 
-            userMessageLog.getMpc();
-            result = mpc;
-
-            userMessageLog.getMessageId();
-            result = messageId;
-
             messageExchangeService.retrieveMessageRestoreStatus(messageId);
             result = MessageStatus.READY_TO_PULL;
 
             userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
             result = newMaxAttempts;
+
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
 
         }};
 
@@ -261,7 +258,7 @@ public class UserMessageDefaultServiceTest {
             messagingDao.findUserMessageByMessageId(messageId);
             times = 1;
             ToExtractor toExtractor = null;
-            pullMessageService.addPullMessageLock(withAny(toExtractor), null, null);
+            pullMessageService.addPullMessageLock(withAny(toExtractor), userMessage, userMessageLog);
             times = 1;
         }};
     }

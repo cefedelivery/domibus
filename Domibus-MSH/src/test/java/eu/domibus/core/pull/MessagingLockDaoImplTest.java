@@ -14,6 +14,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,8 +60,8 @@ public class MessagingLockDaoImplTest {
             sqlRowSet.getString(1);
             result = messageId;
 
-            sqlRowSet.getDate(2);
-            result = new java.sql.Date(System.currentTimeMillis() + 20000);
+            sqlRowSet.getObject(2);
+            result = new java.sql.Timestamp(System.currentTimeMillis() + 20000);
 
             sqlRowSet.getInt(3);
             result = 0;
@@ -105,8 +106,8 @@ public class MessagingLockDaoImplTest {
             sqlRowSet.getString(1);
             result = messageId;
 
-            sqlRowSet.getDate(2);
-            result = new java.sql.Date(System.currentTimeMillis() + 20000);
+            sqlRowSet.getObject(2);
+            result = new java.sql.Timestamp(System.currentTimeMillis() + 20000);
 
             sqlRowSet.getInt(3);
             result = 1;
@@ -136,7 +137,7 @@ public class MessagingLockDaoImplTest {
     public void getNextPullMessageToProcessStaled(@Mocked final SqlRowSet sqlRowSet) {
         final long idPk = 6;
         final String messageId = "staledMessageId";
-        final java.sql.Date staledDate = new java.sql.Date(System.currentTimeMillis() - 20000);
+        final Timestamp staledDate = new Timestamp(System.currentTimeMillis() - 20000);
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
@@ -152,7 +153,7 @@ public class MessagingLockDaoImplTest {
             sqlRowSet.getString(1);
             result = messageId;
 
-            sqlRowSet.getDate(2);
+            sqlRowSet.getObject(2);
             result = staledDate;
 
             sqlRowSet.getInt(3);
@@ -183,7 +184,7 @@ public class MessagingLockDaoImplTest {
     public void getNextPullMessageToProcessMaxAttemptsReached(@Mocked final SqlRowSet sqlRowSet) {
         final long idPk = 6;
         final String messageId = "maxAttemptMessageId";
-        final java.sql.Date staledDate = new java.sql.Date(System.currentTimeMillis() + 20000);
+        final Timestamp staledDate = new Timestamp(System.currentTimeMillis() + 20000);
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
@@ -199,7 +200,7 @@ public class MessagingLockDaoImplTest {
             sqlRowSet.getString(1);
             result = messageId;
 
-            sqlRowSet.getDate(2);
+            sqlRowSet.getObject(2);
             result = staledDate;
 
             sqlRowSet.getInt(3);

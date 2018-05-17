@@ -274,26 +274,6 @@ public class MessageExchangeServiceImplTest {
 
     }
 
-    @Test
-    public void testRetrieveReadyToPullUserMessageIdWithWrongStatusMessage() {
-        String mpc = "mpc";
-        Party party = Mockito.mock(Party.class);
-
-        Set<Identifier> identifiers = new HashSet<>();
-        Identifier identifier = new Identifier();
-        identifier.setPartyId("party1");
-        identifiers.add(identifier);
-
-        when(party.getIdentifiers()).thenReturn(identifiers);
-
-        final String testMessageId = "testMessageId";
-        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
-        UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setMessageStatus(MessageStatus.BEING_PULLED);
-        when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
-        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
-        verify(pullMessageService, times(1)).deletePullMessageLock(eq(testMessageId));
-    }
 
     @Test
     public void testGetMessageStatusWhenNoPullProcessFound() {
