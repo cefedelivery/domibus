@@ -41,7 +41,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
         } else if (StringUtils.containsIgnoreCase(property, ORACLE)) {
             dataBaseEngine = DataBaseEngine.ORACLE;
         } else if (StringUtils.containsIgnoreCase(property, H_2)) {
-            dataBaseEngine = DataBaseEngine.ORACLE;
+            dataBaseEngine = DataBaseEngine.H2;
         } else {
             throw new IllegalStateException("Unsupporte database dialect:" + property);
         }
