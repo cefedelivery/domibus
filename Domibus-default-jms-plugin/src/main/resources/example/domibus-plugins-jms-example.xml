@@ -8,14 +8,8 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-
-
-
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
-
-
-
 
     <bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
         <constructor-arg value="Jms"/>
