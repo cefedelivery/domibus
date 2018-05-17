@@ -7,6 +7,7 @@ import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.LoginRO;
@@ -48,6 +49,9 @@ public class AuthenticationResourceTest {
 
     @Injectable
     protected DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    DomainCoreConverter domainCoreConverter;
 
     @Mocked
     Logger LOG;
