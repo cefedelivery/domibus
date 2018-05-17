@@ -13,7 +13,7 @@ import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.services.impl.PullMessageService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;

@@ -11,8 +11,9 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.services.impl.PullMessageService;
 import eu.domibus.core.pull.MessagingLockDao;
+import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.PullMessageStateService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -69,6 +70,9 @@ public class RetryService {
     private PullMessageService pullMessageService;
 
     @Autowired
+    private PullMessageStateService pullMessageStateService;
+
+    @Autowired
     private JMSManager jmsManager;
 
     @Autowired
@@ -90,9 +94,6 @@ public class RetryService {
         for (final String messageId : messagesNotAlreadyQueued) {
             userMessageService.scheduleSending(messageId);
         }
-
-        purgePullMessage();
-        pullMessageService.resetWaitingForReceiptPullMessages();
     }
 
     protected List<String> getMessagesNotAlreadyQueued() {
@@ -124,8 +125,8 @@ public class RetryService {
         }
     }
 
-    //@thom test this
-    protected void purgePullMessage() {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void purgePullMessage() {
         List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
             pullMessageService.deletePullMessageLock(timedoutPullMessage);
@@ -141,7 +142,7 @@ public class RetryService {
      * @param messageIdToPurge is the messageId of the expired message
      */
     //TODO in Domibus 3.3 extract the logic below into a method of the MessageService and re-use it here and in the UpdateRetryLoggingService
-    public void purgeTimedoutMessage(final String messageIdToPurge) {
+    private void purgeTimedoutMessage(final String messageIdToPurge) {
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
 
         final boolean notify = NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus());
@@ -165,6 +166,8 @@ public class RetryService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void purgeTimedoutMessageInANewTransaction(final String messageIdToPurge) {
+        pullMessageService.deletePullMessageLock(messageIdToPurge);
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageIdToPurge);
         purgeTimedoutMessage(messageIdToPurge);
     }
 

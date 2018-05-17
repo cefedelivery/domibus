@@ -95,11 +95,15 @@ public class UpdateRetryLoggingService {
 
     public void increaseAttempAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {
         LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
-        userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+        updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, messageStatus, new Timestamp(System.currentTimeMillis()));
         userMessageLog.setMessageStatus(messageStatus);
         LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
         userMessageLogDao.update(userMessageLog);
+    }
+
+    public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+        userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
     }
 
     /**

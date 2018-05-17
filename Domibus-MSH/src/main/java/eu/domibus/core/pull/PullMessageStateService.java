@@ -16,7 +16,7 @@ public interface PullMessageStateService {
      * Handle the state management of a staled pull message.²
      * @param messageId
      */
-    void messageStaled(String messageId);
+    void expirePullMessage(String messageId);
 
     /**
      * Reset the next attempt date, put the message in send_failure and notify if configure.
@@ -24,4 +24,17 @@ public interface PullMessageStateService {
      * @param userMessageLog
      */
     void sendFailed(UserMessageLog userMessageLog);
+
+
+    /**
+     * Reset a faile message into ready to pull..
+     *
+     * @param userMessageLog
+     */
+    void reset(UserMessageLog userMessageLog);
+
+    /**
+     * Delete all the pull messages that are staled.
+     */
+    void bulkExpirePullMessages();
 }

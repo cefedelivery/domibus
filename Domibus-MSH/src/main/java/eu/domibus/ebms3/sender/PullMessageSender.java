@@ -2,9 +2,9 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -124,7 +124,6 @@ public class PullMessageSender {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
             //send receipt
-
             mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
 
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {

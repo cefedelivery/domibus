@@ -20,6 +20,8 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
                 query = "select m from MessagingLock m where m.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "MessagingLock.delete",
                 query = "delete from MessagingLock m where m.messageId=:MESSAGE_ID"),
+        @NamedQuery(name = "MessagingLock.findStalledMessages",
+                query = "SELECT m from MessagingLock m where m.staled<CURRENT_TIMESTAMP()")
 })
 public class MessagingLock extends AbstractBaseEntity {
 

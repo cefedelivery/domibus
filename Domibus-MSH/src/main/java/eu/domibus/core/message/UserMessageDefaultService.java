@@ -17,7 +17,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.PullMessageService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;

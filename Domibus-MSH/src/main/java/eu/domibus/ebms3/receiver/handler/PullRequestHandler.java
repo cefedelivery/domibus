@@ -13,7 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
-import eu.domibus.common.services.impl.PullMessageService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -102,7 +102,6 @@ public class PullRequestHandler {
         SOAPMessage soapMessage = null;
         UserMessage userMessage = null;
         try {
-
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             leg = pullContext.filterLegOnMpc();
             try {

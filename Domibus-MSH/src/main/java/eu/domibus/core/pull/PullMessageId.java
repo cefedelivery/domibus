@@ -1,22 +1,22 @@
 package eu.domibus.core.pull;
 
-import static eu.domibus.core.pull.MessageStaledState.FIRST_ATTEMPT;
+import static eu.domibus.core.pull.PullMessageState.FIRST_ATTEMPT;
 
 public class PullMessageId {
 
     private String messageId;
 
-    private MessageStaledState state;
+    private PullMessageState state;
 
     private String staledReason;
 
-    public PullMessageId(final String messageId, final MessageStaledState state,final String staleReason) {
+    public PullMessageId(final String messageId, final PullMessageState state, final String staleReason) {
         this.messageId = messageId;
         this.state = state;
         this.staledReason =staleReason;
     }
 
-    public PullMessageId(final String messageId, final MessageStaledState state) {
+    public PullMessageId(final String messageId, final PullMessageState state) {
         this(messageId, state, null);
     }
 
@@ -28,7 +28,7 @@ public class PullMessageId {
         return messageId;
     }
 
-    public MessageStaledState getState() {
+    public PullMessageState getState() {
         return state;
     }
 
