@@ -16,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,7 +74,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(databaseSpecificQuery, params);
             while (sqlRowSet.next()) {
                 final String messageId = sqlRowSet.getString(1);
-                final Date messageStaled = sqlRowSet.getDate(2);
+                final Timestamp messageStaled = getTimestamp(sqlRowSet.getObject(2));
                 final int sendAttempts = sqlRowSet.getInt(3);
                 final int sendAttemptsMax = sqlRowSet.getInt(4);
                 jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params);
@@ -90,6 +93,25 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
         }
         return null;
+    }
+
+    //this method is needed because the oracle jdbc driver does return an oracle.sql.TIMESTAMP which guess what...
+    //does not extends java.sql.Timestamp.
+    private Timestamp getTimestamp(Object object) {
+        final String className = object.getClass().getName();
+
+        if (DataBaseEngine.ORACLE == domibusConfigurationService.getDataBaseEngine()) {
+            if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
+                try {
+                    final Method timestampValueMethod = object.getClass().getMethod("timestampValue");
+                    return (Timestamp) timestampValueMethod.invoke(object);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    LOG.error("Impossible to retrieve oracle timestamp");
+                    throw new IllegalStateException("Impossible to retrieve oracle timestamp");
+                }
+            }
+        }
+        return (Timestamp) object;
     }
 
 

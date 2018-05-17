@@ -129,6 +129,7 @@ public class RetryService {
         List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
             pullMessageService.deletePullMessageLock(timedoutPullMessage);
+            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
         }
     }
