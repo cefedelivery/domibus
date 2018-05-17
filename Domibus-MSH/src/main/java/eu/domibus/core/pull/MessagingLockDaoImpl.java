@@ -32,9 +32,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagingLockDaoImpl.class);
 
-    public static final String MPC = "MPC";
+    static final String MPC = "MPC";
 
-    public static final String MESSAGE_ID = "MESSAGE_ID";
+    static final String MESSAGE_ID = "MESSAGE_ID";
+
+    static final String ID_PK = "idPk";
 
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
@@ -63,7 +65,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullMessageId getNextPullMessageToProcess(final Long idPk) {
         final Map<String, Long> params = new HashMap<>();
-        params.put("idPk", idPk);
+        params.put(ID_PK, idPk);
         try {
             final String databaseSpecificQuery = databaseSpecificQueries.get(domibusConfigurationService.getDataBaseEngine());
             final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(databaseSpecificQuery, params);
@@ -77,10 +79,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
                     return new PullMessageId(messageId, STALED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
                 }
                 if (sendAttempts >= sendAttemptsMax) {
-                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts to send the message has been reached:[%d]", 35));
+                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
                 }
                 if (sendAttempts > 0) {
-                    return new PullMessageId(messageId, FURTHER_ATTEMPT, "");
+                    return new PullMessageId(messageId, FURTHER_ATTEMPT);
                 }
                 return new PullMessageId(messageId);
             }

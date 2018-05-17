@@ -16,6 +16,10 @@ public class PullMessageId {
         this.staledReason =staleReason;
     }
 
+    public PullMessageId(final String messageId, final MessageStaledState state) {
+        this(messageId, state, null);
+    }
+
     public PullMessageId(final String messageId) {
         this(messageId, FIRST_ATTEMPT, null);
     }
