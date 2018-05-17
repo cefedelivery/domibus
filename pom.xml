@@ -774,6 +774,10 @@
                         <artifactId>dependency-check-maven</artifactId>
                         <version>3.1.2</version>
                         <inherited>false</inherited>
+                        <configuration>
+                            <skipProvidedScope>true</skipProvidedScope>
+                            <skipRuntimeScope>true</skipRuntimeScope>
+                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
