@@ -152,7 +152,7 @@
                     </security>
                 </datasource>
                 <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://localhost:3306/domibus_4_0_red</connection-url>
+                    <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>com.mysql</driver>
                     <security>
@@ -170,7 +170,7 @@
                         localhost
                     </xa-datasource-property>
                     <xa-datasource-property name="DatabaseName">
-                        domibus_4_0_red
+                        domibus
                     </xa-datasource-property>
                     <driver>com.mysql</driver>
                     <security>
