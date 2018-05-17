@@ -1,7 +1,9 @@
 package eu.domibus.common.dao;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -34,6 +36,9 @@ public class PModeDaoTest {
     protected EntityManager entityManager;
 
     @Injectable
+    protected DomainContextProvider domainContextProvider;
+
+    @Injectable
     private JAXBContext jaxbContextConfig;
 
     @Injectable
@@ -53,6 +58,9 @@ public class PModeDaoTest {
 
     @Tested(fullyInitialized = true)
     private PModeDao pModeDao;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Mocked
     TypedQuery<LegConfiguration> queryLegConfiguration;

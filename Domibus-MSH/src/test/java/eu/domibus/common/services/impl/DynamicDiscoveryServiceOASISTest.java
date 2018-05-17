@@ -1,9 +1,13 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -29,7 +33,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,10 +59,13 @@ public class DynamicDiscoveryServiceOASISTest {
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
     @Injectable
-    private Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    private CryptoService cryptoService;
+    private MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    protected DomainContextProvider domainProvider;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -67,7 +73,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationMock(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -88,10 +94,10 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationRegexMatch(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*EHEALTH_SMP.*$";
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -112,7 +118,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -126,7 +132,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationNotFoundMessage(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -165,14 +171,14 @@ public class DynamicDiscoveryServiceOASISTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             KeyStore truststore;
             truststore = KeyStore.getInstance("JKS");
             truststore.load(getClass().getResourceAsStream("../ehealth_smp_acc_truststore.jks"), TEST_KEYSTORE_PASSWORD.toCharArray());
 
-            cryptoService.getTrustStore();
+            multiDomainCertificateProvider.getTrustStore(DomainService.DEFAULT_DOMAIN);
             result = truststore;
 
         }};
@@ -200,19 +206,19 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.0";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "1234";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
         }};
 
@@ -227,7 +233,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "false";
         }};
 
@@ -243,19 +249,19 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = null;
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "8012";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
         }};
 
@@ -267,19 +273,19 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.1.1";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
         }};
 
@@ -291,19 +297,19 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.1.1";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "8012";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = null;
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
         }};
 
@@ -315,19 +321,19 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.1.1";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "8012";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "";
         }};
 
@@ -339,25 +345,25 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "true";
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.1";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "8012";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*$";
         }};
 
@@ -373,13 +379,13 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProperties.getProperty("domibus.proxy.enabled", "false");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
             result = "false";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*$";
         }};
 

@@ -61,14 +61,10 @@
       <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">update</md-icon>
       <span>Audit</span>
     </button>
-    <!--
-    <button md-raised-button class="sideNavButton" [routerLink]="['/party']" *ngIf="hasAdmin()" id="party_id">
-      <md-icon md-tooltip="Party management" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">device_hub
-      </md-icon>
-      <span>Party management</span>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/alerts']" *ngIf="hasAdmin()" id="alerts_id">
+      <md-icon md-tooltip="Alerts" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">add_alert</md-icon>
+      <span>Alerts</span>
     </button>
-    -->
-
     <button md-raised-button class="sideNavButton" [routerLink]="['/testservice']" *ngIf="hasAdmin()" id="testservice_id">
       <md-icon md-tooltip="Test Service" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">import_export</md-icon>
       <span *ngIf="fullMenu">Test Service</span>

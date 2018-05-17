@@ -5,6 +5,7 @@ package eu.domibus.messaging;
  */
 public class MessageConstants {
     public static final String MESSAGE_ID = "MESSAGE_ID";
+    public static final String DOMAIN = "DOMAIN";
     public static final String ENDPOINT = "ENDPOINT";
     public static final String DELAY = "DELAY";
     public static final String NOTIFICATION_TYPE = "NOTIFICATION_TYPE";

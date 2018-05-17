@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -20,7 +21,10 @@ import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Tiago Miguel
@@ -41,13 +45,13 @@ public class ErrorLogResourceTest {
     DateUtil dateUtil;
 
     @Injectable
-    Properties domibusProperties;
-
-    @Injectable
     DomainCoreConverter domainConverter;
 
     @Injectable
     ErrorLogCsvServiceImpl errorLogCsvServiceImpl;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
 
     @Test
@@ -122,7 +126,7 @@ public class ErrorLogResourceTest {
         errorLogRO.setNotified(date);
         errorLogROEntries.add(errorLogRO);
         new Expectations() {{
-            domibusProperties.getProperty("domibus.ui.maximumcsvrows", anyString);
+            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
             result = ErrorLogCsvServiceImpl.MAX_NUMBER_OF_ENTRIES;
             errorLogDao.findPaged(anyInt,anyInt,anyString,anyBoolean, (HashMap<String, Object>) any);
             result = errorLogEntries;

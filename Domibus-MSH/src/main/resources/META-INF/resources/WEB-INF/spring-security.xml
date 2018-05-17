@@ -13,6 +13,8 @@
     <!-- Skip the security; the REST services exposed in the domibus-ext-services-api are protected by an interceptor -->
     <http pattern="/ext/**" security="none"/>
 
+    <beans:bean id="setDomainFilter" class="eu.domibus.web.filter.SetDomainFilter"/>
+
     <http auto-config="false"
           use-expressions="true"
           entry-point-ref="http403ForbiddenEntryPoint"
@@ -27,6 +29,7 @@
         <intercept-url pattern="/rest/messagefilters/**" access="hasRole('ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/jms/**" access="hasRole('ROLE_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
+        <intercept-url pattern="/rest/application/multitenancy" access="permitAll"/>
 
         <!-- Enable CSRF protection -->
         <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
@@ -36,6 +39,8 @@
             <content-type-options/>
             <xss-protection enabled="true"/>
         </headers>
+
+        <custom-filter position="FORM_LOGIN_FILTER" ref="setDomainFilter" />
     </http>
 
     <beans:bean id="tokenRepository" class="org.springframework.security.web.csrf.CookieCsrfTokenRepository">

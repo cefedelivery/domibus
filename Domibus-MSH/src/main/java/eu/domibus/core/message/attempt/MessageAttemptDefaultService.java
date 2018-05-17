@@ -2,15 +2,15 @@ package eu.domibus.core.message.attempt;
 
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -26,8 +26,7 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
     DomainCoreConverter domainCoreConverter;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public List<MessageAttempt> getAttemptsHistory(String messageId) {
@@ -38,7 +37,7 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void create(MessageAttempt attempt) {
-        if(isMessageAttemptAuditDisabled()) {
+        if (isMessageAttemptAuditDisabled()) {
             return;
         }
 
@@ -47,7 +46,7 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
     }
 
     protected boolean isMessageAttemptAuditDisabled() {
-        String messageAttemptAuditEnabled = domibusProperties.getProperty("domibus.sendMessage.attempt.audit.active", "true");
-        return !Boolean.valueOf(messageAttemptAuditEnabled);
+        String messageAttemptAuditEnabled = domibusPropertyProvider.getProperty("domibus.sendMessage.attempt.audit.active", "true");
+        return !BooleanUtils.toBoolean(messageAttemptAuditEnabled);
     }
 }

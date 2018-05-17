@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.audit.AuditLog;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
@@ -14,7 +15,6 @@ import eu.domibus.web.rest.criteria.AuditCriteria;
 import eu.domibus.web.rest.ro.AuditResponseRo;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +37,7 @@ public class AuditResource {
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -129,7 +128,7 @@ public class AuditResource {
             @RequestParam(value = "to", required = false) String to) {
         String resultText;
 
-        int maxCSVrows = NumberUtils.toInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
+        int maxCSVrows = NumberUtils.toInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         // get list of audits
         AuditCriteria auditCriteria = new AuditCriteria();

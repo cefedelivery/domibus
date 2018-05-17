@@ -2,6 +2,7 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -19,7 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Date;
-import java.util.Properties;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -52,7 +52,7 @@ public class UpdateRetryLoggingServiceTest {
     private LegConfiguration legConfiguration = new LegConfiguration();
 
     @Injectable
-    private Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Before
     public void setupExpectations() {
@@ -91,7 +91,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
-            domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -135,7 +135,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
 
         new Expectations() {{
-            domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -214,7 +214,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
-            domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -257,7 +257,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
 
         new Expectations() {{
-            domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);

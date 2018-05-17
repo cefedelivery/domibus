@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
@@ -15,8 +16,6 @@ import org.junit.runner.RunWith;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import java.util.Properties;
 
 /**
  @author Arun Raj
@@ -34,7 +33,7 @@ public class BackendMessageValidatorTest {
     private static final String RESPONDER_ROLE = "defaultResponderRole";
 
     @Injectable
-    Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;;
 
     @Tested
     BackendMessageValidator backendMessageValidatorObj;
@@ -44,7 +43,7 @@ public class BackendMessageValidatorTest {
     public void validateMessageId() throws Exception {
 
         new Expectations() {{
-            domibusProperties.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = MESSAGE_ID_PATTERN;
 
         }};
@@ -129,7 +128,7 @@ public class BackendMessageValidatorTest {
     public void validateRefToMessageId() throws Exception {
 
         new Expectations() {{
-            domibusProperties.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = MESSAGE_ID_PATTERN;
 
         }};
@@ -212,7 +211,7 @@ public class BackendMessageValidatorTest {
     public void testConfigurationNotSpecified() {
 
         new Expectations() {{
-            domibusProperties.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = null;
         }};
 

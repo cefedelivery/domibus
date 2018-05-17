@@ -27,7 +27,7 @@ public class DomibusPropertiesService {
 
     public void init() {
         try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("domibus.properties");
+            InputStream is = getClass().getClassLoader().getResourceAsStream("application.properties");
             if (is == null) {
                 LOG.warn("The 'domibus.properties' has not been found!");
             }

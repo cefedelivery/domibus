@@ -1,15 +1,21 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -36,7 +42,23 @@ public class AuthenticationResource {
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 
     @Autowired
-    private AuthenticationService authenticationService;
+    protected AuthenticationService authenticationService;
+
+    @Qualifier("taskExecutor")
+    @Autowired
+    protected SchedulingTaskExecutor schedulingTaskExecutor;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected DomainCoreConverter domainCoreConverter;
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
@@ -47,10 +69,14 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
+        String domain = userDomainService.getDomainForUser(loginRO.getUsername());
+        LOG.debug("Determined domain [{}] for user [{}]", domain, loginRO.getUsername());
+        domainContextProvider.setCurrentDomain(domain);
+
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
-        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
-        if(principal.isDefaultPasswordUsed()){
-            LOG.warn(WarningUtil.warnOutput(principal.getUsername()+" is using default password."));
+        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domain);
+        if (principal.isDefaultPasswordUsed()) {
+            LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
 
         //Parse Granted authorities to a list of string authorities
@@ -87,5 +113,15 @@ public class AuthenticationResource {
         return securityUser.getUsername();
     }
 
+    /**
+     * Retrieve the current domain of the current user (in multi-tenancy mode)
+     * @return the current domain
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.GET)
+    public DomainRO getCurrentDomain() {
+        LOG.debug("Getting current domain");
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
+        return domainCoreConverter.convert(domain, DomainRO.class);
+    }
 
 }

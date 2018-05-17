@@ -1,13 +1,16 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscoveryBuilder;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.impl.DefaultURLFetcher;
@@ -24,9 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.security.KeyStore;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,11 +52,14 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
 
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private CryptoService cryptoService;
+    protected DomainContextProvider domainProvider;
+
+    @Autowired
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
@@ -89,25 +93,25 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DynamicDiscovery createDynamicDiscoveryClient() {
-        final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
+        final String smlInfo = domibusPropertyProvider.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
-        final String certRegex = domibusProperties.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        final String certRegex = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
         if(StringUtils.isEmpty(certRegex)) {
             LOG.debug("The value for property domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation is empty.");
         }
 
         LOG.debug("Load trustore for the smpClient");
-        KeyStore truststore = cryptoService.getTrustStore();
+        KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(domainProvider.getCurrentDomain());
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
 
             DynamicDiscoveryBuilder dynamicDiscoveryBuilder = DynamicDiscoveryBuilder.newInstance();
             dynamicDiscoveryBuilder
                     .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)));
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(trustStore, certRegex)));
 
             if (defaultProxy != null) {
                 dynamicDiscoveryBuilder
@@ -140,10 +144,10 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
         if (useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+            String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
             if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
                     || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
@@ -160,7 +164,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     private boolean useProxy() {
-        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
+        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
         if (StringUtils.isEmpty(useProxy)) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;
@@ -170,11 +174,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     @Override
     public String getPartyIdType() {
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, URN_TYPE_VALUE);
+        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, URN_TYPE_VALUE);
     }
 
     @Override
     public String getResponderRole(){
-        return domibusProperties.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
+        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
     }
 }

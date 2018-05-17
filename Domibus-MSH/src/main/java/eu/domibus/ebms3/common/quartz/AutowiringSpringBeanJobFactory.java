@@ -7,12 +7,14 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * This class ensures that quartz job are spring managed and therefore autowiring and DI is supported in such classes
  *
  * @author Christian Koch, Stefan Mueller
  */
+@Component("autowiringSpringBeanJobFactory")
 public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
 
     private transient AutowireCapableBeanFactory beanFactory;

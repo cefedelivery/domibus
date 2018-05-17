@@ -1,5 +1,6 @@
 package eu.domibus.messaging.jms;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.RegexUtil;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -8,8 +9,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -22,7 +21,7 @@ public class JMSDestinationHelperImplTest {
     RegexUtil regexUtil;
 
     @Injectable
-    Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Tested
     JMSDestinationHelperImpl jmsDestinationHelper;
@@ -31,7 +30,7 @@ public class JMSDestinationHelperImplTest {
     public void testIsInternalWithNoInternalExpressionDefined() throws Exception {
         String queueName = "myQueue";
         new Expectations() {{
-            domibusProperties.getProperty(anyString);
+            domibusPropertyProvider.getProperty(anyString);
             result = null;
         }};
 
@@ -43,7 +42,7 @@ public class JMSDestinationHelperImplTest {
     public void testIsInternal() throws Exception {
         final String queueName = "myQueue";
         new Expectations() {{
-            domibusProperties.getProperty(anyString);
+            domibusPropertyProvider.getProperty(anyString);
             result = "myexpression";
 
             regexUtil.matches("myexpression", queueName);

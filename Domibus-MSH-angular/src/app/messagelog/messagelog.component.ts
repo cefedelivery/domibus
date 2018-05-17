@@ -271,7 +271,7 @@ export class MessageLogComponent {
         this.alertService.error("Maximum number of rows reached for downloading CSV");
       }
     }, (error: any) => {
-      console.log("error getting the error log:" + error);
+      console.log("error getting the message log:" + error);
       this.loading = false;
       this.alertService.error("Error occured:" + error);
     });
