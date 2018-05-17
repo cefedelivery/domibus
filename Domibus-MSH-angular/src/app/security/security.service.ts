@@ -84,16 +84,16 @@ export class SecurityService {
   }
 
   isCurrentUserSuperAdmin (): boolean {
-    return this.isCurrentUserInRole(['ROLE_AP_ADMIN']);
+    return this.isCurrentUserInRole([SecurityService.ROLE_AP_ADMIN]);
   }
 
   isCurrentUserAdmin (): boolean {
-    return this.isCurrentUserInRole(['ROLE_ADMIN', 'ROLE_AP_ADMIN']);
+    return this.isCurrentUserInRole(['ROLE_ADMIN', SecurityService.ROLE_AP_ADMIN]);
   }
 
   isCurrentUserInRole (roles: Array<string>): boolean {
     let hasRole = false;
-    let currentUser = this.getCurrentUser();
+    const currentUser = this.getCurrentUser();
     if (currentUser && currentUser.authorities) {
       roles.forEach((role: string) => {
         if (currentUser.authorities.indexOf(role) !== -1) {

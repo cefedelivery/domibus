@@ -77,12 +77,12 @@ export class EditUserComponent {
         'userName': new FormControl({value: this.userName, disabled: true}, Validators.nullValidator),
         'email': [null, Validators.pattern],
         'roles': new FormControl(this.roles, Validators.required),
-        'domain': this.isDomainVisible ? new FormControl({value: this.domain}) : null,
+        'domain': this.isDomainVisible ? new FormControl({value: this.domain}, Validators.required) : null,
         'password': [null, Validators.pattern],
         'confirmation': [null],
         'active': new FormControl({value: this.active, disabled: this.isCurrentUser()}, Validators.required)
       }, {
-        validator: userValidatorService.validateForm(this.isDomainVisible)
+        validator: userValidatorService.validateForm()
       });
     } else {
       this.formTitle = NEW_MODE;
@@ -90,18 +90,18 @@ export class EditUserComponent {
         'userName': new FormControl(this.userName, Validators.required),
         'email': [null, Validators.pattern],
         'roles': new FormControl(this.roles, Validators.required),
-        'domain': this.isDomainVisible ? new FormControl({value: this.domain}) : null,
+        'domain': this.isDomainVisible ? new FormControl({value: this.domain}, Validators.required) : null,
         'password': [Validators.required, Validators.pattern],
         'confirmation': [Validators.required],
         'active': [Validators.required]
       }, {
-        validator: userValidatorService.validateForm(this.isDomainVisible)
+        validator: userValidatorService.validateForm()
       });
     }
   }
 
   isSuperAdmin () {
-    return this.roles.includes('ROLE_AP_ADMIN');
+    return this.roles.includes(SecurityService.ROLE_AP_ADMIN);
   }
 
   isDomainDisabled () {
@@ -138,23 +138,5 @@ export class EditUserComponent {
   }
 
   onRolesChanged () {
-    // if selected role is
-
-    // // handle selection of roles
-    // if (!this.oldRoles.includes(ROLE_AP_ADMIN) && this.roles.includes(ROLE_AP_ADMIN)) { // the super admin role was selected->unselect all others
-    //   this.roles = [ROLE_AP_ADMIN];
-    // } else if (this.oldRoles.includes(ROLE_AP_ADMIN) && this.roles.includes(ROLE_AP_ADMIN)) { // the super admin role is selected and user selects another role-> remove super-admin
-    //   this.roles = this.roles.filter(el => el !== ROLE_AP_ADMIN);
-    // }
-    // this.oldRoles = this.roles;
-    //
-    // // it is here to avoid angular circular change detection error
-    // this.cdr.detectChanges();
-    //
-    // // handle domain
-    // this.isDomainDisabled = this.roles.includes(ROLE_AP_ADMIN);
-    // if (this.isDomainDisabled) {
-    //   this.domain = null;
-    // }
   }
 }

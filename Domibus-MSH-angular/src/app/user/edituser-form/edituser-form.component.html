@@ -16,19 +16,19 @@
         </md-input-container>
       </div>
 
-      <div style="margin-top:10px;" [hidden]="!isDomainVisible">
+      <div style="margin-top:10px;">
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" (change)="onRolesChanged()" required>
+          <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
+      </div>
+
+      <div style="margin-top:30px;" [hidden]="!isDomainVisible">
         <md2-select mdInput placeholder="{{domainTitle}}" [style.width]="'100%'" [formControl]="userForm.controls['domain']"
                     [(ngModel)]="domain" [disabled]="isDomainDisabled()" required>
           <md2-option *ngFor="let item of existingDomains" [(value)]="item.code">{{item.name}}</md2-option>
         </md2-select>
         <div *ngIf="userForm.controls['domain'].hasError('required')" style="color:red; font-size: 70%">You need to choose a domain for this user</div>
-      </div>
-
-      <div style="margin-top:30px;">
-        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" (change)="onRolesChanged()" required>
-          <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
-        </md2-select>
-        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
       </div>
 
       <div style="margin-top:15px;">

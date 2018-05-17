@@ -4,7 +4,6 @@ import {Http, Response} from '@angular/http';
 import {AlertService} from '../alert/alert.service';
 import {Observable} from 'rxjs/Observable';
 import {SecurityService} from '../security/security.service';
-//import {Domain} from '../security/domain';
 import {DomainService} from '../security/domain.service';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class UserService {
   getUsers (): Observable<UserResponseRO[]> {
     return this.http.get('rest/user/users')
       .map(this.extractData)
-      // temporary mock
+      // todo: temporary mock
       .map(this.mockDomain)
       .catch(this.handleError);
   }
@@ -98,6 +97,5 @@ export class UserService {
     }
     return users;
   }
-
 
 }

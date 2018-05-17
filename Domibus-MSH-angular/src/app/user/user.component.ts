@@ -27,6 +27,9 @@ import {Domain} from '../security/domain';
 
 
 export class UserComponent implements OnInit, DirtyOperations {
+  static readonly USER_URL: string = 'rest/user';
+  static readonly USER_USERS_URL: string = UserComponent.USER_URL + '/users';
+  static readonly USER_CSV_URL: string = UserComponent.USER_URL + '/csv';
 
   @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
@@ -51,11 +54,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   rowNumber = -1;
 
   editedUser: UserResponseRO;
-  test: boolean = false;
-
-  static readonly USER_URL: string = 'rest/user';
-  static readonly USER_USERS_URL: string = UserComponent.USER_URL + '/users';
-  static readonly USER_CSV_URL: string = UserComponent.USER_URL + '/csv';
+  test = false;
 
   constructor (private http: Http,
                private userService: UserService,

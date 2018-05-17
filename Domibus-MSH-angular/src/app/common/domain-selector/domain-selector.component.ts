@@ -1,9 +1,9 @@
-import {Component, OnInit, Input} from "@angular/core";
-import {SecurityService} from "../../security/security.service";
-import {DomainService} from "../../security/domain.service";
-import {Domain} from "../../security/domain";
-import {MdDialog} from "@angular/material";
-import {CancelDialogComponent} from "../cancel-dialog/cancel-dialog.component";
+import {Component, OnInit, Input} from '@angular/core';
+import {SecurityService} from '../../security/security.service';
+import {DomainService} from '../../security/domain.service';
+import {Domain} from '../../security/domain';
+import {MdDialog} from '@angular/material';
+import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
 
 @Component({
   selector: 'domain-selector',
@@ -20,10 +20,10 @@ export class DomainSelectorComponent implements OnInit {
   @Input()
   currentComponent: any;
 
-  constructor(private domainService : DomainService, private securityService: SecurityService, private dialog: MdDialog) {
+  constructor (private domainService: DomainService, private securityService: SecurityService, private dialog: MdDialog) {
   }
 
-  ngOnInit() {
+  ngOnInit () {
     this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
       if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
         this.showDomains = true;
@@ -33,7 +33,7 @@ export class DomainSelectorComponent implements OnInit {
     });
   }
 
-  changeDomain() {
+  changeDomain () {
     let canChangeDomain = Promise.resolve(true);
     if (this.currentComponent && this.currentComponent.isDirty && this.currentComponent.isDirty()) {
       canChangeDomain = this.dialog.open(CancelDialogComponent).afterClosed().toPromise<boolean>();

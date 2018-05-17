@@ -32,7 +32,6 @@ export class UserValidatorService {
     return this.triggerValidation(errorMessage);
   }
 
-
   validateNewUsers (user: UserResponseRO, number): string {
     let errorMessage: string = '';
     if (user.userName == null || user.userName.trim() === '') {
@@ -77,10 +76,10 @@ export class UserValidatorService {
   }
 
   validateEmail (user: UserResponseRO, number): string {
-    let email: string = user.email;
-    let EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
+    const email: string = user.email;
+    const EMAIL_REGEXP = /^[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/i;
 
-    if (email != '' && (email.length <= 5 || !EMAIL_REGEXP.test(email))) {
+    if (email !== '' && (email.length <= 5 || !EMAIL_REGEXP.test(email))) {
       return 'incorrectMailFormat for user ' + number;
     }
     return '';
@@ -95,40 +94,16 @@ export class UserValidatorService {
   }
 
   validateDomain (form: AbstractControl) {
-    //console.log('validateDomain');
     const domain: string = form.get('domain').value;
-    //console.log('domain:', domain);
     if (!domain) {
       form.get('domain').setErrors({required: true})
     }
-
-    // const roles: string[] = form.get('roles').value;
-    // if (!roles.includes('ROLE_AP_ADMIN')) {
-    //   const domain: string = form.get('domain').value;
-    //   if (!domain) {
-    //     form.get('domain').setErrors({required: true})
-    //   }
-    // }
   }
 
-  validateForm (isDomainVisible: boolean) {
+  validateForm () {
     return (form: AbstractControl) => {
-      if (isDomainVisible) {
-        this.validateDomain(form);
-      }
       this.matchPassword(form);
-    }
+    };
   }
 
-  // validateForm2 (form: AbstractControl, isDomainVisible: boolean) {
-  //   if (isDomainVisible) {
-  //     this.validateDomain(form);
-  //   }
-  //   this.matchPassword(form);
-  // }
-
-  // validateForm (form: AbstractControl) {
-  //   UserValidatorService.validateDomain(form);
-  //   UserValidatorService.matchPassword(form);
-  // }
 }
