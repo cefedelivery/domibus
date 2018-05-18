@@ -76,9 +76,13 @@ public class PullRequestHandler {
     }
 
     SOAPMessage notifyNoMessage(PullContext pullContext) {
-        LOG.debug("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
+        LOG.trace("No message for received pull request with mpc " + pullContext.getMpcQualifiedName());
         EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0006, "There is no message available for\n" +
                 "pulling from this MPC at this moment.", null, null);
+        return getSoapMessage(ebMS3Exception);
+    }
+
+    public SOAPMessage getSoapMessage(EbMS3Exception ebMS3Exception) {
         final SignalMessage signalMessage = new SignalMessage();
         signalMessage.getError().add(ebMS3Exception.getFaultInfoError());
         try {

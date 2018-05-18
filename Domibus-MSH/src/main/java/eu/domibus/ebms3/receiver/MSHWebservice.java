@@ -6,12 +6,14 @@ import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
@@ -98,7 +100,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private PullRequestHandler pullRequestHandler;
 
     @Autowired
-    private ReliabilityService reliabilityService;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private PullMessageService pullMessageService;
@@ -118,7 +120,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (messaging.getSignalMessage().getPullRequest() != null) {
                 return handlePullRequest(messaging);
             } else if (messaging.getSignalMessage().getReceipt() != null) {
-                handlePullRequestReceipt(request, messaging);
+                return handlePullRequestReceipt(request, messaging);
             }
         } else {
             String pmodeKey = null;
@@ -162,12 +164,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
         UserMessage userMessage=null;
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
+            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId());
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
+            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+        }
         try {
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
             SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
@@ -180,14 +188,14 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
             } else {
-                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+                LOG.warn("[PULL_RECEIPT]:Error for message with ID [" + messageId + "]", soapFEx);
             }
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful,isOk,messageId,userMessage,legConfiguration);
+            pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful, isOk, userMessageLog, legConfiguration);
         }
         return null;
     }

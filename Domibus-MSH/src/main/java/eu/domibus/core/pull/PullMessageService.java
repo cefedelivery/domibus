@@ -2,6 +2,7 @@ package eu.domibus.core.pull;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -56,21 +57,19 @@ public interface PullMessageService {
      *
      * @param reliabilityCheckSuccessful the state of the reality chek process.
      * @param isOk
-     * @param messageId                  the id of the message to be aknowledge.
-     * @param userMessage                the message.
+     * @param userMessageLog             the message log.
      * @param legConfiguration           contains the context of the configured message exchange.
      */
     void updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
-            String messageId,
-            UserMessage userMessage,
+            UserMessageLog userMessageLog,
             LegConfiguration legConfiguration
     );
 
     /**
      * Retrieve waiting for receipt message for which next attempt date is passed.
-     * Etheir put them back in ready to pull or send failure.
+     * Either put them back in ready to pull or send failure.
      */
     void resetWaitingForReceiptPullMessages();
 }
