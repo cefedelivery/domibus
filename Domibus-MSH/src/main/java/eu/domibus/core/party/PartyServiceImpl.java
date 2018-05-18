@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -19,9 +20,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author Thomas Dussart
@@ -39,7 +38,10 @@ public class PartyServiceImpl implements PartyService {
     @Autowired
     private PModeProvider pModeProvider;
 
-    private final static Predicate<Party> DEFAULT_PREDICATE = condition -> true;
+    @Autowired
+    private PartyDao partyDao;
+
+    private static final Predicate<Party> DEFAULT_PREDICATE = condition -> true;
 
     /**
      * {@inheritDoc}
@@ -72,6 +74,28 @@ public class PartyServiceImpl implements PartyService {
                 stream().
                 filter(searchPredicate).
                 count();
+    }
+
+    /**
+     *{@inheritDoc}
+     */
+    @Override
+    public List<String> findPartyNamesByServiceAndAction(String service, String action) {
+        return pModeProvider.findPartyIdByServiceAndAction(service, action);
+    }
+
+    /**
+     *{@inheritDoc}
+     */
+    @Override
+    public String getGatewayPartyIdentifier() {
+        String result = null;
+        eu.domibus.common.model.configuration.Party gatewayParty = pModeProvider.getGatewayParty();
+        // return the first identifier
+        if(!gatewayParty.getIdentifiers().isEmpty()) {
+            result = gatewayParty.getIdentifiers().iterator().next().getPartyId();
+        }
+        return result;
     }
 
     /**

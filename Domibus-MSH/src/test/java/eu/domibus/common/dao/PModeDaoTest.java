@@ -6,11 +6,13 @@ import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -19,10 +21,9 @@ import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.xml.bind.JAXBContext;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Cosmin Baciu
@@ -60,6 +61,9 @@ public class PModeDaoTest {
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
+
+    @Mocked
+    TypedQuery<LegConfiguration> queryLegConfiguration;
 
     @Test
     public void testFindPushLegName() throws EbMS3Exception {
@@ -213,6 +217,63 @@ public class PModeDaoTest {
 
         // Then
         Assert.assertEquals(detailedConfigurationRawList, rawConfigurationListGot);
+    }
+
+    @Test
+    public void testFind() throws EbMS3Exception {
+        final String STR_TEST = "test";
+        Process process = new Process();
+        List<Process> processes = new ArrayList<>();
+        processes.add(process);
+
+        Party party = new Party();
+        Set<Party> partySet = new HashSet<>();
+        partySet.add(party);
+
+        Identifier identifier = new Identifier();
+        identifier.setPartyId(STR_TEST);
+        Set<Identifier> identifierSet = new HashSet<>();
+        identifierSet.add(identifier);
+
+        List<String> expectedResult = new ArrayList<>();
+        expectedResult.add(STR_TEST);
+
+        new Expectations(process, party) {{
+            entityManager.createNamedQuery(anyString, LegConfiguration.class);
+            result = queryLegConfiguration;
+            processDao.findProcessByLegName(anyString);
+            result = processes;
+            process.getResponderParties();
+            result = partySet;
+            party.getIdentifiers();
+            result = identifierSet;
+        }};
+
+        // When
+        List<String> partyIdByServiceAndAction = pModeDao.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+
+        // Then
+        Assert.assertEquals(expectedResult, partyIdByServiceAndAction);
+    }
+
+    @Test
+    public void testGetPartyIdType() {
+        Assert.assertNull(pModeDao.getPartyIdType(""));
+    }
+
+    @Test
+    public void testGetServiceType() {
+        Assert.assertNull(pModeDao.getServiceType(""));
+    }
+
+    @Test
+    public void testGetRole() {
+        Assert.assertNull(pModeDao.getRole("", ""));
+    }
+
+    @Test
+    public void testGetAgreementRef() {
+        Assert.assertNull(pModeDao.getAgreementRef( ""));
     }
 
 }

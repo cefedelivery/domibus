@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.*;
 
@@ -271,7 +272,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of 0 for downloaded messages.");
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcName);
 
         return 0;
     }
@@ -284,7 +285,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of 0 for downloaded messages.");
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of 0 for downloaded messages.", mpcURI);
 
         return 0;
     }
@@ -297,7 +298,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcName + " found. Assuming message retention of -1 for undownloaded messages.");
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcName);
 
         return -1;
     }
@@ -310,7 +311,7 @@ public class CachingPModeProvider extends PModeProvider {
             }
         }
 
-        CachingPModeProvider.LOG.error("No MPC with name: " + mpcURI + " found. Assuming message retention of -1 for undownloaded messages.");
+        LOG.error("No MPC with name: [{}] found. Assuming message retention of -1 for undownloaded messages.", mpcURI);
 
         return -1;
     }
@@ -405,5 +406,124 @@ public class CachingPModeProvider extends PModeProvider {
         }catch (IllegalArgumentException e){
             return Lists.newArrayList();
         }
+    }
+
+    @Override
+    public List<String> findPartyIdByServiceAndAction(String service, String action) {
+        List result = new ArrayList<String>();
+        for(Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+            for(LegConfiguration legConfiguration : process.getLegs()) {
+                result.addAll(handleLegConfiguration(legConfiguration, process, service, action));
+            }
+        }
+        return result;
+    }
+
+    private List<String> handleLegConfiguration(LegConfiguration legConfiguration, Process process, String service, String action) {
+        List result = new ArrayList<String>();
+        if (legConfiguration.getService().getValue().equals(service) && legConfiguration.getAction().getValue().equals(action)) {
+            handleProcessParties(process, result);
+        }
+        return result;
+    }
+
+    private void handleProcessParties(Process process, List result) {
+        for (Party party : process.getResponderParties()) {
+            for(Identifier identifier : party.getIdentifiers()) {
+                result.add(identifier.getPartyId());
+            }
+        }
+    }
+
+    @Override
+    public String getPartyIdType(String partyIdentifier) {
+        for (Party party : getConfiguration().getBusinessProcesses().getParties()) {
+            String partyIdTypeHandleParty = getPartyIdTypeHandleParty(party, partyIdentifier);
+            if(partyIdTypeHandleParty != null) {
+                return partyIdTypeHandleParty;
+            }
+        }
+        return null;
+    }
+
+    private String getPartyIdTypeHandleParty(Party party, String partyIdentifier) {
+        for(Identifier identifier : party.getIdentifiers()) {
+            if(identifier.getPartyId().equals(partyIdentifier)) {
+                return identifier.getPartyIdType().getValue();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getServiceType(String serviceValue) {
+        for(Service service : getConfiguration().getBusinessProcesses().getServices()) {
+            if(service.getValue().equals(serviceValue)) {
+                return service.getServiceType();
+            }
+        }
+        return null;
+    }
+
+    protected List<Process> getProcessFromService(String serviceValue) {
+        List<Process> result = new ArrayList<>();
+        for(Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+            for(LegConfiguration legConfiguration : process.getLegs()) {
+                if(legConfiguration.getService().getValue().equals(serviceValue)) {
+                    result.add(process);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getRole(String roleType, String serviceValue) {
+        for(Process found : getProcessFromService(serviceValue)) {
+            String roleHandleProcess = getRoleHandleProcess(found, roleType);
+            if(roleHandleProcess != null) {
+                return roleHandleProcess;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private String getRoleHandleProcess(Process found, String roleType) {
+        for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+            if (process.getName().equals(found.getName())) {
+                if (roleType.equalsIgnoreCase("initiator")) {
+                    return process.getInitiatorRole().getValue();
+                }
+                if (roleType.equalsIgnoreCase("responder")) {
+                    return process.getResponderRole().getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getAgreementRef(String serviceValue) {
+        for(Process found : getProcessFromService(serviceValue)) {
+            String agreementRefHandleProcess = getAgreementRefHandleProcess(found);
+            if (agreementRefHandleProcess != null) {
+                return agreementRefHandleProcess;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private String getAgreementRefHandleProcess(Process found) {
+        for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+            if (process.getName().equals(found.getName())) {
+                Agreement agreement = process.getAgreement();
+                if (agreement != null) {
+                    return agreement.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
