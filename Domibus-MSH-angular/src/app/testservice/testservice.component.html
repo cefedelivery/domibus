@@ -19,10 +19,10 @@
           <div *ngIf="dynamicDiscoveryEnabled">
             <div>Dynamic Discovery</div>
             <md-input-container>
-              <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient" #finalRecipient="ngModel" id="finalRecipient_id" (ngModelChange)="onChangeInfo()">
+              <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient" #finalRecipient="ngModel" id="finalRecipient_id" (ngModelChange)="onChangeInfo()" disabled>
             </md-input-container>
             <md-input-container>
-              <input mdInput placeholder="Final Recipient Type" name="finalRecipientType" [(ngModel)]="filter.finalRecipientType" #finalRecipientType="ngModel" id="finalRecipientType_id" (ngModelChange)="onChangeInfo()">
+              <input mdInput placeholder="Final Recipient Type" name="finalRecipientType" [(ngModel)]="filter.finalRecipientType" #finalRecipientType="ngModel" id="finalRecipientType_id" (ngModelChange)="onChangeInfo()" disabled>
             </md-input-container>
           </div>
 
