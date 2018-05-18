@@ -10,6 +10,7 @@ export class DomainService {
 
   static readonly MULTI_TENANCY_URL: string = 'rest/application/multitenancy';
   static readonly CURRENT_DOMAIN_URL: string = 'rest/security/user/domain';
+  static readonly DOMAIN_LIST_URL: string = 'rest/application/domains';
 
   private isMultiDomainSubject: ReplaySubject<boolean>;
   private domainSubject: ReplaySubject<Domain>;
@@ -48,6 +49,18 @@ export class DomainService {
       this.domainSubject.unsubscribe();
     }
     this.domainSubject = null;
+  }
+
+  getDomains(): Observable<Domain[]> {
+    return this.http.get(DomainService.DOMAIN_LIST_URL).map((res:Response) => res.json());
+  }
+
+  setCurrentDomain(domain: Domain) {
+    return this.http.put(DomainService.CURRENT_DOMAIN_URL, domain.code).toPromise().then(() => {
+      if (this.domainSubject) {
+        this.domainSubject.next(domain);
+      }
+    });
   }
 
 }

@@ -1,6 +1,5 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -52,9 +51,6 @@ public class AuthenticationResource {
     protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    protected DomibusConfigurationService domibusConfigurationService;
-
-    @Autowired
     protected UserDomainService userDomainService;
 
     @Autowired
@@ -63,6 +59,12 @@ public class AuthenticationResource {
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
     public ErrorRO handleException(Exception ex) {
+        return new ErrorRO(ex.getMessage());
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({DomainException.class})
+    public ErrorRO handleDomainException(Exception ex) {
         return new ErrorRO(ex.getMessage());
     }
 
@@ -122,6 +124,16 @@ public class AuthenticationResource {
         LOG.debug("Getting current domain");
         Domain domain = domainContextProvider.getCurrentDomainSafely();
         return domainCoreConverter.convert(domain, DomainRO.class);
+    }
+
+    /**
+     * Set the current domain of the current user (in multi-tenancy mode)
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setCurrentDomain(@RequestBody String domainCode) {
+        LOG.debug("Setting current domain " + domainCode);
+        authenticationService.changeDomain(domainCode);
     }
 
 }

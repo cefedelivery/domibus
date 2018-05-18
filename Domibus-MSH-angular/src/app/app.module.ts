@@ -73,6 +73,7 @@ import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
 import {ClearInvalidDirective} from "./customDate/clearInvalid.directive";
 import {PageHeaderComponent} from "./common/page-header/page-header.component";
+import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.component";
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
@@ -124,6 +125,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PartyDetailsComponent,
     ClearInvalidDirective,
     PageHeaderComponent,
+    DomainSelectorComponent,
     AlertsComponent,
     TestServiceComponent
   ],
