@@ -2,6 +2,8 @@ package eu.domibus.configuration;
 
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -13,13 +15,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultDomibusConfigurationService implements DomibusConfigurationService {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomibusConfigurationService.class);
+
     private static final String DATABASE_DIALECT = "domibus.entityManagerFactory.jpaProperty.hibernate.dialect";
-
-    private static final String MYSQL = "mysql";
-
-    private static final String ORACLE = "oracle";
-
-    private static final String H_2 = "h2";
 
     private DataBaseEngine dataBaseEngine;
 
@@ -35,12 +33,12 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     @Override
     public DataBaseEngine getDataBaseEngine() {
         if (dataBaseEngine == null) {
-
             final String property = domibusProperties.getProperty(DATABASE_DIALECT);
             if (property == null) {
                 throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
             }
             dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
+            LOG.info("Database engine:[{}]", dataBaseEngine);
         }
         return dataBaseEngine;
     }
