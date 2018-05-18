@@ -1,9 +1,9 @@
 package eu.domibus.plugin.handler;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -21,8 +21,8 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.core.pull.PartyExtractor;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -105,7 +105,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullMessageService pullMessageService;
 
     @Autowired
     AuthUtils authUtils;
@@ -302,7 +302,8 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
                 userMessageService.scheduleSending(messageId);
             }
             else{
-                messagingLockService.addSearchInFormation(new PartyExtractor(to),messageId,message.getUserMessage().getMpc());
+                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
             LOG.info("Message submitted");

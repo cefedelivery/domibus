@@ -2,9 +2,9 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -112,21 +112,16 @@ public class PullMessageSender {
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
             messaging = MessageUtil.getMessage(response, jaxbContext);
             if(messaging.getUserMessage()==null && messaging.getSignalMessage()!=null){
-                Set<Error> error = signalMessage.getError();
-                //@thom why do not I have the error inside the message??
-                LOG.debug("No message for sent pull request with mpc "+mpc);
-                for (Error error1 : error) {
-                    LOG.info(error1.getErrorCode()+" "+error1.getShortDescription());
-                }
+                LOG.trace("No message for sent pull request with mpc " + mpc);
+                logError(signalMessage);
                 return;
             }
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
-            //send receipt
-
-            mshDispatcher.dispatch(acknowlegement,receiverParty.getEndpoint(),policy,legConfiguration, pMode);
-
+            final SOAPMessage acknowledgementResult = mshDispatcher.dispatch(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
+            handleDispatchReceiptResult(messageId, acknowledgementResult);
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {
             LOG.error(e.getMessage(), e);
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error handling new UserMessage", e);
@@ -139,6 +134,27 @@ public class PullMessageSender {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
             checkConnectionProblem(e);
+        }
+    }
+
+    private void handleDispatchReceiptResult(String messageId, SOAPMessage acknowledgementResult) throws EbMS3Exception {
+        if (acknowledgementResult != null) {
+
+            Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
+            Set<Error> errors = errorMessage.getSignalMessage().getError();
+            for (Error error : errors) {
+                LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
+                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+                ebMS3Ex.setMshRole(MSHRole.RECEIVING);
+                throw ebMS3Ex;
+            }
+        }
+    }
+
+    private void logError(SignalMessage signalMessage) {
+        Set<Error> error = signalMessage.getError();
+        for (Error error1 : error) {
+            LOG.info(error1.getErrorCode() + " " + error1.getShortDescription());
         }
     }
 

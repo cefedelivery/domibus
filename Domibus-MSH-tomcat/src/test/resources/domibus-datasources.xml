@@ -50,7 +50,8 @@
     <amq:topic id="clusterCommandTopic"
                physicalName="domibus.internal.command"/>
 
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+          name="domibusJDBC-XADataSource">
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
         <property name="username" value="sa"/>

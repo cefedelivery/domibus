@@ -16,12 +16,11 @@ import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
-import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -104,7 +103,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private java.util.Properties domibusProperties;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullMessageService pullMessageService;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -211,17 +210,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = messagingLockService.getPullMessageId(partyId, mpc);
+        String pullMessageId = pullMessageService.getPullMessageId(partyId, mpc);
         if (pullMessageId == null) {
-            return null;
-        }
-        //this code is needed because setting the message in pull failed occurs in another transaction, meaning that
-        //the locked message can not be deleted in the new transaction. Once both the pull
-        //and the set pull failed transaction are completed, the message is unlocked and can be retrieved again to be pulled, but because
-        //the status is now pull failed, the message is deleted.
-        MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
-        if (MessageStatus.READY_TO_PULL != userMessageLog.getMessageStatus()) {
-            messagingLockService.delete(pullMessageId);
             return null;
         }
         return pullMessageId;
@@ -247,11 +237,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-    }
 
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
@@ -274,13 +259,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     @Transactional
-    public void removeAndSaveRawXml(String rawXml, String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXml);
-        rawEnvelopeLog.setMessageId(messageId);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
-
+    public void saveRawXml(String rawXml, String messageId) {
+        RawEnvelopeLog newRawEnvelopeLog = new RawEnvelopeLog();
+        newRawEnvelopeLog.setRawXML(rawXml);
+        newRawEnvelopeLog.setMessageId(messageId);
+        rawEnvelopeLogDao.create(newRawEnvelopeLog);
     }
 
     @Override

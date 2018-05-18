@@ -89,6 +89,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
+        userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
             domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
@@ -133,6 +134,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
+        userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
             domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
@@ -174,6 +176,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(receivedTime));
         userMessageLog.setNotificationStatus(NotificationStatus.NOT_REQUIRED);
+        userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -212,6 +215,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(received));
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
+        userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
             domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
@@ -255,6 +259,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setSendAttemptsMax(3);
         userMessageLog.setReceived(new Date(received));
         userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
+        userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
             domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");

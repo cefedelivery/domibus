@@ -14,8 +14,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.core.pull.MessagingLockService;
-import eu.domibus.core.pull.PartyExtractor;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -90,7 +89,7 @@ public class UserMessageDefaultServiceTest {
     MessageExchangeService messageExchangeService;
 
     @Injectable
-    private MessagingLockService messagingLockService;
+    private PullMessageService pullMessageService;
 
 
     @Test
@@ -218,7 +217,7 @@ public class UserMessageDefaultServiceTest {
     }
 
     @Test
-    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog) throws Exception {
+    public void testRestorePUlledMessage(@Injectable final UserMessageLog userMessageLog, @Injectable final UserMessage userMessage) throws Exception {
         final String messageId = "1";
         final Integer newMaxAttempts = 5;
         final String mpc = "mpc";
@@ -227,17 +226,14 @@ public class UserMessageDefaultServiceTest {
             userMessageDefaultService.getFailedMessage(messageId);
             result = userMessageLog;
 
-            userMessageLog.getMpc();
-            result = mpc;
-
-            userMessageLog.getMessageId();
-            result = messageId;
-
             messageExchangeService.retrieveMessageRestoreStatus(messageId);
             result = MessageStatus.READY_TO_PULL;
 
             userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
             result = newMaxAttempts;
+
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
 
         }};
 
@@ -262,7 +258,7 @@ public class UserMessageDefaultServiceTest {
             messagingDao.findUserMessageByMessageId(messageId);
             times = 1;
             ToExtractor toExtractor = null;
-            messagingLockService.addSearchInFormation(withAny(toExtractor), messageId, mpc);
+            pullMessageService.addPullMessageLock(withAny(toExtractor), userMessage, userMessageLog);
             times = 1;
         }};
     }

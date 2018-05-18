@@ -5,12 +5,14 @@ import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.services.ReliabilityService;
@@ -20,6 +22,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -153,6 +156,10 @@ public class MSHWebServiceTest {
 
     @Injectable
     ReliabilityService reliabilityService;
+
+    @Injectable
+    PullMessageService pullMessageService;
+
 
 
     /**
@@ -295,9 +302,18 @@ public class MSHWebServiceTest {
                                                       @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations() {{
             messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
             result = messageId;
+
+            userMessageLogDao.findByMessageId(messageId);
+            result = userMessageLog;
+
+            userMessageLog.getMessageStatus();
+
 
             messagingDao.findUserMessageByMessageId(messageId);
             result = userMessage;
@@ -327,7 +343,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, withAny(legConfiguration));
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration);
         }};
 
     }
@@ -341,9 +357,16 @@ public class MSHWebServiceTest {
                                                               @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations(mshWebservice) {{
+            userMessageLogDao.findByMessageId(messageId);
+            result = userMessageLog;
+
             messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
             result = messageId;
+
             mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
             result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, null);
         }};
@@ -354,7 +377,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration);
             times = 1;
 
         }};
@@ -370,9 +393,14 @@ public class MSHWebServiceTest {
                                                                      @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
         new Expectations(mshWebservice) {{
             messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
             result = messageId;
+            userMessageLogDao.findByMessageId(messageId);
+            result = userMessageLog;
             mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
             result = new ReliabilityException(DomibusCoreErrorCode.DOM_004, "test");
         }};
@@ -383,7 +411,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            reliabilityService.handlePullReceiptReliability(messageId, ReliabilityChecker.CheckResult.PULL_FAILED, null, withAny(legConfiguration));
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration);
             times = 1;
 
         }};

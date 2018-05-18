@@ -9,4 +9,6 @@ public interface DomibusConfigurationService {
     String DOMIBUS_CONFIG_LOCATION = "domibus.config.location";
 
     String getConfigLocation();
+
+    DataBaseEngine getDataBaseEngine();
 }
