@@ -2,7 +2,6 @@ package eu.domibus.configuration;
 
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -34,22 +33,14 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     }
 
     @Override
-    //@TODO add cacheAble here.
     public DataBaseEngine getDataBaseEngine() {
         if (dataBaseEngine == null) {
+
             final String property = domibusProperties.getProperty(DATABASE_DIALECT);
             if (property == null) {
                 throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
             }
-            if (StringUtils.containsIgnoreCase(property, MYSQL)) {
-                dataBaseEngine = DataBaseEngine.MYSQL;
-            } else if (StringUtils.containsIgnoreCase(property, ORACLE)) {
-                dataBaseEngine = DataBaseEngine.ORACLE;
-            } else if (StringUtils.containsIgnoreCase(property, H_2)) {
-                dataBaseEngine = DataBaseEngine.H2;
-            } else {
-                throw new IllegalStateException("Unsupported database dialect:" + property);
-            }
+            dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
         }
         return dataBaseEngine;
     }

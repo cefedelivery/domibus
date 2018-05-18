@@ -95,8 +95,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
                 return new PullMessageId(messageId);
             }
         } catch (CannotAcquireLockException ex) {
-            LOG.trace("MessagingLock:[{}] could not be locked.");
-            LOG.trace(ex.getMessage(), ex);
+            LOG.trace("MessagingLock:[{}] could not be locked.", ex, idPk);
         }
         return null;
     }
