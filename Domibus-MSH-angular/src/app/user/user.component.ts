@@ -117,7 +117,7 @@ export class UserComponent implements OnInit, DirtyOperations {
           canAutoResize: true
         });
     }
-    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain =  domain);
+    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ['Username', 'Role', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
@@ -130,7 +130,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error('Maximum number of rows reached for downloading CSV');
     }
-
   }
 
   getUsers (): void {
@@ -203,7 +202,6 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEditAction (rowNumber) {
-    console.log()
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
@@ -225,7 +223,6 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     user.email = editForm.email;
     user.roles = editForm.roles.toString();
-    console.log('onSaveEditForm', editForm.domain);
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
@@ -282,8 +279,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   cancelDialog () {
-    let dialogRef = this.dialog.open(CancelDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+    this.dialog.open(CancelDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
         this.users = [];
@@ -292,30 +288,48 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  saveDialog (withDownloadCSV: boolean) {
-    let headers = new Headers({'Content-Type': 'application/json'});
-    let dialogRef = this.dialog.open(SaveDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.disableSelectionAndButtons();
-        this.http.put(UserComponent.USER_USERS_URL, JSON.stringify(this.users), {headers: headers}).subscribe(res => {
-          this.getUsers();
-          this.getUserRoles();
-          this.alertService.success('The operation \'update users\' completed successfully.', false);
+  save (withDownloadCSV: boolean) {
+    try {
+      this.validateUsers();
+
+      const headers = new Headers({'Content-Type': 'application/json'});
+      this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
+        if (result) {
+          this.disableSelectionAndButtons();
+          this.http.put(UserComponent.USER_USERS_URL, JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+            this.getUsers();
+            this.getUserRoles();
+            this.alertService.success('The operation \'update users\' completed successfully.', false);
+            if (withDownloadCSV) {
+              DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+            }
+          }, err => {
+            this.getUsers();
+            this.getUserRoles();
+            this.alertService.error('The operation \'update users\' not completed successfully.', false);
+          });
+        } else {
           if (withDownloadCSV) {
             DownloadService.downloadNative(UserComponent.USER_CSV_URL);
           }
-        }, err => {
-          this.getUsers();
-          this.getUserRoles();
-          this.alertService.error('The operation \'update users\' not completed successfully.', false);
-        });
-      } else {
-        if (withDownloadCSV) {
-          DownloadService.downloadNative(UserComponent.USER_CSV_URL);
         }
-      }
-    });
+      });
+    } catch (err) {
+      this.alertService.exception('The operation \'update users\' completed with errors.', err);
+    }
+  }
+
+  validateUsers () {
+    // check at least one domain admin
+    const domainAdmins = this.users.filter(user => user.roles.includes(SecurityService.ROLE_DOMAIN_ADMIN));
+    if (domainAdmins.length < 1) {
+      throw Error('There must always be at least one active Domain Admin for each Domain');
+    }
+    // check at least one ap admin
+    const apAdmins = this.users.filter(user => user.roles.includes(SecurityService.ROLE_AP_ADMIN));
+    if (apAdmins.length < 1) {
+      throw Error('There must always be at least one active AP Admin');
+    }
   }
 
   /**
@@ -331,7 +345,7 @@ export class UserComponent implements OnInit, DirtyOperations {
    */
   saveAsCSV () {
     if (this.isDirty()) {
-      this.saveDialog(true);
+      this.save(true);
     } else {
       DownloadService.downloadNative(UserComponent.USER_CSV_URL);
     }

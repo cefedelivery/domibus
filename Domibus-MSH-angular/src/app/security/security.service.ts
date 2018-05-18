@@ -10,6 +10,7 @@ import {DomainService} from './domain.service';
 @Injectable()
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
+  static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
 
   constructor (private http: Http, private securityEventService: SecurityEventService, private domainService: DomainService) {
   }
