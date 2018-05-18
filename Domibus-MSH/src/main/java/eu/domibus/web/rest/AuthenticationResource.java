@@ -1,6 +1,5 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -10,7 +9,6 @@ import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +51,7 @@ public class AuthenticationResource {
     protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    protected DomibusConfigurationService domibusConfigurationService;
-
-    @Autowired
     protected UserDomainService userDomainService;
-
-    @Autowired
-    protected DomainService domainService;
 
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
@@ -141,17 +133,7 @@ public class AuthenticationResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setCurrentDomain(@RequestBody String domainCode) {
         LOG.debug("Setting current domain " + domainCode);
-        if (StringUtils.isEmpty(domainCode)) {
-            throw new DomainException("Could not set current domain: domain is empty");
-        }
-        if (!domainService.getDomains().stream().anyMatch(d -> domainCode.equalsIgnoreCase(d.getCode()))) {
-            throw new DomainException("Could not set current domain: unknown domain (" + domainCode + ")");
-        }
-
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetail securityUser = (UserDetail) authentication.getPrincipal();
-        securityUser.setDomain(domainCode);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        authenticationService.changeDomain(domainCode);
     }
 
 }

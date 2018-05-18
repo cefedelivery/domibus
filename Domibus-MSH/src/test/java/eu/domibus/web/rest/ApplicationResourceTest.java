@@ -1,8 +1,10 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -33,6 +35,12 @@ public class ApplicationResourceTest {
 
     @Injectable
     DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    DomainService domainService;
+
+    @Injectable
+    DomainCoreConverter domainCoreConverter;
 
     @Test
     public void testGetDomibusInfo() throws Exception {
