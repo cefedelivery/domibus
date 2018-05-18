@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static eu.domibus.core.pull.PullMessageState.EXPIRED;
 import static eu.domibus.core.pull.PullMessageState.RETRY;
-import static eu.domibus.core.pull.PullMessageState.STALED;
 
 /**
  * @author Thomas Dussart
@@ -84,10 +84,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
                 final int sendAttemptsMax = sqlRowSet.getInt(4);
                 jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params);
                 if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
-                    return new PullMessageId(messageId, STALED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
+                    return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
                 }
                 if (sendAttempts >= sendAttemptsMax) {
-                    return new PullMessageId(messageId, STALED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
+                    return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
                 }
                 if (sendAttempts > 0) {
                     return new PullMessageId(messageId, RETRY);
@@ -96,6 +96,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             }
         } catch (CannotAcquireLockException ex) {
             LOG.trace("MessagingLock:[{}] could not be locked.");
+            LOG.trace(ex.getMessage(), ex);
         }
         return null;
     }

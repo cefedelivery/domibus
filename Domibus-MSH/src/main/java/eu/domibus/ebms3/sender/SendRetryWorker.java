@@ -61,6 +61,12 @@ public class SendRetryWorker extends QuartzJobBean {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
+
+        try {
+            retryService.purgePullMessage();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
 

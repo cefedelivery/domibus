@@ -166,7 +166,7 @@ public class MessagingLockDaoImplTest {
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
         assertNotNull(nextPullMessageToProcess);
         assertEquals(messageId, nextPullMessageToProcess.getMessageId());
-        assertEquals(PullMessageState.STALED, nextPullMessageToProcess.getState());
+        assertEquals(PullMessageState.EXPIRED, nextPullMessageToProcess.getState());
         assertEquals(String.format("Maximum time to send the message has been reached:[%tc]", staledDate), nextPullMessageToProcess.getStaledReason());
 
 
@@ -213,7 +213,7 @@ public class MessagingLockDaoImplTest {
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
         assertNotNull(nextPullMessageToProcess);
         assertEquals(messageId, nextPullMessageToProcess.getMessageId());
-        assertEquals(PullMessageState.STALED, nextPullMessageToProcess.getState());
+        assertEquals(PullMessageState.EXPIRED, nextPullMessageToProcess.getState());
         assertEquals(String.format("Maximum number of attempts to send the message has been reached:[%d]", 5), nextPullMessageToProcess.getStaledReason());
 
 

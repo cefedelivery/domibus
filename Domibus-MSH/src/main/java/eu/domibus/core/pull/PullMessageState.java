@@ -12,6 +12,6 @@ public enum PullMessageState {
     FIRST_ATTEMPT,
     //on retry
     RETRY,
-    //when the message has exeded the number of attempts or that maximum delivery date is staled.
-    STALED
+    //when the message has exceeded the number of attempts or that maximum delivery date is expired.
+    EXPIRED
 }
