@@ -37,7 +37,7 @@ public class SubmitMessageEncryptAllIT extends AbstractBackendWSIT {
      * @throws SubmitMessageFault
      * @throws InterruptedException
      */
-    @DirtiesContext
+
     @Test
     public void testSubmitMessageValid() throws SubmitMessageFault {
         String payloadHref = "cid:message";
