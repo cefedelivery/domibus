@@ -73,6 +73,8 @@ export class EditUserComponent {
     this.domainTitle = this.isSuperAdmin() ? 'Preferred Domain' : 'Domain';
 
     if (this.editMode) {
+      this.existingRoles = this.getAllowedRoles(data.userroles, data.user.roles);
+
       this.userForm = fb.group({
         'userName': new FormControl({value: this.userName, disabled: true}, Validators.nullValidator),
         'email': [null, Validators.pattern],
@@ -98,15 +100,6 @@ export class EditUserComponent {
         validator: userValidatorService.validateForm()
       });
     }
-  }
-
-  isSuperAdmin () {
-    return this.roles.includes(SecurityService.ROLE_AP_ADMIN);
-  }
-
-  isDomainDisabled () {
-    // if the edited user is not super-user
-    return !this.isSuperAdmin();
   }
 
   updateUserName (event) {
@@ -135,6 +128,24 @@ export class EditUserComponent {
 
   isCurrentUser (): boolean {
     return this.securityService.getCurrentUser().username === this.userName;
+  }
+
+  isSuperAdmin () {
+    return this.roles.includes(SecurityService.ROLE_AP_ADMIN);
+  }
+
+  isDomainDisabled () {
+    // if the edited user is not super-user
+    return !this.isSuperAdmin();
+  }
+
+  // filters out roles so that the user cannot change from ap admin to the other 2 roles or vice-versa
+  getAllowedRoles(allRoles, userRoles) {
+    //console.log(allRoles, userRoles);
+    if(userRoles.includes(SecurityService.ROLE_AP_ADMIN))
+      return [SecurityService.ROLE_AP_ADMIN];
+    else
+      return allRoles.filter(role => role != SecurityService.ROLE_AP_ADMIN);
   }
 
   onRolesChanged () {

@@ -23,7 +23,7 @@ export class UserService {
     return this.http.get('rest/user/users')
       .map(this.extractData)
       // todo: temporary mock
-      .map(this.mockDomain)
+      //.map(this.mockDomain)
       .catch(this.handleError);
   }
 
@@ -86,16 +86,16 @@ export class UserService {
     return Promise.reject(errMsg);
   }
 
-  private mockDomain (users: any[]) {
-    for (const u of users) {
-      if (u.userName == 'admin' || u.userName == 'user')
-        u.domain = 'myDomain1';
-      else if (u.userName == 'super2zzz')
-        u.domain = null;
-      else
-        u.domain = 'myDomain2';
-    }
-    return users;
-  }
+  // private mockDomain (users: any[]) {
+  //   for (const u of users) {
+  //     if (u.userName == 'admin' || u.userName == 'user')
+  //       u.domain = 'myDomain1';
+  //     else if (u.userName == 'super2zzz')
+  //       u.domain = null;
+  //     else
+  //       u.domain = 'myDomain2';
+  //   }
+  //   return users;
+  // }
 
 }
