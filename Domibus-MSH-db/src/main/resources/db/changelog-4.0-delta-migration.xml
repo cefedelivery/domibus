@@ -16,4 +16,11 @@
         </sql>
     </changeSet>
 
+    <changeSet author="Ion Perpegel" id="EDELIVERY-3338">
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="3" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_AP_ADMIN"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

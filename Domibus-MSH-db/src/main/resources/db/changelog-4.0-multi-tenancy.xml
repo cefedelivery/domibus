@@ -12,7 +12,87 @@
             </column>
             <column name="USER_NAME" type="VARCHAR(255)"/>
             <column name="DOMAIN" type="VARCHAR(255)"/>
+            <column name="PREFERRED_DOMAIN" type="VARCHAR(255)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet author="Ion Perpegel" id="EDELIVERY-3338">
+
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="UQ_USER_NAME" tableName="TB_USER_DOMAIN"/>
+
+        <createTable tableName="TB_USER">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="USER_ENABLED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OPTLOCK" type="INT"/>
+            <column defaultValueNumeric="0" name="ATTEMPT_COUNT" type="INT"/>
+            <column name="SUSPENSION_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLES">
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
+        <addUniqueConstraint columnNames="ROLE_NAME" constraintName="UQ_ROLE_NAME" tableName="TB_USER_ROLE"/>
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="USER_NAME" tableName="TB_USER"/>
+        <createIndex indexName="IDX_ROLE_ID" tableName="TB_USER_ROLES">
+            <column name="ROLE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_ROLES">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+
+        <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
+
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="2" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_USER"/>
+        </insert>
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="3" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_AP_ADMIN"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="USER_NAME" value="super"/>
+            <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="3" type="INT"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

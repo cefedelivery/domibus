@@ -71,16 +71,25 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
-        String domain = userDomainService.getDomainForUser(loginRO.getUsername());
-        LOG.debug("Determined domain [{}] for user [{}]", domain, loginRO.getUsername());
-        domainContextProvider.setCurrentDomain(domain);
+        String domainCode = userDomainService.getDomainForUser(loginRO.getUsername());
+        LOG.debug("Determined domain [{}] for user [{}]", domainCode, loginRO.getUsername());
+
+        if (domainCode != null) {
+            domainContextProvider.setCurrentDomain(domainCode);            
+        } else {
+            domainContextProvider.clearCurrentDomain();
+            domainCode = userDomainService.getPreferredDomainForUser(loginRO.getUsername());
+            LOG.debug("Determined preferred domain [{}] for user [{}]", domainCode, loginRO.getUsername());
+        }
 
         LOG.debug("Authenticating user [{}]", loginRO.getUsername());
-        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domain);
+        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domainCode);
         if (principal.isDefaultPasswordUsed()) {
             LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
 
+        domainContextProvider.setCurrentDomain(domainCode);
+    
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
         for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {

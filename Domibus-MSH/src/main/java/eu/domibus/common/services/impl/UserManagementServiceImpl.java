@@ -2,8 +2,11 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
@@ -60,30 +63,39 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected UserConverter userConverter;
+
     /**
      * {@inheritDoc}
      */
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
-        //@thom use a dozer custom mapper to map from role to authorities.
         List<User> userEntities = userDao.listUsers();
-        List<eu.domibus.api.user.User> users = new ArrayList<>();
-        for (User userEntity : userEntities) {
-            List<String> authorities = new ArrayList<>();
-            Collection<UserRole> roles = userEntity.getRoles();
-            for (UserRole role : roles) {
-                authorities.add(role.getName());
-            }
-            eu.domibus.api.user.User user = new eu.domibus.api.user.User(
-                    userEntity.getUserName(),
-                    userEntity.getEmail(),
-                    userEntity.getActive(),
-                    authorities,
-                    UserState.PERSISTED, userEntity.getSuspensionDate());
-            users.add(user);
-        }
+        List<eu.domibus.api.user.User> users = userConverter.convert(userEntities);
+
+        String domainCode = domainContextProvider.getCurrentDomainSafely().getCode();
+        users.forEach(u -> u.setDomain(domainCode));
+
         return users;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<eu.domibus.api.user.User> findAllUsers() {
+        List<eu.domibus.api.user.User> allUsers = findUsers();
+        List<eu.domibus.api.user.User> superUsers = userDomainService.getSuperUsers();
+        allUsers.addAll(superUsers);
+        return allUsers;
     }
 
     /**

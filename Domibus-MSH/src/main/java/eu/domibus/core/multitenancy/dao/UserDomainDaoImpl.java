@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 
 /**
@@ -30,6 +31,24 @@ public class UserDomainDaoImpl extends BasicDao<User> implements UserDomainDao {
         } catch (NoResultException e) {
             return null;
         }
+    }
+
+    @Override
+    public String findPreferredDomainByUser(String userName) {
+        TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findByUserName", UserDomainEntity.class);
+        namedQuery.setParameter("USER_NAME", userName);
+        try {
+            final UserDomainEntity userDomainEntity = namedQuery.getSingleResult();
+            return userDomainEntity.getPreferredDomain();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<UserDomainEntity> listPreferredDomains() {
+        TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findPreferredDomains", UserDomainEntity.class);
+        return namedQuery.getResultList();
     }
 }
 

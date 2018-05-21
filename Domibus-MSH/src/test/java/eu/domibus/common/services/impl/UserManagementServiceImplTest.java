@@ -1,7 +1,10 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
@@ -45,6 +48,15 @@ public class UserManagementServiceImplTest {
 
     @Injectable
     private DomainCoreConverter domainConverter;
+    
+    @Injectable
+    private DomainContextProvider domainContextProvider;
+
+    @Injectable
+    private UserDomainService userDomainService;
+
+    @Injectable
+    private UserConverter userConverter;
 
     @Tested
     private UserManagementServiceImpl userService;

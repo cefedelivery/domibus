@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -38,6 +39,9 @@ public class UserResourceTest {
 
     @Injectable
     private CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    private AuthUtils authUtils;
 
     private List<UserResponseRO> getUserResponseList() {
         final List<UserResponseRO> userResponseROList = new ArrayList<>();

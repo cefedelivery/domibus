@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
@@ -20,10 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Thomas Dussart
@@ -48,13 +46,22 @@ public class UserResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
+    @Autowired
+    private AuthUtils authUtils;
+
     /**
      * {@inheritDoc}
      */
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)
     public List<UserResponseRO> users() {
         LOG.debug("Retrieving users");
-        List<User> users = userService.findUsers();
+
+        List<User> users;
+        if (authUtils.isSuperAdmin())
+            users = userService.findAllUsers();
+        else
+            users = userService.findUsers();
+
         return prepareResponse(users);
     }
 

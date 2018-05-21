@@ -17,6 +17,11 @@ public interface UserService{
     List<eu.domibus.api.user.User> findUsers();
 
     /**
+     * @return the list of users, including super users.
+     */
+    List<eu.domibus.api.user.User> findAllUsers();
+
+    /**
      * create or update users of the system (edited in the user management gui console).
      * @param users to create of update.
      */
