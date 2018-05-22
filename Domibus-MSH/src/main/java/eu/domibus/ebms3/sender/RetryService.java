@@ -11,9 +11,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
-import eu.domibus.core.pull.PullMessageStateService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -70,17 +68,10 @@ public class RetryService {
     private PullMessageService pullMessageService;
 
     @Autowired
-    private PullMessageStateService pullMessageStateService;
-
-    @Autowired
     private JMSManager jmsManager;
 
     @Autowired
-    private MessagingLockDao messagingLockDao;
-
-    @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
-
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {

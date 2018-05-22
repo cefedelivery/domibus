@@ -46,11 +46,13 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     public static final String MPC = "mpc";
 
-    public static final String INITIATOR = "initiator";
+    private static final String INITIATOR = "initiator";
 
     public static final String MESSAGE_TYPE = "messageType";
 
-    public static final String CURRENT_TIME = "current_time";
+    private static final String CURRENT_TIME = "current_time";
+
+    private static final String PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE = "pull.extra.number.of.attempt.time.for.expiration.date";
 
     @Autowired
     private UserMessageLogService userMessageLogService;
@@ -91,25 +93,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-
     private Integer extraNumberOfAttemptTimeForExpirationDate;
-
-    private Date getPullMessageExpirationDate(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
-        if (legConfiguration.getReceptionAwareness() != null) {
-            final Long scheduledStartTime = updateRetryLoggingService.getScheduledStartTime(userMessageLog);
-            final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
-            long oneAttemptTimeInMillis = timeOut / legConfiguration.getReceptionAwareness().getRetryCount();
-            return new Date(scheduledStartTime + timeOut + (getExtraNumberOfAttemptTimeForExpirationDate() * oneAttemptTimeInMillis));
-        }
-        return null;
-    }
-
-    private int getExtraNumberOfAttemptTimeForExpirationDate() {
-        if (extraNumberOfAttemptTimeForExpirationDate == null) {
-            extraNumberOfAttemptTimeForExpirationDate = Integer.valueOf(domibusProperties.getProperty("pull.extra.number.of.attempt.time.for.expiration.date", "2"));
-        }
-        return extraNumberOfAttemptTimeForExpirationDate;
-    }
 
     /**
      * {@inheritDoc}
@@ -133,71 +117,6 @@ public class PullMessageServiceImpl implements PullMessageService {
                 break;
             default:
                 throw new IllegalStateException(String.format("Status:[%s] should never occur here", state.name()));
-        }
-    }
-
-
-    /**
-     * This method is called when a message has been pulled successfully.
-     *
-     * @param userMessage
-     * @param legConfiguration
-     * @param userMessageLog
-     */
-    private void waitingForCallBack(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
-        final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
-        LOG.debug("[PULL_REQUEST]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
-        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
-            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
-            LOG.debug("[PULL_REQUEST]:Message:[{}] In case of failure, will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
-        } else {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
-        }
-        userMessageLog.setMessageStatus(waitingForReceipt);
-        userMessageLogDao.update(userMessageLog);
-        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
-        addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
-    }
-
-    /**
-     * Check if the message can be sent again: there is time and attempts left
-     */
-    public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
-        // retries start after the first send attempt
-        if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() <= userMessageLog.getSendAttemptsMax()
-                && (updateRetryLoggingService.getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
-            return true;
-        }
-        return false;
-    }
-
-    private void pullFailedOnRequest(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
-        LOG.debug("[PULL_REQUEST]:Message:[{}] failed on pull message retrieval", userMessageLog.getMessageId());
-        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.READY_TO_PULL, userMessageLog);
-            addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
-            LOG.debug("[PULL_REQUEST]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
-        } else {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            pullMessageStateService.sendFailed(userMessageLog);
-        }
-    }
-
-    private void pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
-        LOG.debug("[PULL_RECEIPT]:Message:[{}] failed on pull message acknowledgement", userMessageLog.getMessageId());
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
-        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            LOG.debug("[PULL_RECEIPT]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
-            pullMessageStateService.reset(userMessageLog);
-            LOG.debug("[PULL_RECEIPT]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
-        } else {
-            LOG.debug("[PULL_RECEIPT]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            deletePullMessageLock(userMessageLog.getMessageId());
-            pullMessageStateService.sendFailed(userMessageLog);
         }
     }
 
@@ -280,7 +199,7 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional
-    public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog) {
+    public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, final UserMessage userMessage, final MessageLog messageLog) {
         String partyId = partyIdExtractor.getPartyId();
         final String messageId = messageLog.getMessageId();
         final String mpc = messageLog.getMpc();
@@ -315,7 +234,9 @@ public class PullMessageServiceImpl implements PullMessageService {
         messagingLockDao.delete(messageId);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void resetWaitingForReceiptPullMessages() {
@@ -328,7 +249,7 @@ public class PullMessageServiceImpl implements PullMessageService {
             LOG.debug("Message:[{}] has reach its next attempt offset.", messagedId);
             if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()) {
                 LOG.debug("Message:[{}] has reach its next attempt moment[{}].", messagedId, userMessageLog.getNextAttempt());
-                //retrive the message locK.
+                //retrieve the message locK.
                 final MessagingLock messagingLock = messagingLockDao.findMessagingLockForMessageId(messagedId);
                 //could happen due to different transactions. So in oder to be resilient we check it.
                 if (messagingLock == null) {
@@ -349,7 +270,6 @@ public class PullMessageServiceImpl implements PullMessageService {
         }
     }
 
-
     /**
      * When a message has been set in waiting_for_receipt state its locking record has been deleted. When the retry
      * service set timed_out waiting_for_receipt messages back in ready_to_pull state, the search and lock system has to be fed again
@@ -357,11 +277,92 @@ public class PullMessageServiceImpl implements PullMessageService {
      *
      * @param userMessageLog the messageLod
      */
-    private void addPullMessageLock(final UserMessageLog userMessageLog) {
+    protected void addPullMessageLock(final UserMessageLog userMessageLog) {
         final String messageId = userMessageLog.getMessageId();
         Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
         final UserMessage userMessage = messageByMessageId.getUserMessage();
         To to = userMessage.getPartyInfo().getTo();
         addPullMessageLock(new ToExtractor(to), userMessage, userMessageLog);
+    }
+
+    protected Date getPullMessageExpirationDate(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        if (legConfiguration.getReceptionAwareness() != null) {
+            final Long scheduledStartTime = updateRetryLoggingService.getScheduledStartTime(userMessageLog);
+            final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
+            long oneAttemptTimeInMillis = timeOut / legConfiguration.getReceptionAwareness().getRetryCount();
+            return new Date(scheduledStartTime + timeOut + (getExtraNumberOfAttemptTimeForExpirationDate() * oneAttemptTimeInMillis));
+        }
+        return null;
+    }
+
+    protected int getExtraNumberOfAttemptTimeForExpirationDate() {
+        if (extraNumberOfAttemptTimeForExpirationDate == null) {
+            extraNumberOfAttemptTimeForExpirationDate = Integer.valueOf(domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2"));
+        }
+        return extraNumberOfAttemptTimeForExpirationDate;
+    }
+
+    /**
+     * This method is called when a message has been pulled successfully.
+     *
+     * @param userMessage
+     * @param legConfiguration
+     * @param userMessageLog
+     */
+    protected void waitingForCallBack(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
+        LOG.debug("[PULL_REQUEST]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
+        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
+            LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+            LOG.debug("[PULL_REQUEST]:Message:[{}] In case of failure, will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
+        } else {
+            LOG.debug("[PULL_REQUEST]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+        }
+        userMessageLog.setMessageStatus(waitingForReceipt);
+        userMessageLogDao.update(userMessageLog);
+        backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
+        addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
+    }
+
+    /**
+     * Check if the message can be sent again: there is time and attempts left
+     */
+    protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        // retries start after the first send attempt
+        if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() <= userMessageLog.getSendAttemptsMax()
+                && (updateRetryLoggingService.getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void pullFailedOnRequest(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
+        LOG.debug("[PULL_REQUEST]:Message:[{}] failed on pull message retrieval", userMessageLog.getMessageId());
+        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
+            LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
+            updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.READY_TO_PULL, userMessageLog);
+            addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
+            LOG.debug("[PULL_REQUEST]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
+        } else {
+            LOG.debug("[PULL_REQUEST]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
+            pullMessageStateService.sendFailed(userMessageLog);
+        }
+    }
+
+    protected void pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        LOG.debug("[PULL_RECEIPT]:Message:[{}] failed on pull message acknowledgement", userMessageLog.getMessageId());
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(userMessageLog.getMessageId());
+        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
+            LOG.debug("[PULL_RECEIPT]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
+            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
+            pullMessageStateService.reset(userMessageLog);
+            LOG.debug("[PULL_RECEIPT]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
+        } else {
+            LOG.debug("[PULL_RECEIPT]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
+            deletePullMessageLock(userMessageLog.getMessageId());
+            pullMessageStateService.sendFailed(userMessageLog);
+        }
     }
 }
