@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
         xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-    <id>wildfly-configuration</id>
+    <id>wildfly12-configuration</id>
     <formats>
         <format>zip</format>
     </formats>
@@ -13,7 +13,7 @@
     <includeSiteDirectory>false</includeSiteDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../Domibus-MSH-wildfly-12/src/main/conf/domibus</directory>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly12/src/main/conf/domibus</directory>
             <outputDirectory>/</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>

@@ -4,6 +4,9 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <cargo-maven2-plugin.version>1.6.7</cargo-maven2-plugin.version>
+    </properties>
 
     <parent>
         <groupId>eu.domibus</groupId>
@@ -73,7 +76,7 @@
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.12</version>
+                        <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-tomcat</id>
@@ -173,7 +176,7 @@
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.15</version>
+                        <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-wildfly</id>
@@ -260,13 +263,12 @@
             <properties>
                 <wildfly.version>12.0.0.Final</wildfly.version>
             </properties>
-
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.15</version>
+                        <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-wildfly</id>
@@ -276,7 +278,7 @@
                                 <phase>pre-integration-test</phase>
                                 <configuration>
                                     <container>
-                                        <containerId>wildfly12</containerId>
+                                        <containerId>wildfly12x</containerId>
                                         <zipUrlInstaller>
                                             <url>
                                                 http://central.maven.org/maven2/org/wildfly/wildfly-dist/12.0.0.Final/wildfly-dist-12.0.0.Final.zip
@@ -310,13 +312,13 @@
                                     <replacements>
                                         <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
                                         <replacement>
-                                            <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"</token>
-                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
+                                            <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"</token>
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
                                         </replacement>
                                         <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
                                         <replacement>
-                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true"</token>
-                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
+                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true"</token>
+                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
                                         </replacement>
                                     </replacements>
                                 </configuration>

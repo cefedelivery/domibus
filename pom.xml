@@ -725,7 +725,7 @@
             <modules>
                 <module>Domibus-MSH-jms-wildfly</module>
                 <module>Domibus-MSH-taskexecutor-wildfly</module>
-                <module>Domibus-MSH-wildfly-12</module>
+                <module>Domibus-MSH-wildfly12</module>
             </modules>
         </profile>
         <profile>
