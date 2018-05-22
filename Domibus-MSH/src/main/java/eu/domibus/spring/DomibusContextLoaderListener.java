@@ -2,11 +2,11 @@ package eu.domibus.spring;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.plugin.PluginException;
-import eu.domibus.plugin.classloader.PluginClassLoader;
-import eu.domibus.property.PropertyResolverBuilder;
-import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.classloader.PluginClassLoader;
+import eu.domibus.property.PropertyResolver;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.ContextLoaderListener;
 
 import javax.servlet.ServletContext;
@@ -31,7 +31,7 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
         if (StringUtils.isEmpty(pluginsLocation)) {
             throw new PluginException(DomibusCoreErrorCode.DOM_001, "pluginsLocation context param should not be empty");
         }
-        String resolvedPluginsLocation = PropertyResolverBuilder.create().build().getResolvedProperty(pluginsLocation);
+        String resolvedPluginsLocation = new PropertyResolver().getResolvedValue(pluginsLocation);
         LOG.info("Resolved plugins location [" + pluginsLocation + "] to [" + resolvedPluginsLocation + "]");
 
         try {

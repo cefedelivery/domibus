@@ -2,8 +2,6 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
 
-import javax.xml.soap.SOAPMessage;
-
 /**
  * @author Thomas Dussart
  * @since 3.3
@@ -12,10 +10,10 @@ import javax.xml.soap.SOAPMessage;
 public class UserMessageHandlerContext {
     private String messageId;
     private LegConfiguration legConfiguration;
-    private boolean pingMessage;
+    private boolean testMessage;
 
     public UserMessageHandlerContext() {
-
+        // empty constructor
     }
 
     public String getMessageId() {
@@ -28,8 +26,8 @@ public class UserMessageHandlerContext {
 
 
 
-    public boolean isPingMessage() {
-        return pingMessage;
+    public boolean isTestMessage() {
+        return testMessage;
     }
 
     public void setMessageId(String messageId) {
@@ -40,7 +38,7 @@ public class UserMessageHandlerContext {
         this.legConfiguration = legConfiguration;
     }
 
-    public void setPingMessage(boolean pingMessage) {
-        this.pingMessage = pingMessage;
+    public void setTestMessage(boolean testMessage) {
+        this.testMessage = testMessage;
     }
 }

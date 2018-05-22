@@ -2,19 +2,20 @@ package eu.domibus.plugin;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.MessageStatusChangeEvent;
 import eu.domibus.common.NotificationType;
-import eu.domibus.api.security.AuthUtils;
 import eu.domibus.messaging.MessageConstants;
-import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import eu.domibus.messaging.MessageNotFoundException;
+import eu.domibus.plugin.delegate.BackendConnectorDelegate;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +29,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * // TODO reach 70% coverage.
@@ -59,7 +59,10 @@ public class NotificationListenerServiceTest {
     private JmsListenerContainerFactory internalJmsListenerContainerFactory;
 
     @Injectable
-    private Properties domibusProperties;
+    private DomainContextProvider domainContextProvider;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     BackendConnectorDelegate backendConnectorDelegate;
@@ -67,6 +70,18 @@ public class NotificationListenerServiceTest {
     @Tested
     NotificationListenerService objNotificationListenerService;
 
+    @Test
+    public void testConstructor() {
+        NotificationListenerService nls;
+        List<NotificationType> rn = new ArrayList<>();
+        rn.add(NotificationType.MESSAGE_RECEIVED);
+        rn.add(NotificationType.MESSAGE_SEND_FAILURE);
+        nls = new NotificationListenerService(null, BackendConnector.Mode.PUSH, rn);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().size() == 2);
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED));
+        Assert.assertTrue(nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_FAILURE));
+        Assert.assertTrue(!nls.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_SUCCESS));
+    }
 
     @Test
     public void testAddToListFromQueueHappyFlow(final @Injectable QueueBrowser queueBrowser) throws JMSException {
@@ -76,7 +91,7 @@ public class NotificationListenerServiceTest {
 
         new Expectations() {{
 
-            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
             result = 5;
 
             jmsManager.browseMessages(withAny(new String()));
@@ -87,6 +102,13 @@ public class NotificationListenerServiceTest {
         Collection<String> result = new ArrayList<String>();
         result.addAll(objNotificationListenerService.browseQueue(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT));
         Assert.assertEquals(5, result.size());
+
+        Assert.assertTrue(objNotificationListenerService.getRequiredNotificationTypeList().size() == 3);
+        Assert.assertTrue(objNotificationListenerService.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED));
+        Assert.assertTrue(objNotificationListenerService.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_FAILURE));
+        Assert.assertTrue(objNotificationListenerService.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_RECEIVED_FAILURE));
+        Assert.assertTrue(!objNotificationListenerService.getRequiredNotificationTypeList().contains(NotificationType.MESSAGE_SEND_SUCCESS));
+
     }
 
     @Test
@@ -97,7 +119,7 @@ public class NotificationListenerServiceTest {
 
         new Expectations() {{
 
-            domibusProperties.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
             result = 500;
 
             jmsManager.browseMessages(withAny(new String()));

@@ -6,9 +6,11 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogInfoFilter;
+import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +29,8 @@ import java.util.*;
  */
 @Repository
 public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
+
+    private static final String STR_MESSAGE_ID = "MESSAGE_ID";
 
     @Autowired
     private UserMessageLogInfoFilter userMessageLogInfoFilter;
@@ -95,13 +99,13 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
 
     public UserMessageLog findByMessageId(String messageId) {
         TypedQuery<UserMessageLog> query = em.createNamedQuery("UserMessageLog.findByMessageId", UserMessageLog.class);
-        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter(STR_MESSAGE_ID, messageId);
         return query.getSingleResult();
     }
 
     public UserMessageLog findByMessageId(String messageId, MSHRole mshRole) {
         TypedQuery<UserMessageLog> query = this.em.createNamedQuery("UserMessageLog.findByMessageIdAndRole", UserMessageLog.class);
-        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter(STR_MESSAGE_ID, messageId);
         query.setParameter("MSH_ROLE", mshRole);
 
         try {
@@ -112,7 +116,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    public Long countMessages(HashMap<String, Object> filters) {
+    public Long countMessages(Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<UserMessageLog> mle = cq.from(UserMessageLog.class);
@@ -123,7 +127,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return query.getSingleResult();
     }
 
-    public List<UserMessageLog> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<UserMessageLog> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<UserMessageLog> cq = cb.createQuery(UserMessageLog.class);
         Root<UserMessageLog> mle = cq.from(UserMessageLog.class);
@@ -152,7 +156,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
             return query.getResultList();
         } catch (NoResultException nrEx) {
             LOG.debug("Query UserMessageLog.findUndownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]");
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
@@ -164,13 +168,13 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
             return query.getResultList();
         } catch (NoResultException nrEx) {
             LOG.debug("Query UserMessageLog.findDownloadedUserMessagesOlderThan did not find any result for date [" + date + "] and MPC [" + mpc + "]");
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
     public String findBackendForMessageId(String messageId) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findBackendForMessage", String.class);
-        query.setParameter("MESSAGE_ID", messageId);
+        query.setParameter(STR_MESSAGE_ID, messageId);
         return query.getSingleResult();
     }
 
@@ -180,14 +184,9 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         super.update(messageLog);
     }
 
-    public int countAllInfo(boolean asc, HashMap<String, Object> filters) {
+    public int countAllInfo(boolean asc, Map<String, Object> filters) {
         LOG.debug("Count all");
-        final Map<String, Object> filteredEntries = Maps.filterEntries(filters, new com.google.common.base.Predicate<Map.Entry<String, Object>>() {
-            @Override
-            public boolean apply(Map.Entry<String, Object> input) {
-                return input.getValue() != null;
-            }
-        });
+        final Map<String, Object> filteredEntries = Maps.filterEntries(filters, input -> input.getValue() != null);
         if (filteredEntries.size() == 0) {
             LOG.debug("Filter empty");
             return countAll();
@@ -206,9 +205,9 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return singleResult.intValue();
     }
 
-    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters) {
+    public List<MessageLogInfo> findAllInfoPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Retrieving messages for parameters from " + from + " max " + max + " column " + column + " asc " + asc);
+            LOG.debug("Retrieving messages for parameters from [{}] max [{}] column [{}] asc [{}]", from, max, column, asc);
             for (Map.Entry<String, Object> stringObjectEntry : filters.entrySet()) {
                 if (stringObjectEntry.getValue() != null) {
                     LOG.debug("Setting parameters for query ");
@@ -229,10 +228,32 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         final List<MessageLogInfo> resultList = queryParameterized.getResultList();
         if (LOG.isDebugEnabled()) {
             final long endTime = System.currentTimeMillis();
-            LOG.debug(endTime - startTime + "milliscond to execute query for " + resultList.size() + " resuts");
+            LOG.debug("[{}] millisecond to execute query for [{}] results", endTime - startTime, resultList.size());
         }
         return resultList;
     }
 
+    public String findLastUserTestMessageId(String party) {
+        HashMap<String, Object> filters = new HashMap<>();
+        filters.put("messageSubtype",MessageSubtype.TEST);
+        filters.put("mshRole", MSHRole.SENDING);
+        filters.put("toPartyId", party);
+        filters.put("messageType", MessageType.USER_MESSAGE);
+        String filteredUserMessageLogQuery = userMessageLogInfoFilter.filterUserMessageLogQuery("received", false, filters);
+        TypedQuery<MessageLogInfo> typedQuery = em.createQuery(filteredUserMessageLogQuery, MessageLogInfo.class);
+        TypedQuery<MessageLogInfo> queryParameterized = userMessageLogInfoFilter.applyParameters(typedQuery, filters);
+        queryParameterized.setFirstResult(0);
+        queryParameterized.setMaxResults(1);
+        long startTime = 0;
+        if (LOG.isDebugEnabled()) {
+            startTime = System.currentTimeMillis();
+        }
+        final List<MessageLogInfo> resultList = queryParameterized.getResultList();
+        if (LOG.isDebugEnabled()) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug("[{}] millisecond to execute query for [{}] results", endTime - startTime, resultList.size());
+        }
+        return resultList.isEmpty() ? null : resultList.get(0).getMessageId();
+    }
 
 }

@@ -1,12 +1,13 @@
 package eu.domibus.ebms3.sender;
 
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.quartz.DomibusQuartzJobBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  * Quartz based worker responsible for the periodical execution of {@link eu.domibus.ebms3.sender.MessageSender#sendUserMessage(String)}
@@ -16,23 +17,20 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  */
 
 @DisallowConcurrentExecution //Only one SenderWorker runs at any time
-public class SendRetryWorker extends QuartzJobBean {
+public class SendRetryWorker extends DomibusQuartzJobBean {
 
     @Autowired
-    private RetryService retryService;
+    protected RetryService retryService;
 
     @Autowired
-    AuthUtils authUtils;
+    protected AuthUtils authUtils;
 
     @Override
-    protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
-
+    protected void executeJob(final JobExecutionContext context, final Domain domain) throws JobExecutionException {
         if(!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("retry_user", "retry_password");
         }
 
         retryService.enqueueMessages();
     }
-
-
 }

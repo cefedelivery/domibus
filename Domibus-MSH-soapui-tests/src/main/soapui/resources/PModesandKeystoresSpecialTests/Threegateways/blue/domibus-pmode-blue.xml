@@ -2,9 +2,9 @@
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="blue_gw">
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
-		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
-		<mpc name="brisMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
-		<mpc name="brisMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull2" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
+		<mpc name="brisMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
+		<mpc name="brisMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull2" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>

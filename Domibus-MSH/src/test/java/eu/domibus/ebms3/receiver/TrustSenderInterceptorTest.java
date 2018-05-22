@@ -1,35 +1,54 @@
 package eu.domibus.ebms3.receiver;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.ebms3.SoapInterceptorTest;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.PKIUtil;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
+import eu.domibus.spring.SpringContextProvider;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.wss4j.common.ext.WSSecurityException;
 import org.joda.time.DateTime;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jms.core.JmsOperations;
+import org.w3c.dom.Document;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.SOAPException;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.security.Security;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
 /**
  * @author idragusa
- * @since 3.3
+ * @since 4.0
  */
 @RunWith(JMockit.class)
-public class TrustSenderInterceptorTest {
+public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
-    @Injectable
-    Properties domibusProperties;
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptorTest.class);
+
+    private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/receiver/";
 
     @Injectable
     CertificateService certificateService;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     protected JAXBContext jaxbContextEBMS;
@@ -37,11 +56,71 @@ public class TrustSenderInterceptorTest {
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;
 
+    @Bean
+    @Qualifier("jmsTemplateCommand")
+    public JmsOperations jmsOperations() throws JAXBException {
+        return Mockito.mock(JmsOperations.class);
+    }
+
     PKIUtil pkiUtil = new PKIUtil();
 
-    @Before
-    public void init() {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    @Test
+    public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+    }
+
+    @Test(expected = org.apache.cxf.interceptor.Fault.class)
+    public void testSenderTrustFault(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        new Expectations() {{
+            certificateService.isCertificateValid((X509Certificate) any);
+            result = false;
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
+            result = true;
+        }};
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+    }
+
+    @Test
+    public void testSenderTrustNoSenderVerification(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
+        String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
+        String trustorePassword = "1234";
+
+        new Expectations() {{
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result = false;
+        }};
+        testHandleMessage(doc, trustoreFilename, trustorePassword);
+        new Verifications() {{
+            certificateService.isCertificateValid((X509Certificate) any);
+            times = 0;
+        }};
+    }
+
+    @Test
+    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException {
+        Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement());
+        Assert.assertNotNull(xc);
+        Assert.assertNotNull(xc.getIssuerDN());
+    }
+
+    protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+        SoapMessage soapMessage = getSoapMessageForDom(doc);
+
+        new Expectations() {{
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result = true;
+        }};
+        trustSenderInterceptor.handleMessage(soapMessage);
     }
 
     @Test
@@ -50,7 +129,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = "true";
             certificateService.isCertificateValid(certificate);
             result = true;
@@ -68,7 +147,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
             result = "false";
         }};
         Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender", false));
@@ -79,7 +158,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "true";
         }};
 
@@ -92,7 +171,7 @@ public class TrustSenderInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusProperties.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "false";
         }};
 

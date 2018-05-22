@@ -1,13 +1,18 @@
 package eu.domibus.common.model.configuration;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.envers.AuditJoinTable;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 
 /**
@@ -48,12 +53,18 @@ import java.util.Set;
 @Table(name = "TB_PARTY")
 @NamedQueries({@NamedQuery(name = "Party.findPartyByIdentifier", query = "select p.name from Party p where :PARTY_IDENTIFIER member of p.identifiers"),
         @NamedQuery(name = "Party.findByName", query = "select p from Party p where p.name = :NAME"),
-        @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT")})
+        @NamedQuery(name = "Party.findAll", query = "select p from Party p"),
+        @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT"),
+        @NamedQuery(name = "Party.findByPartyId", query = "select p from Party p, Identifier i where p.entityId = i.entityId and i.partyId = :PARTY_ID")})
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName(value = "Party", auditOrder = 1)
 public class Party extends AbstractBaseEntity {
 
     @XmlElement(required = true, name = "identifier")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PARTY")
+    @Audited(targetAuditMode = NOT_AUDITED)
+    @AuditJoinTable(name = "TB_PARTY_IDENTIFIER_AUD")
     protected Set<Identifier> identifiers; //NOSONAR
     @XmlAttribute(name = "name", required = true)
     @Column(name = "NAME")
@@ -94,6 +105,10 @@ public class Party extends AbstractBaseEntity {
             this.identifiers = new HashSet<>();
         }
         return this.identifiers;
+    }
+
+    public void setIdentifiers(Set<Identifier> identifiers) {
+        this.identifiers = identifiers;
     }
 
     /**

@@ -5,8 +5,7 @@
                       env:mustUnderstand="true" wsu:Id="_c98813fb-57e4-474a-8146-945594cdf2ba">
             <eb:UserMessage mpc="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC">
                 <eb:MessageInfo>
-                    <eb:Timestamp>2016-09-28T18:13:04.000Z
-                    </eb:Timestamp>
+                    <eb:Timestamp>2016-09-28T18:13:04.000Z</eb:Timestamp>
                     <eb:MessageId>43bb6883-77d2-4a41-bac4-52a485d50084@domibus.eu</eb:MessageId>
                 </eb:MessageInfo>
                 <eb:PartyInfo>
@@ -31,9 +30,9 @@
                     </eb:Property>
                 </eb:MessageProperties>
                 <eb:PayloadInfo>
-                    <eb:PartInfo href="sbdh-order">
+                    <eb:PartInfo href="cid:message">
                         <eb:PartProperties>
-                            <eb:Property name="MimeType">application/xml</eb:Property>
+                            <eb:Property name="MimeType">text/xml</eb:Property>
                             <eb:Property name="description">e-sens-sbdh-order</eb:Property>
                         </eb:PartProperties>
                     </eb:PartInfo>

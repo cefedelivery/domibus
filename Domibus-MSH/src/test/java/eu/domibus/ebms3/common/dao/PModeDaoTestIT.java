@@ -1,17 +1,25 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
-import eu.domibus.common.dao.ConfigurationDAO;
-import eu.domibus.common.dao.ConfigurationRawDAO;
-import eu.domibus.common.dao.PModeDao;
-import eu.domibus.common.dao.ProcessDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.configuration.DefaultDomibusConfigurationService;
+import eu.domibus.core.crypto.DomibusPropertyProviderImpl;
+import eu.domibus.core.multitenancy.DomainContextProviderImpl;
+import eu.domibus.core.multitenancy.DomainServiceImpl;
+import eu.domibus.core.multitenancy.dao.DomainDao;
+import eu.domibus.core.multitenancy.dao.DomainDaoImpl;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.property.PropertyResolver;
 import eu.domibus.xml.XMLUtilImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -34,6 +42,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
@@ -68,6 +77,41 @@ public class PModeDaoTestIT {
         }
 
         @Bean
+        public DomainService domainService() {
+            return Mockito.mock(DomainServiceImpl.class);
+        }
+
+        @Bean
+        public DomainContextProvider domainContextProvider() {
+            return Mockito.mock(DomainContextProviderImpl.class);
+        }
+
+        @Bean
+        public PropertyResolver propertyResolver() {
+            return Mockito.mock(PropertyResolver.class);
+        }
+
+        @Bean
+        public DomibusConfigurationService domibusConfigurationService() {
+            return Mockito.mock(DefaultDomibusConfigurationService.class);
+        }
+
+        @Bean
+        public DomainDao domainDao() {
+            return Mockito.mock(DomainDaoImpl.class);
+        }
+
+        @Bean
+        public DomibusPropertyProvider domibusPropertyProvider() {
+            return Mockito.mock(DomibusPropertyProviderImpl.class);
+        }
+
+        @Bean(name = "domibusProperties")
+        public Properties domibusProperties() {
+            return Mockito.mock(Properties.class);
+        }
+
+        @Bean
         public EntityManagerFactory entityManagerFactory() {
             return Mockito.mock(EntityManagerFactory.class);
         }
@@ -75,6 +119,11 @@ public class PModeDaoTestIT {
         @Bean
         public ProcessDao processDao() {
             return Mockito.mock(ProcessDao.class);
+        }
+
+        @Bean
+        public PartyDao partyDao() {
+            return Mockito.mock(PartyDao.class);
         }
 
         @Bean
@@ -90,12 +139,7 @@ public class PModeDaoTestIT {
 
         @Bean
         public ConfigurationValidator validator() {
-            return new ConfigurationValidator() {
-                @Override
-                public List<String> validate(Configuration configuration) {
-                    return Collections.emptyList();
-                }
-            };
+            return configuration -> Collections.emptyList();
         }
 
         @Bean
@@ -137,7 +181,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes, "description");
         assertNotNull(updatePmodeMessage);
         assertTrue(updatePmodeMessage.size() > 0);
 
@@ -157,7 +201,7 @@ public class PModeDaoTestIT {
         final ConfigurationRaw raw = rawConfig.getValue();
         assertNotNull(raw.getConfigurationDate());
         assertEquals(raw.getXml(), pModeBytes);
-
+        assertEquals(raw.getDescription(), "description");
     }
 
 
@@ -167,7 +211,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);
 
-        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes);
+        List<String> updatePmodeMessage = pModeDao.updatePModes(pModeBytes, "description");
         //there are no warnings
         assertTrue(updatePmodeMessage.isEmpty());
 
@@ -188,7 +232,7 @@ public class PModeDaoTestIT {
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
 
         try {
-            pModeDao.updatePModes(pModeBytes);
+            pModeDao.updatePModes(pModeBytes, "description");
             fail("The Pmode is invalid so it should have thrown an exception");
         } catch (XmlProcessingException e) {
             LOG.info("Exception thrown as expected due to invalid PMode");
@@ -196,6 +240,6 @@ public class PModeDaoTestIT {
             assertTrue(e.getErrors().size() > 0);
         }
 
-        Mockito.verify(configurationDAO, never()).updateConfiguration((Configuration) Mockito.anyObject());
+        Mockito.verify(configurationDAO, never()).updateConfiguration(Mockito.anyObject());
     }
 }

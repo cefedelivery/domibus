@@ -1,8 +1,8 @@
 package eu.domibus.core.message.acknowledge;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

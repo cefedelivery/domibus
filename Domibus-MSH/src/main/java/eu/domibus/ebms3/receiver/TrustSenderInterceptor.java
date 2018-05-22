@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import com.sun.org.apache.xerces.internal.dom.TextImpl;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -23,7 +24,6 @@ import org.apache.cxf.ws.security.wss4j.CXFRequestData;
 import org.apache.cxf.ws.security.wss4j.StaxSerializer;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.wss4j.common.crypto.Crypto;
-import org.apache.wss4j.common.crypto.CryptoFactory;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDocInfo;
@@ -49,7 +49,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This interceptor is responsible of the trust of an incoming messages.
@@ -68,11 +67,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
-    private Properties securityEncryptionProp;
-
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    protected Crypto crypto;
 
     @Qualifier("jaxbContextEBMS")
     @Autowired
@@ -83,10 +81,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public TrustSenderInterceptor() {
         super(false);
-    }
-
-    public void setSecurityEncryptionProp(Properties securityEncryptionProp) {
-        this.securityEncryptionProp = securityEncryptionProp;
     }
 
     /**
@@ -136,7 +130,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
-        if (Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
+        if (Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
             try {
                 if (!certificateService.isCertificateValid(certificate)) {
                     LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
@@ -156,13 +150,13 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId, boolean isPullMessage) {
-        if (!Boolean.parseBoolean(domibusProperties.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+        if (!Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }
 
         LOG.info("Verifying sender trust");
-        if(certificate != null && org.apache.commons.lang.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
+        if(certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
             if (isPullMessage) {
                 LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
             } else {
@@ -206,7 +200,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return contents.get(1);
     }
 
-    private X509Certificate getSenderCertificate(SoapMessage msg)  {
+    protected X509Certificate getSenderCertificate(SoapMessage msg)  {
         boolean utWithCallbacks = MessageUtils.getContextualBoolean(msg, "ws-security.validate.token", true);
         super.translateProperties(msg);
         CXFRequestData requestData = new CXFRequestData();
@@ -231,8 +225,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         try {
             requestData.setMsgContext(msg);
             decodeAlgorithmSuite(requestData);
-            Crypto secCrypto = CryptoFactory.getInstance(securityEncryptionProp);
-            requestData.setDecCrypto(secCrypto);
+            requestData.setDecCrypto(crypto);
             // extract certificate from KeyInfo
             X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
 
@@ -253,18 +246,34 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
     }
 
-    private X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+    protected String getTextFromElement(Element element) {
+        StringBuffer buf = new StringBuffer();
+        NodeList list = element.getChildNodes();
+        boolean found = false;
+        for (int i = 0; i < list.getLength(); i++) {
+            Node node = list.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                buf.append(node.getNodeValue());
+                found = true;
+            }
+        }
+        return found? buf.toString():null;
+    }
+
+    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
 
         NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
         if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
             return null;
 
-        Node binarySecurityTokenTag = binarySecurityTokenElement.item(0).getFirstChild();
-        if(binarySecurityTokenTag == null || !( binarySecurityTokenTag instanceof TextImpl) ) {
+        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
+        String certString = getTextFromElement(binarySecurityTokenTag);
+
+        if(certString==null ||  certString.isEmpty() ) {
             return null;
         }
 
-        String certStr = ( "-----BEGIN CERTIFICATE-----\n" + ((TextImpl)binarySecurityTokenTag).getData() + "\n-----END CERTIFICATE-----\n" );
+        String certStr = ( "-----BEGIN CERTIFICATE-----\n" +  certString + "\n-----END CERTIFICATE-----\n" );
         InputStream in = new ByteArrayInputStream(certStr.getBytes());
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
@@ -273,7 +282,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
 
-    private X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
+    protected X509Certificate getCertificateFromKeyInfo(CXFRequestData data, Element securityHeader) throws WSSecurityException {
 
         X509Certificate[] certs;
 
@@ -281,8 +290,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         Element secTokenRef = getSecTokenRef(securityHeader);
         /* CXF class which has to be initialized in order to parse the Security token reference */
         STRParserParameters encryptedEphemeralKey1 = new STRParserParameters();
+        data.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
         encryptedEphemeralKey1.setData(data);
-        encryptedEphemeralKey1.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
         encryptedEphemeralKey1.setStrElement(secTokenRef);
         decryptedBytes = new EncryptedKeySTRParser();
         /* This Apache CXF call will look for a certificate in the Truststore whose Subject Key Identifier bytes matches the <wsse:SecurityTokenReference><wsse:KeyIdentifier> bytes */
@@ -309,6 +318,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             }
         }
         return null;
+    }
+
+    public void setCrypto(Crypto crypto) {
+        this.crypto = crypto;
     }
 
 }

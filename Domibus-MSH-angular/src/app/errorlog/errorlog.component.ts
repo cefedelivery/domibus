@@ -1,4 +1,4 @@
-﻿import {Component, TemplateRef, ViewChild} from "@angular/core";
+﻿import {Component, TemplateRef, ViewChild, Renderer2, AfterViewInit, ElementRef} from "@angular/core";
 import {Observable} from "rxjs";
 import {Http, Response, URLSearchParams} from "@angular/http";
 import {ErrorLogResult} from "./errorlogresult";
@@ -7,6 +7,9 @@ import {ErrorlogDetailsComponent} from "app/errorlog/errorlog-details/errorlog-d
 import {MdDialog, MdDialogRef} from "@angular/material";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
+import { Md2Datepicker } from "md2";
 
 @Component({
   moduleId: module.id,
@@ -15,7 +18,7 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
   styleUrls: ['./errorlog.component.css']
 })
 
-export class ErrorLogComponent {
+export class ErrorLogComponent implements AfterViewInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -23,6 +26,7 @@ export class ErrorLogComponent {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('bibi') bibi: Md2Datepicker;
 
   timestampFromMaxDate: Date = new Date();
   timestampToMinDate: Date = null;
@@ -47,7 +51,10 @@ export class ErrorLogComponent {
 
   advancedSearch: boolean;
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  static readonly ERROR_LOG_URL : string = 'rest/errorlogs';
+  static readonly ERROR_LOG_CSV_URL : string = ErrorLogComponent.ERROR_LOG_URL + '/csv';
+
+  constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService, public dialog: MdDialog, private renderer: Renderer2) {
   }
 
   ngOnInit() {
@@ -83,14 +90,29 @@ export class ErrorLogComponent {
         name: 'Notified'
       }
 
-    ]
+    ];
 
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "Error Code", "Timestamp"].indexOf(col.name) != -1
-    })
+    });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+
+    // this.bibi.registerOnValidatorChange(() => {
+    //   console.log('bau')
+    // })
+    // this.bibi.registerOnTouched(() => {
+    //   console.log('bau touch');
+    //   return {};
+    // });
+    //
+    // this.bibi._onTouched = () => {  console.log('wwwhat?')}
+  //  this.bibi._validatorOnChange
+  }
+
+  onTest() {
+    console.log('onTest')
   }
 
   getErrorLogEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
@@ -132,7 +154,7 @@ export class ErrorLogComponent {
       searchParams.set('asc', asc.toString());
     }
 
-    return this.http.get('rest/errorlogs', {
+    return this.http.get(ErrorLogComponent.ERROR_LOG_URL, {
       search: searchParams
     }).map((response: Response) =>
       response.json()
@@ -179,6 +201,10 @@ export class ErrorLogComponent {
       this.errorCodes = result.errorCodes;
 
       this.loading = false;
+
+      if(this.count > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error("Maximum number of rows reached for downloading CSV");
+      }
     }, (error: any) => {
       console.log("error getting the error log:" + error);
       this.loading = false;
@@ -251,6 +277,63 @@ export class ErrorLogComponent {
     dialogRef.afterClosed().subscribe(result => {
       //Todo:
     });
+  }
+
+  private getFilterPath() {
+    let result = '?';
+
+    //filter
+    if (this.filter.errorSignalMessageId) {
+      result += 'errorSignalMessageId=' + this.filter.errorSignalMessageId + '&';
+    }
+    if (this.filter.mshRole) {
+      result += 'mshRole=' + this.filter.mshRole + '&';
+    }
+    if (this.filter.messageInErrorId) {
+      result += 'messageInErrorId=' + this.filter.messageInErrorId + '&';
+    }
+    if (this.filter.errorCode) {
+      result += 'errorCode=' + this.filter.errorCode + '&';
+    }
+    if (this.filter.errorDetail) {
+      result += 'errorDetail=' + this.filter.errorDetail + '&';
+    }
+    if (this.filter.timestampFrom != null) {
+      result += 'timestampFrom=' + this.filter.timestampFrom.getTime() + '&';
+    }
+    if (this.filter.timestampTo != null) {
+      result += 'timestampTo=' + this.filter.timestampTo.getTime() + '&';
+    }
+    if (this.filter.notifiedFrom != null) {
+      result += 'notifiedFrom=' + this.filter.notifiedFrom.getTime() + '&';
+    }
+    if (this.filter.notifiedTo != null) {
+      result += 'notifiedTo=' + this.filter.notifiedTo.getTime() + '&';
+    }
+
+    return result;
+  }
+
+  isSaveAsCSVButtonEnabled() {
+    return (this.count < AlertComponent.MAX_COUNT_CSV);
+  }
+
+  saveAsCSV() {
+    DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.getFilterPath());
+  }
+
+  ngAfterViewInit() {
+   // var inputs = this.elementRef.nativeElement.getElementsByTagName('input');
+   // console.log( 'inputs[0] ', inputs )
+   // inputs[2].onblur =  () => { console.log('on blur ');
+   //    if (!this.filter.timestampFrom)
+   //      inputs[2].value = '';
+   // }
+
+  }
+
+  onClick(event) {
+    console.log(event);
   }
 
 }

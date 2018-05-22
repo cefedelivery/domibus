@@ -6,6 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -17,6 +18,8 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -87,8 +90,15 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    //TODO remove the ext converter and replace it with DomainCoreConverter
     @Autowired
     private DomainExtConverter domainExtConverter;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private MessagingLockService messagingLockService;
 
     @Override
     public String getFinalRecipient(String messageId) {
@@ -142,6 +152,9 @@ public class UserMessageDefaultService implements UserMessageService {
 
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);
+        } else {
+            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            messagingLockService.addSearchInFormation(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessageLog.getMessageId(), userMessageLog.getMpc());
         }
     }
 

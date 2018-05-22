@@ -81,7 +81,7 @@ public class ConfigurationDAO extends BasicDao<Configuration> {
         return configuration;
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     //FIXME: PMode update instead of wipe
     public void updateConfiguration(final Configuration configuration) {
         if (this.configurationExists()) {

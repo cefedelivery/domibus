@@ -78,7 +78,7 @@ public class InternalJmsMessage {
 
 	@Override
 	public String toString() {
-		return new org.apache.commons.lang.builder.ToStringBuilder(this)
+		return new org.apache.commons.lang3.builder.ToStringBuilder(this)
 				.append("id", id)
 				.append("type", type)
 				.append("content", content)

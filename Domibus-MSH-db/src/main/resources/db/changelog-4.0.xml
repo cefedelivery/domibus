@@ -1,0 +1,2103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="Pion (generated)" id="1525081090763-1">
+
+        <createTable tableName="QRTZ_BLOB_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="BLOB_DATA" type="BLOB"/>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_CALENDARS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CALENDAR_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CALENDAR_BLOB" type="BLOB">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_CRON_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CRON_EXPRESSION" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIME_ZONE_ID" type="VARCHAR(80)"/>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ENTRY_ID" type="VARCHAR(95)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSTANCE_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FIRED_TIME" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SCHED_TIME" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PRIORITY" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATE" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_NAME" type="VARCHAR(200)"/>
+            <column name="JOB_GROUP" type="VARCHAR(200)"/>
+            <column name="IS_NONCONCURRENT" type="BOOLEAN"/>
+            <column name="REQUESTS_RECOVERY" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_JOB_DETAILS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(250)"/>
+            <column name="JOB_CLASS_NAME" type="VARCHAR(250)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_DURABLE" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_NONCONCURRENT" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_UPDATE_DATA" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REQUESTS_RECOVERY" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_DATA" type="BLOB"/>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_LOCKS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOCK_NAME" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_PAUSED_TRIGGER_GRPS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_SCHEDULER_STATE">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="INSTANCE_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LAST_CHECKIN_TIME" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECKIN_INTERVAL" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_SIMPLE_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REPEAT_COUNT" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REPEAT_INTERVAL" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TIMES_TRIGGERED" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_SIMPROP_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STR_PROP_1" type="VARCHAR(512)"/>
+            <column name="STR_PROP_2" type="VARCHAR(512)"/>
+            <column name="STR_PROP_3" type="VARCHAR(512)"/>
+            <column name="INT_PROP_1" type="INT"/>
+            <column name="INT_PROP_2" type="INT"/>
+            <column name="LONG_PROP_1" type="BIGINT"/>
+            <column name="LONG_PROP_2" type="BIGINT"/>
+            <column name="DEC_PROP_1" type="DECIMAL(13, 4)"/>
+            <column name="DEC_PROP_2" type="DECIMAL(13, 4)"/>
+            <column name="BOOL_PROP_1" type="BOOLEAN"/>
+            <column name="BOOL_PROP_2" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME" type="VARCHAR(120)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_NAME" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="JOB_GROUP" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(250)"/>
+            <column name="NEXT_FIRE_TIME" type="BIGINT"/>
+            <column name="PREV_FIRE_TIME" type="BIGINT"/>
+            <column name="PRIORITY" type="INT"/>
+            <column name="TRIGGER_STATE" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRIGGER_TYPE" type="VARCHAR(8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_TIME" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_TIME" type="BIGINT"/>
+            <column name="CALENDAR_NAME" type="VARCHAR(200)"/>
+            <column name="MISFIRE_INSTR" type="SMALLINT"/>
+            <column name="JOB_DATA" type="BLOB"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ACTION">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ACTION_AUDIT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="AUDIT_TYPE" type="VARCHAR(31)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ENTITY_ID" type="VARCHAR(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR(255)"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+            <column name="FROM_QUEUE" type="VARCHAR(255)"/>
+            <column name="TO_QUEUE" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_AGREEMENT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="TYPE" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_AUTHENTICATION_ENTRY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CERTIFICATE_ID" type="VARCHAR(255)"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="PASSWD" type="VARCHAR(255)"/>
+            <column name="AUTH_ROLES" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORIGINAL_USER" type="VARCHAR(255)"/>
+            <column name="BACKEND" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_BACK_RCRITERIA_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="FK_BACKEND_FILTER" type="INT"/>
+            <column name="PRIORITY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_BACKEND_FILTER">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BACKEND_NAME" type="VARCHAR(255)"/>
+            <column name="PRIORITY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_BACKEND_FILTER_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="BACKEND_NAME" type="VARCHAR(255)"/>
+            <column name="BACKENDNAME_MOD" type="BOOLEAN"/>
+            <column name="PRIORITY" type="INT"/>
+            <column name="INDEX_MOD" type="BOOLEAN"/>
+            <column name="ROUTINGCRITERIAS_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_BUSINESS_PROCESS">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_CERTIFICATE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CERTIFICATE_ALIAS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP"/>
+            <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP"/>
+            <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CERTIFICATE_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_CONFIGURATION">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="FK_BUSINESSPROCESSES" type="INT"/>
+            <column name="FK_PARTY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_CONFIGURATION_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="EXPRESSION" type="VARCHAR(255)"/>
+            <column name="EXPRESSION_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_CONFIGURATION_RAW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CONFIGURATION_DATE" type="DATETIME"/>
+            <column name="XML" type="BLOB"/>
+            <column defaultValue="" name="DESCRIPTION" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_CONFIGURATION_RAW_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="CONFIGURATION_DATE" type="TIMESTAMP"/>
+            <column name="CONFIGURATIONDATE_MOD" type="BOOLEAN"/>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_MOD" type="VARCHAR(255)"/>
+            <column name="XML" type="BLOB"/>
+            <column name="XML_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ERROR">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CATEGORY" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_LANG" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_VALUE" type="VARCHAR(255)"/>
+            <column name="ERROR_CODE" type="VARCHAR(255)"/>
+            <column name="ERROR_DETAIL" type="CLOB"/>
+            <column name="ORIGIN" type="VARCHAR(255)"/>
+            <column name="REF_TO_MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="SEVERITY" type="VARCHAR(255)"/>
+            <column name="SHORT_DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="SIGNALMESSAGE_ID" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ERROR_HANDLING">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BUSINESS_ERROR_NOTIFY_CONSUMER" type="BOOLEAN"/>
+            <column name="BUSINESS_ERROR_NOTIFY_PRODUCER" type="BOOLEAN"/>
+            <column name="DELIVERY_FAIL_NOTIFY_PRODUCER" type="BOOLEAN"/>
+            <column name="ERROR_AS_RESPONSE" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ERROR_LOG">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ERROR_CODE" type="VARCHAR(255)"/>
+            <column name="ERROR_DETAIL" type="VARCHAR(255)"/>
+            <column name="ERROR_SIGNAL_MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="MESSAGE_IN_ERROR_ID" type="VARCHAR(255)"/>
+            <column name="MSH_ROLE" type="VARCHAR(255)"/>
+            <column name="NOTIFIED" type="DATETIME"/>
+            <column name="TIME_STAMP" type="DATETIME"/>
+        </createTable>
+
+
+        <createTable tableName="TB_JOIN_PAYLOAD_PROFILE">
+            <column name="FK_PAYLOAD" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_PROFILE" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_JOIN_PROCESS_INIT_PARTY">
+            <column name="PROCESS_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PARTY_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_JOIN_PROCESS_LEG">
+            <column name="PROCESS_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LEG_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_JOIN_PROCESS_RESP_PARTY">
+            <column name="PROCESS_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PARTY_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_JOIN_PROPERTY_SET">
+            <column name="PROPERTY_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SET_FK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_LEG">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="COMPRESS_PAYLOADS" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_ACTION" type="INT"/>
+            <column name="FK_MPC" type="INT"/>
+            <column name="FK_ERROR_HANDLING" type="INT"/>
+            <column name="FK_PAYLOAD_PROFILE" type="INT"/>
+            <column name="FK_PROPERTY_SET" type="INT"/>
+            <column name="FK_RECEPTION_AWARENESS" type="INT"/>
+            <column name="FK_RELIABILITY" type="INT"/>
+            <column name="FK_SECURITY" type="INT"/>
+            <column name="FK_SERVICE" type="INT"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_LEG_TB_MPC">
+            <column name="LegConfiguration_ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partyMpcMap_ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partyMpcMap_KEY" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_MEP">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="LEG_COUNT" type="INT"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MEP_BINDING">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_ACKNW">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="FROM_VALUE" type="VARCHAR(255)"/>
+            <column name="TO_VALUE" type="VARCHAR(255)"/>
+            <column name="CREATE_DATE" type="DATETIME"/>
+            <column name="CREATE_USER" type="VARCHAR(255)"/>
+            <column name="ACKNOWLEDGE_DATE" type="DATETIME"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_ACKNW_PROP">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PROPERTY_NAME" type="VARCHAR(255)"/>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
+            <column name="FK_MSG_ACKNOWLEDGE" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_INFO">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REF_TO_MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="TIME_STAMP" type="DATETIME"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_LOG">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DELETED" type="DATETIME"/>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="MESSAGE_STATUS" type="VARCHAR(255)"/>
+            <column name="MESSAGE_TYPE" type="VARCHAR(255)"/>
+            <column name="MPC" type="VARCHAR(255)"/>
+            <column name="MSH_ROLE" type="VARCHAR(255)"/>
+            <column name="NEXT_ATTEMPT" type="DATETIME"/>
+            <column name="NOTIFICATION_STATUS" type="VARCHAR(255)"/>
+            <column name="RECEIVED" type="DATETIME"/>
+            <column name="RESTORED" type="DATETIME"/>
+            <column name="DOWNLOADED" type="DATETIME"/>
+            <column name="FAILED" type="DATETIME"/>
+            <column name="SEND_ATTEMPTS" type="INT"/>
+            <column name="SEND_ATTEMPTS_MAX" type="INT"/>
+            <column name="BACKEND" type="VARCHAR(255)"/>
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+            <column name="CREATED_BY" type="VARCHAR(255)"/>
+            <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_PROPERTY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DATATYPE" type="VARCHAR(255)"/>
+            <column name="KEY_" type="VARCHAR(255)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="REQUIRED_" type="BOOLEAN"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGE_PROPERTY_SET">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGING">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ID" type="VARCHAR(255)"/>
+            <column name="SIGNAL_MESSAGE_ID" type="INT"/>
+            <column name="USER_MESSAGE_ID" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MESSAGING_LOCK">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_TYPE" type="VARCHAR(10)"/>
+            <column name="MESSAGE_RECEIVED" type="DATETIME"/>
+            <column name="MESSAGE_STATE" type="VARCHAR(10)"/>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+            <column name="INITIATOR" type="VARCHAR(255)"/>
+            <column name="MPC" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_MPC">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DEFAULT_MPC" type="BOOLEAN"/>
+            <column name="IS_ENABLED" type="BOOLEAN"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="QUALIFIED_NAME" type="VARCHAR(255)"/>
+            <column name="RETENTION_DOWNLOADED" type="INT"/>
+            <column name="RETENTION_UNDOWNLOADED" type="INT"/>
+            <column name="FK_CONFIGURATION" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PART_INFO">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="BINARY_DATA" type="LONGBLOB"/>
+            <column name="DESCRIPTION_LANG" type="VARCHAR(255)"/>
+            <column name="DESCRIPTION_VALUE" type="VARCHAR(255)"/>
+            <column name="HREF" type="VARCHAR(255)"/>
+            <column name="IN_BODY" type="BOOLEAN"/>
+            <column name="SCHEMA_LOCATION" type="VARCHAR(255)"/>
+            <column name="SCHEMA_NAMESPACE" type="VARCHAR(255)"/>
+            <column name="SCHEMA_VERSION" type="VARCHAR(255)"/>
+            <column name="PAYLOADINFO_ID" type="INT"/>
+            <column name="FILENAME" type="VARCHAR(255)"/>
+            <column name="MIME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="PASSWORD" type="VARCHAR(255)"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="ENDPOINT" type="VARCHAR(255)"/>
+            <column name="ENDPOINT_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="PASSWORD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_ID">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="TYPE" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="TO_ID" type="INT"/>
+            <column name="FROM_ID" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_ID_TYPE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_ID_TYPE_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="VALUE_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_IDENTIFIER">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PARTY_ID" type="VARCHAR(255)"/>
+            <column name="FK_PARTY_ID_TYPE" type="INT"/>
+            <column name="FK_PARTY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PARTY_IDENTIFIER_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="FK_PARTY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PAYLOAD">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="CID" type="VARCHAR(255)"/>
+            <column name="IN_BODY" type="BOOLEAN"/>
+            <column name="MAX_SIZE" type="INT"/>
+            <column name="MIME_TYPE" type="VARCHAR(255)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="REQUIRED_" type="BOOLEAN"/>
+            <column name="SCHEMA_FILE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PAYLOAD_PROFILE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MAX_SIZE" type="INT"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_PROCESS">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_AGREEMENT" type="INT"/>
+            <column name="FK_INITIATOR_ROLE" type="INT"/>
+            <column name="FK_MEP" type="INT"/>
+            <column name="FK_MEP_BINDING" type="INT"/>
+            <column name="FK_RESPONDER_ROLE" type="INT"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+            <column name="USE_DYNAMIC_INITIATOR" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USE_DYNAMIC_RESPONDER" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_PROPERTY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="MESSAGEPROPERTIES_ID" type="INT"/>
+            <column name="PARTPROPERTIES_ID" type="INT"/>
+            <column name="TYPE" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_RAWENVELOPE_LOG">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USERMESSAGE_ID_FK" type="INT"/>
+            <column name="SIGNALMESSAGE_ID_FK" type="INT"/>
+            <column name="RAW_XML" type="LONGTEXT"/>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_RECEIPT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_RECEIPT_DATA">
+            <column name="RECEIPT_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RAW_XML" type="LONGTEXT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_RECEPTION_AWARENESS">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="DUPLICATE_DETECTION" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="RETRY_COUNT" type="INT"/>
+            <column name="RETRY_TIMEOUT" type="INT"/>
+            <column name="STRATEGY" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_RELIABILITY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NON_REPUDIATION" type="BOOLEAN"/>
+            <column name="REPLY_PATTERN" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_REV_CHANGES">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="REV" type="INT"/>
+            <column name="AUDIT_ORDER" type="INT"/>
+            <column name="ENTIY_NAME" type="VARCHAR(255)"/>
+            <column name="GROUP_NAME" type="VARCHAR(255)"/>
+            <column name="ENTITY_ID" type="VARCHAR(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_REV_INFO">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="TIMESTAMP" type="BIGINT"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ROUTING_CRITERIA">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="EXPRESSION" type="VARCHAR(255)"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FK_BACKEND_FILTER" type="INT"/>
+            <column name="PRIORITY" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_ROUTING_CRITERIA_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="EXPRESSION" type="VARCHAR(255)"/>
+            <column name="EXPRESSION_MOD" type="BOOLEAN"/>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_SECURITY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="POLICY" type="VARCHAR(255)"/>
+            <column name="SIGNATURE_METHOD" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_SEND_ATTEMPT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="START_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="END_DATE" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ERROR" type="VARCHAR(255)"/>
+        </createTable>
+
+
+        <createTable tableName="TB_SERVICE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="SERVICE_TYPE" type="VARCHAR(255)"/>
+            <column name="VALUE" type="VARCHAR(255)"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_SIGNAL_MESSAGE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PULL_REQUEST_MPC" type="VARCHAR(255)"/>
+            <column name="messageInfo_ID_PK" type="INT"/>
+            <column name="receipt_ID_PK" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_USER">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="USER_ENABLED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OPTLOCK" type="INT"/>
+            <column defaultValueNumeric="0" name="ATTEMPT_COUNT" type="INT"/>
+            <column name="SUSPENSION_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ENABLED" type="BOOLEAN"/>
+            <column name="ACTIVE_MOD" type="BOOLEAN"/>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="EMAIL_MOD" type="BOOLEAN"/>
+            <column name="USER_PASSWORD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+            <column name="OPTLOCK" type="INT"/>
+            <column name="VERSION_MOD" type="BOOLEAN"/>
+            <column name="ROLES_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_MESSAGE">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="COLLABORATION_INFO_ACTION" type="VARCHAR(255)"/>
+            <column name="AGREEMENT_REF_PMODE" type="VARCHAR(255)"/>
+            <column name="AGREEMENT_REF_TYPE" type="VARCHAR(255)"/>
+            <column name="AGREEMENT_REF_VALUE" type="VARCHAR(255)"/>
+            <column name="COLL_INFO_CONVERS_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SERVICE_TYPE" type="VARCHAR(255)"/>
+            <column name="SERVICE_VALUE" type="VARCHAR(255)"/>
+            <column name="MPC" type="VARCHAR(255)"/>
+            <column name="FROM_ROLE" type="VARCHAR(255)"/>
+            <column name="TO_ROLE" type="VARCHAR(255)"/>
+            <column name="messageInfo_ID_PK" type="INT"/>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_ROLE_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="ROLE_NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="USERS_MOD" type="BOOLEAN"/>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_ROLES">
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_USER_ROLES_AUD">
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ID" type="INT"/>
+            <column name="ROLE_ID" type="INT"/>
+        </createTable>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_01" tableName="QRTZ_BLOB_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, CALENDAR_NAME" constraintName="PRIMARY_02" tableName="QRTZ_CALENDARS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_03" tableName="QRTZ_CRON_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, ENTRY_ID" constraintName="PRIMARY_04" tableName="QRTZ_FIRED_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, JOB_NAME, JOB_GROUP" constraintName="PRIMARY_05" tableName="QRTZ_JOB_DETAILS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, LOCK_NAME" constraintName="PRIMARY_06" tableName="QRTZ_LOCKS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_GROUP" constraintName="PRIMARY_07" tableName="QRTZ_PAUSED_TRIGGER_GRPS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, INSTANCE_NAME, LAST_CHECKIN_TIME, CHECKIN_INTERVAL" constraintName="PRIMARY_08" tableName="QRTZ_SCHEDULER_STATE"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_09" tableName="QRTZ_SIMPLE_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_10" tableName="QRTZ_SIMPROP_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="SCHED_NAME, TRIGGER_NAME, TRIGGER_GROUP" constraintName="PRIMARY_11" tableName="QRTZ_TRIGGERS"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_BACK_RCRITERIA_AUD" tableName="TB_BACK_RCRITERIA_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_BACKEND_FILTER_AUD" tableName="TB_BACKEND_FILTER_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_CONFIGURATION_AUD" tableName="TB_CONFIGURATION_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_CONFIGURATION_RAW_AUD" tableName="TB_CONFIGURATION_RAW_AUD"/>
+
+
+        <addPrimaryKey columnNames="LegConfiguration_ID_PK, partyMpcMap_KEY" constraintName="PRIMARY_12" tableName="TB_LEG_TB_MPC"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_AUD" tableName="TB_PARTY_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_ID_TYPE_AUD" tableName="TB_PARTY_ID_TYPE_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_PARTY_IDENTIFIER_AUD" tableName="TB_PARTY_IDENTIFIER_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_ROUTING_CRITERIA_AUD" tableName="TB_ROUTING_CRITERIA_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_USER_AUD" tableName="TB_USER_AUD"/>
+
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_USER_ROLE_AUD" tableName="TB_USER_ROLE_AUD"/>
+
+
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
+
+
+        <addUniqueConstraint columnNames="CERTIFICATE_ALIAS, CERTIFICATE_TYPE" constraintName="CERTIFICATE_ALIAS" tableName="TB_CERTIFICATE"/>
+
+
+        <addUniqueConstraint columnNames="MESSAGE_ID" constraintName="IDX_MESSAGE_LOCK_UNIQUE_ID" tableName="TB_MESSAGING_LOCK"/>
+
+
+        <addUniqueConstraint columnNames="partyMpcMap_ID_PK" constraintName="UK_7h5nw411791gf4lg1yh6si1wd" tableName="TB_LEG_TB_MPC"/>
+
+
+        <addUniqueConstraint columnNames="MESSAGE_ID" constraintName="UK_ecrraoe83o1uqq0dn9424x7ln" tableName="TB_MESSAGE_INFO"/>
+
+
+        <addUniqueConstraint columnNames="ROLE_NAME" constraintName="UQ_ROLE_NAME" tableName="TB_USER_ROLE"/>
+
+
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="USER_NAME" tableName="TB_USER"/>
+
+
+        <createIndex indexName="FK_13k2eptp1ejp5othy1njrg3p8" tableName="TB_LEG">
+            <column name="FK_RELIABILITY"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_277j83lgsq3nmwyhsw637ynd8" tableName="TB_MEP_BINDING">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_2h31p0a2y6weg2grh70c9cyva" tableName="TB_PROPERTY">
+            <column name="MESSAGEPROPERTIES_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_2sw6knalor7rpr04ye0o2r9ap" tableName="TB_ROLE">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_3emt6xaglh7676lpckiy6r1vb" tableName="TB_PROCESS">
+            <column name="FK_RESPONDER_ROLE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_3sgaxwfr5koe3oldbbd62siwq" tableName="TB_RECEPTION_AWARENESS">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_433rgm5a446t59q6jkb885l3x" tableName="TB_MESSAGING">
+            <column name="USER_MESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_53gp9smtemqcuio8o9t10narm" tableName="TB_MESSAGING">
+            <column name="SIGNAL_MESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_62dt1y6o7od1t0iqn7dow8uq5" tableName="TB_CONFIGURATION">
+            <column name="FK_BUSINESSPROCESSES"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_6hldnnqkmh6lui555t4n9fjiv" tableName="TB_ACTION">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_70m9kqpqab3rgk90wsuv9vn64" tableName="TB_AGREEMENT">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_7p1g7sqvli1sj6k7vphjo9irc" tableName="TB_PROCESS">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_8nccae214mvs1kh5sgcj3y5oy" tableName="TB_RECEIPT_DATA">
+            <column name="RECEIPT_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_8q319stwm1noijpb3jfl8jri8" tableName="TB_MPC">
+            <column name="FK_CONFIGURATION"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_9hpmoewlitivcl8rw1joccuau" tableName="TB_LEG">
+            <column name="FK_SECURITY"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_BACKEND_FILTER_AUD_REV" tableName="TB_BACKEND_FILTER_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_BACK_RCRITERIA_AUD" tableName="TB_BACK_RCRITERIA_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_CONFIGURATION_AUD_REV" tableName="TB_CONFIGURATION_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_CONFIGURATION_RAW_AUD" tableName="TB_CONFIGURATION_RAW_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_MSG_ACK_PROP_MSG_ACK" tableName="TB_MESSAGE_ACKNW_PROP">
+            <column name="FK_MSG_ACKNOWLEDGE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_PARTY_AUD_REV" tableName="TB_PARTY_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_PARTY_IDENTIFIER_AUD_REV" tableName="TB_PARTY_IDENTIFIER_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_PARTY_ID_TYPE_AUD_REV" tableName="TB_PARTY_ID_TYPE_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_REV_CHANGES_REV" tableName="TB_REV_CHANGES">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_ROUTING_CRITERIA_AUD_REV" tableName="TB_ROUTING_CRITERIA_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_USER_AUD_REV" tableName="TB_USER_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_USER_ROLE_AUD" tableName="TB_USER_ROLE_AUD">
+            <column name="REV"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_advgudix024irqpuge4dl9iqf" tableName="TB_PARTY_ID_TYPE">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_am7bwsm92se3nvclbeiep5vwg" tableName="TB_LEG">
+            <column name="FK_PAYLOAD_PROFILE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_asjdl57budmuwmj3611969jpp" tableName="TB_JOIN_PROCESS_INIT_PARTY">
+            <column name="PARTY_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_be4xc1069qyw2klhvm3xmg26s" tableName="TB_USER_MESSAGE">
+            <column name="messageInfo_ID_PK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_c08ljjwi4p9dx1rjtcdbe1sfu" tableName="TB_SIGNAL_MESSAGE">
+            <column name="messageInfo_ID_PK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_cloyy9k391vhsup85iwr8ixiv" tableName="TB_PARTY">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_cwylvg6ernwba61mo3yagmkg8" tableName="TB_PROPERTY">
+            <column name="PARTPROPERTIES_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_d9el0l8u1gm5oeu67nqrkherq" tableName="TB_PAYLOAD">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_desr6xtdp1lp41d5venlhf4bc" tableName="TB_PARTY_IDENTIFIER">
+            <column name="FK_PARTY"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_dgtgtg41yrfebyysmkyi1gcaa" tableName="TB_LEG">
+            <column name="FK_ACTION"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_e7ehghifrns83w6v3tps7vpii" tableName="TB_PARTY_IDENTIFIER">
+            <column name="FK_PARTY_ID_TYPE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_eiy3f9ahx0kdx4wxoi6prytn9" tableName="TB_MESSAGE_PROPERTY_SET">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_ekk8pn89y50g22kd3gpja7j39" tableName="TB_JOIN_PROPERTY_SET">
+            <column name="PROPERTY_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_epmxkh8u7jnw5pbyj47sirmlh" tableName="TB_MEP">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_fkftd5orw2etiu4ghmn3mhx9i" tableName="TB_PARTY_ID">
+            <column name="FROM_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_fpxbdc63gifacrd4qb6afrqyw" tableName="TB_JOIN_PROCESS_LEG">
+            <column name="PROCESS_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_fwrq81cctu2nh0qeprmpvker9" tableName="TB_SECURITY">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_g20eow5f2cke3avsrg6qpkuxv" tableName="TB_JOIN_PAYLOAD_PROFILE">
+            <column name="FK_PROFILE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_gh98q07kcjl7wdaon9ggifqux" tableName="TB_JOIN_PROCESS_LEG">
+            <column name="LEG_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_hlb2y2prpm52ssynn22h3swsr" tableName="TB_JOIN_PROCESS_RESP_PARTY">
+            <column name="PROCESS_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_i7gei6bdr2cdn61hdoplxbu7p" tableName="TB_ROUTING_CRITERIA">
+            <column name="FK_BACKEND_FILTER"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_j0y3fcediqx5but8jbscy59kw" tableName="TB_LEG">
+            <column name="FK_ERROR_HANDLING"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_j7lab5n5suklcldqhxn8jl2jo" tableName="TB_PROCESS">
+            <column name="FK_MEP"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_kjanlcdeap7nirdigr7rt7p4v" tableName="TB_PROCESS">
+            <column name="FK_AGREEMENT"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_kkhxs36rw15aygpn00nvvgyxg" tableName="TB_SERVICE">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_kv2c5k41apdlvc6i18ar57abe" tableName="TB_LEG">
+            <column name="FK_SERVICE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_kyn19swm143m96in317sr97h2" tableName="TB_JOIN_PROCESS_RESP_PARTY">
+            <column name="PARTY_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_l1mmhs1tbt8pw7vx5teuytjvj" tableName="TB_ERROR_HANDLING">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_le4rxnki51eak6xetc7fq8sri" tableName="TB_LEG">
+            <column name="FK_PROPERTY_SET"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_lnnplhiawxx7wlt43ye3pej00" tableName="TB_RELIABILITY">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_lynom7rxkc0t1xfl0nowxpeuj" tableName="TB_PAYLOAD_PROFILE">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_m6uu2y6g9buet3o3k1n4qxwec" tableName="TB_SIGNAL_MESSAGE">
+            <column name="receipt_ID_PK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_mk54xe43f3hokh7fjl3w66efk" tableName="TB_JOIN_PROPERTY_SET">
+            <column name="SET_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_orddltv2g3lq79eu48c2mc2fy" tableName="TB_LEG_TB_MPC">
+            <column name="partyMpcMap_KEY"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_ot8jfkotd6qu7jrdaptrohbn8" tableName="TB_JOIN_PROCESS_INIT_PARTY">
+            <column name="PROCESS_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_ppvxyurcvfy71fvejw9bosghw" tableName="TB_LEG">
+            <column name="FK_MPC"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_prrcmi4grm4txhfsfnfhgq1k1" tableName="TB_ERROR">
+            <column name="SIGNALMESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_q0l3ej6ruqcfutru2securq9l" tableName="TB_JOIN_PAYLOAD_PROFILE">
+            <column name="FK_PAYLOAD"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_q1jfsxfoj3nl7hii3co7bu0fr" tableName="TB_PROCESS">
+            <column name="FK_INITIATOR_ROLE"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_q3gapfc1e7hfbgmo0nebj4k1n" tableName="TB_CONFIGURATION">
+            <column name="FK_PARTY"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_r2swpqof7636vveqt0dxl89dp" tableName="TB_LEG">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_rj8h1b65vnjjgyfcjnvswkguh" tableName="TB_MESSAGE_PROPERTY">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_rlbjstvo4gpdcp6ysv9mofqxj" tableName="TB_LEG">
+            <column name="FK_RECEPTION_AWARENESS"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_signalmsg_id_fk_rawenv_id" tableName="TB_RAWENVELOPE_LOG">
+            <column name="SIGNALMESSAGE_ID_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_tp11d8fg7cv1fwf5xkvwqpp34" tableName="TB_PROCESS">
+            <column name="FK_MEP_BINDING"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_tq6lbn3mp0vsfc6qqu7wxy54g" tableName="TB_PART_INFO">
+            <column name="PAYLOADINFO_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_usermsg_id_fk_rawenv_id" tableName="TB_RAWENVELOPE_LOG">
+            <column name="USERMESSAGE_ID_FK"/>
+        </createIndex>
+
+
+        <createIndex indexName="FK_ylub8lptgvsch02mj71euuil" tableName="TB_PARTY_ID">
+            <column name="TO_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_MESSAGE_INFO_R_T_M_ID" tableName="TB_MESSAGE_INFO">
+            <column name="REF_TO_MESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_MESSAGE_LOCK_SEARCH" tableName="TB_MESSAGING_LOCK">
+            <column name="MESSAGE_TYPE"/>
+            <column name="MESSAGE_STATE"/>
+            <column name="INITIATOR"/>
+            <column name="MPC"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_MESSAGE_LOG_M_STATUS" tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_STATUS"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_MESSAGE_LOG_RECEIVED" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_PARTY_ID_VALUE" tableName="TB_PARTY_ID">
+            <column name="VALUE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_PROPERTY_NAME" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_INST_JOB_REQ_RCVRY" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="INSTANCE_NAME"/>
+            <column name="REQUESTS_RECOVERY"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_JG" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="JOB_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_J_G" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="JOB_NAME"/>
+            <column name="JOB_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_TG" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_TRIG_INST_NAME" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="INSTANCE_NAME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_FT_T_G" tableName="QRTZ_FIRED_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_NAME"/>
+            <column name="TRIGGER_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_J_GRP" tableName="QRTZ_JOB_DETAILS">
+            <column name="SCHED_NAME"/>
+            <column name="JOB_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_J_REQ_RECOVERY" tableName="QRTZ_JOB_DETAILS">
+            <column name="SCHED_NAME"/>
+            <column name="REQUESTS_RECOVERY"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_C" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="CALENDAR_NAME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_G" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_J" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="JOB_NAME"/>
+            <column name="JOB_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_JG" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="JOB_GROUP"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_NEXT_FIRE_TIME" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="NEXT_FIRE_TIME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_NFT_MISFIRE" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="MISFIRE_INSTR"/>
+            <column name="NEXT_FIRE_TIME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_NFT_ST" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_STATE"/>
+            <column name="NEXT_FIRE_TIME"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_NFT_ST_MISFIRE" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="MISFIRE_INSTR"/>
+            <column name="NEXT_FIRE_TIME"/>
+            <column name="TRIGGER_STATE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_NFT_ST_MISFIRE_GRP" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="MISFIRE_INSTR"/>
+            <column name="NEXT_FIRE_TIME"/>
+            <column name="TRIGGER_GROUP"/>
+            <column name="TRIGGER_STATE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_N_G_STATE" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_GROUP"/>
+            <column name="TRIGGER_STATE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_N_STATE" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_NAME"/>
+            <column name="TRIGGER_GROUP"/>
+            <column name="TRIGGER_STATE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_QRTZ_T_STATE" tableName="QRTZ_TRIGGERS">
+            <column name="SCHED_NAME"/>
+            <column name="TRIGGER_STATE"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_RAWENVELOPE_MESSAGE_ID" tableName="TB_RAWENVELOPE_LOG">
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_ROLE_ID" tableName="TB_USER_ROLES">
+            <column name="ROLE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_TB_ML_MSG_ID" tableName="TB_MESSAGE_LOG">
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_ROLES">
+            <column name="USER_ID"/>
+        </createIndex>
+
+
+        <createIndex indexName="UK_bpeflt902ybu9nshba2fjpv9d" tableName="TB_MESSAGE_LOG">
+            <column name="MSH_ROLE"/>
+        </createIndex>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_RELIABILITY" baseTableName="TB_LEG" constraintName="FK_13k2eptp1ejp5othy1njrg3p8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_RELIABILITY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_MEP_BINDING" constraintName="FK_277j83lgsq3nmwyhsw637ynd8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="MESSAGEPROPERTIES_ID" baseTableName="TB_PROPERTY" constraintName="FK_2h31p0a2y6weg2grh70c9cyva" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_ROLE" constraintName="FK_2sw6knalor7rpr04ye0o2r9ap" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_RESPONDER_ROLE" baseTableName="TB_PROCESS" constraintName="FK_3emt6xaglh7676lpckiy6r1vb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_ROLE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_RECEPTION_AWARENESS" constraintName="FK_3sgaxwfr5koe3oldbbd62siwq" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="USER_MESSAGE_ID" baseTableName="TB_MESSAGING" constraintName="FK_433rgm5a446t59q6jkb885l3x" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SIGNAL_MESSAGE_ID" baseTableName="TB_MESSAGING" constraintName="FK_53gp9smtemqcuio8o9t10narm" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESSES" baseTableName="TB_CONFIGURATION" constraintName="FK_62dt1y6o7od1t0iqn7dow8uq5" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_ACTION" constraintName="FK_6hldnnqkmh6lui555t4n9fjiv" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_AGREEMENT" constraintName="FK_70m9kqpqab3rgk90wsuv9vn64" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="partyMpcMap_ID_PK" baseTableName="TB_LEG_TB_MPC" constraintName="FK_7h5nw411791gf4lg1yh6si1wd" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MPC"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_PROCESS" constraintName="FK_7p1g7sqvli1sj6k7vphjo9irc" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="RECEIPT_ID" baseTableName="TB_RECEIPT_DATA" constraintName="FK_8nccae214mvs1kh5sgcj3y5oy" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_RECEIPT"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_CONFIGURATION" baseTableName="TB_MPC" constraintName="FK_8q319stwm1noijpb3jfl8jri8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_CONFIGURATION"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_SECURITY" baseTableName="TB_LEG" constraintName="FK_9hpmoewlitivcl8rw1joccuau" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_SECURITY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACKEND_FILTER_AUD" constraintName="FK_BACKEND_FILTER_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_BACK_RCRITERIA_AUD" constraintName="FK_BACK_RCRITERIA_AUD" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" baseTableName="QRTZ_BLOB_TRIGGERS" constraintName="FK_BLOB_TRIGGERS" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" referencedTableName="QRTZ_TRIGGERS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_AUD" constraintName="FK_CONFIGURATION_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_RAW_AUD" constraintName="FK_CONFIGURATION_RAW_AUD" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" baseTableName="QRTZ_CRON_TRIGGERS" constraintName="FK_CRON_TRIGGERS" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" referencedTableName="QRTZ_TRIGGERS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP" constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_AUD" constraintName="FK_PARTY_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_IDENTIFIER_AUD" constraintName="FK_PARTY_IDENTIFIER_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_ID_TYPE_AUD" constraintName="FK_PARTY_ID_TYPE_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_REV_CHANGES" constraintName="FK_REV_CHANGES_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_ROUTING_CRITERIA_AUD" constraintName="FK_ROUTING_CRITERIA_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" baseTableName="QRTZ_SIMPLE_TRIGGERS" constraintName="FK_SIMPLE_TRIGGERS" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" referencedTableName="QRTZ_TRIGGERS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" baseTableName="QRTZ_SIMPROP_TRIGGERS" constraintName="FK_SIMPROP_TRIGGERS" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP" referencedTableName="QRTZ_TRIGGERS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SCHED_NAME,JOB_NAME,JOB_GROUP" baseTableName="QRTZ_TRIGGERS" constraintName="FK_TRIGGERS" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="SCHED_NAME,JOB_NAME,JOB_GROUP" referencedTableName="QRTZ_JOB_DETAILS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_AUD" constraintName="FK_USER_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_ROLE_AUD" constraintName="FK_USER_ROLE_AUD" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_PARTY_ID_TYPE" constraintName="FK_advgudix024irqpuge4dl9iqf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PAYLOAD_PROFILE" baseTableName="TB_LEG" constraintName="FK_am7bwsm92se3nvclbeiep5vwg" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PAYLOAD_PROFILE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PARTY_FK" baseTableName="TB_JOIN_PROCESS_INIT_PARTY" constraintName="FK_asjdl57budmuwmj3611969jpp" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="messageInfo_ID_PK" baseTableName="TB_USER_MESSAGE" constraintName="FK_be4xc1069qyw2klhvm3xmg26s" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="messageInfo_ID_PK" baseTableName="TB_SIGNAL_MESSAGE" constraintName="FK_c08ljjwi4p9dx1rjtcdbe1sfu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_PARTY" constraintName="FK_cloyy9k391vhsup85iwr8ixiv" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PARTPROPERTIES_ID" baseTableName="TB_PROPERTY" constraintName="FK_cwylvg6ernwba61mo3yagmkg8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PART_INFO"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_PAYLOAD" constraintName="FK_d9el0l8u1gm5oeu67nqrkherq" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PARTY" baseTableName="TB_PARTY_IDENTIFIER" constraintName="FK_desr6xtdp1lp41d5venlhf4bc" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_ACTION" baseTableName="TB_LEG" constraintName="FK_dgtgtg41yrfebyysmkyi1gcaa" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_ACTION"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PARTY_ID_TYPE" baseTableName="TB_PARTY_IDENTIFIER" constraintName="FK_e7ehghifrns83w6v3tps7vpii" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY_ID_TYPE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_MESSAGE_PROPERTY_SET" constraintName="FK_eiy3f9ahx0kdx4wxoi6prytn9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PROPERTY_FK" baseTableName="TB_JOIN_PROPERTY_SET" constraintName="FK_ekk8pn89y50g22kd3gpja7j39" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_PROPERTY_SET"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_MEP" constraintName="FK_epmxkh8u7jnw5pbyj47sirmlh" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FROM_ID" baseTableName="TB_PARTY_ID" constraintName="FK_fkftd5orw2etiu4ghmn3mhx9i" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PROCESS_FK" baseTableName="TB_JOIN_PROCESS_LEG" constraintName="FK_fpxbdc63gifacrd4qb6afrqyw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_SECURITY" constraintName="FK_fwrq81cctu2nh0qeprmpvker9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PROFILE" baseTableName="TB_JOIN_PAYLOAD_PROFILE" constraintName="FK_g20eow5f2cke3avsrg6qpkuxv" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PAYLOAD"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="LEG_FK" baseTableName="TB_JOIN_PROCESS_LEG" constraintName="FK_gh98q07kcjl7wdaon9ggifqux" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_LEG"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PROCESS_FK" baseTableName="TB_JOIN_PROCESS_RESP_PARTY" constraintName="FK_hlb2y2prpm52ssynn22h3swsr" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BACKEND_FILTER" baseTableName="TB_ROUTING_CRITERIA" constraintName="FK_i7gei6bdr2cdn61hdoplxbu7p" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BACKEND_FILTER"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_ERROR_HANDLING" baseTableName="TB_LEG" constraintName="FK_j0y3fcediqx5but8jbscy59kw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_ERROR_HANDLING"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_MEP" baseTableName="TB_PROCESS" constraintName="FK_j7lab5n5suklcldqhxn8jl2jo" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MEP"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_AGREEMENT" baseTableName="TB_PROCESS" constraintName="FK_kjanlcdeap7nirdigr7rt7p4v" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_AGREEMENT"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_SERVICE" constraintName="FK_kkhxs36rw15aygpn00nvvgyxg" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_SERVICE" baseTableName="TB_LEG" constraintName="FK_kv2c5k41apdlvc6i18ar57abe" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_SERVICE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PARTY_FK" baseTableName="TB_JOIN_PROCESS_RESP_PARTY" constraintName="FK_kyn19swm143m96in317sr97h2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_ERROR_HANDLING" constraintName="FK_l1mmhs1tbt8pw7vx5teuytjvj" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PROPERTY_SET" baseTableName="TB_LEG" constraintName="FK_le4rxnki51eak6xetc7fq8sri" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_PROPERTY_SET"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_RELIABILITY" constraintName="FK_lnnplhiawxx7wlt43ye3pej00" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_PAYLOAD_PROFILE" constraintName="FK_lynom7rxkc0t1xfl0nowxpeuj" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="receipt_ID_PK" baseTableName="TB_SIGNAL_MESSAGE" constraintName="FK_m6uu2y6g9buet3o3k1n4qxwec" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_RECEIPT"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SET_FK" baseTableName="TB_JOIN_PROPERTY_SET" constraintName="FK_mk54xe43f3hokh7fjl3w66efk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_PROPERTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="LegConfiguration_ID_PK" baseTableName="TB_LEG_TB_MPC" constraintName="FK_nylcxsy1f9cn3tdskh97h8pt1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_LEG"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="partyMpcMap_KEY" baseTableName="TB_LEG_TB_MPC" constraintName="FK_orddltv2g3lq79eu48c2mc2fy" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PROCESS_FK" baseTableName="TB_JOIN_PROCESS_INIT_PARTY" constraintName="FK_ot8jfkotd6qu7jrdaptrohbn8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_MPC" baseTableName="TB_LEG" constraintName="FK_ppvxyurcvfy71fvejw9bosghw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MPC"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SIGNALMESSAGE_ID" baseTableName="TB_ERROR" constraintName="FK_prrcmi4grm4txhfsfnfhgq1k1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PAYLOAD" baseTableName="TB_JOIN_PAYLOAD_PROFILE" constraintName="FK_q0l3ej6ruqcfutru2securq9l" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PAYLOAD_PROFILE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_INITIATOR_ROLE" baseTableName="TB_PROCESS" constraintName="FK_q1jfsxfoj3nl7hii3co7bu0fr" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_ROLE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_PARTY" baseTableName="TB_CONFIGURATION" constraintName="FK_q3gapfc1e7hfbgmo0nebj4k1n" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_PARTY"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_LEG" constraintName="FK_r2swpqof7636vveqt0dxl89dp" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_BUSINESSPROCESS" baseTableName="TB_MESSAGE_PROPERTY" constraintName="FK_rj8h1b65vnjjgyfcjnvswkguh" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_BUSINESS_PROCESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_RECEPTION_AWARENESS" baseTableName="TB_LEG" constraintName="FK_rlbjstvo4gpdcp6ysv9mofqxj" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_RECEPTION_AWARENESS"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="SIGNALMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG" constraintName="FK_signalmsg_id_fk_rawenv_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_SIGNAL_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="FK_MEP_BINDING" baseTableName="TB_PROCESS" constraintName="FK_tp11d8fg7cv1fwf5xkvwqpp34" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MEP_BINDING"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="PAYLOADINFO_ID" baseTableName="TB_PART_INFO" constraintName="FK_tq6lbn3mp0vsfc6qqu7wxy54g" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="USERMESSAGE_ID_FK" baseTableName="TB_RAWENVELOPE_LOG" constraintName="FK_usermsg_id_fk_rawenv_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="TO_ID" baseTableName="TB_PARTY_ID" constraintName="FK_ylub8lptgvsch02mj71euuil" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_MESSAGE"/>
+
+        <createView
+                replaceIfExists="true"
+                viewName="V_AUDIT_DETAIL">
+            SELECT
+            DISTINCT rc.GROUP_NAME as AUDIT_TYPE ,
+            rc.MODIFICATION_TYPE as ACTION_TYPE,
+            ri.USER_NAME as USER_NAME ,
+            ri.REVISION_DATE as AUDIT_DATE,
+            CAST(rc.ENTITY_ID AS CHAR(255)) AS ID,
+            CAST(ri.ID AS CHAR(11)) AS REV_ID
+            FROM TB_REV_INFO ri, TB_REV_CHANGES rc
+            WHERE ri.ID=rc.REV
+            UNION
+            SELECT aa.AUDIT_TYPE,aa.MODIFICATION_TYPE,aa.USER_NAME,aa.REVISION_DATE,aa.ENTITY_ID,'1' FROM
+            TB_ACTION_AUDIT aa
+        </createView>
+
+        <createView
+                replaceIfExists="true"
+                viewName="V_AUDIT">
+            SELECT *
+            FROM V_AUDIT_DETAIL VAD
+            ORDER BY VAD.AUDIT_DATE DESC;
+        </createView>
+
+        <sqlFile path="./scripts/mysql_procedure.sql" endDelimiter="$$" dbms="mysql" relativeToChangelogFile="true"/>
+
+        <createProcedure dbms="oracle">
+            create or replace procedure get_next(
+            message_type_in in VARCHAR2,
+            initiator_in in VARCHAR2,
+            mpc_in in VARCHAR2,
+            message_id_out out VARCHAR2)
+            is
+            resource_busy    EXCEPTION;
+            pragma exception_init( resource_busy, -54 );
+            begin
+            for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK)
+            loop
+            begin
+            select TB_MESSAGING_LOCK.MESSAGE_ID into message_id_out from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
+            exit;
+            exception
+            when resource_busy then
+            message_id_out:=null;
+            end;
+            end loop;
+            exception
+            when NO_DATA_FOUND then
+            message_id_out:=null;
+            end;
+        </createProcedure>
+
+    </changeSet>
+
+    <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta-1">
+        <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="1" maxValue="9999999999999999999999999999"
+                        incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
+    </changeSet>
+
+    <changeSet author="thomas dussart" id="EDELIVERY-2144">
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_ADMIN"/>
+        </insert>
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="2" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_USER"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="USER_NAME" value="admin"/>
+            <column name="USER_PASSWORD" value="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="2" type="INT"/>
+            <column name="USER_NAME" value="user"/>
+            <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="1" type="INT"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="2" type="INT"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="2" type="INT"/>
+            <column name="ROLE_ID" value="2" type="INT"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

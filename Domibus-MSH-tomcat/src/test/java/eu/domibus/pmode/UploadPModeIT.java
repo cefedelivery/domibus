@@ -3,13 +3,11 @@ package eu.domibus.pmode;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,28 +37,16 @@ public class UploadPModeIT extends AbstractIT {
 
     private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
 
-    private static boolean initialized;
+
     @Autowired
     PModeResource adminGui;
 
     @Autowired
-    PModeProvider pModeProvider;
-
-    @Autowired
     ConfigurationDAO configurationDAO;
 
-    /*@Autowired
-    PModeProvider pModeDao;*/
     @Autowired()
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
-
-    @Before
-    public void before() {
-        if (!initialized) {
-            initialized = true;
-        }
-    }
 
 
     /**
@@ -76,7 +62,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
             //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
             //String response = adminGui.uploadFileHandler(pModeContent);
-            pModeProvider.updatePModes(IOUtils.toByteArray(is));
+            pModeProvider.updatePModes(IOUtils.toByteArray(is), "description");
             //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
@@ -99,7 +85,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
 
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
@@ -230,7 +216,7 @@ public class UploadPModeIT extends AbstractIT {
             String pmodeName = "domibus-configuration-long-names.xml";
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
             MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());

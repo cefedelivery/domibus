@@ -3,9 +3,10 @@ package eu.domibus.common.model.logging;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 
@@ -14,38 +15,41 @@ import java.util.Date;
  * @since 3.3
  */
 public class MessageLogInfo {
+    // order of the fields is important for CSV generation
 
-    private String conversationId;
+    private final String messageId;
 
     private String fromPartyId;
 
     private String toPartyId;
 
-    private String originalSender;
-
-    private String finalRecipient;
-
-    private String refToMessageId;
-
-    private final String messageId;
-
     private final MessageStatus messageStatus;
 
     private final NotificationStatus notificationStatus;
 
-    private final MSHRole mshRole;
-
-    private final MessageType messageType;
-
-    private final Date deleted;
-
     private final Date received;
+
+    private final MSHRole mshRole;
 
     private final int sendAttempts;
 
     private final int sendAttemptsMax;
 
     private final Date nextAttempt;
+
+    private String conversationId;
+
+    private final MessageType messageType;
+
+    private final MessageSubtype messageSubtype;
+
+    private final Date deleted;
+
+    private String originalSender;
+
+    private String finalRecipient;
+
+    private String refToMessageId;
 
     private final Date failed;
 
@@ -69,7 +73,8 @@ public class MessageLogInfo {
                           final String finalRecipient,
                           final String refToMessageId,
                           final Date failed,
-                          final Date restored) {
+                          final Date restored,
+                          final MessageSubtype messageSubtype) {
         //message log information.
         this.messageId = messageId;
         this.messageStatus = messageStatus;
@@ -91,6 +96,7 @@ public class MessageLogInfo {
         // rest of message log information.
         this.failed = failed;
         this.restored = restored;
+        this.messageSubtype = messageSubtype;
     }
 
 
@@ -191,6 +197,10 @@ public class MessageLogInfo {
         return restored;
     }
 
+    public MessageSubtype getMessageSubtype() {
+        return messageSubtype;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -202,20 +212,21 @@ public class MessageLogInfo {
         return new EqualsBuilder()
                 .append(sendAttempts, that.sendAttempts)
                 .append(sendAttemptsMax, that.sendAttemptsMax)
-                .append(conversationId, that.conversationId)
+                .append(messageSubtype, that.messageSubtype)
+                .append(messageId, that.messageId)
                 .append(fromPartyId, that.fromPartyId)
                 .append(toPartyId, that.toPartyId)
+                .append(messageStatus, that.messageStatus)
+                .append(notificationStatus, that.notificationStatus)
+                .append(received, that.received)
+                .append(mshRole, that.mshRole)
+                .append(nextAttempt, that.nextAttempt)
+                .append(conversationId, that.conversationId)
+                .append(messageType, that.messageType)
+                .append(deleted, that.deleted)
                 .append(originalSender, that.originalSender)
                 .append(finalRecipient, that.finalRecipient)
                 .append(refToMessageId, that.refToMessageId)
-                .append(messageId, that.messageId)
-                .append(messageStatus, that.messageStatus)
-                .append(notificationStatus, that.notificationStatus)
-                .append(mshRole, that.mshRole)
-                .append(messageType, that.messageType)
-                .append(deleted, that.deleted)
-                .append(received, that.received)
-                .append(nextAttempt, that.nextAttempt)
                 .append(failed, that.failed)
                 .append(restored, that.restored)
                 .isEquals();
@@ -224,24 +235,25 @@ public class MessageLogInfo {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(conversationId)
+                .append(messageId)
                 .append(fromPartyId)
                 .append(toPartyId)
-                .append(originalSender)
-                .append(finalRecipient)
-                .append(refToMessageId)
-                .append(messageId)
                 .append(messageStatus)
                 .append(notificationStatus)
-                .append(mshRole)
-                .append(messageType)
-                .append(deleted)
                 .append(received)
+                .append(mshRole)
                 .append(sendAttempts)
                 .append(sendAttemptsMax)
                 .append(nextAttempt)
+                .append(conversationId)
+                .append(messageType)
+                .append(deleted)
+                .append(originalSender)
+                .append(finalRecipient)
+                .append(refToMessageId)
                 .append(failed)
                 .append(restored)
+                .append(messageSubtype)
                 .toHashCode();
     }
 }

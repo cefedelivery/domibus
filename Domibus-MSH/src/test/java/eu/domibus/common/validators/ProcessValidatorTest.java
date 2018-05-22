@@ -5,7 +5,7 @@ import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.impl.PullProcessStatus;
-import eu.domibus.util.PojoInstaciatorUtil;
+import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.junit.Test;
 
 import java.util.List;

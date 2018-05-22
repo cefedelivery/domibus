@@ -13,6 +13,8 @@ import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {SecurityService} from "../security/security.service";
+import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
 
 @Component({
   moduleId: module.id,
@@ -46,6 +48,10 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   editedUser: UserResponseRO;
   test: boolean = false;
+
+  static readonly USER_URL: string = "rest/user";
+  static readonly USER_USERS_URL: string = UserComponent.USER_URL + "/users";
+  static readonly USER_CSV_URL: string = UserComponent.USER_URL + "/csv";
 
   constructor(private http: Http,
               private userService: UserService,
@@ -105,6 +111,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.getUsers();
 
     this.getUserRoles();
+
+    if(this.users.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error("Maximum number of rows reached for downloading CSV");
+    }
   }
 
   getUsers(): void {
@@ -282,23 +292,49 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  saveDialog() {
+  saveDialog(withDownloadCSV: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
-        this.http.put('rest/user/users', JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+        this.http.put(UserComponent.USER_USERS_URL, JSON.stringify(this.users), {headers: headers}).subscribe(res => {
           this.getUsers();
           this.getUserRoles();
           this.alertService.success("The operation 'update users' completed successfully.", false);
+          if(withDownloadCSV) {
+            DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+          }
         }, err => {
           this.getUsers();
           this.getUserRoles();
           this.alertService.error("The operation 'update users' not completed successfully.", false);
         });
+      } else {
+        if(withDownloadCSV) {
+          DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+        }
       }
     });
+  }
+
+  /**
+   * Method that checks if CSV Button export can be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  isSaveAsCSVButtonEnabled() : boolean {
+    return this.users.length < AlertComponent.MAX_COUNT_CSV;
+  }
+
+  /**
+   * Saves the content of the datatable into a CSV file
+   */
+  saveAsCSV() {
+    if(this.isDirty()) {
+      this.saveDialog(true);
+    } else {
+      DownloadService.downloadNative(UserComponent.USER_CSV_URL);
+    }
   }
 
   isDirty(): boolean {

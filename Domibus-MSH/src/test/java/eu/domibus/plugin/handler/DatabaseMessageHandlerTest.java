@@ -23,6 +23,7 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -125,7 +126,10 @@ public class DatabaseMessageHandlerTest {
     private PropertyProfileValidator propertyProfileValidator;
 
     @Injectable
-    BackendMessageValidator backendMessageValidator;
+    private BackendMessageValidator backendMessageValidator;
+
+    @Injectable
+    private MessagingLockService messagingLockService;
 
     @Injectable
     AuthUtils authUtils;
@@ -263,7 +267,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
         }};
 
@@ -343,8 +347,7 @@ public class DatabaseMessageHandlerTest {
             assertEquals("TC2Leg1", message.getCollaborationInfo().getAction());
             assertEquals("bdx:noprocess", message.getCollaborationInfo().getService().getValue());
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            UserMessageLog userMessageLog;
-            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, MessageStatus.READY_TO_PULL.toString(), anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
             userMessageService.scheduleSending(MESS_ID);
             times = 0;
         }};
@@ -403,7 +406,7 @@ public class DatabaseMessageHandlerTest {
             pModeProvider.getLegConfiguration(anyString);
             compressionService.handleCompression(withAny(new UserMessage()), withAny(new LegConfiguration()));
             messagingService.storeMessage(withAny(new Messaging()), MSHRole.SENDING);
-            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString);
+            userMessageLogService.save(messageId, anyString, anyString, MSHRole.SENDING.toString(), anyInt, anyString, anyString, anyString, anyString, anyString);
         }};
 
     }
@@ -1150,28 +1153,6 @@ public class DatabaseMessageHandlerTest {
     }
 
     @Test
-    public void testGetMessageStatusOk() throws Exception {
-        new Expectations() {{
-
-            authUtils.isUnsecureLoginAllowed();
-            result = false;
-
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            result = MessageStatus.ACKNOWLEDGED;
-
-        }};
-
-        final MessageStatus msgStatus = dmh.getMessageStatus(MESS_ID);
-
-        new Verifications() {{
-            authUtils.hasAdminRole();
-            userMessageLogDao.getMessageStatus(MESS_ID);
-            msgStatus.equals(MessageStatus.ACKNOWLEDGED);
-        }};
-
-    }
-
-    @Test
     public void testGetErrorsForMessageOk() throws Exception {
         new Expectations() {{
 
@@ -1200,4 +1181,52 @@ public class DatabaseMessageHandlerTest {
 
     }
 
+    @Test
+    public void testGetStatus() {
+        // Given
+        new Expectations() {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            userMessageLogDao.getMessageStatus(MESS_ID);
+            result = MessageStatus.ACKNOWLEDGED;
+        }};
+
+        // When
+        final MessageStatus status = dmh.getStatus(MESS_ID);
+
+        // Then
+        new Verifications() {{
+            authUtils.hasUserOrAdminRole();
+            Assert.assertEquals(MessageStatus.ACKNOWLEDGED, status);
+        }};
+    }
+
+    @Test
+    public void testGetStatusAccessDenied() {
+        // Given
+        new Expectations(dmh) {{
+            authUtils.isUnsecureLoginAllowed();
+            result = false;
+
+            dmh.validateOriginalUser((UserMessage)any, anyString, anyString);
+            result = new AccessDeniedException("");
+        }};
+
+        // When
+        MessageStatus status = null;
+        try {
+            status = dmh.getStatus(MESS_ID);
+            Assert.fail("It should throw " + AccessDeniedException.class.getCanonicalName());
+        } catch (AccessDeniedException ex) {
+            // Then
+            MessageStatus finalStatus = status;
+            new Verifications() {{
+                authUtils.hasUserOrAdminRole();
+                Assert.assertNull(finalStatus);
+            }};
+        }
+
+
+    }
 }

@@ -5,6 +5,8 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.*;
@@ -26,6 +28,7 @@ import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -34,7 +37,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -59,21 +61,54 @@ public class NotificationListenerService implements MessageListener, JmsListener
     private BackendConnectorDelegate backendConnectorDelegate;
 
     @Autowired
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     private Queue backendNotificationQueue;
     private BackendConnector.Mode mode;
     private BackendConnector backendConnector;
+    private List<NotificationType> requiredNotifications = null;
 
-    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode) {
+    /* Default notifications sent to the plugins, depending on their MODE (PULL or PUSH)
+     * On PULL mode we do not notify for MESSAGE_SEND_SUCCESS and
+     * MESSAGE_STATUS_CHANGE as there are too many notifications that pile up in the queue
+     * This default list is used only when there is no requiredNotifications list declared in the plugin xml
+     */
+    @PostConstruct
+    protected void initRequiredNotificationsList() {
+        if (requiredNotifications != null) {
+            LOG.debug("Required notifications already initialized [{}]", requiredNotifications);
+            return;
+        }
+        requiredNotifications = new ArrayList<>();
+        requiredNotifications.add(NotificationType.MESSAGE_RECEIVED);
+        requiredNotifications.add(NotificationType.MESSAGE_SEND_FAILURE);
+        requiredNotifications.add(NotificationType.MESSAGE_RECEIVED_FAILURE);
+
+        if (BackendConnector.Mode.PUSH.equals(getMode())) {
+            requiredNotifications.add(NotificationType.MESSAGE_SEND_SUCCESS);
+            requiredNotifications.add(NotificationType.MESSAGE_STATUS_CHANGE);
+        }
+    }
+
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode ) {
         backendNotificationQueue = queue;
         this.mode = mode;
+    }
+
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications ) {
+        backendNotificationQueue = queue;
+        this.mode = mode;
+        this.requiredNotifications = requiredNotifications;
     }
 
     public void setBackendConnector(final BackendConnector backendConnector) {
         this.backendConnector = backendConnector;
     }
 
+    @MDCKey({DomibusLogger.MDC_MESSAGE_ID})
     @Transactional
     public void onMessage(final Message message) {
         if (!authUtils.isUnsecureLoginAllowed()) {
@@ -82,6 +117,12 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         try {
             final String messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
+
+            final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
+            LOG.debug("Processing message ID [{}] for domain [{}]", messageId, domainCode);
+            domainContextProvider.setCurrentDomain(domainCode);
+
             final NotificationType notificationType = NotificationType.valueOf(message.getStringProperty(MessageConstants.NOTIFICATION_TYPE));
 
             LOG.info("Received message with messageId [" + messageId + "] and notification type [" + notificationType + "]");
@@ -181,7 +222,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     protected Collection<String> browseQueue(final NotificationType notificationType, final String finalRecipient) {
 
         final Collection<String> result = new ArrayList<>();
-        final String strMaxPendingMessagesRetrieveCount = domibusProperties.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
+        final String strMaxPendingMessagesRetrieveCount = domibusPropertyProvider.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
         LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
@@ -287,4 +328,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     public BackendConnector.Mode getMode() {
         return this.mode;
     }
+
+    @Override
+    public List<NotificationType> getRequiredNotificationTypeList() {return this.requiredNotifications; }
 }

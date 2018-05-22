@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
@@ -12,17 +14,19 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.core.crypto.DomibusPropertyProviderImpl;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,19 +39,15 @@ import org.mockito.Spy;
 import javax.xml.bind.JAXBContext;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.UUID;
+import java.util.*;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -107,10 +107,13 @@ public class DynamicDiscoveryPModeProviderTest {
     ConfigurationDAO configurationDAO;
 
     @Mock
-    CryptoService cryptoService;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
-    @Spy
-    private Properties domibusProperties;
+    @Mock
+    DomainContextProvider domainProvider;
+
+    @Mock
+    private DomibusPropertyProviderImpl domibusPropertyProvider;
 
     @Before
     public void initMocks() {
@@ -142,7 +145,7 @@ public class DynamicDiscoveryPModeProviderTest {
         assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServiceOASIS);
 
         /* test selection of dynamic discovery client Peppol compliant*/
-        doReturn(DynamicDiscoveryClientSpecification.PEPPOL.getName()).when(domibusProperties).getProperty(anyString(), anyString());
+        doReturn(DynamicDiscoveryClientSpecification.PEPPOL.getName()).when(domibusPropertyProvider).getProperty(anyString(), anyString());
         dynamicDiscoveryPModeProvider.init();
         assertTrue(dynamicDiscoveryPModeProvider.dynamicDiscoveryService instanceof DynamicDiscoveryServicePEPPOL);
     }
@@ -169,8 +172,8 @@ public class DynamicDiscoveryPModeProviderTest {
 
         EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, ADDRESS, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(cryptoService).getTrustStore();
-        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        doReturn(KeyStore.getInstance(KeyStore.getDefaultType())).when(multiDomainCertificateProvider).getTrustStore(DomainService.DEFAULT_DOMAIN);
+        doReturn(true).when(multiDomainCertificateProvider).addCertificate(null, testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
         Party expectedParty = new Party();
@@ -179,8 +182,8 @@ public class DynamicDiscoveryPModeProviderTest {
         Identifier expectedIdentifier = new Identifier();
         expectedIdentifier.setPartyId(EXPECTED_COMMON_NAME);
         PartyIdType expectedPartyIType = new PartyIdType();
-        expectedPartyIType.setName(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
-        expectedPartyIType.setValue(dynamicDiscoveryPModeProvider.URN_TYPE_VALUE);
+        expectedPartyIType.setName(dynamicDiscoveryServiceOASIS.getPartyIdType());
+        expectedPartyIType.setValue(dynamicDiscoveryServiceOASIS.getPartyIdType());
         expectedIdentifier.setPartyIdType(expectedPartyIType);
         expectedParty.getIdentifiers().add(expectedIdentifier);
         assertTrue(dynamicDiscoveryPModeProvider.getConfiguration().getBusinessProcesses().getParties().contains(expectedParty));
@@ -195,8 +198,8 @@ public class DynamicDiscoveryPModeProviderTest {
 
         EndpointInfo testDataEndpoint = buildAS4EndpointWithArguments(PROCESSIDENTIFIER_ID, PROCESSIDENTIFIER_SCHEME, null, ALIAS_CN_AVAILABLE);
         doReturn(testDataEndpoint).when(dynamicDiscoveryServiceOASIS).lookupInformation(UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
-        doReturn(null).when(cryptoService).getTrustStore();
-        doReturn(true).when(cryptoService).addCertificate(testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
+        doReturn(null).when(multiDomainCertificateProvider).getTrustStore(null);
+        doReturn(true).when(multiDomainCertificateProvider).addCertificate(null, testDataEndpoint.getCertificate(), EXPECTED_COMMON_NAME, true);
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
         dynamicDiscoveryPModeProvider.doDynamicDiscovery(userMessage, MSHRole.SENDING);
     }
@@ -320,6 +323,19 @@ public class DynamicDiscoveryPModeProviderTest {
         certificateService.extractCommonName(testData);
     }
 
+    @Test
+    public void testFindPartyIdByServiceAndAction() {
+        // Given
+        String service = "service";
+        String action = "action";
+
+        // When
+        List<String> partyIdByServiceAndAction = dynamicDiscoveryPModeProvider.findPartyIdByServiceAndAction(service, action);
+
+        // Then
+        Assert.assertEquals(Collections.emptyList(), partyIdByServiceAndAction);
+    }
+
 
     /**
      * Build UserMessage for testing. Only the fields that are mandatory for the testing doDynamicThings are filled.
@@ -413,29 +429,5 @@ public class DynamicDiscoveryPModeProviderTest {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Load certificate with alias from JKS and return as {@code X509Certificate}.
-     * The password is always 1234 in this test.
-     *
-     * @param filePath
-     * @param alias
-     * @return
-     */
-    private X509Certificate loadCertificateFromJKS(String filePath, String alias) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
-
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fileInputStream, "1234".toCharArray());
-
-            Certificate cert = keyStore.getCertificate(alias);
-
-            return (X509Certificate) cert;
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }

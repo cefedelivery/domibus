@@ -1,8 +1,6 @@
 package eu.domibus.pki;
 
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -45,7 +43,7 @@ public class CRLServiceImplTest {
     //    @Test
     public void testCreateCertificate() throws Exception {
         BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
-        X509Certificate certificate = pkiUtil.createCertificate(serial, Arrays.asList(new String[]{"test.crl", "test1.crl"}));
+        X509Certificate certificate = pkiUtil.createCertificate(serial, Arrays.asList("test.crl", "test1.crl"));
         System.out.println(certificate);
         FileUtils.writeByteArrayToFile(new File("c:\\work\\certificates_self_signed\\mycertificate.cer"), certificate.getEncoded());
     }
@@ -61,14 +59,19 @@ public class CRLServiceImplTest {
         BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
         final String crlUrl1 = "http://domain1.crl";
         final String crlUrl2 = "http://domain2.crl";
-        final List<String> crlUrlList = Arrays.asList(new String[]{crlUrl1, crlUrl2});
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+
+        //stubbing static method
+        new MockUp<CRLUrlType>() {
+            @Mock
+            boolean isURLSupported(final String crlURL) {
+                return true;
+            }
+        };
 
         new Expectations(crlService) {{
             crlUtil.getCrlDistributionPoints(certificate);
             returns(crlUrlList, crlUrlList);
-
-            crlUtil.isURLSupported(anyString);
-            returns(true, true);
 
             crlService.isCertificateRevoked(certificate, crlUrl1);
             returns(false, true, false);
@@ -91,9 +94,9 @@ public class CRLServiceImplTest {
 
     @Test(expected = DomibusCRLException.class)
     public void testIsCertificateRevokedWithNotSupportedCRLURLs(@Injectable final X509Certificate certificate) throws Exception {
-        final String crlUrl1 = "ldap://domain1.crl";
-        final String crlUrl2 = "ldap://domain2.crl";
-        final List<String> crlUrlList = Arrays.asList(new String[]{crlUrl1, crlUrl2});
+        final String crlUrl1 = "ldap2://domain1.crl";
+        final String crlUrl2 = "ldap2://domain2.crl";
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
 
         new Expectations(crlService) {{
             crlUtil.getCrlDistributionPoints(certificate);

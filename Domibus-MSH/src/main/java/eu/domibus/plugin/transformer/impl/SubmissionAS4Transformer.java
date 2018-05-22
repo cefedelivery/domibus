@@ -183,7 +183,7 @@ public class SubmissionAS4Transformer {
             }
         }
         if (partInfo.getFileName() != null) {
-            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), ""));
+            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), null));
         }
         Submission.Description description = null;
         if(partInfo.getDescription() != null){

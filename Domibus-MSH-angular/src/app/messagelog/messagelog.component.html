@@ -1,4 +1,4 @@
-<h1 id="messagesheader_id">Messages</h1>
+<page-header id="messagesheader_id">Messages</page-header>
 
 <div class="selectionCriteria">
   <md-card>
@@ -66,7 +66,7 @@
                    #finalRecipient="ngModel" id="finalrecipient_id">
           </md-input-container>
 
-          <md2-datepicker placeholder="Sent From:"
+          <md2-datepicker placeholder="Sent From:" appClearInvalid
                           [(ngModel)]="filter.receivedFrom"
                           name="receivedFrom"
                           [type]="'datetime'"
@@ -74,7 +74,7 @@
                           (change)='onTimestampFromChange($event)'
                           #timestampControl="ngModel" id="receivedfrom_id" *ngIf="advancedSearch">
           </md2-datepicker>
-          <md2-datepicker placeholder="Received Up To:"
+          <md2-datepicker placeholder="Received Up To:" appClearInvalid
                           [(ngModel)]="filter.receivedTo"
                           name="receivedTo"
                           [min]="timestampToMinDate"
@@ -83,6 +83,11 @@
                           [type]="'datetime'"
                           #timestampControl="ngModel" id="receivedto_id" *ngIf="advancedSearch">
           </md2-datepicker>
+          <ng-container *ngIf="advancedSearch">
+            <input type="checkbox" name="showTestMessages" [(ngModel)]="filter.isTestMessage"
+                   #showTestMessages="ngModel" id="showTestMessages_id">
+            <span>Show Only Test Messages</span>
+          </ng-container>
 
           <div class="searchArea">
             <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
@@ -108,6 +113,10 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
+    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id" md-tooltip="Export as CSV">
+      <img src="assets/images/exportCSV.svg" width="30" height="30">
+    </button>
   </div>
 
   <ngx-datatable

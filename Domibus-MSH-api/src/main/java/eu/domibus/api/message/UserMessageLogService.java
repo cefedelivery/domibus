@@ -8,6 +8,8 @@ public interface UserMessageLogService {
 
     void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint);
 
+    void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service);
+
     void setMessageAsDeleted(String messageId);
 
     void setMessageAsDownloaded(String messageId);
@@ -19,6 +21,4 @@ public interface UserMessageLogService {
     void setMessageAsWaitingForReceipt(String messageId);
 
     void setMessageAsSendFailure(String messageId);
-
-    void setIntermediaryPullStatus(String messageId);
 }

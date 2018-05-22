@@ -37,6 +37,10 @@
         <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
     </bean>
 
+    <bean id="domibusReadyInterceptor" class="eu.domibus.ebms3.receiver.DomibusReadyInterceptor">
+        <property name="before" value="eu.domibus.ebms3.receiver.SetPolicyInInterceptor"/>
+    </bean>
+
     <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor">
         <property name="prettyLogging" value="true"/>
         <property name="showBinaryContent" value="false"/>
@@ -44,16 +48,18 @@
     </bean>
 
     <bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
-        <property name="securityEncryptionProp" ref="trustStoreProperties"/>
+        <property name="crypto" ref="Wss4JMultiDomainCryptoProvider"/>
+    </bean>
+
+    <bean id="setDomainInInterceptor" class="eu.domibus.ebms3.receiver.SetDomainInInterceptor">
+
     </bean>
 
     <!--Interceptors to enable SwA encryption for Dispatch/WebServiceProvider implementations-->
     <bean id="setPolicyInInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
-        <property name="jaxbContext" ref="jaxbContextEBMS"/>
         <property name="messageLegConfigurationFactory" ref="serverInMessageLegConfigurationFactory"/>
     </bean>
     <bean id="setPolicyInInterceptorClient" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
-        <property name="jaxbContext" ref="jaxbContextEBMS"/>
         <property name="messageLegConfigurationFactory" ref="userMessageLegConfigurationFactory"/>
     </bean>
 
@@ -73,6 +79,11 @@
         <constructor-arg ref="cxf"/>
     </bean>
 
+    <bean id="Wss4JMultiDomainCryptoProvider" class="eu.domibus.core.crypto.Wss4JMultiDomainCryptoProvider"/>
+
+    <!-- Passwordcallback for private key access -->
+    <bean id="keystorePasswordCallback" class="eu.domibus.ebms3.security.SimpleKeystorePasswordCallback"/>
+
     <!--MSH Webservice endpoint-->
     <jaxws:endpoint id="msh" address="/msh">
         <jaxws:implementor>
@@ -81,8 +92,8 @@
         <jaxws:properties>
             <entry key="ws-security.cache.config.file" value="/cxf-ehcache.xml"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
-            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
+            <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <!--use the alias from the request-->
             <entry key="ws-security.encryption.username" value="useReqSigCert"/>
             <entry key="faultStackTraceEnabled" value="false"/>
@@ -90,13 +101,15 @@
         </jaxws:properties>
         <jaxws:inInterceptors>
             <!--<ref bean="logInbound"/>-->
+            <ref bean="domibusReadyInterceptor"/>
+            <ref bean="setDomainInInterceptor"/>
             <ref bean="trustSenderInterceptor"/>
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>
         </jaxws:inInterceptors>
 
         <jaxws:outInterceptors>
-            <ref bean="clearMDCInterceptor"/>
+           <ref bean="clearMDCInterceptor"/>
            <ref bean="setPolicyOutInterceptorServer"/>
            <ref bean="saveRawPulledMessageInterceptor"/>
         </jaxws:outInterceptors>
@@ -127,9 +140,9 @@
         </jaxws:handlers>
 
         <jaxws:properties>
-            <entry key="ws-security.signature.properties" value-ref="keystoreProperties"/>
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
-            <entry key="ws-security.encryption.properties" value-ref="trustStoreProperties"/>
+            <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

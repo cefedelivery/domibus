@@ -2,105 +2,95 @@ package eu.domibus.property;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.cxf.common.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
 /**
- * Created by Cosmin Baciu on 6/15/2016.
+ * @author Cosmin Baciu
+ * @since 3.2
  */
+@Service
 public class PropertyResolver {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyResolver.class);
 
-    private static final String START_DELIMITER = "{";
-    private static final String END_DELIMITER = "}";
-    private static final int RESOLVE_LEVEL = 3;
-
-    private String startDelimiter = START_DELIMITER;
-    private String endDelimiter = END_DELIMITER;
-    private Integer resolveLevel = RESOLVE_LEVEL;
 
     public String getResolvedProperty(String propertyName) {
         return getResolvedProperty(propertyName, new Properties(), true);
     }
 
-    public String getResolvedProperty(String propertyName, Properties properties, boolean includeSystemProperties) {
-        String result = propertyName;
+    /**
+     * Resolves a value against the system properties
+     *
+     * See {@link PropertyResolver#getResolvedValue(String, Properties, boolean)}
+     * @param value
+     * @return
+     */
+    public String getResolvedValue(String value) {
+        return getResolvedValue(value, new Properties(), true);
+    }
 
-        if(includeSystemProperties) {
+    /**
+     *
+     * Resolves a value against the provided properties
+     *
+     * <p>
+     * Eg: <br>
+     * Properties properties = new Properties(); <br>
+     * properties.setProperty("wsPluginLocation", "${pluginsDirectory}/ws"); <br>
+     * String resolvedProperty = propertyResolver.getResolvedProperty("wsPluginLocation", properties, false); <br>
+     * resolvedProperty is /home/plugins/ws
+     * </p>
+     *
+     * @param value The value to be resolved
+     * @param properties The properties which the provided value will be resolved against
+     * @param includeSystemProperties If true the system properties will be taken into account when resolving the value
+     * @return The resolved value
+     */
+    public String getResolvedValue(String value, Properties properties, boolean includeSystemProperties) {
+        String temporaryPropertyName = "_tempValue";
+        Properties tempProperties = new Properties();
+        tempProperties.setProperty(temporaryPropertyName , value);
+        if(properties != null) {
+            tempProperties.putAll(properties);
+        }
+        String resolvedProperty = getResolvedProperty(temporaryPropertyName, tempProperties, includeSystemProperties);
+        if(StringUtils.isEmpty(resolvedProperty)) {
+            LOG.debug("[{}] could not be resolved, returning the original value", value);
+            resolvedProperty = value;
+        }
+        return resolvedProperty;
+    }
+
+    public String getResolvedProperty(String propertyName, Properties properties, boolean includeSystemProperties) {
+        if(propertyName == null) {
+            return null;
+        }
+
+        if (includeSystemProperties) {
             LOG.debug("Adding the system properties to the available properties");
             properties.putAll(System.getProperties());
         }
 
-        for (int i = 0; i < resolveLevel; i++) {
-            result = getResolvedProperty(result, properties, startDelimiter, endDelimiter);
+        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+        propertySourcesPlaceholderConfigurer.setProperties(properties);
+        PropertiesPropertySource propertiesPropertySource = new PropertiesPropertySource("myproperties", properties);
+        final MutablePropertySources propertySources = new MutablePropertySources();
+        propertySources.addFirst(propertiesPropertySource);
+        PropertySourcesPropertyResolver propertySourcesPropertyResolver = new PropertySourcesPropertyResolver(propertySources);
+
+        String result = properties.getProperty(propertyName);
+        try {
+            result = propertySourcesPropertyResolver.getProperty(propertyName);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Could not resolve property [{}]: {}", propertyName, e.getMessage());
         }
         return result;
-    }
-
-    public String getResolvedProperty(String propertyName, Properties properties, String startVarDelimit, String endVarDelimit) {
-        if (StringUtils.isEmpty(propertyName)) {
-            LOG.debug("Could not resolve property: the property name is null");
-            return null;
-        }
-
-        startVarDelimit = "$" + startVarDelimit;
-        String value = propertyName;
-
-        int startIndex = value.indexOf(startVarDelimit);
-
-        while (startIndex != -1) {
-            int endIndex = value.indexOf(endVarDelimit, startIndex);
-
-            if (endIndex == -1) {
-                // Restore value in case the variable reference is not valid
-                value = propertyName;
-                LOG.debug("Could not resolve property [ " + propertyName + "]." + "Could not find the associated end index for start index " + startIndex );
-                break;
-            }
-
-            String variable = value.substring(startIndex + startVarDelimit.length(), endIndex);
-
-            String result = properties.getProperty(variable);
-            if (StringUtils.isEmpty(result)) {
-                result = startVarDelimit + variable + endVarDelimit;
-            }
-
-            LOG.debug("Property [" + variable + "] = [" + result + "]");
-
-            // Replace the variable reference with the variable value.
-            value = value.substring(0, startIndex) + result + value.substring(endIndex + endVarDelimit.length());
-            // Search for another variable reference.
-            startIndex = value.indexOf(startVarDelimit, startIndex + result.length());
-        }
-        LOG.debug("Property [" + propertyName + "] has been resolved to [" + value + "]");
-
-        return value;
-    }
-
-
-    public void setStartDelimiter(String startDelimiter) {
-        this.startDelimiter = startDelimiter;
-    }
-
-    public void setEndDelimiter(String endDelimiter) {
-        this.endDelimiter = endDelimiter;
-    }
-
-    public void setResolveLevel(Integer resolveLevel) {
-        this.resolveLevel = resolveLevel;
-    }
-
-    public String getStartDelimiter() {
-        return startDelimiter;
-    }
-
-    public Integer getResolveLevel() {
-        return resolveLevel;
-    }
-
-    public String getEndDelimiter() {
-        return endDelimiter;
     }
 }

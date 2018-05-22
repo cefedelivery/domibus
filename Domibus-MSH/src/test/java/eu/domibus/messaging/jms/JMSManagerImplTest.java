@@ -1,6 +1,8 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
@@ -30,10 +32,16 @@ public class JMSManagerImplTest {
     InternalJMSManager internalJmsManager;
 
     @Injectable
+    DomainContextProvider domainContextProvider;
+
+    @Injectable
     JMSDestinationMapper jmsDestinationMapper;
 
     @Injectable
     JMSMessageMapper jmsMessageMapper;
+
+    @Injectable
+    AuditService auditService;
 
     @Test
     public void testGetDestinations() throws Exception {
@@ -150,6 +158,10 @@ public class JMSManagerImplTest {
 
         new Verifications() {{
             internalJmsManager.deleteMessages(source, messageIds);
+            auditService.addJmsMessageDeletedAudit("1", source);
+            times = 1;
+            auditService.addJmsMessageDeletedAudit("2", source);
+            times = 1;
         }};
     }
 
@@ -163,6 +175,10 @@ public class JMSManagerImplTest {
 
         new Verifications() {{
             internalJmsManager.moveMessages(source, destination, messageIds);
+            auditService.addJmsMessageMovedAudit("1", source, destination);
+            times = 1;
+            auditService.addJmsMessageMovedAudit("2", source, destination);
+            times = 1;
         }};
     }
 }

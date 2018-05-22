@@ -1,0 +1,22 @@
+<div style="width:800px;max-width: 800px;">
+  <h1 id="pmodeheader_id" style="margin: 0px; ">{{pModeType}} PMode: {{pMode.metadata.description}}</h1>
+  <div class="selectionCriteria" style="width:100%;">
+    <md-card>
+      <md-card-content>
+        <div class="textarea">
+          <textarea #pmode_view_content [hidden]="!display" class="textarea" style="resize: none" readonly="readonly">{{pMode.content}}</textarea>
+        </div>
+        <table class="group-action-button" style="width: 100%; text-align: center;">
+          <tr>
+            <td>
+              <button md-raised-button color="primary" (click)="ok()">
+                <md-icon>check_circle</md-icon>
+                <span>Ok</span>
+              </button>
+            </td>
+          </tr>
+        </table>
+      </md-card-content>
+    </md-card>
+  </div>
+</div>

@@ -2,7 +2,7 @@ package eu.domibus.api.util.xml;
 
 
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

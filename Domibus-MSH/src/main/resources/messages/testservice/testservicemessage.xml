@@ -1,0 +1,45 @@
+<eu.domibus.plugin.Submission>
+  <fromParties>
+    <eu.domibus.plugin.Submission_-Party>
+      <partyId>_SENDER_</partyId>
+    </eu.domibus.plugin.Submission_-Party>
+  </fromParties>
+  <toParties>
+    <eu.domibus.plugin.Submission_-Party>
+      <partyId>_RECEIVER_</partyId>
+    </eu.domibus.plugin.Submission_-Party>
+  </toParties>
+  <payloads>
+    <eu.domibus.plugin.Submission_-Payload>
+      <contentId>cid:message</contentId>
+      <payloadDatahandler>
+        <dataSource class="javax.mail.util.ByteArrayDataSource">
+          <source>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxs
+bz4=</source>
+          <contentType>text/xml</contentType>
+          <name></name>
+        </dataSource>
+        <transferFlavors/>
+      </payloadDatahandler>
+      <payloadProperties class="list">
+        <eu.domibus.plugin.Submission_-TypedProperty>
+          <key>MimeType</key>
+          <value>text/xml</value>
+        </eu.domibus.plugin.Submission_-TypedProperty>
+      </payloadProperties>
+      <inBody>false</inBody>
+    </eu.domibus.plugin.Submission_-Payload>
+  </payloads>
+  <messageProperties class="list">
+    <eu.domibus.plugin.Submission_-TypedProperty>
+      <key>originalSender</key>
+      <value>urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</value>
+    </eu.domibus.plugin.Submission_-TypedProperty>
+    <eu.domibus.plugin.Submission_-TypedProperty>
+      <key>finalRecipient</key>
+      <value>urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</value>
+    </eu.domibus.plugin.Submission_-TypedProperty>
+  </messageProperties>
+  <action>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test</action>
+  <service>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service</service>
+</eu.domibus.plugin.Submission>

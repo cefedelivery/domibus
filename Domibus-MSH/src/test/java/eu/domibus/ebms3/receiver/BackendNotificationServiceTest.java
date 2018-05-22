@@ -2,6 +2,8 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.MessageStatus;
@@ -50,6 +52,9 @@ public class BackendNotificationServiceTest {
     JMSManager jmsManager;
 
     @Injectable
+    DomainContextProvider domainContextProvider;
+
+    @Injectable
     BackendFilterDao backendFilterDao;
 
     @Injectable
@@ -94,7 +99,7 @@ public class BackendNotificationServiceTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Injectable
-    Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Test
     public void testValidateSubmissionForUnsupportedNotificationType(@Injectable final Submission submission, @Injectable final UserMessage userMessage) throws Exception {
@@ -182,9 +187,9 @@ public class BackendNotificationServiceTest {
     }
 
     @Test
-    public void testValidateAndNotify(@Injectable final UserMessage userMessage,
-                                      @Injectable final String backendName,
-                                      @Injectable final NotificationType notificationType) throws Exception {
+    public void testValidateAndNotify(@Injectable final UserMessage userMessage) throws Exception {
+        String backendName = "backendName";
+        NotificationType notificationType = NotificationType.MESSAGE_RECEIVED;
         new Expectations(backendNotificationService) {{
             backendNotificationService.validateSubmission(userMessage, backendName, notificationType);
             result = null;
@@ -227,10 +232,14 @@ public class BackendNotificationServiceTest {
             @Injectable final Queue queue) throws Exception {
 
         final String backendName = "customPlugin";
-
+        List<NotificationType> requiredNotifications = new ArrayList<>();
+        requiredNotifications.add(NotificationType.MESSAGE_RECEIVED);
         new Expectations(backendNotificationService) {{
             backendNotificationService.getNotificationListener(backendName);
             result = notificationListener;
+
+            notificationListener.getRequiredNotificationTypeList();
+            result = requiredNotifications;
 
             notificationListener.getBackendNotificationQueue();
             result = queue;

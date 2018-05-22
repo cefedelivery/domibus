@@ -27,10 +27,10 @@ import static org.junit.Assert.assertEquals;
 public class BackendJMSImplTest {
 
     @Injectable
-    protected MessageRetriever<Submission> messageRetriever;
+    protected MessageRetriever messageRetriever;
 
     @Injectable
-    protected MessageSubmitter<Submission> messageSubmitter;
+    protected MessageSubmitter messageSubmitter;
 
     @Injectable
     private JmsOperations replyJmsTemplate;

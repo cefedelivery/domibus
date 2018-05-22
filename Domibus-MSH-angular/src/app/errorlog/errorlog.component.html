@@ -1,4 +1,4 @@
-﻿<h1 id="errorlogheader_id">Error Log</h1>
+﻿<page-header id="errorlogheader_id">Error Log</page-header>
 <div class="selectionCriteria">
   <md-card>
     <md-card-content>
@@ -16,14 +16,14 @@
             <input mdInput placeholder="Message Id" name="messageInErrorId" [(ngModel)]="filter.messageInErrorId"
                    #messageInErrorId="ngModel" id="messageid_id">
           </md-input-container>
-          <md2-datepicker placeholder="Error From:"
+          <md2-datepicker placeholder="Error From:" appClearInvalid
                           [(ngModel)]="filter.timestampFrom"
                           name="fromTimestmap"
                           [type]="'datetime'"
                           [max]="timestampFromMaxDate"
                           (change)='onTimestampFromChange($event)'
-                          #timestampControl="ngModel" id="fromtimestamp_id"></md2-datepicker>
-          <md2-datepicker placeholder="Error To:"
+                          id="fromtimestamp_id"></md2-datepicker>
+          <md2-datepicker placeholder="Error To:" appClearInvalid
                           [(ngModel)]="filter.timestampTo"
                           name="toTimestmap"
                           [min]="timestampToMinDate"
@@ -56,7 +56,7 @@
           </md-select>
 
 
-          <md2-datepicker placeholder="Notified From:"
+          <md2-datepicker placeholder="Notified From:" appClearInvalid
                           [(ngModel)]="filter.notifiedFrom"
                           name="notifiedFrom"
                           [type]="'datetime'"
@@ -64,7 +64,7 @@
                           (change)='onNotifiedFromChange($event)'
                           #timestampControl="ngModel" id="notifiedfrom_id"
                           *ngIf="advancedSearch"></md2-datepicker>
-          <md2-datepicker placeholder="Notified To:"
+          <md2-datepicker placeholder="Notified To:" appClearInvalid
                           [(ngModel)]="filter.notifiedTo"
                           name="notifiedTo"
                           [type]="'datetime'"
@@ -100,6 +100,10 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
+    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id" md-tooltip="Export as CSV">
+      <img src="assets/images/exportCSV.svg" width="30" height="30">
+    </button>
   </div>
 
 

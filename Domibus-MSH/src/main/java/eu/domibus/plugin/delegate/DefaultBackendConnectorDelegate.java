@@ -23,7 +23,7 @@ public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate
 
     @Override
     public void messageStatusChanged(BackendConnector backendConnector, MessageStatusChangeEvent event) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Notifying connector [{}] about status change event [{}]", backendConnector.getName(), event);
         }
         backendConnector.messageStatusChanged(event);
@@ -31,32 +31,8 @@ public class DefaultBackendConnectorDelegate implements BackendConnectorDelegate
 
     @Override
     public void messageReceiveFailed(BackendConnector backendConnector, MessageReceiveFailureEvent event) {
-        boolean newMessageReceiveFailureDefined = false;
-        try {
-            newMessageReceiveFailureDefined = isNewMessageReceiveFailureDefined(backendConnector);
-        } catch (Exception e) {
-            LOG.warn("Could not determine which variant of messageReceiveFailure method should be called. The deprecated messageReceiveFailure method will be called");
-        }
-        final String messageId = event.getMessageId();
-        if (newMessageReceiveFailureDefined) {
-            LOG.info("Calling messageReceiveFailed method");
-            backendConnector.messageReceiveFailed(event);
-        } else {
-            LOG.info("Calling deprecated messageReceiveFailed method");
-            backendConnector.messageReceiveFailed(messageId, event.getEndpoint());
-        }
+        LOG.info("Calling messageReceiveFailed method");
+        backendConnector.messageReceiveFailed(event);
     }
 
-    protected boolean isNewMessageReceiveFailureDefined(BackendConnector backendConnector) throws ClassNotFoundException {
-        final Class<?> pluginImplementationClass = classUtil.getTargetObjectClass(backendConnector);
-        boolean isNewMessageReceiveFailureDefined = true;
-        try {
-            pluginImplementationClass.getDeclaredMethod("messageReceiveFailed", MessageReceiveFailureEvent.class);
-        } catch (NoSuchMethodException e) {
-            LOG.debug("New messageReceiveFailed(MessageReceiveFailureEvent.class) is not defined");
-            isNewMessageReceiveFailureDefined = false;
-        }
-
-        return isNewMessageReceiveFailureDefined;
-    }
 }

@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
@@ -14,12 +15,16 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
 
@@ -53,9 +58,11 @@ public class UserManagementServiceImpl implements UserService {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
@@ -79,6 +86,9 @@ public class UserManagementServiceImpl implements UserService {
         return users;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public void saveUsers(List<eu.domibus.api.user.User> users) {
@@ -93,6 +103,9 @@ public class UserManagementServiceImpl implements UserService {
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<eu.domibus.api.user.UserRole> findUserRoles() {
         List<UserRole> userRolesEntities = userRoleDao.listRoles();
@@ -105,6 +118,9 @@ public class UserManagementServiceImpl implements UserService {
         return userRoles;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateUsers(List<eu.domibus.api.user.User> users) {
         // update
@@ -131,11 +147,23 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    public String getLoggedUserNamed() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     @Transactional
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
         User user = userDao.loadUserByUsername(userName);
         UserLoginErrorReason userLoginErrorReason = canApplyAccountLockingPolicy(userName, user);
-        if(BAD_CREDENTIALS.equals(userLoginErrorReason)){
+        if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
         return userLoginErrorReason;
@@ -161,14 +189,14 @@ public class UserManagementServiceImpl implements UserService {
     protected void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount;
         try {
-            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
+            maxAttemptAmount = Integer.valueOf(domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
         } catch (NumberFormatException n) {
             maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]",maxAttemptAmount,user.getUserName());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]", maxAttemptAmount, user.getUserName());
             }
             user.setActive(false);
             user.setSuspensionDate(new Date(System.currentTimeMillis()));
@@ -185,7 +213,7 @@ public class UserManagementServiceImpl implements UserService {
     public void findAndReactivateSuspendedUsers() {
         int suspensionInterval;
         try {
-            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
+            suspensionInterval = Integer.valueOf(domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
         } catch (NumberFormatException n) {
             suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
         }
@@ -198,7 +226,7 @@ public class UserManagementServiceImpl implements UserService {
         List<User> users = userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
         for (User user : users) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Suspended user [{}] is going to be reactivated.",user.getUserName());
+                LOG.debug("Suspended user [{}] is going to be reactivated.", user.getUserName());
             }
             user.setSuspensionDate(null);
             user.setAttemptCount(0);
@@ -209,14 +237,13 @@ public class UserManagementServiceImpl implements UserService {
 
     /**
      * {@inheritDoc}
-     *
      */
     @Override
     public void handleCorrectAuthentication(final String userName) {
         User user = userDao.loadActiveUserByUsername(userName);
-        LOG.debug("handleCorrectAuthentication for user [{}]",userName);
-        if(user.getAttemptCount()>0){
-            LOG.debug("user [{}] has [{}] attempt ",userName,user.getAttemptCount());
+        LOG.debug("handleCorrectAuthentication for user [{}]", userName);
+        if (user.getAttemptCount() > 0) {
+            LOG.debug("user [{}] has [{}] attempt ", userName, user.getAttemptCount());
             LOG.debug("reseting to 0");
             user.setAttemptCount(0);
             userDao.update(user);

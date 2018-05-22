@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
@@ -43,10 +44,14 @@ public class MessageResource {
     @Autowired
     private MessagingDao messagingDao;
 
+    @Autowired
+    private AuditService auditService;
+
 
     @RequestMapping(path = "{messageId:.+}/restore", method = RequestMethod.PUT)
     public void resend(@PathVariable(value = "messageId") String messageId) {
         userMessageService.restoreFailedMessage(messageId);
+        auditService.addMessageResentAudit(messageId);
     }
 
     @RequestMapping(path = "{messageId:.+}/downloadOld", method = RequestMethod.GET)
@@ -64,6 +69,7 @@ public class MessageResource {
             }
         }
 
+        auditService.addMessageDownloadedAudit(messageId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header("content-disposition", "attachment; filename=" + messageId + ".xml")
@@ -74,14 +80,15 @@ public class MessageResource {
     public ResponseEntity<ByteArrayResource> zipFiles(@PathVariable(value = "messageId") String messageId) throws IOException {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if (userMessage == null)
+            return ResponseEntity.notFound().build();
         final Map<String, InputStream> message = getMessageWithAttachments(userMessage);
         byte[] zip = zip(message);
-
+        auditService.addMessageDownloadedAudit(messageId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .header("content-disposition", "attachment; filename=" + messageId + ".zip")
                 .body(new ByteArrayResource(zip));
-
     }
 
     public InputStream getMessage(UserMessage userMessage) {

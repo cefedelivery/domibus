@@ -1,6 +1,6 @@
 package eu.domibus.common.model.logging;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -60,7 +60,8 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 " propsTo.value," +
                 " info.refToMessageId," +
                 "log.failed," +
-                "log.restored" +
+                "log.restored," +
+                "log.messageSubtype" +
                 ")" + QUERY_BODY;
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();

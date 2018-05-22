@@ -3,16 +3,17 @@ import {Http, Headers, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/map";
 import {User} from "./user";
-import {Router} from "@angular/router";
 import {ReplaySubject} from "rxjs";
 import {SecurityEventService} from "./security.event.service";
+import {DomainService} from "./domain.service";
 
 @Injectable()
 export class SecurityService {
-  constructor(private http: Http, private router: Router, private securityEventService: SecurityEventService) {
+  constructor(private http: Http, private securityEventService: SecurityEventService, private domainService: DomainService) {
   }
 
   login(username: string, password: string) {
+    this.domainService.resetDomain();
     let headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication',
       JSON.stringify({
@@ -33,6 +34,7 @@ export class SecurityService {
 
   logout() {
     console.log("Logging out");
+    this.domainService.resetDomain();
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
         localStorage.removeItem('currentUser');
         this.securityEventService.notifyLogoutSuccessEvent(res);
@@ -47,7 +49,7 @@ export class SecurityService {
     return JSON.parse(localStorage.getItem('currentUser'));
   }
 
-  getCurrentUsernameFromServer(): Observable<string> {
+  private getCurrentUsernameFromServer(): Observable<string> {
     let subject = new ReplaySubject();
     this.http.get('rest/security/user')
       .subscribe((res: Response) => {
@@ -79,8 +81,12 @@ export class SecurityService {
     return subject.asObservable();
   }
 
+  isCurrentUserSuperAdmin(): boolean {
+    return this.isCurrentUserInRole(["ROLE_AP_ADMIN"]);
+  }
+
   isCurrentUserAdmin(): boolean {
-    return this.isCurrentUserInRole(["ROLE_ADMIN"]);
+    return this.isCurrentUserInRole(["ROLE_ADMIN", "ROLE_AP_ADMIN"]);
   }
 
   isCurrentUserInRole(roles: Array<string>): boolean {

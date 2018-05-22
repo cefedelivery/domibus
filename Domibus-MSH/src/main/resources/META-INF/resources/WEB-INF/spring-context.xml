@@ -18,7 +18,7 @@
     <context:annotation-config/>
 
     <util:properties id="domibusProperties" ignore-resource-not-found="true"
-                     location="classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties"/>
+                     location="classpath:application.properties,classpath:domibus-default.properties,classpath:domibus.properties,file:///${domibus.config.location}/domibus.properties,file:///${domibus.config.location}/*-domibus.properties"/>
 
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
 
@@ -33,7 +33,8 @@
         </tx:attributes>
     </tx:advice>
     <aop:config proxy-target-class="true">
-        <!-- all services from eu.domibus package which do not use a specific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class  -->
+        <!-- all services from eu.domibus package which do not use a specific @Transactional annotation; the implementations of the org.apache.cxf.phase.PhaseInterceptor are not taken into account due to final methods present in the CXF abstract class
+        We need to exclude the domibusUserTransactionServiceImpConfigurationInit bean so that the circular dependency with the transactionManager is avoided -->
         <aop:pointcut id="allMethods" expression="execution(public * eu.domibus..*(..)) and not @annotation(org.springframework.transaction.annotation.Transactional) and not within(@org.springframework.transaction.annotation.Transactional *) and not within(org.apache.cxf.phase.PhaseInterceptor+)"/>
         <aop:advisor order="2" advice-ref="txAdvice" pointcut-ref="allMethods"/>
     </aop:config>
@@ -64,14 +65,6 @@
                 <value>config/DomainCoreBeanMapping.xml</value>
             </list>
         </property>
-    </bean>
-
-    <!-- Security Policy caching -->
-    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
-        <property name="cacheManager" ref="ehcache"/>
-    </bean>
-    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="file:///${domibus.config.location}/internal/ehcache.xml"/>
     </bean>
 
     <!-- JAXB Context for mapping of ebMS3 schema -->
