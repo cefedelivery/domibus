@@ -89,7 +89,7 @@ export class SecurityService {
   }
 
   isCurrentUserAdmin (): boolean {
-    return this.isCurrentUserInRole(['ROLE_ADMIN', SecurityService.ROLE_AP_ADMIN]);
+    return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
   }
 
   isCurrentUserInRole (roles: Array<string>): boolean {
