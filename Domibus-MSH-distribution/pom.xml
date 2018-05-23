@@ -281,7 +281,7 @@
                                         <containerId>wildfly12x</containerId>
                                         <zipUrlInstaller>
                                             <url>
-                                                http://central.maven.org/maven2/org/wildfly/wildfly-dist/12.0.0.Final/wildfly-dist-12.0.0.Final.zip
+                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/org/wildfly/as/wildfly-as-dist/12.0.0.Final/wildfly-as-dist-12.0.0.Final.zip
                                             </url>
                                         </zipUrlInstaller>
                                     </container>
@@ -303,10 +303,10 @@
                                 <configuration>
                                     <includes>
                                         <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
                                         </include>
                                         <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
                                         </include>
                                     </includes>
                                     <replacements>

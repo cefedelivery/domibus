@@ -27,7 +27,7 @@
             <filtered>false</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/cargo/installs/wildfly-dist-${wildfly.version}/wildfly-${wildfly.version}</directory>
+            <directory>${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}</directory>
             <outputDirectory>domibus</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
