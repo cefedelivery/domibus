@@ -2,7 +2,9 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.common.util.DomibusApacheFetcher;
 import eu.domibus.common.util.EndpointInfo;
+import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
@@ -16,6 +18,8 @@ import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -55,9 +59,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
         String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
         try {
             final LookupClient smpClient = LookupClientBuilder.forMode(mode)
-                .locator(new BusdoxLocator(smlInfo))
-                .fetcher(new BasicApacheFetcher(Mode.of(mode)))
-                .build();
+                    .locator(new BusdoxLocator(smlInfo))
+                    .fetcher(new DomibusApacheFetcher(Mode.of(mode)))
+                    .build();
 
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
             final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
