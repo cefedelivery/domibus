@@ -30,6 +30,9 @@ public interface PullMessageService {
      */
     void addPullMessageLock(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog);
 
+
+    void reset(UserMessageLog messageLog);
+
     /**
      * When a message has been successfully delivered or marked a failed, its lock counter part item should be removed from
      * the  locking system.
@@ -68,8 +71,12 @@ public interface PullMessageService {
     );
 
     /**
-     * Retrieve waiting for receipt message for which next attempt date is passed.
-     * Either put them back in ready to pull or send failure.
+     *
+     * @param messageId
+     * @return
      */
-    void resetWaitingForReceiptPullMessages();
+    boolean lockAndDeleteMessageLock(String messageId);
+
+
+    void sendFailed(UserMessageLog userMessageLog);
 }

@@ -33,8 +33,4 @@ public interface PullMessageStateService {
      */
     void reset(UserMessageLog userMessageLog);
 
-    /**
-     * Delete all the pull messages that are staled.
-     */
-    void bulkExpirePullMessages();
 }

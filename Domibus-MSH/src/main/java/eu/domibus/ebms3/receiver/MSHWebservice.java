@@ -163,11 +163,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
-        UserMessage userMessage=null;
+        UserMessage userMessage = null;
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
-            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId());
+            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessage);
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
+            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+        }
+        final boolean lockAcquired = pullMessageService.lockAndDeleteMessageLock(messageId);
+        if (!lockAcquired) {
+            LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);
             return pullRequestHandler.getSoapMessage(ebMS3Exception);
         }
         try {
@@ -235,7 +241,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
 
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        LOG.debug("Unmarshalling the Messaging instance from the request");
+        LOG.trace("Unmarshalling the Messaging instance from the request");
         return userMessageHandlerService.getMessaging(request);
     }
 

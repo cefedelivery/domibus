@@ -114,6 +114,10 @@ public class MessagingLock extends AbstractBaseEntity {
         return mpc;
     }
 
+    public Date getStaled() {
+        return staled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

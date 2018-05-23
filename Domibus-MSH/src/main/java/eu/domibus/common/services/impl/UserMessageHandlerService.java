@@ -160,6 +160,7 @@ public class UserMessageHandlerService {
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists && !pingMessage) { // ping messages are not stored/delivered
+                LOG.error("Message id:[{}] after duplication check", messaging.getUserMessage().getMessageInfo().getMessageId());
                 final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
                 String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, backendName);

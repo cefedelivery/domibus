@@ -5,7 +5,6 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -13,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * @author Thomas Dussart
@@ -61,7 +58,7 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Transactional
     public void sendFailed(UserMessageLog userMessageLog) {
         LOG.debug("Message:[{}] failed to be pull.", userMessageLog.getMessageId());
-        userMessageLog.setNextAttempt(null);
+        // userMessageLog.setNextAttempt(null);
         updateRetryLoggingService.messageFailed(userMessageLog);
     }
 
@@ -76,21 +73,5 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
         userMessageLogDao.update(userMessageLog);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void bulkExpirePullMessages() {
-        final List<MessagingLock> staledMessages = messagingLockDao.findStaledMessages();
-        LOG.debug("Delete expired pull message");
-        for (MessagingLock staledMessage : staledMessages) {
-            LOG.debug("Message:[{}] expired.", staledMessage.getMessageId());
-            messagingLockDao.delete(staledMessage);
-            final String messageId = staledMessage.getMessageId();
-            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-            sendFailed(userMessageLogDao.findByMessageId(messageId));
-        }
-    }
 
 }

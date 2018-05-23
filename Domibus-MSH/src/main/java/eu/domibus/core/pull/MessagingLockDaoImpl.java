@@ -57,9 +57,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         selectAndLockQueriesForPulling.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
         selectAndLockQueriesForPulling.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
 
-        selectAndLockQueriesForClearing.put(DataBaseEngine.MYSQL, "DELETE FROM TB_MESSAGING_LOCK ml.MESSAGE_STALED>");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
+        selectAndLockQueriesForClearing.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        selectAndLockQueriesForClearing.put(DataBaseEngine.H2, "SELECT ml.ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        selectAndLockQueriesForClearing.put(DataBaseEngine.ORACLE, "SELECT ml.ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE NOWAIT");
+
+
     }
 
 
@@ -154,4 +156,25 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         return query.getResultList();
     }
 
+    @Override
+    public boolean lockAndDeleteMessageLock(final String messageId) {
+        final Map<String, String> params = new HashMap<>();
+        params.put(MESSAGE_ID, messageId);
+
+        final String selectForDelete = selectAndLockQueriesForClearing.get(domibusConfigurationService.getDataBaseEngine());
+        SqlRowSet sqlRowSet = null;
+        try {
+            sqlRowSet = jdbcTemplate.queryForRowSet(selectForDelete, params);
+        } catch (CannotAcquireLockException ex) {
+            LOG.trace("MessagingLock:[{}] could not be locked.", messageId, ex);
+            return false;
+        }
+        if (sqlRowSet.next()) {
+            final Map<String, Long> idpkd = new HashMap<>();
+            idpkd.put(ID_PK, sqlRowSet.getLong("ID_PK"));
+            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", idpkd);
+            return true;
+        }
+        return false;
+    }
 }

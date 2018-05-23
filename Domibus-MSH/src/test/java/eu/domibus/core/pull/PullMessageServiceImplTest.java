@@ -1,11 +1,14 @@
 package eu.domibus.core.pull;
 
-import com.google.common.collect.Lists;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.pmode.PModeException;
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
@@ -19,11 +22,13 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -60,8 +65,12 @@ public class PullMessageServiceImplTest {
     @Injectable
     private java.util.Properties domibusProperties;
 
+    @Injectable
+    private NamedParameterJdbcTemplate jdbcTemplate;
+
     @Tested
     private PullMessageServiceImpl pullMessageService;
+
 
     @Test
     public void setDataSource(@Mocked NamedParameterJdbcTemplate namedParameterJdbcTemplate, @Mocked final DataSource dataSource) {
@@ -85,10 +94,6 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void getPullMessageId() {
-    }
-
-    @Test
     public void addPullMessageLock() {
     }
 
@@ -97,75 +102,73 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void resetWaitingForReceiptPullMessagesWithNoAttempts(@Mocked final MessagingLock messagingLock) {
-        final String messageId = "123456";
-        final UserMessageLog userMessageLog = new UserMessageLog();
-        userMessageLog.setSendAttempts(2);
-        userMessageLog.setSendAttemptsMax(2);
-        final List<String> messages = Lists.newArrayList(messageId);
+    public void getPullMessageId(@Mocked final SqlRowSet sqlRowSet, @Mocked final Map<String, Object> params) {
+        final String initiator = "initiator";
+        final String mpc = "mpc";
+        new Expectations() {{
+            jdbcTemplate.queryForRowSet("", params);
+            result = sqlRowSet;
+        }};
+        pullMessageService.getPullMessageId(initiator, mpc);
+
+    }
+
+    @Test(expected = PModeException.class)
+    public void addPullMessageLockWithPmodeException(@Mocked final PartyIdExtractor partyIdExtractor, @Mocked final UserMessage userMessage, @Mocked final MessageLog messageLog) throws EbMS3Exception {
+        final String pmodeKey = "pmodeKey";
+        final String partyId = "partyId";
+        final String messageId = "messageId";
+        final String mpc = "mpc";
+        final Date staledDate = new Date();
+        final LegConfiguration legConfiguration = new LegConfiguration();
         new Expectations(pullMessageService) {{
-            userMessageLogDao.findPullWaitingForReceiptMessages();
-            result = messages;
-            userMessageLogDao.findByMessageId(messageId);
-            result = userMessageLog;
+            partyIdExtractor.getPartyId();
+            result = partyId;
+            messageLog.getMessageId();
+            result = messageId;
+            messageLog.getMpc();
+            result = mpc;
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "", "", null);
         }};
-        pullMessageService.resetWaitingForReceiptPullMessages();
-        new VerificationsInOrder() {{
-            pullMessageService.addPullMessageLock(userMessageLog);
-            times = 0;
-            UserMessageLog userMessageLog1 = null;
-            pullMessageStateService.sendFailed(userMessageLog);
-        }};
+
+        pullMessageService.addPullMessageLock(partyIdExtractor, userMessage, messageLog);
     }
 
     @Test
-    public void resetWaitingForReceiptPullMessagesWithNoLockAndAttempts(@Mocked final UserMessageLog userMessageLog, @Mocked final MessagingLock messagingLock) {
-        final String messageId = "123456";
-        final List<String> messages = Lists.newArrayList(messageId);
+    public void addPullMessageLock(@Mocked final PartyIdExtractor partyIdExtractor, @Mocked final UserMessage userMessage, @Mocked final MessageLog messageLog) throws EbMS3Exception {
+        final String pmodeKey = "pmodeKey";
+        final String partyId = "partyId";
+        final String messageId = "messageId";
+        final String mpc = "mpc";
+        final Date staledDate = new Date();
+        final LegConfiguration legConfiguration = new LegConfiguration();
         new Expectations(pullMessageService) {{
-            userMessageLogDao.findPullWaitingForReceiptMessages();
-            result = messages;
-            userMessageLogDao.findByMessageId(messageId);
-            result = userMessageLog;
-            userMessageLog.getSendAttempts();
-            result = 1;
-            userMessageLog.getSendAttemptsMax();
-            result = 2;
-            messagingLockDao.findMessagingLockForMessageId(messageId);
-            result = messagingLock;
+            partyIdExtractor.getPartyId();
+            result = partyId;
+            messageLog.getMessageId();
+            result = messageId;
+            messageLog.getMpc();
+            result = mpc;
+            pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            result = pmodeKey;
+            pModeProvider.getLegConfiguration(pmodeKey);
+            result = legConfiguration;
+            pullMessageService.getPullMessageExpirationDate(messageLog, legConfiguration);
+            result = staledDate;
         }};
-        pullMessageService.resetWaitingForReceiptPullMessages();
-        new VerificationsInOrder() {{
-            pullMessageService.addPullMessageLock(userMessageLog);
-            times = 0;
-            pullMessageStateService.reset(userMessageLog);
+        pullMessageService.addPullMessageLock(partyIdExtractor, userMessage, messageLog);
+        new Verifications() {{
+            MessagingLock messagingLock = null;
+            messagingLockDao.save(messagingLock = withCapture());
+            assertEquals(partyId, messagingLock.getInitiator());
+            assertEquals(mpc, messagingLock.getMpc());
+            assertEquals(messageId, messagingLock.getMessageId());
+            assertEquals(staledDate, messagingLock.getStaled());
+
         }};
     }
 
-    @Test
-    public void resetWaitingForReceiptPullMessagesWithExistingLockAndAttempts(@Mocked final UserMessageLog userMessageLog) {
-        final String messageId = "123456";
-        final List<String> messages = Lists.newArrayList(messageId);
-        new Expectations(pullMessageService) {{
-            userMessageLogDao.findPullWaitingForReceiptMessages();
-            result = messages;
-            pullMessageService.addPullMessageLock(userMessageLog);
-            userMessageLogDao.findByMessageId(messageId);
-            result = userMessageLog;
-            userMessageLog.getSendAttempts();
-            result = 1;
-            userMessageLog.getSendAttemptsMax();
-            result = 2;
-            messagingLockDao.findMessagingLockForMessageId(messageId);
-            result = null;
-        }};
-        pullMessageService.resetWaitingForReceiptPullMessages();
-        new VerificationsInOrder() {{
-            pullMessageService.addPullMessageLock(userMessageLog);
-            times = 1;
-            pullMessageStateService.reset(userMessageLog);
-        }};
-    }
 
     @Test
     public void getPullMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
