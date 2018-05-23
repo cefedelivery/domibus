@@ -4,6 +4,7 @@ import eu.domibus.api.jms.DomibusJMSException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -31,7 +32,6 @@ import javax.jms.JMSException;
 import javax.jms.Queue;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -45,8 +45,7 @@ public class RetryService {
     private BackendNotificationService backendNotificationService;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     @Qualifier("jmsTemplateDispatch")
@@ -76,7 +75,7 @@ public class RetryService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
-        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(Integer.parseInt(domibusPropertyProvider.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
@@ -122,7 +121,7 @@ public class RetryService {
 
     //@thom test this
     protected void purgePullMessage() {
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusPropertyProvider.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
             messagingLockService.delete(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
@@ -181,7 +180,7 @@ public class RetryService {
         }
         userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
 
-        if ("true".equals(domibusProperties.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+        if ("true".equals(domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
             messagingDao.clearPayloadData(messageIdToPurge);
         }
     }

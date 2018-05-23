@@ -1,6 +1,12 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -10,7 +16,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Tiago Miguel
@@ -28,8 +35,17 @@ public class ApplicationResourceTest {
     @Injectable
     DomibusPropertiesService domibusPropertiesService;
 
-    @Injectable("domibusProperties")
-    Properties domibusProperties;
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    DomainService domainService;
+
+    @Injectable
+    DomainCoreConverter domainCoreConverter;
 
     @Test
     public void testGetDomibusInfo() throws Exception {
@@ -50,7 +66,7 @@ public class ApplicationResourceTest {
     public void testDomibusName(String name) {
         // Given
         new Expectations(applicationResource) {{
-            domibusProperties.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
+            domibusPropertyProvider.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
             result = name;
         }};
 
@@ -69,5 +85,46 @@ public class ApplicationResourceTest {
     @Test
     public void testGetDomibusDefaultName() {
         testDomibusName(ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
+    }
+
+    @Test
+    public void testGetDomains() {
+        // Given
+        final List<Domain> domainEntries = Arrays.asList(DomainService.DEFAULT_DOMAIN);
+        final DomainRO domainRO = new DomainRO();
+        domainRO.setCode(DomainService.DEFAULT_DOMAIN.getCode());
+        domainRO.setName(DomainService.DEFAULT_DOMAIN.getName());
+        final List<DomainRO> domainROEntries = Arrays.asList(domainRO);
+
+        new Expectations(applicationResource) {{
+            domainService.getDomains();
+            result = domainEntries;
+
+            domainCoreConverter.convert(domainEntries, DomainRO.class);
+            result = domainROEntries;
+        }};
+
+        // When
+        final List<DomainRO> result = applicationResource.getDomains();
+
+        // Then
+        Assert.assertNotNull(result);
+        Assert.assertNotEquals(0, result.size());
+        Assert.assertEquals(domainROEntries, result);
+    }
+
+    @Test
+    public void testGetMultiTenancy() {
+        // Given
+        new Expectations(applicationResource) {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+        }};
+
+        // When
+        final Boolean isMultiTenancy = applicationResource.getMultiTenancy();
+
+        // Then
+        Assert.assertEquals(true, isMultiTenancy);
     }
 }

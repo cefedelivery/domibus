@@ -1,0 +1,4 @@
+:host:before {
+	display: none !important;
+	content: '' !important;
+}

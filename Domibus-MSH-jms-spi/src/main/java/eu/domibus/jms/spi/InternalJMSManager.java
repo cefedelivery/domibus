@@ -13,9 +13,7 @@ import java.util.Map;
  */
 public interface InternalJMSManager {
 
-    static final String QUEUE = "Queue";
-
-    static final String TOPIC = "Topic";
+    String QUEUE = "Queue";
 
     Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 

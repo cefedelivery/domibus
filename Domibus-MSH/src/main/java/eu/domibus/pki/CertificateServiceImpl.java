@@ -1,24 +1,26 @@
 package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -49,25 +51,20 @@ public class CertificateServiceImpl implements CertificateService {
     CRLService crlService;
 
     @Autowired
-    CryptoService cryptoService;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    DomainContextProvider domainProvider;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private CertificateDao certificateDao;
 
-    @Cacheable(value = "certValidationByAlias", key = "#alias")
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
-    public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        LOG.debug("Checking certificate validation for [" + alias + "]");
-        KeyStore trustStore = cryptoService.getTrustStore();
-        if (trustStore == null) {
-            throw new DomibusCertificateException("Error getting the truststore");
-        }
-
+    public boolean isCertificateChainValid(KeyStore trustStore, String alias) throws DomibusCertificateException {
         X509Certificate[] certificateChain = null;
         try {
             certificateChain = getCertificateChain(trustStore, alias);
@@ -125,32 +122,6 @@ public class CertificateServiceImpl implements CertificateService {
         return result;
     }
 
-    /**
-     * Verifies the existence and validity of a certificate.
-     *
-     * @param alias
-     * @return boolean
-     * @throws DomibusCertificateException
-     * @Author Federico Martini
-     * @Since 3.3
-     */
-    @Override
-    public boolean isCertificateValid(String alias) throws DomibusCertificateException {
-        LOG.debug("Verifying the certificate with alias [" + alias + "]");
-        try {
-            X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(alias);
-            if (certificate == null) {
-                throw new DomibusCertificateException("Error: the certificate does not exist for alias[" + alias + "]");
-            }
-            if (!isCertificateValid(certificate)) {
-                throw new DomibusCertificateException("Error: the certificate is not valid anymore for alias [" + alias + "]");
-            }
-        } catch (KeyStoreException ksEx) {
-            throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
-        }
-        return true;
-    }
-
     @Override
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
@@ -186,7 +157,7 @@ public class CertificateServiceImpl implements CertificateService {
             return (X509Certificate) cert;
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
-            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password, e);
+            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias, e);
         }
     }
 
@@ -194,9 +165,8 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
-    public List<TrustStoreEntry> getTrustStoreEntries() {
+    public List<TrustStoreEntry> getTrustStoreEntries(final KeyStore trustStore) {
         try {
-            final KeyStore trustStore = cryptoService.getTrustStore();
             List<TrustStoreEntry> trustStoreEntries = new ArrayList<>();
             final Enumeration<String> aliases = trustStore.aliases();
             while (aliases.hasMoreElements()) {
@@ -221,16 +191,30 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
-    public void saveCertificateAndLogRevocation() {
-        saveCertificateData();
+    public void saveCertificateAndLogRevocation(final Domain currentDomain) {
+        final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(currentDomain);
+        final KeyStore keyStore = multiDomainCertificateProvider.getKeyStore(currentDomain);
+        saveCertificateData(trustStore, keyStore);
         logCertificateRevocationWarning();
+    }
+
+    @Override
+    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) {
+        try {
+            KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
+            newTrustStoreBytes.reset();
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+            throw new DomibusCertificateException("Could not load key store", e);
+        }
+
     }
 
     /**
      * Create or update certificate in the db.
      */
-    protected void saveCertificateData() {
-        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates();
+    protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
@@ -259,11 +243,9 @@ public class CertificateServiceImpl implements CertificateService {
      *
      * @return a list of certificate.
      */
-    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates() {
-        KeyStore trustStore = cryptoService.getTrustStore();
+    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> allCertificates = new ArrayList<>();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(trustStore, CertificateType.PUBLIC));
-        KeyStore keyStore = cryptoService.getKeyStore();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(keyStore, CertificateType.PRIVATE));
         return Collections.unmodifiableList(allCertificates);
     }
@@ -298,7 +280,7 @@ public class CertificateServiceImpl implements CertificateService {
     protected CertificateStatus getCertificateStatus(Date notAfter) {
         int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
-            revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+            revocationOffsetInDays = Integer.valueOf(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
 
         }

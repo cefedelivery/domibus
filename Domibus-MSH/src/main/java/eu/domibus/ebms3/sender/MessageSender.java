@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
@@ -93,6 +94,9 @@ public class MessageSender implements MessageListener {
 
     @Autowired
     UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
 
     private void sendUserMessage(final String messageId) {
@@ -208,6 +212,9 @@ public class MessageSender implements MessageListener {
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
+            LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
+            domainContextProvider.setCurrentDomain(domainCode);
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {

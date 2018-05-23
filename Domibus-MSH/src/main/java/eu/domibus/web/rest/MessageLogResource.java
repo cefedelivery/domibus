@@ -1,23 +1,26 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
-import eu.domibus.ebms3.common.model.MessageSubtype;
-import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
+import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Tiago Miguel
@@ -45,14 +51,19 @@ public class MessageLogResource {
     private static final String RECEIVED_TO_STR = "receivedTo";
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
+
+    @Autowired
+    private MessagingDao messagingDao;
+
+    @Autowired
+    private PartyDao partyDao;
 
     @Autowired
     DateUtil dateUtil;
@@ -186,7 +197,7 @@ public class MessageLogResource {
         filters.put(RECEIVED_FROM_STR, from);
         filters.put(RECEIVED_TO_STR, to);
 
-        int maxCSVrows = Integer.parseInt(domibusProperties.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
+        int maxCSVrows = Integer.parseInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
@@ -213,6 +224,51 @@ public class MessageLogResource {
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("messages"))
                 .body(resultText);
+    }
+
+    @RequestMapping(value = "test/outgoing/latest", method = RequestMethod.GET)
+    public ResponseEntity<TestServiceMessageInfoRO> getLastTestSent(@RequestParam(value = "partyId") String partyId) {
+        LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
+
+        String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
+        UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(userMessageId);
+
+        if (userMessageByMessageId != null) {
+            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+            testServiceMessageInfoRO.setMessageId(userMessageId);
+            testServiceMessageInfoRO.setTimeReceived(userMessageByMessageId.getMessageInfo().getTimestamp());
+            testServiceMessageInfoRO.setPartyId(partyId);
+            Party party = partyDao.findById(partyId);
+            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @RequestMapping(value = "test/incoming/latest", method = RequestMethod.GET)
+    public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
+        LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
+        Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
+        SignalMessage signalMessage = messaging.getSignalMessage();
+        if(signalMessage != null) {
+            String signalMessageId = signalMessage.getMessageInfo().getMessageId();
+            SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
+
+            if (signalMessageByMessageId != null) {
+                TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+                testServiceMessageInfoRO.setMessageId(signalMessageId);
+                testServiceMessageInfoRO.setTimeReceived(signalMessageByMessageId.getMessageInfo().getTimestamp());
+                Party party = partyDao.findById(partyId);
+                testServiceMessageInfoRO.setPartyId(partyId);
+                testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+                return ResponseEntity.ok().body(testServiceMessageInfoRO);
+            }
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {

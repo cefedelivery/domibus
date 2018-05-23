@@ -9,20 +9,14 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Properties;
 
 @Component(value = "customAuthenticationInterceptor")
 public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
-
-    @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
 
     @Autowired
     private AuthenticationService authenticationService;

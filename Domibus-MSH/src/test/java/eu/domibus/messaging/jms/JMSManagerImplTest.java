@@ -1,6 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -29,6 +30,9 @@ public class JMSManagerImplTest {
 
     @Injectable
     InternalJMSManager internalJmsManager;
+
+    @Injectable
+    DomainContextProvider domainContextProvider;
 
     @Injectable
     JMSDestinationMapper jmsDestinationMapper;

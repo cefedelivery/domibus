@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
@@ -16,12 +17,14 @@ import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
 
@@ -55,8 +58,7 @@ public class UserManagementServiceImpl implements UserService {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     /**
      * {@inheritDoc}
@@ -187,7 +189,7 @@ public class UserManagementServiceImpl implements UserService {
     protected void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount;
         try {
-            maxAttemptAmount = Integer.valueOf(domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
+            maxAttemptAmount = Integer.valueOf(domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
         } catch (NumberFormatException n) {
             maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
         }
@@ -211,7 +213,7 @@ public class UserManagementServiceImpl implements UserService {
     public void findAndReactivateSuspendedUsers() {
         int suspensionInterval;
         try {
-            suspensionInterval = Integer.valueOf(domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
+            suspensionInterval = Integer.valueOf(domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
         } catch (NumberFormatException n) {
             suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
         }

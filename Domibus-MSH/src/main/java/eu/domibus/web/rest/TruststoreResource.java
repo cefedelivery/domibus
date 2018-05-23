@@ -9,13 +9,15 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.KeyStore;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -31,7 +33,10 @@ public class TruststoreResource {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TruststoreResource.class);
 
     @Autowired
-    private CryptoService cryptoService;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Autowired
+    protected DomainContextProvider domainProvider;
 
     @Autowired
     private DomibusCacheService domibusCacheService;
@@ -51,7 +56,7 @@ public class TruststoreResource {
         if (!truststore.isEmpty()) {
             try {
                 byte[] bytes = truststore.getBytes();
-                cryptoService.replaceTruststore(bytes, password);
+                multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
                 domibusCacheService.clearCache("certValidationByAlias");
                 return ResponseEntity.ok("Truststore file has been successfully replaced.");
             } catch (Exception e) {
@@ -65,7 +70,8 @@ public class TruststoreResource {
 
     @RequestMapping(value = {"/list"}, method = GET)
     public List<TrustStoreRO> trustStoreEntries() {
-        return domainConverter.convert(certificateService.getTrustStoreEntries(), TrustStoreRO.class);
+        final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(domainProvider.getCurrentDomain());
+        return domainConverter.convert(certificateService.getTrustStoreEntries(trustStore), TrustStoreRO.class);
     }
 
     /**

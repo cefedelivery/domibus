@@ -1,6 +1,6 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {SecurityService} from "./security/security.service";
-import {Router} from "@angular/router";
+import {Router, RouterOutlet} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
 import {Title} from "@angular/platform-browser";
 import {Http, Response} from "@angular/http";
@@ -18,12 +18,15 @@ export class AppComponent implements OnInit {
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
 
+  @ViewChild(RouterOutlet)
+  outlet: RouterOutlet;
+
   constructor(private securityService: SecurityService,
               private router: Router,
               private securityEventService: SecurityEventService,
               private http: Http,
               private titleService: Title) {
-    let applicationNameResponse: Observable<Response>  = this.http.get('rest/application/name');
+    let applicationNameResponse: Observable<Response> = this.http.get('rest/application/name');
 
     applicationNameResponse.subscribe((name: Response) => {
       this.titleService.setTitle(name.json());
@@ -54,11 +57,7 @@ export class AppComponent implements OnInit {
 
   get currentUser(): string {
     let user = this.securityService.getCurrentUser();
-    if (user != null) {
-      return user.username;
-    }
-    return "";
-
+    return user ? user.username : "";
   }
 
   logout(event: Event): void {

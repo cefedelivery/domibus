@@ -2,6 +2,7 @@ package eu.domibus.messaging;
 
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
 
 
 /**
@@ -16,6 +17,7 @@ public class DispatchMessageCreator {
     }
 
     public JmsMessage createMessage() {
+
         return JMSMessageBuilder
                 .create()
                 .property(MessageConstants.MESSAGE_ID, messageId)

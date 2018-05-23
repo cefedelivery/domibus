@@ -54,7 +54,8 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @NamedQueries({@NamedQuery(name = "Party.findPartyByIdentifier", query = "select p.name from Party p where :PARTY_IDENTIFIER member of p.identifiers"),
         @NamedQuery(name = "Party.findByName", query = "select p from Party p where p.name = :NAME"),
         @NamedQuery(name = "Party.findAll", query = "select p from Party p"),
-        @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT")})
+        @NamedQuery(name = "Party.findPartyIdentifiersByEndpoint", query = "select p.identifiers from Party p where p.endpoint = :ENDPOINT"),
+        @NamedQuery(name = "Party.findByPartyId", query = "select p from Party p, Identifier i where p.entityId = i.entityId and i.partyId = :PARTY_ID")})
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName(value = "Party", auditOrder = 1)
 public class Party extends AbstractBaseEntity {
@@ -104,6 +105,10 @@ public class Party extends AbstractBaseEntity {
             this.identifiers = new HashSet<>();
         }
         return this.identifiers;
+    }
+
+    public void setIdentifiers(Set<Identifier> identifiers) {
+        this.identifiers = identifiers;
     }
 
     /**

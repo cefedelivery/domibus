@@ -1,13 +1,17 @@
 package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
 import eu.domibus.core.certificate.CertificateDao;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
-import eu.domibus.wss4j.common.crypto.CryptoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.joda.time.DateTime;
@@ -23,7 +27,10 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
@@ -39,13 +46,16 @@ public class CertificateServiceImplTest {
     CertificateServiceImpl certificateService;
 
     @Injectable
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    DomainContextProvider domainProvider;
 
     @Injectable
     CRLService crlService;
-
-    @Injectable
-    CryptoService cryptoService;
 
     @Injectable
     CertificateDao certificateDao;
@@ -65,9 +75,6 @@ public class CertificateServiceImplTest {
         final X509Certificate receiverCertificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations(certificateService) {{
-            cryptoService.getTrustStore();
-            result = trustStore;
-
             trustStore.getCertificateChain(receiverAlias);
             X509Certificate[] certificateChain = new X509Certificate[]{receiverCertificate, rootCertificate};
             result = certificateChain;
@@ -79,7 +86,7 @@ public class CertificateServiceImplTest {
             result = true;
         }};
 
-        boolean certificateChainValid = certificateService.isCertificateChainValid(receiverAlias);
+        boolean certificateChainValid = certificateService.isCertificateChainValid(trustStore, receiverAlias);
         assertTrue(certificateChainValid);
 
         new Verifications() {{ // a "verification block"
@@ -99,9 +106,6 @@ public class CertificateServiceImplTest {
         final X509Certificate receiverCertificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations(certificateService) {{
-            cryptoService.getTrustStore();
-            result = trustStore;
-
             trustStore.getCertificateChain(receiverAlias);
             X509Certificate[] certificateChain = new X509Certificate[]{receiverCertificate, rootCertificate};
             result = certificateChain;
@@ -110,7 +114,7 @@ public class CertificateServiceImplTest {
             result = false;
         }};
 
-        boolean certificateChainValid = certificateService.isCertificateChainValid(receiverAlias);
+        boolean certificateChainValid = certificateService.isCertificateChainValid(trustStore, receiverAlias);
         assertFalse(certificateChainValid);
 
         new Verifications() {{
@@ -178,10 +182,6 @@ public class CertificateServiceImplTest {
             trustStore.aliases();
             result = aliasEnum;
 
-            cryptoService.getTrustStore();
-            times = 1;
-            result = trustStore;
-
             blueCertificate.getSubjectDN().getName();
             result = "C=BE,O=eDelivery,CN=blue_gw";
             blueCertificate.getIssuerDN().getName();
@@ -205,7 +205,7 @@ public class CertificateServiceImplTest {
             trustStore.getCertificate("red_gw");
             result = redCertificate;
         }};
-        final List<TrustStoreEntry> trustStoreEntries = certificateService.getTrustStoreEntries();
+        final List<TrustStoreEntry> trustStoreEntries = certificateService.getTrustStoreEntries(trustStore);
         assertEquals(2, trustStoreEntries.size());
 
         TrustStoreEntry trustStoreEntry = trustStoreEntries.get(0);
@@ -230,33 +230,39 @@ public class CertificateServiceImplTest {
         new Expectations() {{
             trustStore.aliases();
             result = new KeyStoreException();
-
-            cryptoService.getTrustStore();
-            times = 1;
-            result = trustStore;
         }};
-        assertEquals(0, certificateService.getTrustStoreEntries().size());
+        assertEquals(0, certificateService.getTrustStoreEntries(trustStore).size());
     }
 
     @Test
-    public void saveCertificateAndLogRevocation(){
-        certificateService.saveCertificateAndLogRevocation();
+    public void saveCertificateAndLogRevocation(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore){
+        final Domain currentDomain = DomainService.DEFAULT_DOMAIN;
+
+        new Expectations() {{
+            multiDomainCertificateProvider.getTrustStore(currentDomain);
+            result = keyStore;
+
+            multiDomainCertificateProvider.getKeyStore(currentDomain);
+            result = trustStore;
+        }};
+
+        certificateService.saveCertificateAndLogRevocation(currentDomain);
         new Verifications(){{
-           certificateService.saveCertificateData(); times=1;
+           certificateService.saveCertificateData(trustStore, keyStore); times=1;
            certificateService.logCertificateRevocationWarning();times=1;
         }};
     }
 
     @Test
-    public void saveCertificateData(){
+    public void saveCertificateData(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore){
         final Certificate cert1 = new Certificate();
         final Certificate cert2 = new Certificate();
         final List<Certificate> certificates=Lists.newArrayList(cert1, cert2);
         new Expectations(certificateService){{
-            certificateService.groupAllKeystoreCertificates();
+            certificateService.groupAllKeystoreCertificates(trustStore, keyStore);
             result=certificates;
         }};
-        certificateService.saveCertificateData();
+        certificateService.saveCertificateData(trustStore , keyStore);
         new Verifications(){{
             certificateDao.saveOrUpdate(withInstanceOf(Certificate.class));times=2;
         }};
@@ -303,17 +309,13 @@ public class CertificateServiceImplTest {
         final List<Certificate> keyStoreCertificates= Lists.newArrayList(certificate);
 
         new Expectations(certificateService){{
-            cryptoService.getTrustStore();
-            result=trustStore;
-            cryptoService.getKeyStore();
-            result=keyStore;
             certificateService.extractCertificateFromKeyStore(trustStore);
             result=trustStoreCertificates;
             certificateService.extractCertificateFromKeyStore(keyStore);
             result=keyStoreCertificates;
         }};
 
-        List<Certificate> certificates = certificateService.groupAllKeystoreCertificates();
+        List<Certificate> certificates = certificateService.groupAllKeystoreCertificates(trustStore, keyStore);
         assertEquals(CertificateType.PUBLIC,certificates.get(0).getCertificateType());
         assertEquals(CertificateType.PRIVATE,certificates.get(1).getCertificateType());
 

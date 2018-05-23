@@ -7,6 +7,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
@@ -14,6 +15,7 @@ import java.util.Properties;
  * @author Cosmin Baciu
  * @since 3.2
  */
+@Service
 public class PropertyResolver {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PropertyResolver.class);
