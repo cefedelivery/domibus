@@ -8,6 +8,7 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.common.util.ProxyUtil;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -66,6 +67,9 @@ public class DynamicDiscoveryServiceOASISTest {
 
     @Injectable
     protected DomainContextProvider domainProvider;
+
+    @Injectable
+    ProxyUtil proxyUtil;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -206,8 +210,8 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
+            proxyUtil.useProxy();
+            result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.0";
@@ -233,8 +237,8 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "false";
+            proxyUtil.useProxy();
+            result = false;
         }};
 
         //when
@@ -243,110 +247,13 @@ public class DynamicDiscoveryServiceOASISTest {
         //then
         Assert.assertNull(defaultProxy);
     }
-
-    @Test
-    public void testProxyConfigurationMissingHost() throws Exception {
-        // Given
-
-        new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = null;
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "proxyUser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "proxyPassword";
-        }};
-
-        assertNullForMissingParameters();
-    }
-
-    @Test
-    public void testProxyConfigurationMissingPort() throws Exception {
-        // Given
-
-        new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "192.168.1.1";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "proxyUser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "proxyPassword";
-        }};
-
-        assertNullForMissingParameters();
-    }
-
-    @Test
-    public void testProxyConfigurationMissingUser() throws Exception {
-        // Given
-
-        new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "192.168.1.1";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = null;
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "proxyPassword";
-        }};
-
-        assertNullForMissingParameters();
-    }
-
-    @Test
-    public void testProxyConfigurationMissingPassword() throws Exception {
-        // Given
-
-        new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            result = "192.168.1.1";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            result = "8012";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            result = "proxyUser";
-
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-            result = "";
-        }};
-
-        assertNullForMissingParameters();
-    }
-
     @Test
     public void testCreateDynamicDiscoveryClientWithProxy() throws Exception {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "true";
+            proxyUtil.useProxy();
+            result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.1";
@@ -379,8 +286,8 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = "false";
+            proxyUtil.useProxy();
+            result = false;
 
             domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
