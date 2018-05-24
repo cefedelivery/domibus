@@ -128,6 +128,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
+            httpUtil.useProxy();
+            result = true;
+
             domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
