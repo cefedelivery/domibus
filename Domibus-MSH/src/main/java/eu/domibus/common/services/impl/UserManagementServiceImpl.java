@@ -215,13 +215,13 @@ public class UserManagementServiceImpl implements UserService {
                 }
             });
         }); 
-        */
-        
         try {
             utrFuture.get(3000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new DomainException("Could not save super users", e);
         } 
+        */
+        
     }
     
     /**
