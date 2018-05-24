@@ -10,14 +10,11 @@ import mockit.Tested;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.validation.constraints.AssertFalse;
 
 /**
- * Created by idragusa on 5/24/18.
+ * @idragusa
+ * @since 4.0
  */
 public class HttpUtilImplTest {
 

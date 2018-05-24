@@ -1,7 +1,6 @@
 package eu.domibus.api.util;
 
 import org.apache.http.HttpHost;
-import org.apache.http.*;
 import org.apache.http.client.CredentialsProvider;
 
 import java.io.ByteArrayInputStream;
