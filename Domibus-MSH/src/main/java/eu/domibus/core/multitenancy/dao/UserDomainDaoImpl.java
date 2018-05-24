@@ -71,7 +71,12 @@ public class UserDomainDaoImpl extends BasicDao<UserDomainEntity> implements Use
         if (userDomainEntity != null) {
             userDomainEntity.setPreferredDomain(domainCode);
             this.update(userDomainEntity);
-        }  
+        }  else {
+            userDomainEntity = new UserDomainEntity();
+            userDomainEntity.setUserName(userName);
+            userDomainEntity.setPreferredDomain(domainCode);
+            this.create(userDomainEntity); 
+        }
     }
     
     private UserDomainEntity findUserDomainEntity(String userName) {
