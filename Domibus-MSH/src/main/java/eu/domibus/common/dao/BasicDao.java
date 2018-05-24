@@ -35,7 +35,7 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
     }
 
     @BasicAudit
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void create(final T entity) {
         em.persist(entity);
     }

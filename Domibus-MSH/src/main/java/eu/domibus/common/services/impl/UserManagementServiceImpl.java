@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
@@ -28,10 +29,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
 import java.util.concurrent.ExecutionException;
@@ -90,9 +88,10 @@ public class UserManagementServiceImpl implements UserService {
     @Qualifier("taskExecutor")
     @Autowired
     protected SchedulingTaskExecutor schedulingTaskExecutor;
-
+    
     @Autowired
     protected TransactionManager transactionManager;
+     
 
     /**
      * {@inheritDoc}
@@ -139,23 +138,28 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional 
     public void updateUsers(List<eu.domibus.api.user.User> users) {
-        persistUsers(users, null);
+        persistUsers(users);
     }
- 
-    private void persistUsers(List<eu.domibus.api.user.User> users, Session session) {
-        // update
-        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
-        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
-        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
-        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
-        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
-        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+    
+    
+    private void persistUsers(List<eu.domibus.api.user.User> users) {
+        final Domain currentDomainSafely = domainContextProvider.getCurrentDomainSafely();
+        LOG.info("Current domain " + currentDomainSafely);
+
+//        // update
+//        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
+//        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
+//        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
+//        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
+//        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
+        updateUserWithPasswordChange(users);
 
         // insertion
-        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
-        LOG.debug("New users:" + newUsers.size());
-        insertNewUsers(newUsers, session);
+//        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
+//        LOG.debug("New users:" + newUsers.size());
+//        insertNewUsers(newUsers);
 
         /*
         // deletion - TODO: delete logically
@@ -163,7 +167,16 @@ public class UserManagementServiceImpl implements UserService {
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
         userDao.deleteAll(usersEntitiesToDelete);
-         */
+        */
+    }
+
+    protected User createRandomUser() {
+        User result = new User();
+        result.setActive(true);
+        result.setAttemptCount(0);
+        result.setUserName(UUID.randomUUID().toString());
+        result.setPassword("test123");
+        return result;
     }
 
     /**
@@ -171,59 +184,49 @@ public class UserManagementServiceImpl implements UserService {
      */
     @Override 
     public void updateAllUsers(List<eu.domibus.api.user.User> users) {
-        List<eu.domibus.api.user.User> regularUsers = users.stream()
-                .filter(u -> !u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-                .collect(Collectors.toList());
-        List<eu.domibus.api.user.User> superUsers = users.stream()
-                .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-                .collect(Collectors.toList());
+        final User normalUser = createRandomUser();
+        userDao.create(normalUser);
 
-        persistUsers(regularUsers, null);
-
-        /*
         Future utrFuture = schedulingTaskExecutor.submit(() -> {
-            persistUsers(superUsers);
+            // block starts
+            final User adminUser = createRandomUser();
+            adminUser.setUserName(normalUser.getUserName());
+            userDao.create(adminUser);
+            // block ends
+            // this block needs to called inside a transaction; for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
         }); 
         try {
             utrFuture.get(3000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new DomainException("Could not save super users", e);
         }
-          
-         */
-        SessionFactory sessionFactory = em.getEntityManagerFactory().unwrap(SessionFactory.class);
+        
+        
+        /*
+        SessionFactory sessionFactory =  em.getEntityManagerFactory().unwrap(SessionFactory.class);
         Future utrFuture = schedulingTaskExecutor.submit(() -> {
             HibernateTemplate template = new HibernateTemplate(sessionFactory);
-            template.execute((Session session) -> {
-                
-                persistUsers(superUsers, session); 
-               
-                return null;
+            template.execute(new HibernateCallback()
+            {
+                @Override
+                public Object doInHibernate(Session session) throws HibernateException 
+                {  
+                    // ... pass session too ... 
+                    persistUsers(superUsers);
+                    
+                    return null;
+                }
             });
-        });
-
+        }); 
         try {
             utrFuture.get(3000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not save super users 5", e);
+            throw new DomainException("Could not save super users", e);
         } 
+        */
+        
     }
-     
-    private void saveUserEntity(User userEntity, Session session) {
-        try {
-            transactionManager.begin();
-            session.saveOrUpdate(userEntity);
-
-            transactionManager.commit();
-        }catch (Exception ex) {
-            
-            throw new DomainException("Could not save super user 6", ex);
-        }
-    }
- 
-    @PersistenceContext(unitName = "domibusJTA")
-    protected EntityManager em;
-
+    
     /**
      * {@inheritDoc}
      */
@@ -337,21 +340,17 @@ public class UserManagementServiceImpl implements UserService {
         return result;
     }
 
-    private void insertNewUsers(Collection<eu.domibus.api.user.User> users, Session session) {
+    private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             List<String> authorities = user.getAuthorities();
             User userEntity = domainConverter.convert(user, User.class);
-            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
-            if (session == null) {
-                addRoleToUser(authorities, userEntity);
-                userDao.create(userEntity);
-            } else {
-                saveUserEntity(userEntity, session);
-            }
+            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword())); 
+            addRoleToUser(authorities, userEntity);
+            userDao.create(userEntity);
 
-            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
+            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) { 
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
-            } else {
+            } else { 
                 userDomainService.setDomainForUser(user.getUserName(), user.getDomain());
             }
         }
@@ -375,7 +374,7 @@ public class UserManagementServiceImpl implements UserService {
     private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
-            userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
+//            userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
         }
@@ -383,11 +382,11 @@ public class UserManagementServiceImpl implements UserService {
 
     protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
         User userEntity = userDao.loadUserByUsername(user.getUserName());
-        if (!userEntity.getActive() && user.isActive()) {
-            userEntity.setSuspensionDate(null);
-            userEntity.setAttemptCount(0);
-        }
-        userEntity.setActive(user.isActive());
+//        if (!userEntity.getActive() && user.isActive()) {
+//            userEntity.setSuspensionDate(null);
+//            userEntity.setAttemptCount(0);
+//        }
+//        userEntity.setActive(user.isActive());
         userEntity.setEmail(user.getEmail());
         userEntity.clearRoles();
         return userEntity;

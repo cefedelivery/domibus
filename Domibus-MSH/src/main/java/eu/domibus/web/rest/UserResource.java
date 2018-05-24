@@ -71,10 +71,8 @@ public class UserResource {
         LOG.debug("Update Users was called: " + userROS);
         updateUserRoles(userROS);
         List<User> users = domainConverter.convert(userROS, User.class);
-        if (authUtils.isSuperAdmin())
-            userService.updateAllUsers(users);
-        else
-            userService.updateUsers(users);
+
+        userService.updateAllUsers(users);
     }
 
     private void updateUserRoles(List<UserResponseRO> userROS) {

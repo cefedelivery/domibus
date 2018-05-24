@@ -28,8 +28,8 @@ import java.util.Set;
                 )
         }
 )
-@Audited(withModifiedFlag = true)
-@RevisionLogicalName(value = "User", auditOrder = 1)
+//@Audited(withModifiedFlag = true)
+//@RevisionLogicalName(value = "User", auditOrder = 1)
 public class UserRole extends AbstractBaseEntity{
 
     @NotNull

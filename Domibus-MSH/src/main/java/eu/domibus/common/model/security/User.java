@@ -30,8 +30,8 @@ import java.util.*;
         @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
 })
 
-@Audited(withModifiedFlag = true)
-@RevisionLogicalName("User")
+//@Audited(withModifiedFlag = true)
+//@RevisionLogicalName("User")
 public class User extends AbstractBaseEntity{
 
     @NotNull
