@@ -10,24 +10,33 @@
 
     <jee:jndi-lookup id="notifyBackendJmsQueue"
                      jndi-name="jms/domibus.notification.jms"
-                     cache="true"
-                     resource-ref="true"
-                     lookup-on-startup="true" environment-ref="contextEnvironment">
+                     environment-ref="contextEnvironment">
     </jee:jndi-lookup>
-
+	<bean id="pluginToBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jms/domibus.backend.jms.replyQueue" />
+	</bean>
+	<bean id="businessMessageOutQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jms/domibus.backend.jms.outQueue" />
+	</bean>
+	<bean id="errorNotifyConsumerQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jms/domibus.backend.jms.errorNotifyConsumer" />
+	</bean>
+	<bean id="errorNotifyProducerQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="jms/domibus.backend.jms.errorNotifyProducer" />
+	</bean>
 	<bean id="businessMessageInQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.backend.jms.inQueue"/>
     </bean>
+
+	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer">
+		<constructor-arg name="defaultProperties" value="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/>
+	</bean>
 
 	<bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
 		<constructor-arg value="Jms"/>
 		<property name="lister" ref="jmsNotificationListenerService"/>
 		<property name="messageSubmissionTransformer" ref="jmsMessageTransformer"/>
 		<property name="messageRetrievalTransformer"  ref="jmsMessageTransformer"/>
-	</bean>
-
-	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer">
-		<constructor-arg name="defaultProperties" value="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/>
 	</bean>
 
 	<bean id="jmsNotificationListenerService"
@@ -50,19 +59,6 @@
 		<property name="concurrency" value="1-1"/>
 		<property name="sessionTransacted" value="true"/>
 		<property name="sessionAcknowledgeMode" value="0"/>
-	</bean>
-
-	<bean id="pluginToBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.replyQueue" />
-	</bean>
-	<bean id="businessMessageOutQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.outQueue" />
-	</bean>
-	<bean id="errorNotifyConsumerQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.errorNotifyConsumer" />
-	</bean>
-	<bean id="errorNotifyProducerQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.errorNotifyProducer" />
 	</bean>
 
 	<bean id="replyJmsTemplate"
