@@ -3,12 +3,12 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -63,7 +63,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     protected MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
-    ProxyUtil proxyUtil;
+    HttpUtil httpUtil;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
@@ -147,7 +147,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
-        if (proxyUtil.useProxy()) {
+        if (httpUtil.useProxy()) {
             String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);

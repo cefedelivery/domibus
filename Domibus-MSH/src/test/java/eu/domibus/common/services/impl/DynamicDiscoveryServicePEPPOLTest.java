@@ -1,31 +1,26 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.util.DomibusApacheFetcher;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.api.MetadataFetcher;
-import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,27 +51,13 @@ public class DynamicDiscoveryServicePEPPOLTest {
     DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    private ProxyUtil proxyUtil;
+    private CertificateService certificateService;
 
     @Injectable
-    private CertificateService certificateService;
+    HttpUtil httpUtil;
 
     @Tested
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
-
-    @Before
-    public void initMocks() {
-        new MockUp<DomibusApacheFetcher>() {
-            @Mock
-            void $init(Mode mode) {
-            }
-        };
-        new MockUp<AbstractFetcher>() {
-            @Mock
-            void $init(Mode mode) {
-            }
-        };
-    }
 
     @Test
     public void testLookupInformationMock(final @Capturing LookupClient smpClient) throws Exception {

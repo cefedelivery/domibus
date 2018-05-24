@@ -1,6 +1,7 @@
 package eu.domibus.common.util;
 
 import com.google.common.io.ByteStreams;
+import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
@@ -9,6 +10,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,26 +34,22 @@ public class DomibusApacheFetcher extends AbstractFetcher {
 
     protected RequestConfig requestConfig;
 
-    @Autowired
-    protected ProxyUtil proxyUtil;
+    protected HttpUtil httpUtil;
 
-    public DomibusApacheFetcher(Mode mode) {
+    public DomibusApacheFetcher(Mode mode, HttpUtil httpUtil) {
         super(mode);
 
-        if(proxyUtil.useProxy()) {
-            this.requestConfig = RequestConfig.custom()
-                    .setConnectionRequestTimeout(timeout)
-                    .setConnectTimeout(timeout)
-                    .setSocketTimeout(timeout)
-                    .setProxy(proxyUtil.getConfiguredProxy())
-                    .build();
-        } else {
-            this.requestConfig = RequestConfig.custom()
-                    .setConnectionRequestTimeout(timeout)
-                    .setConnectTimeout(timeout)
-                    .setSocketTimeout(timeout)
-                    .build();
+        this.httpUtil = httpUtil;
+        RequestConfig.Builder builder = RequestConfig.custom()
+                .setConnectionRequestTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .setSocketTimeout(timeout);
+
+        if(httpUtil.useProxy()) {
+            builder.setProxy(httpUtil.getConfiguredProxy());
         }
+
+        builder.build();
     }
 
     @Override
@@ -85,15 +83,13 @@ public class DomibusApacheFetcher extends AbstractFetcher {
     }
 
     protected CloseableHttpClient createClient() {
-        if(proxyUtil.useProxy()) {
-            return HttpClients.custom()
-                    .setDefaultRequestConfig(requestConfig)
-                    .setDefaultCredentialsProvider(proxyUtil.getConfiguredCredentialsProvider())
-                    .build();
+        HttpClientBuilder builder = HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig);
+
+        if(httpUtil.useProxy()) {
+            builder.setDefaultCredentialsProvider(httpUtil.getConfiguredCredentialsProvider());
         }
 
-        return HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
+        return builder.build();
     }
 }
