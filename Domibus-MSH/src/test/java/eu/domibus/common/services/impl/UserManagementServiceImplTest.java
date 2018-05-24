@@ -48,7 +48,7 @@ public class UserManagementServiceImplTest {
 
     @Injectable
     private DomainCoreConverter domainConverter;
-    
+
     @Injectable
     private DomainContextProvider domainContextProvider;
 
@@ -88,11 +88,6 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void findUsers() throws Exception {
-        //TODO
-    }
-
-    @Test
-    public void saveUsers() throws Exception {
         //TODO
     }
 

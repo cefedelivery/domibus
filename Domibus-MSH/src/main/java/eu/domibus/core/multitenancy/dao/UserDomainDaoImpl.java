@@ -15,10 +15,10 @@ import java.util.List;
  * @since 4.0
  */
 @Repository
-public class UserDomainDaoImpl extends BasicDao<User> implements UserDomainDao {
+public class UserDomainDaoImpl extends BasicDao<UserDomainEntity> implements UserDomainDao {
 
     public UserDomainDaoImpl() {
-        super(User.class);
+        super(UserDomainEntity.class);
     }
 
     @Override
@@ -50,5 +50,40 @@ public class UserDomainDaoImpl extends BasicDao<User> implements UserDomainDao {
         TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findPreferredDomains", UserDomainEntity.class);
         return namedQuery.getResultList();
     }
+    
+    @Override
+    public void setDomainByUser(String userName, String domainCode) {
+        UserDomainEntity userDomainEntity = findUserDomainEntity(userName);
+        if (userDomainEntity != null) {
+            userDomainEntity.setDomain(domainCode);
+            this.update(userDomainEntity);
+        } else {
+            userDomainEntity = new UserDomainEntity();
+            userDomainEntity.setUserName(userName);
+            userDomainEntity.setDomain(domainCode);
+            this.create(userDomainEntity);
+        }
+    }
+    
+    @Override
+    public void setPreferredDomainByUser(String userName, String domainCode) {
+        UserDomainEntity userDomainEntity = findUserDomainEntity(userName);
+        if (userDomainEntity != null) {
+            userDomainEntity.setPreferredDomain(domainCode);
+            this.update(userDomainEntity);
+        }  
+    }
+    
+    private UserDomainEntity findUserDomainEntity(String userName) {
+        TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findByUserName", UserDomainEntity.class);
+        namedQuery.setParameter("USER_NAME", userName);
+        try {
+            final UserDomainEntity userDomainEntity = namedQuery.getSingleResult();
+            return userDomainEntity;
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 }
 

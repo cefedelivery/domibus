@@ -28,23 +28,6 @@ export class UserService {
       .catch(this.handleError);
   }
 
-  deleteUsers(users:Array<UserResponseRO>):void {
-    this.http.post("rest/user/delete", users).subscribe(res => {
-      this.alertService.success("User(s) deleted", false);
-    }, err => {
-      this.alertService.error(err, false);
-    });
-  }
-
-  saveUsers(users:Array<UserResponseRO>):void{
-    this.http.post("rest/user/save", users).subscribe(res => {
-      this.changeUserStatus(users);
-      this.alertService.success("User saved", false);
-    }, err => {
-      this.alertService.error(err, false);
-    });
-  }
-
   changeUserStatus(users:Array<UserResponseRO>){
     for(let u in users){
       users[u].status="PERSISTED";

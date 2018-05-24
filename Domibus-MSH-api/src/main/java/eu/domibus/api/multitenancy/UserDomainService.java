@@ -11,8 +11,12 @@ import java.util.List;
 public interface UserDomainService {
 
     String getDomainForUser(String user);
+     
+    void setDomainForUser(String user, String domainCode);
 
     String getPreferredDomainForUser(String user);
-
+    
+    void setPreferredDomainForUser(String user, String domainCode);
+     
     List<User> getSuperUsers();
 }

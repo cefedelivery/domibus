@@ -130,7 +130,35 @@ public class UserDomainServiceImpl implements UserDomainService {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new DomainException("Could not find super users", e);
         }
-        return users;
-
+        return users; 
+    }
+    
+    
+    @Override
+    public void setDomainForUser(String user, String domainCode) {
+        LOG.debug("Setting domain [{}] for user [{}]", domainCode, user);
+        
+        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+            userDomainDao.setDomainByUser(user, domainCode);
+        });
+        try {
+            utrFuture.get(3000L, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new DomainException("Could not set domain", e);
+        }
+    }
+    
+    @Override  
+    public void setPreferredDomainForUser(String user, String domainCode) {
+        LOG.debug("Setting preferred domain [{}] for user [{}]", domainCode, user);
+        
+        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+            userDomainDao.setPreferredDomainByUser(user, domainCode);
+        });
+        try {
+            utrFuture.get(3000L, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new DomainException("Could not set preferred domain", e);
+        }
     }
 }

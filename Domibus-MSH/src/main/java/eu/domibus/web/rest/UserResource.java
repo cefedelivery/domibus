@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserRole;
@@ -70,7 +71,10 @@ public class UserResource {
         LOG.debug("Update Users was called: " + userROS);
         updateUserRoles(userROS);
         List<User> users = domainConverter.convert(userROS, User.class);
-        userService.updateUsers(users);
+        if (authUtils.isSuperAdmin())
+            userService.updateAllUsers(users);
+        else
+            userService.updateUsers(users);
     }
 
     private void updateUserRoles(List<UserResponseRO> userROS) {
@@ -82,14 +86,6 @@ public class UserResource {
         }
     }
 
-
-    @RequestMapping(value = {"/save"}, method = RequestMethod.POST)
-    public void save(@RequestBody List<UserResponseRO> usersRo) {
-        LOG.debug("Saving " + usersRo);
-        List<User> users = domainConverter.convert(usersRo, User.class);
-        userService.saveUsers(users);
-    }
-
     @RequestMapping(value = {"/userroles"}, method = RequestMethod.GET)
     public List<String> userRoles() {
         List<String> result = new ArrayList<>();
@@ -97,6 +93,12 @@ public class UserResource {
         for (UserRole userRole : userRoles) {
             result.add(userRole.getRole());
         }
+        
+        // ROLE_AP_ADMIN role is available only to superusers
+        if (authUtils.isSuperAdmin()) {
+            result.add(AuthRole.ROLE_AP_ADMIN.name());
+        }
+                
         return result;
     }
 

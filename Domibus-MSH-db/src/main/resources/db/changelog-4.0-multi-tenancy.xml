@@ -72,14 +72,6 @@
         <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
 
         <insert tableName="TB_USER_ROLE">
-            <column name="ID_PK" value="1" type="INT"/>
-            <column name="ROLE_NAME" value="ROLE_ADMIN"/>
-        </insert>
-        <insert tableName="TB_USER_ROLE">
-            <column name="ID_PK" value="2" type="INT"/>
-            <column name="ROLE_NAME" value="ROLE_USER"/>
-        </insert>
-        <insert tableName="TB_USER_ROLE">
             <column name="ID_PK" value="3" type="INT"/>
             <column name="ROLE_NAME" value="ROLE_AP_ADMIN"/>
         </insert>

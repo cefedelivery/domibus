@@ -22,20 +22,20 @@ public interface UserService{
     List<eu.domibus.api.user.User> findAllUsers();
 
     /**
-     * create or update users of the system (edited in the user management gui console).
-     * @param users to create of update.
-     */
-    void saveUsers(List<eu.domibus.api.user.User> users);
-
-    /**
      * get all user roles
      */
     List<eu.domibus.api.user.UserRole> findUserRoles();
 
     /**
-     * update users
+     * create or update users of the system (edited in the user management gui console).
+     * @param users to create of update.
      */
     void updateUsers(List<User> users);
+    
+    /**
+     * update users and super users
+     */
+    void updateAllUsers(List<User> users);
 
     /**
      * Handle the account lockout policy.

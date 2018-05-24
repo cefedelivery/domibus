@@ -11,6 +11,10 @@ public interface UserDomainDao {
     String findDomainByUser(String userName);
 
     String findPreferredDomainByUser(String userName);
+    
+    void setDomainByUser(String userName, String domainCode);
+    
+    void setPreferredDomainByUser(String userName, String domainCode);
 
     List<UserDomainEntity> listPreferredDomains();
 }
