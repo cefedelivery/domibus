@@ -270,7 +270,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = System.currentTimeMillis() - 50000;
         }};
-        assertEquals(true, pullMessageService.hasAttemptsLeft(userMessageLog, legConfiguration));
+        assertEquals(true, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
     }
 
     @Test
@@ -285,7 +285,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             times = 0;
         }};
-        assertEquals(false, pullMessageService.hasAttemptsLeft(userMessageLog, legConfiguration));
+        assertEquals(false, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = System.currentTimeMillis() - 70000;
         }};
-        assertEquals(false, pullMessageService.hasAttemptsLeft(userMessageLog, legConfiguration));
+        assertEquals(false, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
     }
 
     @Test

@@ -22,5 +22,5 @@ public interface MessagingLockDao {
 
     List<MessagingLock> findStaledMessages();
 
-    boolean lockAndDeleteMessageLock(String messageId);
+    PullLockAckquire lockAndDeleteMessageLock(String messageId);
 }

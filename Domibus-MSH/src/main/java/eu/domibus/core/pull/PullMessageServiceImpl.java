@@ -114,6 +114,9 @@ public class PullMessageServiceImpl implements PullMessageService {
             case PULL_FAILED:
                 pullFailedOnRequest(userMessage, legConfiguration, userMessageLog);
                 break;
+            case ABORT:
+                pullMessageStateService.sendFailed(userMessageLog);
+                break;
             default:
                 throw new IllegalStateException(String.format("Status:[%s] should never occur here", state.name()));
         }
@@ -205,6 +208,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void reset(final UserMessageLog messageLog) {
+        LOG.debug("[reset]:Message:[{}] add lock", messageLog.getMessageId());
         addPullMessageLock(messageLog);
         pullMessageStateService.reset(messageLog);
     }
@@ -234,6 +238,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 messageLog.getSendAttemptsMax());
     }
 
+
     /**
      * {@inheritDoc}
      */
@@ -246,7 +251,7 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean lockAndDeleteMessageLock(final String messageId) {
+    public PullLockAckquire lockAndDeleteMessageLock(final String messageId) {
         return messagingLockDao.lockAndDeleteMessageLock(messageId);
     }
 
@@ -282,6 +287,15 @@ public class PullMessageServiceImpl implements PullMessageService {
         return extraNumberOfAttemptTimeForExpirationDate;
     }
 
+    public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+        final MessageLog userMessageLog1 = userMessageLog;
+        Date nextAttempt = new Date();
+        if (userMessageLog.getReceived().compareTo(userMessageLog.getNextAttempt()) < 0) {
+            nextAttempt = userMessageLog.getNextAttempt();
+        }
+        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+    }
+
     /**
      * This method is called when a message has been pulled successfully.
      *
@@ -290,28 +304,50 @@ public class PullMessageServiceImpl implements PullMessageService {
      * @param userMessageLog
      */
     protected void waitingForCallBack(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        if (isExpired(legConfiguration, userMessageLog)) {
+            LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] expired]", userMessageLog.getMessageId());
+            pullMessageStateService.sendFailed(userMessageLog);
+            return;
+        }
         final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
-        LOG.debug("[PULL_REQUEST]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
-        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
-            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
-            LOG.debug("[PULL_REQUEST]:Message:[{}] In case of failure, will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
-        } else {
-            LOG.debug("[PULL_REQUEST]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+        LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
+        updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+        if (LOG.isDebugEnabled()) {
+            if (attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration)) {
+                LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+                LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] In case of failure, will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
+            } else {
+                LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+            }
         }
         userMessageLog.setMessageStatus(waitingForReceipt);
         userMessageLogDao.update(userMessageLog);
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
+        LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] Adding lock with next attempt:[{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
         addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
+    }
+
+    private boolean isExpired(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
+        return getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis();
     }
 
     /**
      * Check if the message can be sent again: there is time and attempts left
      */
-    protected boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+    protected boolean attemptNumberLeftIsLowerOrEqualThenMaxAttempts(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() <= userMessageLog.getSendAttemptsMax()
-                && (updateRetryLoggingService.getScheduledStartTime(userMessageLog) + legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000) > System.currentTimeMillis()) {
+                && getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis()) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+        // retries start after the first send attempt
+        if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
+                && getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis()) {
             return true;
         }
         return false;
@@ -319,9 +355,11 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     protected void pullFailedOnRequest(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
         LOG.debug("[PULL_REQUEST]:Message:[{}] failed on pull message retrieval", userMessageLog.getMessageId());
-        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
+        if (attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration)) {
             LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.READY_TO_PULL, userMessageLog);
+            updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+            updateRetryLoggingService.saveAndNotify(MessageStatus.READY_TO_PULL, userMessageLog);
+            LOG.debug("[pullFailedOnRequest]:Message:[{}] add lock", userMessageLog.getMessageId());
             addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
             LOG.debug("[PULL_REQUEST]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
         } else {
@@ -332,11 +370,12 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     protected void pullFailedOnReceipt(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
         LOG.debug("[PULL_RECEIPT]:Message:[{}] failed on pull message acknowledgement", userMessageLog.getMessageId());
-        if (updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration)) {
+        if (attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration)) {
             LOG.debug("[PULL_RECEIPT]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
             backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
             pullMessageStateService.reset(userMessageLog);
             addPullMessageLock(userMessageLog);
+            LOG.debug("[pullFailedOnReceipt]:Message:[{}] add lock", userMessageLog.getMessageId());
             LOG.debug("[PULL_RECEIPT]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
         } else {
             LOG.debug("[PULL_RECEIPT]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);

@@ -3,6 +3,7 @@ package eu.domibus.messaging.jms;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -92,5 +93,17 @@ public class JMSManagerImpl implements JMSManager {
     public JmsMessage consumeMessage(String source, String messageId) {
         InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
+    }
+
+    @Override
+    public long getDestinationSize(final String destinationName) {
+        final Map<String, InternalJMSDestination> destinationsGroupedByFQName = internalJmsManager.findDestinationsGroupedByFQName();
+        for (Map.Entry<String, InternalJMSDestination> entry : destinationsGroupedByFQName.entrySet()) {
+            if (StringUtils.containsIgnoreCase(entry.getKey(), destinationName)) {
+                final InternalJMSDestination value = entry.getValue();
+                return value.getNumberOfMessages();
+            }
+        }
+        return 0;
     }
 }

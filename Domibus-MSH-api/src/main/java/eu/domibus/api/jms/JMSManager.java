@@ -67,4 +67,6 @@ public interface JMSManager {
      * @return a JmsMessage
      */
     JmsMessage consumeMessage(String source, String messageId);
+
+    long getDestinationSize(String destinationName);
 }

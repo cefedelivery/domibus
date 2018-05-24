@@ -8,6 +8,7 @@ import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -30,6 +31,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
 import java.sql.Timestamp;
 
+import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.ABORT;
 import static eu.domibus.ebms3.sender.ReliabilityChecker.CheckResult.WAITING_FOR_CALLBACK;
 
 /**
@@ -67,6 +69,9 @@ public class PullRequestHandler {
     @Autowired
     private PullMessageService pullMessageService;
 
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
+
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             return handleRequest(messageId, pullContext);
@@ -102,7 +107,6 @@ public class PullRequestHandler {
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
         String attemptError = null;
         final Timestamp startDate = new Timestamp(System.currentTimeMillis());
-        boolean abortSending = false;
         SOAPMessage soapMessage = null;
         UserMessage userMessage = null;
         try {
@@ -132,7 +136,9 @@ public class PullRequestHandler {
             }
 
         } catch (ChainCertificateInvalidException e) {
-            abortSending = true;
+            checkResult = ABORT;
+            LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+            LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
@@ -147,12 +153,8 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            if (abortSending) {
-                LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
-                retryService.purgeTimedoutMessageInANewTransaction(messageId);
-            } else {
                 pullMessageService.updatePullMessageAfterRequest(userMessage,messageId,leg,checkResult);
+            if (checkResult != ABORT) {
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()
                             .setMessageId(messageId)
@@ -165,6 +167,7 @@ public class PullRequestHandler {
                 }
             }
         }
+
         return soapMessage;
     }
 

@@ -62,11 +62,11 @@ public class SendRetryWorker extends QuartzJobBean {
             LOG.error("Error while bulk expiring pull messages.", e);
         }
 
-        try {
+       /* try {
             retryService.purgePullMessage();
         } catch (Exception e) {
             LOG.error("Error while purging pull messages.", e);
-        }
+        }*/
     }
 
 

@@ -75,7 +75,7 @@ public interface PullMessageService {
      * @param messageId
      * @return
      */
-    boolean lockAndDeleteMessageLock(String messageId);
+    PullLockAckquire lockAndDeleteMessageLock(String messageId);
 
 
     void sendFailed(UserMessageLog userMessageLog);

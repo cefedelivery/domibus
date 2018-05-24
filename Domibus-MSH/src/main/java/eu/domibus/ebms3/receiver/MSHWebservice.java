@@ -17,6 +17,7 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pull.PullLockAckquire;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -166,12 +167,13 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         UserMessage userMessage = null;
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
-            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessage);
+            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessageLog.getMessageStatus());
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
             return pullRequestHandler.getSoapMessage(ebMS3Exception);
         }
-        final boolean lockAcquired = pullMessageService.lockAndDeleteMessageLock(messageId);
-        if (!lockAcquired) {
+        LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
+        PullLockAckquire lockAcquired = pullMessageService.lockAndDeleteMessageLock(messageId);
+        if (lockAcquired == null) {
             LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);
             return pullRequestHandler.getSoapMessage(ebMS3Exception);
