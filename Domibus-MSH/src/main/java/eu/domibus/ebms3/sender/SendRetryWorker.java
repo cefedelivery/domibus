@@ -51,16 +51,17 @@ public class SendRetryWorker extends QuartzJobBean {
         }
 
         try {
+            retryService.bulkExpirePullMessages();
+        } catch (Exception e) {
+            LOG.error("Error while bulk expiring pull messages.", e);
+        }
+
+        try {
             retryService.resetWaitingForReceiptPullMessages();
         } catch (Exception e) {
             LOG.error("Error while reseting waiting for receipt.", e);
         }
 
-        try {
-            retryService.bulkExpirePullMessages();
-        } catch (Exception e) {
-            LOG.error("Error while bulk expiring pull messages.", e);
-        }
 
        /* try {
             retryService.purgePullMessage();

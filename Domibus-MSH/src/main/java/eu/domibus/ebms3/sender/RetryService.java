@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -173,7 +174,7 @@ public class RetryService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void resetWaitingForReceiptPullMessages() {
         final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
         for (String messagedId : messagesToReset) {
@@ -188,15 +189,15 @@ public class RetryService {
                 continue;
             }
             final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
-            LOG.debug("Message:[{}] has reach its next attempt offset, send attempts[{}]", messagedId, userMessageLog.getSendAttempts());
-            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax() && lockAcquired.getExpirationTimeStamp() < System.currentTimeMillis()) {
-                LOG.debug("Message:[{}] has reach its next attempt moment[{}].", messagedId, userMessageLog.getNextAttempt());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] checking if can be retry, attempts[{}], max attempts[{}], expiration date[{}]", messagedId, userMessageLog.getSendAttempts(), userMessageLog.getSendAttemptsMax(), new Date(lockAcquired.getExpirationTimeStamp()));
+            }
+            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax() && lockAcquired.getExpirationTimeStamp() > System.currentTimeMillis()) {
                 pullMessageService.reset(userMessageLog);
                 //notify ??
             } else {
                 LOG.debug("Message:[{}] has no more attempt.", messagedId);
                 final MessageStatus sendFailure = MessageStatus.SEND_FAILURE;
-                LOG.debug("Set message:[{}] in state:[{}].", messagedId, sendFailure);
                 pullMessageService.sendFailed(userMessageLog);
             }
         }
@@ -205,7 +206,7 @@ public class RetryService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bulkExpirePullMessages() {
         final List<MessagingLock> staledMessages = messagingLockDao.findStaledMessages();
         LOG.trace("Delete expired pull message");
@@ -216,7 +217,7 @@ public class RetryService {
             if (lockAndDelete == null) {
                 continue;
             }
-            LOG.debug("Message:[{}] expired.", messageId);
+            LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", messageId);
             pullMessageService.sendFailed(userMessageLogDao.findByMessageId(messageId));
         }
     }

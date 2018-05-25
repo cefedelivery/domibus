@@ -160,6 +160,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullLockAckquire lockAndDeleteMessageLock(final String messageId) {
         final Map<String, String> params = new HashMap<>();
         params.put(MESSAGE_ID, messageId);
@@ -168,7 +169,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         SqlRowSet sqlRowSet = null;
         try {
             sqlRowSet = jdbcTemplate.queryForRowSet(selectForDelete, params);
-        } catch (CannotAcquireLockException ex) {
+        } catch (CannotAcquireLockException | org.springframework.dao.DeadlockLoserDataAccessException ex) {
             LOG.trace("MessagingLock:[{}] could not be locked.", messageId, ex);
             return null;
         }

@@ -250,9 +250,11 @@ public class PullMessageServiceImpl implements PullMessageService {
 
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public PullLockAckquire lockAndDeleteMessageLock(final String messageId) {
-        return messagingLockDao.lockAndDeleteMessageLock(messageId);
+        final PullLockAckquire pullLockAckquire = messagingLockDao.lockAndDeleteMessageLock(messageId);
+        return pullLockAckquire;
     }
 
     /**
@@ -317,7 +319,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
                 LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] In case of failure, will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
             } else {
-                LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has no more attempt, it has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
+                LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has no more attempt, it has been pulled [{}] times and it will be the last try.", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
             }
         }
         userMessageLog.setMessageStatus(waitingForReceipt);
@@ -327,8 +329,8 @@ public class PullMessageServiceImpl implements PullMessageService {
         addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
     }
 
-    private boolean isExpired(LegConfiguration legConfiguration, UserMessageLog userMessageLog) {
-        return getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis();
+    private boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+        return getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
     }
 
     /**
@@ -337,7 +339,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected boolean attemptNumberLeftIsLowerOrEqualThenMaxAttempts(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() <= userMessageLog.getSendAttemptsMax()
-                && getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis()) {
+                && !isExpired(legConfiguration, userMessageLog)) {
             return true;
         }
         return false;
@@ -347,7 +349,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     public boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
-                && getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() > System.currentTimeMillis()) {
+                && !isExpired(legConfiguration, userMessageLog)) {
             return true;
         }
         return false;

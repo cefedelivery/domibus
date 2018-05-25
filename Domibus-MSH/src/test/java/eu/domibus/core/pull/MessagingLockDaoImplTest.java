@@ -80,10 +80,10 @@ public class MessagingLockDaoImplTest {
         new Verifications() {{
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
         }};
     }
 
@@ -126,10 +126,10 @@ public class MessagingLockDaoImplTest {
         new Verifications() {{
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
         }};
     }
 
@@ -173,10 +173,10 @@ public class MessagingLockDaoImplTest {
         new Verifications() {{
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
         }};
     }
 
@@ -220,10 +220,10 @@ public class MessagingLockDaoImplTest {
         new Verifications() {{
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
         }};
     }
 
@@ -250,7 +250,7 @@ public class MessagingLockDaoImplTest {
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", params = withCapture());
             times = 1;
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", withAny(params));
             times = 0;
@@ -277,7 +277,7 @@ public class MessagingLockDaoImplTest {
             Map params = new HashMap();
             jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", params = withCapture());
             times = 1;
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK));
+            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
 
             jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", withAny(params));
             times = 0;
