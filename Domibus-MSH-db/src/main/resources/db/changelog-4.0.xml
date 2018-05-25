@@ -2091,10 +2091,6 @@
             <column name="ROLE_ID" value="1" type="INT"/>
         </insert>
         <insert tableName="TB_USER_ROLES">
-            <column name="USER_ID" value="1" type="INT"/>
-            <column name="ROLE_ID" value="2" type="INT"/>
-        </insert>
-        <insert tableName="TB_USER_ROLES">
             <column name="USER_ID" value="2" type="INT"/>
             <column name="ROLE_ID" value="2" type="INT"/>
         </insert>
