@@ -9,16 +9,16 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
-import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 import java.util.List;
@@ -44,10 +44,10 @@ public class UserManagementServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    private BCryptPasswordEncoder bcryptEncoder;
+    private SchedulingTaskExecutor taskExecutor;
 
     @Injectable
-    private DomainCoreConverter domainConverter;
+    private UserPersistenceService userPersistenceService;
 
     @Injectable
     private DomainContextProvider domainContextProvider;
@@ -286,23 +286,6 @@ public class UserManagementServiceImplTest {
             assertEquals(0, modifiedUser.getAttemptCount(), 0d);
         }};
 
-    }
-
-    @Test
-    public void prepareUserForUpdate() {
-        final User userEntity = new User();
-        userEntity.setActive(false);
-        userEntity.setSuspensionDate(new Date());
-        userEntity.setAttemptCount(5);
-        eu.domibus.api.user.User user = new eu.domibus.api.user.User();
-        user.setActive(true);
-        new Expectations() {{
-            userDao.loadUserByUsername(anyString);
-            result = userEntity;
-        }};
-        User user1 = userManagementService.prepareUserForUpdate(user);
-        assertNull(user1.getSuspensionDate());
-        assertEquals(0, user1.getAttemptCount(), 0d);
     }
 
     @Test

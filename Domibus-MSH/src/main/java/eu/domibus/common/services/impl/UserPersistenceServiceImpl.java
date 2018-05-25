@@ -62,30 +62,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private DomainCoreConverter domainConverter;
 
     @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
-
-    @Autowired
-    protected DomainContextProvider domainContextProvider;
-
-    @Autowired
     protected UserDomainService userDomainService;
 
-    @Autowired
-    protected UserConverter userConverter;
-
-    @Qualifier("taskExecutor")
-    @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor;
-    
-    @Autowired
-    protected TransactionManager transactionManager;
      
     @Override 
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsers(List<eu.domibus.api.user.User> users) {
-  
-        final Domain currentDomainSafely = domainContextProvider.getCurrentDomainSafely();
-        LOG.info("Current domain " + currentDomainSafely);
 
         // update
         Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);

@@ -68,12 +68,13 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     protected UserConverter userConverter;
 
+    @Autowired
+    protected UserPersistenceService userPersistenceService;
+
     @Qualifier("taskExecutor")
     @Autowired
     protected SchedulingTaskExecutor schedulingTaskExecutor; 
-     
-    @Autowired 
-    protected UserPersistenceService userPersistenceService;
+
 
     /**
      * {@inheritDoc}
