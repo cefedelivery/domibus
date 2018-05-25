@@ -290,7 +290,8 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   save (withDownloadCSV: boolean) {
     try {
-      this.validateUsers();
+      const isValid = this.userValidatorService.validateUsers(this.users);
+      if(!isValid) return;
 
       const headers = new Headers({'Content-Type': 'application/json'});
       this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
@@ -319,19 +320,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  validateUsers () {
-    const activeUsers = this.users.filter(user => user.active);
-    // check at least one active domain admin
-    const domainAdmins = activeUsers.filter(user => user.roles.includes(SecurityService.ROLE_DOMAIN_ADMIN));
-    if (domainAdmins.length < 1) {
-      throw Error('There must always be at least one active Domain Admin for each Domain');
-    }
-    // check at least one ap admin
-    const apAdmins = activeUsers.filter(user => user.roles.includes(SecurityService.ROLE_AP_ADMIN));
-    if (apAdmins.length < 1) {
-      throw Error('There must always be at least one active AP Admin');
-    }
-  }
 
   /**
    * Method that checks if CSV Button export can be enabled
