@@ -170,7 +170,7 @@
                         localhost
                     </xa-datasource-property>
                     <xa-datasource-property name="DatabaseName">
-                        domibus
+                        domibus?noAccessToProcedureBodies=true&amp;sessionVariables=innodb_lock_wait_timeout=1
                     </xa-datasource-property>
                     <driver>com.mysql</driver>
                     <security>
