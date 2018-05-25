@@ -71,8 +71,7 @@ public class UserResource {
         LOG.debug("Update Users was called: " + userROS);
         updateUserRoles(userROS);
         List<User> users = domainConverter.convert(userROS, User.class);
-
-        userService.updateAllUsers(users);
+        userService.updateUsers(users);
     }
 
     private void updateUserRoles(List<UserResponseRO> userROS) {

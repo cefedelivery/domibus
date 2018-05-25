@@ -31,12 +31,7 @@ public interface UserService{
      * @param users to create of update.
      */
     void updateUsers(List<User> users);
-    
-    /**
-     * update users and super users
-     */
-    void updateAllUsers(List<User> users);
-
+     
     /**
      * Handle the account lockout policy.
      * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
