@@ -58,7 +58,7 @@ export class SecurityService {
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
-        console.log('getCurrentUsernameFromServer:' + error);
+        //console.log('getCurrentUsernameFromServer:' + error);
         subject.next(null);
       });
     return subject.asObservable();
