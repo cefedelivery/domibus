@@ -161,4 +161,20 @@ public class UserDomainServiceImpl implements UserDomainService {
             throw new DomainException("Could not set preferred domain", e);
         }
     }
+
+    @Override
+    public List<String> getAllUserNames() {
+        LOG.debug("Setting preferred domain [{}] for user [{}]");
+
+        List<String> userNames = null;
+        Future<List<String>> utrFuture = schedulingTaskExecutor.submit(() -> {
+            return userDomainDao.listAllUserNames();
+        });
+        try {
+            userNames = utrFuture.get(3000L, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new DomainException("Could not set preferred domain", e);
+        }
+        return userNames;
+    }
 }

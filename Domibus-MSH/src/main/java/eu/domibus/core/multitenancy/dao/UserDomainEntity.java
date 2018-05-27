@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 @NamedQueries({
         @NamedQuery(name = "UserDomainEntity.findByUserName", query = "FROM UserDomainEntity u where u.userName=:USER_NAME"),
         @NamedQuery(name = "UserDomainEntity.findPreferredDomains", query = "FROM UserDomainEntity u where u.preferredDomain is not null"),
+        @NamedQuery(name = "UserDomainEntity.findAll", query = "FROM UserDomainEntity"),
 })
 public class UserDomainEntity extends AbstractBaseEntity {
 

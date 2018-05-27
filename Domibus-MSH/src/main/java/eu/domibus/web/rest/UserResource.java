@@ -15,6 +15,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.*;
 
 /**
@@ -29,17 +32,21 @@ import java.util.*;
  * @since 3.3
  */
 @RestController
+@Scope(value="session")
 @RequestMapping(value = "/rest/user")
 public class UserResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserResource.class);
 
-    private final UserService userService;
+    private UserService userService;
 
-    @Autowired
-    public UserResource(UserService userService) {
-        this.userService = userService;
-    }
+    @Resource(name="userServicesMap")
+    Map<String, UserService> userServices = new HashMap<>();
+
+//    @Autowired
+//    public UserResource(UserService userService) {
+//        this.userService = userService;
+//    }
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -50,6 +57,14 @@ public class UserResource {
     @Autowired
     private AuthUtils authUtils;
 
+    @PostConstruct
+    public void init() {
+        if (authUtils.isSuperAdmin())
+            userService = userServices.get(AuthRole.ROLE_AP_ADMIN.name());
+        else
+            userService = userServices.get(AuthRole.ROLE_ADMIN.name());
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -57,11 +72,12 @@ public class UserResource {
     public List<UserResponseRO> users() {
         LOG.debug("Retrieving users");
 
-        List<User> users;
-        if (authUtils.isSuperAdmin())
-            users = userService.findAllUsers();
-        else
-            users = userService.findUsers();
+        List<User> users = userService.findUsers();
+//        List<User> users;
+//        if (authUtils.isSuperAdmin())
+//            users = userService.findAllUsers();
+//        else
+//            users = userService.findUsers();
 
         return prepareResponse(users);
     }

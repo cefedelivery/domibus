@@ -71,12 +71,13 @@ public class AuthenticationResource {
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
+
         String domainCode = userDomainService.getDomainForUser(loginRO.getUsername());
         LOG.debug("Determined domain [{}] for user [{}]", domainCode, loginRO.getUsername());
 
-        if (domainCode != null) {
+        if (domainCode != null) {   //domain user
             domainContextProvider.setCurrentDomain(domainCode);            
-        } else {
+        } else {                    //ap user
             domainContextProvider.clearCurrentDomain();
             domainCode = userDomainService.getPreferredDomainForUser(loginRO.getUsername());
             LOG.debug("Determined preferred domain [{}] for user [{}]", domainCode, loginRO.getUsername());

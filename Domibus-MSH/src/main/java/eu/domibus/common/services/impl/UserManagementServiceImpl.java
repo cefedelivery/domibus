@@ -26,11 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
 import eu.domibus.common.services.UserPersistenceService;
 
 /**
@@ -51,11 +53,11 @@ public class UserManagementServiceImpl implements UserService {
     private static final String DEFAULT_LOGING_ATTEMPT = "5";
 
     @Autowired
-    private UserDao userDao;
+    protected UserDao userDao;
 
     @Autowired
     private UserRoleDao userRoleDao;
- 
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -73,7 +75,7 @@ public class UserManagementServiceImpl implements UserService {
 
     @Qualifier("taskExecutor")
     @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor; 
+    protected SchedulingTaskExecutor schedulingTaskExecutor;
 
 
     /**
@@ -91,16 +93,16 @@ public class UserManagementServiceImpl implements UserService {
         return users;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<eu.domibus.api.user.User> findAllUsers() {
-        List<eu.domibus.api.user.User> allUsers = findUsers();
-        List<eu.domibus.api.user.User> superUsers = userDomainService.getSuperUsers();
-        allUsers.addAll(superUsers);
-        return allUsers;
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    public List<eu.domibus.api.user.User> findAllUsers() {
+//        List<eu.domibus.api.user.User> allUsers = findUsers();
+//        List<eu.domibus.api.user.User> superUsers = userDomainService.getSuperUsers();
+//        allUsers.addAll(superUsers);
+//        return allUsers;
+//    }
 
     /**
      * {@inheritDoc}
@@ -121,32 +123,33 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    @Transactional 
+    @Transactional
     public void updateUsers(List<eu.domibus.api.user.User> users) {
-   
-        List<eu.domibus.api.user.User> regularUsers = users.stream()
-                .filter(u -> !u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-                .collect(Collectors.toList());
-        List<eu.domibus.api.user.User> superUsers = users.stream()
-                .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-                .collect(Collectors.toList());
+        userPersistenceService.updateUsers(users);
 
-        userPersistenceService.updateUsers(regularUsers); 
-         
-        Future utrFuture = schedulingTaskExecutor.submit(() -> {  
-            
-            userPersistenceService.updateUsers(superUsers);
- 
-            // this block needs to called inside a transaction; for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
-        }); 
-        
-        try {
-            utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not save super users", e);
-        }       
+//        List<eu.domibus.api.user.User> regularUsers = users.stream()
+//                .filter(u -> !u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
+//                .collect(Collectors.toList());
+//        List<eu.domibus.api.user.User> superUsers = users.stream()
+//                .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
+//                .collect(Collectors.toList());
+//
+//        userPersistenceService.updateUsers(regularUsers);
+//
+//        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+//
+//            userPersistenceService.updateUsers(superUsers);
+//
+//            // this block needs to called inside a transaction; for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
+//        });
+//
+//        try {
+//            utrFuture.get(3000L, TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            throw new DomainException("Could not save super users", e);
+//        }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -253,5 +256,5 @@ public class UserManagementServiceImpl implements UserService {
             userDao.update(user);
         }
     }
-  
+
 }

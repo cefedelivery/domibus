@@ -19,4 +19,6 @@ public interface UserDomainService {
     void setPreferredDomainForUser(String user, String domainCode);
      
     List<User> getSuperUsers();
+
+    List<String> getAllUserNames();
 }

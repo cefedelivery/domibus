@@ -79,5 +79,12 @@
         </property>
     </bean>
 
-
+    <util:map id="userServicesMap">
+        <entry key="ROLE_ADMIN">
+            <bean class="eu.domibus.common.services.impl.UserManagementServiceImpl"></bean>
+        </entry>
+        <entry key="ROLE_AP_ADMIN">
+            <bean class="eu.domibus.common.services.impl.SuperUserManagementServiceImpl"></bean>
+        </entry>
+    </util:map>
 </beans>

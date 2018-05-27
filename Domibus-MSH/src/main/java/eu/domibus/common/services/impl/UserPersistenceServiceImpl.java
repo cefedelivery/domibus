@@ -13,6 +13,7 @@ import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
+import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
@@ -22,6 +23,7 @@ import eu.domibus.common.model.security.UserRole;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.transaction.TransactionManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -38,17 +41,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import eu.domibus.common.services.UserPersistenceService;
+import sun.security.validator.ValidatorException;
 
 /**
- *
  * @author Pion
  */
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {
-     
-    
+
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserPersistenceServiceImpl.class);
-    
+
     @Autowired
     private UserDao userDao;
 
@@ -64,10 +66,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     @Autowired
     protected UserDomainService userDomainService;
 
-     
-    @Override 
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsers(List<eu.domibus.api.user.User> users) {
+        // insertion
+        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
+        LOG.debug("New users:" + newUsers.size());
+        insertNewUsers(newUsers);
 
         // update
         Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
@@ -77,18 +82,11 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
 
-        // insertion
-        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
-        LOG.debug("New users:" + newUsers.size());
-        insertNewUsers(newUsers);
-
-        /*
-        // deletion - TODO: delete logically
+        // deletion
         List<User> usersEntities = domainConverter.convert(users, User.class);
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
         userDao.deleteAll(usersEntitiesToDelete);
-        */
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -114,17 +112,24 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         return result;
     }
 
-    private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {
-        for (eu.domibus.api.user.User user : users) {
+    private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
+        //get all users from general schema
+        List<String> allUserNames = userDomainService.getAllUserNames();
+        for (eu.domibus.api.user.User user : newUsers) {
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
+                throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists.");
+        }
+
+        for (eu.domibus.api.user.User user : newUsers) {
             List<String> authorities = user.getAuthorities();
             User userEntity = domainConverter.convert(user, User.class);
-            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword())); 
+            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(authorities, userEntity);
             userDao.create(userEntity);
 
-            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) { 
+            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
-            } else { 
+            } else {
                 userDomainService.setDomainForUser(user.getUserName(), user.getDomain());
             }
         }
@@ -136,6 +141,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             userEntity.addRole(userRole);
         }
     }
+
     protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
         User userEntity = userDao.loadUserByUsername(user.getUserName());
         if (!userEntity.getActive() && user.isActive()) {

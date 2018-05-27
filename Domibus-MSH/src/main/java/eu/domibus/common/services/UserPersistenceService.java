@@ -12,6 +12,5 @@ import java.util.List;
  * @author Pion
  */
 public interface UserPersistenceService {
-    
     void updateUsers(List<eu.domibus.api.user.User> users);
 }

@@ -16,10 +16,10 @@ public interface UserService{
      */
     List<eu.domibus.api.user.User> findUsers();
 
-    /**
-     * @return the list of users, including super users.
-     */
-    List<eu.domibus.api.user.User> findAllUsers();
+//    /**
+//     * @return the list of users, including super users.
+//     */
+//    List<eu.domibus.api.user.User> findAllUsers();
 
     /**
      * get all user roles

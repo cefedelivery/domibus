@@ -1013,6 +1013,7 @@
             <column name="OPTLOCK" type="INT"/>
             <column defaultValueNumeric="0" name="ATTEMPT_COUNT" type="INT"/>
             <column name="SUSPENSION_DATE" type="TIMESTAMP"/>
+            <column name="USER_DELETED" type="BOOLEAN" value="false"/>
         </createTable>
 
 
