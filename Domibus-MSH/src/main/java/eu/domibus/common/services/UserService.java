@@ -48,12 +48,6 @@ public interface UserService{
      */
     void findAndReactivateSuspendedUsers();
 
-    /**
-     * Get currently logged user name.
-     *
-     * @return the userName
-     */
-    String getLoggedUserNamed();
 
     /**
      * Verify if user add some incorrect login attempt and reset the attempt counter.

@@ -150,17 +150,6 @@ public class UserManagementServiceImpl implements UserService {
 //        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getLoggedUserNamed() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName();
-        }
-        return null;
-    }
 
     /**
      * {@inheritDoc}

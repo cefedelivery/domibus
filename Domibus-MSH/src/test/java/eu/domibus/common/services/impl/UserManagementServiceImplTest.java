@@ -61,27 +61,27 @@ public class UserManagementServiceImplTest {
     @Tested
     private UserManagementServiceImpl userService;
 
-    @Test
-    public void getLoggedUserNamed(@Mocked SecurityContextHolder securityContextHolder, @Mocked Authentication authentication) throws Exception {
-        new Expectations() {{
-            securityContextHolder.getContext().getAuthentication();
-            result = authentication;
-            authentication.getName();
-            result = "thomas";
-        }};
-        String loggedUserNamed = userService.getLoggedUserNamed();
-        assertEquals("thomas", loggedUserNamed);
-    }
-
-    @Test
-    public void getLoggedUserNamedWithNoAuthentication(@Mocked SecurityContextHolder securityContextHolder) throws Exception {
-        new Expectations() {{
-            SecurityContextHolder.getContext().getAuthentication();
-            result = null;
-        }};
-        String loggedUserNamed = userService.getLoggedUserNamed();
-        assertNull(loggedUserNamed);
-    }
+//    @Test
+//    public void getLoggedUserNamed(@Mocked SecurityContextHolder securityContextHolder, @Mocked Authentication authentication) throws Exception {
+//        new Expectations() {{
+//            securityContextHolder.getContext().getAuthentication();
+//            result = authentication;
+//            authentication.getName();
+//            result = "thomas";
+//        }};
+//        String loggedUserNamed = userService.getLoggedUserNamed();
+//        assertEquals("thomas", loggedUserNamed);
+//    }
+//
+//    @Test
+//    public void getLoggedUserNamedWithNoAuthentication(@Mocked SecurityContextHolder securityContextHolder) throws Exception {
+//        new Expectations() {{
+//            SecurityContextHolder.getContext().getAuthentication();
+//            result = null;
+//        }};
+//        String loggedUserNamed = userService.getLoggedUserNamed();
+//        assertNull(loggedUserNamed);
+//    }
 
     @Tested
     private UserManagementServiceImpl userManagementService;
