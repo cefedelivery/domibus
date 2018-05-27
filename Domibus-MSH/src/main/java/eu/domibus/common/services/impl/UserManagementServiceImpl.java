@@ -173,6 +173,7 @@ public class UserManagementServiceImpl implements UserService {
         if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
+        userDao.flush();
         return userLoginErrorReason;
     }
 
@@ -251,10 +252,12 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("handleCorrectAuthentication for user [{}]", userName);
         if (user.getAttemptCount() > 0) {
             LOG.debug("user [{}] has [{}] attempt ", userName, user.getAttemptCount());
-            LOG.debug("reseting to 0");
+            LOG.debug("resetting to 0");
             user.setAttemptCount(0);
             userDao.update(user);
         }
+
+        userDao.flush();
     }
 
 }

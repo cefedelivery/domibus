@@ -68,4 +68,7 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
         em.merge(entity);
     }
 
+    public void flush() {
+        em.flush();
+    }
 }

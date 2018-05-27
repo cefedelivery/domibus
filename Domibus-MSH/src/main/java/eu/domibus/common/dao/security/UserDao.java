@@ -27,4 +27,6 @@ public interface UserDao {
     void update(final List<User> users);
 
     void deleteAll(final Collection<User> delete);
+
+    void flush();
 }
