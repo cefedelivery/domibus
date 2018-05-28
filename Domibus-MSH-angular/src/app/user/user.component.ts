@@ -307,7 +307,7 @@ export class UserComponent implements OnInit, DirtyOperations {
           }, err => {
             this.getUsers();
             this.getUserRoles();
-            this.alertService.error('The operation \'update users\' not completed successfully.', false);
+            this.alertService.exception('The operation \'update users\' not completed successfully.', err, false);
           });
         } else {
           if (withDownloadCSV) {

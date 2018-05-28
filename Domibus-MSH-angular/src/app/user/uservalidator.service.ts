@@ -15,17 +15,13 @@ export class UserValidatorService {
 
   validateUsers (users: UserResponseRO[]): boolean {
     let errorMessage = '';
-    const modifiedUsers = users.filter(user => user.status === UserState[UserState.UPDATED])
-    if (modifiedUsers.length === 0) {
-      return true;
-    }
     errorMessage = errorMessage.concat(this.checkUserNameDuplication(users));
     errorMessage = errorMessage.concat(this.validateDomains(users));
     return this.triggerValidation(errorMessage);
   }
 
   validateDomains (users: UserResponseRO[]): string {
-    let errorMessage: string = '';
+    let errorMessage = '';
     const activeUsers = users.filter(user => user.active);
 
     // check at least one active domain admin
@@ -44,7 +40,7 @@ export class UserValidatorService {
   }
 
   private checkUserNameDuplication (allUsers: UserResponseRO[]) {
-    let errorMessage: string = '';
+    let errorMessage = '';
     let seen = new Set();
     allUsers.every(function (user) {
       if (seen.size === seen.add(user.userName).size) {

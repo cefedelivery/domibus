@@ -56,8 +56,9 @@ export class AlertService {
     this.subject.next({type: 'error', text: message});
   }
 
-  exception (message: string, error: Error, keepAfterNavigationChange = false): void {
-    this.error(message + ' \n' + error.message, keepAfterNavigationChange);
+  exception (message: string, error: any, keepAfterNavigationChange = false): void {
+    const errMsg = error.message || (error.json ? error.json().message : error );
+    this.error(message + ' \n' + errMsg, keepAfterNavigationChange);
   }
 
   getMessage (): Observable<any> {
