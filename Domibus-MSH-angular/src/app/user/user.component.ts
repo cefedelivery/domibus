@@ -46,10 +46,10 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   selected = [];
 
-  enableCancel = false;
-  enableSave = false;
-  enableDelete = false;
-  enableEdit = false;
+  enableCancel:boolean = false;
+  enableSave:boolean = false;
+  enableDelete:boolean = false;
+  enableEdit:boolean = false;
 
   rowNumber = -1;
 
@@ -66,6 +66,11 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
     this.columnPicker.allColumns = [
       {
         cellTemplate: this.editableTpl,
