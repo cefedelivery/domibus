@@ -37,7 +37,9 @@
             <column name="OPTLOCK" type="INT"/>
             <column defaultValueNumeric="0" name="ATTEMPT_COUNT" type="INT"/>
             <column name="SUSPENSION_DATE" type="TIMESTAMP"/>
-            <column name="USER_DELETED" type="BOOLEAN" value="false"/>
+            <column name="USER_DELETED" type="BOOLEAN" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <createTable tableName="TB_USER_ROLE">
