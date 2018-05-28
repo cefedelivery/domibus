@@ -2,26 +2,28 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
+import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserRole;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -41,7 +43,7 @@ public class UserResource {
     private UserService userService;
 
     @Resource(name="userServicesMap")
-    Map<String, UserService> userServices = new HashMap<>();
+    Map<String, UserService> userServices;
 
 //    @Autowired
 //    public UserResource(UserService userService) {
@@ -63,6 +65,12 @@ public class UserResource {
             userService = userServices.get(AuthRole.ROLE_AP_ADMIN.name());
         else
             userService = userServices.get(AuthRole.ROLE_ADMIN.name());
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({UserManagementException.class})
+    public ErrorRO handleUserManagementException(Exception ex) {
+        return new ErrorRO(ex.getMessage());
     }
 
     /**

@@ -9,6 +9,7 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 
@@ -24,6 +25,7 @@ public class ActivateSuspendedUsersJob extends DomibusQuartzJobBean {
     public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ActivateSuspendedUsersJob.class);
 
     @Autowired
+    @Qualifier("userManagementService")
     private UserService userService;
 
     @Override

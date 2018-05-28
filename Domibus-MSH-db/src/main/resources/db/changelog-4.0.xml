@@ -1027,6 +1027,8 @@
             <column name="REVTYPE" type="TINYINT"/>
             <column name="USER_ENABLED" type="BOOLEAN"/>
             <column name="ACTIVE_MOD" type="BOOLEAN"/>
+            <column name="USER_DELETED" type="BOOLEAN"/>
+            <column name="DELETED_MOD" type="BOOLEAN"/>
             <column name="USER_EMAIL" type="VARCHAR(255)"/>
             <column name="EMAIL_MOD" type="BOOLEAN"/>
             <column name="USER_PASSWORD" type="VARCHAR(255)"/>
@@ -2080,12 +2082,14 @@
             <column name="USER_NAME" value="admin"/>
             <column name="USER_PASSWORD" value="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"/>
             <column name="USER_ENABLED" valueBoolean="true"/>
+            <column name="USER_DELETED" valueBoolean="false"/>
         </insert>
         <insert tableName="TB_USER">
             <column name="ID_PK" value="2" type="INT"/>
             <column name="USER_NAME" value="user"/>
             <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
             <column name="USER_ENABLED" valueBoolean="true"/>
+            <column name="USER_DELETED" valueBoolean="false"/>
         </insert>
         <insert tableName="TB_USER_ROLES">
             <column name="USER_ID" value="1" type="INT"/>

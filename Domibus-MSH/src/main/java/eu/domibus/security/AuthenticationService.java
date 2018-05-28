@@ -31,6 +31,7 @@ public class AuthenticationService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    @Qualifier("userManagementService")
     private UserService userService;
 
     @Autowired
@@ -53,6 +54,7 @@ public class AuthenticationService {
             }
             throw ae;
         }
+        
         final UserDetail principal = (UserDetail) authentication.getPrincipal();
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);
