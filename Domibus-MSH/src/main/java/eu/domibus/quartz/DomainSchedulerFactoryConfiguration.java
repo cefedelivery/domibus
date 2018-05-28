@@ -64,8 +64,7 @@ public class DomainSchedulerFactoryConfiguration {
     protected AutowiringSpringBeanJobFactory autowiringSpringBeanJobFactory;
 
     @Autowired
-    @Resource(name = "domibusStandardTriggerList")
-    protected List<Trigger> domibusStandardTriggerList;
+    protected List<Trigger> allTriggers;
 
     @Autowired
     protected DomainService domainService;
@@ -107,7 +106,7 @@ public class DomainSchedulerFactoryConfiguration {
         scheduler.setQuartzProperties(properties);
 
         scheduler.setJobFactory(autowiringSpringBeanJobFactory);
-        scheduler.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
+        scheduler.setTriggers(allTriggers.toArray(new Trigger[0]));
 
         return scheduler;
     }

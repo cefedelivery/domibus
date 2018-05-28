@@ -27,14 +27,4 @@
         <property name="cronExpression" value="${domibus.retentionWorker.cronExpression}"/>
         <property name="startDelay" value="20000"/>
     </bean>
-
-    <bean id="domibusStandardTriggerList" parent="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list merge="true">
-                <ref bean="retentionWorkerTrigger"/>
-            </list>
-        </property>
-    </bean>
-
 </beans>
