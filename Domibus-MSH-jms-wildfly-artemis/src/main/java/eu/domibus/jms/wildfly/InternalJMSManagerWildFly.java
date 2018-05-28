@@ -1,6 +1,7 @@
 package eu.domibus.jms.wildfly;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -31,6 +32,8 @@ import javax.naming.NamingException;
 import java.util.*;
 
 /**
+ * JMSManager implementation for ActiveMQ Artemis (Wildfly 12)
+ *
  * @author Catalin Enache
  * @since 4.0
  */
@@ -42,7 +45,11 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
 
-    static final String MBEAN_PREFIX_QUEUE_TOPIC = "org.apache.activemq.artemis:type=Broker,brokerName=\"default\",module=JMS,serviceType=";
+    /** prefix for MBean names of topic, queues */
+    static final String MBEAN_PREFIX_QUEUE_TOPIC = "org.apache.activemq.artemis:type=Broker,brokerName=\"";
+
+    /** propery key for name of the JMS broker */
+    static final String JMS_BROKER_PROPERTY = "domibus.jms.activemq.artemis.broker";
 
     protected Map<String, ObjectName> queueMap;
 
@@ -63,6 +70,9 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
 
     @Autowired
     JMSSelectorUtil jmsSelectorUtil;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -97,8 +107,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         String[] queueNames = jmsServerControl.getQueueNames();
 
         for (String queueName : queueNames) {
-            //TODO externalize this
-            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + "Queue,name=\"" + queueName + "\"";
+            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY, "default")
+                    + "\",module=JMS,serviceType=Queue,name=\"" + queueName + "\"";
 
             try {
                 ObjectName objectName = ObjectName.getInstance(mbeanObjectName);
@@ -118,8 +128,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         topicMap = new HashMap<>();
         String[] topicNames = jmsServerControl.getTopicNames();
         for (String topicName : topicNames) {
-            //TODO externalize this
-            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + "Topic,name=\"" + topicName + "\"";
+            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY, "default")
+                    + "\",module=JMS,serviceType=Topic,name=\"" + topicName + "\"";
 
             try {
                 ObjectName objectName = ObjectName.getInstance(mbeanObjectName);

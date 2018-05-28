@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:c="http://www.springframework.org/schema/c"
        xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:jms="http://www.springframework.org/schema/jms"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd   http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
     <bean id="mbeanServer"
@@ -14,7 +12,7 @@
           factory-method="getPlatformMBeanServer"/>
 
     <bean id="jmsServerControl" class="org.springframework.jmx.access.MBeanProxyFactoryBean"
-          p:objectName="org.apache.activemq.artemis:type=Broker,brokerName=&quot;default&quot;,module=JMS,serviceType=Server"
+          p:objectName="org.apache.activemq.artemis:type=Broker,brokerName=&quot;${domibus.jms.activemq.artemis.broker}&quot;,module=JMS,serviceType=Server"
           p:proxyInterface="org.apache.activemq.artemis.api.jms.management.JMSServerControl"
           p:server-ref="mbeanServer" />
 
