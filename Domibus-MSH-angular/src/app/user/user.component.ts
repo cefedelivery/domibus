@@ -54,7 +54,6 @@ export class UserComponent implements OnInit, DirtyOperations {
   rowNumber = -1;
 
   editedUser: UserResponseRO;
-  test = false;
 
   constructor (private http: Http,
                private userService: UserService,
@@ -66,10 +65,18 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
+    this.columnPicker = new ColumnPickerBase();
+    this.rowLimiter = new RowLimiterBase();
+
+    this.users = [];
+    this.userRoles = [];
+
     this.enableCancel = false;
     this.enableSave = false;
     this.enableDelete = false;
     this.enableEdit = false;
+    this.rowNumber = -1;
+    this.selected = [];
 
     this.columnPicker.allColumns = [
       {
