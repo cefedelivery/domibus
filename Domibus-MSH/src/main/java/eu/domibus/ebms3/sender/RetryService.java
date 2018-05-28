@@ -125,7 +125,7 @@ public class RetryService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    /*@Transactional(propagation = Propagation.REQUIRES_NEW)
     public void purgePullMessage() {
         List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String timedoutPullMessage : timedoutPullMessages) {
@@ -134,7 +134,7 @@ public class RetryService {
             rawEnvelopeLogDao.deleteUserMessageRawEnvelope(timedoutPullMessage);
             purgeTimedoutMessage(timedoutPullMessage);
         }
-    }
+    }*/
 
 
     /**

@@ -288,7 +288,7 @@ public class MessagingLockDaoImplTest {
     @Test
     public void save() {
         final MessagingLock messagingLock=new MessagingLock();
-        messagingLockDao.save(messagingLock);
+        messagingLockDao.releaseLock(messagingLock);
         new Verifications(){{
            entityManager.persist(messagingLock);
         }};

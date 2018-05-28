@@ -12,6 +12,10 @@ public interface MessagingLockDao {
 
     PullMessageId getNextPullMessageToProcess(Long messageId);
 
+    void releaseLock(MessagingLock messagingLock);
+
+    void deleteLock(String messageId);
+
     void save(MessagingLock messagingLock);
 
     void delete(String messageId);

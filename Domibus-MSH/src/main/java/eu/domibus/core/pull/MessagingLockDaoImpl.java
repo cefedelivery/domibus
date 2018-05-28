@@ -41,6 +41,9 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     protected static final String ID_PK_PARAM = "idPk";
     public static final String MESSAGE_STALED_COLUM = "MESSAGE_STALED";
     public static final String ID_PK_COLUMN = "ID_PK";
+    public static final String DEL = "DEL";
+    public static final String READY = "READY";
+    public static final String PROCESS = "PROCESS";
 
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
@@ -50,18 +53,24 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
-    private final static Map<DataBaseEngine, String> selectAndLockQueriesForPulling = new HashMap<>();
+    private final static Map<DataBaseEngine, String> lockByIdQuery = new HashMap<>();
 
-    private final static Map<DataBaseEngine, String> selectAndLockQueriesForClearing = new HashMap<>();
+    private final static Map<DataBaseEngine, String> lockByMessageIdQuery = new HashMap<>();
+
+    private final static Map<DataBaseEngine, String> unlockByMessageIdQuery = new HashMap<>();
 
     static {
-        selectAndLockQueriesForPulling.put(DataBaseEngine.MYSQL, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForPulling.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForPulling.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
+        lockByIdQuery.put(DataBaseEngine.MYSQL, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idPk FOR UPDATE");
+        lockByIdQuery.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idPk FOR UPDATE");
+        lockByIdQuery.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idPk FOR UPDATE NOWAIT");
 
-        selectAndLockQueriesForClearing.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.H2, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.ORACLE, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE NOWAIT");
+        lockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        lockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        lockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE NOWAIT");
+
+        unlockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        unlockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
+        unlockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE  NOWAIT");
 
 
     }
@@ -76,18 +85,19 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullMessageId getNextPullMessageToProcess(final Long idPk) {
-        final Map<String, Long> params = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
         params.put(ID_PK_PARAM, idPk);
         try {
-            final String databaseSpecificQuery = selectAndLockQueriesForPulling.get(domibusConfigurationService.getDataBaseEngine());
+            final String databaseSpecificQuery = lockByIdQuery.get(domibusConfigurationService.getDataBaseEngine());
             final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(databaseSpecificQuery, params);
             while (sqlRowSet.next()) {
                 final String messageId = sqlRowSet.getString(1);
                 final Timestamp messageStaled = getTimestamp(sqlRowSet.getObject(2));
                 final int sendAttempts = sqlRowSet.getInt(3);
                 final int sendAttemptsMax = sqlRowSet.getInt(4);
+                params.put("MESSAGE_STATE", PROCESS);
                 LOG.debug("[getNextPullMessageToProcess]:Message:[{}] delete lock ", messageId);
-                jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params);
+                jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK SET MESSAGE_STATE=:MESSAGE_STATE WHERE ID_PK=:idPk", params);
                 if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
                     return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
                 }
@@ -122,6 +132,44 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             }
         }
         return (Timestamp) object;
+    }
+
+
+    @Override
+    public void releaseLock(final MessagingLock messagingLock) {
+        changeStatus(messagingLock, READY);
+
+    }
+
+    @Override
+    public void deleteLock(final String messageId) {
+        final Map<String, String> params = new HashMap<>();
+        params.put(MESSAGE_ID, messageId);
+        final String selectForUpdate = unlockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine());
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(selectForUpdate, params);
+        sqlRowSet.next();
+        final Map<String, Object> updateParams = new HashMap<>();
+        final long id = sqlRowSet.getLong(ID_PK_COLUMN);
+        updateParams.put(ID_PK_PARAM, id);
+        updateParams.put("MESSAGE_STATE", DEL);
+        jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK SET MESSAGE_STATE=:MESSAGE_STATE WHERE ID_PK=:idPk", updateParams);
+
+    }
+
+    public void changeStatus(final MessagingLock messagingLock, final String messageState) {
+        final Map<String, String> params = new HashMap<>();
+        params.put(MESSAGE_ID, messagingLock.getMessageId());
+        final String selectForUpdate = unlockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine());
+        SqlRowSet sqlRowSet = null;
+        sqlRowSet = jdbcTemplate.queryForRowSet(selectForUpdate, params);
+        sqlRowSet.next();
+        final Map<String, Object> updateParams = new HashMap<>();
+        final long id = sqlRowSet.getLong(ID_PK_COLUMN);
+        updateParams.put(ID_PK_PARAM, id);
+        updateParams.put("SEND_ATTEMPT", messagingLock.getSendAttempts());
+        updateParams.put("NEXT_ATTEMPT", messagingLock.getNextAttempt());
+        updateParams.put("MESSAGE_STATE", messageState);
+        jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK SET MESSAGE_STATE=:MESSAGE_STATE,SEND_ATTEMPTS=:SEND_ATTEMPT,NEXT_ATTEMPT=:NEXT_ATTEMPT WHERE ID_PK=:idPk", updateParams);
     }
 
 
@@ -165,7 +213,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         final Map<String, String> params = new HashMap<>();
         params.put(MESSAGE_ID, messageId);
 
-        final String selectForDelete = selectAndLockQueriesForClearing.get(domibusConfigurationService.getDataBaseEngine());
+        final String selectForDelete = lockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine());
         SqlRowSet sqlRowSet = null;
         try {
             sqlRowSet = jdbcTemplate.queryForRowSet(selectForDelete, params);
@@ -178,7 +226,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             final long id = sqlRowSet.getLong(ID_PK_COLUMN);
             final Timestamp messageStaled = getTimestamp(sqlRowSet.getObject(MESSAGE_STALED_COLUM));
             idpkd.put(ID_PK_PARAM, id);
-            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", idpkd);
+            jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK SET MESSAGE_STATE='PROCESS' WHERE ID_PK=:idPk", idpkd);
             return new PullLockAckquire(id, messageStaled.getTime());
         }
         return null;

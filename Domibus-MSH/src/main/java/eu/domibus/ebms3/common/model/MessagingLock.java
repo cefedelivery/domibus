@@ -118,6 +118,14 @@ public class MessagingLock extends AbstractBaseEntity {
         return staled;
     }
 
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public int getSendAttempts() {
+        return sendAttempts;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -153,4 +161,5 @@ public class MessagingLock extends AbstractBaseEntity {
                 .append(nextAttempt)
                 .toHashCode();
     }
+
 }

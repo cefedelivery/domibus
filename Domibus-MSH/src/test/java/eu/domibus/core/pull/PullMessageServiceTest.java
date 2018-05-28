@@ -89,7 +89,7 @@ public class PullMessageServiceTest {
         pullService.addPullMessageLock(partyIdExtractor, null, null);
         new Verifications() {{
             MessagingLock messagingLock;
-            messagingLockDao.save(messagingLock = withCapture());
+            messagingLockDao.releaseLock(messagingLock = withCapture());
             assertEquals(MESSAGE_ID, messagingLock.getMessageId());
             assertEquals(MessageState.READY, messagingLock.getMessageState());
             assertEquals(MessagingLock.PULL, messagingLock.getMessageType());
