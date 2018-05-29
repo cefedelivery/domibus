@@ -118,11 +118,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging;
         messaging = getMessage(request);
         UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+        LOG.trace("Message received");
         if (messaging.getSignalMessage() != null) {
             if (messaging.getSignalMessage().getPullRequest() != null) {
-                return handlePullRequest(messaging);
+                LOG.trace("before pull request.");
+                final SOAPMessage soapMessage = handlePullRequest(messaging);
+                LOG.trace("returning pull request message.");
+                return soapMessage;
             } else if (messaging.getSignalMessage().getReceipt() != null) {
-                return handlePullRequestReceipt(request, messaging);
+                LOG.trace("before pull receipt.");
+                final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
+                LOG.trace("returning pull receipt.");
+                return soapMessage;
             }
         } else {
             String pmodeKey = null;

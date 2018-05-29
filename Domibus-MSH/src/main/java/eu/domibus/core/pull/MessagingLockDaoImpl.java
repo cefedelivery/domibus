@@ -8,8 +8,12 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
@@ -55,14 +59,17 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private final static Map<DataBaseEngine, String> unlockByMessageIdQuery = new HashMap<>();
 
-    static {
-        lockByIdQuery.put(DataBaseEngine.MYSQL, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE");
-        lockByIdQuery.put(DataBaseEngine.H2, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE");
-        lockByIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE NOWAIT");
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
-        lockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE");
-        lockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE");
-        lockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE NOWAIT");
+    static {
+        lockByIdQuery.put(DataBaseEngine.MYSQL, "SELECT ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE");
+        lockByIdQuery.put(DataBaseEngine.H2, "SELECT ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE");
+        lockByIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE NOWAIT");
+
+        lockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=? FOR UPDATE;");
+        lockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=? FOR UPDATE;");
+        lockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=? FOR UPDATE NOWAIT;");
 
         unlockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
         unlockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
@@ -78,48 +85,48 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     }
 
     @Override
-    @Transactional(noRollbackFor = PersistenceException.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullMessageId getNextPullMessageToProcess(final Integer idPk) {
-
-        Query q = entityManager.createNativeQuery(lockByIdQuery.get(domibusConfigurationService.getDataBaseEngine()), MessagingLock.class);
-        q.setParameter(1, idPk);
-        List<MessagingLock> resultList = q.getResultList();
-     /*   try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-        for (MessagingLock messagingLock : resultList) {
-
-            final String messageId = messagingLock.getMessageId();
-            final java.util.Date messageStaled = messagingLock.getStaled();
-            final int sendAttempts = messagingLock.getSendAttempts();
-            final int sendAttemptsMax = messagingLock.getSendAttemptsMax();
-            if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
-                messagingLock.setMessageState(MessageState.DEL);
-                entityManager.persist(messagingLock);
-                return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
-            }
-            if (sendAttempts >= sendAttemptsMax) {
-                messagingLock.setMessageState(MessageState.DEL);
-                entityManager.persist(messagingLock);
-                return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
-            }
-            if (sendAttempts >= 0) {
-                messagingLock.setMessageState(MessageState.PROCESS);
-                entityManager.persist(messagingLock);
-            }
-            if (sendAttempts > 0) {
-                return new PullMessageId(messageId, RETRY);
-            }
-            LOG.debug("Message[{}] locked", messageId);
-            return new PullMessageId(messageId);
-
+        Map<String, Object> params = new HashMap<>();
+        params.put("idpk", idPk);
+        try {
+            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(lockByIdQuery.get(domibusConfigurationService.getDataBaseEngine()), params);
+            sqlRowSet.next();
+        } catch (CannotAcquireLockException e) {
+            //        LOG.trace("Can not acquire lock ", e);
+            return null;
         }
 
 
-        return null;
-
+        MessagingLock messagingLock = entityManager.find(MessagingLock.class, idPk);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        final String messageId = messagingLock.getMessageId();
+        final java.util.Date messageStaled = messagingLock.getStaled();
+        final int sendAttempts = messagingLock.getSendAttempts();
+        final int sendAttemptsMax = messagingLock.getSendAttemptsMax();
+        if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
+            messagingLock.setMessageState(MessageState.DEL);
+            entityManager.persist(messagingLock);
+            return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
+        }
+        if (sendAttempts >= sendAttemptsMax) {
+            messagingLock.setMessageState(MessageState.DEL);
+            entityManager.persist(messagingLock);
+            return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
+        }
+        if (sendAttempts >= 0) {
+            messagingLock.setMessageState(MessageState.PROCESS);
+            entityManager.persist(messagingLock);
+        }
+        if (sendAttempts > 0) {
+            return new PullMessageId(messageId, RETRY);
+        }
+        LOG.debug("Message[{}] locked", messageId);
+        return new PullMessageId(messageId);
     }
 
 
@@ -139,7 +146,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             Query q = entityManager.createNativeQuery(lockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine()), MessagingLock.class);
             q.setParameter(1, messageId);
             return (MessagingLock) q.getSingleResult();
-        } catch (NoResultException | org.hibernate.exception.LockAcquisitionException ex) {
+        } catch (org.hibernate.exception.LockAcquisitionException | PersistenceException ex) {
             LOG.trace("Message:[{}] no result for message id", messageId);
             return null;
         }
@@ -158,12 +165,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         query.executeUpdate();
     }
 
-
-    public void processing(final String messageId) {
-        Query query = entityManager.createNamedQuery("MessagingLock.delete");
-        query.setParameter(MESSAGE_ID, messageId);
-        query.executeUpdate();
-    }
 
     @Override
     public void delete(final MessagingLock messagingLock) {
@@ -187,11 +188,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         return query.getResultList();
     }
 
-  /*  @Override
-    public List<MessagingLock> findDeleteMessages() {
-        TypedQuery<MessagingLock> query = entityManager.createNamedQuery("MessagingLock.findDeletedMessage", MessagingLock.class);
+    @Override
+    public List<MessagingLock> findDeletedMessages() {
+        TypedQuery<MessagingLock> query = entityManager.createNamedQuery("MessagingLock.findDeletedMessages", MessagingLock.class);
         return query.getResultList();
-    }*/
+    }
 
 
     @Override

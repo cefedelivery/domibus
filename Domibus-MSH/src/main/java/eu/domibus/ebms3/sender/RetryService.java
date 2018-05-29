@@ -11,7 +11,6 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.model.MessagingLock;
@@ -175,25 +174,10 @@ public class RetryService {
     public void resetWaitingForReceiptPullMessages() {
         final List<MessagingLock> messagesToReset = messagingLockDao.findWaitingForReceipt();
         for (MessagingLock messagingLock : messagesToReset) {
-            final MessagingLock lock = pullMessageService.getLock(messagingLock.getMessageId());
-            if (lock == null) {
-                LOG.debug("[bulkExpirePullMessages]:Message:[] lock cound not be acquired", lock.getMessageId());
-                continue;
-            }
-            LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] checking if can be retry, attempts[{}], max attempts[{}], expiration date[{}]", messagingLock.getMessageId(), messagingLock.getSendAttempts(), messagingLock.getSendAttemptsMax(), messagingLock.getStaled());
-            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagingLock.getMessageId());
-            if (lock.getSendAttempts() < lock.getSendAttemptsMax() && lock.getStaled().getTime() > System.currentTimeMillis()) {
-                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] set ready for pulling", lock.getMessageId());
-                pullMessageService.reset(userMessageLog);
-                pullMessageService.ready(lock);
-                //notify ??
-            } else {
-                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] send failed.", lock.getMessageId());
-                pullMessageService.sendFailed(userMessageLog);
-                pullMessageService.readyToDelete(lock);
-            }
+            pullMessageService.resetMessageInWaitingForReceptState(messagingLock);
         }
     }
+
 
     /**
      * {@inheritDoc}
@@ -203,15 +187,19 @@ public class RetryService {
         final List<MessagingLock> staledMessages = messagingLockDao.findStaledMessages();
         LOG.trace("Delete expired pull message");
         for (MessagingLock staledMessage : staledMessages) {
-            final MessagingLock lock = pullMessageService.getLock(staledMessage.getMessageId());
-            if (lock == null) {
-                LOG.debug("[bulkExpirePullMessages]:Message:[] could not acquire lock", staledMessage.getMessageId());
-                continue;
-            }
-            LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());
-            pullMessageService.sendFailed(userMessageLogDao.findByMessageId(lock.getMessageId()));
-            pullMessageService.delete(lock);
+            pullMessageService.expireMessage(staledMessage);
         }
     }
+
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void bulkDeletePullMessages() {
+        final List<MessagingLock> staledMessages = messagingLockDao.findDeletedMessages();
+        LOG.trace("Delete unecessary locks");
+        for (MessagingLock staledMessage : staledMessages) {
+            pullMessageService.deleteInNewTransaction(staledMessage);
+        }
+    }
+
 
 }

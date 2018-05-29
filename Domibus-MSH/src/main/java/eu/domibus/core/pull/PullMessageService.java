@@ -7,6 +7,8 @@ import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface PullMessageService {
 
@@ -31,8 +33,6 @@ public interface PullMessageService {
      */
     void addPullMessageLock(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog);
 
-
-    void reset(UserMessageLog messageLog);
 
     /**
      * When a message has been successfully delivered or marked a failed, its lock counter part item should be removed from
@@ -78,16 +78,18 @@ public interface PullMessageService {
     MessagingLock getLock(String messageId);
 
 
-    void sendFailed(UserMessageLog userMessageLog);
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void deleteInNewTransaction(MessagingLock messagingLock);
 
     void releaseLockAfterRequest(PullRequestResult requestResult);
 
     void releaseLockAfterReceipt(PullRequestResult requestResult);
 
-    void ready(MessagingLock messagingLock);
-
     void readyToDelete(MessagingLock messagingLock);
 
     void delete(MessagingLock messagingLock);
 
+    void resetMessageInWaitingForReceptState(MessagingLock messagingLock);
+
+    void expireMessage(MessagingLock staledMessage);
 }
