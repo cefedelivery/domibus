@@ -94,9 +94,7 @@ public class PartyResource {
                     .stream()
                     .map(item->new PartyProcessLinkRo(item.getName(),processesWithPartyAsInitiator.contains(item),processesWithPartyAsResponder.contains(item)))
                     .collect(Collectors.toSet());
-
-
-        };
+        });
 
         return partyResponseRos;
     }
