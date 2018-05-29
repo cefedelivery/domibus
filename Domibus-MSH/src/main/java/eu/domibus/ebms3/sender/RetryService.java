@@ -6,7 +6,6 @@ import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
@@ -14,7 +13,6 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pull.MessagingLockDao;
-import eu.domibus.core.pull.PullLockAckquire;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -30,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Queue;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -88,7 +85,7 @@ public class RetryService {
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
-        LOG.debug(messageIdsToPurge.size() + " messages to purge found");
+        LOG.trace(messageIdsToPurge.size() + " messages to purge found");
 
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
@@ -176,29 +173,24 @@ public class RetryService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void resetWaitingForReceiptPullMessages() {
-        final List<String> messagesToReset = userMessageLogDao.findPullWaitingForReceiptMessages();
-        for (String messagedId : messagesToReset) {
-            //should be deleted but in order to do so, this process should also lock the messagingLock and delte it
-            //to avoid having deadlock when deleting the raw message. Next version.
-            //rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messagedId);
-            LOG.debug("[PULL]:Message[{}]: reset into ready to pull.", messagedId);
-            LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] delete lock ", messagedId);
-            PullLockAckquire lockAcquired = pullMessageService.lockAndDeleteMessageLock(messagedId);
-            if (lockAcquired == null) {
-                LOG.debug("[PULL]:Message[{}]:could not acquire the lock. Message skipped");
+        final List<MessagingLock> messagesToReset = messagingLockDao.findWaitingForReceipt();
+        for (MessagingLock messagingLock : messagesToReset) {
+            final MessagingLock lock = pullMessageService.getLock(messagingLock.getMessageId());
+            if (lock == null) {
+                LOG.debug("[bulkExpirePullMessages]:Message:[] lock cound not be acquired", lock.getMessageId());
                 continue;
             }
-            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagedId);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] checking if can be retry, attempts[{}], max attempts[{}], expiration date[{}]", messagedId, userMessageLog.getSendAttempts(), userMessageLog.getSendAttemptsMax(), new Date(lockAcquired.getExpirationTimeStamp()));
-            }
-            if (userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax() && lockAcquired.getExpirationTimeStamp() > System.currentTimeMillis()) {
+            LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] checking if can be retry, attempts[{}], max attempts[{}], expiration date[{}]", messagingLock.getMessageId(), messagingLock.getSendAttempts(), messagingLock.getSendAttemptsMax(), messagingLock.getStaled());
+            final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messagingLock.getMessageId());
+            if (lock.getSendAttempts() < lock.getSendAttemptsMax() && lock.getStaled().getTime() > System.currentTimeMillis()) {
+                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] set ready for pulling", lock.getMessageId());
                 pullMessageService.reset(userMessageLog);
+                pullMessageService.ready(lock);
                 //notify ??
             } else {
-                LOG.debug("Message:[{}] has no more attempt.", messagedId);
-                final MessageStatus sendFailure = MessageStatus.SEND_FAILURE;
+                LOG.debug("[resetWaitingForReceiptPullMessages]:Message:[{}] send failed.", lock.getMessageId());
                 pullMessageService.sendFailed(userMessageLog);
+                pullMessageService.readyToDelete(lock);
             }
         }
     }
@@ -211,14 +203,14 @@ public class RetryService {
         final List<MessagingLock> staledMessages = messagingLockDao.findStaledMessages();
         LOG.trace("Delete expired pull message");
         for (MessagingLock staledMessage : staledMessages) {
-            final String messageId = staledMessage.getMessageId();
-            LOG.debug("[bulkExpirePullMessages]:Message:[{}] delete lock ", messageId);
-            PullLockAckquire lockAndDelete = pullMessageService.lockAndDeleteMessageLock(messageId);
-            if (lockAndDelete == null) {
+            final MessagingLock lock = pullMessageService.getLock(staledMessage.getMessageId());
+            if (lock == null) {
+                LOG.debug("[bulkExpirePullMessages]:Message:[] could not acquire lock", lock.getMessageId());
                 continue;
             }
-            LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", messageId);
-            pullMessageService.sendFailed(userMessageLogDao.findByMessageId(messageId));
+            LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());
+            pullMessageService.sendFailed(userMessageLogDao.findByMessageId(lock.getMessageId()));
+            pullMessageService.delete(lock);
         }
     }
 

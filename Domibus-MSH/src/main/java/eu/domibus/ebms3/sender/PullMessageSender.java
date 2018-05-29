@@ -119,6 +119,7 @@ public class PullMessageSender {
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+
             final SOAPMessage acknowledgementResult = mshDispatcher.dispatch(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
             handleDispatchReceiptResult(messageId, acknowledgementResult);
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {

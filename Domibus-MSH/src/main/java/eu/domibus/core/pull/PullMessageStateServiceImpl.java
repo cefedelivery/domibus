@@ -46,7 +46,6 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void expirePullMessage(final String messageId) {
         LOG.debug("Message:[{}] expired.", messageId);
-        messagingLockDao.deleteLock(messageId);
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
         sendFailed(userMessageLog);

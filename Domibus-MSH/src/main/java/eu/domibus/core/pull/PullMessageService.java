@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -44,39 +45,49 @@ public interface PullMessageService {
     /**
      * Manage the status of the pull message after the pull request has occured.
      * It handles happyflow and failure.
-     *
      * @param userMessage      the userMessage that has been pulled.
      * @param messageId        the id of the message.
      * @param legConfiguration contains the context of the configured message exchange.
      * @param state            the state of the pull tentative.
      */
-    void updatePullMessageAfterRequest(final UserMessage userMessage,
-                                       final String messageId,
-                                       final LegConfiguration legConfiguration,
-                                       final ReliabilityChecker.CheckResult state);
+    PullRequestResult updatePullMessageAfterRequest(final UserMessage userMessage,
+                                                    final String messageId,
+                                                    final LegConfiguration legConfiguration,
+                                                    final ReliabilityChecker.CheckResult state);
 
     /**
      * Manage the status of the pull message when the receipt arrives..
-     *
      * @param reliabilityCheckSuccessful the state of the reality chek process.
      * @param isOk
      * @param userMessageLog             the message log.
      * @param legConfiguration           contains the context of the configured message exchange.
+     * @param userMessage
      */
-    void updatePullMessageAfterReceipt(
+    PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
             UserMessageLog userMessageLog,
-            LegConfiguration legConfiguration
-    );
+            LegConfiguration legConfiguration,
+            UserMessage userMessage);
 
     /**
      *
      * @param messageId
      * @return
      */
-    PullLockAckquire lockAndDeleteMessageLock(String messageId);
+    MessagingLock getLock(String messageId);
 
 
     void sendFailed(UserMessageLog userMessageLog);
+
+    void releaseLockAfterRequest(PullRequestResult requestResult);
+
+    void releaseLockAfterReceipt(PullRequestResult requestResult);
+
+    void ready(MessagingLock messagingLock);
+
+    void readyToDelete(MessagingLock messagingLock);
+
+    void delete(MessagingLock messagingLock);
+
 }

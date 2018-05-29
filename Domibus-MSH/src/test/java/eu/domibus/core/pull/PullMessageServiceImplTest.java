@@ -359,7 +359,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
             result = true;
         }};
-        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
+        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog, null);
         new VerificationsInOrder() {{
             rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageID);
             times = 1;
@@ -380,7 +380,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
             result = false;
         }};
-        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
+        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog, null);
         new VerificationsInOrder() {{
             messagingLockDao.delete(messageID);
             times = 1;

@@ -10,11 +10,13 @@ import java.util.List;
  */
 public interface MessagingLockDao {
 
-    PullMessageId getNextPullMessageToProcess(Long messageId);
+    PullMessageId getNextPullMessageToProcess(Integer messageId);
 
     void releaseLock(MessagingLock messagingLock);
 
-    void deleteLock(String messageId);
+    void readyToDelete(String messageId);
+
+    MessagingLock getLock(String messageId);
 
     void save(MessagingLock messagingLock);
 
@@ -26,5 +28,9 @@ public interface MessagingLockDao {
 
     List<MessagingLock> findStaledMessages();
 
-    PullLockAckquire lockAndDeleteMessageLock(String messageId);
+    List<MessagingLock> findDeleteMessages();
+
+    List<MessagingLock> findReadyToPull(String mpc, String initiator);
+
+    List<MessagingLock> findWaitingForReceipt();
 }

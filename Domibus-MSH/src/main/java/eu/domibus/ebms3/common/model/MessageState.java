@@ -6,6 +6,7 @@ package eu.domibus.ebms3.common.model;
  */
 public enum MessageState {
     READY,
-    PROCESSING,
-    WAIT_FOR_RECEIPT
+    PROCESS,
+    DEL,
+    ACK
 }

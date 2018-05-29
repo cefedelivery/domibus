@@ -343,7 +343,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, null);
         }};
 
     }
@@ -377,7 +377,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, null);
             times = 1;
 
         }};
@@ -411,7 +411,7 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, null);
             times = 1;
 
         }};

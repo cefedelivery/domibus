@@ -8,13 +8,13 @@ import eu.domibus.api.security.ChainCertificateInvalidException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -26,6 +26,7 @@ import eu.domibus.pki.DomibusCertificateException;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.WebServiceException;
@@ -69,8 +70,6 @@ public class PullRequestHandler {
     @Autowired
     private PullMessageService pullMessageService;
 
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
@@ -101,6 +100,7 @@ public class PullRequestHandler {
         }
     }
 
+    @Transactional
     SOAPMessage handleRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
         ReliabilityChecker.CheckResult checkResult = ReliabilityChecker.CheckResult.PULL_FAILED;
@@ -153,7 +153,8 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-                pullMessageService.updatePullMessageAfterRequest(userMessage,messageId,leg,checkResult);
+            final PullRequestResult messagingLock = pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, leg, checkResult);
+            pullMessageService.releaseLockAfterRequest(messagingLock);
             if (checkResult != ABORT) {
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()

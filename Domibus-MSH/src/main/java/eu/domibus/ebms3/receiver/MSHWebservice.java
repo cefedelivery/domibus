@@ -17,11 +17,12 @@ import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
-import eu.domibus.core.pull.PullLockAckquire;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.PullRequest;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
@@ -172,8 +173,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             return pullRequestHandler.getSoapMessage(ebMS3Exception);
         }
         LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
-        PullLockAckquire lockAcquired = pullMessageService.lockAndDeleteMessageLock(messageId);
-        if (lockAcquired == null) {
+        final MessagingLock lock = pullMessageService.getLock(messageId);
+        if (lock == null) {
             LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);
             return pullRequestHandler.getSoapMessage(ebMS3Exception);
@@ -203,7 +204,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful, isOk, userMessageLog, legConfiguration);
+            final PullRequestResult pullRequestResult = pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful, isOk, userMessageLog, legConfiguration, userMessage);
+            pullMessageService.releaseLockAfterReceipt(pullRequestResult);
         }
         return null;
     }
@@ -224,6 +226,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
 
+    @Transactional
     SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
