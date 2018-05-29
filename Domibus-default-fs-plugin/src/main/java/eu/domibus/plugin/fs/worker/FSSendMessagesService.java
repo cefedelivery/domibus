@@ -1,5 +1,7 @@
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.ext.services.AuthenticationService;
+import eu.domibus.ext.services.MultiTenantService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.fs.*;
@@ -32,6 +34,12 @@ public class FSSendMessagesService {
     
     @Autowired
     private FSProcessFileService fsProcessFileService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    private MultiTenantService multiTenantService;
     
     /**
      * Triggering the send messages means that the message files from the OUT directory
@@ -39,7 +47,7 @@ public class FSSendMessagesService {
      */
     public void sendMessages() {
         LOG.debug("Sending file system messages...");
-        
+
         sendMessages(null);
         
         for (String domain : fsPluginProperties.getDomains()) {
@@ -49,6 +57,11 @@ public class FSSendMessagesService {
     
     private void sendMessages(String domain) {
         FileObject[] contentFiles = null;
+
+        if(multiTenantService.isMultiTenantAware()) {
+            authenticationService.basicAuthenticate(fsPluginProperties.getAuthenticationUser(domain), fsPluginProperties.getAuthenticationPassword(domain));
+        }
+
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
             

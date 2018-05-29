@@ -32,4 +32,14 @@ public class AuthenticationServiceDelegate implements AuthenticationService {
         }
 
     }
+
+    @Override
+    public void basicAuthenticate(String user, String password) throws AuthenticationException {
+        try {
+            authenticationService.basicAuthenticate(user, password);
+        } catch (Exception e) {
+            //already logged by the authentication service
+            throw new AuthenticationException(e);
+        }
+    }
 }

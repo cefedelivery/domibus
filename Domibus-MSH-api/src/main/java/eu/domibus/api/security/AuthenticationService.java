@@ -9,4 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 public interface AuthenticationService {
 
     void authenticate(HttpServletRequest httpRequest) throws AuthenticationException;
+
+    void basicAuthenticate(String user, String password) throws AuthenticationException;
 }

@@ -42,6 +42,12 @@ public class AuthenticationDefaultService implements AuthenticationService {
     protected DomainContextProvider domainContextProvider;
 
     @Override
+    public void basicAuthenticate(String user, String password) {
+        BasicAuthentication authentication = new BasicAuthentication(user, password);
+        authenticate(authentication, null);
+    }
+
+    @Override
     public void authenticate(HttpServletRequest httpRequest) throws AuthenticationException {
         LOG.debug("Authenticating for " + httpRequest.getRequestURI());
 
@@ -102,7 +108,9 @@ public class AuthenticationDefaultService implements AuthenticationService {
     }
 
     private void authenticate(Authentication authentication, HttpServletRequest httpRequest) throws AuthenticationException {
-        LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+        if(httpRequest != null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+        }
         Authentication authenticationResult;
         try {
             authenticationResult = authenticationProvider.authenticate(authentication);
@@ -111,13 +119,17 @@ public class AuthenticationDefaultService implements AuthenticationService {
         }
 
         if (authenticationResult.isAuthenticated()) {
-            LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
+            if(httpRequest != null) {
+                LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
+            }
             LOG.debug("Request authenticated. Storing the authentication result in the security context");
             LOG.debug("Authentication result: " + authenticationResult);
             SecurityContextHolder.getContext().setAuthentication(authenticationResult);
             LOG.putMDC(DomibusLogger.MDC_USER, authenticationResult.getName());
         } else {
-            LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            if(httpRequest != null) {
+                LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            }
             throw new AuthenticationException("The certificate is not valid or is not present or the basic authentication credentials are invalid");
         }
     }
