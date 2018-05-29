@@ -4,12 +4,12 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.DomibusApacheFetcher;
 import eu.domibus.common.util.EndpointInfo;
-import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
+import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.fetcher.BasicApacheFetcher;
+import no.difi.vefa.peppol.lookup.locator.StaticLocator;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
@@ -20,6 +20,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
+    @Autowired
+    HttpUtil httpUtil;
+
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
 
@@ -60,7 +64,8 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
         try {
             final LookupClient smpClient = LookupClientBuilder.forMode(mode)
                     .locator(new BusdoxLocator(smlInfo))
-                    .fetcher(new DomibusApacheFetcher(Mode.of(mode)))
+//                    .locator(new StaticLocator("https://my-json-server.typicode.com"))
+                    .fetcher(new DomibusApacheFetcher(Mode.of(mode), httpUtil))
                     .build();
 
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));

@@ -1,11 +1,12 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.wss4j.common.crypto.CryptoService;
@@ -59,7 +60,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     private CryptoService cryptoService;
 
     @Autowired
-    ProxyUtil proxyUtil;
+    HttpUtil httpUtil;
 
     @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
     public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
@@ -143,20 +144,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
-        if (proxyUtil.useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
-
-            if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
-                    || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
-
-                return null;
-            }
-
-            LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                    httpProxyUser);
+        if (httpUtil.useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
             return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }

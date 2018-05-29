@@ -3,7 +3,8 @@ package eu.domibus.common.services.impl;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.common.util.ProxyUtil;
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.wss4j.common.crypto.CryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
@@ -21,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
@@ -63,7 +65,7 @@ public class DynamicDiscoveryServiceOASISTest {
     private CryptoService cryptoService;
 
     @Injectable
-    ProxyUtil proxyUtil;
+    private HttpUtil httpUtil;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -162,49 +164,11 @@ public class DynamicDiscoveryServiceOASISTest {
         return serviceMetadata;
     }
 
-    /*
-    * This is not a unit tests but the code is useful to test real SMP entries.
-     */
-    @Test
-    @Ignore
-    public void testLookupInformation() throws Exception {
-        new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
-            result = TEST_SML_ZONE;
-
-            KeyStore truststore;
-            truststore = KeyStore.getInstance("JKS");
-            truststore.load(getClass().getResourceAsStream("../ehealth_smp_acc_truststore.jks"), TEST_KEYSTORE_PASSWORD.toCharArray());
-
-            cryptoService.getTrustStore();
-            result = truststore;
-
-        }};
-
-        // This entry is valid
-        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
-
-        // This entry is valid but has no certificate
-        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829dev1", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.2", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
-
-        //TEST Service
-        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
-
-        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0088:270420181111", "iso6523-actorid-upis", "busdox-docid-qns::lululu", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
-
-        // Support Issue
-        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("dynceftestparty13gw", "connectivity-partid-qns", "connectivity-docid-qns::doc_id1", "urn:www.cenbii.eu:profile:bii04:ver1.0", "connectivity-docid-qns");
-
-        System.out.println(endpointInfo.getAddress());
-        System.out.println(endpointInfo.getCertificate());
-        Assert.assertNotNull(endpointInfo);
-    }
-
-    @Test
+   @Test
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            proxyUtil.useProxy();
+            httpUtil.useProxy();
             result = true;
 
             domibusProperties.getProperty("domibus.proxy.http.host");
@@ -231,7 +195,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            proxyUtil.useProxy();
+            httpUtil.useProxy();
             result = false;
         }};
 
@@ -247,7 +211,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            proxyUtil.useProxy();
+            httpUtil.useProxy();
             result = true;
 
             domibusProperties.getProperty("domibus.proxy.http.host");
@@ -281,7 +245,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            proxyUtil.useProxy();
+            httpUtil.useProxy();
             result = false;
 
             domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
@@ -305,4 +269,47 @@ public class DynamicDiscoveryServiceOASISTest {
         //then
         Assert.assertNull(defaultProxy);
     }
+
+
+    /*
+    * This is not a unit tests but the code is useful to test real SMP entries.
+     */
+    @Test
+    @Ignore
+    public void testLookupInformation() throws Exception {
+        new NonStrictExpectations() {{
+            httpUtil.useProxy();
+            result = false;
+
+            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            result = TEST_SML_ZONE;
+
+            KeyStore truststore;
+            truststore = KeyStore.getInstance("JKS");
+            truststore.load(getClass().getResourceAsStream("../ehealth_smp_acc_truststore.jks"), TEST_KEYSTORE_PASSWORD.toCharArray());
+
+            cryptoService.getTrustStore();
+            result = truststore;
+
+        }};
+
+        // This entry is valid
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+
+        // This entry is valid but has no certificate
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829dev1", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:www.cenbii.eu:transaction:biitrns010:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.2", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+
+        //TEST Service
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
+
+        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0088:270420181111", "iso6523-actorid-upis", "busdox-docid-qns::lululu", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+
+        // Support Issue
+        //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("dynceftestparty13gw", "connectivity-partid-qns", "connectivity-docid-qns::doc_id1", "urn:www.cenbii.eu:profile:bii04:ver1.0", "connectivity-docid-qns");
+
+        System.out.println(endpointInfo.getAddress());
+        System.out.println(endpointInfo.getCertificate());
+        Assert.assertNotNull(endpointInfo);
+    }
+
 }
