@@ -29,6 +29,7 @@ export class PartyComponent implements OnInit {
   process: string;
 
   rows = [];
+  selected = [];
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   offset: number = 0;
@@ -153,12 +154,45 @@ export class PartyComponent implements OnInit {
   }
   onActivate(event) {
     if ("dblclick" === event.type) {
-      let dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent,{
-        data: {
-          edit: event.row
-        }
-      });
+      this.edit(event.row);
     }
   }
 
+  canSave() {
+    return false;
+  }
+  canEdit() {
+    return this.selected.length == 1;
+  }
+  canCancel() {
+    return false;
+  }
+  canDelete() {
+    return this.selected.length == 1;
+  }
+
+  cancel() {
+
+  }
+
+  save() {
+
+  }
+
+  add() {
+
+  }
+
+  remove() {
+
+  }
+
+  edit(row) {
+    row = row || this.selected[0];
+    let dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent,{
+      data: {
+        edit: row
+      }
+    });
+  }
 }
