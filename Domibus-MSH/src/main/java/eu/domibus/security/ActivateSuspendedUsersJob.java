@@ -1,13 +1,14 @@
 package eu.domibus.security;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.quartz.DomibusQuartzJobBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.util.Date;
 
@@ -18,7 +19,7 @@ import java.util.Date;
  * Job in charge of unlocking suspended user accounts.
  */
 @DisallowConcurrentExecution
-public class ActivateSuspendedUsersJob extends QuartzJobBean {
+public class ActivateSuspendedUsersJob extends DomibusQuartzJobBean {
 
     public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ActivateSuspendedUsersJob.class);
 
@@ -26,10 +27,11 @@ public class ActivateSuspendedUsersJob extends QuartzJobBean {
     private UserService userService;
 
     @Override
-    protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Executing job to unlock suspended account at " + new Date());
         }
         userService.findAndReactivateSuspendedUsers();
     }
+
 }

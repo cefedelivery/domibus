@@ -1,14 +1,17 @@
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractSendMessageIT;
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.plugin.webService.generated.BackendInterface;
+import eu.domibus.AbstractBackendWSIT;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.plugin.webService.generated.SubmitResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -17,21 +20,17 @@ import java.sql.SQLException;
  * @author venugar
  * @since 3.3
  */
+@DirtiesContext
+@Rollback
+public class SubmitMessageCaseInsensitiveIT extends AbstractBackendWSIT {
 
-public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
-
-    private static boolean initialized;
 
     @Autowired
-    BackendInterface backendWebService;
+    JMSManager jmsManager;
 
     @Before
-    public void before() throws IOException {
-        if (!initialized) {
-            // The dataset is executed only once for each class
-            insertDataset("sendMessageDataset.sql");
-            initialized = true;
-        }
+    public void updatePMode() throws IOException, XmlProcessingException {
+        uploadPmode(wireMockRule.port());
     }
 
     /**
@@ -41,62 +40,19 @@ public class SubmitMessageCaseInsensitiveIT extends AbstractSendMessageIT {
      * @throws SubmitMessageFault
      * @throws InterruptedException
      */
+
+
     @Test
     public void testSubmitMessageOK() throws SubmitMessageFault, SQLException, InterruptedException {
-
-        String payloadHref = "SBDH-ORDER";
+        String payloadHref = "cid:message";
         SubmitRequest submitRequest = createSubmitRequest(payloadHref);
 
         super.prepareSendMessage("validAS4Response.xml");
 
-        Messaging ebMSHeaderInfo = new Messaging();
-        UserMessage userMessage = new UserMessage();
-        CollaborationInfo collaborationInfo = new CollaborationInfo();
-        collaborationInfo.setAction("TC3LEG1");
-        AgreementRef agreementRef = new AgreementRef();
-        agreementRef.setValue("edelivery-1110");
-        collaborationInfo.setAgreementRef(agreementRef);
-        Service service = new Service();
-        service.setValue("BDX:NOPROCESS");
-        service.setType("TC3");
-        collaborationInfo.setService(service);
-        userMessage.setCollaborationInfo(collaborationInfo);
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.getProperty().add(createProperty("originalSender", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C1", STRING_TYPE));
-        messageProperties.getProperty().add(createProperty("finalRecipient", "URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:C41", STRING_TYPE));
-        userMessage.setMessageProperties(messageProperties);
-        PartyInfo partyInfo = new PartyInfo();
-        From from = new From();
-        from.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/INITIATOR");
-        PartyId sender = new PartyId();
-        sender.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-BLUE");
-        from.setPartyId(sender);
-        partyInfo.setFrom(from);
-        To to = new To();
-        to.setRole("HTTP://DOCS.OASIS-OPEN.ORG/EBXML-MSG/EBMS/V3.0/NS/CORE/200704/RESPONDER");
-        PartyId receiver = new PartyId();
-        receiver.setValue("URN:OASIS:NAMES:TC:EBCORE:PARTYID-TYPE:UNREGISTERED:DOMIBUS-RED");
-        to.setPartyId(receiver);
-        partyInfo.setTo(to);
-        userMessage.setPartyInfo(partyInfo);
-        PayloadInfo payloadInfo = new PayloadInfo();
-        PartInfo partInfo = new PartInfo();
-        Description description = new Description();
-        description.setValue("e-sens-sbdh-order");
-        description.setLang("en-US");
-        partInfo.setHref(payloadHref);
-        String mimeType = "TEXT/XML";
-        if (mimeType != null) {
-            PartProperties partProperties = new PartProperties();
-            partProperties.getProperty().add(createProperty(mimeType, "MimeType", STRING_TYPE));
-            partInfo.setPartProperties(partProperties);
-        }
-        partInfo.setDescription(description);
-        payloadInfo.getPartInfo().add(partInfo);
-        userMessage.setPayloadInfo(payloadInfo);
-        ebMSHeaderInfo.setUserMessage(userMessage);
+        final Messaging messaging = createMessageHeader(payloadHref);
+        messaging.getUserMessage().getCollaborationInfo().setAction("TC3Leg1");
 
-        SubmitResponse response = backendWebService.submitMessage(submitRequest, ebMSHeaderInfo);
+        SubmitResponse response = backendWebService.submitMessage(submitRequest, messaging);
         verifySendMessageAck(response);
     }
 }

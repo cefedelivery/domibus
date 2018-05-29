@@ -1,5 +1,7 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DomibusCacheService;
@@ -7,9 +9,11 @@ import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -21,6 +25,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -39,7 +44,10 @@ public class TruststoreResourceTest {
     TruststoreResource truststoreResource;
 
     @Injectable
-    CryptoService cryptoService;
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    protected DomainContextProvider domainProvider;
 
     @Injectable
     DomibusCacheService domibusCacheService;
@@ -86,8 +94,13 @@ public class TruststoreResourceTest {
         // Given
         MultipartFile multiPartFile = new MockMultipartFile("filename", new byte[] {1,0,1});
 
+        final Domain domain = DomainService.DEFAULT_DOMAIN;
+
         new Expectations() {{
-            cryptoService.replaceTruststore((byte[]) any, anyString);
+            domainProvider.getCurrentDomain();
+            result = domain;
+
+            multiDomainCertificateProvider.replaceTrustStore(domain, (byte[]) any, anyString);
             result = new KeyStoreException("Impossible to access keystore");
         }};
 
@@ -113,15 +126,23 @@ public class TruststoreResourceTest {
     }
 
     @Test
-    public void testTrustStoreEntries() {
+    public void testTrustStoreEntries(@Mocked KeyStore trustStore) {
         // Given
         Date date = new Date();
         List<TrustStoreEntry> trustStoreEntryList = new ArrayList<>();
         TrustStoreEntry trustStoreEntry = new TrustStoreEntry("Name", "Subject", "Issuer", date, date);
         trustStoreEntryList.add(trustStoreEntry);
 
+        final Domain domain = DomainService.DEFAULT_DOMAIN;
+
         new Expectations() {{
-            certificateService.getTrustStoreEntries();
+            domainProvider.getCurrentDomain();
+            result = domain;
+
+            multiDomainCertificateProvider.getTrustStore(domain);
+            result = trustStore;
+
+            certificateService.getTrustStoreEntries(trustStore);
             result = trustStoreEntryList;
             domainConverter.convert(trustStoreEntryList, TrustStoreRO.class);
             result = getTestTrustStoreROList(date);

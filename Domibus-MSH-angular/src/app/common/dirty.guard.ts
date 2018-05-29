@@ -17,7 +17,7 @@ export class DirtyGuard implements CanActivate, CanDeactivate<any> {
   }
 
   canDeactivate(component: any, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState?: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    if (!component.isDirty()) return true;
+    if (component.isDirty && !component.isDirty()) return true;
     return this.dialog.open(CancelDialogComponent).afterClosed();
   }
 }

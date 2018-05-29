@@ -5,6 +5,8 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 
 import java.util.concurrent.FutureTask;
@@ -17,6 +19,9 @@ public class DomibusQuartzThreadExecutorTest {
 
     @Tested
     DomibusQuartzThreadExecutor domibusQuartzThreadExecutor;
+
+    @Injectable
+    ApplicationContext applicationContext;
 
     @Test
     public void testExecute(final @Injectable Thread thread, final @Injectable TaskExecutor taskExecutor, @Mocked SpringContextProvider springContextProvider) throws Exception {

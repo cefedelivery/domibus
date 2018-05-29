@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.domibus.api.pmode.PModeException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -22,7 +23,7 @@ import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
-import eu.domibus.util.PojoInstaciatorUtil;
+import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +71,7 @@ public class MessageExchangeServiceImplTest {
     private MessagingLockService messagingLockService;
 
     @Mock
-    private java.util.Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Spy
     private ProcessValidator processValidator;
@@ -145,7 +146,7 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
-        when(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE,"1")).thenReturn("10");
+        when(domibusPropertyProvider.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE,"1")).thenReturn("10");
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();

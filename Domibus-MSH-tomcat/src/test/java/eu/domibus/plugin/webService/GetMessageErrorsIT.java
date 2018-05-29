@@ -1,16 +1,20 @@
 
 package eu.domibus.plugin.webService;
 
-import eu.domibus.AbstractIT;
-import eu.domibus.plugin.webService.generated.BackendInterface;
+import eu.domibus.AbstractBackendWSIT;
+import eu.domibus.common.ErrorCode;
+import eu.domibus.common.MSHRole;
+import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.plugin.webService.generated.ErrorResultImplArray;
 import eu.domibus.plugin.webService.generated.GetErrorsRequest;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 
-import java.io.IOException;
+import java.util.Date;
 
 
 /**
@@ -18,19 +22,12 @@ import java.io.IOException;
  *
  * @author martifp
  */
-public class GetMessageErrorsIT extends AbstractIT {
+@DirtiesContext
+@Rollback
+public class GetMessageErrorsIT extends AbstractBackendWSIT {
 
-    private static boolean initialized;
     @Autowired
-    BackendInterface backendWebService;
-
-    @Before
-    public void before() throws IOException {
-        if (!initialized) {
-            insertDataset("getMessageErrorsDataset.sql");
-            initialized = true;
-        }
-    }
+    ErrorLogDao errorLogDao;
 
     /**
      * Tests that the list of errors is not empty for a certain message.
@@ -38,6 +35,13 @@ public class GetMessageErrorsIT extends AbstractIT {
     @Test
     public void testGetMessageErrorsOk() {
         String messageId = "9008713e-1912-460c-97b3-40ec12a29f49@domibus.eu";
+        ErrorLogEntry logEntry = new ErrorLogEntry();
+        logEntry.setMessageInErrorId(messageId);
+        logEntry.setMshRole(MSHRole.RECEIVING);
+        logEntry.setErrorCode(ErrorCode.EBMS_0004);
+        logEntry.setTimestamp(new Date());
+        errorLogDao.create(logEntry);
+
         GetErrorsRequest errorsRequest = createMessageErrorsRequest(messageId);
         ErrorResultImplArray response = backendWebService.getMessageErrors(errorsRequest);
         Assert.assertFalse(response.getItem().isEmpty());

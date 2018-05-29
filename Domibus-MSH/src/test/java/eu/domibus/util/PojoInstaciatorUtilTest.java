@@ -4,6 +4,7 @@ import eu.domibus.common.model.configuration.Mpc;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.test.util.PojoInstaciatorUtil;
 import org.junit.Assert;
 import org.junit.Test;
 

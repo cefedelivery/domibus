@@ -1,6 +1,7 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
@@ -9,7 +10,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
-import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -24,6 +24,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +82,9 @@ public abstract class PModeProvider {
     private JmsOperations jmsOperations;
 
     @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
     XMLUtil xmlUtil;
 
     @Autowired
@@ -97,7 +101,7 @@ public abstract class PModeProvider {
 
     public byte[] getPModeFile(int id) {
         final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
-        if(rawConfiguration != null) {
+        if (rawConfiguration != null) {
             return rawConfiguration.getXml();
         }
         return new byte[0];
@@ -108,7 +112,7 @@ public abstract class PModeProvider {
     }
 
     public void removePMode(int id) {
-        LOG.debug("Removing PMode with id:" + id);
+        LOG.debug("Removing PMode with id: [{}]", id);
         configurationRawDAO.deleteById(id);
     }
 
@@ -116,11 +120,7 @@ public abstract class PModeProvider {
         return this.configurationRawDAO.getDetailedConfigurationRaw();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
-        LOG.debug("Updating the PMode");
-
+    public UnmarshallerResult parsePMode(byte[] bytes) throws XmlProcessingException {
         //unmarshall the PMode with whitespaces ignored
         UnmarshallerResult unmarshalledConfigurationWithWhiteSpacesIgnored = unmarshall(bytes, true);
 
@@ -131,9 +131,22 @@ public abstract class PModeProvider {
             throw xmlProcessingException;
         }
 
-        List<String> resultMessage = new ArrayList<>();
         //unmarshall the PMode taking into account the whitespaces
-        UnmarshallerResult unmarshalledConfiguration = unmarshall(bytes, false);
+        return  unmarshall(bytes, false);
+
+    }
+    public Configuration getPModeConfiguration(byte[] bytes) throws XmlProcessingException {
+        final UnmarshallerResult unmarshallerResult = parsePMode(bytes);
+        return unmarshallerResult.getResult();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
+        LOG.debug("Updating the PMode");
+
+        List<String> resultMessage = new ArrayList<>();
+        final UnmarshallerResult unmarshalledConfiguration = parsePMode(bytes);
         if (!unmarshalledConfiguration.isValid()) {
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
@@ -193,7 +206,7 @@ public abstract class PModeProvider {
         final String action;
         final String leg;
 
-        final String messageId =  userMessage.getMessageInfo().getMessageId();
+        final String messageId = userMessage.getMessageInfo().getMessageId();
         //add messageId to MDC map
         if (StringUtils.isNotBlank(messageId)) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
@@ -234,6 +247,7 @@ public abstract class PModeProvider {
         public Message createMessage(Session session) throws JMSException {
             Message m = session.createMessage();
             m.setStringProperty(Command.COMMAND, Command.RELOAD_PMODE);
+            m.setStringProperty(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode());
             return m;
         }
     }
@@ -312,5 +326,14 @@ public abstract class PModeProvider {
 
     public abstract List<Party> findAllParties();
 
+    public abstract List<String> findPartyIdByServiceAndAction(final String service, final String action);
+
+    public abstract String getPartyIdType(String partyIdentifier);
+
+    public abstract String getServiceType(String serviceValue);
+
+    public abstract String getRole(String roleType, String serviceValue);
+
+    public abstract String getAgreementRef(String serviceValue);
 
 }

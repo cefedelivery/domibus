@@ -1,6 +1,7 @@
 package eu.domibus.core.message.attempt;
 
 import eu.domibus.api.message.attempt.MessageAttempt;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.converter.DomainCoreConverter;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -24,14 +24,13 @@ public class MessageAttemptDefaultServiceTest {
     MessageAttemptDefaultService messageAttemptDefaultService;
 
     @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
     MessageAttemptDao messageAttemptDao;
 
     @Injectable
     DomainCoreConverter domainCoreConverter;
-
-    @Injectable
-    Properties domibusProperties;
-
 
     @Test
     public void testGetAttemptsHistory(@Injectable final List<MessageAttemptEntity> entities) throws Exception {

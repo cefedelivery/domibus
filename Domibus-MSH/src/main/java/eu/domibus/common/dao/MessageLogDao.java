@@ -72,11 +72,11 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
 
     protected abstract MessageLog findByMessageId(String messageId, MSHRole mshRole);
 
-    protected abstract Long countMessages(HashMap<String, Object> filters);
+    protected abstract Long countMessages(Map<String, Object> filters);
 
-    protected abstract List<F> findPaged(int from, int max, String column, boolean asc, HashMap<String, Object> filters);
+    protected abstract List<F> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters);
 
-    protected List<Predicate> getPredicates(HashMap<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
+    protected List<Predicate> getPredicates(Map<String, Object> filters, CriteriaBuilder cb, Root<? extends MessageLog> mle) {
         List<Predicate> predicates = new ArrayList<>();
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
             if (filter.getValue() != null) {
@@ -86,7 +86,7 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
                             case "":
                                 break;
                             default:
-                                predicates.add(cb.like(mle.<String>get(filter.getKey()), (String) filter.getValue()));
+                                predicates.add(cb.like(mle.get(filter.getKey()), (String) filter.getValue()));
                                 break;
                         }
                     }
@@ -98,6 +98,8 @@ public abstract class MessageLogDao<F extends MessageLog> extends BasicDao {
                                 break;
                             case "receivedTo":
                                 predicates.add(cb.lessThanOrEqualTo(mle.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
+                                break;
+                            default:
                                 break;
                         }
                     }

@@ -5,18 +5,20 @@ import com.google.common.collect.Sets;
 import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.process.Process;
+import eu.domibus.common.dao.PartyDao;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Dussart
@@ -30,6 +32,9 @@ public class PartyServiceImplTest {
 
     @Injectable
     private PModeProvider pModeProvider;
+
+    @Injectable
+    private PartyDao partyDao;
 
     @Tested
     private PartyServiceImpl partyService;
@@ -228,6 +233,45 @@ public class PartyServiceImplTest {
         assertTrue(partyService.processPredicate(null).test(party));
         assertTrue(partyService.processPredicate("cessName").test(party));
         assertFalse(partyService.processPredicate("wrong").test(party));
+    }
+
+    @Test
+    public void testFindPartyNamesByServiceAndAction() throws EbMS3Exception {
+        // Given
+        List<String> parties = new ArrayList<>();
+        parties.add("test");
+        new Expectations() {{
+           pModeProvider.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+           result = parties;
+        }};
+
+        // When
+        List<String> partyNamesByServiceAndAction = partyService.findPartyNamesByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+
+        // Then
+        Assert.assertEquals(parties, partyNamesByServiceAndAction);
+    }
+
+    @Test
+    public void testGetGatewayPartyIdentifier() {
+        // Given
+        String expectedGatewayPartyId = "testGatewayPartyId";
+        eu.domibus.common.model.configuration.Party gatewayParty = new eu.domibus.common.model.configuration.Party();
+        Set<eu.domibus.common.model.configuration.Identifier> identifiers = new HashSet<>();
+        eu.domibus.common.model.configuration.Identifier identifier = new eu.domibus.common.model.configuration.Identifier();
+        identifier.setPartyId(expectedGatewayPartyId);
+        identifiers.add(identifier);
+        gatewayParty.setIdentifiers(identifiers);
+        new Expectations() {{
+            pModeProvider.getGatewayParty();
+            result = gatewayParty;
+        }};
+
+        // When
+        String gatewayPartyId = partyService.getGatewayPartyIdentifier();
+
+        // Then
+        Assert.assertEquals(expectedGatewayPartyId, gatewayPartyId);
     }
 
 }

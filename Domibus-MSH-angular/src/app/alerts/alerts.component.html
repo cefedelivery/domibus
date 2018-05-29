@@ -1,0 +1,164 @@
+<page-header id="alertsheader_id">Alerts</page-header>
+
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+        <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
+          <!-- Processed -->
+          <md-select placeholder="Processed" [(ngModel)]="filter.processed" name="processed" id="processed_id">
+            <md-option [value]="''"></md-option>
+            <md-option *ngFor="let aprocessed of aProcessedValues" [value]="aprocessed">
+              {{aprocessed}}
+            </md-option>
+          </md-select>
+          <!-- Alert Type (Basic) -->
+          <md-select placeholder="Alert Type" [(ngModel)]="filter.alertType" name="alertType"
+                     id="alerttype_id" (change)="onAlertTypeChanged(filter.alertType)">
+            <md-option [value]="''"></md-option>
+            <md-option *ngFor="let atype of aTypes" [value]="atype">
+              {{atype}}
+            </md-option>
+          </md-select>
+          <!-- Alert Id (Advanced) -->
+          <md-input-container *ngIf="advancedSearch">
+            <input mdInput placeholder="Alert Id" name="alertId" [(ngModel)]="filter.alertId"
+                   #alertId="ngModel" id="alertid_id">
+          </md-input-container>
+          <!-- Alert Level (Basic) -->
+          <md-select placeholder="Alert Level" [(ngModel)]="filter.alertLevel" name="alertLevel"
+                     id="alertlevel_id">
+            <md-option [value]="''">
+            </md-option>
+            <md-option *ngFor="let alevel of aLevels" [value]="alevel">
+              {{alevel}}
+            </md-option>
+          </md-select>
+          <!-- Creation From (Basic) -->
+          <md2-datepicker placeholder="Creation From:" appClearInvalid
+                          [(ngModel)]="filter.creationFrom"
+                          name="creationFrom"
+                          [max]="timestampCreationFromMaxDate"
+                          (change)='onTimestampCreationFromChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="creationfrom_id">
+          </md2-datepicker>
+          <!-- Creation To (Basic) -->
+          <md2-datepicker placeholder="Creation To:" appClearInvalid
+                          [(ngModel)]="filter.creationTo"
+                          name="creationTo"
+                          [min]="timestampCreationToMinDate"
+                          [max]="timestampCreationToMaxDate"
+                          (change)='onTimestampCreationToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="creationto_id">
+          </md2-datepicker>
+          <!-- Reporting From -->
+          <md2-datepicker placeholder="Reporting From:" appClearInvalid
+                          [(ngModel)]="filter.reportingFrom"
+                          name="reportingFrom"
+                          [max]="timestampReportingFromMaxDate"
+                          (change)='onTimestampReportingFromChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="reportingfrom_id" *ngIf="advancedSearch">
+          </md2-datepicker>
+          <!-- Reporting To -->
+          <md2-datepicker placeholder="Reporting To:" appClearInvalid
+                          [(ngModel)]="filter.reportingTo"
+                          name="reportingTo"
+                          [min]="timestampReportingToMinDate"
+                          [max]="timestampReportingToMaxDate"
+                          (change)='onTimestampReportingToChange($event)'
+                          [type]="'datetime'"
+                          #timestampControl="ngModel" id="reportingto_id" *ngIf="advancedSearch">
+          </md2-datepicker>
+
+          <!-- Alert Type Criteria -->
+          <div class="panel" *ngIf="isAlertTypeDefined()">
+            <md-card>
+              <div>
+              <md-card-title>
+                {{filter.alertType}}
+              </md-card-title>
+              </div>
+              <md-card-content>
+                <md-input-container *ngFor="let item of items; let i = index">
+                  <input mdInput placeholder={{item}} name={{item}} [(ngModel)]="dynamicFilters[i]"
+                     #{{item}}="ngModel" id={{item}}_id>
+                </md-input-container>
+              </md-card-content>
+            </md-card>
+          </div>
+
+          <!-- Search Button and Basic/Advanced Search-->
+          <div class="searchArea">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+              <md-icon>search</md-icon>
+              <span>Search</span>
+            </button>
+            <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+          </div>
+        </form>
+      </div>
+    </md-card-content>
+  </md-card>
+
+  <ng-template #rowProcessed let-row="row" let-value="value" ngx-datatable-cell-template>
+    <input autofocus type="checkbox" [checked]="value" id="processed{{row.$$index}}_id" (click)="setProcessedValue(row)"/>
+  </ng-template>
+
+</div>
+
+<div class="panel">
+  <div class="group-filter-button">
+    <span class="row-button">
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                       (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+    </span>
+    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id" md-tooltip="Export as CSV">
+      <img src="assets/images/exportCSV.svg" width="30" height="30">
+    </button>
+  </div>
+
+<!-- Data Table -->
+  <ngx-datatable
+    id="alertsTable"
+    class="material striped"
+    [rows]="rows"
+    [columns]="columnPicker.selectedColumns"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [count]="count"
+    [offset]="offset"
+    [limit]="rowLimiter.pageSize"
+    [sorts]="[{prop: 'Creation Time', dir: 'desc'}]"
+    (page)='onPage($event)'
+    (sort)="onSort($event)"
+    (activate)="onActivate($event)">
+  </ngx-datatable>
+
+  <div class="group-action-button">
+    <button id="alertsCancelButton" md-raised-button color="primary" (click)="cancel()"
+            [disabled]="buttonsDisabled">
+      <md-icon>cancel</md-icon>
+      <span>Cancel</span>
+    </button>
+    <button id="alertsSaveButton" md-raised-button color="primary" (click)="save(false)"
+            [disabled]="buttonsDisabled">
+      <md-icon>save</md-icon>
+      <span>Save</span>
+    </button>
+  </div>
+</div>
