@@ -14,11 +14,6 @@
     <packaging>jar</packaging>
     <name>Domibus MSH JMS WildFly Artemis</name>
 
-    <properties>
-        <version.wildfly>9.0.2.Final</version.wildfly>
-    </properties>
-
-
     <build>
         <plugins>
             <plugin>
@@ -27,18 +22,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.wildfly</groupId>
-                <artifactId>wildfly-jms-client-bom</artifactId>
-                <version>${version.wildfly}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
