@@ -12,9 +12,7 @@ public interface MessagingLockDao {
 
     PullMessageId getNextPullMessageToProcess(Integer messageId);
 
-    void releaseLock(MessagingLock messagingLock);
-
-    void readyToDelete(String messageId);
+    /*void releaseLock(MessagingLock messagingLock);*/
 
     MessagingLock getLock(String messageId);
 
@@ -28,7 +26,6 @@ public interface MessagingLockDao {
 
     List<MessagingLock> findStaledMessages();
 
-    List<MessagingLock> findDeleteMessages();
 
     List<MessagingLock> findReadyToPull(String mpc, String initiator);
 

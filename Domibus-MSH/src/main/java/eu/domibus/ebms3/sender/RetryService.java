@@ -205,7 +205,7 @@ public class RetryService {
         for (MessagingLock staledMessage : staledMessages) {
             final MessagingLock lock = pullMessageService.getLock(staledMessage.getMessageId());
             if (lock == null) {
-                LOG.debug("[bulkExpirePullMessages]:Message:[] could not acquire lock", lock.getMessageId());
+                LOG.debug("[bulkExpirePullMessages]:Message:[] could not acquire lock", staledMessage.getMessageId());
                 continue;
             }
             LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());

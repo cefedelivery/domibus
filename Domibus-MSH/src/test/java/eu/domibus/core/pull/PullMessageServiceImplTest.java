@@ -160,7 +160,7 @@ public class PullMessageServiceImplTest {
         pullMessageService.addPullMessageLock(partyIdExtractor, userMessage, messageLog);
         new Verifications() {{
             MessagingLock messagingLock = null;
-            messagingLockDao.releaseLock(messagingLock = withCapture());
+            //messagingLockDao.releaseLock(messagingLock = withCapture());
             assertEquals(partyId, messagingLock.getInitiator());
             assertEquals(mpc, messagingLock.getMpc());
             assertEquals(messageId, messagingLock.getMessageId());

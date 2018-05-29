@@ -10,15 +10,12 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -171,7 +168,7 @@ public class MessagingLockDaoImplTest {
     }
 
     @Test
-    public void getNextPullMessageToProcessMaxAttemptsReached(@Mocked final SqlRowSet sqlRowSet) {
+    public void getNextPullMessageToProcessMaxAttemptsReached(@Mocked final Query query, @Mocked final MessagingLock messagingLock) {
         final int idPk = 6;
         final String messageId = "maxAttemptMessageId";
         final Timestamp staledDate = new Timestamp(System.currentTimeMillis() + 20000);
@@ -180,24 +177,25 @@ public class MessagingLockDaoImplTest {
             domibusConfigurationService.getDataBaseEngine();
             result = DataBaseEngine.H2;
 
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", withAny(params));
-            result = sqlRowSet;
 
-            sqlRowSet.next();
-            result = true;
+            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE", MessagingLock.class);
+            result = query;
 
-            sqlRowSet.getString(1);
-            result = messageId;
+            query.getResultList();
+            result = Lists.newArrayList(messagingLock);
 
-            sqlRowSet.getObject(2);
-            result = staledDate;
+            messagingLock.getMessageId();
+            this.result = messageId;
 
-            sqlRowSet.getInt(3);
-            result = 5;
+            messagingLock.getStaled();
+            this.result = staledDate;
 
-            sqlRowSet.getInt(4);
-            result = 5;
+            messagingLock.getSendAttempts();
+            this.result = 5;
+
+            messagingLock.getSendAttemptsMax();
+            this.result = 5;
+
 
         }};
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
@@ -208,81 +206,58 @@ public class MessagingLockDaoImplTest {
 
 
         new Verifications() {{
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
-
-            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params = withCapture());
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
-        }};
-    }
-
-    @Test
-    public void getNextPullMessageToProcessNoMessage(@Mocked final SqlRowSet sqlRowSet) {
-        final int idPk = 6;
-        new Expectations() {{
-            domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.ORACLE;
-
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", withAny(params));
-            result = sqlRowSet;
-
-            sqlRowSet.next();
-            result = false;
-
-        }};
-        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
-        assertNull(nextPullMessageToProcess);
-
-
-        new Verifications() {{
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", params = withCapture());
-            times = 1;
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
-
-            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", withAny(params));
-            times = 0;
-        }};
-    }
-
-    @Test
-    public void getNextPullMessageToProcessMessageLocked(@Mocked final SqlRowSet sqlRowSet) {
-        final int idPk = 6;
-        new Expectations() {{
-            domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.ORACLE;
-
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", withAny(params));
-            result = new CannotAcquireLockException("");
-
-        }};
-        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
-        assertNull(nextPullMessageToProcess);
-
-
-        new Verifications() {{
-            Map params = new HashMap();
-            jdbcTemplate.queryForRowSet("SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT", params = withCapture());
-            times = 1;
-            assertEquals(idPk, params.get(MessagingLockDaoImpl.ID_PK_PARAM));
-
-            jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", withAny(params));
-            times = 0;
-        }};
-    }
-
-
-    @Test
-    public void save() {
-        final MessagingLock messagingLock = new MessagingLock();
-        messagingLockDao.releaseLock(messagingLock);
-        new Verifications() {{
+            messagingLock.setMessageState(MessageState.DEL);
             entityManager.persist(messagingLock);
         }};
     }
+
+    @Test
+    public void getNextPullMessageToProcessNoMessage(@Mocked final Query query) {
+        final int idPk = 6;
+        new Expectations() {{
+            domibusConfigurationService.getDataBaseEngine();
+            result = DataBaseEngine.ORACLE;
+
+
+            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE NOWAIT", MessagingLock.class);
+            result = query;
+
+            query.getResultList();
+            result = Lists.newArrayList();
+
+
+        }};
+        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
+        assertNull(nextPullMessageToProcess);
+    }
+
+    @Test(expected = PersistenceException.class)
+    public void getNextPullMessageToProcessMessageLocked(@Mocked final Query query) {
+        final int idPk = 6;
+        new Expectations() {{
+            domibusConfigurationService.getDataBaseEngine();
+            result = DataBaseEngine.ORACLE;
+
+            domibusConfigurationService.getDataBaseEngine();
+            result = DataBaseEngine.ORACLE;
+
+
+            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE NOWAIT", MessagingLock.class);
+            result = query;
+
+            query.getResultList();
+            result = new PersistenceException("test", null);
+
+        }};
+        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
+        assertNull(nextPullMessageToProcess);
+
+
+        new Verifications() {{
+            query.setParameter(1, idPk);
+        }};
+    }
+
 
     @Test
     public void delete(@Mocked final Query query) {

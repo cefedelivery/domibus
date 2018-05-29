@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -170,8 +171,16 @@ public class PullMessageServiceImpl implements PullMessageService {
         final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(mpc, initiator);
         LOG.trace("[PULL_REQUEST]:Reading messages for initiatior [{}] mpc[{}].", initiator, mpc);
         for (MessagingLock lock : messagingLock) {
-            final PullMessageId pullMessageId = messagingLockDao.getNextPullMessageToProcess(lock.getEntityId());
+            PullMessageId pullMessageId = null;
+            try {
+                pullMessageId = messagingLockDao.getNextPullMessageToProcess(lock.getEntityId());
+            } catch (PersistenceException ex) {
+                LOG.trace("[getPullMessageId]:[Message]:[{}] could not acquire the lock.");
+                return null;
+            }
+
             if (pullMessageId != null) {
+                //messagingLockDao.getLock(pullMessageId.getMessageId());
                 LOG.debug("[PULL_REQUEST]:Message:[{}] retrieved", pullMessageId.getMessageId());
                 final String messageId = pullMessageId.getMessageId();
                 switch (pullMessageId.getState()) {
@@ -258,7 +267,8 @@ public class PullMessageServiceImpl implements PullMessageService {
      * with the message information.
      *
      * @param userMessageLog the messageLod
-    /* *//*
+     *                       /*
+     *//*
     protected void addPullMessageLock(final UserMessageLog userMessageLog) {
         final String messageId = userMessageLog.getMessageId();
         Messaging messageByMessageId = messagingDao.findMessageByMessageId(messageId);
@@ -274,8 +284,6 @@ public class PullMessageServiceImpl implements PullMessageService {
         To to = userMessage.getPartyInfo().getTo();
         messagingLockDao.releaseLock(prepareMessagingLock(new ToExtractor(to), userMessage, userMessageLog));
     }*/
-
-
     protected Date getPullMessageExpirationDate(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         if (legConfiguration.getReceptionAwareness() != null) {
             final Long scheduledStartTime = updateRetryLoggingService.getScheduledStartTime(userMessageLog);
@@ -304,7 +312,8 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
-     *  @param userMessage
+     *
+     * @param userMessage
      * @param legConfiguration
      * @param userMessageLog
      */

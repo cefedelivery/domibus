@@ -23,6 +23,7 @@ import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
@@ -298,6 +299,7 @@ public class MSHWebServiceTest {
                                                       @Mocked final Messaging messaging,
                                                       @Mocked final UserMessage userMessage,
                                                       @Mocked final MessageExchangeConfiguration messageConfiguration,
+                                                      @Injectable final PullRequestResult pullRequestResult,
                                                       @Injectable final SOAPMessage soapMessage,
                                                       @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
@@ -342,8 +344,8 @@ public class MSHWebServiceTest {
             times = 1;
             responseHandler.handle(request);
             times = 1;
-            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, null);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, userMessage);
+            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
         }};
 
     }
@@ -354,6 +356,7 @@ public class MSHWebServiceTest {
                                                               @Mocked final UserMessage userMessage,
                                                               @Mocked final MessageExchangeConfiguration me,
                                                               @Injectable final SOAPMessage soapMessage,
+                                                              @Injectable final PullRequestResult pullRequestResult,
                                                               @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
@@ -374,10 +377,9 @@ public class MSHWebServiceTest {
         mshWebservice.handlePullRequestReceipt(request, messaging);
 
         new Verifications() {{
-
-            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, null);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
+            times = 1;
+            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
             times = 1;
 
         }};
@@ -390,6 +392,7 @@ public class MSHWebServiceTest {
                                                                      @Mocked final UserMessage userMessage,
                                                                      @Mocked final MessageExchangeConfiguration me,
                                                                      @Injectable final SOAPMessage soapMessage,
+                                                                     @Injectable final PullRequestResult pullRequestResult,
                                                                      @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
@@ -408,11 +411,9 @@ public class MSHWebServiceTest {
         mshWebservice.handlePullRequestReceipt(request, messaging);
 
         new Verifications() {{
-
-            reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
-            times = 0;
-            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, null);
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
             times = 1;
+            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
 
         }};
 
