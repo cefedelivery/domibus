@@ -22,12 +22,14 @@ import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTI
 
 
 import eu.domibus.common.services.UserPersistenceService;
+import org.springframework.context.annotation.Primary;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
  */
-@Service
+@Service("userManagementService")
+@Primary
 public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);

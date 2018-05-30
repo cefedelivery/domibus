@@ -1,26 +1,11 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
-import eu.domibus.common.converters.UserConverter;
-import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.model.security.User;
-import eu.domibus.common.model.security.UserLoginErrorReason;
-import eu.domibus.common.model.security.UserRole;
-import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.services.UserService;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +21,7 @@ import java.util.stream.Collectors;
  * @author Ion Perpegel
  * @since 4.0
  */
-@Service
+@Service("superUserManagementService")
 public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
 
     @Autowired
