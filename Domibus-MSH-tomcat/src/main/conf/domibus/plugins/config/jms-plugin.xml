@@ -23,7 +23,6 @@
 
     <bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
         <constructor-arg value="Jms"/>
-        <property name="lister" ref="jmsNotificationListenerService"/>
         <property name="messageSubmissionTransformer" ref="jmsMessageTransformer"/>
         <property name="messageRetrievalTransformer"  ref="jmsMessageTransformer"/>
     </bean>
