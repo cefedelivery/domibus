@@ -18,6 +18,7 @@ import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
                     .locator(new BusdoxLocator(smlInfo))
 //                    .locator(new StaticLocator("https://my-json-server.typicode.com"))
                     .fetcher(new DomibusApacheFetcher(Mode.of(mode), httpUtil))
+                    .certificateValidator(EmptyCertificateValidator.INSTANCE)
                     .build();
 
             final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
