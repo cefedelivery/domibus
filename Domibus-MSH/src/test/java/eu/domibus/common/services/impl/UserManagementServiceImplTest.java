@@ -1,21 +1,24 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
-import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 import java.util.List;
@@ -41,46 +44,22 @@ public class UserManagementServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    private BCryptPasswordEncoder bcryptEncoder;
+    private UserPersistenceService userPersistenceService;
 
     @Injectable
-    private DomainCoreConverter domainConverter;
+    private DomainContextProvider domainContextProvider;
+
+    @Injectable
+    private UserConverter userConverter;
 
     @Tested
     private UserManagementServiceImpl userService;
-
-    @Test
-    public void getLoggedUserNamed(@Mocked SecurityContextHolder securityContextHolder, @Mocked Authentication authentication) throws Exception {
-        new Expectations() {{
-            securityContextHolder.getContext().getAuthentication();
-            result = authentication;
-            authentication.getName();
-            result = "thomas";
-        }};
-        String loggedUserNamed = userService.getLoggedUserNamed();
-        assertEquals("thomas", loggedUserNamed);
-    }
-
-    @Test
-    public void getLoggedUserNamedWithNoAuthentication(@Mocked SecurityContextHolder securityContextHolder) throws Exception {
-        new Expectations() {{
-            SecurityContextHolder.getContext().getAuthentication();
-            result = null;
-        }};
-        String loggedUserNamed = userService.getLoggedUserNamed();
-        assertNull(loggedUserNamed);
-    }
 
     @Tested
     private UserManagementServiceImpl userManagementService;
 
     @Test
     public void findUsers() throws Exception {
-        //TODO
-    }
-
-    @Test
-    public void saveUsers() throws Exception {
         //TODO
     }
 
@@ -279,23 +258,6 @@ public class UserManagementServiceImplTest {
             assertEquals(0, modifiedUser.getAttemptCount(), 0d);
         }};
 
-    }
-
-    @Test
-    public void prepareUserForUpdate() {
-        final User userEntity = new User();
-        userEntity.setActive(false);
-        userEntity.setSuspensionDate(new Date());
-        userEntity.setAttemptCount(5);
-        eu.domibus.api.user.User user = new eu.domibus.api.user.User();
-        user.setActive(true);
-        new Expectations() {{
-            userDao.loadUserByUsername(anyString);
-            result = userEntity;
-        }};
-        User user1 = userManagementService.prepareUserForUpdate(user);
-        assertNull(user1.getSuspensionDate());
-        assertEquals(0, user1.getAttemptCount(), 0d);
     }
 
     @Test

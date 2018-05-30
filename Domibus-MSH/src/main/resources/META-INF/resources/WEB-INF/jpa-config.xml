@@ -50,6 +50,7 @@
           p:defaultDestination-ref="clusterCommandTopic"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
+	 
 </beans>
 
 
