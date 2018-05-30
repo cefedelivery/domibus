@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -8,6 +9,7 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Property;
@@ -16,8 +18,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /* This class is used for dynamic discovery of the parties participating in a message exchange.
  *
@@ -157,7 +154,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "No matching dynamic discovery processes found for message.", userMessage.getMessageInfo().getMessageId(), null);
         }
 
-        LOG.info("Found " + candidates.size() + " dynamic discovery candidates. MSHRole: " + mshRole);
+        LOG.info("Found [{}] dynamic discovery candidates. MSHRole: [{}]", candidates.size(), mshRole);
 
         if(MSHRole.RECEIVING.equals(mshRole)) {
             PartyId fromPartyId = getFromPartyId(userMessage);
@@ -208,7 +205,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     protected synchronized Party updateConfigurationParty(String name, String type, String endpoint) {
-        LOG.info("Update the configuration party with: " + name + " " + type + " " + endpoint);
+        LOG.info("Update the configuration party with [{}] [{}] [{}]", name, type, endpoint);
         // update the list of party types
         PartyIdType configurationType = updateConfigurationType(type);
 
@@ -236,7 +233,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             }
         }
 
-        LOG.debug("New endpoint is " + newEndpoint);
+        LOG.debug("New endpoint is [{}]", newEndpoint);
         Party newConfigurationParty = buildNewConfigurationParty(name, configurationType, newEndpoint);
         LOG.debug("Add new configuration party: " + newConfigurationParty.getName());
         getConfiguration().getBusinessProcesses().getParties().add(newConfigurationParty);
@@ -266,13 +263,13 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         PartyIdType configurationType = null;
         for (final PartyIdType t : partyIdTypes) {
             if (StringUtils.equalsIgnoreCase(t.getValue(), type)) {
-                LOG.debug("PartyIdType exists in the pmode: " + type);
+                LOG.debug("PartyIdType exists in the pmode [{}]", type);
                 configurationType = t;
             }
         }
         // add to partyIdType list
         if (configurationType == null) {
-            LOG.debug("Add new PartyIdType: " + type);
+            LOG.debug("Add new PartyIdType [{}]", type);
             configurationType = new PartyIdType();
             configurationType.setName(type);
             configurationType.setValue(type);
@@ -321,7 +318,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             //parse certificate for common name = toPartyId
             cn = certificateService.extractCommonName(certificate);
-            LOG.debug("Extracted the common name: " + cn);
+            LOG.debug("Extracted the common name [{}]", cn);
         } catch (final InvalidNameException e) {
             LOG.error("Error while extracting CommonName from certificate", e);
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "Error while extracting CommonName from certificate", null, e);
@@ -375,7 +372,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
         for (final Process process : processes) {
             if (matchProcess(process, mshRole)) {
-                LOG.debug("Process matched: " + process.getName() + "  " + mshRole);
+                LOG.debug("Process matched: [{}] [{}]", process.getName(), mshRole);
                 for (final LegConfiguration legConfiguration : process.getLegs()) {
                     if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), userMessage.getCollaborationInfo().getService().getValue()) &&
                             StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), userMessage.getCollaborationInfo().getAction())) {
@@ -414,5 +411,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
             LOG.debug("Property: " + p.getName());
         }
         return null;
+    }
+
+    @Override
+    public List<String> findPartyIdByServiceAndAction(String service, String action) {
+        // not used in DynamicDiscoveryPModeProvider
+        return Collections.emptyList();
     }
 }

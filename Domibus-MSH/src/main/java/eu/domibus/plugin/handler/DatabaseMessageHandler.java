@@ -124,11 +124,12 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             authUtils.hasUserOrAdminRole();
         }
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+        String displayUser = originalUser == null ? "super user" : originalUser;
+        LOG.debug("Authorized as [{}]", displayUser);
 
         UserMessage userMessage;
         try {
-            LOG.info("Searching message with id [" + messageId + "]");
+            LOG.info("Searching message with id [{}]", messageId);
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
@@ -167,11 +168,11 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
-            LOG.debug("OriginalUser is [" + authOriginalUser + "]");
+            LOG.debug("OriginalUser is [{}]", authOriginalUser);
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, recipient);
             if (originalUser != null && !originalUser.equals(authOriginalUser)) {
-                LOG.debug("User [" + authOriginalUser + "] is trying to submit/access a message having as final recipient: " + originalUser);
+                LOG.debug("User [{}] is trying to submit/access a message having as final recipient: [{}]", authOriginalUser, originalUser);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
         }
@@ -238,7 +239,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         }
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        LOG.debug("Authorized as " + (originalUser == null ? "super user" : originalUser));
+        String displayUser = originalUser == null ? "super user" : originalUser;
+        LOG.debug("Authorized as [{}]", displayUser);
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
@@ -286,7 +288,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             propertyProfileValidator.validate(message, pModeKey);
 
             boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
-            LOG.debug("Compression for message with id: " + messageId + " applied: " + compressed);
+            LOG.debug("Compression for message with id: [{}] applied: [{}]", messageId, compressed);
 
             try {
                 messagingService.storeMessage(message, MSHRole.SENDING);
@@ -321,7 +323,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
-
     }
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {

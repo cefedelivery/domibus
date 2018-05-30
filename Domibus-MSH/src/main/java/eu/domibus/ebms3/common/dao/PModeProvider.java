@@ -112,7 +112,7 @@ public abstract class PModeProvider {
     }
 
     public void removePMode(int id) {
-        LOG.debug("Removing PMode with id:" + id);
+        LOG.debug("Removing PMode with id: [{}]", id);
         configurationRawDAO.deleteById(id);
     }
 
@@ -326,5 +326,14 @@ public abstract class PModeProvider {
 
     public abstract List<Party> findAllParties();
 
+    public abstract List<String> findPartyIdByServiceAndAction(final String service, final String action);
+
+    public abstract String getPartyIdType(String partyIdentifier);
+
+    public abstract String getServiceType(String serviceValue);
+
+    public abstract String getRole(String roleType, String serviceValue);
+
+    public abstract String getAgreementRef(String serviceValue);
 
 }

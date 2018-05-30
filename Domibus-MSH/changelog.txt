@@ -9,6 +9,7 @@ Domibus 4.0
 - Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
 - Internalize EhCache configuration and give possibility to override it
 - Added OWASP Dependency Check Maven Plugin to identify vulnerable dependencies
+- Possibility to Test the connections for other Access Points
 Domibus 3.3.4
 - Change the pulling mechanism in order to have a better message per second throughput.
 - Changes to support the fixed values of PEPPOL AS4 profile in the dynamic discovery lookup.

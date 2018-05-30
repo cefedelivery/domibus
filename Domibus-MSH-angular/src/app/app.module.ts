@@ -76,6 +76,7 @@ import {PageHeaderComponent} from "./common/page-header/page-header.component";
 import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.component";
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
+import {TestServiceComponent} from "./testservice/testservice.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -125,7 +126,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ClearInvalidDirective,
     PageHeaderComponent,
     DomainSelectorComponent,
-    AlertsComponent
+    AlertsComponent,
+    TestServiceComponent
   ],
   entryComponents: [
     AppComponent,

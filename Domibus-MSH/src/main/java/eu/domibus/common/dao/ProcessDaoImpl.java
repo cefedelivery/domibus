@@ -21,12 +21,12 @@ import static eu.domibus.common.model.configuration.Process.*;
 @Repository
 public class ProcessDaoImpl implements ProcessDao{
 
-    private final static String LEG = "leg";
-    private final static String INITIATOR_NAME = "initiatorName";
-    private final static String RESPONDER_NAME = "responderName";
-    private final static String MEP_BINDING = "mepBinding";
-    private final static String INITIATOR = "initiator";
-    private final static String MPC_NAME = "mpcName";
+    private static final String LEG = "leg";
+    private static final String INITIATOR_NAME = "initiatorName";
+    private static final String RESPONDER_NAME = "responderName";
+    private static final String MEP_BINDING = "mepBinding";
+    private static final String INITIATOR = "initiator";
+    private static final String MPC_NAME = "mpcName";
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
@@ -73,7 +73,16 @@ public class ProcessDaoImpl implements ProcessDao{
     public List<Process> findPullProcessByLegName(final String legName) {
         final TypedQuery<Process> processQuery = this.entityManager.createNamedQuery(Process.FIND_PULL_PROCESS_FROM_LEG_NAME, Process.class);
         processQuery.setParameter("legName", legName);
-        processQuery.setParameter("mepBinding", BackendConnector.Mode.PULL.getFileMapping());
+        processQuery.setParameter(MEP_BINDING, BackendConnector.Mode.PULL.getFileMapping());
+        return processQuery.getResultList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<Process> findProcessByLegName(String legName) {
+        final TypedQuery<Process> processQuery = this.entityManager.createNamedQuery(Process.FIND_PROCESS_FROM_LEG_NAME, Process.class);
+        processQuery.setParameter("legName", legName);
         return processQuery.getResultList();
     }
 
