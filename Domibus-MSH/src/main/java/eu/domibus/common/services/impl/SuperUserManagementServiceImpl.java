@@ -24,24 +24,28 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-
-import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
+ 
 
 /**
- * @author Thomas Dussart
- * @since 3.3
+ * @author Ion Perpegel
+ * @since 4.0
  */
 @Service
 public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
 
+    @Autowired
+    protected UserDomainService userDomainService;
+    
+    @Qualifier("taskExecutor")
+    @Autowired
+    protected SchedulingTaskExecutor schedulingTaskExecutor;
+    
     /**
      * {@inheritDoc}
      */
@@ -70,7 +74,8 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
                 .collect(Collectors.toList());
 
         Future utrFuture = schedulingTaskExecutor.submit(() -> {
-            // this block needs to called inside a transaction; for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
+            // this block needs to called inside a transaction; 
+            // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
             userPersistenceService.updateUsers(superUsers);
         });
 
@@ -80,31 +85,5 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
             throw new DomainException("Could not save super users", e);
         }
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    @Transactional(readOnly = true)
-//    public List<eu.domibus.api.user.User> findUsers() {
-//        List<User> userEntities = userDao.listUsers();
-//        List<eu.domibus.api.user.User> users = userConverter.convert(userEntities);
-//
-//        String domainCode = domainContextProvider.getCurrentDomainSafely().getCode();
-//        users.forEach(u -> u.setDomain(domainCode));
-//
-//        return users;
-//    }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    public List<eu.domibus.api.user.User> findAllUsers() {
-//        List<eu.domibus.api.user.User> allUsers = findUsers();
-//        List<eu.domibus.api.user.User> superUsers = userDomainService.getSuperUsers();
-//        allUsers.addAll(superUsers);
-//        return allUsers;
-//    }
 
 }

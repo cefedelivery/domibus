@@ -2,7 +2,6 @@ package eu.domibus.web.rest;
 
 
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
@@ -17,7 +16,6 @@ import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -44,11 +42,6 @@ public class UserResource {
 
     @Resource(name="userServicesMap")
     Map<String, UserService> userServices;
-
-//    @Autowired
-//    public UserResource(UserService userService) {
-//        this.userService = userService;
-//    }
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -81,11 +74,6 @@ public class UserResource {
         LOG.debug("Retrieving users");
 
         List<User> users = userService.findUsers();
-//        List<User> users;
-//        if (authUtils.isSuperAdmin())
-//            users = userService.findAllUsers();
-//        else
-//            users = userService.findUsers();
 
         return prepareResponse(users);
     }

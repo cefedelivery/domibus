@@ -1,10 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
-import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
@@ -16,10 +13,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +20,6 @@ import java.util.*;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import eu.domibus.common.services.UserPersistenceService;
 
@@ -65,17 +53,10 @@ public class UserManagementServiceImpl implements UserService {
     protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    protected UserDomainService userDomainService;
-
-    @Autowired
     protected UserConverter userConverter;
 
     @Autowired
     protected UserPersistenceService userPersistenceService;
-
-    @Qualifier("taskExecutor")
-    @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor;
 
 
     /**
@@ -92,17 +73,6 @@ public class UserManagementServiceImpl implements UserService {
 
         return users;
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    public List<eu.domibus.api.user.User> findAllUsers() {
-//        List<eu.domibus.api.user.User> allUsers = findUsers();
-//        List<eu.domibus.api.user.User> superUsers = userDomainService.getSuperUsers();
-//        allUsers.addAll(superUsers);
-//        return allUsers;
-//    }
 
     /**
      * {@inheritDoc}
@@ -126,28 +96,6 @@ public class UserManagementServiceImpl implements UserService {
     @Transactional
     public void updateUsers(List<eu.domibus.api.user.User> users) {
         userPersistenceService.updateUsers(users);
-
-//        List<eu.domibus.api.user.User> regularUsers = users.stream()
-//                .filter(u -> !u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-//                .collect(Collectors.toList());
-//        List<eu.domibus.api.user.User> superUsers = users.stream()
-//                .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
-//                .collect(Collectors.toList());
-//
-//        userPersistenceService.updateUsers(regularUsers);
-//
-//        Future utrFuture = schedulingTaskExecutor.submit(() -> {
-//
-//            userPersistenceService.updateUsers(superUsers);
-//
-//            // this block needs to called inside a transaction; for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
-//        });
-//
-//        try {
-//            utrFuture.get(3000L, TimeUnit.SECONDS);
-//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-//            throw new DomainException("Could not save super users", e);
-//        }
     }
 
 
