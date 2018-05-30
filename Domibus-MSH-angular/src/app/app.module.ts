@@ -149,7 +149,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TrustStoreUploadComponent,
     RollbackDialogComponent,
     ActionDirtyDialogComponent,
-    PartyDetailsComponent
+    PartyDetailsComponent,
+    PartyIdentifierDetailsComponent
   ],
   imports: [
     BrowserModule,

@@ -17,4 +17,11 @@ export class PartyIdentifierDetailsComponent implements OnInit {
   ngOnInit() {
   }
 
+  ok() {
+    this.dialogRef.close(true);
+  }
+
+  cancel() {
+    this.dialogRef.close(false);
+  }
 }

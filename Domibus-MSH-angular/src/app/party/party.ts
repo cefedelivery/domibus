@@ -6,51 +6,57 @@
  */
 export class PartyResponseRo {
 
-  entityId:number;
+  entityId: number;
 
-  identifiers:Array<IdentifierRo>; //NOSONAR
+  identifiers: Array<IdentifierRo>; //NOSONAR
 
-  name:string;
+  name: string;
 
-  endpoint:string;
+  endpoint: string;
 
   processes;
 
-  joinedIdentifiers:string;
+  joinedIdentifiers: string;
 
-  joinedProcesses:string;
+  joinedProcesses: string;
 
-  processesWithPartyAsInitiator:Array<ProcessRo>;
+  processesWithPartyAsInitiator: Array<ProcessRo>;
 
-  processesWithPartyAsResponder:Array<ProcessRo>;
-
-}
-
-export class IdentifierRo{
-
-
-  entityId:number;
-
-  partyId:string;
-
-  partyIdType:PartyIdTypeRo;
+  processesWithPartyAsResponder: Array<ProcessRo>;
 
 }
 
-export class PartyIdTypeRo{
+export class IdentifierRo {
 
-  name:string;
+  entityId: number;
 
-  value:string;
+  partyId: string;
 
-}
-
-export class ProcessRo{
-
-  entityId:number;
-
-  name:string;
+  partyIdType: PartyIdTypeRo;
 
 }
 
+export class PartyIdTypeRo {
 
+  name: string;
+
+  value: string;
+
+}
+
+export class ProcessRo {
+
+  entityId: number;
+
+  name: string;
+
+}
+
+export class ProcessInfoRo {
+
+  name: string;
+
+  isInitiator: boolean;
+
+  isResponder: boolean;
+}

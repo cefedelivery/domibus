@@ -1,23 +1,30 @@
 <h2 md-dialog-title>Identifier</h2>
 
-<md-dialog-content style="width:25vw;height:25vh;padding-top:25px;">
+<md-dialog-content style="width:50vw;height:350px;padding-top:25px;">
   <form name="filterForm">
     <div>
       <md-card>
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party ID" name="partyId" value="{{partyIdentifier.partyId}}">
+              <input mdInput placeholder="Party ID" name="partyId" [(ngModel)]="partyIdentifier.partyId">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party Id Type" name="partyIdType_name" value="{{partyIdentifier.partyIdType.name}}">
+              <input mdInput placeholder="Party Id Type" name="partyIdType_name" [(ngModel)]="partyIdentifier.partyIdType.name">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party Id value" name="partyIdType_value" value="{{partyIdentifier.partyIdType.value}}">
+              <input mdInput placeholder="Party Id value" name="partyIdType_value" [(ngModel)]="partyIdentifier.partyIdType.value">
             </md-input-container>
           </div>
         </md-card-content>
       </md-card>
     </div>
+
+    <button md-raised-button (click)="ok()" color="primary">
+      <span>OK</span>
+    </button>
+    <button md-raised-button (click)="cancel()" color="primary">
+      <span>Cancel</span>
+    </button>
   </form>
 </md-dialog-content>

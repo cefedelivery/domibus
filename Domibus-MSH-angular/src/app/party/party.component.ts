@@ -1,13 +1,13 @@
-import {Component, OnInit} from "@angular/core";
-import {MdDialog, MdDialogRef} from "@angular/material";
-import {RowLimiterBase} from "app/common/row-limiter/row-limiter-base";
-import {ColumnPickerBase} from "app/common/column-picker/column-picker-base";
-import {PartyService} from "./party.service";
-import {PartyResponseRo} from "./party";
-import {Observable} from "rxjs/Observable";
-import {AlertService} from "../alert/alert.service";
-import {AlertComponent} from "../alert/alert.component";
-import {PartyDetailsComponent} from "./party-details/party-details.component";
+import {Component, OnInit} from '@angular/core';
+import {MdDialog, MdDialogRef} from '@angular/material';
+import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
+import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
+import {PartyService} from './party.service';
+import {PartyResponseRo, ProcessRo, ProcessInfoRo} from './party';
+import {Observable} from 'rxjs/Observable';
+import {AlertService} from '../alert/alert.service';
+import {AlertComponent} from '../alert/alert.component';
+import {PartyDetailsComponent} from './party-details/party-details.component';
 
 /**
  * @author Thomas Dussart
@@ -36,31 +36,36 @@ export class PartyComponent implements OnInit {
   count: number = 0;
   loading: boolean = false;
 
-  constructor(public dialog: MdDialog, public partyService: PartyService, public alertService: AlertService) {
+  allProcesses: string[];
+
+  constructor (public dialog: MdDialog, public partyService: PartyService, public alertService: AlertService) {
   }
 
-  ngOnInit() {
+  ngOnInit () {
 
     this.initColumns();
     this.searchAndCount();
 
   }
 
-  searchAndCount() {
+  searchAndCount () {
     this.offset = 0;
-    this.loading = true;
-    let pageStart = this.offset * this.rowLimiter.pageSize;
-    let pageSize = this.rowLimiter.pageSize;
 
-    let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
-      this.name,
-      this.endPoint,
-      this.partyID,
-      this.process,
-      pageStart,
-      pageSize);
+    const partyObservable = this.search();
 
-    let countObservable: Observable<number> = this.partyService.countParty(
+    // this.loading = true;
+    // let pageStart = this.offset * this.rowLimiter.pageSize;
+    // let pageSize = this.rowLimiter.pageSize;
+    //
+    // let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
+    //   this.name,
+    //   this.endPoint,
+    //   this.partyID,
+    //   this.process,
+    //   pageStart,
+    //   pageSize);
+
+    const countObservable: Observable<number> = this.partyService.countParty(
       this.name,
       this.endPoint,
       this.partyID,
@@ -70,42 +75,56 @@ export class PartyComponent implements OnInit {
         this.rows = response[0];
         this.count = response[1];
         this.loading = false;
-        if(this.count > AlertComponent.MAX_COUNT_CSV) {
-          this.alertService.error("Maximum number of rows reached for downloading CSV");
+        if (this.count > AlertComponent.MAX_COUNT_CSV) {
+          this.alertService.error('Maximum number of rows reached for downloading CSV');
         }
       },
       error => {
-        this.alertService.error("Could not load parties" + error);
+        this.alertService.error('Could not load parties' + error);
         this.loading = false;
       }
     );
   }
 
-  search(){
+  search (): Observable<PartyResponseRo[]> {
     this.loading = true;
-    let pageStart = this.offset * this.rowLimiter.pageSize;
-    let pageSize = this.rowLimiter.pageSize;
+    const pageStart = this.offset * this.rowLimiter.pageSize;
+    const pageSize = this.rowLimiter.pageSize;
 
-    this.partyService.listParties(
+    const res = this.partyService.listParties(
       this.name,
       this.endPoint,
       this.partyID,
       this.process,
       pageStart,
-      pageSize).subscribe((response) => {
+      pageSize);
+
+    res.subscribe((response) => {
         this.rows = response;
-        debugger;
+        // debugger;
+
+        const all = [];
+        for (const row of this.rows) {
+          for (const p1 of row.processesWithPartyAsInitiator) {
+            all.push(p1.name)
+          }
+          for (const p1 of row.processesWithPartyAsResponder) {
+            all.push(p1.name)
+          }
+        }
+        this.allProcesses = Array.from(new Set(all));
+
         this.loading = false;
       },
       error => {
-        this.alertService.error("Could not load parties" + error);
+        this.alertService.error('Could not load parties' + error);
         this.loading = false;
       }
     );
-
+    return res;
   }
 
-  initColumns() {
+  initColumns () {
     this.columnPicker.allColumns = [
       {
         name: 'Name',
@@ -129,69 +148,76 @@ export class PartyComponent implements OnInit {
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Name", "End point", "Party id", 'Process'].indexOf(col.name) != -1
+      return ['Name', 'End point', 'Party id', 'Process'].indexOf(col.name) != -1
     })
   }
 
-  changePageSize(newPageLimit: number) {
+  changePageSize (newPageLimit: number) {
     this.offset = 0;
     this.rowLimiter.pageSize = newPageLimit;
     this.searchAndCount();
   }
 
-  onPage(event) {
+  onPage (event) {
     console.log('Page Event', event);
     this.offset = event.offset;
     this.search();
   }
 
-  isSaveAsCSVButtonEnabled() {
+  isSaveAsCSVButtonEnabled () {
     return (this.count < AlertComponent.MAX_COUNT_CSV);
   }
 
-  saveAsCSV() {
+  saveAsCSV () {
     this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
   }
-  onActivate(event) {
-    if ("dblclick" === event.type) {
+
+  onActivate (event) {
+    if ('dblclick' === event.type) {
       this.edit(event.row);
     }
   }
 
-  canSave() {
+  canSave () {
     return false;
   }
-  canEdit() {
-    return this.selected.length == 1;
+
+  canEdit () {
+    return this.selected.length === 1;
   }
-  canCancel() {
+
+  canCancel () {
     return false;
   }
-  canDelete() {
-    return this.selected.length == 1;
+
+  canDelete () {
+    return this.selected.length === 1;
   }
 
-  cancel() {
-
-  }
-
-  save() {
+  cancel () {
 
   }
 
-  add() {
+  save () {
 
   }
 
-  remove() {
+  add () {
 
   }
 
-  edit(row) {
+  remove () {
+
+  }
+
+  edit (row) {
     row = row || this.selected[0];
-    let dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent,{
+    const rowCopy = JSON.parse(JSON.stringify(row));
+    const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
+    const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
       data: {
-        edit: row
+        edit: rowCopy,
+        allProcesses: allProcessesCopy
       }
     });
   }
