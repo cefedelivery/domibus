@@ -150,6 +150,11 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         replyJmsTemplate.send(new SignalMessageCreator(messageId, NotificationType.MESSAGE_SEND_SUCCESS));
     }
 
+    @Override
+    public MapMessage downloadMessage(String messageId, MapMessage target) throws MessageNotFoundException {
+        return this.getMessageRetrievalTransformer().transformFromSubmission(this.messageRetriever.downloadMessage(messageId), target);
+    }
+
     private class DownloadMessageCreator implements MessageCreator {
         private String messageId;
 
