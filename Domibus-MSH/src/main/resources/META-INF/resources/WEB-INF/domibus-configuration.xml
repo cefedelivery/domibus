@@ -79,17 +79,4 @@
         </property>
     </bean>
 
-    <bean id="userManagementService"
-          class="eu.domibus.common.services.impl.UserManagementServiceImpl"></bean>
-    <bean id="superUserManagementService"
-          class="eu.domibus.common.services.impl.SuperUserManagementServiceImpl"></bean>
-
-    <util:map id="userServicesMap">
-        <entry key="ROLE_ADMIN">
-            <ref bean="userManagementService"/>
-        </entry>
-        <entry key="ROLE_AP_ADMIN">
-            <ref bean="superUserManagementService"/>
-        </entry>
-    </util:map>
 </beans>

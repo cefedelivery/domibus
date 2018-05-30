@@ -31,7 +31,6 @@ public class AuthenticationService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    @Qualifier("userManagementService")
     private UserService userService;
 
     @Autowired

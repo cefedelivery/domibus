@@ -44,16 +44,10 @@ public class UserManagementServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    private SchedulingTaskExecutor taskExecutor;
-
-    @Injectable
     private UserPersistenceService userPersistenceService;
 
     @Injectable
     private DomainContextProvider domainContextProvider;
-
-    @Injectable
-    private UserDomainService userDomainService;
 
     @Injectable
     private UserConverter userConverter;

@@ -15,11 +15,9 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +33,10 @@ public class UserResourceTest {
     UserResource userResource;
 
     @Injectable
-    Map<String, UserService> userServices;
+    private UserService superUserManagementService;
 
     @Injectable
-    @Qualifier("userManagementService")
-    UserService userService;
+    private UserService userManagementService;
 
     @Injectable
     DomainCoreConverter domainConverter;
@@ -76,7 +73,7 @@ public class UserResourceTest {
         final List<UserResponseRO> userResponseROList = getUserResponseList();
 
         new Expectations() {{
-            userService.findUsers();
+            userManagementService.findUsers();
             result = userList;
 
             domainConverter.convert(userList, UserResponseRO.class);
