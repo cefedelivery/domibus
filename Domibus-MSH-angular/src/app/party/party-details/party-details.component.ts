@@ -1,7 +1,8 @@
 import {Component, Inject, OnInit} from "@angular/core";
-import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
+import {MD_DIALOG_DATA, MdDialogRef, MdDialog, MdDialogConfig} from "@angular/material";
 import {ColumnPickerBase} from "app/common/column-picker/column-picker-base";
 import {IdentifierRo, PartyResponseRo} from "../party";
+import {PartyIdentifierDetailsComponent} from "../party-identifier-details/party-identifier-details.component";
 
 @Component({
   selector: 'app-party-details',
@@ -11,20 +12,18 @@ import {IdentifierRo, PartyResponseRo} from "../party";
 export class PartyDetailsComponent implements OnInit {
 
   //identifiersRow = [];
-  processesRow = [];
+  processesRows = [];
   identifiersRowColumnPicker: ColumnPickerBase = new ColumnPickerBase();
   processesRowColumnPicker: ColumnPickerBase = new ColumnPickerBase();
-  identifiersRowCount = 0;
-  processesRowCount = 0;
-  loading;
+
   party:PartyResponseRo ;
-  identifiers:Array<IdentifierRo> ;
+  identifiers:Array<IdentifierRo>;
+  selectedIdentifiers=[];
 
 
-  constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>,@Inject(MD_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MdDialogRef<PartyDetailsComponent>,@Inject(MD_DIALOG_DATA) public data: any, private dialog: MdDialog) {
     this.party=data.edit;
     this.identifiers=this.party.identifiers;
-    this.identifiersRowCount=this.identifiers.length;
   }
 
   ngOnInit() {
@@ -36,17 +35,17 @@ export class PartyDetailsComponent implements OnInit {
       {
         name: 'Party ID',
         prop: 'partyId',
-        width: 15
+        width: 100
       },
       {
         name: 'Party Id Type',
         prop: 'partyIdType.name',
-        width: 30
+        width: 150
       },
       {
         name: 'Party Id value',
         prop: 'partyIdType.value',
-        width: 150
+        width: 280
       }
     ];
     this.identifiersRowColumnPicker.selectedColumns = this.identifiersRowColumnPicker.allColumns.filter(col => {
@@ -56,17 +55,14 @@ export class PartyDetailsComponent implements OnInit {
       {
         name: 'Process',
         prop: 'process',
-        width: 20
       },
       {
         name: 'Initiator',
         prop: 'initiator',
-        width: 20
       },
       {
         name: 'Responder',
         prop: 'responder',
-        width: 20
       }
     ];
     this.processesRowColumnPicker.selectedColumns = this.processesRowColumnPicker.allColumns.filter(col => {
@@ -75,7 +71,15 @@ export class PartyDetailsComponent implements OnInit {
 
 
   }
-  onPage(){
 
+  editIdentifier() {
+    let identifierRow = this.selectedIdentifiers[0];
+    let dialogRef: MdDialogRef<PartyIdentifierDetailsComponent> = this.dialog.open(PartyIdentifierDetailsComponent,{
+      data: {
+        edit: identifierRow
+      }
+
+    });
   }
+
 }

@@ -1,0 +1,23 @@
+<h2 md-dialog-title>Identifier</h2>
+
+<md-dialog-content style="width:25vw;height:25vh;padding-top:25px;">
+  <form name="filterForm">
+    <div>
+      <md-card>
+        <md-card-content>
+          <div class="panel">
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Party ID" name="partyId" value="{{partyIdentifier.partyId}}">
+            </md-input-container>
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Party Id Type" name="partyIdType_name" value="{{partyIdentifier.partyIdType.name}}">
+            </md-input-container>
+            <md-input-container style="width:100%">
+              <input mdInput placeholder="Party Id value" name="partyIdType_value" value="{{partyIdentifier.partyIdType.value}}">
+            </md-input-container>
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+  </form>
+</md-dialog-content>

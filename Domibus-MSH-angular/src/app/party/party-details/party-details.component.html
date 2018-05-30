@@ -56,20 +56,33 @@
               id="identifierTable"
               class="material striped"
               [rows]="identifiers"
+              [selected]="selectedIdentifiers"
+              [selectionType]="'single'"
               [columnMode]="'force'"
               [columns]="identifiersRowColumnPicker.selectedColumns"
               [headerHeight]="50"
               [footerHeight]="50"
               [rowHeight]="'auto'"
-              [scrollbarH]="true"
-              [externalPaging]="true"
-              [externalSorting]="true"
-              [loadingIndicator]="loading"
-              [count]="identifiersRowCount"
-              (page)='onPage($event)'
+              [externalPaging]="false"
+              [externalSorting]="false"
+              [count]="identifiers.length"
             >
             </ngx-datatable>
 
+            <div>
+              <button md-raised-button (click)="addIdentifier()" color="primary">
+                <md-icon>add</md-icon>
+                <span>New</span>
+              </button>
+              <button md-raised-button (click)="editIdentifier()" color="primary" [disabled]="selectedIdentifiers.length==0">
+                <md-icon>edit</md-icon>
+                <span>Edit</span>
+              </button>
+              <button md-raised-button (click)="removeIdentifier()" color="primary" [disabled]="selectedIdentifiers.length==0">
+                <md-icon>delete</md-icon>
+                <span>Delete</span>
+              </button>
+            </div>
           </div>
         </md-card-content>
       </md-card>
@@ -85,17 +98,17 @@
               id="processTable"
               class="material striped"
               [rows]="processesRow"
+              [selectionType]="'single'"
               [columnMode]="'force'"
               [columns]="processesRowColumnPicker.selectedColumns"
               [headerHeight]="50"
               [footerHeight]="50"
               [rowHeight]="'auto'"
+              [scrollbarV]="true"
               [scrollbarH]="true"
-              [externalPaging]="true"
-              [externalSorting]="true"
-              [loadingIndicator]="loading"
-              [count]="processesRowCount"
-              (page)='onPage($event)'
+              [externalPaging]="false"
+              [externalSorting]="false"
+              [count]="processesRows.length"
             >
             </ngx-datatable>
 
