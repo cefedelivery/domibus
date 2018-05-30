@@ -53,6 +53,7 @@ public class AuthenticationService {
             }
             throw ae;
         }
+        
         final UserDetail principal = (UserDetail) authentication.getPrincipal();
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);

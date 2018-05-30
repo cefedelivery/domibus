@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -64,4 +65,13 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
             super.update(u);
         }
     }
+
+    @Override
+    public void deleteAll(final Collection<User> users){
+        for (final User u : users) {
+            u.setDeleted(true);
+            super.update(u);
+        }
+    }
+
 }

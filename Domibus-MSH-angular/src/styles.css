@@ -269,6 +269,11 @@ md-card {
   }
 }
 
+.md-select-menu-container,
+.md2-select-panel {
+  z-index: 99999 !important;
+}
+
 /* --- GROUP BUTTON FILTER ---*/
 .group-filter-button {
   position: relative;
