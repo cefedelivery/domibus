@@ -74,6 +74,20 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     }
 
+   /* @PostConstruct
+    public void init(){
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                try {
+                    updateOperation1();
+                    updateOperation2();
+                } catch (SomeBusinessExeption ex) {
+                    status.setRollbackOnly();
+                }
+            }
+        });
+    }*/
 
     @Autowired
     @Qualifier("domibusJDBC-XADataSource")
@@ -92,11 +106,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             params.put(IDPK, idPk);
             final String sql = lockByIdQuery.get(domibusConfigurationService.getDataBaseEngine());
             final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, params);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             final boolean next = sqlRowSet.next();
             if (!next) {
                 return null;
@@ -178,12 +187,13 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     public MessagingLock getLock(final String messageId) {
 
         try {
+            LOG.debug("Message[{}] Getting lock", messageId);
             Query q = entityManager.createNativeQuery(lockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine()), MessagingLock.class);
             q.setParameter(1, messageId);
             MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
             return messagingLock;
-        } catch (org.hibernate.exception.LockAcquisitionException | PersistenceException ex) {
-            LOG.trace("Message:[{}] no result for message id", messageId);
+        } catch (Exception ex) {
+            LOG.error("Message:[{}] no result for message id", messageId);
             return null;
         }
     }
@@ -232,10 +242,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<MessagingLock> findReadyToPull(final String mpc, final String initiator) {
         final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findReadyToPull", MessagingLock.class);
         namedQuery.setFirstResult(0);
-        namedQuery.setMaxResults(100);
+        namedQuery.setMaxResults(3);
         namedQuery.setParameter("MPC", mpc);
         namedQuery.setParameter("INITIATOR", initiator);
         return namedQuery.getResultList();
