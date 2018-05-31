@@ -23,6 +23,7 @@ public class UserResponseRO {
     private List<String> authorities;
     private String status;
     private boolean suspended;
+    private String domain;
 
     public UserResponseRO() {
     }
@@ -107,6 +108,14 @@ public class UserResponseRO {
         this.suspended = suspended;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -116,6 +125,7 @@ public class UserResponseRO {
                 .append("authorities", authorities)
                 .append("roles", roles)
                 .append("status", status)
+                .append("domain", domain)
                 .toString();
     }
 

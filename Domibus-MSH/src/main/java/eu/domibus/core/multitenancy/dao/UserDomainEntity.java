@@ -22,6 +22,8 @@ import javax.validation.constraints.NotNull;
 )
 @NamedQueries({
         @NamedQuery(name = "UserDomainEntity.findByUserName", query = "FROM UserDomainEntity u where u.userName=:USER_NAME"),
+        @NamedQuery(name = "UserDomainEntity.findPreferredDomains", query = "FROM UserDomainEntity u where u.preferredDomain is not null"),
+        @NamedQuery(name = "UserDomainEntity.findAll", query = "FROM UserDomainEntity"),
 })
 public class UserDomainEntity extends AbstractBaseEntity {
 
@@ -31,6 +33,9 @@ public class UserDomainEntity extends AbstractBaseEntity {
 
     @Column(name = "DOMAIN")
     private String domain;
+
+    @Column(name = "PREFERRED_DOMAIN")
+    private String preferredDomain;
 
     public String getUserName() {
         return userName;
@@ -47,6 +52,10 @@ public class UserDomainEntity extends AbstractBaseEntity {
     public void setDomain(String domain) {
         this.domain = domain;
     }
+
+    public String getPreferredDomain() {  return preferredDomain; }
+
+    public void setPreferredDomain(String preferredDomain) { this.preferredDomain = preferredDomain; }
 
     @Override
     public boolean equals(Object o) {

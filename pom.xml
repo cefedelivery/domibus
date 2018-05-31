@@ -721,6 +721,14 @@
             </modules>
         </profile>
         <profile>
+            <id>wildfly12</id>
+            <modules>
+                <module>Domibus-MSH-jms-wildfly-artemis</module>
+                <module>Domibus-MSH-taskexecutor-wildfly</module>
+                <module>Domibus-MSH-wildfly12</module>
+            </modules>
+        </profile>
+        <profile>
             <id>UI</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

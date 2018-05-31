@@ -16,6 +16,6 @@ export class AuthorizedAdminGuard extends AuthorizedGuard {
 
 
   getAllowedRoles(route: ActivatedRouteSnapshot): Array<string> {
-    return ['ROLE_ADMIN'];
+    return [SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN];
   }
 }

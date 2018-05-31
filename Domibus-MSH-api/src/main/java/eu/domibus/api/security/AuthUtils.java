@@ -14,7 +14,7 @@ public interface AuthUtils {
 
     boolean isUnsecureLoginAllowed();
 
-    boolean isUserAdmin();
+    boolean isSuperAdmin();
 
     void hasUserOrAdminRole();
 

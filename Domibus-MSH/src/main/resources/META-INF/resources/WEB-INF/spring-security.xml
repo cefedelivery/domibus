@@ -31,6 +31,7 @@
         <intercept-url pattern="/rest/truststore/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/messagefilters/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/jms/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/user/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_AP_ADMIN')"/>
 
         <!-- Enable CSRF protection -->

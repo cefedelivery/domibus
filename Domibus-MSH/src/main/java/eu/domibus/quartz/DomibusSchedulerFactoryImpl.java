@@ -23,7 +23,7 @@ public class DomibusSchedulerFactoryImpl implements DomibusSchedulerFactory {
 
     @Override
     public Scheduler createScheduler(Domain domain) {
-        LOG.debug("Creating the certificate provider for domain [{}]", domain);
+        LOG.debug("Creating the scheduler for domain [{}]", domain);
 
         return applicationContext.getBean(SchedulerFactoryBean.class, domain).getScheduler();
     }

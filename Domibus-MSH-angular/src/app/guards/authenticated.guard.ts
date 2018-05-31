@@ -10,10 +10,8 @@ export class AuthenticatedGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    console.debug("AuthenticatedGuard");
-    let subject = new ReplaySubject();
+    const subject = new ReplaySubject();
     this.securityService.isAuthenticated(true).subscribe((isAuthenticated: boolean) => {
-      console.log("AuthenticatedGuard canActivate [" + isAuthenticated + "]");
       if(isAuthenticated) {
         subject.next(true);
       } else {

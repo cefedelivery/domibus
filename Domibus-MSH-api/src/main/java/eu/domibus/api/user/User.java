@@ -15,6 +15,7 @@ public class User {
     private List<String> authorities;
     private String status;
     private String password;
+    private String domain;
     private boolean suspended;
 
     public User(String userName, String email, boolean active, List<String> authorities, UserState userState, Date suspensionDate) {
@@ -86,5 +87,13 @@ public class User {
 
     public void setSuspended(boolean suspended) {
         this.suspended = suspended;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
