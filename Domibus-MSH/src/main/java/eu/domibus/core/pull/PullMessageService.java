@@ -7,8 +7,6 @@ import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface PullMessageService {
 
@@ -50,10 +48,10 @@ public interface PullMessageService {
      * @param legConfiguration contains the context of the configured message exchange.
      * @param state            the state of the pull tentative.
      */
-    PullRequestResult updatePullMessageAfterRequest(final UserMessage userMessage,
-                                                    final String messageId,
-                                                    final LegConfiguration legConfiguration,
-                                                    final ReliabilityChecker.CheckResult state);
+    void updatePullMessageAfterRequest(final UserMessage userMessage,
+                                       final String messageId,
+                                       final LegConfiguration legConfiguration,
+                                       final ReliabilityChecker.CheckResult state);
 
     /**
      * Manage the status of the pull message when the receipt arrives..
@@ -77,19 +75,13 @@ public interface PullMessageService {
      */
     MessagingLock getLock(String messageId);
 
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void deleteInNewTransaction(MessagingLock messagingLock);
-
-    void releaseLockAfterRequest(PullRequestResult requestResult);
-
-    void releaseLockAfterReceipt(PullRequestResult requestResult);
-
-    void readyToDelete(MessagingLock messagingLock);
+    void deleteInNewTransaction(String messageId);
 
     void delete(MessagingLock messagingLock);
 
-    void resetMessageInWaitingForReceptState(MessagingLock messagingLock);
+    void resetMessageInWaitingForReceiptState(String messageId);
 
-    void expireMessage(MessagingLock staledMessage);
+    void expireMessage(String messageId);
+
+    void releaseLockAfterReceipt(PullRequestResult requestResult);
 }

@@ -42,6 +42,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * @author Thomas Dussart
@@ -81,6 +82,10 @@ public class PullMessageSender {
 
     @Autowired
     private PullReceiptSender pullReceiptSender;
+
+    @Autowired
+    @Qualifier("taskExecutor")
+    private Executor executor;
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
@@ -129,12 +134,12 @@ public class PullMessageSender {
             final SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
             final String sendMessageId = messageId;
             try {
-                new Thread(new Runnable() {
+                executor.execute(new Runnable() {
                     @Override
                     public void run() {
                         pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId);
                     }
-                }).start();
+                });
             } catch (Exception ex) {
                 LOG.trace("Message[{}] exception while sending receipt assynchronously.");
             }

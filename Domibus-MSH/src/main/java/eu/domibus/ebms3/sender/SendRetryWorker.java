@@ -49,12 +49,11 @@ public class SendRetryWorker extends QuartzJobBean {
         } catch (Exception e) {
             LOG.error("Error while eqnueing messages.", e);
         }
-        /*try {
+        try {
             retryService.bulkExpirePullMessages();
         } catch (Exception e) {
             LOG.error("Error while bulk expiring pull messages.", e);
         }
-
 
         try {
             retryService.resetWaitingForReceiptPullMessages();
@@ -65,8 +64,8 @@ public class SendRetryWorker extends QuartzJobBean {
         try {
             retryService.bulkDeletePullMessages();
         } catch (Exception e) {
-            LOG.error("Error while reseting waiting for receipt.", e);
-        }*/
+            LOG.error("Error while bulk deleting messages.", e);
+        }
 
 
     }

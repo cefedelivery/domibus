@@ -24,7 +24,7 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
                 query = "SELECT m from MessagingLock m where m.staled<CURRENT_TIMESTAMP() and messageState != 'DEL'"),
         @NamedQuery(name = "MessagingLock.findDeletedMessages",
                 query = "SELECT m from MessagingLock m where messageState = 'DEL'"),
-        @NamedQuery(name = "MessagingLock.findReadyToPull", query = "from MessagingLock where messageState = 'READY' and mpc=:MPC and initiator=:INITIATOR AND messageType='PULL' and nextAttempt<CURRENT_TIMESTAMP() order by entityId"),
+        @NamedQuery(name = "MessagingLock.findReadyToPull", query = "from MessagingLock where messageState = 'READY' and mpc=:MPC and initiator=:INITIATOR AND messageType='PULL' and nextAttempt<CURRENT_TIMESTAMP() and staled>CURRENT_TIMESTAMP() order by entityId"),
         @NamedQuery(name = "MessagingLock.findWaitingForReceipt", query = "from MessagingLock where messageState = 'WAITING' AND nextAttempt<CURRENT_TIMESTAMP() order by entityId")
 })
 public class MessagingLock extends AbstractBaseEntity {

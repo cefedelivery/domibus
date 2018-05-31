@@ -14,7 +14,6 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.core.pull.PullMessageService;
-import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -153,8 +152,8 @@ public class PullRequestHandler {
             attemptStatus = MessageAttemptStatus.ERROR;
             throw e;
         } finally {
-            final PullRequestResult messagingLock = pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, leg, checkResult);
-            pullMessageService.releaseLockAfterRequest(messagingLock);
+            LOG.debug("Before updatePullMessageAfterRequest message id[{}] checkResult[{}]", messageId, checkResult);
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, leg, checkResult);
             if (checkResult != ABORT) {
                 try {
                     final MessageAttempt attempt = MessageAttemptBuilder.create()

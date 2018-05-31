@@ -121,17 +121,6 @@ public class RetryService {
         }
     }
 
-    /*@Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void purgePullMessage() {
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
-        for (final String timedoutPullMessage : timedoutPullMessages) {
-            LOG.debug("[purgePullMessage]:Message:[{}] delete lock ", timedoutPullMessage);
-            pullMessageService.deletePullMessageLock(timedoutPullMessage);
-            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(timedoutPullMessage);
-            purgeTimedoutMessage(timedoutPullMessage);
-        }
-    }*/
-
 
     /**
      * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
@@ -174,7 +163,7 @@ public class RetryService {
     public void resetWaitingForReceiptPullMessages() {
         final List<MessagingLock> messagesToReset = messagingLockDao.findWaitingForReceipt();
         for (MessagingLock messagingLock : messagesToReset) {
-            pullMessageService.resetMessageInWaitingForReceptState(messagingLock);
+            pullMessageService.resetMessageInWaitingForReceiptState(messagingLock.getMessageId());
         }
     }
 
@@ -184,20 +173,25 @@ public class RetryService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bulkExpirePullMessages() {
-        final List<MessagingLock> staledMessages = messagingLockDao.findStaledMessages();
+        final List<MessagingLock> expiredMessages = messagingLockDao.findStaledMessages();
         LOG.trace("Delete expired pull message");
-        for (MessagingLock staledMessage : staledMessages) {
-            pullMessageService.expireMessage(staledMessage);
+        for (MessagingLock staledMessage : expiredMessages) {
+            try {
+                pullMessageService.expireMessage(staledMessage.getMessageId());
+            } catch (Exception e) {
+                LOG.trace("Error while lockinc ", e);
+            }
+
         }
     }
 
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bulkDeletePullMessages() {
-        final List<MessagingLock> staledMessages = messagingLockDao.findDeletedMessages();
+        final List<MessagingLock> deletedLocks = messagingLockDao.findDeletedMessages();
         LOG.trace("Delete unecessary locks");
-        for (MessagingLock staledMessage : staledMessages) {
-            pullMessageService.deleteInNewTransaction(staledMessage);
+        for (MessagingLock deletedLock : deletedLocks) {
+            pullMessageService.deleteInNewTransaction(deletedLock.getMessageId());
         }
     }
 

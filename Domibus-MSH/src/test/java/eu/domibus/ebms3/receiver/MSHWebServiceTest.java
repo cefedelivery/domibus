@@ -345,7 +345,6 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, userMessage);
-            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
         }};
 
     }
@@ -379,8 +378,7 @@ public class MSHWebServiceTest {
         new Verifications() {{
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
             times = 1;
-            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
-            times = 1;
+
 
         }};
 
@@ -413,7 +411,6 @@ public class MSHWebServiceTest {
         new Verifications() {{
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
             times = 1;
-            pullMessageService.releaseLockAfterReceipt(withAny(pullRequestResult));
 
         }};
 
