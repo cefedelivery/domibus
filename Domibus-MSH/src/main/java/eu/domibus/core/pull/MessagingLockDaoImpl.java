@@ -61,11 +61,11 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         retrieveMessageReady.put(DataBaseEngine.H2, "SELECT ID_PK FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' ORDER BY ID_PK");*/
 
         lockByIdQuery.put(DataBaseEngine.MYSQL, "SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE");
-        lockByIdQuery.put(DataBaseEngine.ORACLE, "SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' AND ml.ID_PK=:idpk FOR UPDATE NOWAIT");
+        lockByIdQuery.put(DataBaseEngine.ORACLE, "SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' AND ml.ID_PK=:idpk FOR UPDATE");
         lockByIdQuery.put(DataBaseEngine.H2, "SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE");
 
         lockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE");
-        lockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE NOWAIT");
+        lockByMessageIdQuery.put(DataBaseEngine.ORACLE, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE");
         lockByMessageIdQuery.put(DataBaseEngine.H2, "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE");
 
        /* unlockByMessageIdQuery.put(DataBaseEngine.MYSQL, "SELECT ml.ID_PK,ml.MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='PROCESS' and ml.MESSAGE_ID=:MESSAGE_ID FOR UPDATE");
@@ -108,8 +108,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, params);
             final boolean next = sqlRowSet.next();
             if (!next) {
+                LOG.debug("[getNextPullMessageToProcess]:id[{}] already locked", idPk);
                 return null;
             }
+            LOG.debug("[getNextPullMessageToProcess]:id[{}] locked", idPk);
 
             final String messageId = sqlRowSet.getString(1);
             final int sendAttempts = sqlRowSet.getInt(2);
@@ -185,7 +187,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
 
     public MessagingLock getLock(final String messageId) {
-
         try {
             LOG.debug("Message[{}] Getting lock", messageId);
             Query q = entityManager.createNativeQuery(lockByMessageIdQuery.get(domibusConfigurationService.getDataBaseEngine()), MessagingLock.class);

@@ -21,10 +21,7 @@ import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.MessagingLock;
-import eu.domibus.ebms3.common.model.PullRequest;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -47,6 +44,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.ws.*;
+import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
@@ -182,7 +180,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
 
         final MessagingLock lock = pullMessageService.getLock(messageId);
-        if (lock == null) {
+        if (lock == null || MessageState.WAITING != lock.getMessageState()) {
             LOG.trace("Message[{}] could not acquire lock", messageId);
             LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);

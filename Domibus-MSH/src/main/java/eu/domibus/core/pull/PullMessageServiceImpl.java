@@ -102,11 +102,13 @@ public class PullMessageServiceImpl implements PullMessageService {
                                               final ReliabilityChecker.CheckResult state) {
         try {
             final MessagingLock lock = getLock(messageId);
-            if (lock == null || lock.getMessageState() != MessageState.PROCESS) {
+            if (lock == null || MessageState.PROCESS != lock.getMessageState()) {
+                LOG.warn("Message[] could not acquire lock when updating status", messageId);
                 return;
             }
         } catch (Exception e) {
-            LOG.trace("Error while locking ", e);
+            LOG.error("Error while locking ", e);
+            return;
         }
 
         UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -454,7 +456,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     public void expireMessage(String messageId) {
         try {
             MessagingLock lock = messagingLockDao.getLock(messageId);
-            if (lock != null) {
+            if (lock != null && MessageState.ACK != lock.getMessageState()) {
                 LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());
                 pullMessageStateService.sendFailed(userMessageLogDao.findByMessageId(lock.getMessageId()));
                 delete(lock);
@@ -463,8 +465,6 @@ public class PullMessageServiceImpl implements PullMessageService {
             LOG.trace("[expireMessage]:Message[{}]:unable to lock", messageId);
             return;
         }
-
-
     }
 
     @Override
