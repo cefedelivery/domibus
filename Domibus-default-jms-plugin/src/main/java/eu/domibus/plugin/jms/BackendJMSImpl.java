@@ -79,7 +79,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      *
      * @param map The incoming JMS Message
      */
-    @JmsListener(destination = "${domibus.backend.jmsInQueue}", containerFactory = "backendJmsListenerContainerFactory")
+    @JmsListener(destination = "${jmsplugin.queue.in}", containerFactory = "backendJmsListenerContainerFactory")
     //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
