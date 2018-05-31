@@ -141,8 +141,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             }
             return new PullMessageId(messageId);
         } catch (Exception e) {
-            //LOG.trace("MessageLock[{}] lock could not be acquired", idPk, e);
-            LOG.debug("MessageLock[{}] lock could not be acquired", idPk);
+            LOG.error("MessageLock[{}] lock could not be acquired", idPk, e);
             return null;
         }
 
@@ -194,7 +193,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
             return messagingLock;
         } catch (Exception ex) {
-            LOG.error("Message:[{}] no result for message id", messageId);
+            LOG.error("Message:[{}] no result for message id", messageId, ex);
             return null;
         }
     }

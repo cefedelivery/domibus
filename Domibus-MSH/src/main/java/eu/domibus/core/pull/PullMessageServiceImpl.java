@@ -313,6 +313,7 @@ public class PullMessageServiceImpl implements PullMessageService {
             lock.setNextAttempt(null);
             lock.setMessageState(MessageState.DEL);
             messagingLockDao.save(lock);
+            return;
         }
         final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
         LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
