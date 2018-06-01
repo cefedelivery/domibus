@@ -8,6 +8,7 @@ import {Observable} from 'rxjs/Observable';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
 import {PartyDetailsComponent} from './party-details/party-details.component';
+import {DirtyOperations} from '../common/dirty-operations';
 
 /**
  * @author Thomas Dussart
@@ -21,7 +22,7 @@ import {PartyDetailsComponent} from './party-details/party-details.component';
   styleUrls: ['./party.component.css']
 })
 
-export class PartyComponent implements OnInit {
+export class PartyComponent implements OnInit, DirtyOperations {
 
   name: string;
   endPoint: string;
@@ -36,16 +37,28 @@ export class PartyComponent implements OnInit {
   count: number = 0;
   loading: boolean = false;
 
+  newParties: PartyResponseRo[] = [];
+  updatedParties: PartyResponseRo[] = [];
+  deletedParties: PartyResponseRo[] = [];
+
   allProcesses: string[];
 
   constructor (public dialog: MdDialog, public partyService: PartyService, public alertService: AlertService) {
   }
 
   ngOnInit () {
-
     this.initColumns();
     this.searchAndCount();
+  }
 
+  isDirty (): boolean {
+    return this.newParties.length + this.updatedParties.length + this.deletedParties.length > 0;
+  }
+
+  resetDirty () {
+    this.newParties.length = 0;
+    this.updatedParties.length = 0;
+    this.deletedParties.length = 0;
   }
 
   searchAndCount () {
@@ -101,20 +114,13 @@ export class PartyComponent implements OnInit {
 
     res.subscribe((response) => {
         this.rows = response;
+        this.selected.length = 0;
         // debugger;
 
-        const all = [];
-        for (const row of this.rows) {
-          for (const p1 of row.processesWithPartyAsInitiator) {
-            all.push(p1.name)
-          }
-          for (const p1 of row.processesWithPartyAsResponder) {
-            all.push(p1.name)
-          }
-        }
-        this.allProcesses = Array.from(new Set(all));
+        this.initProcesses(); // TODO : temp
 
         this.loading = false;
+        this.resetDirty();
       },
       error => {
         this.alertService.error('Could not load parties' + error);
@@ -122,6 +128,19 @@ export class PartyComponent implements OnInit {
       }
     );
     return res;
+  }
+
+  initProcesses() {
+    const all = [];
+    for (const row of this.rows) {
+      for (const p1 of row.processesWithPartyAsInitiator) {
+        all.push(p1.name)
+      }
+      for (const p1 of row.processesWithPartyAsResponder) {
+        all.push(p1.name)
+      }
+    }
+    this.allProcesses = Array.from(new Set(all));
   }
 
   initColumns () {
@@ -179,7 +198,7 @@ export class PartyComponent implements OnInit {
   }
 
   canSave () {
-    return false;
+    return this.isDirty();
   }
 
   canEdit () {
@@ -187,7 +206,7 @@ export class PartyComponent implements OnInit {
   }
 
   canCancel () {
-    return false;
+    return this.isDirty();
   }
 
   canDelete () {
@@ -195,19 +214,35 @@ export class PartyComponent implements OnInit {
   }
 
   cancel () {
-
+    this.search();
   }
 
   save () {
-
+    // TODO
+    this.partyService.updateParties(this.newParties,this.updatedParties,this.deletedParties);
+    this.resetDirty();
   }
 
   add () {
+    const newParty = this.partyService.initParty();
+    this.rows.push(newParty);
+    this.selected.length = 0;
+    this.selected.push(newParty);
+    this.count++;
 
+    this.newParties.push(newParty);
   }
 
   remove () {
+    const deletedParty = this.selected[0];
+    this.rows.splice(this.rows.indexOf(deletedParty), 1);
+    this.selected.length = 0;
+    this.count--;
 
+    if (this.newParties.indexOf(deletedParty) < 0)
+      this.deletedParties.push(deletedParty);
+    else
+      this.newParties.splice(this.newParties.indexOf(deletedParty), 1);
   }
 
   edit (row) {
@@ -218,6 +253,14 @@ export class PartyComponent implements OnInit {
       data: {
         edit: rowCopy,
         allProcesses: allProcessesCopy
+      }
+    });
+    dialogRef.afterClosed().subscribe(ok => {
+      if (ok) {
+        if (JSON.stringify(row) == JSON.stringify(rowCopy)) return; // nothing changed
+
+        Object.assign(row, rowCopy);
+        if (this.updatedParties.indexOf(row) < 0) this.updatedParties.push(row);
       }
     });
   }

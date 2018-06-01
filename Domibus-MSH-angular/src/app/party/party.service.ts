@@ -14,6 +14,7 @@ import {DownloadService} from "../download/download.service";
 export class PartyService {
 
   static readonly LIST_PARTIES: string = "rest/party/list";
+  static readonly UPDATE_PARTIES: string = "rest/party/update";
   static readonly COUNT_PARTIES: string = "rest/party/count";
   static readonly CSV_PARTIES: string = "rest/party/csv";
 
@@ -68,4 +69,22 @@ export class PartyService {
     DownloadService.downloadNative(PartyService.CSV_PARTIES + this.getFilterPath(name, endPoint, partyId, process));
   }
 
+  initParty() {
+    const newParty = new PartyResponseRo();
+    newParty.name = 'new';
+    newParty.processesWithPartyAsInitiator = [];
+    newParty.processesWithPartyAsResponder = [];
+    newParty.identifiers = [];
+    return newParty;
+  }
+
+  updateParties(newParties: PartyResponseRo[], updatedParties: PartyResponseRo[], deletedParties: PartyResponseRo[]) {
+    // new parties: keep only parties that are not deleted
+    newParties = newParties.filter(x => deletedParties.indexOf(x) < 0);
+    // updated parties: keep only parties that are not new or deleted
+    updatedParties = updatedParties.filter(x => deletedParties.indexOf(x) < 0 && newParties.indexOf(x) < 0);
+
+    const payload = {'added': newParties, 'updated': updatedParties, 'deleted': deletedParties };
+    return this.http.put(PartyService.UPDATE_PARTIES, payload);
+  }
 }

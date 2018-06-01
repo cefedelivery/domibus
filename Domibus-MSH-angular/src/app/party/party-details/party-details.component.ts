@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MD_DIALOG_DATA, MdDialogRef, MdDialog, MdDialogConfig} from '@angular/material';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
-import {IdentifierRo, PartyResponseRo, ProcessInfoRo} from '../party';
+import {IdentifierRo, PartyIdTypeRo, PartyResponseRo, ProcessInfoRo} from '../party';
 import {PartyIdentifierDetailsComponent} from '../party-identifier-details/party-identifier-details.component';
 
 @Component({
@@ -41,6 +41,16 @@ export class PartyDetailsComponent implements OnInit {
       this.processesRows.push(row);
     }
 
+    this.processesRows.sort((a, b) => {
+        if (!!a.isInitiator > !!b.isInitiator) return -1;
+        if (!!a.isInitiator < !!b.isInitiator) return 1;
+        if (!!a.isResponder > !!b.isResponder) return -1;
+        if (!!a.isResponder < !!b.isResponder) return 1;
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      }
+    );
   }
 
   ngOnInit () {
@@ -68,23 +78,24 @@ export class PartyDetailsComponent implements OnInit {
     this.identifiersRowColumnPicker.selectedColumns = this.identifiersRowColumnPicker.allColumns.filter(col => {
       return ['Party ID', 'Party Id Type', 'Party Id value'].indexOf(col.name) != -1
     });
-    this.processesRowColumnPicker.allColumns = [
-      {
-        name: 'Process',
-        prop: 'name',
-      },
-      {
-        name: 'Initiator',
-        prop: 'isInitiator',
-      },
-      {
-        name: 'Responder',
-        prop: 'isResponder',
-      }
-    ];
-    this.processesRowColumnPicker.selectedColumns = this.processesRowColumnPicker.allColumns.filter(col => {
-      return ['Process', 'Initiator', 'Responder'].indexOf(col.name) != -1
-    });
+
+    // this.processesRowColumnPicker.allColumns = [
+    //   {
+    //     name: 'Process',
+    //     prop: 'name',
+    //   },
+    //   {
+    //     name: 'Initiator',
+    //     prop: 'isInitiator',
+    //   },
+    //   {
+    //     name: 'Responder',
+    //     prop: 'isResponder',
+    //   }
+    // ];
+    // this.processesRowColumnPicker.selectedColumns = this.processesRowColumnPicker.allColumns.filter(col => {
+    //   return ['Process', 'Initiator', 'Responder'].indexOf(col.name) != -1
+    // });
   }
 
   editIdentifier () {
@@ -100,10 +111,26 @@ export class PartyDetailsComponent implements OnInit {
       const editForm = dialogRef.componentInstance;
       if (ok) {
         Object.assign(identifierRow, editForm.data.edit);
-      } else {
-
       }
     });
   }
 
+  removeIdentifier() {
+    const identifierRow = this.selectedIdentifiers[0];
+    this.party.identifiers.splice(this.party.identifiers.indexOf(identifierRow), 1);
+    this.selectedIdentifiers.length = 0;
+  }
+
+  addIdentifier() {
+    const identifierRow = {entityId:0, partyId: "new", partyIdType: {name: "", value: ""}};
+    this.party.identifiers.push(identifierRow);
+  }
+
+  ok() {
+    this.dialogRef.close(true);
+  }
+
+  cancel() {
+    this.dialogRef.close(false);
+  }
 }
