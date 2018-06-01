@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
+    <!-- start include domains config files here -->
+    <include file="${catalina.home}/conf/domibus/taxud-logback.xml"/>
+    <include file="${catalina.home}/conf/domibus/default-logback.xml"/>
+    <!-- end include domains config files here -->
     <appender name="atomikos" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/atomikos.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
