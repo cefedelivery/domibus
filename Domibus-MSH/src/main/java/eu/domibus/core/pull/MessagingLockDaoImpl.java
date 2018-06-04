@@ -45,6 +45,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     protected static final String MESSAGE_STATE = "MESSAGE_STATE";
 
+    private final static String lockByIdQuery="SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE";
+
+    private final static String lockByMessageIdQuery="SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE";
+
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
@@ -52,12 +56,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
-
-    private final String lockByIdQuery="SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE";
-
-    private final String lockByMessageIdQuery="SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE";
-
-
 
     @Autowired
     @Qualifier("domibusJDBC-XADataSource")
