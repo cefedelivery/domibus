@@ -58,8 +58,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Autowired
     protected JMSManager jmsManager;
 
-    @Qualifier("" +
-            "clusterCommandTopic")
     @Autowired
     protected Topic clusterCommandTopic;
 
