@@ -1,6 +1,9 @@
 package eu.domibus.pmode;
 
+import com.google.common.io.Files;
 import eu.domibus.AbstractIT;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.messaging.XmlProcessingException;
@@ -20,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -48,6 +52,8 @@ public class UploadPModeIT extends AbstractIT {
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
 
+    @Autowired
+    XMLUtil xmlUtil;
 
     /**
      * Tests that the PMODE is correctly saved in the DB.
@@ -102,7 +108,7 @@ public class UploadPModeIT extends AbstractIT {
 
     /**
      * Tests that a subset of the PMODE file content (given a fixed pModeKey) is correctly stored in the DB.
-     *
+     * <p>
      * PMODE Key  = Initiator Party: Responder Party: Service name: Action name: Agreement: Test case name
      */
     @Test
@@ -223,4 +229,69 @@ public class UploadPModeIT extends AbstractIT {
             throw ioEx;
         }
     }
+
+
+    public static final String SCHEMAS_DIR = "schemas/";
+    public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
+
+    /**
+     * Tests that a PMODE can be serialized/deserialized properly.
+     */
+    @Test
+    public void testVerifyPartyListUpdate() throws IOException, JAXBException {
+
+        try {
+            InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
+            byte[] bytes = IOUtils.toByteArray(is);
+
+            InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+            ByteArrayInputStream xmlStream = new ByteArrayInputStream(bytes);
+
+            UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
+            Configuration configuration = unmarshallerResult.getResult();
+
+            //final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
+
+             Files.write(bytes, new File("/Users/pion/temp2.xml"));
+
+
+            // Configuration configuration = testUpdatePModes(IOUtils.toByteArray(is));
+
+            byte[] x2 = pModeProvider.serializePModeConfiguration(configuration);
+
+            Files.write(x2, new File("/Users/pion/temp4.xml"));
+
+//
+//            Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+//            Validate.notNull(receiverParty, "Responder party was not found");
+//            Party senderParty = pModeProvider.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
+//            Validate.notNull(senderParty, "Initiator party was not found");
+//            List<String> parties = new ArrayList<>();
+//            parties.add(receiverParty.getName());
+//            parties.add(senderParty.getName());
+//
+//            boolean partyFound = false;
+//            Iterator<Party> partyIterator = configuration.getBusinessProcesses().getParties().iterator();
+//            while (!partyFound && partyIterator.hasNext()) {
+//                Party party = partyIterator.next();
+//                partyFound = parties.contains(party.getName());
+//            }
+//            Assert.assertTrue(partyFound);
+
+
+        } catch (IOException ioEx) {
+            System.out.println("Error: " + ioEx.getMessage());
+            throw ioEx;
+        } catch (JAXBException jEx) {
+            System.out.println("JAXB error: " + jEx.getMessage());
+            throw jEx;
+        } catch (XmlProcessingException e) {
+            System.out.println("XmlProcessingException: " + e.getMessage());
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.out.println(e.getClass() + " : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
 }

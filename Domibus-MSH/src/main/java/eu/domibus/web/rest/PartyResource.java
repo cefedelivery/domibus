@@ -2,6 +2,7 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
@@ -12,19 +13,14 @@ import eu.domibus.core.party.PartyResponseRo;
 import eu.domibus.core.party.ProcessRo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.ro.PModePartiesRequestRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -153,6 +149,16 @@ public class PartyResource {
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("party"))
                 .body(resultText);
+    }
+
+    @RequestMapping(value = {"/update"}, method = RequestMethod.PUT)
+    public void updateParties(@RequestBody List<PartyResponseRo> partiesRo) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
+        }
+
+        List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
+        partyService.updateParties(partyList);
     }
 
     /**

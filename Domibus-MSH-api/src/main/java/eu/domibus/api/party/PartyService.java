@@ -49,4 +49,10 @@ public interface PartyService {
      * @return Party Identifier Name
      */
     String getGatewayPartyIdentifier();
+
+    /**
+     * Updates the list of parties.
+     * @param partyList
+     */
+    void updateParties(List<Party> partyList);
 }

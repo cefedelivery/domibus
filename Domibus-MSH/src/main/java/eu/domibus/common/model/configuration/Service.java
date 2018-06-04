@@ -44,7 +44,7 @@ public class Service extends AbstractBaseEntity {
     protected String value;
     @XmlAttribute(name = "type", required = false)
     @Column(name = "SERVICE_TYPE")
-    protected String serviceType = "";
+    protected String serviceType;
 
     public String getServiceType() {
         return this.serviceType;

@@ -78,13 +78,9 @@ export class PartyService {
     return newParty;
   }
 
-  updateParties(newParties: PartyResponseRo[], updatedParties: PartyResponseRo[], deletedParties: PartyResponseRo[]) {
-    // new parties: keep only parties that are not deleted
-    newParties = newParties.filter(x => deletedParties.indexOf(x) < 0);
-    // updated parties: keep only parties that are not new or deleted
-    updatedParties = updatedParties.filter(x => deletedParties.indexOf(x) < 0 && newParties.indexOf(x) < 0);
-
-    const payload = {'added': newParties, 'updated': updatedParties, 'deleted': deletedParties };
-    return this.http.put(PartyService.UPDATE_PARTIES, payload);
+  updateParties(partyList: PartyResponseRo[]) {
+    console.log('updateParties')
+    console.log('put ... ', PartyService.UPDATE_PARTIES)
+    return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
   }
 }

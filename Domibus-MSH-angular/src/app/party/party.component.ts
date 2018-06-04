@@ -219,8 +219,9 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   save () {
     // TODO
-    this.partyService.updateParties(this.newParties,this.updatedParties,this.deletedParties);
-    this.resetDirty();
+    this.partyService.updateParties(this.rows).then(() => {
+      this.resetDirty();
+    }).catch(err => this.alertService.exception('Party update error', err, false));
   }
 
   add () {

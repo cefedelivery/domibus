@@ -4,18 +4,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.dao.PartyDao;
+import eu.domibus.common.model.configuration.Configuration;
+import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -183,8 +189,6 @@ public class PartyServiceImpl implements PartyService {
                 and(processPredicate(processName));
     }
 
-
-
     protected Predicate<Party> namePredicate(final String name) {
 
         if (StringUtils.isNotEmpty(name)) {
@@ -244,5 +248,58 @@ public class PartyServiceImpl implements PartyService {
         }
 
         return DEFAULT_PREDICATE;
+    }
+
+    protected void updateParties(List<Party> partyList, Configuration configuration) {
+
+        List<eu.domibus.common.model.configuration.Party> allParties = pModeProvider.findAllParties();
+
+        final List<Process> allProcesses =
+                pModeProvider.findAllProcesses().
+                        stream().
+                        collect(collectingAndThen(toList(), ImmutableList::copyOf));
+
+
+        List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
+        Set<eu.domibus.common.model.configuration.Party> partySet = new HashSet<>(list);
+
+        configuration.getBusinessProcesses().setParties(partySet);
+
+    }
+
+    public void updateParties(List<Party> partyList) {
+
+        final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
+        if (pModeArchiveInfo == null)
+            throw new IllegalStateException("Could not update PMode parties: PMode not found!");
+
+        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(pModeArchiveInfo.getId());
+
+        Configuration configuration;
+        try {
+            configuration = pModeProvider.getPModeConfiguration(rawConfiguration.getXml());
+        } catch(XmlProcessingException e){
+            LOG.error("Error reading current PMode", e);
+            throw new IllegalStateException(e);
+        }
+
+        updateParties(partyList, configuration);
+
+        byte[] updatedPmode;
+        try {
+            updatedPmode = pModeProvider.serializePModeConfiguration(configuration);
+            pModeProvider.updatePModes(updatedPmode, rawConfiguration.getDescription());
+        } catch (XmlProcessingException e) {
+            LOG.error("Error writing current PMode", e);
+            throw new IllegalStateException(e);
+        }
+
+        rawConfiguration.setEntityId(0);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        rawConfiguration.setDescription("Updated parties to version of " + confDate.format(formatter));
+
+        rawConfiguration.setConfigurationDate(new Date());
     }
 }
