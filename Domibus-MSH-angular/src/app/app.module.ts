@@ -33,6 +33,7 @@ import {ExtendedHttpClient} from "./http/extended-http-client";
 import {HttpEventService} from "./http/http.event.service";
 import {SecurityService} from "./security/security.service";
 import {SecurityEventService} from "./security/security.event.service";
+import {DomainService} from "./security/domain.service";
 import {AlertComponent} from "./alert/alert.component";
 import {AlertService} from "./alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
@@ -70,9 +71,12 @@ import {ActionDirtyDialogComponent} from "./pmode/action-dirty-dialog/action-dir
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
 import {PartyDetailsComponent} from "./party/party-details/party-details.component";
-import {ClearInvalidDirective} from "./customDate/clearInvalid.directive"
+import {ClearInvalidDirective} from "./customDate/clearInvalid.directive";
+import {PageHeaderComponent} from "./common/page-header/page-header.component";
+import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.component";
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
+import {TestServiceComponent} from "./testservice/testservice.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -120,7 +124,10 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PartyComponent,
     PartyDetailsComponent,
     ClearInvalidDirective,
-    AlertsComponent
+    PageHeaderComponent,
+    DomainSelectorComponent,
+    AlertsComponent,
+    TestServiceComponent
   ],
   entryComponents: [
     AppComponent,
@@ -172,6 +179,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     HttpEventService,
     SecurityService,
     SecurityEventService,
+    DomainService,
     DomibusInfoService,
     AlertService,
     {

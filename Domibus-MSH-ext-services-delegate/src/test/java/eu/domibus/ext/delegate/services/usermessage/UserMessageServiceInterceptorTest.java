@@ -5,7 +5,7 @@ import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.AOPUtil;
 import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.exceptions.UserMessageException;
+import eu.domibus.ext.exceptions.UserMessageExtException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -47,19 +47,19 @@ public class UserMessageServiceInterceptorTest {
     @Test
     public void testInterceptWhenExtExceptionIsRaised(@Injectable final ProceedingJoinPoint joinPoint) throws Throwable {
         // Given
-        final UserMessageException userMessageException = new UserMessageException(DomibusErrorCode.DOM_001, "test");
+        final UserMessageExtException userMessageExtException = new UserMessageExtException(DomibusErrorCode.DOM_001, "test");
 
         new Expectations() {{
            joinPoint.proceed();
-           result = userMessageException;
+           result = userMessageExtException;
         }};
 
         // When
         try {
             userMessageServiceInterceptor.intercept(joinPoint);
-        } catch(UserMessageException e) {
+        } catch(UserMessageExtException e) {
             // Then
-            Assert.assertTrue(userMessageException == e);
+            Assert.assertTrue(userMessageExtException == e);
             return;
         }
         Assert.fail();
@@ -78,7 +78,7 @@ public class UserMessageServiceInterceptorTest {
         // When
         try {
             userMessageServiceInterceptor.intercept(joinPoint);
-        } catch (UserMessageException e) {
+        } catch (UserMessageExtException e) {
             Assert.assertTrue(e.getCause() == userMessageException);
             return;
         }

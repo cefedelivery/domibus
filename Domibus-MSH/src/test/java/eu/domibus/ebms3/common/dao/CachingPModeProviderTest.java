@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.model.configuration.Role;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import eu.domibus.logging.DomibusLogger;
@@ -23,6 +24,7 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,10 +37,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Arun Raj
@@ -50,6 +49,7 @@ public class CachingPModeProviderTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProviderTest.class);
 
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
+    private static final String VALID_PMODE_TEST_CONFIG_URI = "samplePModes/domibus-configuration-valid-testservice.xml";
     private static final String PULL_PMODE_CONFIG_URI = "samplePModes/domibus-pmode-with-pull-processes.xml";
     private static final String DEFAULT_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpc";
     private static final String ANOTHER_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/anotherMpc";
@@ -334,6 +334,25 @@ public class CachingPModeProviderTest {
         }};
     }
 
+    @Test
+    public void testFindPartyIdByServiceAndAction() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        List<String> expectedList = new ArrayList<>();
+        expectedList.add("domibus-blue");
+        expectedList.add("domibus-red");
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+        }};
+
+        // When
+        List<String> partyIdByServiceAndAction = cachingPModeProvider.findPartyIdByServiceAndAction(Ebms3Constants.TEST_SERVICE, Ebms3Constants.TEST_ACTION);
+
+        // Then
+        Assert.assertEquals(expectedList, partyIdByServiceAndAction);
+    }
+
 
     private Party getPartyByName(Set<Party> parties, final String partyName) {
         final Collection<Party> filter = Collections2.filter(parties, new Predicate<Party>() {
@@ -343,5 +362,185 @@ public class CachingPModeProviderTest {
             }
         });
         return Lists.newArrayList(filter).get(0);
+    }
+
+    @Test
+    public void testGetPartyIdType() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        String partyIdentifier = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-de";
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getParties();
+            result = configuration.getBusinessProcesses().getParties();
+        }};
+
+        // When
+        String partyIdType = cachingPModeProvider.getPartyIdType(partyIdentifier);
+
+        // Then
+        Assert.assertTrue(StringUtils.isEmpty(partyIdType));
+    }
+
+    @Test
+    public void testGetPartyIdTypeNull() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        String partyIdentifier = "empty";
+
+        // When
+        String partyIdType = cachingPModeProvider.getPartyIdType(partyIdentifier);
+
+        // Then
+        Assert.assertNull(partyIdType);
+    }
+
+    @Test
+    public void testGetServiceType() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        //Given
+        String serviceValue = "bdx:noprocess";
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getServices();
+            result = configuration.getBusinessProcesses().getServices();
+        }};
+
+        // When
+        String serviceType = cachingPModeProvider.getServiceType(serviceValue);
+
+        // Then
+        Assert.assertEquals("tc2", serviceType);
+    }
+
+    @Test
+    public void testGetServiceTypeNull() {
+        // Given
+        String serviceValue = "serviceValue";
+
+        // When
+        String serviceType = cachingPModeProvider.getServiceType(serviceValue);
+
+        // Then
+        Assert.assertNull(serviceType);
+    }
+
+    @Test
+    public void testGetProcessFromService() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+        }};
+
+        // When
+        List<Process> processFromService = cachingPModeProvider.getProcessFromService(Ebms3Constants.TEST_SERVICE);
+
+        // Then
+        Assert.assertEquals(1, processFromService.size());
+        Assert.assertEquals("testService", processFromService.get(0).getName());
+    }
+
+    @Test
+    public void testGetProcessFromServiceNull() {
+        // Given
+        String serviceValue = "serviceValue";
+
+        // When
+        List<Process> processFromService = cachingPModeProvider.getProcessFromService(serviceValue);
+
+        // Then
+        Assert.assertTrue(processFromService.isEmpty());
+    }
+
+    @Test
+    public void testGetRoleInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+
+            cachingPModeProvider.getProcessFromService(Ebms3Constants.TEST_SERVICE);
+            result = getTestProcess(configuration.getBusinessProcesses().getProcesses());
+
+        }};
+
+        // When
+        String initiator = cachingPModeProvider.getRole("INITIATOR", Ebms3Constants.TEST_SERVICE);
+
+        // Then
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator", initiator);
+    }
+
+    @Test
+    public void testGetRoleResponder() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+
+            cachingPModeProvider.getProcessFromService(Ebms3Constants.TEST_SERVICE);
+            result = getTestProcess(configuration.getBusinessProcesses().getProcesses());
+
+        }};
+
+        // When
+        String responder = cachingPModeProvider.getRole("RESPONDER", Ebms3Constants.TEST_SERVICE);
+
+        // Then
+        Assert.assertEquals("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder", responder);
+    }
+
+    @Test
+    public void testGetRoleNull() {
+        // Given
+        String serviceValue = "serviceValue";
+
+        // When
+        String role = cachingPModeProvider.getRole("", serviceValue);
+
+        // Then
+        Assert.assertNull(role);
+    }
+
+    @Test
+    public void testAgreementRef() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
+        // Given
+        configuration = loadSamplePModeConfiguration(VALID_PMODE_TEST_CONFIG_URI);
+        new Expectations() {{
+            cachingPModeProvider.getConfiguration().getBusinessProcesses().getProcesses();
+            result = configuration.getBusinessProcesses().getProcesses();
+
+            cachingPModeProvider.getProcessFromService(Ebms3Constants.TEST_SERVICE);
+            result = getTestProcess(configuration.getBusinessProcesses().getProcesses());
+
+        }};
+
+        // When
+        String agreementRef = cachingPModeProvider.getAgreementRef(Ebms3Constants.TEST_SERVICE);
+
+        // Then
+        Assert.assertEquals("TestServiceAgreement", agreementRef);
+    }
+
+    @Test
+    public void testAgreementRefNull() {
+        // Given
+        String serviceValue = "serviceValue";
+
+        // When
+        String agreementRef = cachingPModeProvider.getAgreementRef(serviceValue);
+
+        // Then
+        Assert.assertNull(agreementRef);
+    }
+
+    private Process getTestProcess(Set<Process> processes) {
+        for(Process process : processes) {
+            if(process.getName().equals("testService")) {
+                return process;
+            }
+        }
+        return null;
     }
 }

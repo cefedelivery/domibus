@@ -1,17 +1,18 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ public class AuthenticationResourceTest {
     @Injectable
     protected DomibusConfigurationService domibusConfigurationService;
 
+    @Injectable
+    DomainCoreConverter domainCoreConverter;
+
     @Mocked
     Logger LOG;
 
@@ -77,4 +81,38 @@ public class AuthenticationResourceTest {
         }};
     }
 
+    @Test
+    public void testGetCurrentDomain(@Mocked final LoggerFactory loggerFactory) {
+        // Given
+        final DomainRO domainRO = new DomainRO();
+        domainRO.setCode(DomainService.DEFAULT_DOMAIN.getCode());
+        domainRO.setName(DomainService.DEFAULT_DOMAIN.getName());
+
+        new Expectations(authenticationResource) {{
+            domainContextProvider.getCurrentDomainSafely();
+            result = DomainService.DEFAULT_DOMAIN;
+
+            domainCoreConverter.convert(DomainService.DEFAULT_DOMAIN, DomainRO.class);
+            result = domainRO;
+        }};
+
+        // When
+        final DomainRO result = authenticationResource.getCurrentDomain();
+
+        // Then
+        Assert.assertEquals(domainRO, result);
+    }
+
+    @Test(expected = DomainException.class)
+    public void testExceptionInSetCurrentDomain(@Mocked final LoggerFactory loggerFactory) {
+        // Given
+        new Expectations(authenticationResource) {{
+            authenticationService.changeDomain("");
+            result = new DomainException("");
+        }};
+        // When
+        authenticationResource.setCurrentDomain("");
+        // Then
+        // expect DomainException
+    }
 }

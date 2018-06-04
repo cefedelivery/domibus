@@ -53,12 +53,15 @@ export class AuditComponent implements OnInit {
   ngOnInit() {
 
 //--- lets init the component's data ---
+    this.existingUsers = [];
     let userObservable = this.userService.getUserNames();
     userObservable.subscribe((userName: string) => this.existingUsers.push(userName));
 
+    this.existingActions = [];
     let actionObservable = this.auditService.listActions();
     actionObservable.subscribe((action: string) => this.existingActions.push(action));
 
+    this.existingAuditTargets = [];
     let existingTargets = this.auditService.listTargetTypes();
     existingTargets.subscribe((target: string) => this.existingAuditTargets.push(target));
 

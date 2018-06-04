@@ -17,12 +17,6 @@
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ext-services-api</artifactId>
-            <version>${domibus-ext-services-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

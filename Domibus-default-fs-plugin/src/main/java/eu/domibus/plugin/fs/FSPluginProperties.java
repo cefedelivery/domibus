@@ -46,6 +46,12 @@ public class FSPluginProperties {
     @SuppressWarnings("squid:S2068")
     private static final String PASSWORD = "messages.password";
 
+    private static final String AUTHENTICATION_USER = "authentication.user";
+
+    // Sonar confuses this constant with an actual password
+    @SuppressWarnings("squid:S2068")
+    private static final String AUTHENTICATION_PASSWORD = "authentication.password";
+
     private static final String EXPRESSION = "messages.expression";
 
     private static final String ORDER = "order";
@@ -198,6 +204,22 @@ public class FSPluginProperties {
      */
     public String getPassword(String domain) {
         return getDomainProperty(domain, PASSWORD, null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return the user used to authenticate
+     */
+    public String getAuthenticationUser(String domain) {
+        return getDomainProperty(domain, AUTHENTICATION_USER, null);
+    }
+
+    /**
+     * @param domain The domain property qualifier
+     * @return the password used to authenticate
+     */
+    public String getAuthenticationPassword(String domain) {
+        return getDomainProperty(domain, AUTHENTICATION_PASSWORD, null);
     }
 
     /**

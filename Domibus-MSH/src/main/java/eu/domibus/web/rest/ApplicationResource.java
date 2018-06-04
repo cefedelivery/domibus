@@ -1,14 +1,20 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
+import eu.domibus.web.rest.ro.DomainRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author Cosmin Baciu
@@ -29,6 +35,15 @@ public class ApplicationResource {
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    protected DomainService domainService;
+
+    @Autowired
+    protected DomainCoreConverter domainCoreConverter;
 
     /**
      * Rest method for the Domibus Info (Version, Build Time, ...)
@@ -51,4 +66,25 @@ public class ApplicationResource {
         LOG.debug("Getting application name");
         return domibusPropertyProvider.getProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
     }
+
+    /**
+     * Rest get method for multi-tenancy status
+     * @return true if multi-tenancy is enabled
+     */
+    @RequestMapping(value = "multitenancy", method = RequestMethod.GET)
+    public Boolean getMultiTenancy() {
+        LOG.debug("Getting multi-tenancy status");
+        return domibusConfigurationService.isMultiTenantAware();
+    }
+
+    /**
+     * Retrieve all configured domains in multi-tenancy mode
+     * @return a list of domains
+     */
+    @RequestMapping(value = "domains", method = RequestMethod.GET)
+    public List<DomainRO> getDomains() {
+        LOG.debug("Getting domains");
+        return domainCoreConverter.convert(domainService.getDomains(), DomainRO.class);
+    }
+
 }

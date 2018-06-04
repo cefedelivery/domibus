@@ -1,7 +1,5 @@
 package eu.domibus.api.party;
 
-import eu.domibus.api.party.Party;
-
 import java.util.List;
 
 /**
@@ -37,4 +35,18 @@ public interface PartyService {
      * @return the number of party.
      */
     long countParties(String name, String endPoint, String partyId, String processName);
+
+    /**
+     * Returns the list of Party Names for a specific Service and Action
+     * @param service Service name
+     * @param action Action name
+     * @return List of Party names
+     */
+    List<String> findPartyNamesByServiceAndAction(final String service, final String action);
+
+    /**
+     * Returns the Party Identifier Name for the gateway party
+     * @return Party Identifier Name
+     */
+    String getGatewayPartyIdentifier();
 }

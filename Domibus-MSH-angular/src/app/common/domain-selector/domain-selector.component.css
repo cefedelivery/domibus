@@ -1,0 +1,8 @@
+:host {
+	float: right;
+	margin-right: 120px;
+}
+
+:host /deep/ .mat-select-trigger {
+  min-width: 140px;
+}

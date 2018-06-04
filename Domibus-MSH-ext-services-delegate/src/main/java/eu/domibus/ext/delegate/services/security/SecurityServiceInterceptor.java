@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.security;
 
 import eu.domibus.ext.delegate.services.interceptor.ServiceInterceptor;
-import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,7 +23,7 @@ public class SecurityServiceInterceptor extends ServiceInterceptor {
 
     @Override
     public Exception convertCoreException(Exception e) {
-        return new AuthenticationException(e);
+        return new AuthenticationExtException(e);
     }
 
     @Override

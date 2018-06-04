@@ -3,13 +3,13 @@ package eu.domibus.common.services.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.domibus.api.audit.AuditLog;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.dao.AuditDao;
 import eu.domibus.common.model.audit.Audit;
 import eu.domibus.common.model.audit.JmsMessageAudit;
 import eu.domibus.common.model.audit.MessageAudit;
 import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.common.model.common.ModificationType;
-import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.AnnotationsUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class AuditServiceImplTest {
     private AuditDao auditDao;
 
     @Mock
-    private UserService userService;
+    private AuthUtils authUtils;
 
     @InjectMocks
     private AuditServiceImpl auditService;
@@ -107,7 +107,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void addMessageResentAudit() {
-        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        when(authUtils.getAuthenticatedUser()).thenReturn("thomas");
         auditService.addMessageResentAudit("resendMessageId");
         ArgumentCaptor<MessageAudit> messageAuditCaptor = ArgumentCaptor.forClass(MessageAudit.class);
         verify(auditDao, times(1)).saveMessageAudit(messageAuditCaptor.capture());
@@ -120,7 +120,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void addMessageDownloadedAudit() {
-        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        when(authUtils.getAuthenticatedUser()).thenReturn("thomas");
         auditService.addMessageDownloadedAudit("resendMessageId");
         ArgumentCaptor<MessageAudit> messageAuditCaptor = ArgumentCaptor.forClass(MessageAudit.class);
         verify(auditDao, times(1)).saveMessageAudit(messageAuditCaptor.capture());
@@ -133,7 +133,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void addPModeDownloadedAudit() {
-        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        when(authUtils.getAuthenticatedUser()).thenReturn("thomas");
         auditService.addPModeDownloadedAudit("resendMessageId");
         ArgumentCaptor<PModeAudit> messageAuditCaptor = ArgumentCaptor.forClass(PModeAudit.class);
         verify(auditDao, times(1)).savePModeAudit(messageAuditCaptor.capture());
@@ -146,7 +146,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void addJmsMessageDeletedAudit() {
-        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        when(authUtils.getAuthenticatedUser()).thenReturn("thomas");
         auditService.addJmsMessageDeletedAudit("resendMessageId", "fromQueue");
         ArgumentCaptor<JmsMessageAudit> jmsMessageAuditCaptor = ArgumentCaptor.forClass(JmsMessageAudit.class);
         verify(auditDao, times(1)).saveJmsMessageAudit(jmsMessageAuditCaptor.capture());
@@ -160,7 +160,7 @@ public class AuditServiceImplTest {
 
     @Test
     public void addJmsMessageMovedAudit() {
-        when(userService.getLoggedUserNamed()).thenReturn("thomas");
+        when(authUtils.getAuthenticatedUser()).thenReturn("thomas");
         auditService.addJmsMessageMovedAudit("resendMessageId", "fromQueue", "toQueue");
         ArgumentCaptor<JmsMessageAudit> jmsMessageAuditCaptor = ArgumentCaptor.forClass(JmsMessageAudit.class);
         verify(auditDao, times(1)).saveJmsMessageAudit(jmsMessageAuditCaptor.capture());

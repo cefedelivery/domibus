@@ -65,13 +65,14 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * Gets all the PModes Entries
    */
   getAllPModeEntries () {
+    this.current = null;
+    this.pModeContents = null;
+    this.pModeExists = false;
     this.getResultObservable().subscribe((response: Response) => {
         const list: any[] = response.json();
         if (list && list.length) {
           this.current = list[0];
           this.getActivePMode();
-        } else {
-          this.alertService.error(' \'Get all pmodes\' returned an emty list.');
         }
       },
       () => {
@@ -171,11 +172,11 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
   }
 
   /**
-   * Method that checks if 'Download' button should be enabled
+   * Method that checks if 'Upload' button should be enabled
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
   canUpload (): boolean {
-    return this.pModeExists && !this.pModeContentsDirty;
+    return !this.pModeExists || !this.pModeContentsDirty;
   }
 
   /**

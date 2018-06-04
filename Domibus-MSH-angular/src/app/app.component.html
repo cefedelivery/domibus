@@ -65,6 +65,11 @@
       <md-icon md-tooltip="Alerts" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">add_alert</md-icon>
       <span>Alerts</span>
     </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/testservice']" *ngIf="hasAdmin()" id="testservice_id">
+      <md-icon md-tooltip="Test Service" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">import_export</md-icon>
+      <span *ngIf="fullMenu">Test Service</span>
+    </button>
+
     <div class="collapse-button">
       <button *ngIf="fullMenu" md-raised-button id="expand_id" (click)="toggleMenu()">
         <md-icon md-tooltip="Collapse" mdTooltipPosition="right">chevron_left</md-icon>
@@ -97,6 +102,9 @@
     <alert></alert>
 
     <div id="sandwichMenuHolder">
+
+      <domain-selector *ngIf="currentUser" [currentComponent]="outlet.activated ? outlet.component : null"></domain-selector>
+
       <div class="helpMenu">
         <page-helper></page-helper>
       </div>

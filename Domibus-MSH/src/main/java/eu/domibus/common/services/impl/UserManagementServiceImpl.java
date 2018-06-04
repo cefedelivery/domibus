@@ -1,38 +1,35 @@
 package eu.domibus.common.services.impl;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.user.UserState;
+import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserService;
-import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
+
+
+import eu.domibus.common.services.UserPersistenceService;
+import org.springframework.context.annotation.Primary;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
  */
-@Service
+@Service("userManagementService")
+@Primary
 public class UserManagementServiceImpl implements UserService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserManagementServiceImpl.class);
@@ -46,19 +43,23 @@ public class UserManagementServiceImpl implements UserService {
     private static final String DEFAULT_LOGING_ATTEMPT = "5";
 
     @Autowired
-    private UserDao userDao;
+    protected UserDao userDao;
 
     @Autowired
     private UserRoleDao userRoleDao;
 
     @Autowired
-    private BCryptPasswordEncoder bcryptEncoder;
-
-    @Autowired
-    private DomainCoreConverter domainConverter;
-
-    @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected UserConverter userConverter;
+
+    @Autowired
+    protected UserPersistenceService userPersistenceService;
+
 
     /**
      * {@inheritDoc}
@@ -66,41 +67,13 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<eu.domibus.api.user.User> findUsers() {
-        //@thom use a dozer custom mapper to map from role to authorities.
         List<User> userEntities = userDao.listUsers();
-        List<eu.domibus.api.user.User> users = new ArrayList<>();
-        for (User userEntity : userEntities) {
-            List<String> authorities = new ArrayList<>();
-            Collection<UserRole> roles = userEntity.getRoles();
-            for (UserRole role : roles) {
-                authorities.add(role.getName());
-            }
-            eu.domibus.api.user.User user = new eu.domibus.api.user.User(
-                    userEntity.getUserName(),
-                    userEntity.getEmail(),
-                    userEntity.getActive(),
-                    authorities,
-                    UserState.PERSISTED, userEntity.getSuspensionDate());
-            users.add(user);
-        }
-        return users;
-    }
+        List<eu.domibus.api.user.User> users = userConverter.convert(userEntities);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void saveUsers(List<eu.domibus.api.user.User> users) {
-        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
-        LOG.debug("New users:" + newUsers.size());
-        insertNewUsers(newUsers);
-        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
-        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
-        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
-        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
-        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
-        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+        String domainCode = domainContextProvider.getCurrentDomainSafely().getCode();
+        users.forEach(u -> u.setDomain(domainCode));
+
+        return users;
     }
 
     /**
@@ -122,38 +95,11 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public void updateUsers(List<eu.domibus.api.user.User> users) {
-        // update
-        Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
-        LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
-        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
-        Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
-        LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
-        updateUserWithPasswordChange(passwordChangedModifiedUsers);
-
-        // insertion
-        Collection<eu.domibus.api.user.User> newUsers = filterNewUsers(users);
-        LOG.debug("New users:" + newUsers.size());
-        insertNewUsers(newUsers);
-
-        // deletion
-        List<User> usersEntities = domainConverter.convert(users, User.class);
-        List<User> allUsersEntities = userDao.listUsers();
-        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-        userDao.deleteAll(usersEntitiesToDelete);
+        userPersistenceService.updateUsers(users);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getLoggedUserNamed() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName();
-        }
-        return null;
-    }
 
     /**
      * {@inheritDoc}
@@ -166,6 +112,7 @@ public class UserManagementServiceImpl implements UserService {
         if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
+        userDao.flush();
         return userLoginErrorReason;
     }
 
@@ -244,89 +191,12 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("handleCorrectAuthentication for user [{}]", userName);
         if (user.getAttemptCount() > 0) {
             LOG.debug("user [{}] has [{}] attempt ", userName, user.getAttemptCount());
-            LOG.debug("reseting to 0");
+            LOG.debug("resetting to 0");
             user.setAttemptCount(0);
             userDao.update(user);
         }
-    }
 
-    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
-        List<User> result = new ArrayList<>(masterData);
-        result.removeAll(newData);
-        return result;
-    }
-
-    private void insertNewUsers(Collection<eu.domibus.api.user.User> users) {
-        for (eu.domibus.api.user.User user : users) {
-            List<String> authorities = user.getAuthorities();
-            User userEntity = domainConverter.convert(user, User.class);
-            addRoleToUser(authorities, userEntity);
-            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
-            userDao.create(userEntity);
-        }
-    }
-
-    private void addRoleToUser(List<String> authorities, User userEntity) {
-        for (String authority : authorities) {
-            UserRole userRole = userRoleDao.findByName(authority);
-            userEntity.addRole(userRole);
-        }
-    }
-
-    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
-        for (eu.domibus.api.user.User user : users) {
-            User userEntity = prepareUserForUpdate(user);
-            addRoleToUser(user.getAuthorities(), userEntity);
-            userDao.update(userEntity);
-        }
-    }
-
-    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users) {
-        for (eu.domibus.api.user.User user : users) {
-            User userEntity = prepareUserForUpdate(user);
-            userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
-            addRoleToUser(user.getAuthorities(), userEntity);
-            userDao.update(userEntity);
-        }
-    }
-
-    protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
-        User userEntity = userDao.loadUserByUsername(user.getUserName());
-        if (!userEntity.getActive() && user.isActive()) {
-            userEntity.setSuspensionDate(null);
-            userEntity.setAttemptCount(0);
-        }
-        userEntity.setActive(user.isActive());
-        userEntity.setEmail(user.getEmail());
-        userEntity.clearRoles();
-        return userEntity;
-    }
-
-    private Collection<eu.domibus.api.user.User> filterNewUsers(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.NEW.name().equals(user.getStatus());
-            }
-        });
-    }
-
-    private Collection<eu.domibus.api.user.User> filterModifiedUserWithoutPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() == null;
-            }
-        });
-    }
-
-    private Collection<eu.domibus.api.user.User> filterModifiedUserWithPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty();
-            }
-        });
+        userDao.flush();
     }
 
 }

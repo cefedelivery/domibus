@@ -1229,5 +1229,4 @@ public class DatabaseMessageHandlerTest {
 
 
     }
-
 }

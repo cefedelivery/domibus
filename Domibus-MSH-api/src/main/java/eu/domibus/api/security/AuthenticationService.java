@@ -1,5 +1,7 @@
 package eu.domibus.api.security;
 
+import org.springframework.security.core.Authentication;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -9,4 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 public interface AuthenticationService {
 
     void authenticate(HttpServletRequest httpRequest) throws AuthenticationException;
+
+    Authentication basicAuthenticate(String user, String password) throws AuthenticationException;
 }

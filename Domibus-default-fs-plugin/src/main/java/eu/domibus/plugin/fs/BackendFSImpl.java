@@ -1,6 +1,8 @@
 package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
+import eu.domibus.ext.services.DomainExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -72,7 +74,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     
     @Autowired
     private FSPluginProperties fsPluginProperties;
-    
+
+    @Autowired
+    private DomibusConfigurationExtService domibusConfigurationExtService;
+
+    @Autowired
+    private DomainExtService domainExtService;
+
     private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
     /**
@@ -127,9 +135,18 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         }
         final String finalRecipientFolder = sanitizeFileName(finalRecipient);
 
+        // get multiTenantAware
+        boolean multiTenantAware = domibusConfigurationExtService.isMultiTenantAware();
+
+        // get domain info
+        String domain;
+        if(multiTenantAware) {
+            domain = domainExtService.getCurrentDomain().getName();
+        } else {
+            domain = resolveDomain(fsMessage);
+        }
 
         // Persist message
-        String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
              FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
