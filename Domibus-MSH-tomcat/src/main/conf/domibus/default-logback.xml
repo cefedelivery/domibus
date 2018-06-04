@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <included>
+    <!-- change the name of the domain to match your domain name.
+    also rename the file and be sure to include it in the logback.xml -->
     <property name="domainName" value="default" scope="local" />
     <appender name="taxud-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/${domainName}-domibus.log</file>
             <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
                 <domainName>${domainName}</domainName>
-                <markerName>LOGGED_MARKER</markerName>
+                <markerName>SECURITY,BUSINESS</markerName>
                 <markerMismatch>NEUTRAL</markerMismatch>
                 <markerMatch>DENY</markerMatch>
             </filter>

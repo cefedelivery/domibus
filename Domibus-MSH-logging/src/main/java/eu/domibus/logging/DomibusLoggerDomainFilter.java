@@ -6,7 +6,10 @@ import ch.qos.logback.core.spi.FilterReply;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link Filter} for Domain logging
@@ -17,12 +20,13 @@ import java.util.Map;
  */
 public class DomibusLoggerDomainFilter extends Filter<ILoggingEvent> {
 
-    static final String MDC_DOMAIN_KEY = "d_domain";
+    static final String MDC_DOMAIN_KEY = DomibusLogger.MDC_PROPERTY_PREFIX + DomibusLogger.MDC_DOMAIN;
+    static final String MARKER_SEPARATOR = ",";
     private String domainName = "default";
 
-    private String markerName = "LOGGED_MARKER";
-    private String markerMatch = "NEUTRAL";
-    private String markerMismatch = "DENY";
+    private String markerName;
+    private String markerMatch;
+    private String markerMismatch;
 
     public void setDomainName(String domainName) {
         this.domainName = domainName;
@@ -43,15 +47,18 @@ public class DomibusLoggerDomainFilter extends Filter<ILoggingEvent> {
     @Override
     public FilterReply decide(ILoggingEvent iLoggingEvent) {
 
+        //MDC map
         Map<String, String> mdcPropertyMap = iLoggingEvent.getMDCPropertyMap();
-        Marker markerToAccept = MarkerFactory.getMarker(markerName);
+
+        //read the configuration  - markers to check
+        List<Marker> markerListToCheck = Arrays.stream(markerName.split(MARKER_SEPARATOR)).map(s -> MarkerFactory.getMarker(s)).collect(Collectors.toList());
 
         //filter by domain from MDC map
         if (mdcPropertyMap != null && mdcPropertyMap.get(MDC_DOMAIN_KEY) != null) {
             if (domainName.equals(mdcPropertyMap.get(MDC_DOMAIN_KEY))) {
 
                 //filter by marker
-                if (markerToAccept.equals(iLoggingEvent.getMarker())) {
+                if (markerListToCheck.contains(iLoggingEvent.getMarker())) {
                     return FilterReply.valueOf(markerMatch);
                 } else {
                     return FilterReply.valueOf(markerMismatch);
