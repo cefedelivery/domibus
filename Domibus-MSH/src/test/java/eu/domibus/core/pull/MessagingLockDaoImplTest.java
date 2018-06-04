@@ -11,11 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -41,31 +44,40 @@ public class MessagingLockDaoImplTest {
     }
 
     @Test
-    public void getNextPullMessageToProcessFirstAttempt(@Mocked final Query query, @Mocked final MessagingLock messagingLock) {
+    public void getNextPullMessageToProcessFirstAttempt(
+            @Mocked final SqlRowSet sqlRowSet) {
         final int idPk = 6;
-        final String messageId = "firstTimeMessageId";
+
+        final String messageId = "furtherAttemptMessageId";
+
+        final int sendAttempts = 0;
+
+        final int sendAttemptsMax = 5;
+
+        final Timestamp timestamp=new Timestamp(System.currentTimeMillis()+20000);
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
             result = DataBaseEngine.MYSQL;
 
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE", MessagingLock.class);
-            result = query;
+            final Map arg = new HashMap<>();
+            jdbcTemplate.queryForRowSet("SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE", withAny(arg));
+            result = sqlRowSet;
 
-            query.getResultList();
-            result = Lists.newArrayList(messagingLock);
+            sqlRowSet.next();
+            result = true;
 
-            messagingLock.getMessageId();
-            this.result = messageId;
+            sqlRowSet.getString(1);
+            result = messageId;
 
-            messagingLock.getStaled();
-            this.result = new java.sql.Timestamp(System.currentTimeMillis() + 20000);
+            sqlRowSet.getInt(2);
+            result = sendAttempts;
 
-            messagingLock.getSendAttempts();
-            this.result = 0;
+            sqlRowSet.getInt(3);
+            result = sendAttemptsMax;
 
-            messagingLock.getSendAttemptsMax();
-            this.result = 5;
+            sqlRowSet.getObject(4);
+            result = timestamp;
 
         }};
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
@@ -74,39 +86,49 @@ public class MessagingLockDaoImplTest {
         assertEquals(PullMessageState.FIRST_ATTEMPT, nextPullMessageToProcess.getState());
         assertEquals(null, nextPullMessageToProcess.getStaledReason());
 
-
         new Verifications() {{
-            messagingLock.setMessageState(MessageState.PROCESS);
-            entityManager.persist(messagingLock);
+            Map<String, Object> params;
+            jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk", params = withCapture());
+            assertEquals(6, params.get(MessagingLockDaoImpl.IDPK));
+            assertEquals(MessageState.PROCESS.name(), params.get(MessagingLockDaoImpl.MESSAGE_STATE));
+
         }};
     }
 
     @Test
-    public void getNextPullMessageToProcessFurtherAttempt(@Mocked final Query query, @Mocked final MessagingLock messagingLock) {
+    public void getNextPullMessageToProcessWithRetry(
+            @Mocked final SqlRowSet sqlRowSet,
+            @Mocked final Timestamp timestamp) {
         final int idPk = 6;
+
         final String messageId = "furtherAttemptMessageId";
+
+        final int sendAttempts = 1;
+
+        final int sendAttemptsMax = 5;
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
             result = DataBaseEngine.MYSQL;
 
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE", MessagingLock.class);
-            result = query;
+            final Map arg = new HashMap<>();
+            jdbcTemplate.queryForRowSet("SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE", withAny(arg));
+            result = sqlRowSet;
 
-            query.getResultList();
-            result = Lists.newArrayList(messagingLock);
+            sqlRowSet.next();
+            result = true;
 
-            messagingLock.getMessageId();
-            this.result = messageId;
+            sqlRowSet.getString(1);
+            result = messageId;
 
-            messagingLock.getStaled();
-            this.result = new java.sql.Timestamp(System.currentTimeMillis() + 20000);
+            sqlRowSet.getInt(2);
+            result = sendAttempts;
 
-            messagingLock.getSendAttempts();
-            this.result = 1;
+            sqlRowSet.getInt(3);
+            result = sendAttemptsMax;
 
-            messagingLock.getSendAttemptsMax();
-            this.result = 5;
+            sqlRowSet.getObject(4);
+            result = timestamp;
 
         }};
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess((int) idPk);
@@ -117,147 +139,137 @@ public class MessagingLockDaoImplTest {
 
 
         new Verifications() {{
-            query.setParameter(1, idPk);
-            messagingLock.setMessageState(MessageState.PROCESS);
-            entityManager.persist(messagingLock);
+            Map<String, Object> params;
+            jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk", params = withCapture());
+            assertEquals(6, params.get(MessagingLockDaoImpl.IDPK));
+            assertEquals(MessageState.PROCESS.name(), params.get(MessagingLockDaoImpl.MESSAGE_STATE));
 
         }};
     }
 
     @Test
-    public void getNextPullMessageToProcessStaled(@Mocked final Query query, @Mocked final MessagingLock messagingLock) {
+    public void getNextPullMessageToProcessExpired(
+            @Mocked final SqlRowSet sqlRowSet) {
+
         final int idPk = 6;
-        final String messageId = "staledMessageId";
-        final Timestamp staledDate = new Timestamp(System.currentTimeMillis() - 20000);
+
+        final String messageId = "furtherAttemptMessageId";
+
+        final int sendAttempts = 1;
+
+        final int sendAttemptsMax = 5;
+
+        final Timestamp timestamp=new Timestamp(System.currentTimeMillis()-20000);
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
             result = DataBaseEngine.MYSQL;
 
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE", MessagingLock.class);
-            result = query;
+            final Map arg = new HashMap<>();
+            jdbcTemplate.queryForRowSet("SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE", withAny(arg));
+            result = sqlRowSet;
 
-            query.getResultList();
-            result = Lists.newArrayList(messagingLock);
+            sqlRowSet.next();
+            result = true;
 
-            messagingLock.getMessageId();
-            this.result = messageId;
+            sqlRowSet.getString(1);
+            result = messageId;
 
-            messagingLock.getStaled();
-            this.result = staledDate;
+            sqlRowSet.getInt(2);
+            result = sendAttempts;
 
-            messagingLock.getSendAttempts();
-            this.result = 1;
+            sqlRowSet.getInt(3);
+            result = sendAttemptsMax;
 
-            messagingLock.getSendAttemptsMax();
-            this.result = 5;
-
+            sqlRowSet.getObject(4);
+            result = timestamp;
 
         }};
-        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
+        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess((int) idPk);
         assertNotNull(nextPullMessageToProcess);
         assertEquals(messageId, nextPullMessageToProcess.getMessageId());
         assertEquals(PullMessageState.EXPIRED, nextPullMessageToProcess.getState());
-        assertEquals(String.format("Maximum time to send the message has been reached:[%tc]", staledDate), nextPullMessageToProcess.getStaledReason());
+        assertNotNull(null, nextPullMessageToProcess.getStaledReason());
 
 
         new Verifications() {{
-            messagingLock.setMessageState(MessageState.DEL);
-            entityManager.persist(messagingLock);
+            Map<String, Object> params;
+            jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk", params = withCapture());
+            assertEquals(6, params.get(MessagingLockDaoImpl.IDPK));
+            assertEquals(MessageState.DEL.name(), params.get(MessagingLockDaoImpl.MESSAGE_STATE));
+
         }};
     }
 
     @Test
-    public void getNextPullMessageToProcessMaxAttemptsReached(@Mocked final Query query, @Mocked final MessagingLock messagingLock) {
+    public void getNextPullMessageToProcessMaxAttemptsReached(
+            @Mocked final SqlRowSet sqlRowSet,
+            @Mocked final Timestamp timestamp) {
         final int idPk = 6;
-        final String messageId = "maxAttemptMessageId";
-        final Timestamp staledDate = new Timestamp(System.currentTimeMillis() + 20000);
+
+        final String messageId = "furtherAttemptMessageId";
+
+        final int sendAttempts = 5;
+
+        final int sendAttemptsMax = 5;
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.H2;
+            result = DataBaseEngine.MYSQL;
 
+            final Map arg = new HashMap<>();
+            jdbcTemplate.queryForRowSet("SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE", withAny(arg));
+            result = sqlRowSet;
 
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED  FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE", MessagingLock.class);
-            result = query;
+            sqlRowSet.next();
+            result = true;
 
-            query.getResultList();
-            result = Lists.newArrayList(messagingLock);
+            sqlRowSet.getString(1);
+            result = messageId;
 
-            messagingLock.getMessageId();
-            this.result = messageId;
+            sqlRowSet.getInt(2);
+            result = sendAttempts;
 
-            messagingLock.getStaled();
-            this.result = staledDate;
+            sqlRowSet.getInt(3);
+            result = sendAttemptsMax;
 
-            messagingLock.getSendAttempts();
-            this.result = 5;
-
-            messagingLock.getSendAttemptsMax();
-            this.result = 5;
-
+            sqlRowSet.getObject(4);
+            result = timestamp;
 
         }};
-        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
+        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess((int) idPk);
         assertNotNull(nextPullMessageToProcess);
         assertEquals(messageId, nextPullMessageToProcess.getMessageId());
         assertEquals(PullMessageState.EXPIRED, nextPullMessageToProcess.getState());
-        assertEquals(String.format("Maximum number of attempts to send the message has been reached:[%d]", 5), nextPullMessageToProcess.getStaledReason());
+        assertNotNull(null, nextPullMessageToProcess.getStaledReason());
+
 
 
         new Verifications() {{
-            messagingLock.setMessageState(MessageState.DEL);
-            entityManager.persist(messagingLock);
+            Map<String, Object> params;
+            jdbcTemplate.update("UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk", params = withCapture());
+            assertEquals(6, params.get(MessagingLockDaoImpl.IDPK));
+            assertEquals(MessageState.DEL.name(), params.get(MessagingLockDaoImpl.MESSAGE_STATE));
+
         }};
     }
+
+
 
     @Test
-    public void getNextPullMessageToProcessNoMessage(@Mocked final Query query) {
+    public void getNextPullMessageToProcessNoMessage(@Mocked final SqlRowSet sqlRowSet) {
         final int idPk = 6;
         new Expectations() {{
-            domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.ORACLE;
+            final Map arg = new HashMap<>();
+            jdbcTemplate.queryForRowSet("SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE", withAny(arg));
+            result = sqlRowSet;
 
-
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE NOWAIT", MessagingLock.class);
-            result = query;
-
-            query.getResultList();
-            result = Lists.newArrayList();
-
-
+            sqlRowSet.next();
+            result = false;
         }};
         final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
         assertNull(nextPullMessageToProcess);
     }
-
-    @Test(expected = PersistenceException.class)
-    public void getNextPullMessageToProcessMessageLocked(@Mocked final Query query) {
-        final int idPk = 6;
-        new Expectations() {{
-            domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.ORACLE;
-
-            domibusConfigurationService.getDataBaseEngine();
-            result = DataBaseEngine.ORACLE;
-
-
-            entityManager.createNativeQuery("SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE NOWAIT", MessagingLock.class);
-            result = query;
-
-            query.getResultList();
-            result = new PersistenceException("test", null);
-
-        }};
-        final PullMessageId nextPullMessageToProcess = messagingLockDao.getNextPullMessageToProcess(idPk);
-        assertNull(nextPullMessageToProcess);
-
-
-        new Verifications() {{
-            query.setParameter(1, idPk);
-        }};
-    }
-
 
     @Test
     public void delete(@Mocked final Query query) {

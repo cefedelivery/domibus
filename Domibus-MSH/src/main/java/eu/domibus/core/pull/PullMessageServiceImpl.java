@@ -104,7 +104,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         userMessageLog.setSendAttempts(sendAttempts);
         switch (state) {
             case WAITING_FOR_CALLBACK:
-                waitingForCallBack(userMessage, legConfiguration, userMessageLog);
+                waitingForCallBack(legConfiguration, userMessageLog);
                 break;
             case PULL_FAILED:
                 pullFailedOnRequest(legConfiguration, userMessageLog);
@@ -284,12 +284,10 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
-     *
-     * @param userMessage
-     * @param legConfiguration
+     *  @param legConfiguration
      * @param userMessageLog
      */
-    protected void waitingForCallBack(UserMessage userMessage, LegConfiguration legConfiguration, UserMessageLog
+    protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
         final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
         if (isExpired(legConfiguration, userMessageLog)) {
@@ -320,7 +318,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
     }
 
-    private boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+    protected boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         return getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
     }
 

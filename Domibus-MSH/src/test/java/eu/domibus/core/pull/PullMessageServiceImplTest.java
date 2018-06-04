@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -23,11 +24,9 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Map;
 
 import static eu.domibus.core.pull.PullMessageServiceImpl.PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE;
 import static org.junit.Assert.assertEquals;
@@ -117,14 +116,15 @@ public class PullMessageServiceImplTest {
             result = PullMessageState.FIRST_ATTEMPT;
 
             pullMessageId.getMessageId();
-            result=messageId;
+            result = messageId;
 
         }};
         final String returnedMessageId = pullMessageService.getPullMessageId(initiator, mpc);
         assertEquals(messageId, returnedMessageId);
 
-        new Verifications(){{
-            pullMessageStateService.expirePullMessage(messageId);times=0;
+        new Verifications() {{
+            pullMessageStateService.expirePullMessage(messageId);
+            times = 0;
         }};
 
     }
@@ -153,14 +153,15 @@ public class PullMessageServiceImplTest {
             result = PullMessageState.EXPIRED;
 
             pullMessageId.getMessageId();
-            result=messageId;
+            result = messageId;
 
         }};
         final String returnedMessageId = pullMessageService.getPullMessageId(initiator, mpc);
         assertNull(returnedMessageId);
 
-        new Verifications(){{
-            pullMessageStateService.expirePullMessage(messageId);times=1;
+        new Verifications() {{
+            pullMessageStateService.expirePullMessage(messageId);
+            times = 1;
         }};
 
     }
@@ -189,14 +190,15 @@ public class PullMessageServiceImplTest {
             result = PullMessageState.RETRY;
 
             pullMessageId.getMessageId();
-            result=messageId;
+            result = messageId;
 
         }};
         final String returnedMessageId = pullMessageService.getPullMessageId(initiator, mpc);
-        assertNull(returnedMessageId);
+        assertEquals(messageId,returnedMessageId);
 
-        new Verifications(){{
-            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);times=1;
+        new Verifications() {{
+            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+            times = 1;
         }};
 
     }
@@ -248,7 +250,7 @@ public class PullMessageServiceImplTest {
         pullMessageService.addPullMessageLock(partyIdExtractor, userMessage, messageLog);
         new Verifications() {{
             MessagingLock messagingLock = null;
-            //messagingLockDao.releaseLock(messagingLock = withCapture());
+            messagingLockDao.save(messagingLock = withCapture());
             assertEquals(partyId, messagingLock.getInitiator());
             assertEquals(mpc, messagingLock.getMpc());
             assertEquals(messageId, messagingLock.getMessageId());
@@ -295,54 +297,55 @@ public class PullMessageServiceImplTest {
         assertEquals(2, pullMessageService.getExtraNumberOfAttemptTimeForExpirationDate());
     }
 
-    @Test
-    public void waitingForCallBackWithoutAttempt(@Mocked final ToExtractor toExtractor, @Mocked final UserMessage userMessage, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
-        final String messageID = "123456";
-        new MockUp<PullMessageServiceImpl>() {
-            @Mock
-            public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
-                return false;
-            }
 
-            @Mock
-            public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog) {
-            }
-        };
-        pullMessageService.waitingForCallBack(userMessage, legConfiguration, userMessageLog);
+    @Test
+    public void waitingForCallExpired(
+            @Mocked final MessagingLock lock,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final UserMessageLog userMessageLog,
+            @Mocked final Timestamp timestamp) {
+        new Expectations(pullMessageService){{
+            messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
+            result=lock;
+
+            pullMessageService.isExpired(legConfiguration, userMessageLog);
+            result=true;
+
+        }};
+        pullMessageService.waitingForCallBack(legConfiguration, userMessageLog);
         new Verifications() {{
-            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
-            times = 0;
-            userMessageLogDao.update(userMessageLog);
-            userMessage.getPartyInfo().getTo();
-            times = 1;
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.WAITING_FOR_RECEIPT, withAny(new Timestamp(System.currentTimeMillis())));
-            pullMessageService.addPullMessageLock(toExtractor, userMessage, userMessageLog);
-            times = 1;
+            pullMessageStateService.sendFailed(userMessageLog);
+            lock.setNextAttempt(null);
+            lock.setMessageState(MessageState.DEL);
+            messagingLockDao.save(lock);
+            userMessageLogDao.update(userMessageLog);times=0;
         }};
     }
 
     @Test
-    public void waitingForCallBackWithAttempt(@Mocked final ToExtractor toExtractor, @Mocked final UserMessage userMessage, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
-        final String messageID = "123456";
-        new MockUp<PullMessageServiceImpl>() {
-            @Mock
-            public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
-                return true;
-            }
+    public void waitingForCallBackWithAttempt(
+            @Mocked final MessagingLock lock,
+            @Mocked final LegConfiguration legConfiguration,
+            @Mocked final UserMessageLog userMessageLog,
+            @Mocked final Timestamp timestamp) {
+        new Expectations(pullMessageService){{
+            messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
+            result=lock;
 
-            @Mock
-            public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog) {
-            }
-        };
-        pullMessageService.waitingForCallBack(userMessage, legConfiguration, userMessageLog);
+            pullMessageService.isExpired(legConfiguration, userMessageLog);
+            result=false;
+
+            pullMessageService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+        }};
+        pullMessageService.waitingForCallBack(legConfiguration, userMessageLog);
         new Verifications() {{
-            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
-            times = 1;
+            lock.setMessageState(MessageState.WAITING);
+            lock.setSendAttempts(userMessageLog.getSendAttempts());
+            lock.setNextAttempt(userMessageLog.getNextAttempt());
+            userMessageLog.setMessageStatus(MessageStatus.WAITING_FOR_RECEIPT);
+            messagingLockDao.save(lock);
             userMessageLogDao.update(userMessageLog);
-            userMessage.getPartyInfo().getTo();
-            times = 1;
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.WAITING_FOR_RECEIPT, withAny(new Timestamp(System.currentTimeMillis())));
-            pullMessageService.addPullMessageLock(toExtractor, userMessage, userMessageLog);
+            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.WAITING_FOR_RECEIPT, withAny(timestamp));
         }};
     }
 
@@ -358,7 +361,7 @@ public class PullMessageServiceImplTest {
             userMessageLog.getSendAttemptsMax();
             result = 2;
             domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2");
-            result="2";
+            result = "2";
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = System.currentTimeMillis() - 50000;
         }};
@@ -385,54 +388,79 @@ public class PullMessageServiceImplTest {
         new Expectations() {{
             legConfiguration.getReceptionAwareness().getRetryTimeout();
             result = 1;
+
+            legConfiguration.getReceptionAwareness().getRetryCount();
+            result = 10;
+
             userMessageLog.getSendAttempts();
             result = 2;
+
             userMessageLog.getSendAttemptsMax();
             result = 2;
+
+            domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2");
+            result="2";
+
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = System.currentTimeMillis() - 70000;
         }};
-        assertEquals(false, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
+        assertEquals(true, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
     }
 
     @Test
-    public void pullFailedOnRequestWithNoAttempt(@Mocked final ToExtractor toExtractor, @Mocked final UserMessage userMessage, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
-
-        final String messageID = "123456";
-        new MockUp<PullMessageServiceImpl>() {
-            @Mock
-            public void addPullMessageLock(final PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog) {
-            }
-        };
-        new Expectations() {{
-            userMessageLog.getMessageId();
-            result = messageID;
-            updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
-            result = false;
-        }};
-
-        pullMessageService.pullFailedOnRequest(legConfiguration, userMessageLog);
-        new VerificationsInOrder() {{
-            pullMessageStateService.sendFailed(userMessageLog);
-        }};
-    }
-
-    @Test
-    public void pullFailedOnRequestWithAttempt(@Mocked final MessagingLock messagingLock, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
+    public void pullFailedOnRequestWithNoAttempt(@Mocked final MessagingLock lock,@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
 
         final String messageID = "123456";
         new Expectations(pullMessageService) {{
             userMessageLog.getMessageId();
             result = messageID;
+
             messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
-            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog,legConfiguration);
-            result=true;
+            result=lock;
+
+            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration);
+            result=false;
+        }};
+
+        pullMessageService.pullFailedOnRequest(legConfiguration, userMessageLog);
+        new VerificationsInOrder() {{
+            lock.setNextAttempt(null);
+            lock.setMessageState(MessageState.DEL);
+            pullMessageStateService.sendFailed(userMessageLog);
+            messagingLockDao.save(lock);
+        }};
+    }
+
+    @Test
+    public void pullFailedOnRequestWithAttempt(@Mocked final MessagingLock lock, @Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
+
+        final String messageID = "123456";
+        final Date nextAttempt = new Date(1528110891749l);
+        new Expectations(pullMessageService) {{
+            userMessageLog.getMessageId();
+            result = messageID;
+
+            messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
+            result = lock;
+
+            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration);
+            result = true;
+
+            userMessageLog.getSendAttempts();
+            result = 3;
+
+            userMessageLog.getNextAttempt();
+            result = nextAttempt;
         }};
 
         pullMessageService.pullFailedOnRequest(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
             updateRetryLoggingService.saveAndNotify(MessageStatus.READY_TO_PULL, userMessageLog);
+            lock.setMessageState(MessageState.READY);
+            lock.setSendAttempts(3);
+            lock.setNextAttempt(nextAttempt);
             messagingLockDao.save(lock);
+        }};
     }
 
     @Test
@@ -441,8 +469,8 @@ public class PullMessageServiceImplTest {
         new Expectations(pullMessageService) {{
             userMessageLog.getMessageId();
             result = messageID;
-            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog,legConfiguration);
-            result=true;
+            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration);
+            result = true;
         }};
         pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
@@ -457,18 +485,17 @@ public class PullMessageServiceImplTest {
     @Test
     public void pullFailedOnReceiptWithNoAttemptLeft(@Mocked final LegConfiguration legConfiguration, @Mocked final UserMessageLog userMessageLog) {
         final String messageID = "123456";
-        new Expectations() {{
+        new Expectations(pullMessageService) {{
             userMessageLog.getMessageId();
             result = messageID;
-            updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
+
+            pullMessageService.attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration);
             result = false;
         }};
         pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
+
         new VerificationsInOrder() {{
-            messagingLockDao.delete(messageID);
-            times = 1;
             pullMessageStateService.sendFailed(userMessageLog);
-            times = 1;
         }};
 
     }

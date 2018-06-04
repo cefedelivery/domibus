@@ -232,7 +232,6 @@ public class PullRequestHandlerImplTest {
             messageExchangeService.verifySenderCertificate(legConfiguration, pullContext.getResponder().getName());
             result = new ConfigurationException();
 
-
         }};
         pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
