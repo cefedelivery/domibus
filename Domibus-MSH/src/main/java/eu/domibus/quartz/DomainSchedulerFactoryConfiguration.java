@@ -19,9 +19,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
@@ -64,16 +65,16 @@ public class DomainSchedulerFactoryConfiguration {
     protected AutowiringSpringBeanJobFactory autowiringSpringBeanJobFactory;
 
     @Autowired
-    @Resource(name = "domibusStandardTriggerList")
-    protected List<Trigger> domibusStandardTriggerList;
-
-    @Autowired
     protected DomainService domainService;
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public SchedulerFactoryBean schedulerFactory(Domain domain) {
         LOG.debug("Instantiating the scheduler factory for domain [{}]", domain);
+
+        //get all the Spring Bean Triggers so that new instances with scope prototype are injected
+        final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
+        List<Trigger> domibusStandardTriggerList = new ArrayList<>(beansOfType.values());
 
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
 

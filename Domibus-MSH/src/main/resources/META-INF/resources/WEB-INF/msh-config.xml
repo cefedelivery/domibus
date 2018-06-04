@@ -22,14 +22,14 @@
     </bean>
 
     <bean id="retentionWorkerTrigger"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="retentionWorkerJob"/>
         <property name="cronExpression" value="${domibus.retentionWorker.cronExpression}"/>
         <property name="startDelay" value="20000"/>
     </bean>
 
     <bean id="domibusStandardTriggerList" parent="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
+          class="org.springframework.beans.factory.config.ListFactoryBean" scope="prototype">
         <property name="sourceList">
             <list merge="true">
                 <ref bean="retentionWorkerTrigger"/>
