@@ -96,10 +96,10 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public long getDestinationSize(final String destinationName) {
+    public long getDestinationSize(final String nameLike) {
         final Map<String, InternalJMSDestination> destinationsGroupedByFQName = internalJmsManager.findDestinationsGroupedByFQName();
         for (Map.Entry<String, InternalJMSDestination> entry : destinationsGroupedByFQName.entrySet()) {
-            if (StringUtils.containsIgnoreCase(entry.getKey(), destinationName)) {
+            if (StringUtils.containsIgnoreCase(entry.getKey(), nameLike)) {
                 final InternalJMSDestination value = entry.getValue();
                 return value.getNumberOfMessages();
             }

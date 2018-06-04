@@ -157,7 +157,7 @@ public class RetryService {
     }
 
     /**
-     * {@inheritDoc}
+     * Method call by job to reset waiting_for_receipt messages into ready to pull.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void resetWaitingForReceiptPullMessages() {
@@ -169,23 +169,20 @@ public class RetryService {
 
 
     /**
-     * {@inheritDoc}
+     * Method call by job to to expire messages that could not be delivered in the configured time range..
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bulkExpirePullMessages() {
         final List<MessagingLock> expiredMessages = messagingLockDao.findStaledMessages();
         LOG.trace("Delete expired pull message");
         for (MessagingLock staledMessage : expiredMessages) {
-            try {
-                pullMessageService.expireMessage(staledMessage.getMessageId());
-            } catch (Exception e) {
-                LOG.trace("Error while lockinc ", e);
-            }
-
+            pullMessageService.expireMessage(staledMessage.getMessageId());
         }
     }
 
-
+    /**
+     * Method call by job to to delete messages marked as failed.
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void bulkDeletePullMessages() {
         final List<MessagingLock> deletedLocks = messagingLockDao.findDeletedMessages();

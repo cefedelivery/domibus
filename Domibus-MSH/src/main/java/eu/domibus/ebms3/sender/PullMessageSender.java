@@ -141,7 +141,7 @@ public class PullMessageSender {
                     }
                 });
             } catch (Exception ex) {
-                LOG.trace("Message[{}] exception while sending receipt assynchronously.");
+                LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }
         } catch (TransformerException | SOAPException | IOException | JAXBException | JMSException e) {
             LOG.error(e.getMessage(), e);

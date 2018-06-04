@@ -440,16 +440,11 @@ public class PullMessageServiceImpl implements PullMessageService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void expireMessage(String messageId) {
-        try {
-            MessagingLock lock = messagingLockDao.getLock(messageId);
-            if (lock != null && MessageState.ACK != lock.getMessageState()) {
-                LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());
-                pullMessageStateService.sendFailed(userMessageLogDao.findByMessageId(lock.getMessageId()));
-                delete(lock);
-            }
-        } catch (Exception ex) {
-            LOG.trace("[expireMessage]:Message[{}]:unable to lock", messageId);
-            return;
+        MessagingLock lock = messagingLockDao.getLock(messageId);
+        if (lock != null && MessageState.ACK != lock.getMessageState()) {
+            LOG.debug("[bulkExpirePullMessages]:Message:[{}] expired.", lock.getMessageId());
+            pullMessageStateService.sendFailed(userMessageLogDao.findByMessageId(lock.getMessageId()));
+            delete(lock);
         }
     }
 

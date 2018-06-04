@@ -69,7 +69,6 @@ public class PullRequestHandler {
     @Autowired
     private PullMessageService pullMessageService;
 
-
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             LOG.info("Message id [{}] ", messageId);
@@ -169,7 +168,6 @@ public class PullRequestHandler {
                 }
             }
         }
-
         return soapMessage;
     }
 
