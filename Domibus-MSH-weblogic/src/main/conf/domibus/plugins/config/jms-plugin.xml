@@ -9,22 +9,11 @@
                             http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 
     <jee:jndi-lookup id="notifyBackendJmsQueue"
-                     jndi-name="jms/domibus.notification.jms"
+                     jndi-name="${jmsplugin.queue.notification}"
                      environment-ref="contextEnvironment">
     </jee:jndi-lookup>
-	<bean id="businessMessageOutQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.outQueue" />
-	</bean>
-	<bean id="errorNotifyProducerQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="jms/domibus.backend.jms.errorNotifyProducer" />
-	</bean>
-	<bean id="businessMessageInQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="jms/domibus.backend.jms.inQueue"/>
-    </bean>
 
-	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer">
-		<constructor-arg name="defaultProperties" value="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/>
-	</bean>
+	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer"/>
 
 	<bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
 		<constructor-arg value="Jms"/>
@@ -36,7 +25,7 @@
           class="eu.domibus.submission.WeblogicNotificationListenerService"
           c:queue-ref="notifyBackendJmsQueue" c:mode="PUSH"
           p:backendConnector-ref="backendJms">
-		<property name="queueJndi" value="jms/domibus.notification.jms"/>
+		<property name="queueJndi" value="${jmsplugin.queue.notification}"/>
 	</bean>
 
 	<bean id="jndiDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
@@ -49,7 +38,7 @@
                   ref="domibusJMS-XAConnectionFactory"/>
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="destinationResolver" ref="jndiDestinationResolver"/>
-		<property name="concurrency" value="1-1"/>
+		<property name="concurrency" value="${jmsplugin.queue.in.concurrency}"/>
 		<property name="sessionTransacted" value="true"/>
 		<property name="sessionAcknowledgeMode" value="0"/>
 	</bean>

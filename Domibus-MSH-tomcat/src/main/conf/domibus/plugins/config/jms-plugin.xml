@@ -11,12 +11,9 @@
        http://activemq.apache.org/schema/core
        http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-    <amq:queue id="notifyBackendJmsQueue" physicalName="domibus.notification.jms"/>
-    <amq:queue id="businessMessageOutQueue" physicalName="domibus.backend.jms.outQueue"/>
+    <amq:queue id="notifyBackendJmsQueue" physicalName="${jmsplugin.queue.notification}"/>
 
-    <bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer">
-        <constructor-arg name="defaultProperties" value="${domibus.config.location}/plugins/config/jms-business-defaults.properties"/>
-    </bean>
+    <bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer"/>
 
     <bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
         <constructor-arg value="Jms"/>
@@ -33,7 +30,7 @@
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="1-1"/>
+        <property name="concurrency" value="${jmsplugin.queue.in.concurrency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
