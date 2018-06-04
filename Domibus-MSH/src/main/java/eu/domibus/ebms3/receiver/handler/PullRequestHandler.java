@@ -18,7 +18,10 @@ import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.sender.*;
+import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
+import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
+import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.DomibusCertificateException;
@@ -61,9 +64,6 @@ public class PullRequestHandler {
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    private RetryService retryService;
-
-    @Autowired
     private ReliabilityChecker reliabilityChecker;
 
     @Autowired
@@ -72,6 +72,7 @@ public class PullRequestHandler {
 
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
+            LOG.info("Message id [{}] ", messageId);
             return handleRequest(messageId, pullContext);
         } else {
             return notifyNoMessage(pullContext);
@@ -122,6 +123,7 @@ public class PullRequestHandler {
                     PhaseInterceptorChain.getCurrentMessage().getExchange().put(DispatchClientDefaultProvider.MESSAGE_ID, messageId);
                 }
                 checkResult = WAITING_FOR_CALLBACK;
+                LOG.info("Sending message");
                 return soapMessage;
             } catch (DomibusCertificateException dcEx) {
                 LOG.error(dcEx.getMessage(), dcEx);

@@ -238,11 +238,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = pullMessageService.getPullMessageId(partyId, mpc);
-        if (pullMessageId == null) {
-            return null;
-        }
-        return pullMessageId;
+        return pullMessageService.getPullMessageId(partyId, mpc);
     }
 
     /**

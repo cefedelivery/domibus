@@ -24,10 +24,8 @@ import org.junit.runner.RunWith;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -71,15 +69,6 @@ public class PullMessageServiceImplTest {
     @Tested
     private PullMessageServiceImpl pullMessageService;
 
-
-    @Test
-    public void setDataSource(@Mocked NamedParameterJdbcTemplate namedParameterJdbcTemplate, @Mocked final DataSource dataSource) {
-        pullMessageService.setDataSource(dataSource);
-        new Verifications() {{
-            final List<NamedParameterJdbcTemplate> namedParameterJdbcTemplates = withCapture(new NamedParameterJdbcTemplate(dataSource));
-            assertEquals(1, namedParameterJdbcTemplates.size());
-        }};
-    }
 
     @Test
     public void updatePullMessageAfterRequest() {
@@ -319,7 +308,7 @@ public class PullMessageServiceImplTest {
             result = false;
         }};
 
-        pullMessageService.pullFailedOnRequest(userMessage, legConfiguration, userMessageLog);
+        pullMessageService.pullFailedOnRequest(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
             pullMessageStateService.sendFailed(userMessageLog);
         }};
@@ -341,7 +330,7 @@ public class PullMessageServiceImplTest {
             result = true;
         }};
 
-        pullMessageService.pullFailedOnRequest(userMessage, legConfiguration, userMessageLog);
+        pullMessageService.pullFailedOnRequest(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
             updateRetryLoggingService.increaseAttempAndNotify(legConfiguration, MessageStatus.READY_TO_PULL, userMessageLog);
             times = 1;
@@ -359,7 +348,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
             result = true;
         }};
-        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog, null);
+        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
             rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageID);
             times = 1;
@@ -380,7 +369,7 @@ public class PullMessageServiceImplTest {
             updateRetryLoggingService.hasAttemptsLeft(userMessageLog, legConfiguration);
             result = false;
         }};
-        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog, null);
+        pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
             messagingLockDao.delete(messageID);
             times = 1;

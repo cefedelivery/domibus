@@ -69,19 +69,40 @@ public interface PullMessageService {
             UserMessage userMessage);
 
     /**
-     *
+     *Acquire a lock given a messageid.
      * @param messageId
-     * @return
+     * @return the lock entity.
      */
     MessagingLock getLock(String messageId);
 
+    /**
+     * Delete a lock in a new transaction..
+     *
+     * @param messageId the id of the lock to delete.
+     */
     void deleteInNewTransaction(String messageId);
 
+    /**
+     * Delete a lock.
+     * @param messagingLock the enity to delete.
+     */
     void delete(MessagingLock messagingLock);
 
+    /**
+     * Given a message id, set the message in waiting for receipt state into ready to pull.
+     * @param messageId the message id.
+     */
     void resetMessageInWaitingForReceiptState(String messageId);
 
+    /**
+     * Handle message expiration when expiration date is reached.
+     * @param messageId the message id.
+     */
     void expireMessage(String messageId);
 
+    /**
+     * Handles the lock in regards of message receipt status.
+     * @param requestResult
+     */
     void releaseLockAfterReceipt(PullRequestResult requestResult);
 }
