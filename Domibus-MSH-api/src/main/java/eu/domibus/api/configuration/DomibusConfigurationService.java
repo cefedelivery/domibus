@@ -19,4 +19,6 @@ public interface DomibusConfigurationService {
     String getConfigLocation();
 
     DataBaseEngine getDataBaseEngine();
+
+    boolean useProxy();
 }

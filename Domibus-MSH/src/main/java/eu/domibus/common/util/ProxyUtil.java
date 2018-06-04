@@ -1,5 +1,6 @@
 package eu.domibus.common.util;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.logging.DomibusLogger;
@@ -10,6 +11,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -26,49 +28,25 @@ public class ProxyUtil {
     @Resource(name = "domibusProperties")
     private Properties domibusProperties;
 
-    public boolean useProxy() {
-        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
-        if (StringUtils.isEmpty(useProxy)) {
-            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
-            return false;
-        }
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
 
-        String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-        String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-        String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-        String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
-
-        if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
-                || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
-
-            LOG.error("Proxy is enabled but the configuration is invalid:" + httpProxyHost + " " + httpProxyPort + " " +
-                    httpProxyUser);
-
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy is enabled but the configuration is invalid.");
-        }
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                httpProxyUser);
-
-        return Boolean.parseBoolean(useProxy);
-    }
-
-
-    protected HttpHost getConfiguredProxy() {
-        if (useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
+    public HttpHost getConfiguredProxy() {
+        if (domibusConfigurationService.useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
 
             return new HttpHost(httpProxyHost, Integer.parseInt(httpProxyPort));
         }
         return null;
     }
 
-    protected CredentialsProvider getConfiguredCredentialsProvider() {
-        if(useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+    public CredentialsProvider getConfiguredCredentialsProvider() {
+        if(domibusConfigurationService.useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusProperties.getProperty(domibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(httpProxyHost, Integer.parseInt(httpProxyPort)),

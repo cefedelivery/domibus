@@ -65,7 +65,7 @@ public class DynamicDiscoveryServiceOASISTest {
     private CryptoService cryptoService;
 
     @Injectable
-    private HttpUtil httpUtil;
+    private DomibusConfigurationService domibusConfigurationService;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -168,7 +168,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusProperties.getProperty("domibus.proxy.http.host");
@@ -195,7 +195,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
         }};
 
@@ -211,7 +211,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusProperties.getProperty("domibus.proxy.http.host");
@@ -245,7 +245,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
 
             domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
@@ -278,7 +278,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
 
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);

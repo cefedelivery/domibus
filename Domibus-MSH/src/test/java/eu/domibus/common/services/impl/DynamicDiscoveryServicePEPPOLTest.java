@@ -1,20 +1,15 @@
 package eu.domibus.common.services.impl;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.common.util.DomibusApacheFetcher;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.api.util.HttpUtil;
+import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.api.MetadataFetcher;
-import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import org.apache.http.HttpHost;
@@ -22,12 +17,9 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
@@ -66,7 +58,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private Properties domibusProperties;
 
     @Injectable
-    private HttpUtil httpUtil;
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    private ProxyUtil proxyUtil;
 
     @Injectable
     private CertificateService certificateService;
@@ -138,21 +133,18 @@ public class DynamicDiscoveryServicePEPPOLTest {
         return sm;
     }
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8280);
-
     /* This is not a unit tests but a useful test for a real SMP entry. */
     @Test
     //@Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false; // SET THIS VALUE TO TRUE
 
-            httpUtil.getConfiguredCredentialsProvider();
+            proxyUtil.getConfiguredCredentialsProvider();
             result = getConfiguredCredentialsProvider();
 
-            httpUtil.getConfiguredProxy();
+            proxyUtil.getConfiguredProxy();
             result = getConfiguredProxy();
 
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
@@ -162,10 +154,12 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-//        try {
-//            EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("1111", "222", "3333", "4444::5555", "");
-            EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
-//        } catch (ConfigurationException exc) {}
+        // participantId = "0088:260420181111";
+        // participantIdScheme = "iso6523-actorid-upis";
+        // documentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0";
+        // processIdentifier = "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0";
+        // transportProfileAS4 = "bdxr-transport-ebms3-as4-v1p0"
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
 
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());

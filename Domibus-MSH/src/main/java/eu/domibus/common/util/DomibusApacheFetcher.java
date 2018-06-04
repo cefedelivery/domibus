@@ -1,6 +1,7 @@
 package eu.domibus.common.util;
 
 import com.google.common.io.ByteStreams;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
@@ -34,19 +35,23 @@ public class DomibusApacheFetcher extends AbstractFetcher {
 
     protected RequestConfig requestConfig;
 
-    protected HttpUtil httpUtil;
+    protected DomibusConfigurationService domibusConfigurationService;
 
-    public DomibusApacheFetcher(Mode mode, HttpUtil httpUtil) {
+    protected ProxyUtil proxyUtil;
+
+    public DomibusApacheFetcher(Mode mode, DomibusConfigurationService domibusConfigurationService, ProxyUtil proxyUtil) {
         super(mode);
 
-        this.httpUtil = httpUtil;
+        this.domibusConfigurationService = domibusConfigurationService;
+        this.proxyUtil = proxyUtil;
+
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
                 .setSocketTimeout(timeout);
 
-        if(httpUtil.useProxy()) {
-            builder.setProxy(httpUtil.getConfiguredProxy());
+        if(domibusConfigurationService.useProxy()) {
+            builder.setProxy(proxyUtil.getConfiguredProxy());
         }
 
         this.requestConfig = builder.build();
@@ -86,8 +91,8 @@ public class DomibusApacheFetcher extends AbstractFetcher {
         HttpClientBuilder builder = HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig);
 
-        if(httpUtil.useProxy()) {
-            builder.setDefaultCredentialsProvider(httpUtil.getConfiguredCredentialsProvider());
+        if(domibusConfigurationService.useProxy()) {
+            builder.setDefaultCredentialsProvider(proxyUtil.getConfiguredCredentialsProvider());
         }
 
         return builder.build();

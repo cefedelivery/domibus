@@ -1,10 +1,13 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.DomibusApacheFetcher;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.api.util.HttpUtil;
+import eu.domibus.common.util.ProxyUtil;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
@@ -19,8 +22,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -51,26 +52,33 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
     private Properties domibusProperties;
 
     @Autowired
-    HttpUtil httpUtil;
+    DomibusConfigurationService domibusConfigurationService;
 
-    @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
-    public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType, final String documentId, final String processId, final String processIdType) {
+    @Autowired
+    ProxyUtil proxyUtil;
 
-        LOG.info("[PEPPOL SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId + " " + processId + " " + processIdType);
+    @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
+    public EndpointInfo lookupInformation(final String participantId, final String participantIdScheme, final String documentId, final String processId, final String processIdScheme) throws
+        EbMS3Exception {
+        LOG.info("[PEPPOL SMP] Do the lookup by: " + participantId + " " + participantIdScheme + " " + documentId + " " + processId + " " + processIdScheme);
         final String smlInfo = domibusProperties.getProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
         String mode = domibusProperties.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
         try {
-            final LookupClient smpClient = LookupClientBuilder.forMode(mode)
-                    .locator(new BusdoxLocator(smlInfo))
-//                    .locator(new StaticLocator("https://my-json-server.typicode.com"))
-                    .fetcher(new DomibusApacheFetcher(Mode.of(mode), httpUtil))
-                    .certificateValidator(EmptyCertificateValidator.INSTANCE)
-                    .build();
+            LookupClientBuilder lookupClientBuilder = LookupClientBuilder.forMode(mode);
+            lookupClientBuilder.locator(new BusdoxLocator(smlInfo));
+            //lookupClientBuilder.locator(new StaticLocator("https://my-json-server.typicode.com"))
+            lookupClientBuilder.fetcher(new DomibusApacheFetcher(Mode.of(mode), domibusConfigurationService, proxyUtil));
+            /* DifiCertificateValidator.validate() fails when going through the proxy */
+            if(domibusConfigurationService.useProxy()) {
+                lookupClientBuilder.certificateValidator(EmptyCertificateValidator.INSTANCE);
+            }
 
-            final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(receiverId, Scheme.of(receiverIdType));
+            LookupClient smpClient = lookupClientBuilder.build();
+
+            final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(participantId, Scheme.of(participantIdScheme));
             final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
 
             final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
