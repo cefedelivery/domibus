@@ -41,39 +41,15 @@
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
 
-    <amq:queue id="pluginToBackendQueue"
-               physicalName="domibus.backend.jms.replyQueue"/>
-    <amq:queue id="businessMessageOutQueue"
-               physicalName="domibus.backend.jms.outQueue"/>
+    <amq:queue id="pluginToBackendQueue"physicalName="domibus.backend.jms.replyQueue"/>
+    <amq:queue id="businessMessageOutQueue" physicalName="domibus.backend.jms.outQueue"/>
     <amq:queue id="errorNotifyConsumerQueue" physicalName="domibus.backend.jms.errorNotifyConsumer"/>
     <amq:queue id="errorNotifyProducerQueue" physicalName="domibus.backend.jms.errorNotifyProducer"/>
 
-    <bean id="replyJmsTemplate"
-          class="org.springframework.jms.core.JmsTemplate"
-          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
-          p:defaultDestination-ref="pluginToBackendQueue"
-          p:sessionTransacted="true"
-          p:sessionAcknowledgeMode="0"/>
 
     <bean id="mshToBackendTemplate"
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
-          p:defaultDestination-ref="businessMessageOutQueue"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
-
-    <bean id="errorNotifyConsumerTemplate"
-          class="org.springframework.jms.core.JmsTemplate"
-          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
-          p:defaultDestination-ref="errorNotifyConsumerQueue"
-          p:sessionTransacted="true"
-          p:sessionAcknowledgeMode="0"/>
-
-    <bean id="errorNotifyProducerTemplate"
-          class="org.springframework.jms.core.JmsTemplate"
-          c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
-          p:defaultDestination-ref="errorNotifyProducerQueue"
-          p:sessionTransacted="true"
-          p:sessionAcknowledgeMode="0"/>
-
 </beans>

@@ -56,6 +56,10 @@ public interface JMSManager {
 
     void sendMessageToQueue(JmsMessage message, Queue destination);
 
+    void sendMapMessageToQueue(JmsMessage message, String destination);
+
+    void sendMapMessageToQueue(JmsMessage message, Queue destination);
+
     void sendMessageToTopic(JmsMessage message, Topic destination);
 
     void deleteMessages(String source, String[] messageIds);
