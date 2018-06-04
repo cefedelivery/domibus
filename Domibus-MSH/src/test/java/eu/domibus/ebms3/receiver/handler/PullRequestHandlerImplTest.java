@@ -218,7 +218,6 @@ public class PullRequestHandlerImplTest {
 
     @Test
     public void testHandlePullRequestConfigurationException(
-            @Mocked final PhaseInterceptorChain pi,
             @Mocked final LegConfiguration legConfiguration,
             @Mocked final UserMessage userMessage,
             @Mocked final PullContext pullContext) throws EbMS3Exception {
@@ -257,13 +256,15 @@ public class PullRequestHandlerImplTest {
 
     @Test
     public void testHandlePullRequestWithInvalidReceiverCertificate(
-            @Mocked final PhaseInterceptorChain pi,
-            @Mocked final Process process,
+            @Mocked final UserMessage userMessage,
             @Mocked final LegConfiguration legConfiguration,
             @Mocked final PullContext pullContext) throws EbMS3Exception {
 
         final String messageId = "whatEverID";
         new Expectations() {{
+
+            messagingDao.findUserMessageByMessageId(messageId);
+            result = userMessage;
 
             messageExchangeService.verifyReceiverCertificate(legConfiguration, pullContext.getInitiator().getName());
             result = new ChainCertificateInvalidException(DomibusCoreErrorCode.DOM_001, "invalid certificate");
@@ -272,12 +273,10 @@ public class PullRequestHandlerImplTest {
         }};
         pullRequestHandler.handleRequest(messageId, pullContext);
         new Verifications() {{
-            retryService.purgeTimedoutMessageInANewTransaction(messageId);
-            times = 1;
             messageBuilder.buildSOAPFaultMessage(withAny(new Error()));
             times = 0;
-            pullMessageService.updatePullMessageAfterRequest(null, null, legConfiguration, ReliabilityChecker.CheckResult.SEND_FAIL);
-            times = 0;
+            pullMessageService.updatePullMessageAfterRequest(userMessage, messageId, legConfiguration, ReliabilityChecker.CheckResult.ABORT);
+            times = 1;
             MessageAttempt attempt = null;
             messageAttemptService.create(withAny(attempt));
             times = 0;

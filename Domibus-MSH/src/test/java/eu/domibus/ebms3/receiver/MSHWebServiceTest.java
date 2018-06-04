@@ -300,6 +300,7 @@ public class MSHWebServiceTest {
                                                       @Mocked final UserMessage userMessage,
                                                       @Mocked final MessageExchangeConfiguration messageConfiguration,
                                                       @Injectable final PullRequestResult pullRequestResult,
+                                                      @Injectable final MessagingLock messagingLock,
                                                       @Injectable final SOAPMessage soapMessage,
                                                       @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
@@ -314,7 +315,11 @@ public class MSHWebServiceTest {
             userMessageLogDao.findByMessageId(messageId);
             result = userMessageLog;
 
-            userMessageLog.getMessageStatus();
+            pullMessageService.getLock(messageId);
+            result=messagingLock;
+
+            messagingLock.getMessageState();
+            result=MessageState.WAITING;
 
 
             messagingDao.findUserMessageByMessageId(messageId);
@@ -331,6 +336,9 @@ public class MSHWebServiceTest {
 
             reliabilityChecker.check(withAny(soapMessage), request, pModeKey, pullReceiptMatcher);
             result = ReliabilityChecker.CheckResult.OK;
+
+            pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, userMessage);
+            result=pullRequestResult;
         }};
 
         mshWebservice.handlePullRequestReceipt(request, messaging);
@@ -345,6 +353,7 @@ public class MSHWebServiceTest {
             responseHandler.handle(request);
             times = 1;
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.OK, ResponseHandler.CheckResult.WARNING, userMessageLog, legConfiguration, userMessage);
+            pullMessageService.releaseLockAfterReceipt(pullRequestResult);
         }};
 
     }
@@ -353,9 +362,8 @@ public class MSHWebServiceTest {
     public void testHandlePullRequestReceiptWithEbmsException(@Mocked final SOAPMessage request,
                                                               @Mocked final Messaging messaging,
                                                               @Mocked final UserMessage userMessage,
-                                                              @Mocked final MessageExchangeConfiguration me,
-                                                              @Injectable final SOAPMessage soapMessage,
                                                               @Injectable final PullRequestResult pullRequestResult,
+                                                              @Injectable final MessagingLock messagingLock,
                                                               @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
@@ -369,6 +377,12 @@ public class MSHWebServiceTest {
             messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
             result = messageId;
 
+            pullMessageService.getLock(messageId);
+            result=messagingLock;
+
+            messagingLock.getMessageState();
+            result=MessageState.WAITING;
+
             mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
             result = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, null);
         }};
@@ -378,8 +392,7 @@ public class MSHWebServiceTest {
         new Verifications() {{
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
             times = 1;
-
-
+            pullMessageService.releaseLockAfterReceipt(pullRequestResult); times=1;
         }};
 
     }
@@ -391,6 +404,7 @@ public class MSHWebServiceTest {
                                                                      @Mocked final MessageExchangeConfiguration me,
                                                                      @Injectable final SOAPMessage soapMessage,
                                                                      @Injectable final PullRequestResult pullRequestResult,
+                                                                     @Injectable final MessagingLock messagingLock,
                                                                      @Injectable final LegConfiguration legConfiguration) throws EbMS3Exception {
         final String messageId = "12345";
         final String pModeKey = "pmodeKey";
@@ -400,8 +414,13 @@ public class MSHWebServiceTest {
         new Expectations(mshWebservice) {{
             messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
             result = messageId;
+
             userMessageLogDao.findByMessageId(messageId);
             result = userMessageLog;
+
+            messagingLock.getMessageState();
+            result=MessageState.WAITING;
+
             mshWebservice.getSoapMessage(messageId, withAny(legConfiguration), withAny(userMessage));
             result = new ReliabilityException(DomibusCoreErrorCode.DOM_004, "test");
         }};
@@ -411,7 +430,7 @@ public class MSHWebServiceTest {
         new Verifications() {{
             pullMessageService.updatePullMessageAfterReceipt(ReliabilityChecker.CheckResult.PULL_FAILED, null, userMessageLog, legConfiguration, userMessage);
             times = 1;
-
+            pullMessageService.releaseLockAfterReceipt(pullRequestResult); times=1;
         }};
 
     }

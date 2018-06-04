@@ -46,7 +46,7 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     private static final String CURRENT_TIME = "current_time";
 
-    private static final String PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE = "pull.extra.number.of.attempt.time.for.expiration.date";
+    protected static final String PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE = "pull.extra.number.of.attempt.time.for.expiration.date";
 
     @Autowired
     private UserMessageLogService userMessageLogService;
@@ -338,7 +338,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     }
 
 
-    private boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
+    protected boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
                 && !isExpired(legConfiguration, userMessageLog)) {
