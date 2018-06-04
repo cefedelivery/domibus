@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.usermessage;
 
 import eu.domibus.ext.delegate.services.interceptor.ServiceInterceptor;
-import eu.domibus.ext.exceptions.UserMessageException;
+import eu.domibus.ext.exceptions.UserMessageExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -27,7 +27,7 @@ public class UserMessageServiceInterceptor extends ServiceInterceptor{
 
     @Override
     public Exception convertCoreException(Exception e) {
-        return new UserMessageException(e);
+        return new UserMessageExtException(e);
     }
 
     @Override

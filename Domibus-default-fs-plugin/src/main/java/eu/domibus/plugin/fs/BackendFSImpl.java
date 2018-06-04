@@ -1,8 +1,8 @@
 package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
-import eu.domibus.ext.services.DomainService;
-import eu.domibus.ext.services.MultiTenantService;
+import eu.domibus.ext.services.DomainExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -76,11 +76,11 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private FSPluginProperties fsPluginProperties;
 
     @Autowired
-    private MultiTenantService multiTenantService;
+    private DomibusConfigurationExtService domibusConfigurationExtService;
 
     @Autowired
-    private DomainService domainService;
-    
+    private DomainExtService domainExtService;
+
     private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
     /**
@@ -131,17 +131,17 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         //extract final recipient
         final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
         if (StringUtils.isBlank(finalRecipient)) {
-            throw new FSPluginException("Unable to extract finalRecipient from message " + messageId);
+            throw new FSPluginException("Unable to extract finalRecipinet from message " + messageId);
         }
         final String finalRecipientFolder = sanitizeFileName(finalRecipient);
 
         // get multiTenantAware
-        boolean multiTenantAware = multiTenantService.isMultiTenantAware();
+        boolean multiTenantAware = domibusConfigurationExtService.isMultiTenantAware();
 
         // get domain info
         String domain;
         if(multiTenantAware) {
-            domain = domainService.getDomainName();
+            domain = domainExtService.getCurrentDomain().getName();
         } else {
             domain = resolveDomain(fsMessage);
         }

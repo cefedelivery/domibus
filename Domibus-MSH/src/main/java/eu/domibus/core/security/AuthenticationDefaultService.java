@@ -42,9 +42,11 @@ public class AuthenticationDefaultService implements AuthenticationService {
     protected DomainContextProvider domainContextProvider;
 
     @Override
-    public void basicAuthenticate(String user, String password) {
+    public Authentication basicAuthenticate(String user, String password) {
+        final String domainForUser = userDomainService.getDomainForUser(user);
+        domainContextProvider.setCurrentDomain(domainForUser);
         BasicAuthentication authentication = new BasicAuthentication(user, password);
-        authenticate(authentication, null);
+        return authenticate(authentication);
     }
 
     @Override
@@ -78,11 +80,14 @@ public class AuthenticationDefaultService implements AuthenticationService {
             String basicAuthCredentials = new String(Base64.decode(basicHeaderValue.substring("Basic ".length())));
             int index = basicAuthCredentials.indexOf(":");
             String user = basicAuthCredentials.substring(0, index);
-            final String domainForUser = userDomainService.getDomainForUser(user);
-            domainContextProvider.setCurrentDomain(domainForUser);
             String password = basicAuthCredentials.substring(index + 1);
-            BasicAuthentication authentication = new BasicAuthentication(user, password);
-            authenticate(authentication, httpRequest);
+            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            Authentication authenticationResult = basicAuthenticate(user, password);
+            if(authenticationResult.isAuthenticated()) {
+                LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
+            } else {
+                LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            }
         } else if ("https".equalsIgnoreCase(httpRequest.getScheme())) {
             if (certificateAttribute == null) {
                 throw new AuthenticationException("No client certificate present in the request");
@@ -93,24 +98,33 @@ public class AuthenticationDefaultService implements AuthenticationService {
             LOG.securityInfo(DomibusMessageCode.SEC_X509CERTIFICATE_AUTHENTICATION_USE);
             final X509Certificate[] certificates = (X509Certificate[]) certificateAttribute;
             X509CertificateAuthentication authentication = new X509CertificateAuthentication(certificates);
-            authenticate(authentication, httpRequest);
+            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            Authentication authenticationResult = authenticate(authentication);
+            if(authenticationResult.isAuthenticated()) {
+                LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
+            } else {
+                LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            }
         } else if ("http".equalsIgnoreCase(httpRequest.getScheme())) {
             if (certHeaderValue == null) {
                 throw new AuthenticationException(DomibusCoreErrorCode.DOM_002, "There is no valid authentication in this request and unsecure login is not allowed.");
             }
             LOG.securityInfo(DomibusMessageCode.SEC_BLUE_COAT_AUTHENTICATION_USE);
             Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
-            authenticate(authentication, httpRequest);
+            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            Authentication authenticationResult = authenticate(authentication);
+            if(authenticationResult.isAuthenticated()) {
+                LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
+            } else {
+                LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            }
         } else {
             throw new AuthenticationException("There is no valid authentication in this request and unsecure login is not allowed.");
         }
 
     }
 
-    private void authenticate(Authentication authentication, HttpServletRequest httpRequest) throws AuthenticationException {
-        if(httpRequest != null) {
-            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
-        }
+    private Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Authentication authenticationResult;
         try {
             authenticationResult = authenticationProvider.authenticate(authentication);
@@ -119,18 +133,14 @@ public class AuthenticationDefaultService implements AuthenticationService {
         }
 
         if (authenticationResult.isAuthenticated()) {
-            if(httpRequest != null) {
-                LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
-            }
             LOG.debug("Request authenticated. Storing the authentication result in the security context");
             LOG.debug("Authentication result: " + authenticationResult);
             SecurityContextHolder.getContext().setAuthentication(authenticationResult);
             LOG.putMDC(DomibusLogger.MDC_USER, authenticationResult.getName());
         } else {
-            if(httpRequest != null) {
-                LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
-            }
             throw new AuthenticationException("The certificate is not valid or is not present or the basic authentication credentials are invalid");
         }
+
+        return authenticationResult;
     }
 }
