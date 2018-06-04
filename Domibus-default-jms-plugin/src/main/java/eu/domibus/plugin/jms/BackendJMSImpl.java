@@ -19,10 +19,8 @@ import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -45,7 +43,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     protected static final String JMSPLUGIN_QUEUE_REPLY = "jmsplugin.queue.reply";
     protected static final String JMSPLUGIN_QUEUE_CONSUMER_NOTIFICATION_ERROR = "jmsplugin.queue.consumer.notification.error";
     protected static final String JMSPLUGIN_QUEUE_PRODUCER_NOTIFICATION_ERROR = "jmsplugin.queue.producer.notification.error";
-    protected static final String JMSPLUGIN_QUEUE_OUT = "jmsplugin.queue.producer.notification.error";
+    protected static final String JMSPLUGIN_QUEUE_OUT = "jmsplugin.queue.out";
 
 
     @Autowired
@@ -91,9 +89,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      *
      * @param map The incoming JMS Message
      */
-    @JmsListener(destination = "${jmsplugin.queue.in}", containerFactory = "backendJmsListenerContainerFactory")
-    //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);

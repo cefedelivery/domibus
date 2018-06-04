@@ -18,8 +18,9 @@
     <context:annotation-config/>
 
     <util:properties id="domibusProperties" ignore-resource-not-found="true"
-                     location="classpath:config/application.properties,classpath:config/domibus-default.properties,classpath:config/domibus.properties,
-                     file:///${domibus.config.location}/domibus.properties,file:///${domibus.config.location}/*-domibus.properties,
+                     location="classpath:config/application.properties,
+                     classpath:config/domibus-default.properties,classpath:config/domibus.properties, file:///${domibus.config.location}/domibus.properties,
+                     file:///${domibus.config.location}/*-domibus.properties,
                      classpath*:config/*-plugin-default.properties,file:///${domibus.config.location}/plugins/config/*-plugin.properties"/>
 
     <context:property-placeholder properties-ref="domibusProperties" ignore-resource-not-found="true" ignore-unresolvable="true"/>
