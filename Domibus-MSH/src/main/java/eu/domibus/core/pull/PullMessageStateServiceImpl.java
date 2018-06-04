@@ -1,7 +1,6 @@
 package eu.domibus.core.pull;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
@@ -33,12 +32,6 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
-    @Autowired
-    private MessagingLockDao messagingLockDao;
-
-    @Autowired
-    private MessagingDao messagingDao;
-
     /**
      * {@inheritDoc}
      */
@@ -58,7 +51,6 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Transactional
     public void sendFailed(UserMessageLog userMessageLog) {
         LOG.debug("Message:[{}] failed to be pull.", userMessageLog.getMessageId());
-        // userMessageLog.setNextAttempt(null);
         updateRetryLoggingService.messageFailed(userMessageLog);
     }
 

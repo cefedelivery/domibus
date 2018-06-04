@@ -31,7 +31,6 @@ public interface PullMessageService {
      */
     void addPullMessageLock(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog);
 
-
     /**
      * When a message has been successfully delivered or marked a failed, its lock counter part item should be removed from
      * the  locking system.

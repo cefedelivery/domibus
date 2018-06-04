@@ -93,7 +93,7 @@ public class PullMessageServiceImpl implements PullMessageService {
 
         final MessagingLock lock = getLock(messageId);
         if (lock == null || MessageState.PROCESS != lock.getMessageState()) {
-            LOG.warn("Message[] could not acquire lock when updating status", messageId);
+            LOG.warn("Message[] could not acquire lock when updating status, it has been handled by another process.", messageId);
             return;
         }
 
@@ -111,6 +111,9 @@ public class PullMessageServiceImpl implements PullMessageService {
                 break;
             case ABORT:
                 pullMessageStateService.sendFailed(userMessageLog);
+                lock.setNextAttempt(null);
+                lock.setMessageState(MessageState.DEL);
+                messagingLockDao.save(lock);
                 break;
             default:
                 throw new IllegalStateException(String.format("Status:[%s] should never occur here", state.name()));
@@ -145,14 +148,10 @@ public class PullMessageServiceImpl implements PullMessageService {
                     default:
                         assert false;
                 }
-                // final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(messageId);
                 backendNotificationService.notifyOfSendSuccess(messageId);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId);
                 messagingDao.clearPayloadData(messageId);
                 userMessageLog.setMessageStatus(MessageStatus.ACKNOWLEDGED);
-             /*   lock.setNextAttempt(null);
-                lock.setMessageState(MessageState.ACK);
-                messagingLockDao.delete(lock);*/
                 return new PullRequestResult(userMessageLog);
             case PULL_FAILED:
                 return pullFailedOnReceipt(legConfiguration, userMessageLog);
@@ -339,8 +338,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     }
 
 
-    private boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog,
-                                                                   final LegConfiguration legConfiguration) {
+    private boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
                 && !isExpired(legConfiguration, userMessageLog)) {

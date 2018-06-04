@@ -12,8 +12,6 @@ public interface MessagingLockDao {
 
     PullMessageId getNextPullMessageToProcess(Integer messageId);
 
-    /*void releaseLock(MessagingLock messagingLock);*/
-
     MessagingLock getLock(String messageId);
 
     void save(MessagingLock messagingLock);
@@ -26,12 +24,10 @@ public interface MessagingLockDao {
 
     List<MessagingLock> findStaledMessages();
 
-
     List<MessagingLock> findDeletedMessages();
 
     List<MessagingLock> findReadyToPull(String mpc, String initiator);
 
     List<MessagingLock> findWaitingForReceipt();
 
-    MessagingLock getMessagingLock(Integer id);
 }

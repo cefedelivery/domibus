@@ -39,6 +39,10 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final String IDPK = "idpk";
 
+    private static final String MPC = "MPC";
+
+    private static final String INITIATOR = "INITIATOR";
+
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
@@ -131,7 +135,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         }
     }
 
-
     @Override
     public void save(final MessagingLock messagingLock) {
         entityManager.persist(messagingLock);
@@ -143,7 +146,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         query.setParameter(MESSAGE_ID, messageId);
         query.executeUpdate();
     }
-
 
     @Override
     public void delete(final MessagingLock messagingLock) {
@@ -173,15 +175,14 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
         return query.getResultList();
     }
 
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<MessagingLock> findReadyToPull(final String mpc, final String initiator) {
         final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findReadyToPull", MessagingLock.class);
         namedQuery.setFirstResult(0);
         namedQuery.setMaxResults(50);
-        namedQuery.setParameter("MPC", mpc);
-        namedQuery.setParameter("INITIATOR", initiator);
+        namedQuery.setParameter(MPC, mpc);
+        namedQuery.setParameter(INITIATOR, initiator);
         return namedQuery.getResultList();
     }
 
@@ -189,11 +190,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     public List<MessagingLock> findWaitingForReceipt() {
         final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findWaitingForReceipt", MessagingLock.class);
         return namedQuery.getResultList();
-    }
-
-    @Override
-    public MessagingLock getMessagingLock(Integer id) {
-        return entityManager.find(MessagingLock.class, id);
     }
 
     private Timestamp getTimestamp(Object object) {
