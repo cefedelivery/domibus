@@ -103,32 +103,3 @@ Purge mechanisme
 	change status to send_failure.
 	delete raw_reccord
 	notify??
-
-
-
-Implement mysql/oracle switch OK
-Merge 3.3.4 OK
-Do code review OK.
-Test on oracle. OK.
-correct and write unit test.
-
-
-
-
-Test:
-
-Happy flow Ok mysql Ora ok
-With no receipt retry in pull mechanism OK mysql.
-With no receipt retry with retry service. Increase the pull time above the next send attempt. Ora ok
-With attempt staled. mysql OK ora ok.
-Without reception awareness. Bug not possible to load the pmode without receptionAwareness
-Test purge.
-Resend. Ok oracle.
-Under charge. OK mysql
-Test retry on pull failed. Oracle OK
-Test retry with more attempt and without attempt.
-Check the notifications for the retry/purge/retry at pull moment.
-
-create a ticket to explain the unique constraint execption due to acknowledgement send in the same transaction.
-
-

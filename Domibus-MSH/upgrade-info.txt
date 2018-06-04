@@ -5,22 +5,6 @@ Domibus 3.3.4 (from 3.3.3):
                             domibus.internal.queue.concurency=3-10
                             domibus.pull.request.send.per.job.cycle=1 (Optional default value to 1)
                             domibus.internal.queue.concurency=3-10
-                 - [Mysql only]
-                        - [Tomcat] Please add the following parameters at the end of the domibus.datasource.xa.property.url property in the file"/conf/domibus/domibus.properties"
-                             &sessionVariables=innodb_lock_wait_timeout=1
-                             EG:jdbc:mysql://localhost:3306/domibus?pinGlobalTxToPhysicalConnection=true&sessionVariables=innodb_lock_wait_timeout=1
-                        - [WebLogic] Please edit eDeliveryDs datasource URL via the WebLogic console and add the following string at the end:
-                             sessionVariables=innodb_lock_wait_timeout=1
-                             EG:jdbc:mysql://localhost:3306/domibus?sessionVariables=innodb_lock_wait_timeout=1
-                        - [Wildfly] Please modify standalone-full.xml and edit the property DatabaseName of the datasource eDeliveryMysqlXADS. Add the following string after the value:
-                             ?sessionVariables=innodb_lock_wait_timeout=1
-                             EG:  <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryMysqlXADS" enabled="true" use-ccm="true">
-                                                 .......
-                                                 <xa-datasource-property name="DatabaseName">
-                                                     domibus?sessionVariables=innodb_lock_wait_timeout=1
-                                                 </xa-datasource-property>
-                                                 .......
-                                             </xa-datasource>
                  - If used, rename the following properties ("." was removed between dynamic and discovery):
                         domibus.dynamic.discovery.client.specification rename to domibus.dynamicdiscovery.client.specification
                         domibus.dynamic.discovery.peppolclient.mode rename to domibus.dynamicdiscovery.peppolclient.mode
