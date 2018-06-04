@@ -10,6 +10,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 
 @RunWith(JMockit.class)
@@ -30,6 +33,27 @@ public class DomibusLoggerDomainFilterTest {
 
                 iLoggingEvent.getMDCPropertyMap();
                 result = null;
+
+            }};
+
+        //tested method
+        Assert.assertEquals(FilterReply.DENY, domibusLoggerDomainFilter.decide(iLoggingEvent));
+    }
+
+    @Test
+    public void testDecide_DomainPresent_FilterDeny(final @Mocked ILoggingEvent iLoggingEvent) {
+        Map<String, String> mdcMap = new HashMap<>();
+        mdcMap.put(DomibusLoggerDomainFilter.MDC_DOMAIN_KEY, "taxud");
+
+        new Expectations() {
+            {
+                domibusLoggerDomainFilter.setDomainName("default");
+                domibusLoggerDomainFilter.setMarkerName("BUSINESS,SECURITY");
+                domibusLoggerDomainFilter.setMarkerMatch("NEUTRAL");
+                domibusLoggerDomainFilter.setMarkerMismatch("DENY");
+
+                iLoggingEvent.getMDCPropertyMap();
+                result = mdcMap;
 
             }};
 
