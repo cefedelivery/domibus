@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.api.security.ChainCertificateInvalidException;
@@ -10,7 +11,6 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -67,7 +67,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
 
-    static final String DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE = "domibus.pull.request.send.per.job.cycle";
+    protected static final String DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE = "domibus.pull.request.send.per.job.cycle";
+
+    private static final String PULL = "pull";
 
     @Autowired
     private MessagingDao messagingDao;
@@ -106,7 +108,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private PullMessageService pullMessageService;
 
     @Autowired
-    private UserMessageLogDao userMessageLogDao;
+    private JMSManager jmsManager;
 
     /**
      * {@inheritDoc}
@@ -153,7 +155,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
-        LOG.debug("Initiating pull requests:");
+        LOG.trace("Initiating pull requests:");
+        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+        if (pause(pullProcesses, numberOfPullRequestPerMpc)) {
+            return;
+        }
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
@@ -186,7 +192,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                             }
                         };
 
-                        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
                             jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
@@ -201,6 +207,29 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     }
 
+    private boolean pause(List<Process> pullProcesses, int numberOfPullRequestPerMpc) {
+        LOG.trace("Checking if the system should pause the pulling mechanism.");
+        int numberOfPullMpc = 0;
+        final long queueMessageNumber = jmsManager.getDestinationSize(PULL);
+        for (Process pullProcess : pullProcesses) {
+            try {
+                processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
+                numberOfPullMpc++;
+            } catch (PModeException e) {
+                LOG.warn("Invalid pull process configuration found during pull try " + e.getMessage());
+            }
+        }
+
+        final int pullRequestsToSendCount = numberOfPullMpc * numberOfPullRequestPerMpc;
+        final boolean shouldPause = queueMessageNumber > pullRequestsToSendCount;
+        if (shouldPause) {
+            LOG.debug("[PULL]:Size of the pulling queue:[{}] is higher then the number of pull requests to send:[{}]. Pause adding to the queue so the system can consume the requests.", queueMessageNumber, pullRequestsToSendCount);
+        } else {
+            LOG.trace("[PULL]:Size of the pulling queue:[{}], the number of pull requests to send:[{}].", queueMessageNumber, pullRequestsToSendCount);
+        }
+        return shouldPause;
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
@@ -210,11 +239,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = pullMessageService.getPullMessageId(partyId, mpc);
-        if (pullMessageId == null) {
-            return null;
-        }
-        return pullMessageId;
+        return pullMessageService.getPullMessageId(partyId, mpc);
     }
 
     /**

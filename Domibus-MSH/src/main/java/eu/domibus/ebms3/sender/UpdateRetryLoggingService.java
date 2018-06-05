@@ -96,6 +96,10 @@ public class UpdateRetryLoggingService {
     public void increaseAttempAndNotify(LegConfiguration legConfiguration, MessageStatus messageStatus, MessageLog userMessageLog) {
         LOG.debug("Updating send attempts to [{}]", userMessageLog.getSendAttempts());
         updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+        saveAndNotify(messageStatus, userMessageLog);
+    }
+
+    public void saveAndNotify(MessageStatus messageStatus, MessageLog userMessageLog) {
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, messageStatus, new Timestamp(System.currentTimeMillis()));
         userMessageLog.setMessageStatus(messageStatus);
         LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());

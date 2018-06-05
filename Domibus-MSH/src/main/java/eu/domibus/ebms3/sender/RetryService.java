@@ -13,7 +13,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
-import eu.domibus.core.pull.PullMessageStateService;
+import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -36,9 +36,13 @@ import java.util.Properties;
  */
 @Service
 public class RetryService {
+
     public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
+
     private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
+
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
+
     @Autowired
     private BackendNotificationService backendNotificationService;
 
@@ -70,17 +74,13 @@ public class RetryService {
     private PullMessageService pullMessageService;
 
     @Autowired
-    private PullMessageStateService pullMessageStateService;
-
-    @Autowired
     private JMSManager jmsManager;
-
-    @Autowired
-    private MessagingLockDao messagingLockDao;
 
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Autowired
+    private MessagingLockDao messagingLockDao;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
@@ -88,7 +88,7 @@ public class RetryService {
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
-        LOG.debug(messageIdsToPurge.size() + " messages to purge found");
+        LOG.trace(messageIdsToPurge.size() + " messages to purge found");
 
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
@@ -125,16 +125,6 @@ public class RetryService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void purgePullMessage() {
-        List<String> timedoutPullMessages = userMessageLogDao.findTimedOutPullMessages(Integer.parseInt(domibusProperties.getProperty(RetryService.TIMEOUT_TOLERANCE)));
-        for (final String timedoutPullMessage : timedoutPullMessages) {
-            pullMessageService.deletePullMessageLock(timedoutPullMessage);
-            rawEnvelopeLogDao.deleteUserMessageRawEnvelope(timedoutPullMessage);
-            purgeTimedoutMessage(timedoutPullMessage);
-        }
-    }
-
 
     /**
      * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
@@ -166,9 +156,45 @@ public class RetryService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void purgeTimedoutMessageInANewTransaction(final String messageIdToPurge) {
-        pullMessageService.deletePullMessageLock(messageIdToPurge);
         rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageIdToPurge);
         purgeTimedoutMessage(messageIdToPurge);
     }
+
+    /**
+     * Method call by job to reset waiting_for_receipt messages into ready to pull.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void resetWaitingForReceiptPullMessages() {
+        final List<MessagingLock> messagesToReset = messagingLockDao.findWaitingForReceipt();
+        for (MessagingLock messagingLock : messagesToReset) {
+            pullMessageService.resetMessageInWaitingForReceiptState(messagingLock.getMessageId());
+        }
+    }
+
+
+    /**
+     * Method call by job to to expire messages that could not be delivered in the configured time range..
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void bulkExpirePullMessages() {
+        final List<MessagingLock> expiredMessages = messagingLockDao.findStaledMessages();
+        LOG.trace("Delete expired pull message");
+        for (MessagingLock staledMessage : expiredMessages) {
+            pullMessageService.expireMessage(staledMessage.getMessageId());
+        }
+    }
+
+    /**
+     * Method call by job to to delete messages marked as failed.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void bulkDeletePullMessages() {
+        final List<MessagingLock> deletedLocks = messagingLockDao.findDeletedMessages();
+        LOG.trace("Delete unecessary locks");
+        for (MessagingLock deletedLock : deletedLocks) {
+            pullMessageService.deleteInNewTransaction(deletedLock.getMessageId());
+        }
+    }
+
 
 }

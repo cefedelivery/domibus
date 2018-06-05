@@ -3,6 +3,7 @@ package eu.domibus.core.pull;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -41,7 +42,6 @@ public interface PullMessageService {
     /**
      * Manage the status of the pull message after the pull request has occured.
      * It handles happyflow and failure.
-     *
      * @param userMessage      the userMessage that has been pulled.
      * @param messageId        the id of the message.
      * @param legConfiguration contains the context of the configured message exchange.
@@ -54,22 +54,54 @@ public interface PullMessageService {
 
     /**
      * Manage the status of the pull message when the receipt arrives..
-     *
      * @param reliabilityCheckSuccessful the state of the reality chek process.
      * @param isOk
      * @param userMessageLog             the message log.
      * @param legConfiguration           contains the context of the configured message exchange.
+     * @param userMessage
      */
-    void updatePullMessageAfterReceipt(
+    PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
             ResponseHandler.CheckResult isOk,
             UserMessageLog userMessageLog,
-            LegConfiguration legConfiguration
-    );
+            LegConfiguration legConfiguration,
+            UserMessage userMessage);
 
     /**
-     * Retrieve waiting for receipt message for which next attempt date is passed.
-     * Either put them back in ready to pull or send failure.
+     *Acquire a lock given a messageid.
+     * @param messageId
+     * @return the lock entity.
      */
-    void resetWaitingForReceiptPullMessages();
+    MessagingLock getLock(String messageId);
+
+    /**
+     * Delete a lock in a new transaction..
+     *
+     * @param messageId the id of the lock to delete.
+     */
+    void deleteInNewTransaction(String messageId);
+
+    /**
+     * Delete a lock.
+     * @param messagingLock the enity to delete.
+     */
+    void delete(MessagingLock messagingLock);
+
+    /**
+     * Given a message id, set the message in waiting for receipt state into ready to pull.
+     * @param messageId the message id.
+     */
+    void resetMessageInWaitingForReceiptState(String messageId);
+
+    /**
+     * Handle message expiration when expiration date is reached.
+     * @param messageId the message id.
+     */
+    void expireMessage(String messageId);
+
+    /**
+     * Handles the lock in regards of message receipt status.
+     * @param requestResult
+     */
+    void releaseLockAfterReceipt(PullRequestResult requestResult);
 }

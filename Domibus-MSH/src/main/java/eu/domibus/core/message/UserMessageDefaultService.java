@@ -149,6 +149,7 @@ public class UserMessageDefaultService implements UserMessageService {
             scheduleSending(messageId);
         } else {
             final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            LOG.debug("[restoreFailedMessage]:Message:[{}] add lock", userMessageLog.getMessageId());
             pullMessageService.addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
         }
     }

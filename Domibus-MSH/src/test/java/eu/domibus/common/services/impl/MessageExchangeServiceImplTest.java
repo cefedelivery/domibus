@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -71,6 +72,9 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private java.util.Properties domibusProperties;
+
+    @Mock
+    private JMSManager jmsManager;
 
     @Spy
     private ProcessValidator processValidator;
@@ -146,6 +150,7 @@ public class MessageExchangeServiceImplTest {
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
         when(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE,"1")).thenReturn("10");
+        when(jmsManager.getDestinationSize("pull")).thenReturn(0l);
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();

@@ -40,7 +40,7 @@ public class SendRetryWorker extends QuartzJobBean {
     @Override
     protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
 
-        if(!authUtils.isUnsecureLoginAllowed()) {
+        if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("retry_user", "retry_password");
         }
 
@@ -49,24 +49,25 @@ public class SendRetryWorker extends QuartzJobBean {
         } catch (Exception e) {
             LOG.error("Error while eqnueing messages.", e);
         }
-
         try {
-            pullMessageService.resetWaitingForReceiptPullMessages();
-        } catch (Exception e) {
-            LOG.error("Error while reseting waiting for receipt.", e);
-        }
-
-        try {
-            pullMessageStateService.bulkExpirePullMessages();
+            retryService.bulkExpirePullMessages();
         } catch (Exception e) {
             LOG.error("Error while bulk expiring pull messages.", e);
         }
 
         try {
-            retryService.purgePullMessage();
+            retryService.resetWaitingForReceiptPullMessages();
         } catch (Exception e) {
-            LOG.error("Error while purging pull messages.", e);
+            LOG.error("Error while reseting waiting for receipt.", e);
         }
+
+        try {
+            retryService.bulkDeletePullMessages();
+        } catch (Exception e) {
+            LOG.error("Error while bulk deleting messages.", e);
+        }
+
+
     }
 
 

@@ -303,6 +303,7 @@ public class DatabaseMessageHandler implements MessageSubmitter<Submission>, Mes
             }
             else{
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 

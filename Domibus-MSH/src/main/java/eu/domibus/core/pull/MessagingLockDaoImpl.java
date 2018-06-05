@@ -2,12 +2,12 @@ package eu.domibus.core.pull;
 
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -18,7 +18,6 @@ import javax.persistence.*;
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +37,17 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     private static final String MESSAGE_ID = "MESSAGE_ID";
 
-    protected static final String ID_PK = "idPk";
+    protected static final String IDPK = "idpk";
+
+    private static final String MPC = "MPC";
+
+    private static final String INITIATOR = "INITIATOR";
+
+    protected static final String MESSAGE_STATE = "MESSAGE_STATE";
+
+    private final static String lockByIdQuery="SELECT MESSAGE_ID,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX, MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=:idpk FOR UPDATE";
+
+    private final static String lockByMessageIdQuery="SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE";
 
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
@@ -48,21 +57,6 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
-    private final static Map<DataBaseEngine, String> selectAndLockQueriesForPulling = new HashMap<>();
-
-    private final static Map<DataBaseEngine, String> selectAndLockQueriesForClearing = new HashMap<>();
-
-    static {
-        selectAndLockQueriesForPulling.put(DataBaseEngine.MYSQL, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForPulling.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForPulling.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
-
-        selectAndLockQueriesForClearing.put(DataBaseEngine.MYSQL, "DELETE FROM TB_MESSAGING_LOCK ml.MESSAGE_STALED>");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.H2, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE");
-        selectAndLockQueriesForClearing.put(DataBaseEngine.ORACLE, "SELECT ml.MESSAGE_ID,ml.MESSAGE_STALED,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX  FROM TB_MESSAGING_LOCK ml where ml.ID_PK=:idPk FOR UPDATE NOWAIT");
-    }
-
-
     @Autowired
     @Qualifier("domibusJDBC-XADataSource")
     public void setDataSource(DataSource dataSource) {
@@ -71,54 +65,65 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public PullMessageId getNextPullMessageToProcess(final Long idPk) {
-        final Map<String, Long> params = new HashMap<>();
-        params.put(ID_PK, idPk);
+    public PullMessageId getNextPullMessageToProcess(final Integer idPk) {
+        Map<String, Object> params = new HashMap<>();
         try {
-            final String databaseSpecificQuery = selectAndLockQueriesForPulling.get(domibusConfigurationService.getDataBaseEngine());
-            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(databaseSpecificQuery, params);
-            while (sqlRowSet.next()) {
-                final String messageId = sqlRowSet.getString(1);
-                final Timestamp messageStaled = getTimestamp(sqlRowSet.getObject(2));
-                final int sendAttempts = sqlRowSet.getInt(3);
-                final int sendAttemptsMax = sqlRowSet.getInt(4);
-                jdbcTemplate.update("DELETE FROM TB_MESSAGING_LOCK WHERE ID_PK=:idPk", params);
-                if (messageStaled.compareTo(new Date(System.currentTimeMillis())) < 0) {
-                    return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
-                }
-                if (sendAttempts >= sendAttemptsMax) {
-                    return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
-                }
-                if (sendAttempts > 0) {
-                    return new PullMessageId(messageId, RETRY);
-                }
-                return new PullMessageId(messageId);
+            params.put(IDPK, idPk);
+            final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(lockByIdQuery, params);
+            final boolean next = sqlRowSet.next();
+            if (!next) {
+                LOG.debug("[getNextPullMessageToProcess]:id[{}] already locked", idPk);
+                return null;
             }
-        } catch (CannotAcquireLockException ex) {
-            LOG.trace("MessagingLock:[{}] could not be locked.", ex, idPk);
+            LOG.debug("[getNextPullMessageToProcess]:id[{}] locked", idPk);
+
+            final String messageId = sqlRowSet.getString(1);
+            final int sendAttempts = sqlRowSet.getInt(2);
+            final int sendAttemptsMax = sqlRowSet.getInt(3);
+            final Timestamp messageStaled = getTimestamp(sqlRowSet.getObject(4));
+
+            final String updateSql = "UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk";
+            final Timestamp currentDate = new Timestamp(System.currentTimeMillis());
+            LOG.debug("expiration date[{}], current date[{}] ", messageStaled, currentDate);
+            if (messageStaled.compareTo(currentDate) < 0) {
+                params.put(MESSAGE_STATE, MessageState.DEL.name());
+                jdbcTemplate.update(updateSql, params);
+                return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
+            }
+            LOG.debug("sendattempts[{}], sendattemptsmax[{}]", sendAttempts, sendAttemptsMax);
+            if (sendAttempts >= sendAttemptsMax) {
+                params.put(MESSAGE_STATE, MessageState.DEL.name());
+                jdbcTemplate.update(updateSql, params);
+                return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
+            }
+            if (sendAttempts >= 0) {
+                params.put(MESSAGE_STATE, MessageState.PROCESS.name());
+                jdbcTemplate.update(updateSql, params);
+            }
+            if (sendAttempts > 0) {
+                return new PullMessageId(messageId, RETRY);
+            }
+            return new PullMessageId(messageId);
+        } catch (Exception e) {
+            LOG.error("MessageLock[{}] lock could not be acquired", idPk, e);
+            return null;
         }
-        return null;
+
+
     }
 
-    //this method is needed because the oracle jdbc driver does return an oracle.sql.TIMESTAMP which guess what...
-    //does not extends java.sql.Timestamp.
-    private Timestamp getTimestamp(Object object) {
-        final String className = object.getClass().getName();
-
-        if (DataBaseEngine.ORACLE == domibusConfigurationService.getDataBaseEngine()) {
-            if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
-                try {
-                    final Method timestampValueMethod = object.getClass().getMethod("timestampValue");
-                    return (Timestamp) timestampValueMethod.invoke(object);
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    LOG.error("Impossible to retrieve oracle timestamp");
-                    throw new IllegalStateException("Impossible to retrieve oracle timestamp");
-                }
-            }
+    public MessagingLock getLock(final String messageId) {
+        try {
+            LOG.debug("Message[{}] Getting lock", messageId);
+            Query q = entityManager.createNativeQuery(lockByMessageIdQuery, MessagingLock.class);
+            q.setParameter(1, messageId);
+            MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
+            return messagingLock;
+        } catch (Exception ex) {
+            LOG.warn("Message:[{}] lock could not be acquire. It is probably handled by another process.", messageId, ex);
+            return null;
         }
-        return (Timestamp) object;
     }
-
 
     @Override
     public void save(final MessagingLock messagingLock) {
@@ -152,6 +157,46 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
     public List<MessagingLock> findStaledMessages() {
         TypedQuery<MessagingLock> query = entityManager.createNamedQuery("MessagingLock.findStalledMessages", MessagingLock.class);
         return query.getResultList();
+    }
+
+    @Override
+    public List<MessagingLock> findDeletedMessages() {
+        TypedQuery<MessagingLock> query = entityManager.createNamedQuery("MessagingLock.findDeletedMessages", MessagingLock.class);
+        return query.getResultList();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<MessagingLock> findReadyToPull(final String mpc, final String initiator) {
+        final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findReadyToPull", MessagingLock.class);
+        namedQuery.setFirstResult(0);
+        namedQuery.setMaxResults(50);
+        namedQuery.setParameter(MPC, mpc);
+        namedQuery.setParameter(INITIATOR, initiator);
+        return namedQuery.getResultList();
+    }
+
+    @Override
+    public List<MessagingLock> findWaitingForReceipt() {
+        final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findWaitingForReceipt", MessagingLock.class);
+        return namedQuery.getResultList();
+    }
+
+    private Timestamp getTimestamp(Object object) {
+        final String className = object.getClass().getName();
+
+        if (DataBaseEngine.ORACLE == domibusConfigurationService.getDataBaseEngine()) {
+            if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
+                try {
+                    final Method timestampValueMethod = object.getClass().getMethod("timestampValue");
+                    return (Timestamp) timestampValueMethod.invoke(object);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    LOG.error("Impossible to retrieve oracle timestamp");
+                    throw new IllegalStateException("Impossible to retrieve oracle timestamp");
+                }
+            }
+        }
+        return (Timestamp) object;
     }
 
 }
