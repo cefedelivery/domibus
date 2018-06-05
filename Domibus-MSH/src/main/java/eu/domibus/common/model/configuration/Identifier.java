@@ -83,6 +83,7 @@ public class Identifier extends AbstractBaseEntity {
      */
     public void setPartyIdType(final PartyIdType value) {
         this.partyIdType = value;
+        this.partyIdTypeXml = value == null ? null : value.name;
     }
 
     public void init(final Configuration configuration) {

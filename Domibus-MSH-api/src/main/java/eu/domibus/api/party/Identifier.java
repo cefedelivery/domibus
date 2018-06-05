@@ -25,4 +25,10 @@ public class Identifier {
     public void setPartyIdType(PartyIdType partyIdType) {
         this.partyIdType = partyIdType;
     }
+
+    @Override
+    public String toString() {
+        return "Identifier{" + "partyId=" + partyId + ", partyIdType=" + partyIdType + '}';
+    }
+
 }

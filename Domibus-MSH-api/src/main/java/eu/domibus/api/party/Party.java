@@ -61,19 +61,27 @@ public class Party {
     public List<Process> getProcessesWithPartyAsInitiator() {
         return processesWithPartyAsInitiator;
     }
-
+    
+    public void setProcessesWithPartyAsInitiator(List<Process> processesWithPartyAsInitiator) {
+        this.processesWithPartyAsInitiator = processesWithPartyAsInitiator;
+    }
+    
     public void addProcessesWithPartyAsInitiator(Process process) {
         this.processesWithPartyAsInitiator.add(process);
     }
-
+    
     public List<Process> getProcessesWithPartyAsResponder() {
         return processesWithPartyAsResponder;
     }
 
-    public void addprocessesWithPartyAsResponder(Process process) {
-        this.processesWithPartyAsResponder.add(process);
+    public void setProcessesWithPartyAsResponder(List<Process> processesWithPartyAsResponder) {
+        this.processesWithPartyAsResponder = processesWithPartyAsResponder;
     }
 
+    public void addprocessesWithPartyAsResponder(Process process) {
+        this.processesWithPartyAsResponder.add(process);
+    }    
+    
     @Override
     public String toString() {
         return "Party{" +

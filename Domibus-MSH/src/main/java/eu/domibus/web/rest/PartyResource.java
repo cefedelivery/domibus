@@ -158,6 +158,10 @@ public class PartyResource {
         }
 
         List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Updating partyList [{}]", Arrays.toString(partyList.toArray()));
+        }
+
         partyService.updateParties(partyList);
     }
 

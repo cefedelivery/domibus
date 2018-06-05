@@ -2,12 +2,12 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.dao.PartyDao;
-import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.common.model.configuration.ConfigurationRaw;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -258,13 +258,79 @@ public class PartyServiceImpl implements PartyService {
                 pModeProvider.findAllProcesses().
                         stream().
                         collect(collectingAndThen(toList(), ImmutableList::copyOf));
-
+//
+//        List<eu.domibus.common.model.configuration.Party> list = new ArrayList<>(partyList.size());
+//        for (Party party : partyList) {
+//            eu.domibus.common.model.configuration.Party p = domainCoreConverter.convert(party, eu.domibus.common.model.configuration.Party.class);
+//            list.add(p);
+//
+//            for (Identifier identifier : party.getIdentifiers()) {
+////                eu.domibus.common.model.configuration.Identifier i = domainCoreConverter.convert(identifier, eu.domibus.common.model.configuration.Identifier.class);
+////                i.setPartyIdType(new PartyIdType());
+////                p.getIdentifiers().add(i);
+//            }
+//        }
+        //List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
+        //Set<eu.domibus.common.model.configuration.Party> partySet = new HashSet<>(list);
 
         List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
-        Set<eu.domibus.common.model.configuration.Party> partySet = new HashSet<>(list);
-
-        configuration.getBusinessProcesses().setParties(partySet);
-
+//   
+        BusinessProcesses bp = configuration.getBusinessProcesses();
+        Parties parties = bp.getPartiesXml();
+        parties.getParty().clear();
+        parties.getParty().addAll(list); 
+        
+        PartyIdTypes partyIdTypes = bp.getPartiesXml().getPartyIdTypes(); 
+        list.forEach(party -> {
+            party.getIdentifiers().forEach(identifier -> {
+                if (!partyIdTypes.getPartyIdType().contains(identifier.getPartyIdType())) {
+                    partyIdTypes.getPartyIdType().add(identifier.getPartyIdType());
+                }
+            });
+        }); 
+        
+        List<Process> processes = bp.getProcesses();
+        processes.forEach(process -> {
+            // sync <initiatorParties> and <responderParties>
+            Set<String> iParties = partyList.stream()
+                    .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
+                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                    .map(p -> p.getName())
+                    .collect(Collectors.toSet());
+            
+            if (process.getInitiatorPartiesXml() == null)
+                process.setInitiatorPartiesXml(new InitiatorParties());
+            List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
+            ip.removeIf(x -> !iParties.contains(x.getName()));
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name.equals(x.getName())))
+                    .map(name -> {
+                        InitiatorParty y = new InitiatorParty();
+                        y.setName(name);
+                        return y;
+                    }).collect(Collectors.toSet()));
+            if (ip.isEmpty())
+                process.setInitiatorPartiesXml(null);
+            
+            
+            Set<String> rParties = partyList.stream()
+                    .filter(p -> p.getProcessesWithPartyAsResponder().stream()
+                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                    .map(p -> p.getName())
+                    .collect(Collectors.toSet());
+             
+            if (process.getResponderPartiesXml() == null)
+                process.setResponderPartiesXml(new ResponderParties());
+            List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
+            rp.removeIf(x -> !rParties.contains(x.getName()));
+            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equals(x.getName())))
+                    .map(name -> {
+                        ResponderParty y = new ResponderParty();
+                        y.setName(name);
+                        return y;
+                    }).collect(Collectors.toSet()));
+            if (rp.isEmpty())
+                process.setResponderPartiesXml(null);
+        });
     }
 
     public void updateParties(List<Party> partyList) {
@@ -285,21 +351,17 @@ public class PartyServiceImpl implements PartyService {
 
         updateParties(partyList, configuration);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        String updatedDescription = "Updated parties to version of " + confDate.format(formatter);
+
         byte[] updatedPmode;
         try {
             updatedPmode = pModeProvider.serializePModeConfiguration(configuration);
-            pModeProvider.updatePModes(updatedPmode, rawConfiguration.getDescription());
+            pModeProvider.updatePModes(updatedPmode, updatedDescription);
         } catch (XmlProcessingException e) {
             LOG.error("Error writing current PMode", e);
             throw new IllegalStateException(e);
         }
-
-        rawConfiguration.setEntityId(0);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
-        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
-        rawConfiguration.setDescription("Updated parties to version of " + confDate.format(formatter));
-
-        rawConfiguration.setConfigurationDate(new Date());
     }
 }
