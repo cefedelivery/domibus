@@ -16,11 +16,10 @@ public interface UserService{
      */
     List<eu.domibus.api.user.User> findUsers();
 
-    /**
-     * create or update users of the system (edited in the user management gui console).
-     * @param users to create of update.
-     */
-    void saveUsers(List<eu.domibus.api.user.User> users);
+//    /**
+//     * @return the list of users, including super users.
+//     */
+//    List<eu.domibus.api.user.User> findAllUsers();
 
     /**
      * get all user roles
@@ -28,10 +27,11 @@ public interface UserService{
     List<eu.domibus.api.user.UserRole> findUserRoles();
 
     /**
-     * update users
+     * create or update users of the system (edited in the user management gui console).
+     * @param users to create of update.
      */
     void updateUsers(List<User> users);
-
+     
     /**
      * Handle the account lockout policy.
      * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
@@ -48,12 +48,6 @@ public interface UserService{
      */
     void findAndReactivateSuspendedUsers();
 
-    /**
-     * Get currently logged user name.
-     *
-     * @return the userName
-     */
-    String getLoggedUserNamed();
 
     /**
      * Verify if user add some incorrect login attempt and reset the attempt counter.

@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class DomainServiceImpl implements DomainService {
 
-    private  static final String SGS_CLUSTERED_SCHEDULER = "SgsClusteredScheduler";
+    private  static final String DEFAULT_QUARTZ_SCHEDULER_NAME = "schedulerFactoryBean";
     private static final String DOMIBUS_DATABASE_SCHEMA = "domibus.database.schema";
 
     @Autowired
@@ -49,7 +49,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public Domain getDomainForScheduler(String schedulerName) {
-        if (SGS_CLUSTERED_SCHEDULER.equalsIgnoreCase(schedulerName)) {
+        if (DEFAULT_QUARTZ_SCHEDULER_NAME.equalsIgnoreCase(schedulerName)) {
             return DomainService.DEFAULT_DOMAIN;
         }
         return getDomain(schedulerName);
@@ -70,7 +70,7 @@ public class DomainServiceImpl implements DomainService {
         String result = domain.getCode();
         if (DomainService.DEFAULT_DOMAIN.equals(domain)) {
             //keep the same name used in Domibus 3.3.x in order not to break the backward compatibility; if scheduler name is changed, a DB migration script is needed
-            result = "SgsClusteredScheduler";
+            result = DEFAULT_QUARTZ_SCHEDULER_NAME;
         }
         return result;
     }

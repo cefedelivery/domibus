@@ -12,6 +12,163 @@
             </column>
             <column name="USER_NAME" type="VARCHAR(255)"/>
             <column name="DOMAIN" type="VARCHAR(255)"/>
+            <column name="PREFERRED_DOMAIN" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Ion Perpegel" id="EDELIVERY-3338">
+
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="UQ_USER_NAME" tableName="TB_USER_DOMAIN"/>
+
+        <createTable tableName="TB_USER">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="USER_ENABLED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OPTLOCK" type="INT"/>
+            <column defaultValueNumeric="0" name="ATTEMPT_COUNT" type="INT"/>
+            <column name="SUSPENSION_DATE" type="TIMESTAMP"/>
+            <column name="USER_DELETED" type="BOOLEAN" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLE">
+            <column autoIncrement="true" name="ID_PK" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ROLE_NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLES">
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ROLE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="USER_ID, ROLE_ID" constraintName="PK_PRIMARY" tableName="TB_USER_ROLES"/>
+        <addUniqueConstraint columnNames="ROLE_NAME" constraintName="UQ_ROLE_NAME" tableName="TB_USER_ROLE"/>
+        <addUniqueConstraint columnNames="USER_NAME" constraintName="USER_NAME" tableName="TB_USER"/>
+        <createIndex indexName="IDX_ROLE_ID" tableName="TB_USER_ROLES">
+            <column name="ROLE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_ROLES">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_ROLE" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+
+        <addForeignKeyConstraint baseColumnNames="ROLE_ID" baseTableName="TB_USER_ROLES" constraintName="FK_USER_ROLES_USER" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_USER_ROLE"/>
+
+        <insert tableName="TB_USER_ROLE">
+            <column name="ID_PK" value="3" type="INT"/>
+            <column name="ROLE_NAME" value="ROLE_AP_ADMIN"/>
+        </insert>
+        <insert tableName="TB_USER">
+            <column name="ID_PK" value="1" type="INT"/>
+            <column name="USER_NAME" value="super"/>
+            <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
+            <column name="USER_ENABLED" valueBoolean="true"/>
+            <column name="USER_DELETED" valueBoolean="false"/>
+        </insert>
+        <insert tableName="TB_USER_ROLES">
+            <column name="USER_ID" value="1" type="INT"/>
+            <column name="ROLE_ID" value="3" type="INT"/>
+        </insert>
+
+        <insert tableName="TB_USER_DOMAIN">
+            <column name="USER_NAME" value="super"/>
+            <column name="PREFERRED_DOMAIN" value="default"/>
+        </insert>
+        <insert tableName="TB_USER_DOMAIN">
+            <column name="USER_NAME" value="admin"/>
+            <column name="DOMAIN" value="default"/>
+        </insert>
+        <insert tableName="TB_USER_DOMAIN">
+            <column name="USER_NAME" value="user"/>
+            <column name="DOMAIN" value="default"/>
+        </insert>
+
+    </changeSet>
+
+    <changeSet author="Ion Perpegel" id="EDELIVERY-3338-audit">
+
+        <createTable tableName="TB_REV_CHANGES">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="REV" type="INT"/>
+            <column name="AUDIT_ORDER" type="INT"/>
+            <column name="ENTIY_NAME" type="VARCHAR(255)"/>
+            <column name="GROUP_NAME" type="VARCHAR(255)"/>
+            <column name="ENTITY_ID" type="VARCHAR(255)"/>
+            <column name="MODIFICATION_TYPE" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="TB_REV_INFO">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="TIMESTAMP" type="BIGINT"/>
+            <column name="REVISION_DATE" type="TIMESTAMP"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+        </createTable>
+
+        <createTable tableName="TB_USER_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ENABLED" type="BOOLEAN"/>
+            <column name="ACTIVE_MOD" type="BOOLEAN"/>
+            <column name="USER_DELETED" type="BOOLEAN"/>
+            <column name="DELETED_MOD" type="BOOLEAN"/>
+            <column name="USER_EMAIL" type="VARCHAR(255)"/>
+            <column name="EMAIL_MOD" type="BOOLEAN"/>
+            <column name="USER_PASSWORD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="USER_NAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+            <column name="OPTLOCK" type="INT"/>
+            <column name="VERSION_MOD" type="BOOLEAN"/>
+            <column name="ROLES_MOD" type="BOOLEAN"/>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLE_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="ROLE_NAME" type="VARCHAR(255)"/>
+            <column name="NAME_MOD" type="BOOLEAN"/>
+            <column name="USERS_MOD" type="BOOLEAN"/>
+        </createTable>
+
+        <createTable tableName="TB_USER_ROLES_AUD">
+            <column name="REV" type="INT"/>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="USER_ID" type="INT"/>
+            <column name="ROLE_ID" type="INT"/>
         </createTable>
     </changeSet>
 

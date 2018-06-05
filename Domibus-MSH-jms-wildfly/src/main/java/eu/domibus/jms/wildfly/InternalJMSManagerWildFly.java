@@ -270,12 +270,17 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 List<InternalJmsMessage> result = new ArrayList<>();
                 Enumeration enumeration = browser.getEnumeration();
                 while (enumeration.hasMoreElements()) {
-                    TextMessage textMessage = null;
+                    Object message = enumeration.nextElement();
                     try {
-                        textMessage = (TextMessage) enumeration.nextElement();
-                        result.add(convert(textMessage));
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            result.add(convert(textMessage));
+                        } else if (message instanceof MapMessage) {
+                            MapMessage mapMessage = (MapMessage) message;
+                            result.add(convert(mapMessage));
+                        }
                     } catch (Exception e) {
-                        LOG.error("Error converting message [" + textMessage + "]", e);
+                        LOG.error("Error converting message [" + message + "]", e);
                     }
 
                 }
@@ -296,43 +301,28 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         while (propertyNames.hasMoreElements()) {
             String name = (String) propertyNames.nextElement();
             Object objectProperty = textMessage.getObjectProperty(name);
-//            if (objectProperty instanceof String) {
             properties.put(name, objectProperty);
-//            }
         }
         result.setProperties(properties);
         return result;
     }
 
-    protected List<InternalJmsMessage> convert(Map<String, Object>[] maps) {
-        if (maps == null) {
-            return null;
-        }
-        List<InternalJmsMessage> result = new ArrayList<>();
-        for (Map<String, Object> map : maps) {
-            result.add(convert(map));
-        }
-        return result;
-    }
-
-    protected InternalJmsMessage convert(Map<String, Object> map) {
+    protected InternalJmsMessage convert(MapMessage mapMessage) throws JMSException {
         InternalJmsMessage result = new InternalJmsMessage();
 
-        result.setType((String) map.get("JMSType"));
-        Long jmsTimestamp = (Long) map.get("JMSTimestamp");
+        result.setType(mapMessage.getJMSType());
+        mapMessage.getJMSTimestamp();
+        Long jmsTimestamp = mapMessage.getJMSTimestamp();
         if (jmsTimestamp != null) {
             result.setTimestamp(new Date(jmsTimestamp));
         }
-
-        result.setId((String) map.get("JMSMessageID"));
+        result.setId(mapMessage.getJMSMessageID());
 
         Map<String, Object> properties = new HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            Object propertyValue = entry.getValue();
-
-//            if (propertyValue instanceof String) {
-            properties.put(entry.getKey(), propertyValue);
-//            }
+        Enumeration<String> mapNames = mapMessage.getMapNames();
+        while (mapNames.hasMoreElements()) {
+            String mapKey = mapNames.nextElement();
+            properties.put(mapKey, mapMessage.getObject(mapKey));
         }
         result.setProperties(properties);
         return result;
