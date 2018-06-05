@@ -27,15 +27,19 @@ export class PartyDetailsComponent implements OnInit {
     this.identifiers = this.party.identifiers;
     this.allProcesses = data.allProcesses;
 
+    this.formatProcesses();
+  }
+
+  // transform processes to view-model
+  private formatProcesses () {
     const processesWithPartyAsInitiator = this.party.processesWithPartyAsInitiator.map(el => el.name);
     const processesWithPartyAsResponder = this.party.processesWithPartyAsResponder.map(el => el.name);
-
     for (const proc of this.allProcesses) {
       const row = new ProcessInfoRo();
       row.name = proc;
-      if (processesWithPartyAsInitiator.indexOf(proc) != -1)
+      if (processesWithPartyAsInitiator.indexOf(proc) >= 0)
         row.isInitiator = true;
-      if (processesWithPartyAsResponder.indexOf(proc) != -1)
+      if (processesWithPartyAsResponder.indexOf(proc) >= 0)
         row.isResponder = true;
 
       this.processesRows.push(row);
@@ -110,27 +114,57 @@ export class PartyDetailsComponent implements OnInit {
     dialogRef.afterClosed().subscribe(ok => {
       const editForm = dialogRef.componentInstance;
       if (ok) {
+        const test = rowClone;
         Object.assign(identifierRow, editForm.data.edit);
       }
     });
   }
 
-  removeIdentifier() {
+  removeIdentifier () {
     const identifierRow = this.selectedIdentifiers[0];
     this.party.identifiers.splice(this.party.identifiers.indexOf(identifierRow), 1);
     this.selectedIdentifiers.length = 0;
   }
 
-  addIdentifier() {
-    const identifierRow = {entityId:0, partyId: "new", partyIdType: {name: "", value: ""}};
+  addIdentifier () {
+    const identifierRow = {entityId: 0, partyId: 'new', partyIdType: {name: '', value: ''}};
     this.party.identifiers.push(identifierRow);
   }
 
-  ok() {
+  ok () {
+    this.persistProcesses();
     this.dialogRef.close(true);
   }
 
-  cancel() {
+  // transform data from view-model to model
+  private persistProcesses () {
+    this.party.processesWithPartyAsInitiator = [];
+    this.party.processesWithPartyAsResponder = [];
+    const rowsToProcess = this.processesRows.filter(el => el.isResponder || el.isInitiator);
+
+    for (const proc of rowsToProcess) {
+      if (proc.isInitiator) {
+          this.party.processesWithPartyAsInitiator.push({entityId: 0, name: proc.name})
+      }
+      if (proc.isResponder) {
+          this.party.processesWithPartyAsResponder.push({entityId: 0, name: proc.name})
+      }
+    }
+
+    // set the string column too
+    const initiatorElements = rowsToProcess.filter(el => el.isInitiator && !el.isResponder).map(el => el.name);
+    const responderElements = rowsToProcess.filter(el => el.isResponder && !el.isInitiator).map(el => el.name);
+    const bothElements = rowsToProcess.filter(el => el.isInitiator && el.isResponder).map(el => el.name);
+
+    this.party.joinedProcesses = ((initiatorElements.length > 0) ? initiatorElements.join('(I), ') + '(I), ' : '')
+                                  + ((responderElements.length > 0) ? responderElements.join('(R), ') + '(R), ' : '')
+                                  + ((bothElements.length > 0) ? bothElements.join('(IR), ') + '(IR)' : '');
+
+    if(this.party.joinedProcesses.endsWith(', '))
+      this.party.joinedProcesses = this.party.joinedProcesses.substr(0, this.party.joinedProcesses.length - 2);
+  }
+
+  cancel () {
     this.dialogRef.close(false);
   }
 }

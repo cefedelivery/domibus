@@ -100,7 +100,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   //   );
   // }
 
-  search () : Observable<PartyFilteredResult> {
+  search (): Observable<PartyFilteredResult> {
     this.loading = true;
     const pageStart = this.offset * this.rowLimiter.pageSize;
     const pageSize = this.rowLimiter.pageSize;
@@ -132,7 +132,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
     return res;
   }
 
-  initProcesses() {
+  // TODO: replace this with a call to back-end
+  initProcesses () {
     const all = [];
     for (const row of this.rows) {
       for (const p1 of row.processesWithPartyAsInitiator) {
@@ -252,15 +253,17 @@ export class PartyComponent implements OnInit, DirtyOperations {
     row = row || this.selected[0];
     const rowCopy = JSON.parse(JSON.stringify(row));
     const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
+
     const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
       data: {
         edit: rowCopy,
         allProcesses: allProcessesCopy
       }
     });
+
     dialogRef.afterClosed().subscribe(ok => {
       if (ok) {
-        if (JSON.stringify(row) == JSON.stringify(rowCopy)) return; // nothing changed
+        if (JSON.stringify(row) === JSON.stringify(rowCopy)) return; // nothing changed
 
         Object.assign(row, rowCopy);
         if (this.updatedParties.indexOf(row) < 0) this.updatedParties.push(row);
