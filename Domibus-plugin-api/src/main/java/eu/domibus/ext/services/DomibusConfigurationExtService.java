@@ -9,7 +9,7 @@ package eu.domibus.ext.services;
  * </ul>
  *
  * @author Tiago Miguel
- * @since 1.2
+ * @since 4.0
  */
 public interface DomibusConfigurationExtService {
 

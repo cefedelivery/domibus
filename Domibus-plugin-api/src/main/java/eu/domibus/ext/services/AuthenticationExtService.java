@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Cosmin Baciu
- * @since 1.0
+ * @since 4.0
  */
 public interface AuthenticationExtService {
 

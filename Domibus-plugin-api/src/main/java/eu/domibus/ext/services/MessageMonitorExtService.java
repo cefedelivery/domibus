@@ -28,7 +28,7 @@ import java.util.List;
  * </p>
  *
  * @author Cosmin Baciu
- * @since 1.0
+ * @since 4.0
  */
 public interface MessageMonitorExtService {
 

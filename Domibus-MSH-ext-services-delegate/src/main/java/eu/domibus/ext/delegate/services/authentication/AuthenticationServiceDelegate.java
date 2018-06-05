@@ -4,7 +4,6 @@ import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

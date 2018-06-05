@@ -43,7 +43,7 @@ import java.util.Map;
  * </ul>
  *
  * @author Cosmin Baciu
- * @since 1.0
+ * @since 4.0
  */
 public interface MessageAcknowledgeExtService {
 
