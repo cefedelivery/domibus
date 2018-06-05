@@ -29,4 +29,10 @@ public class ApplicationResource {
         domibusInfoRO.setVersion(domibusPropertiesService.getDisplayVersion());
         return domibusInfoRO;
     }
+
+    @RequestMapping(value = "fourcornerenabled", method = RequestMethod.GET)
+    public boolean getFourCornerModelEnabled() {
+        LOG.debug("Getting four corner enabled");
+        return domibusPropertiesService.getFourCornerEnabled();
+    }
 }

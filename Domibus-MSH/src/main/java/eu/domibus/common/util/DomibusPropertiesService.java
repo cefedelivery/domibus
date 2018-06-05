@@ -2,6 +2,7 @@ package eu.domibus.common.util;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -61,6 +62,10 @@ public class DomibusPropertiesService {
         display.append(getBuiltTime());
         display.append("]");
         return display.toString();
+    }
+
+    public boolean getFourCornerEnabled() {
+        return MapUtils.getBooleanValue(domibusProps, "domibus.fourcornermodel.enabled", true);
     }
 
 }
