@@ -289,16 +289,6 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void getExtraNumberOfAttemptTimeForExpirationDate() {
-        new Expectations() {{
-            domibusProperties.getProperty("pull.extra.number.of.attempt.time.for.expiration.date", "2");
-            result = "2";
-        }};
-        assertEquals(2, pullMessageService.getExtraNumberOfAttemptTimeForExpirationDate());
-    }
-
-
-    @Test
     public void waitingForCallExpired(
             @Mocked final MessagingLock lock,
             @Mocked final LegConfiguration legConfiguration,

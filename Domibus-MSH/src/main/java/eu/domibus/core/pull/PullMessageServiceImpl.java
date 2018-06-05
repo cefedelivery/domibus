@@ -260,17 +260,9 @@ public class PullMessageServiceImpl implements PullMessageService {
         if (legConfiguration.getReceptionAwareness() != null) {
             final Long scheduledStartTime = updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
-            long oneAttemptTimeInMillis = timeOut / legConfiguration.getReceptionAwareness().getRetryCount();
-            return new Date(scheduledStartTime + timeOut + (getExtraNumberOfAttemptTimeForExpirationDate() * oneAttemptTimeInMillis));
+            return new Date(scheduledStartTime + timeOut);
         }
         return null;
-    }
-
-    protected int getExtraNumberOfAttemptTimeForExpirationDate() {
-        if (extraNumberOfAttemptTimeForExpirationDate == null) {
-            extraNumberOfAttemptTimeForExpirationDate = Integer.valueOf(domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2"));
-        }
-        return extraNumberOfAttemptTimeForExpirationDate;
     }
 
     protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
