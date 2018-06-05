@@ -27,7 +27,7 @@ export class PartyService {
 
     return this.http.get(PartyService.LIST_PARTIES).map(res => {
       const allRecords = res.json() as PartyResponseRo[];
-      let records = allRecords;
+      let records = allRecords.slice();
 
       if (name)
         records = records.filter(party => party.name === name);

@@ -2,26 +2,28 @@
 <div class="selectionCriteria">
   <md-card>
     <md-card-content>
-      <div class="panel">
-        <md-input-container>
-          <input mdInput placeholder="Name" [(ngModel)]="name" id="name_id">
-        </md-input-container>
-        <md-input-container>
-          <input mdInput placeholder="End point" [(ngModel)]="endPoint" id="endPoint_id">
-        </md-input-container>
-        <md-input-container>
-          <input mdInput placeholder="Party id" [(ngModel)]="partyID" id="partyID_id">
-        </md-input-container>
-        <md-input-container>
-          <input mdInput placeholder="Process" [(ngModel)]="process" id="process_id">
-        </md-input-container>
-        <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id" (click)="search()">
-            <md-icon>search</md-icon>
-            <span>Search</span>
-          </button>
+      <form (submit)="searchIfOK()">
+        <div class="panel">
+          <md-input-container>
+            <input mdInput placeholder="Name" [(ngModel)]="name" name="name" id="name_id">
+          </md-input-container>
+          <md-input-container>
+            <input mdInput placeholder="End point" [(ngModel)]="endPoint" name="endPoint" id="endPoint_id">
+          </md-input-container>
+          <md-input-container>
+            <input mdInput placeholder="Party id" [(ngModel)]="partyID" name="partyID" id="partyID_id">
+          </md-input-container>
+          <md-input-container>
+            <input mdInput placeholder="Process" [(ngModel)]="process" name="process" id="process_id">
+          </md-input-container>
+          <div class="searchArea">
+            <button md-raised-button color="primary" id="searchbutton_id">
+              <md-icon>search</md-icon>
+              <span>Search</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
     </md-card-content>
   </md-card>
 </div>

@@ -9,6 +9,7 @@ import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
 import {PartyDetailsComponent} from './party-details/party-details.component';
 import {DirtyOperations} from '../common/dirty-operations';
+import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 
 /**
  * @author Thomas Dussart
@@ -29,12 +30,15 @@ export class PartyComponent implements OnInit, DirtyOperations {
   partyID: string;
   process: string;
 
-  rows = [];
-  selected = [];
+  rows: PartyResponseRo[] = [];
+  allRows: PartyResponseRo[] = [];
+  selected: PartyResponseRo[] = [];
+
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
+
   offset: number = 0;
-  pageSize: number = this.rowLimiter.pageSizes[0].value;
+  pageSize: number;
   count: number = 0;
   loading: boolean = false;
 
@@ -46,14 +50,13 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   constructor (public dialog: MdDialog,
                public partyService: PartyService,
-               public alertService: AlertService,
-               private cdRef: ChangeDetectorRef) {
+               public alertService: AlertService) {
   }
 
   ngOnInit () {
+    this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
     this.search();
-
   }
 
   isDirty (): boolean {
@@ -66,6 +69,10 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.deletedParties.length = 0;
   }
 
+  searchIfOK () {
+    this.askIfNeededAndThen(this.search);
+  }
+
   search (): Observable<PartyFilteredResult> {
     this.loading = true;
 
@@ -73,7 +80,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
     res.subscribe((response) => {
         this.rows = response.data;
-        this.count = response.allData.length;
+        this.allRows = response.allData;
+        this.count = this.allRows.length;
 
         this.selected.length = 0;
 
@@ -91,6 +99,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   refresh () {
+    // ugly but the grid does not feel the paging changes otherwise
     this.loading = true;
     const rows = this.rows;
     this.rows = [];
@@ -198,6 +207,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   add () {
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
+    this.allRows.push(newParty);
+
     this.selected.length = 0;
     this.selected.push(newParty);
     this.count++;
@@ -208,6 +219,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   remove () {
     const deletedParty = this.selected[0];
     this.rows.splice(this.rows.indexOf(deletedParty), 1);
+    this.allRows.splice(this.rows.indexOf(deletedParty), 1);
+
     this.selected.length = 0;
     this.count--;
 
@@ -238,4 +251,17 @@ export class PartyComponent implements OnInit, DirtyOperations {
       }
     });
   }
+
+  askIfNeededAndThen (func: Function) {
+    if (this.isDirty()) {
+      this.dialog.open(CancelDialogComponent).afterClosed().subscribe(yes => {
+        if (yes) {
+          func.call(this);
+        }
+      });
+    } else {
+      func.call(this);
+    }
+  }
+
 }
