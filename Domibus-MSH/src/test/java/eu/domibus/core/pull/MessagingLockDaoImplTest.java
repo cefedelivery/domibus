@@ -1,10 +1,8 @@
 package eu.domibus.core.pull;
 
-import com.google.common.collect.Lists;
 import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.ebms3.common.model.MessageState;
-import eu.domibus.ebms3.common.model.MessagingLock;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -14,7 +12,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -97,8 +94,7 @@ public class MessagingLockDaoImplTest {
 
     @Test
     public void getNextPullMessageToProcessWithRetry(
-            @Mocked final SqlRowSet sqlRowSet,
-            @Mocked final Timestamp timestamp) {
+            @Mocked final SqlRowSet sqlRowSet) {
         final int idPk = 6;
 
         final String messageId = "furtherAttemptMessageId";
@@ -106,6 +102,8 @@ public class MessagingLockDaoImplTest {
         final int sendAttempts = 1;
 
         final int sendAttemptsMax = 5;
+
+        final Timestamp timestamp=new Timestamp(System.currentTimeMillis()+10000);
 
         new Expectations() {{
             domibusConfigurationService.getDataBaseEngine();
