@@ -135,7 +135,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     /* This is not a unit tests but a useful test for a real SMP entry. */
     @Test
-    //@Ignore
+    @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
             domibusConfigurationService.useProxy();
