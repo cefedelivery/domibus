@@ -128,9 +128,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     protected void sendReplyMessage(final String messageId, final String errorMessage, final String correlationId) {
-        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
         final JmsMessageDTO jmsMessageDTO = new ReplyMessageCreator(messageId, errorMessage, correlationId).createMessage();
-        sendJmsMessage(jmsMessageDTO, domibusPropertyExtService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_REPLY));
+        sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_REPLY);
     }
 
     @Override

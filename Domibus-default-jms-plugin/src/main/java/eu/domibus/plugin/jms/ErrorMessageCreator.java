@@ -5,8 +5,6 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
 import eu.domibus.ext.domain.JMSMessageDTOBuilder;
 import eu.domibus.ext.domain.JmsMessageDTO;
-import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.exceptions.DomibusServiceException;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 
@@ -36,7 +34,7 @@ class ErrorMessageCreator {
                 messageType = JMSMessageConstants.MESSAGE_TYPE_RECEIVE_FAILURE;
                 break;
             default:
-                throw new DomibusServiceException(DomibusErrorCode.DOM_001, "unknown NotificationType: " + notificationType.name());
+                throw new DefaultJmsPluginException("unknown NotificationType: " + notificationType.name());
         }
         jmsMessageBuilder.property(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
 

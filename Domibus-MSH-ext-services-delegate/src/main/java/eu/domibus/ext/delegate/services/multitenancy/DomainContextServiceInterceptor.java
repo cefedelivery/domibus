@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.multitenancy;
 
 import eu.domibus.ext.delegate.services.interceptor.ServiceInterceptor;
-import eu.domibus.ext.exceptions.DomainException;
+import eu.domibus.ext.exceptions.DomainExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,7 +23,7 @@ public class DomainContextServiceInterceptor extends ServiceInterceptor {
 
     @Override
     public Exception convertCoreException(Exception e) {
-        return new DomainException(e);
+        return new DomainExtException(e);
     }
 
     @Override

@@ -4,7 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.domain.JmsMessageDTO;
-import eu.domibus.ext.services.JMSService;
+import eu.domibus.ext.services.JMSExtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import javax.jms.Queue;
  * @since 4.0
  */
 @Service
-public class JMSServiceServiceDelegate implements JMSService {
+public class JMSServiceServiceDelegate implements JMSExtService {
 
     @Autowired
     protected JMSManager jmsManager;

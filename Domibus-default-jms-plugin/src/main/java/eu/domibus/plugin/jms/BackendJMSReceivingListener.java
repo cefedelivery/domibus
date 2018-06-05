@@ -6,6 +6,7 @@ import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,15 @@ public class BackendJMSReceivingListener {
             LOG.error("Exception occurred while retrieving the username or password", e);
             throw new DefaultJmsPluginException("Exception occurred while retrieving the username or password", e);
         }
+        if(StringUtils.isBlank(username)) {
+            LOG.error("Username is empty");
+            throw new DefaultJmsPluginException("Username is empty");
+        }
+        if(StringUtils.isBlank(password)) {
+            LOG.error("Password is empty");
+            throw new DefaultJmsPluginException("Password is empty");
+        }
+
         authenticationExtService.basicAuthenticate(username, password);
     }
 

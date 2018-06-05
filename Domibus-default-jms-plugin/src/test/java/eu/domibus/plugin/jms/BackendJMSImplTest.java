@@ -4,9 +4,9 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
-import eu.domibus.ext.services.DomainContextService;
-import eu.domibus.ext.services.DomibusPropertyService;
-import eu.domibus.ext.services.JMSService;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import mockit.*;
@@ -47,13 +47,13 @@ public class BackendJMSImplTest {
     private JmsOperations errorNotifyProducerTemplate;
 
     @Injectable
-    protected JMSService jmsService;
+    protected JMSExtService jmsService;
 
     @Injectable
-    protected DomibusPropertyService domibusPropertyService;
+    protected DomibusPropertyExtService domibusPropertyService;
 
     @Injectable
-    protected DomainContextService domainContextService;
+    protected DomainContextExtService domainContextService;
 
     @Injectable
     String name = "myjmsplugin";

@@ -5,7 +5,7 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.domain.DomainDTO;
-import eu.domibus.ext.services.DomibusPropertyService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @since 4.0
  */
 @Service
-public class DomibusPropertyServiceDelegate implements DomibusPropertyService {
+public class DomibusPropertyServiceDelegate implements DomibusPropertyExtService {
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
