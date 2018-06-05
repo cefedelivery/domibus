@@ -4,6 +4,7 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
+import eu.domibus.ext.domain.JmsMessageDTO;
 import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
@@ -139,6 +140,10 @@ public class BackendJMSImplTest {
         event.setEndpoint(myEndpoint);
         final String messageId = "1";
         event.setMessageId(messageId);
+
+        new Expectations(backendJMS) {{
+            backendJMS.sendJmsMessage(withAny(new JmsMessageDTO()), anyString);
+        }};
 
         backendJMS.messageReceiveFailed(event);
 
