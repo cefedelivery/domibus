@@ -263,26 +263,18 @@ public class PullMessageServiceImplTest {
     @Test
     public void getPullMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
 
-        final int extraAttemptsToAddToExpirationDate = 2;
-        new MockUp<PullMessageServiceImpl>() {
-            @Mock
-            public int getExtraNumberOfAttemptTimeForExpirationDate() {
-                return extraAttemptsToAddToExpirationDate;
-            }
-        };
+
 
         final long currentTime = System.currentTimeMillis();
         final int timeOut = 10;
         final long timeOutInMillis = 60000 * timeOut;
-        final int retryCount = 3;
-        final Date expectedDate = new Date(currentTime + timeOutInMillis + (extraAttemptsToAddToExpirationDate * (timeOutInMillis / retryCount)));
+        final Date expectedDate = new Date(currentTime + timeOutInMillis);
         new Expectations() {{
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = currentTime;
             legConfiguration.getReceptionAwareness().getRetryTimeout();
             result = timeOut;
-            legConfiguration.getReceptionAwareness().getRetryCount();
-            result = retryCount;
+
         }};
         assertEquals(expectedDate, pullMessageService.getPullMessageExpirationDate(userMessageLog, legConfiguration));
 
@@ -344,16 +336,13 @@ public class PullMessageServiceImplTest {
         new Expectations() {{
             legConfiguration.getReceptionAwareness().getRetryTimeout();
             result = 1;
-            legConfiguration.getReceptionAwareness().getRetryCount();
-            result = 10;
             userMessageLog.getSendAttempts();
             result = 1;
             userMessageLog.getSendAttemptsMax();
             result = 2;
-            domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2");
-            result = "2";
+
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
-            result = System.currentTimeMillis() - 50000;
+            result = System.currentTimeMillis() + 10000;
         }};
         assertEquals(true, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
     }
@@ -374,13 +363,10 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void hasAttemptsLeftFalseBecauseOfRetry(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
+    public void equalAttemptsButNotExpired(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
         new Expectations() {{
             legConfiguration.getReceptionAwareness().getRetryTimeout();
             result = 1;
-
-            legConfiguration.getReceptionAwareness().getRetryCount();
-            result = 10;
 
             userMessageLog.getSendAttempts();
             result = 2;
@@ -388,13 +374,30 @@ public class PullMessageServiceImplTest {
             userMessageLog.getSendAttemptsMax();
             result = 2;
 
-            domibusProperties.getProperty(PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE, "2");
-            result="2";
+            updateRetryLoggingService.getScheduledStartTime(userMessageLog);
+            result = System.currentTimeMillis() + 70000;
+        }};
+        final boolean actual = pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration);
+        assertEquals(true, actual);
+    }
+
+    @Test
+    public void equalAttemptsButExpired(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
+        new Expectations() {{
+            legConfiguration.getReceptionAwareness().getRetryTimeout();
+            result = 1;
+
+            userMessageLog.getSendAttempts();
+            result = 2;
+
+            userMessageLog.getSendAttemptsMax();
+            result = 2;
 
             updateRetryLoggingService.getScheduledStartTime(userMessageLog);
             result = System.currentTimeMillis() - 70000;
         }};
-        assertEquals(true, pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration));
+        final boolean actual = pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration);
+        assertEquals(false, actual);
     }
 
     @Test
