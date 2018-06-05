@@ -1,8 +1,10 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -10,6 +12,11 @@ import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -47,6 +56,12 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     @Injectable
     private Properties domibusProperties;
+
+    @Injectable
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    private ProxyUtil proxyUtil;
 
     @Injectable
     private CertificateService certificateService;
@@ -120,9 +135,18 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     /* This is not a unit tests but a useful test for a real SMP entry. */
     @Test
-    @Ignore
+    //@Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
+            domibusConfigurationService.useProxy();
+            result = false; // SET THIS VALUE TO TRUE
+
+            proxyUtil.getConfiguredCredentialsProvider();
+            result = getConfiguredCredentialsProvider();
+
+            proxyUtil.getConfiguredProxy();
+            result = getConfiguredProxy();
+
             domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
@@ -130,9 +154,42 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+        // participantId = "0088:260420181111";
+        // participantIdScheme = "iso6523-actorid-upis";
+        // documentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0";
+        // processIdentifier = "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0";
+        // transportProfileAS4 = "bdxr-transport-ebms3-as4-v1p0"
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
 
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());
+
+//        verify(getRequestedFor(urlMatching(".*"))
+//                .withRequestBody(matching(".*")));
+    }
+
+    // PUT YOUR VALUES HERE
+    private static String HOST = "somehost";
+    private static String PORT = "8280";
+    private static String USER = "idragusa";
+    private static String PASSWORD = "changeme";
+
+    private HttpHost getConfiguredProxy() {
+        String httpProxyHost = HOST;
+        String httpProxyPort = PORT;
+        return new HttpHost(httpProxyHost, Integer.parseInt(httpProxyPort));
+    }
+
+    private CredentialsProvider getConfiguredCredentialsProvider() {
+        String httpProxyHost = HOST;
+        String httpProxyPort = PORT;
+        String httpProxyUser = USER;
+        String httpProxyPassword = PASSWORD;
+
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(new AuthScope(httpProxyHost, Integer.parseInt(httpProxyPort)),
+                new UsernamePasswordCredentials(httpProxyUser, httpProxyPassword));
+
+        return credsProvider;
     }
 }

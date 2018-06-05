@@ -1,8 +1,8 @@
 package eu.domibus.util;
 
 import eu.domibus.api.util.HttpUtil;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.http.HttpHost;
@@ -35,26 +35,20 @@ public class HttpUtilImpl implements HttpUtil {
     @Qualifier("domibusProperties")
     private Properties domibusProperties;
 
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
-        if (useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-            String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-            String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-            String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+        if (domibusConfigurationService.useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             LOG.info("Using proxy for downloading URL " + url);
             return downloadURLViaProxy(url, httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
         return downloadURLDirect(url);
-    }
-
-    protected boolean useProxy() {
-        String useProxy = domibusProperties.getProperty("domibus.proxy.enabled", "false");
-        if (StringUtils.isEmpty(useProxy)) {
-            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
-            return false;
-        }
-        return Boolean.parseBoolean(useProxy);
     }
 
     @Override

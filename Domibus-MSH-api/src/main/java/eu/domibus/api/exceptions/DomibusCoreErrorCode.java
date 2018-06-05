@@ -29,7 +29,11 @@ public enum DomibusCoreErrorCode {
     /**
      * Cetificate related exception.
      */
-    DOM_005("005");
+    DOM_005("005"),
+    /**
+     * Proxy related exception.
+     */
+    DOM_006("006");
 
     private final String errorCode;
 

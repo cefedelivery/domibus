@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -18,7 +19,7 @@ import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultSignatureValidato
 import eu.europa.ec.dynamicdiscovery.exception.ConnectionException;
 import eu.europa.ec.dynamicdiscovery.exception.TechnicalException;
 import eu.europa.ec.dynamicdiscovery.model.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Service to query a compliant e-SENS SMP profile based on the OASIS BDX Service Metadata Publishers
+ * Service to query a compliant eDelivery SMP profile based on the OASIS BDX Service Metadata Publishers
  * (SMP) to extract the required information about the unknown receiver AP.
  * The SMP Lookup is done using an SMP Client software, with the following input:
  *       The End Receiver Participant ID (C4)
@@ -57,28 +58,29 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     @Autowired
     private CryptoService cryptoService;
 
-    @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
-    public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
-                                          final String documentId, final String processId,
-                                          final String processIdType) throws EbMS3Exception {
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
 
-        LOG.info("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
-                " " + processId + " " + processIdType);
+    @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
+    public EndpointInfo lookupInformation(final String participantId, final String participantIdScheme, final String documentId, final String processId, final String processIdScheme) throws EbMS3Exception {
+
+        LOG.info("[OASIS SMP] Do the lookup by: " + participantId + " " + participantIdScheme + " " + documentId +
+                " " + processId + " " + processIdScheme);
 
         try {
             DynamicDiscovery smpClient = createDynamicDiscoveryClient();
 
             LOG.debug("Preparing to request the ServiceMetadata");
-            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
+            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, participantIdScheme);
             final DocumentIdentifier documentIdentifier = createDocumentIdentifier(documentId);
-            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
+            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdScheme);
             ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Could not fetch metadata for: " + receiverId + " " + receiverIdType + " " + documentId +
-                        " " + processId + " " + processIdType + " using the AS4 Protocol " + transportProfileAS4);
+                throw new ConfigurationException("Could not fetch metadata for: " + participantId + " " + participantIdScheme + " " + documentId +
+                        " " + processId + " " + processIdScheme + " using the AS4 Protocol " + transportProfileAS4);
             }
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
@@ -103,22 +105,20 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
         KeyStore truststore = cryptoService.getTrustStore();
         try {
             DefaultProxy defaultProxy = getConfiguredProxy();
+
+            DynamicDiscoveryBuilder dynamicDiscoveryBuilder = DynamicDiscoveryBuilder.newInstance();
+            dynamicDiscoveryBuilder
+                    .locator(new DefaultBDXRLocator(smlInfo))
+                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)));
+
             if (defaultProxy != null) {
-                LOG.debug("Creating SMP client with proxy");
-                return DynamicDiscoveryBuilder.newInstance()
-                        .fetcher(new DefaultURLFetcher(defaultProxy))
-                        .locator(new DefaultBDXRLocator(smlInfo))
-                        .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
-                        .build();
+                dynamicDiscoveryBuilder
+                        .fetcher(new DefaultURLFetcher(defaultProxy));
             }
 
-            LOG.debug("Creating SMP client without proxy");
-            // no proxy is configured
-            return DynamicDiscoveryBuilder.newInstance()
-                    .locator(new DefaultBDXRLocator(smlInfo))
-                    .reader(new DefaultBDXRReader(new DefaultSignatureValidator(truststore, certRegex)))
-                    .build();
+            LOG.debug("Creating SMP client " + (defaultProxy != null ? "with" : "without") + " proxy.");
 
+            return dynamicDiscoveryBuilder.build();
         } catch (TechnicalException exc) {
             throw new ConfigurationException("Could not create smp client to fetch metadata from SMP", exc);
         }
@@ -141,19 +141,15 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
-        String httpProxyHost = domibusProperties.getProperty("domibus.proxy.http.host");
-        String httpProxyPort = domibusProperties.getProperty("domibus.proxy.http.port");
-        String httpProxyUser = domibusProperties.getProperty("domibus.proxy.user");
-        String httpProxyPassword = domibusProperties.getProperty("domibus.proxy.password");
+        if (domibusConfigurationService.useProxy()) {
+            String httpProxyHost = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
-        if(StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)) {
-            return null;
+            return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
-
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                httpProxyUser + " " + httpProxyPassword + " ");
-
-        return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
+        return null;
     }
 
     @Override
