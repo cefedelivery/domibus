@@ -1,7 +1,6 @@
-package eu.domibus.util;
+package eu.domibus.common.util;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import junit.framework.Assert;
 import mockit.Injectable;
@@ -12,38 +11,30 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CredentialsProvider;
 import org.junit.Test;
 
+
 /**
- * @idragusa
- * @since 4.0
+ * Created by idragusa on 6/5/18.
  */
-public class HttpUtilImplTest {
+public class ProxyUtilTest {
 
     @Tested
-    HttpUtilImpl httpUtil;
+    ProxyUtil proxyUtil;
 
     @Injectable
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Injectable
+    protected DomibusConfigurationService domibusConfigurationService;
+
     @Test
     public void testUseProxyFalse() {
-        Assert.assertFalse(httpUtil.useProxy());
-    }
-
-    @Test(expected = DomibusCoreException.class)
-    public void testUseProxyException() {
-        new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-            result = true;
-        }};
-
-        // exception is expected
-        httpUtil.useProxy();
+        Assert.assertFalse(domibusConfigurationService.useProxy());
     }
 
     @Test
     public void testUseProxytrue() {
         new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
@@ -61,13 +52,13 @@ public class HttpUtilImplTest {
         }};
 
         // exception is expected
-        Assert.assertTrue(httpUtil.useProxy());
+        Assert.assertTrue(domibusConfigurationService.useProxy());
     }
 
     @Test
     public void testGetConfiguredProxy() {
         new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
@@ -83,7 +74,7 @@ public class HttpUtilImplTest {
             result = "somepass";
 
         }};
-        HttpHost httpHost = httpUtil.getConfiguredProxy();
+        HttpHost httpHost = proxyUtil.getConfiguredProxy();
 
         Assert.assertEquals(httpHost.getPort(), 8280);
     }
@@ -91,7 +82,7 @@ public class HttpUtilImplTest {
     @Test
     public void testGetConfiguredCredentialsProvider() {
         new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
@@ -107,7 +98,8 @@ public class HttpUtilImplTest {
             result = "somepass";
 
         }};
-        CredentialsProvider credentialsProvider = httpUtil.getConfiguredCredentialsProvider();
+        CredentialsProvider credentialsProvider = proxyUtil.getConfiguredCredentialsProvider();
         Assert.assertEquals("someuser", credentialsProvider.getCredentials(AuthScope.ANY).getUserPrincipal().getName());
     }
 }
+

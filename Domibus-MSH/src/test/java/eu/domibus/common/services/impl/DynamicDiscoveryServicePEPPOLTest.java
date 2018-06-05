@@ -1,10 +1,12 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -54,7 +56,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private CertificateService certificateService;
 
     @Injectable
-    HttpUtil httpUtil;
+    ProxyUtil proxyUtil;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
 
     @Tested
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
@@ -128,7 +133,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);

@@ -19,4 +19,6 @@ public interface DomibusConfigurationService {
     String getConfigLocation();
 
     boolean isMultiTenantAware();
+
+    boolean useProxy();
 }

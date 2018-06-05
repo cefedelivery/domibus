@@ -70,7 +70,7 @@ public class DynamicDiscoveryServiceOASISTest {
     protected DomainContextProvider domainProvider;
 
     @Injectable
-    HttpUtil httpUtil;
+    DomibusConfigurationService domibusConfigurationService;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -173,7 +173,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
@@ -200,7 +200,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
         }};
 
@@ -215,7 +215,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = true;
 
             domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
@@ -249,7 +249,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
 
             domibusPropertyProvider.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
@@ -282,7 +282,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            httpUtil.useProxy();
+            domibusConfigurationService.useProxy();
             result = false;
 
             domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);

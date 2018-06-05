@@ -1,8 +1,5 @@
 package eu.domibus.api.util;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.CredentialsProvider;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -17,11 +14,4 @@ public interface HttpUtil {
     ByteArrayInputStream downloadURLDirect(String url) throws IOException;
 
     ByteArrayInputStream downloadURLViaProxy(String url, String proxyHost, Integer proxyPort, String proxyUser, String proxyPassword) throws IOException;
-
-    boolean useProxy();
-
-    HttpHost getConfiguredProxy();
-
-    CredentialsProvider getConfiguredCredentialsProvider();
-
 }
