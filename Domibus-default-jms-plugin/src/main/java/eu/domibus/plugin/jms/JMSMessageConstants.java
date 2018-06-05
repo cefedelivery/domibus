@@ -54,4 +54,7 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_MIME_CONTENT_ID_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_CONTENT_ID_SUFFIX;
     public static final String PUT_ATTACHMENTS_IN_QUEUE = "putAttachmentInQueue";
     public static final String PAYLOAD_FILENAME = "FileName";
+
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
 }

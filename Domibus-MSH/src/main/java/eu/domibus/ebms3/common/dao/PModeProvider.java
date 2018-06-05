@@ -1,6 +1,8 @@
 
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
@@ -29,7 +31,6 @@ import eu.domibus.messaging.XmlProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,6 +40,7 @@ import org.xml.sax.SAXException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
@@ -73,13 +75,16 @@ public abstract class PModeProvider {
     @PersistenceContext(unitName = "domibusJTA")
     protected EntityManager entityManager;
 
-    @Autowired()
+    @Autowired
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
 
-    @Qualifier("jmsTemplateCommand")
     @Autowired
-    private JmsOperations jmsOperations;
+    protected JMSManager jmsManager;
+
+    @Qualifier("clusterCommandTopic")
+    @Autowired
+    protected Topic clusterCommandTopic;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -168,8 +173,12 @@ public abstract class PModeProvider {
         configurationRawDAO.create(configurationRaw);
 
         LOG.info("Configuration successfully updated");
+
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
-        jmsOperations.send(new ReloadPmodeMessageCreator());
+        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                .property(Command.COMMAND, Command.RELOAD_PMODE)
+                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
+                .build(), clusterCommandTopic);
 
         return resultMessage;
     }
