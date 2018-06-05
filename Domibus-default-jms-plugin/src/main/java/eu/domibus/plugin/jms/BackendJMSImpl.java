@@ -11,6 +11,7 @@ import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
@@ -196,6 +197,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 throw new DefaultJmsPluginException("Unable to create push message", e);
             }
             mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
+            final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+            mapMessage.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
             return mapMessage;
         }
     }
