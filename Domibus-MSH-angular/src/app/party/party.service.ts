@@ -22,10 +22,12 @@ export class PartyService {
 
   }
 
-  listParties (name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyFilteredResult> {
+  listParties (name: string, endPoint: string, partyId: string, process: string)
+    : Observable<PartyFilteredResult> {
 
     return this.http.get(PartyService.LIST_PARTIES).map(res => {
-      let records = res.json() as PartyResponseRo[];
+      const allRecords = res.json() as PartyResponseRo[];
+      let records = allRecords;
 
       if (name)
         records = records.filter(party => party.name === name);
@@ -36,23 +38,11 @@ export class PartyService {
       if (process)
         records = records.filter(party => party.joinedProcesses.lastIndexOf(process) >= 0);
 
-      const result = {data: records, count: records.length};
+      const result = {data: records, allData: allRecords};
       return result;
     });
-  }
 
-  // listParties (name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyResponseRo[]> {
-  //   const searchParams: URLSearchParams = new URLSearchParams();
-  //
-  //   searchParams.set('name', name);
-  //   searchParams.set('endPoint', endPoint);
-  //   searchParams.set('partyId', partyId);
-  //   searchParams.set('process', process);
-  //   searchParams.set('pageStart', pageStart);
-  //   searchParams.set('pageSize', pageSize);
-  //
-  //   return this.http.get(PartyService.LIST_PARTIES, {search: searchParams}).map(res => res.json());
-  // }
+  }
 
   countParty (name: string, endPoint: string, partyId: string, process: string): Observable<number> {
     let searchParams: URLSearchParams = new URLSearchParams();

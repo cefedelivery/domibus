@@ -53,17 +53,14 @@
   [footerHeight]="50"
   [rowHeight]="'auto'"
   [scrollbarH]="true"
-  [externalPaging]="true"
+  [externalPaging]="false"
   [externalSorting]="true"
   [loadingIndicator]="loading"
   [count]="count"
   [offset]="offset"
-  [limit]="rowLimiter.pageSize"
-  [offset]="offset"
-  [limit]="rowLimiter.pageSize"
+  [limit]="pageSize"
   [selected]="selected"
   [selectionType]="'single'"
-  (page)='onPage($event)'
   (activate)="onActivate($event)"
 >
 </ngx-datatable>

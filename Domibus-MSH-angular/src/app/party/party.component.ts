@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
@@ -34,6 +34,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   offset: number = 0;
+  pageSize: number = this.rowLimiter.pageSizes[0].value;
   count: number = 0;
   loading: boolean = false;
 
@@ -43,13 +44,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   allProcesses: string[];
 
-  constructor (public dialog: MdDialog, public partyService: PartyService, public alertService: AlertService) {
+  constructor (public dialog: MdDialog,
+               public partyService: PartyService,
+               public alertService: AlertService,
+               private cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit () {
     this.initColumns();
     this.search();
-    // this.searchAndCount();
+
   }
 
   isDirty (): boolean {
@@ -62,64 +66,18 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.deletedParties.length = 0;
   }
 
-  // searchAndCount () {
-  //   this.offset = 0;
-  //
-  //   const partyObservable = this.search();
-  //
-  //   // this.loading = true;
-  //   // let pageStart = this.offset * this.rowLimiter.pageSize;
-  //   // let pageSize = this.rowLimiter.pageSize;
-  //   //
-  //   // let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
-  //   //   this.name,
-  //   //   this.endPoint,
-  //   //   this.partyID,
-  //   //   this.process,
-  //   //   pageStart,
-  //   //   pageSize);
-  //
-  //   const countObservable: Observable<number> = this.partyService.countParty(
-  //     this.name,
-  //     this.endPoint,
-  //     this.partyID,
-  //     this.process);
-  //
-  //   Observable.zip(partyObservable, countObservable).subscribe((response) => {
-  //       this.rows = response[0];
-  //       this.count = response[1];
-  //       this.loading = false;
-  //       if (this.count > AlertComponent.MAX_COUNT_CSV) {
-  //         this.alertService.error('Maximum number of rows reached for downloading CSV');
-  //       }
-  //     },
-  //     error => {
-  //       this.alertService.error('Could not load parties' + error);
-  //       this.loading = false;
-  //     }
-  //   );
-  // }
-
   search (): Observable<PartyFilteredResult> {
     this.loading = true;
-    const pageStart = this.offset * this.rowLimiter.pageSize;
-    const pageSize = this.rowLimiter.pageSize;
 
-    const res = this.partyService.listParties(
-      this.name,
-      this.endPoint,
-      this.partyID,
-      this.process,
-      pageStart,
-      pageSize);
+    const res = this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process);
 
     res.subscribe((response) => {
         this.rows = response.data;
-        this.count = response.count;
+        this.count = response.allData.length;
 
         this.selected.length = 0;
 
-        this.initProcesses(); // TODO : temp
+        this.initProcesses();
 
         this.loading = false;
         this.resetDirty();
@@ -130,6 +88,21 @@ export class PartyComponent implements OnInit, DirtyOperations {
       }
     );
     return res;
+  }
+
+  refresh () {
+    this.loading = true;
+    const rows = this.rows;
+    this.rows = [];
+
+    setTimeout(() => {
+      this.rows = rows;
+
+      this.selected.length = 0;
+
+      this.loading = false;
+      this.resetDirty();
+    }, 50);
   }
 
   // TODO: replace this with a call to back-end
@@ -176,14 +149,9 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   changePageSize (newPageLimit: number) {
     this.offset = 0;
-    this.rowLimiter.pageSize = newPageLimit;
-    //this.searchAndCount();
-  }
+    this.pageSize = newPageLimit;
 
-  onPage (event) {
-    console.log('Page Event', event);
-    this.offset = event.offset;
-    this.search();
+    this.refresh();
   }
 
   isSaveAsCSVButtonEnabled () {

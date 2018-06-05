@@ -35,9 +35,9 @@
             <md-input-container style="width:100%">
               <input mdInput placeholder="Issuer" name="issuer" id="issuer_id">
             </md-input-container>
-          <!--  <md-input-container style="width:100%">
-              <input mdInput placeholder="Issuer" name="issuer" id=issuer_id">
-            </md-input-container>-->
+            <!--  <md-input-container style="width:100%">
+                <input mdInput placeholder="Issuer" name="issuer" id=issuer_id">
+              </md-input-container>-->
             <md-input-container style="width:100%">
               <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
             </md-input-container>
@@ -66,6 +66,7 @@
               [externalPaging]="false"
               [externalSorting]="false"
               [count]="identifiers.length"
+              (activate)="onActivate($event)"
             >
             </ngx-datatable>
 
@@ -74,11 +75,13 @@
                 <md-icon>add</md-icon>
                 <span>New</span>
               </button>
-              <button md-raised-button (click)="editIdentifier()" color="primary" [disabled]="selectedIdentifiers.length==0">
+              <button md-raised-button (click)="editIdentifier()" color="primary"
+                      [disabled]="selectedIdentifiers.length==0">
                 <md-icon>edit</md-icon>
                 <span>Edit</span>
               </button>
-              <button md-raised-button (click)="removeIdentifier()" color="primary" [disabled]="selectedIdentifiers.length==0">
+              <button md-raised-button (click)="removeIdentifier()" color="primary"
+                      [disabled]="selectedIdentifiers.length==0">
                 <md-icon>delete</md-icon>
                 <span>Delete</span>
               </button>
@@ -110,25 +113,24 @@
             >
               <ngx-datatable-column name="Process" prop="name"></ngx-datatable-column>
 
-              <ngx-datatable-column >
+              <ngx-datatable-column>
                 <ng-template ngx-datatable-header-template>
                   Initiator
                 </ng-template>
-                <ng-template ngx-datatable-cell-template let-row="row" let-value="value">
-                  <input type="checkbox" [(ngModel)]="row.isInitiator" [ngModelOptions]="{standalone: true}"/>
+                <ng-template ngx-datatable-cell-template let-row="row" let-value="row.isInitiator">
+                  <md-checkbox [checked]="row.isInitiator" (change)="row.isInitiator = !row.isInitiator"></md-checkbox>
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column >
+              <ngx-datatable-column>
                 <ng-template ngx-datatable-header-template>
                   Responder
                 </ng-template>
                 <ng-template ngx-datatable-cell-template let-row="row" let-value="value">
-                  <input type="checkbox" [(ngModel)]="row.isResponder" [ngModelOptions]="{standalone: true}"/>
+                  <md-checkbox [checked]="row.isResponder" (change)="row.isResponder = !row.isResponder"></md-checkbox>
                 </ng-template>
               </ngx-datatable-column>
             </ngx-datatable>
-
           </div>
         </md-card-content>
       </md-card>

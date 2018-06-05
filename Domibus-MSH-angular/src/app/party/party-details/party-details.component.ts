@@ -133,6 +133,7 @@ export class PartyDetailsComponent implements OnInit {
 
   ok () {
     this.persistProcesses();
+    this.party.joinedIdentifiers = this.party.identifiers.map(el => el.partyId).join(', ');
     this.dialogRef.close(true);
   }
 
@@ -144,10 +145,10 @@ export class PartyDetailsComponent implements OnInit {
 
     for (const proc of rowsToProcess) {
       if (proc.isInitiator) {
-          this.party.processesWithPartyAsInitiator.push({entityId: 0, name: proc.name})
+        this.party.processesWithPartyAsInitiator.push({entityId: 0, name: proc.name})
       }
       if (proc.isResponder) {
-          this.party.processesWithPartyAsResponder.push({entityId: 0, name: proc.name})
+        this.party.processesWithPartyAsResponder.push({entityId: 0, name: proc.name})
       }
     }
 
@@ -157,14 +158,20 @@ export class PartyDetailsComponent implements OnInit {
     const bothElements = rowsToProcess.filter(el => el.isInitiator && el.isResponder).map(el => el.name);
 
     this.party.joinedProcesses = ((initiatorElements.length > 0) ? initiatorElements.join('(I), ') + '(I), ' : '')
-                                  + ((responderElements.length > 0) ? responderElements.join('(R), ') + '(R), ' : '')
-                                  + ((bothElements.length > 0) ? bothElements.join('(IR), ') + '(IR)' : '');
+      + ((responderElements.length > 0) ? responderElements.join('(R), ') + '(R), ' : '')
+      + ((bothElements.length > 0) ? bothElements.join('(IR), ') + '(IR)' : '');
 
-    if(this.party.joinedProcesses.endsWith(', '))
+    if (this.party.joinedProcesses.endsWith(', '))
       this.party.joinedProcesses = this.party.joinedProcesses.substr(0, this.party.joinedProcesses.length - 2);
   }
 
   cancel () {
     this.dialogRef.close(false);
+  }
+
+  onActivate (event) {
+    if ('dblclick' === event.type) {
+      this.editIdentifier();
+    }
   }
 }

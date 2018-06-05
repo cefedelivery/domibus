@@ -63,5 +63,5 @@ export class ProcessInfoRo {
 
 export class PartyFilteredResult {
   data: PartyResponseRo[];
-  count: number;
+  allData: PartyResponseRo[];
 }

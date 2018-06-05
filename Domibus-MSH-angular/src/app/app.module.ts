@@ -12,8 +12,8 @@ import {
   MdSelectModule,
   MdSidenavModule,
   MdTooltipModule,
-  MdExpansionModule
-} from "@angular/material";
+  MdExpansionModule, MdCheckboxModule
+} from '@angular/material';
 import "hammerjs";
 
 import {NgxDatatableModule} from "@swimlane/ngx-datatable";
@@ -172,7 +172,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     Md2Module,
     Md2SelectModule,
     SharedModule,
-    MdExpansionModule
+    MdExpansionModule,
+    MdCheckboxModule
   ],
   providers: [
     AuthenticatedGuard,
