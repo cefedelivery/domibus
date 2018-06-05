@@ -6,6 +6,8 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -70,7 +72,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @XmlElement(required = true, name = "process")
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
-    private Set<Process> processes;
+    private List<Process> processes;
 
 
     @XmlTransient
@@ -84,7 +86,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
-    private Set<Party> parties;
+    private List<Party> parties;
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
@@ -220,7 +222,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
         for (final Party party : this.partiesXml.getParty()) {
             party.init(configuration);
         }
-        this.parties = new HashSet<>();
+        this.parties = new ArrayList<>();
         this.parties.addAll(this.partiesXml.getParty());
         for (final Binding binding : this.mepsXml.getBinding()) {
             binding.init(configuration);
@@ -308,11 +310,11 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.roles = roles;
     }
 
-    public Set<Party> getParties() {
+    public List<Party> getParties() {
         return this.parties;
     }
 
-    public void setParties(final Set<Party> parties) {
+    public void setParties(final List<Party> parties) {
         this.parties = parties;
     }
 
@@ -346,8 +348,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
 
     public void setAgreements(final Set<Agreement> agreements) {
         this.agreements = agreements;
-    }
+    } 
 
+    public Parties getPartiesXml() {
+        return this.partiesXml;
+    }
+    
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -432,9 +438,9 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.legConfigurations = legConfigurations;
     }
 
-    public Set<Process> getProcesses() {
+    public List<Process> getProcesses() {
         if (this.processes == null) {
-            this.processes = new HashSet<>();
+            this.processes = new ArrayList<>();
         }
         return this.processes;
     }

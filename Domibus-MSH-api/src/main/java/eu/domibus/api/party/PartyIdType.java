@@ -30,4 +30,10 @@ public class PartyIdType {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "PartyIdType{" + "name=" + name + ", value=" + value + '}';
+    }
+
 }
