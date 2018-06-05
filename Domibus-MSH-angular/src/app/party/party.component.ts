@@ -3,7 +3,7 @@ import {MdDialog, MdDialogRef} from '@angular/material';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {PartyService} from './party.service';
-import {PartyResponseRo, ProcessRo, ProcessInfoRo} from './party';
+import {PartyResponseRo, ProcessRo, ProcessInfoRo, PartyFilteredResult} from './party';
 import {Observable} from 'rxjs/Observable';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
@@ -48,7 +48,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   ngOnInit () {
     this.initColumns();
-    this.searchAndCount();
+    this.search();
+    // this.searchAndCount();
   }
 
   isDirty (): boolean {
@@ -61,45 +62,45 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.deletedParties.length = 0;
   }
 
-  searchAndCount () {
-    this.offset = 0;
+  // searchAndCount () {
+  //   this.offset = 0;
+  //
+  //   const partyObservable = this.search();
+  //
+  //   // this.loading = true;
+  //   // let pageStart = this.offset * this.rowLimiter.pageSize;
+  //   // let pageSize = this.rowLimiter.pageSize;
+  //   //
+  //   // let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
+  //   //   this.name,
+  //   //   this.endPoint,
+  //   //   this.partyID,
+  //   //   this.process,
+  //   //   pageStart,
+  //   //   pageSize);
+  //
+  //   const countObservable: Observable<number> = this.partyService.countParty(
+  //     this.name,
+  //     this.endPoint,
+  //     this.partyID,
+  //     this.process);
+  //
+  //   Observable.zip(partyObservable, countObservable).subscribe((response) => {
+  //       this.rows = response[0];
+  //       this.count = response[1];
+  //       this.loading = false;
+  //       if (this.count > AlertComponent.MAX_COUNT_CSV) {
+  //         this.alertService.error('Maximum number of rows reached for downloading CSV');
+  //       }
+  //     },
+  //     error => {
+  //       this.alertService.error('Could not load parties' + error);
+  //       this.loading = false;
+  //     }
+  //   );
+  // }
 
-    const partyObservable = this.search();
-
-    // this.loading = true;
-    // let pageStart = this.offset * this.rowLimiter.pageSize;
-    // let pageSize = this.rowLimiter.pageSize;
-    //
-    // let partyObservable: Observable<PartyResponseRo[]> = this.partyService.listParties(
-    //   this.name,
-    //   this.endPoint,
-    //   this.partyID,
-    //   this.process,
-    //   pageStart,
-    //   pageSize);
-
-    const countObservable: Observable<number> = this.partyService.countParty(
-      this.name,
-      this.endPoint,
-      this.partyID,
-      this.process);
-
-    Observable.zip(partyObservable, countObservable).subscribe((response) => {
-        this.rows = response[0];
-        this.count = response[1];
-        this.loading = false;
-        if (this.count > AlertComponent.MAX_COUNT_CSV) {
-          this.alertService.error('Maximum number of rows reached for downloading CSV');
-        }
-      },
-      error => {
-        this.alertService.error('Could not load parties' + error);
-        this.loading = false;
-      }
-    );
-  }
-
-  search (): Observable<PartyResponseRo[]> {
+  search () : Observable<PartyFilteredResult> {
     this.loading = true;
     const pageStart = this.offset * this.rowLimiter.pageSize;
     const pageSize = this.rowLimiter.pageSize;
@@ -113,9 +114,10 @@ export class PartyComponent implements OnInit, DirtyOperations {
       pageSize);
 
     res.subscribe((response) => {
-        this.rows = response;
+        this.rows = response.data;
+        this.count = response.count;
+
         this.selected.length = 0;
-        // debugger;
 
         this.initProcesses(); // TODO : temp
 
@@ -174,7 +176,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   changePageSize (newPageLimit: number) {
     this.offset = 0;
     this.rowLimiter.pageSize = newPageLimit;
-    this.searchAndCount();
+    //this.searchAndCount();
   }
 
   onPage (event) {

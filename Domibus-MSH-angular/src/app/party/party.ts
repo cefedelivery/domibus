@@ -60,3 +60,8 @@ export class ProcessInfoRo {
 
   isResponder: boolean;
 }
+
+export class PartyFilteredResult {
+  data: PartyResponseRo[];
+  count: number;
+}

@@ -1,9 +1,9 @@
-import {Injectable} from "@angular/core";
-import {Http, URLSearchParams} from "@angular/http";
-import {AlertService} from "app/alert/alert.service";
-import {PartyResponseRo} from "./party";
-import {Observable} from "rxjs/Observable";
-import {DownloadService} from "../download/download.service";
+import {Injectable} from '@angular/core';
+import {Http, URLSearchParams} from '@angular/http';
+import {AlertService} from 'app/alert/alert.service';
+import {PartyResponseRo, PartyFilteredResult} from './party';
+import {Observable} from 'rxjs/Observable';
+import {DownloadService} from '../download/download.service';
 
 /**
  * @author Thomas Dussart
@@ -13,30 +13,48 @@ import {DownloadService} from "../download/download.service";
 @Injectable()
 export class PartyService {
 
-  static readonly LIST_PARTIES: string = "rest/party/list";
-  static readonly UPDATE_PARTIES: string = "rest/party/update";
-  static readonly COUNT_PARTIES: string = "rest/party/count";
-  static readonly CSV_PARTIES: string = "rest/party/csv";
+  static readonly LIST_PARTIES: string = 'rest/party/list';
+  static readonly UPDATE_PARTIES: string = 'rest/party/update';
+  static readonly COUNT_PARTIES: string = 'rest/party/count';
+  static readonly CSV_PARTIES: string = 'rest/party/csv';
 
-  constructor(private http: Http, private alertService: AlertService) {
+  constructor (private http: Http, private alertService: AlertService) {
 
   }
 
-  listParties(name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyResponseRo[]> {
+  listParties (name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyFilteredResult> {
 
-    let searchParams: URLSearchParams = new URLSearchParams();
+    return this.http.get(PartyService.LIST_PARTIES).map(res => {
+      let records = res.json() as PartyResponseRo[];
 
-    searchParams.set('name', name);
-    searchParams.set('endPoint', endPoint);
-    searchParams.set('partyId', partyId);
-    searchParams.set('process', process);
-    searchParams.set('pageStart', pageStart);
-    searchParams.set('pageSize', pageSize);
+      if (name)
+        records = records.filter(party => party.name === name);
+      if (endPoint)
+        records = records.filter(party => party.endpoint === endPoint);
+      if (partyId)
+        records = records.filter(party => party.identifiers.filter(x => x.partyId === partyId).length > 0);
+      if (process)
+        records = records.filter(party => party.joinedProcesses.lastIndexOf(process) >= 0);
 
-    return this.http.get(PartyService.LIST_PARTIES, {search: searchParams}).map(res => res.json());
+      const result = {data: records, count: records.length};
+      return result;
+    });
   }
 
-  countParty(name: string, endPoint: string, partyId: string, process: string): Observable<number> {
+  // listParties (name: string, endPoint: string, partyId: string, process: string, pageStart, pageSize): Observable<PartyResponseRo[]> {
+  //   const searchParams: URLSearchParams = new URLSearchParams();
+  //
+  //   searchParams.set('name', name);
+  //   searchParams.set('endPoint', endPoint);
+  //   searchParams.set('partyId', partyId);
+  //   searchParams.set('process', process);
+  //   searchParams.set('pageStart', pageStart);
+  //   searchParams.set('pageSize', pageSize);
+  //
+  //   return this.http.get(PartyService.LIST_PARTIES, {search: searchParams}).map(res => res.json());
+  // }
+
+  countParty (name: string, endPoint: string, partyId: string, process: string): Observable<number> {
     let searchParams: URLSearchParams = new URLSearchParams();
 
     searchParams.set('name', name);
@@ -47,29 +65,29 @@ export class PartyService {
     return this.http.get(PartyService.COUNT_PARTIES, {search: searchParams}).map(res => res.json());
   }
 
-  getFilterPath(name: string, endPoint: string, partyId: string, process: string) {
+  getFilterPath (name: string, endPoint: string, partyId: string, process: string) {
     let result = '?';
     //filters
-    if(name) {
+    if (name) {
       result += 'name=' + name + '&';
     }
-    if(endPoint) {
+    if (endPoint) {
       result += 'endPoint=' + endPoint + '&';
     }
-    if(partyId) {
+    if (partyId) {
       result += 'partyId=' + partyId + '&';
     }
-    if(process) {
+    if (process) {
       result += 'process=' + process + '&';
     }
     return result;
   }
 
-  saveAsCsv(name: string, endPoint: string, partyId: string, process: string) {
+  saveAsCsv (name: string, endPoint: string, partyId: string, process: string) {
     DownloadService.downloadNative(PartyService.CSV_PARTIES + this.getFilterPath(name, endPoint, partyId, process));
   }
 
-  initParty() {
+  initParty () {
     const newParty = new PartyResponseRo();
     newParty.name = 'new';
     newParty.processesWithPartyAsInitiator = [];
@@ -78,7 +96,7 @@ export class PartyService {
     return newParty;
   }
 
-  updateParties(partyList: PartyResponseRo[]) {
+  updateParties (partyList: PartyResponseRo[]) {
     console.log('updateParties')
     console.log('put ... ', PartyService.UPDATE_PARTIES)
     return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
