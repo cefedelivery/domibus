@@ -5,10 +5,10 @@ import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
 import eu.domibus.ext.domain.DomainDTO;
 import eu.domibus.ext.domain.JmsMessageDTO;
-import eu.domibus.ext.exceptions.DomibusPropertyException;
-import eu.domibus.ext.services.DomainContextService;
-import eu.domibus.ext.services.DomibusPropertyService;
-import eu.domibus.ext.services.JMSService;
+import eu.domibus.ext.exceptions.DomibusPropertyExtException;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageNotFoundException;
@@ -45,15 +45,14 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     protected static final String JMSPLUGIN_QUEUE_PRODUCER_NOTIFICATION_ERROR = "jmsplugin.queue.producer.notification.error";
     protected static final String JMSPLUGIN_QUEUE_OUT = "jmsplugin.queue.out";
 
+    @Autowired
+    protected JMSExtService jmsExtService;
 
     @Autowired
-    protected JMSService jmsService;
+    protected DomibusPropertyExtService domibusPropertyExtService;
 
     @Autowired
-    protected DomibusPropertyService domibusPropertyService;
-
-    @Autowired
-    protected DomainContextService domainContextService;
+    protected DomainContextExtService domainContextExtService;
 
     @Autowired
     @Qualifier(value = "mshToBackendTemplate")
@@ -129,17 +128,17 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     protected void sendReplyMessage(final String messageId, final String errorMessage, final String correlationId) {
-        final DomainDTO currentDomain = domainContextService.getCurrentDomain();
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
         final JmsMessageDTO jmsMessageDTO = new ReplyMessageCreator(messageId, errorMessage, correlationId).createMessage();
-        sendJmsMessage(jmsMessageDTO, domibusPropertyService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_REPLY));
+        sendJmsMessage(jmsMessageDTO, domibusPropertyExtService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_REPLY));
     }
 
     @Override
     public void deliverMessage(final String messageId) {
-        final DomainDTO currentDomain = domainContextService.getCurrentDomain();
-        final String queueValue = domibusPropertyService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_OUT);
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+        final String queueValue = domibusPropertyExtService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_OUT);
         if (StringUtils.isEmpty(queueValue)) {
-            throw new DomibusPropertyException("Error getting the queue [" + JMSPLUGIN_QUEUE_OUT + "]");
+            throw new DomibusPropertyExtException("Error getting the queue [" + JMSPLUGIN_QUEUE_OUT + "]");
         }
         LOG.info("Sending message to queue [{}]", queueValue);
         mshToBackendTemplate.send(queueValue, new DownloadMessageCreator(messageId));
@@ -167,13 +166,13 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     }
 
     protected void sendJmsMessage(JmsMessageDTO message, String queueProperty) {
-        final DomainDTO currentDomain = domainContextService.getCurrentDomain();
-        final String queueValue = domibusPropertyService.getDomainProperty(currentDomain, queueProperty);
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+        final String queueValue = domibusPropertyExtService.getDomainProperty(currentDomain, queueProperty);
         if (StringUtils.isEmpty(queueValue)) {
-            throw new DomibusPropertyException("Error getting the queue [" + queueProperty + "]");
+            throw new DomibusPropertyExtException("Error getting the queue [" + queueProperty + "]");
         }
         LOG.info("Sending message to queue [{}]", queueValue);
-        jmsService.sendMapMessageToQueue(message, queueValue);
+        jmsExtService.sendMapMessageToQueue(message, queueValue);
     }
 
     @Override
