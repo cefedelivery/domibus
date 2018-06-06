@@ -467,8 +467,6 @@ public class PullMessageServiceImplTest {
         }};
         pullMessageService.pullFailedOnReceipt(legConfiguration, userMessageLog);
         new VerificationsInOrder() {{
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, withAny(new Timestamp(0)));
-            times = 1;
             pullMessageStateService.reset(userMessageLog);
             times = 1;
         }};
