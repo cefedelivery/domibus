@@ -59,11 +59,11 @@
           </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
-                   #originalSender="ngModel" id="originalsender_id">
+                   #originalSender="ngModel" id="originalsender_id" [hidden]="!fourCornerEnabled">
           </md-input-container>
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
-                   #finalRecipient="ngModel" id="finalrecipient_id">
+                   #finalRecipient="ngModel" id="finalrecipient_id" [hidden]="!fourCornerEnabled">
           </md-input-container>
 
           <md2-datepicker placeholder="Sent From:"
