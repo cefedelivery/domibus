@@ -2,7 +2,6 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.api.pmode.PModeArchiveInfo;
@@ -363,5 +362,23 @@ public class PartyServiceImpl implements PartyService {
             LOG.error("Error writing current PMode", e);
             throw new IllegalStateException(e);
         }
+    }
+
+    public List<eu.domibus.api.process.Process> getAllProcesses() {
+        //Retrieve all processes
+        List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("findAllProcesses for pmode");
+            allProcesses.forEach(process -> LOG.debug("     [{}]", process));
+        }
+
+        List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("     party");
+            processes.forEach(party -> LOG.debug("[{}]", party));
+        }
+
+        return processes;
     }
 }

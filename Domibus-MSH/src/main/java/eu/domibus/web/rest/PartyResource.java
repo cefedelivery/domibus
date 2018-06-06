@@ -253,4 +253,9 @@ public class PartyResource {
                     }
                 });
     }
+
+    @RequestMapping(value = {"/processes"}, method = RequestMethod.GET)
+    public List<ProcessRo> listProcesses() {
+        return domainConverter.convert(partyService.getAllProcesses(), ProcessRo.class);
+    }
 }

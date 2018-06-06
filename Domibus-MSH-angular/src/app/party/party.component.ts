@@ -56,7 +56,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   ngOnInit () {
     this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
-    this.search();
+    this.listPartiesAndProcesses();
   }
 
   isDirty (): boolean {
@@ -70,32 +70,33 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   searchIfOK () {
-    this.askIfNeededAndThen(this.search);
+    this.askIfNeededAndThen(this.listPartiesAndProcesses);
   }
 
-  search (): Observable<PartyFilteredResult> {
-    this.loading = true;
+  listPartiesAndProcesses () {
+    return Observable.forkJoin([
+      this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process),
+      this.partyService.listProcesses()
+    ])
+      .subscribe((data: any[]) => {
+          const partiesRes: PartyFilteredResult = data[0];
+          const processes: ProcessRo[] = data[1];
 
-    const res = this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process);
+          this.allProcesses = processes.map(el => el.name);
 
-    res.subscribe((response) => {
-        this.rows = response.data;
-        this.allRows = response.allData;
-        this.count = this.allRows.length;
+          this.rows = partiesRes.data;
+          this.allRows = partiesRes.allData;
+          this.count = this.allRows.length;
+          this.selected.length = 0;
 
-        this.selected.length = 0;
-
-        this.initProcesses();
-
-        this.loading = false;
-        this.resetDirty();
-      },
-      error => {
-        this.alertService.error('Could not load parties' + error);
-        this.loading = false;
-      }
-    );
-    return res;
+          this.loading = false;
+          this.resetDirty();
+        },
+        error => {
+          this.alertService.error('Could not load parties' + error);
+          this.loading = false;
+        }
+      );
   }
 
   refresh () {
@@ -112,20 +113,6 @@ export class PartyComponent implements OnInit, DirtyOperations {
       this.loading = false;
       this.resetDirty();
     }, 50);
-  }
-
-  // TODO: replace this with a call to back-end
-  initProcesses () {
-    const all = [];
-    for (const row of this.rows) {
-      for (const p1 of row.processesWithPartyAsInitiator) {
-        all.push(p1.name)
-      }
-      for (const p1 of row.processesWithPartyAsResponder) {
-        all.push(p1.name)
-      }
-    }
-    this.allProcesses = Array.from(new Set(all));
   }
 
   initColumns () {
@@ -194,7 +181,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   cancel () {
-    this.search();
+    this.listPartiesAndProcesses();
   }
 
   save () {
@@ -244,10 +231,12 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
     dialogRef.afterClosed().subscribe(ok => {
       if (ok) {
-        if (JSON.stringify(row) === JSON.stringify(rowCopy)) return; // nothing changed
+        if (JSON.stringify(row) === JSON.stringify(rowCopy))
+          return; // nothing changed
 
         Object.assign(row, rowCopy);
-        if (this.updatedParties.indexOf(row) < 0) this.updatedParties.push(row);
+        if (this.updatedParties.indexOf(row) < 0)
+          this.updatedParties.push(row);
       }
     });
   }

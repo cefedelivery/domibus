@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Http, URLSearchParams} from '@angular/http';
 import {AlertService} from 'app/alert/alert.service';
-import {PartyResponseRo, PartyFilteredResult} from './party';
+import {PartyResponseRo, PartyFilteredResult, ProcessRo} from './party';
 import {Observable} from 'rxjs/Observable';
 import {DownloadService} from '../download/download.service';
 
@@ -12,7 +12,7 @@ import {DownloadService} from '../download/download.service';
 
 @Injectable()
 export class PartyService {
-
+  static readonly LIST_PROCESSES: string = 'rest/party/processes';
   static readonly LIST_PARTIES: string = 'rest/party/list';
   static readonly UPDATE_PARTIES: string = 'rest/party/update';
   static readonly COUNT_PARTIES: string = 'rest/party/count';
@@ -20,6 +20,12 @@ export class PartyService {
 
   constructor (private http: Http, private alertService: AlertService) {
 
+  }
+
+  listProcesses (): Observable<ProcessRo> {
+    return this.http.get(PartyService.LIST_PROCESSES).map(res => {
+      return res.json();
+    });
   }
 
   listParties (name: string, endPoint: string, partyId: string, process: string)
@@ -87,7 +93,6 @@ export class PartyService {
   }
 
   updateParties (partyList: PartyResponseRo[]) {
-    console.log('updateParties')
     console.log('put ... ', PartyService.UPDATE_PARTIES)
     return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
   }

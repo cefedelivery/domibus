@@ -1,5 +1,7 @@
 package eu.domibus.api.party;
 
+import eu.domibus.api.process.Process;
+
 import java.util.List;
 
 /**
@@ -55,4 +57,11 @@ public interface PartyService {
      * @param partyList
      */
     void updateParties(List<Party> partyList);
+
+    /**
+     * Retrieve all the processes configured in the pmode.
+     *
+     * @return a lit of processes.
+     */
+    List<Process> getAllProcesses();
 }
