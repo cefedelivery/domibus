@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {Http, URLSearchParams} from '@angular/http';
+import {Http, Response, URLSearchParams} from '@angular/http';
 import {AlertService} from 'app/alert/alert.service';
-import {PartyResponseRo, PartyFilteredResult, ProcessRo} from './party';
+import {PartyResponseRo, PartyFilteredResult, ProcessRo, CertificateRo} from './party';
 import {Observable} from 'rxjs/Observable';
 import {DownloadService} from '../download/download.service';
 
@@ -12,6 +12,7 @@ import {DownloadService} from '../download/download.service';
 
 @Injectable()
 export class PartyService {
+  static readonly CERTIFICATE: string = 'rest/party/{partyName}/certificate';
   static readonly LIST_PROCESSES: string = 'rest/party/processes';
   static readonly LIST_PARTIES: string = 'rest/party/list';
   static readonly UPDATE_PARTIES: string = 'rest/party/update';
@@ -22,10 +23,21 @@ export class PartyService {
 
   }
 
+  uploadCertificate(file, partyName: string): Observable<CertificateRo> {
+    const input = new FormData();
+    input.append('certificate', file);
+    return this.http.post(PartyService.CERTIFICATE.replace('{partyName}', partyName), input)
+      .map(res => res.json());
+  }
+
+  getCertificate (partyName: string): Observable<CertificateRo> {
+    return this.http.get(PartyService.CERTIFICATE.replace('{partyName}', partyName))
+      .map(res => res.json());
+  }
+
   listProcesses (): Observable<ProcessRo> {
-    return this.http.get(PartyService.LIST_PROCESSES).map(res => {
-      return res.json();
-    });
+    return this.http.get(PartyService.LIST_PROCESSES)
+      .map(res => res.json());
   }
 
   listParties (name: string, endPoint: string, partyId: string, process: string)

@@ -274,9 +274,10 @@ public class PartyResource {
     }
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.GET)
-    public CertificateRo getCertificate(@RequestParam("partyName") String partyName) {
+    public CertificateRo getCertificate(@PathVariable(name="partyName") String partyName) {
         try {
             X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
+            //X509Certificate cert = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), partyName);
             return convert(cert);
         } catch (KeyStoreException e) {
             return null;
@@ -285,10 +286,12 @@ public class PartyResource {
 
     private CertificateRo convert(X509Certificate cert) {
         CertificateRo res = new CertificateRo();
-        res.setSubjectName(cert.getSubjectDN().getName());
+        if(cert.getSubjectX500Principal() != null)
+            res.setSubjectName(cert.getSubjectX500Principal().getName());
         res.setValidityFrom(cert.getNotBefore());
         res.setValidityTo(cert.getNotAfter());
-        res.setIssuer(cert.getIssuerDN().getName());
+        if(cert.getIssuerX500Principal() != null)
+            res.setIssuer(cert.getIssuerX500Principal().getName());
         res.setFingerprints(getThumbprint(cert));
 
         return res;
@@ -314,7 +317,8 @@ public class PartyResource {
     }
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
-    public ResponseEntity<CertificateRo> convertCertificateFile(@RequestPart("certificate") MultipartFile certificate, @RequestParam("partyName") String partyName) {
+    public ResponseEntity<CertificateRo> convertCertificateFile(@RequestPart("certificate") MultipartFile certificate,
+                                                                @PathVariable(name="partyName") String partyName) {
 
         if (!certificate.isEmpty()) {
             try {

@@ -1,11 +1,14 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MD_DIALOG_DATA, MdDialogRef, MdDialog, MdDialogConfig} from '@angular/material';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
-import {IdentifierRo, PartyIdTypeRo, PartyResponseRo, ProcessInfoRo} from '../party';
+import {CertificateRo, IdentifierRo, PartyFilteredResult, PartyIdTypeRo, PartyResponseRo, ProcessInfoRo, ProcessRo} from '../party';
 import {PartyIdentifierDetailsComponent} from '../party-identifier-details/party-identifier-details.component';
+import {PartyService} from '../party.service';
+import {AlertService} from '../../alert/alert.service';
 
 @Component({
   selector: 'app-party-details',
+  providers: [PartyService],
   templateUrl: './party-details.component.html',
   styleUrls: ['./party-details.component.css']
 })
@@ -21,8 +24,14 @@ export class PartyDetailsComponent implements OnInit {
   identifiers: Array<IdentifierRo>;
   selectedIdentifiers = [];
 
+  @ViewChild('fileInput')
+  private fileInput;
 
-  constructor (public dialogRef: MdDialogRef<PartyDetailsComponent>, @Inject(MD_DIALOG_DATA) public data: any, private dialog: MdDialog) {
+  constructor (public dialogRef: MdDialogRef<PartyDetailsComponent>,
+               @Inject(MD_DIALOG_DATA) public data: any,
+               private dialog: MdDialog,
+               public partyService: PartyService,
+               public alertService: AlertService) {
     this.party = data.edit;
     this.identifiers = this.party.identifiers;
     this.allProcesses = data.allProcesses;
@@ -59,6 +68,36 @@ export class PartyDetailsComponent implements OnInit {
 
   ngOnInit () {
     this.initColumns();
+    this.fetchCertificateIfNeeded();
+  }
+
+  fetchCertificateIfNeeded () {
+    if (!this.party.certificate) {
+      this.partyService.getCertificate(this.party.name)
+        .subscribe((cert: CertificateRo) => {
+            this.party.certificate = cert;
+          },
+          error => {
+            this.alertService.error('Could not load party certificate' + error);
+          });
+    }
+  }
+
+  uploadCertificate () {
+    let fi = this.fileInput.nativeElement;
+    this.partyService.uploadCertificate(fi.files[0], this.party.name)
+      .subscribe(res => {
+          this.alertService.success("Certificate uploaded", false);
+          this.party.certificate = res;
+        },
+        err => {
+          if (!err.ok && err.statusText.length == 0) {
+            this.alertService.error('Error updating truststore file (' + fi.files[0].name + ')', false);
+          } else {
+            this.alertService.error(err.text() + ' (' + fi.files[0].name + ')', false);
+          }
+        }
+      );
   }
 
   initColumns () {
@@ -137,8 +176,7 @@ export class PartyDetailsComponent implements OnInit {
     this.dialogRef.close(true);
   }
 
-  // transform data from view-model to model
-  private persistProcesses () {
+  persistProcesses () {
     this.party.processesWithPartyAsInitiator = [];
     this.party.processesWithPartyAsResponder = [];
     const rowsToProcess = this.processesRows.filter(el => el.isResponder || el.isInitiator);
@@ -174,4 +212,5 @@ export class PartyDetailsComponent implements OnInit {
       this.editIdentifier();
     }
   }
+  
 }

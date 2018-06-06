@@ -24,6 +24,7 @@ export class PartyResponseRo {
 
   processesWithPartyAsResponder: Array<ProcessRo>;
 
+  certificate: CertificateRo;
 }
 
 export class IdentifierRo {
@@ -63,5 +64,19 @@ export class ProcessInfoRo {
 
 export class PartyFilteredResult {
   data: PartyResponseRo[];
+
   allData: PartyResponseRo[];
+}
+
+export class CertificateRo {
+
+  subjectName: string;
+
+  validityFrom: Date;
+
+  validityTo: Date;
+
+  issuer: string;
+
+  fingerprints: string;
 }

@@ -70,7 +70,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   searchIfOK () {
-    this.askIfNeededAndThen(this.listPartiesAndProcesses);
+    this.checkIsDirtyAndThen(this.listPartiesAndProcesses);
   }
 
   listPartiesAndProcesses () {
@@ -241,7 +241,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
     });
   }
 
-  askIfNeededAndThen (func: Function) {
+  checkIsDirtyAndThen (func: Function) {
     if (this.isDirty()) {
       this.dialog.open(CancelDialogComponent).afterClosed().subscribe(yes => {
         if (yes) {

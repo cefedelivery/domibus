@@ -35,12 +35,16 @@
             <md-input-container style="width:100%">
               <input mdInput placeholder="Issuer" name="issuer" id="issuer_id">
             </md-input-container>
-            <!--  <md-input-container style="width:100%">
-                <input mdInput placeholder="Issuer" name="issuer" id=issuer_id">
-              </md-input-container>-->
             <md-input-container style="width:100%">
               <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
             </md-input-container>
+
+            <input #fileInput type="file" id="cert" accept=".jks" (change)="uploadCertificate()">
+
+            <!--<button md-raised-button color="primary" (click)="uploadCertificate()" id="uploadbutton_id">-->
+              <!--<md-icon>file_upload</md-icon>-->
+              <!--<span>Import</span>-->
+            <!--</button>-->
           </div>
         </md-card-content>
       </md-card>
