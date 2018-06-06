@@ -122,7 +122,7 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     }
 
     protected String getProperty(String propertyName) {
-        return getProperty( propertyName, null);
+        return getProperty(propertyName, null);
     }
 
     protected String getProperty(String propertyName, String defaultValue) {
@@ -331,18 +331,18 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException(propPayload + " neither available as byte[] or URL, aborting transformation");
             }
-
-
-            String descriptionLanguage = trim(getProperty(DESCRIPTION_LANGUAGE));
-            Locale descriptionLocale = Locale.getDefault();
-            if (!isEmpty(descriptionLanguage)) {
-                try {
-                    descriptionLocale = new Locale(descriptionLanguage);
-                } catch (RuntimeException rEx) {
-                    LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
-                }
-            }
-            target.addPayload(contentId, payloadDataHandler, partProperties, false, new Submission.Description(descriptionLocale, description), null);
         }
+
+        String descriptionLanguage = trim(getProperty(DESCRIPTION_LANGUAGE));
+        Locale descriptionLocale = Locale.getDefault();
+        if (!isEmpty(descriptionLanguage)) {
+            try {
+                descriptionLocale = new Locale(descriptionLanguage);
+            } catch (RuntimeException rEx) {
+                LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
+            }
+        }
+        target.addPayload(contentId, payloadDataHandler, partProperties, false, new Submission.Description(descriptionLocale, description), null);
     }
+
 }
