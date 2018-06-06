@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class DomibusLoggerDomainFilter extends Filter<ILoggingEvent> {
 
     static final String MDC_DOMAIN_KEY = DomibusLogger.MDC_PROPERTY_PREFIX + DomibusLogger.MDC_DOMAIN;
-    static final String MARKER_SEPARATOR = ",";
+    private static final String MARKER_SEPARATOR = ",";
     private String domainName = "default";
 
     private String markerName;
