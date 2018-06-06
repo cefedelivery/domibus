@@ -80,6 +80,11 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Override
+    public X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException {
+        return (X509Certificate) getTrustStore().getCertificate(alias);
+    }
+
+    @Override
     public String getPrivateKeyPassword(String alias) {
         return domibusPropertyProvider.getProperty(domain, "domibus.security.key.private.password");
     }

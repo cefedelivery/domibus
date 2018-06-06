@@ -2,15 +2,14 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.core.party.IdentifierRo;
-import eu.domibus.core.party.PartyProcessLinkRo;
-import eu.domibus.core.party.PartyResponseRo;
-import eu.domibus.core.party.ProcessRo;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.party.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.PModePartiesRequestRO;
@@ -19,7 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +50,12 @@ public class PartyResource {
 
     @Autowired
     private CsvServiceImpl csvServiceImpl;
+
+    @Autowired
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Autowired
+    protected DomainContextProvider domainProvider;
 
     @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PartyResponseRo> listParties(
@@ -76,7 +91,6 @@ public class PartyResource {
         flattenProcesses(partyResponseRos);
 
 
-
         partyResponseRos.forEach(partyResponseRo -> {
             final List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo
                     .getProcessesWithPartyAsInitiator();
@@ -88,7 +102,7 @@ public class PartyResource {
 
             processRos
                     .stream()
-                    .map(item->new PartyProcessLinkRo(item.getName(),processesWithPartyAsInitiator.contains(item),processesWithPartyAsResponder.contains(item)))
+                    .map(item -> new PartyProcessLinkRo(item.getName(), processesWithPartyAsInitiator.contains(item), processesWithPartyAsResponder.contains(item)))
                     .collect(Collectors.toSet());
         });
 
@@ -128,7 +142,7 @@ public class PartyResource {
                                          @RequestParam(value = "partyId", required = false) String partyId,
                                          @RequestParam(value = "process", required = false) String process) {
         String resultText;
-        final List<PartyResponseRo> partyResponseRoList = listParties(name,endPoint,partyId,process,0, CsvService.MAX_NUMBER_OF_ENTRIES);
+        final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
         // excluding unneeded columns
         csvServiceImpl.setExcludedItems(CsvExcludedItems.PARTY_RESOURCE.getExcludedItems());
@@ -232,22 +246,22 @@ public class PartyResource {
                             map(name -> name.concat("(IR)")).
                             collect(Collectors.joining(","));
 
-                    List<String> joinedProcess= Lists.newArrayList();
+                    List<String> joinedProcess = Lists.newArrayList();
 
-                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorOnly)){
+                    if (StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorOnly)) {
                         joinedProcess.add(joinedProcessesWithMeAsInitiatorOnly);
                     }
 
-                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsResponderOnly)){
+                    if (StringUtils.isNotEmpty(joinedProcessesWithMeAsResponderOnly)) {
                         joinedProcess.add(joinedProcessesWithMeAsResponderOnly);
                     }
 
-                    if(StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorAndResponder)){
+                    if (StringUtils.isNotEmpty(joinedProcessesWithMeAsInitiatorAndResponder)) {
                         joinedProcess.add(joinedProcessesWithMeAsInitiatorAndResponder);
                     }
 
                     partyResponseRo.setJoinedProcesses(
-                            StringUtils.join(joinedProcess,", "));
+                            StringUtils.join(joinedProcess, ", "));
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Flatten processes for [{}]=[{}]", partyResponseRo.getName(), partyResponseRo.getJoinedProcesses());
                     }
@@ -257,5 +271,67 @@ public class PartyResource {
     @RequestMapping(value = {"/processes"}, method = RequestMethod.GET)
     public List<ProcessRo> listProcesses() {
         return domainConverter.convert(partyService.getAllProcesses(), ProcessRo.class);
+    }
+
+    @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.GET)
+    public CertificateRo getCertificate(@RequestParam("partyName") String partyName) {
+        try {
+            X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
+            return convert(cert);
+        } catch (KeyStoreException e) {
+            return null;
+        }
+    }
+
+    private CertificateRo convert(X509Certificate cert) {
+        CertificateRo res = new CertificateRo();
+        res.setSubjectName(cert.getSubjectDN().getName());
+        res.setValidityFrom(cert.getNotBefore());
+        res.setValidityTo(cert.getNotAfter());
+        res.setIssuer(cert.getIssuerDN().getName());
+        res.setFingerprints(getThumbprint(cert));
+
+        return res;
+    }
+
+    private static String getThumbprint(X509Certificate cert) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] der = new byte[0];
+        try {
+            der = cert.getEncoded();
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+        }
+        md.update(der);
+        byte[] digest = md.digest();
+        String digestHex = DatatypeConverter.printHexBinary(digest);
+        return digestHex.toLowerCase();
+    }
+
+    @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
+    public ResponseEntity<CertificateRo> convertCertificateFile(@RequestPart("certificate") MultipartFile certificate, @RequestParam("partyName") String partyName) {
+
+        if (!certificate.isEmpty()) {
+            try {
+                byte[] bytes = certificate.getBytes();
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                InputStream in = new ByteArrayInputStream(bytes);
+                X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
+                CertificateRo res = convert(cert);
+
+//                domibusCacheService.clearCache("certValidationByAlias");
+                return ResponseEntity.ok(res);
+            } catch (Exception e) {
+                LOG.error("Failed to upload the truststore file", e);
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
