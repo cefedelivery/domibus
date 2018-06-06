@@ -2,12 +2,16 @@ package eu.domibus.web.rest;
 
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -22,6 +26,10 @@ public class ApplicationResource {
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
 
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
+
     @RequestMapping(value = "info", method = RequestMethod.GET)
     public DomibusInfoRO getDomibusInfo() {
         LOG.debug("Getting application info");
@@ -33,6 +41,6 @@ public class ApplicationResource {
     @RequestMapping(value = "fourcornerenabled", method = RequestMethod.GET)
     public boolean getFourCornerModelEnabled() {
         LOG.debug("Getting four corner enabled");
-        return domibusPropertiesService.getFourCornerEnabled();
+        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled", true);
     }
 }

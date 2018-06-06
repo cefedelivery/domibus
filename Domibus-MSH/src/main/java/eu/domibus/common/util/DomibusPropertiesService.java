@@ -64,8 +64,4 @@ public class DomibusPropertiesService {
         return display.toString();
     }
 
-    public boolean getFourCornerEnabled() {
-        return MapUtils.getBooleanValue(domibusProps, "domibus.fourcornermodel.enabled", true);
-    }
-
 }
