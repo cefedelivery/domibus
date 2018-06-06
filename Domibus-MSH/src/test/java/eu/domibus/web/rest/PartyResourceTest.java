@@ -2,9 +2,11 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
 import eu.domibus.core.party.ProcessRo;
@@ -39,6 +41,12 @@ public class PartyResourceTest {
 
     @Injectable
     private CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    protected DomainContextProvider domainProvider;
 
     @Test
     public void listParties() throws Exception {

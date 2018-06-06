@@ -251,29 +251,8 @@ public class PartyServiceImpl implements PartyService {
 
     protected void updateParties(List<Party> partyList, Configuration configuration) {
 
-        List<eu.domibus.common.model.configuration.Party> allParties = pModeProvider.findAllParties();
-
-        final List<Process> allProcesses =
-                pModeProvider.findAllProcesses().
-                        stream().
-                        collect(collectingAndThen(toList(), ImmutableList::copyOf));
-//
-//        List<eu.domibus.common.model.configuration.Party> list = new ArrayList<>(partyList.size());
-//        for (Party party : partyList) {
-//            eu.domibus.common.model.configuration.Party p = domainCoreConverter.convert(party, eu.domibus.common.model.configuration.Party.class);
-//            list.add(p);
-//
-//            for (Identifier identifier : party.getIdentifiers()) {
-////                eu.domibus.common.model.configuration.Identifier i = domainCoreConverter.convert(identifier, eu.domibus.common.model.configuration.Identifier.class);
-////                i.setPartyIdType(new PartyIdType());
-////                p.getIdentifiers().add(i);
-//            }
-//        }
-        //List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
-        //Set<eu.domibus.common.model.configuration.Party> partySet = new HashSet<>(list);
-
         List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
-//   
+
         BusinessProcesses bp = configuration.getBusinessProcesses();
         Parties parties = bp.getPartiesXml();
         parties.getParty().clear();
@@ -332,6 +311,7 @@ public class PartyServiceImpl implements PartyService {
         });
     }
 
+    @Override
     public void updateParties(List<Party> partyList) {
 
         final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
@@ -364,6 +344,7 @@ public class PartyServiceImpl implements PartyService {
         }
     }
 
+    @Override
     public List<eu.domibus.api.process.Process> getAllProcesses() {
         //Retrieve all processes
         List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
