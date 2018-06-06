@@ -2,6 +2,7 @@ import {Component, OnInit} from "@angular/core";
 import {SecurityService} from "./security/security.service";
 import {Router} from "@angular/router";
 import {SecurityEventService} from "./security/security.event.service";
+import {Http, Response} from "@angular/http";
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,9 @@ export class AppComponent implements OnInit {
 
   constructor(private securityService: SecurityService,
               private router: Router,
-              private securityEventService: SecurityEventService) {
+              private securityEventService: SecurityEventService,
+              private http: Http) {
+
   }
 
   ngOnInit() {
