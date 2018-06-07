@@ -23,27 +23,28 @@
         </md-card-header>
         <md-card-content>
           <div class="panel">
-            <md-input-container style="width:100%">
-              <input mdInput placeholder="Subject name" name="subjectName" id="subjectName_id">
-            </md-input-container>
-            <md-input-container style="width:40%">
-              <input mdInput placeholder="Valid from" name="validityFrom" id="validityFrom_id">
-            </md-input-container>
-            <md-input-container style="width:40%">
-              <input mdInput placeholder="Valid to" name="validityTo" id="validityTo_id">
-            </md-input-container>
-            <md-input-container style="width:100%">
-              <input mdInput placeholder="Issuer" name="issuer" id="issuer_id">
-            </md-input-container>
-            <md-input-container style="width:100%">
-              <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
-            </md-input-container>
-
+            <!--<fieldset [disabled]="true">-->
+              <md-input-container style="width:100%">
+                <input mdInput placeholder="Subject name" name="subjectName" value="{{party.certificate.subjectName}}" id="subjectName_id">
+              </md-input-container>
+              <md-input-container style="width:40%">
+                <input mdInput placeholder="Valid from" name="validityFrom" id="validityFrom_id">
+              </md-input-container>
+              <md-input-container style="width:40%">
+                <input mdInput placeholder="Valid to" name="validityTo" id="validityTo_id">
+              </md-input-container>
+              <md-input-container style="width:100%">
+                <input mdInput placeholder="Issuer" name="issuer" id="issuer_id">
+              </md-input-container>
+              <md-input-container style="width:100%">
+                <input mdInput placeholder="Finger prints" name="fingerPrint" id="fingerPrint_id">
+              </md-input-container>
+            <!--</fieldset>-->
             <input #fileInput type="file" id="cert" accept=".jks" (change)="uploadCertificate()">
 
             <!--<button md-raised-button color="primary" (click)="uploadCertificate()" id="uploadbutton_id">-->
-              <!--<md-icon>file_upload</md-icon>-->
-              <!--<span>Import</span>-->
+            <!--<md-icon>file_upload</md-icon>-->
+            <!--<span>Import</span>-->
             <!--</button>-->
           </div>
         </md-card-content>

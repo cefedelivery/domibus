@@ -212,5 +212,5 @@ export class PartyDetailsComponent implements OnInit {
       this.editIdentifier();
     }
   }
-  
+
 }
