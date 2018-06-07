@@ -290,11 +290,7 @@ public class FSPluginProperties {
     private Integer getInteger(String value, Integer defaultValue) {
         Integer result = defaultValue;
         if (StringUtils.isNotEmpty(value)) {
-            try {
-                result = Integer.valueOf(value);
-            } catch (NumberFormatException e) {
-                result = defaultValue;
-            }
+            result = Integer.valueOf(value);
         }
         return result;
     }
@@ -311,13 +307,10 @@ public class FSPluginProperties {
             }
         }
 
-        Collections.sort(tempDomains, new Comparator<String>() {
-            @Override
-            public int compare(String domain1, String domain2) {
-                Integer domain1Order = getOrder(domain1);
-                Integer domain2Order = getOrder(domain2);
-                return domain1Order - domain2Order;
-            }
+        Collections.sort(tempDomains, (domain1, domain2) -> {
+            Integer domain1Order = getOrder(domain1);
+            Integer domain2Order = getOrder(domain2);
+            return domain1Order - domain2Order;
         });
         return tempDomains;
     }

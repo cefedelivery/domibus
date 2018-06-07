@@ -7,8 +7,8 @@ import eu.domibus.ext.domain.DomainDTO;
  *
  * <p>Operations available in the {@link DomainExtService} : </p>
  * <ul>
- *     <li>Gets domain ({@link #getCurrentDomain()})</li>
  *     <li>Gets domain for scheduler ({@link #getDomainForScheduler(String)})</li>
+ *     <li>Gets domain defined with code ({@link #getDomain(String)}</li>
  * </ul>
  *
  * @author Tiago Miguel
@@ -16,7 +16,7 @@ import eu.domibus.ext.domain.DomainDTO;
  */
 public interface DomainExtService {
 
-    DomainDTO getCurrentDomain();
-
     DomainDTO getDomainForScheduler(String schedulerName);
+
+    DomainDTO getDomain(String code);
 }

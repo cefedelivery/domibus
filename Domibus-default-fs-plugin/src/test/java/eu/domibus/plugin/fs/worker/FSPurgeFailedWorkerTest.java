@@ -1,5 +1,7 @@
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomainExtService;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.VerificationsInOrder;
@@ -20,13 +22,19 @@ public class FSPurgeFailedWorkerTest {
     @Tested
     private FSPurgeFailedWorker purgeFailedWorker;
 
+    @Injectable
+    private DomainExtService domainExtService;
+
+    @Injectable
+    private DomainContextExtService domainContextExtService;
+
     @Test
-    public void testExecuteInternal(@Injectable final JobExecutionContext context) throws Exception {
-        /*purgeFailedWorker.executeInternal(context);
+    public void testExecuteJob(@Injectable final JobExecutionContext context) throws Exception {
+        purgeFailedWorker.executeJob(context, null);
 
         new VerificationsInOrder(1){{
             purgeFailedService.purgeMessages();
-        }};*/
+        }};
     }
 
 }

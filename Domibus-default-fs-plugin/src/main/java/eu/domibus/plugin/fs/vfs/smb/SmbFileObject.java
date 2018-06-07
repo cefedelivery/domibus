@@ -137,7 +137,7 @@ public class SmbFileObject
     protected String[] doListChildren() throws Exception {
         // VFS-210: do not try to get listing for anything else than directories
         if (!file.isDirectory()) {
-            return null;
+            return new String[]{};
         }
 
         return UriParser.encode(file.list());

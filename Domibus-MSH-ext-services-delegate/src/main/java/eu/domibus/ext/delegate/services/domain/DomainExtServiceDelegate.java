@@ -25,12 +25,11 @@ public class DomainExtServiceDelegate implements DomainExtService {
     DomainExtConverter domainConverter;
 
     @Override
-    public DomainDTO getCurrentDomain() {
-        return domainConverter.convert(domainContextProvider.getCurrentDomain(), DomainDTO.class);
-    }
-
-    @Override
     public DomainDTO getDomainForScheduler(String schedulerName) {
         return domainConverter.convert(domainService.getDomainForScheduler(schedulerName), DomainDTO.class);
+    }
+
+    public DomainDTO getDomain(String code) {
+        return domainConverter.convert(domainService.getDomain(code), DomainDTO.class);
     }
 }

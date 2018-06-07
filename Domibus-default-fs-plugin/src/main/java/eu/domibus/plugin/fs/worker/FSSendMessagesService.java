@@ -1,6 +1,7 @@
 package eu.domibus.plugin.fs.worker;
 
 import eu.domibus.ext.services.AuthenticationExtService;
+import eu.domibus.ext.services.DomainExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -41,6 +42,9 @@ public class FSSendMessagesService {
     @Autowired
     private DomibusConfigurationExtService domibusConfigurationExtService;
 
+    @Autowired
+    private FSMultiTenancyService fsMultiTenancyService;
+
     /**
      * Triggering the send messages means that the message files from the OUT directory
      * will be processed to be sent
@@ -51,18 +55,19 @@ public class FSSendMessagesService {
         sendMessages(null);
         
         for (String domain : fsPluginProperties.getDomains()) {
-            sendMessages(domain);
+            if (fsMultiTenancyService.verifyDomainExists(domain)) {
+                sendMessages(domain);
+            }
         }
     }
     
     private void sendMessages(String domain) {
         FileObject[] contentFiles = null;
 
-        if(domain == null) {
-            domain = "default";
-        }
-
         if(domibusConfigurationExtService.isMultiTenantAware()) {
+            if(domain == null) {
+                domain = "default";
+            }
             authenticationExtService.basicAuthenticate(fsPluginProperties.getAuthenticationUser(domain), fsPluginProperties.getAuthenticationPassword(domain));
         }
 
@@ -70,7 +75,7 @@ public class FSSendMessagesService {
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
             
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            LOG.debug(Arrays.toString(contentFiles));
+            LOG.debug("{}", contentFiles);
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
             for (FileObject processableFile : processableFiles) {

@@ -185,7 +185,7 @@ public class SmbFileObjectTest {
         
         String[] result = fileObject.doListChildren();
         
-        Assert.assertNull(result);
+        Assert.assertArrayEquals(new String[]{}, result);
     }
 
     @Test
