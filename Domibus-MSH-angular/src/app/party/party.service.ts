@@ -26,7 +26,7 @@ export class PartyService {
   uploadCertificate(file, partyName: string): Observable<CertificateRo> {
     const input = new FormData();
     input.append('certificate', file);
-    return this.http.post(PartyService.CERTIFICATE.replace('{partyName}', partyName), input)
+    return this.http.put(PartyService.CERTIFICATE.replace('{partyName}', partyName), input)
       .map(res => res.json());
   }
 

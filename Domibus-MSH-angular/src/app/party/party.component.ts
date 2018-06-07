@@ -3,7 +3,7 @@ import {MdDialog, MdDialogRef} from '@angular/material';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {PartyService} from './party.service';
-import {PartyResponseRo, ProcessRo, ProcessInfoRo, PartyFilteredResult} from './party';
+import {PartyResponseRo, ProcessRo, ProcessInfoRo, PartyFilteredResult, CertificateRo} from './party';
 import {Observable} from 'rxjs/Observable';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
@@ -98,6 +98,18 @@ export class PartyComponent implements OnInit, DirtyOperations {
         }
       );
   }
+
+  // fetchCertificateIfNeeded (party: PartyResponseRo) {
+  //   if (!party.certificate) {
+  //     this.partyService.getCertificate(party.name)
+  //       .subscribe((cert: CertificateRo) => {
+  //           party.certificate = cert;
+  //         },
+  //         error => {
+  //           this.alertService.error('Could not load party certificate' + error);
+  //         });
+  //   }
+  // }
 
   refresh () {
     // ugly but the grid does not feel the paging changes otherwise
@@ -219,6 +231,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   edit (row) {
     row = row || this.selected[0];
+    //fetchCertificateIfNeeded()
+
     const rowCopy = JSON.parse(JSON.stringify(row));
     const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
