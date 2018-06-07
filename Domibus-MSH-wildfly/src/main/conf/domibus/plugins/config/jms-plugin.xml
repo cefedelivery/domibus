@@ -12,8 +12,6 @@
 		<property name="jndiName" value="${jmsplugin.queue.notification}" />
 	</bean>
 
-	<bean id="jmsMessageTransformer" class="eu.domibus.plugin.jms.JMSMessageTransformer"/>
-
 	<bean id="backendJms" class="eu.domibus.plugin.jms.BackendJMSImpl">
 		<constructor-arg value="Jms"/>
 		<property name="messageSubmissionTransformer" ref="jmsMessageTransformer"/>

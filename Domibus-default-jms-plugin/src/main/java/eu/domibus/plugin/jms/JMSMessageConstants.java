@@ -6,12 +6,8 @@ package eu.domibus.plugin.jms;
  */
 public class JMSMessageConstants {
 
-    private JMSMessageConstants() {
-        // empty constructor
-    }
-
+    public static final String JMS_PLUGIN_PROPERTY_PREFIX = "jmsplugin";
     public static final String MESSAGE_ID = "messageId";
-    public static final String P1_IN_BODY = "p1InBody";
     public static final String JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY = "messageType";
     public static final String MIME_TYPE = "MimeType";
     public static final String ACTION = "action";

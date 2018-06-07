@@ -1,30 +1,34 @@
 package eu.domibus.plugin.jms;
 
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.plugin.Submission;
+import mockit.Injectable;
+import mockit.Tested;
+import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.jms.MapMessage;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Properties;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 
 /**
  * Created by Arun Raj on 18/10/2016.
  */
+@RunWith(JMockit.class)
 public class JMSMessageTransformerTest {
-
-    private static final String DEFAULT_PROPERTIES_PATH = "./src/main/resources/business-defaults.properties";
 
     private static final String MIME_TYPE = "MimeType";
     private static final String DEFAULT_MT = "text/xml";
@@ -45,13 +49,16 @@ public class JMSMessageTransformerTest {
     private static final String PAYLOAD_1_FILENAME = "payload_1_fileName";
     private static final String FILENAME_TEST = "09878378732323.payload";
 
-    private static Properties properties;
 
-    @BeforeClass
-    public static void init() throws IOException {
-        properties = new Properties();
-        properties.load(new FileReader(DEFAULT_PROPERTIES_PATH));
-    }
+    @Injectable
+    protected DomibusPropertyExtService domibusPropertyExtService;
+
+    @Injectable
+    protected DomainContextExtService domainContextExtService;
+
+
+    @Tested
+    JMSMessageTransformer testObj = new JMSMessageTransformer();
 
     /**
      * Testing basic happy flow scenario of the transform from submission of JMS transformer
@@ -74,7 +81,7 @@ public class JMSMessageTransformerTest {
         submissionObj.setAgreementRef("12345");
         submissionObj.setRefToMessageId("123456");
 
-        boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENT_IN_QUEUE, "true"));
+        boolean putAttachmentsInQueue = true;
 
         String strPayLoad1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         DataHandler payLoadDataHandler;
@@ -94,7 +101,7 @@ public class JMSMessageTransformerTest {
         Submission.Payload objPayload1 = new Submission.Payload(PAYLOAD_ID, payLoadDataHandler, listTypedProperty, false, null, null);
         submissionObj.addPayload(objPayload1);
 
-        JMSMessageTransformer testObj = new JMSMessageTransformer(DEFAULT_PROPERTIES_PATH);
+
         MapMessage messageMap = new ActiveMQMapMessage();
         messageMap = testObj.transformFromSubmission(submissionObj, messageMap);
 
@@ -114,6 +121,7 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals(FINAL_RECIPIENT, messageMap.getStringProperty(PROPERTY_FINAL_RECIPIENT));
         Assert.assertEquals("12345", messageMap.getStringProperty(AGREEMENT_REF));
         Assert.assertEquals("123456", messageMap.getStringProperty(REF_TO_MESSAGE_ID));
+        messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, "customAgreement");
         if(!putAttachmentsInQueue) {
             File file = new File(FILENAME_TEST);
             Assert.assertEquals(file.getName(), messageMap.getStringProperty(PAYLOAD_1_FILENAME));
@@ -139,6 +147,7 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
         messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, PROTOCOL_AS4);
+        messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, "customAgreement");
         messageMap.setStringProperty(PAYLOAD_1_FILENAME, FILENAME_TEST);
 
         // Optional
@@ -156,7 +165,6 @@ public class JMSMessageTransformerTest {
         byte[] payload = pay1.getBytes();
         messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);
 
-        JMSMessageTransformer testObj = new JMSMessageTransformer(DEFAULT_PROPERTIES_PATH);
         Submission objSubmission = testObj.transformToSubmission(messageMap);
         Assert.assertNotNull(objSubmission);
         Assert.assertEquals(SERVICE_NOPROCESS, objSubmission.getService());
@@ -214,6 +222,7 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, "\t" + ORIGINAL_SENDER + "    ");
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, "\t" + FINAL_RECIPIENT + "\t");
         messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, "\t" + PROTOCOL_AS4 + "\t\t");
+        messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, "customAgreement");
 
         // Optional
         // messageMap.setStringProperty("conversationId", "123");
@@ -230,7 +239,6 @@ public class JMSMessageTransformerTest {
         byte[] payload = pay1.getBytes();
         messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);
 
-        JMSMessageTransformer testObj = new JMSMessageTransformer(DEFAULT_PROPERTIES_PATH);
         Submission objSubmission = testObj.transformToSubmission(messageMap);
         Assert.assertNotNull("Submission object in the response should not be null:", objSubmission);
         for (Iterator<Submission.Party> itr = objSubmission.getFromParties().iterator(); itr.hasNext(); ) {
@@ -250,13 +258,6 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals(SERVICE_NOPROCESS, objSubmission.getService());
         Assert.assertEquals(SERVICE_TYPE_TC1, objSubmission.getServiceType());
         Assert.assertEquals(ACTION_TC1LEG1, objSubmission.getAction());
-
-        //        for(Iterator<Submission.TypedProperty> itr = objSubmission.getMessageProperties().iterator(); itr.hasNext();)
-        //        {
-        //            Submission.TypedProperty prop = itr.next();
-        //            Assert.assertEquals(MIME_TYPE, prop.getType());
-        //            Assert.assertEquals(DEFAULT_MT, prop.getValue());
-        //        }
     }
 
 }
