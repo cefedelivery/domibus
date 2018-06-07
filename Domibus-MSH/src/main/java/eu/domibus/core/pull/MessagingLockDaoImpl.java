@@ -119,6 +119,9 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             q.setParameter(1, messageId);
             MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
             return messagingLock;
+        }catch (NoResultException nr){
+            LOG.trace("Message:[{}] lock not found. It is has been removed by another process.", messageId, nr);
+            return null;
         } catch (Exception ex) {
             LOG.warn("Message:[{}] lock could not be acquire. It is probably handled by another process.", messageId, ex);
             return null;
