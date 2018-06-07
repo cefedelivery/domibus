@@ -12,16 +12,6 @@ import java.util.Map;
 @Service(value = "signalMessageLogInfoFilter")
 public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
 
-    private static final String QUERY_BODY = " from SignalMessageLog log, " +
-            "Messaging messaging inner join messaging.signalMessage signal " +
-            "inner join messaging.userMessage message " +
-            "left join message.messageInfo info " +
-            "left join message.messageProperties.property propsFrom " +
-            "left join message.messageProperties.property propsTo " +
-            "left join message.partyInfo.from.partyId partyFrom " +
-            "left join message.partyInfo.to.partyId partyTo " +
-            "where signal.messageInfo.messageId=log.messageId and signal.messageInfo.refToMessageId=message.messageInfo.messageId and propsFrom.name = 'originalSender'" +
-            "and propsTo.name = 'finalRecipient' ";
     private static final String CONVERSATION_ID = "conversationId";
 
     @Override
@@ -56,19 +46,33 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 "''," +
                 " partyFrom.value," +
                 " partyTo.value," +
-                " propsFrom.value," +
-                " propsTo.value," +
+                (isFourCornerModel() ? " propsFrom.value," : "'',") +
+                (isFourCornerModel() ? " propsTo.value," : "'',") +
                 " info.refToMessageId," +
                 "log.failed," +
                 "log.restored" +
-                ")" + QUERY_BODY;
+                ")" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }
 
     public String countSignalMessageLogQuery(boolean asc, Map<String, Object> filters) {
-        String query = "select count(message.id)" + QUERY_BODY;
+        String query = "select count(message.id)" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, null, asc, filters);
         return result.toString();
+    }
+
+    private String getQueryBody(Map<String, Object> filters) {
+        return
+                " from SignalMessageLog log, " +
+                        "Messaging messaging inner join messaging.signalMessage signal " +
+                        "inner join messaging.userMessage message " +
+                        "left join message.messageInfo info " +
+                        (isFourCornerModel() ? "left join message.messageProperties.property propsFrom " +
+                         "left join message.messageProperties.property propsTo " : StringUtils.EMPTY) +
+                        "left join message.partyInfo.from.partyId partyFrom " +
+                        "left join message.partyInfo.to.partyId partyTo " +
+                        "where signal.messageInfo.messageId=log.messageId and signal.messageInfo.refToMessageId=message.messageInfo.messageId " +
+                        (isFourCornerModel() ? "and propsFrom.name = 'originalSender' and propsTo.name = 'finalRecipient' " : StringUtils.EMPTY);
     }
 }

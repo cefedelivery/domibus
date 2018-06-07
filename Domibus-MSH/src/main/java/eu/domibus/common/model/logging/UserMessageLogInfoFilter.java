@@ -1,8 +1,13 @@
 package eu.domibus.common.model.logging;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -10,16 +15,6 @@ import java.util.Map;
  */
 @Service(value = "userMessageLogInfoFilter")
 public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
-
-    private static final String QUERY_BODY = " from UserMessageLog log, " +
-            "UserMessage message " +
-            "left join log.messageInfo info " +
-            "left join message.messageProperties.property propsFrom " +
-            "left join message.messageProperties.property propsTo " +
-            "left join message.partyInfo.from.partyId partyFrom " +
-            "left join message.partyInfo.to.partyId partyTo " +
-            "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
-            "and propsTo.name = 'finalRecipient'";
 
     public String filterUserMessageLogQuery(String column, boolean asc, Map<String, Object> filters) {
         String query = "select new eu.domibus.common.model.logging.MessageLogInfo(" +
@@ -36,21 +31,46 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
                 "message.collaborationInfo.conversationId," +
                 "partyFrom.value," +
                 "partyTo.value," +
-                "propsFrom.value," +
-                "propsTo.value," +
+                (isFourCornerModel() ? "propsFrom.value," : "'',") +
+                (isFourCornerModel() ? "propsTo.value," : "'',") +
                 "info.refToMessageId," +
                 "log.failed," +
                 "log.restored" +
-                ")" + QUERY_BODY;
+                ")" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
     }
 
     public String countUserMessageLogQuery(boolean asc, Map<String, Object> filters) {
-        String query = "select count(message.id)" + QUERY_BODY;
+        String query = "select count(message.id)" + getQueryBody(filters);
 
         StringBuilder result = filterQuery(query, null, asc, filters);
         return result.toString();
     }
+
+    /**
+     * Constructs the query body based on different conditions
+     *
+     * @param filters values from GUI
+     * @return String query body
+     */
+    private String getQueryBody(Map<String, Object> filters) {
+        return
+                " from UserMessageLog log, " +
+                        "UserMessage message " +
+                        "left join log.messageInfo info " +
+                        (isFourCornerModel() ?
+                                "left join message.messageProperties.property propsFrom "  +
+                                "left join message.messageProperties.property propsTo " : StringUtils.EMPTY) +
+                        "left join message.partyInfo.from.partyId partyFrom " +
+                        "left join message.partyInfo.to.partyId partyTo " +
+                        "where message.messageInfo = info " +
+                        (isFourCornerModel() ?
+                                "and propsFrom.name = 'originalSender' "  +
+                                "and propsTo.name = 'finalRecipient' " : StringUtils.EMPTY);
+
+    }
+
+
 
 }
