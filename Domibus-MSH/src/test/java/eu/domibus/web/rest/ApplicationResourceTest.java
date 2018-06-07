@@ -4,12 +4,14 @@ import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Hashtable;
 import java.util.Properties;
 
 /**
@@ -22,10 +24,10 @@ public class ApplicationResourceTest {
     private static final String DOMIBUS_VERSION = "Domibus Unit Tests";
 
     @Tested
-    ApplicationResource applicationResource;
+    private ApplicationResource applicationResource;
 
     @Injectable
-    DomibusPropertiesService domibusPropertiesService;
+    private DomibusPropertiesService domibusPropertiesService;
 
     @Injectable
     private Properties domibusProperties;
@@ -44,5 +46,19 @@ public class ApplicationResourceTest {
         // Then
         Assert.assertNotNull(domibusInfo);
         Assert.assertEquals(DOMIBUS_VERSION, domibusInfo.getVersion());
+    }
+
+    @Test
+    public void testGetFourCornerEnabled() throws Exception {
+
+        new Expectations() {{
+            domibusProperties.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
+            result = "false";
+        }};
+
+        //tested method
+        boolean isFourCornerEnabled = applicationResource.getFourCornerModelEnabled();
+
+        Assert.assertEquals(false, isFourCornerEnabled);
     }
 }
