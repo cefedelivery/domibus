@@ -1,6 +1,7 @@
 package eu.domibus.common.model.logging;
 
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -17,7 +19,7 @@ import java.util.HashMap;
 @RunWith(JMockit.class)
 public class UserMessageLogInfoFilterTest {
 
-    public static final String QUERY = "select new eu.domibus.common.model.logging.MessageLogInfo(log, message.collaborationInfo.conversationId, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from UserMessageLog log, " +
+    private static final String QUERY = "select new eu.domibus.common.model.logging.MessageLogInfo(log, message.collaborationInfo.conversationId, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from UserMessageLog log, " +
             "UserMessage message " +
             "left join log.messageInfo info " +
             "left join message.messageProperties.property propsFrom " +
@@ -26,6 +28,9 @@ public class UserMessageLogInfoFilterTest {
             "left join message.partyInfo.to.partyId partyTo " +
             "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
             "and propsTo.name = 'finalRecipient'";
+
+    @Injectable
+    private Properties domibusProperties;
 
     @Tested
     UserMessageLogInfoFilter userMessageLogInfoFilter;
@@ -42,6 +47,9 @@ public class UserMessageLogInfoFilterTest {
         new Expectations(userMessageLogInfoFilter) {{
             userMessageLogInfoFilter.filterQuery(anyString,anyString,anyBoolean,filters);
             result = QUERY;
+
+            userMessageLogInfoFilter.isFourCornerModel();
+            result = true;
         }};
 
         String query = userMessageLogInfoFilter.filterUserMessageLogQuery("column", true, filters);

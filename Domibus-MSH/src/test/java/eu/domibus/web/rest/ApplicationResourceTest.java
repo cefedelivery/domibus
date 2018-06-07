@@ -10,6 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Properties;
+
 /**
  * @author Tiago Miguel
  * @since 3.3
@@ -24,6 +26,9 @@ public class ApplicationResourceTest {
 
     @Injectable
     DomibusPropertiesService domibusPropertiesService;
+
+    @Injectable
+    private Properties domibusProperties;
 
     @Test
     public void testGetDomibusInfo() throws Exception {
