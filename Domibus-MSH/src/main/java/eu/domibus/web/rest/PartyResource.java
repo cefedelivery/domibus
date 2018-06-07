@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -326,15 +327,11 @@ public class PartyResource {
             try {
                 String content = certificate.getContent();
                 LOG.debug("certificate base 64 received [{}] ", content);
-                byte[] bytes = Base64.decodeBase64(content);
-                LOG.debug(" certificate decoded : [{}] ", bytes);
 
                 CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-                InputStream in = new ByteArrayInputStream(bytes);
+                InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
                 X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
                 CertificateRo res = convert(cert);
-
-//                multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert);
                 return ResponseEntity.ok(res);
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);

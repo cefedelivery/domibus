@@ -92,11 +92,7 @@ export class PartyDetailsComponent implements OnInit {
       const arrayBuffer = reader.result;
       const array = new Uint8Array(arrayBuffer);
       const binaryString = String.fromCharCode.apply(null, array);
-
-      const base64String = btoa(binaryString);
-      console.log('base64String ', base64String);
-
-      this.partyService.uploadCertificate({content: base64String}, this.party.name)
+      this.partyService.uploadCertificate({content: binaryString}, this.party.name)
         .subscribe(res => {
             this.alertService.success('Certificate uploaded', false);
             this.party.certificate = res;
