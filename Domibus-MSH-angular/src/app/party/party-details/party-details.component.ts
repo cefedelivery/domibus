@@ -68,19 +68,6 @@ export class PartyDetailsComponent implements OnInit {
 
   ngOnInit () {
     this.initColumns();
-    this.fetchCertificateIfNeeded();
-  }
-
-  fetchCertificateIfNeeded () {
-    if (!this.party.certificate) {
-      this.partyService.getCertificate(this.party.name)
-        .subscribe((cert: CertificateRo) => {
-            this.party.certificate = cert;
-          },
-          error => {
-            this.alertService.error('Could not load party certificate' + error);
-          });
-    }
   }
 
   uploadCertificate () {

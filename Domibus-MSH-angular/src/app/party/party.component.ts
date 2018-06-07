@@ -99,18 +99,6 @@ export class PartyComponent implements OnInit, DirtyOperations {
       );
   }
 
-  // fetchCertificateIfNeeded (party: PartyResponseRo) {
-  //   if (!party.certificate) {
-  //     this.partyService.getCertificate(party.name)
-  //       .subscribe((cert: CertificateRo) => {
-  //           party.certificate = cert;
-  //         },
-  //         error => {
-  //           this.alertService.error('Could not load party certificate' + error);
-  //         });
-  //   }
-  // }
-
   refresh () {
     // ugly but the grid does not feel the paging changes otherwise
     this.loading = true;
@@ -231,28 +219,43 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   edit (row) {
     row = row || this.selected[0];
-    //fetchCertificateIfNeeded()
+    this.manageCertificate(row).then((cert: CertificateRo) => {
+      const rowCopy = JSON.parse(JSON.stringify(row));
+      const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-    const rowCopy = JSON.parse(JSON.stringify(row));
-    const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
+      const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+        data: {
+          edit: rowCopy,
+          allProcesses: allProcessesCopy
+        }
+      });
 
-    const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
-      data: {
-        edit: rowCopy,
-        allProcesses: allProcessesCopy
-      }
+      dialogRef.afterClosed().subscribe(ok => {
+        if (ok) {
+          if (JSON.stringify(row) === JSON.stringify(rowCopy))
+            return; // nothing changed
+
+          Object.assign(row, rowCopy);
+          if (this.updatedParties.indexOf(row) < 0)
+            this.updatedParties.push(row);
+        }
+      });
     });
+  }
 
-    dialogRef.afterClosed().subscribe(ok => {
-      if (ok) {
-        if (JSON.stringify(row) === JSON.stringify(rowCopy))
-          return; // nothing changed
-
-        Object.assign(row, rowCopy);
-        if (this.updatedParties.indexOf(row) < 0)
-          this.updatedParties.push(row);
-      }
-    });
+  manageCertificate (party: PartyResponseRo): Promise<CertificateRo> {
+    if (!party.certificate) {
+      const res = this.partyService.getCertificate(party.name);
+      res.subscribe((cert: CertificateRo) => {
+          party.certificate = cert;
+        },
+        error => {
+          this.alertService.error('Could not load party certificate' + error);
+        });
+      return res.toPromise();
+    } else {
+      return Observable.empty<CertificateRo>().toPromise();
+    }
   }
 
   checkIsDirtyAndThen (func: Function) {

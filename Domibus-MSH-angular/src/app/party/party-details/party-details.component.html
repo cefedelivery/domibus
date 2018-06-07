@@ -23,7 +23,7 @@
         </md-card-header>
         <md-card-content>
           <div class="panel">
-            <!--<fieldset [disabled]="true">-->
+            <fieldset [disabled]="true" style="border: none;">
               <md-input-container style="width:100%">
                 <input mdInput placeholder="Subject name" name="subjectName" value="{{party.certificate?.subjectName}}" id="subjectName_id">
               </md-input-container>
@@ -39,13 +39,11 @@
               <md-input-container style="width:100%">
                 <input mdInput placeholder="Finger prints" name="fingerPrint" value="{{party.certificate?.fingerprints}}" id="fingerPrint_id">
               </md-input-container>
-            <!--</fieldset>-->
-            <input #fileInput type="file" id="cert" accept=".cer" (change)="uploadCertificate()">
-
-            <!--<button md-raised-button color="primary" (click)="uploadCertificate()" id="uploadbutton_id">-->
-            <!--<md-icon>file_upload</md-icon>-->
-            <!--<span>Import</span>-->
-            <!--</button>-->
+            </fieldset>
+            <label class="custom-file-upload">
+              <input #fileInput type="file" id="custom-file-upload" accept=".cer" (change)="uploadCertificate()">
+              <span class="custom-file-upload-inner">Import</span>
+            </label>
           </div>
         </md-card-content>
       </md-card>
