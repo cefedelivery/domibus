@@ -8,6 +8,7 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 import {MessagelogDetailsComponent} from "app/messagelog/messagelog-details/messagelog-details.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {AppComponent} from "../app.component";
 
 @Component({
   moduleId: module.id,
@@ -55,90 +56,178 @@ export class MessageLogComponent {
 
   messageResent = new EventEmitter(false);
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent) {
   }
 
   ngOnInit() {
-    this.columnPicker.allColumns = [
-      {
-        name: 'Message Id',
-        width: 275
-      },
-      {
-        name: 'From Party Id'
-      },
-      {
-        name: 'To Party Id'
-      },
-      {
-        name: 'Message Status',
-        width: 175
-      },
-      {
-        name: 'Notification Status',
-        width: 175
-      },
-      {
-        cellTemplate: this.rowWithDateFormatTpl,
-        name: 'Received',
-        width: 155
-      },
-      {
-        name: 'AP Role',
-        prop: 'mshRole'
-      },
-      {
-        cellTemplate: this.nextAttemptInfoTpl,
-        name: 'Send Attempts'
-      },
-      {
-        cellTemplate: this.nextAttemptInfoTpl,
-        name: 'Send Attempts Max'
-      },
-      {
-        cellTemplate: this.nextAttemptInfoWithDateFormatTpl,
-        name: 'Next Attempt',
-        width: 155
-      },
-      {
-        name: 'Conversation Id'
-      },
-      {
-        name: 'Message Type',
-        width: 130
-      },
-      {
-        cellTemplate: this.rowWithDateFormatTpl,
-        name: 'Deleted',
-        width: 155
-      },
-      {
-        name: 'Original Sender'
-      },
-      {
-        name: 'Final Recipient'
-      },
-      {
-        name: 'Ref To Message Id'
-      },
-      {
-        cellTemplate: this.rowWithDateFormatTpl,
-        name: 'Failed',
-        width: 155
-      },
-      {
-        cellTemplate: this.rowWithDateFormatTpl,
-        name: 'Restored',
-        width: 155
-      },
-      {
-        cellTemplate: this.rowActions,
-        name: 'Actions',
-        width: 80,
-        sortable: false
-      }
+    this.columnPicker.allColumns.push(
+        {
+          name: 'Message Id',
+          width: 275
+        },
+        {
+          name: 'From Party Id'
+        },
+        {
+          name: 'To Party Id'
+        },
+        {
+          name: 'Message Status',
+          width: 175
+        },
+        {
+          name: 'Notification Status',
+          width: 175
+        },
+        {
+          cellTemplate: this.rowWithDateFormatTpl,
+          name: 'Received',
+          width: 155
+        },
+        {
+          name: 'AP Role',
+          prop: 'mshRole'
+        },
+        {
+          cellTemplate: this.nextAttemptInfoTpl,
+          name: 'Send Attempts'
+        },
+        {
+          cellTemplate: this.nextAttemptInfoTpl,
+          name: 'Send Attempts Max'
+        },
+        {
+          cellTemplate: this.nextAttemptInfoWithDateFormatTpl,
+          name: 'Next Attempt',
+          width: 155
+        },
+        {
+          name: 'Conversation Id'
+        },
+        {
+          name: 'Message Type',
+          width: 130
+        },
+        {
+          cellTemplate: this.rowWithDateFormatTpl,
+          name: 'Deleted',
+          width: 155
+        }
+      );
 
-    ];
+    if (this.app.fourCornerEnabled) {
+      this.columnPicker.allColumns.push(
+        {
+            name: 'Original Sender'
+          },
+          {
+            name: 'Final Recipient'
+          }
+      );
+    }
+
+    this.columnPicker.allColumns.push(
+        {
+          name: 'Ref To Message Id'
+        },
+        {
+          cellTemplate: this.rowWithDateFormatTpl,
+          name: 'Failed',
+          width: 155
+        },
+        {
+          cellTemplate: this.rowWithDateFormatTpl,
+          name: 'Restored',
+          width: 155
+        },
+        {
+          cellTemplate: this.rowActions,
+          name: 'Actions',
+          width: 80,
+          sortable: false
+        }
+    );
+
+    // this.columnPicker.allColumns = [
+    //   {
+    //     name: 'Message Id',
+    //     width: 275
+    //   },
+    //   {
+    //     name: 'From Party Id'
+    //   },
+    //   {
+    //     name: 'To Party Id'
+    //   },
+    //   {
+    //     name: 'Message Status',
+    //     width: 175
+    //   },
+    //   {
+    //     name: 'Notification Status',
+    //     width: 175
+    //   },
+    //   {
+    //     cellTemplate: this.rowWithDateFormatTpl,
+    //     name: 'Received',
+    //     width: 155
+    //   },
+    //   {
+    //     name: 'AP Role',
+    //     prop: 'mshRole'
+    //   },
+    //   {
+    //     cellTemplate: this.nextAttemptInfoTpl,
+    //     name: 'Send Attempts'
+    //   },
+    //   {
+    //     cellTemplate: this.nextAttemptInfoTpl,
+    //     name: 'Send Attempts Max'
+    //   },
+    //   {
+    //     cellTemplate: this.nextAttemptInfoWithDateFormatTpl,
+    //     name: 'Next Attempt',
+    //     width: 155
+    //   },
+    //   {
+    //     name: 'Conversation Id'
+    //   },
+    //   {
+    //     name: 'Message Type',
+    //     width: 130
+    //   },
+    //   {
+    //     cellTemplate: this.rowWithDateFormatTpl,
+    //     name: 'Deleted',
+    //     width: 155
+    //   }, (this.app.fourCornerEnabled ?
+    //   {
+    //     name: 'Original Sender'
+    //   } : {}), (this.app.fourCornerEnabled ?
+    //   {
+    //     name: 'Final Recipient'
+    //   } : {}),
+    //   {
+    //     name: 'Ref To Message Id'
+    //   },
+    //   {
+    //     cellTemplate: this.rowWithDateFormatTpl,
+    //     name: 'Failed',
+    //     width: 155
+    //   },
+    //   {
+    //     cellTemplate: this.rowWithDateFormatTpl,
+    //     name: 'Restored',
+    //     width: 155
+    //   },
+    //   {
+    //     cellTemplate: this.rowActions,
+    //     name: 'Actions',
+    //     width: 80,
+    //     sortable: false
+    //   }
+    //
+    // ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
@@ -367,6 +456,7 @@ export class MessageLogComponent {
   details(selectedRow: any) {
     let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
     dialogRef.componentInstance.message = selectedRow;
+    dialogRef.componentInstance.fourCornerEnabled = this.app.fourCornerEnabled;
     // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
     dialogRef.afterClosed().subscribe(result => {
       //Todo:
