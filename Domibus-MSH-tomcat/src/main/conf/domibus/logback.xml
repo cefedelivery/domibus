@@ -2,7 +2,7 @@
 
 <configuration>
     <!-- start include domains config files here -->
-    <include optional="true" file="${catalina.home}/conf/domibus/default-logback.xml"/>
+    <!--<include optional="true" file="${catalina.home}/conf/domibus/default-logback.xml"/>-->
     <!-- end include domains config files here -->
     <appender name="atomikos" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/atomikos.log</file>
