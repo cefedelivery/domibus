@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<included>
+    <property name="domainName" value="default" scope="local" />
+    <appender name="${domainName}-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/${domainName}-domibus.log</file>
+            <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
+                <domainName>${domainName}</domainName>
+                <markerName>SECURITY,BUSINESS</markerName>
+                <markerMismatch>NEUTRAL</markerMismatch>
+                <markerMatch>DENY</markerMatch>
+            </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="${domainName}-security-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/${domainName}-security.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
+                <domainName>${domainName}</domainName>
+                <markerName>SECURITY</markerName>
+                <markerMismatch>DENY</markerMismatch>
+                <markerMatch>NEUTRAL</markerMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/${domainName}-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="${domainName}-business-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.home}/logs/${domainName}-business.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
+                <domainName>${domainName}</domainName>
+                <markerName>BUSINESS</markerName>
+                <markerMismatch>DENY</markerMismatch>
+                <markerMatch>NEUTRAL</markerMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${catalina.home}/logs/${domainName}-business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
+            <maxFileSize>30MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="eu.domibus" level="INFO" additivity="false">
+        <appender-ref ref="${domainName}-security-file"/>
+        <appender-ref ref="${domainName}-business-file"/>
+    </logger>
+
+    <root level="INFO" additivity="false">
+        <appender-ref ref="${domainName}-file"/>
+    </root>
+
+</included>
