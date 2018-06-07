@@ -84,20 +84,37 @@ export class PartyDetailsComponent implements OnInit {
   }
 
   uploadCertificate () {
-    let fi = this.fileInput.nativeElement;
-    this.partyService.uploadCertificate(fi.files[0], this.party.name)
-      .subscribe(res => {
-          this.alertService.success("Certificate uploaded", false);
-          this.party.certificate = res;
-        },
-        err => {
-          if (!err.ok && err.statusText.length == 0) {
-            this.alertService.error('Error updating truststore file (' + fi.files[0].name + ')', false);
-          } else {
-            this.alertService.error(err.text() + ' (' + fi.files[0].name + ')', false);
+    const fi = this.fileInput.nativeElement;
+    const file = fi.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const arrayBuffer = reader.result;
+      const array = new Uint8Array(arrayBuffer);
+      const binaryString = String.fromCharCode.apply(null, array);
+
+      const base64String = btoa(binaryString);
+      console.log('base64String ', base64String);
+
+      this.partyService.uploadCertificate({content: base64String}, this.party.name)
+        .subscribe(res => {
+            this.alertService.success('Certificate uploaded', false);
+            this.party.certificate = res;
+          },
+          err => {
+            if (!err.ok && err.statusText.length == 0) {
+              this.alertService.error('Error updating truststore file (' + fi.files[0].name + ')', false);
+            } else {
+              this.alertService.error(err.text() + ' (' + fi.files[0].name + ')', false);
+            }
           }
-        }
-      );
+        );
+    };
+    reader.onerror = function (err) {
+      console.warn(err);
+    };
+
+    reader.readAsArrayBuffer(file);
   }
 
   initColumns () {

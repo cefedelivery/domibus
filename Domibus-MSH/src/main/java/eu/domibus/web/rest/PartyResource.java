@@ -13,6 +13,7 @@ import eu.domibus.core.party.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.PModePartiesRequestRO;
+import eu.domibus.web.rest.ro.UserResponseRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * @author Thomas Dussart
@@ -274,10 +276,9 @@ public class PartyResource {
     }
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.GET)
-    public CertificateRo getCertificate(@PathVariable(name="partyName") String partyName) {
+    public CertificateRo getCertificate(@PathVariable(name = "partyName") String partyName) {
         try {
             X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
-            //X509Certificate cert = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), partyName);
             return convert(cert);
         } catch (KeyStoreException e) {
             return null;
@@ -286,14 +287,15 @@ public class PartyResource {
 
     private CertificateRo convert(X509Certificate cert) {
         CertificateRo res = new CertificateRo();
-        if(cert.getSubjectX500Principal() != null)
-            res.setSubjectName(cert.getSubjectX500Principal().getName());
-        res.setValidityFrom(cert.getNotBefore());
-        res.setValidityTo(cert.getNotAfter());
-        if(cert.getIssuerX500Principal() != null)
-            res.setIssuer(cert.getIssuerX500Principal().getName());
-        res.setFingerprints(getThumbprint(cert));
-
+        if (cert != null) {
+            if (cert.getSubjectX500Principal() != null)
+                res.setSubjectName(cert.getSubjectX500Principal().getName());
+            res.setValidityFrom(cert.getNotBefore());
+            res.setValidityTo(cert.getNotAfter());
+            if (cert.getIssuerX500Principal() != null)
+                res.setIssuer(cert.getIssuerX500Principal().getName());
+            res.setFingerprints(getThumbprint(cert));
+        }
         return res;
     }
 
@@ -317,18 +319,22 @@ public class PartyResource {
     }
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
-    public ResponseEntity<CertificateRo> convertCertificateFile(@RequestPart("certificate") MultipartFile certificate,
-                                                                @PathVariable(name="partyName") String partyName) {
+    public ResponseEntity<CertificateRo> convertCertificateFile(@PathVariable(name = "partyName") String partyName,
+                                                                @RequestBody CertificateContentRo certificate) {
 
-        if (!certificate.isEmpty()) {
+        if (certificate != null) {
             try {
-                byte[] bytes = certificate.getBytes();
+                String content = certificate.getContent();
+                LOG.debug("certificate base 64 received [{}] ", content);
+                byte[] bytes = Base64.decodeBase64(content);
+                LOG.debug(" certificate decoded : [{}] ", bytes);
+
                 CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
                 InputStream in = new ByteArrayInputStream(bytes);
                 X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
                 CertificateRo res = convert(cert);
 
-//                domibusCacheService.clearCache("certValidationByAlias");
+//                multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert);
                 return ResponseEntity.ok(res);
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);
@@ -338,4 +344,26 @@ public class PartyResource {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    //    @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.POST)
+//    public ResponseEntity<CertificateRo> convertCertificateFile(@RequestPart("certificate") MultipartFile certificate,
+//                                                                @PathVariable(name = "partyName") String partyName) {
+//        if (!certificate.isEmpty()) {
+//            try {
+//                byte[] bytes = certificate.getBytes();
+//                CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+//                InputStream in = new ByteArrayInputStream(bytes);
+//                X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
+//                CertificateRo res = convert(cert);
+//
+////                domibusCacheService.clearCache("certValidationByAlias");
+//                return ResponseEntity.ok(res);
+//            } catch (Exception e) {
+//                LOG.error("Failed to upload the truststore file", e);
+//                return ResponseEntity.badRequest().build();
+//            }
+//        } else {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 }
