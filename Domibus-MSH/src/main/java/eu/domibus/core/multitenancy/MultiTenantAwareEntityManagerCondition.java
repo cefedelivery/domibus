@@ -5,7 +5,9 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -13,6 +15,8 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @author Cosmin Baciu
  * @since 4.0
  */
+@Configuration
+@PropertySource(value = "file:///${domibus.config.location}/domibus.properties")
 public class MultiTenantAwareEntityManagerCondition implements ConfigurationCondition {
 
     private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MultiTenantAwareEntityManagerCondition.class);
