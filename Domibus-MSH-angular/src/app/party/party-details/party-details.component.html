@@ -25,13 +25,13 @@
           <div class="panel">
             <fieldset [disabled]="true" style="border: none;">
               <md-input-container style="width:100%">
-                <input mdInput placeholder="Subject name" name="subjectName" value="{{party.certificate?.subjectName}}" id="subjectName_id">
+                <input mdInput placeholder="Subject name" name="subjectName" value="{{party.certificate?.subject}}" id="subjectName_id">
               </md-input-container>
               <md-input-container style="width:40%">
-                <input mdInput placeholder="Valid from" name="validityFrom" value="{{party.certificate?.validityFrom | domibusDate: dateFormat}}" id="validityFrom_id">
+                <input mdInput placeholder="Valid from" name="validityFrom" value="{{party.certificate?.validFrom | domibusDate: dateFormat}}" id="validityFrom_id">
               </md-input-container>
               <md-input-container style="width:40%">
-                <input mdInput placeholder="Valid to" name="validityTo" value="{{party.certificate?.validityTo | domibusDate: dateFormat}}" id="validityTo_id">
+                <input mdInput placeholder="Valid to" name="validityTo" value="{{party.certificate?.validUntil | domibusDate: dateFormat}}" id="validityTo_id">
               </md-input-container>
               <md-input-container style="width:100%">
                 <input mdInput placeholder="Issuer" name="issuer" value="{{party.certificate?.issuer}}" id="issuer_id">

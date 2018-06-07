@@ -16,6 +16,7 @@ public class TrustStoreRO {
     private String issuer;
     private Date validFrom;
     private Date validUntil;
+    private String fingerprints;
 
     public String getName() {
         return name;
@@ -57,6 +58,14 @@ public class TrustStoreRO {
         this.validUntil = validUntil;
     }
 
+    public String getFingerprints() {
+        return fingerprints;
+    }
+
+    public void setFingerprints(String fingerprints) {
+        this.fingerprints = fingerprints;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +80,7 @@ public class TrustStoreRO {
                 .append(issuer, that.issuer)
                 .append(validFrom, that.validFrom)
                 .append(validUntil, that.validUntil)
+                .append(fingerprints, that.fingerprints)
                 .isEquals();
     }
 
@@ -82,6 +92,7 @@ public class TrustStoreRO {
                 .append(issuer)
                 .append(validFrom)
                 .append(validUntil)
+                .append(fingerprints)
                 .toHashCode();
     }
 }

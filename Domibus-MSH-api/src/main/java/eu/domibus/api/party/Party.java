@@ -80,8 +80,8 @@ public class Party {
 
     public void addprocessesWithPartyAsResponder(Process process) {
         this.processesWithPartyAsResponder.add(process);
-    }    
-    
+    }
+
     @Override
     public String toString() {
         return "Party{" +

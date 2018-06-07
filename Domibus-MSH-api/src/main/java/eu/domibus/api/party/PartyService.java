@@ -1,7 +1,10 @@
 package eu.domibus.api.party;
 
 import eu.domibus.api.process.Process;
+import eu.domibus.api.security.TrustStoreEntry;
+import javafx.util.Pair;
 
+import java.security.KeyStoreException;
 import java.util.List;
 
 /**
@@ -56,7 +59,7 @@ public interface PartyService {
      * Updates the list of parties.
      * @param partyList
      */
-    void updateParties(List<Party> partyList);
+    void updateParties(List<Party> partyList, List<Pair<String, String>> certificateList);
 
     /**
      * Retrieve all the processes configured in the pmode.
@@ -64,4 +67,6 @@ public interface PartyService {
      * @return a lit of processes.
      */
     List<Process> getAllProcesses();
+
+//    TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException;
 }

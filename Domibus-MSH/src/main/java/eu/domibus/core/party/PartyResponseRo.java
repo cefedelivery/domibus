@@ -99,4 +99,12 @@ public class PartyResponseRo {
     public void setProcessesWithPartyAsResponder(List<ProcessRo> processesWithPartyAsResponder) {
         this.processesWithPartyAsResponder = processesWithPartyAsResponder;
     }
+
+    protected String certificateContent;
+    public String getCertificateContent() {
+        return certificateContent;
+    }
+    public void setCertificateContent(String certificateContent) {
+        this.certificateContent = certificateContent;
+    }
 }

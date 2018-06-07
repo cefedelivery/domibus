@@ -14,6 +14,7 @@ public class TrustStoreEntry {
     private String issuer;
     private Date validFrom;
     private Date validUntil;
+    private String fingerprints;
 
     public TrustStoreEntry(String name, String subject, String issuer, Date validFrom, Date validUntil) {
         this.name = name;
@@ -40,7 +41,13 @@ public class TrustStoreEntry {
         return validFrom;
     }
 
-    public Date getValidUntil() {
-        return validUntil;
+    public Date getValidUntil() { return validUntil; }
+
+    public String getFingerprints() {
+        return fingerprints;
+    }
+
+    public void setFingerprints(String fingerprints) {
+        this.fingerprints = fingerprints;
     }
 }

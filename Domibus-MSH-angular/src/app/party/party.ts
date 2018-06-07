@@ -25,6 +25,8 @@ export class PartyResponseRo {
   processesWithPartyAsResponder: Array<ProcessRo>;
 
   certificate: CertificateRo;
+
+  certificateContent: string;
 }
 
 export class IdentifierRo {
@@ -70,11 +72,11 @@ export class PartyFilteredResult {
 
 export class CertificateRo {
 
-  subjectName: string;
+  subject: string;
 
-  validityFrom: Date;
+  validFrom: Date;
 
-  validityTo: Date;
+  validUntil: Date;
 
   issuer: string;
 

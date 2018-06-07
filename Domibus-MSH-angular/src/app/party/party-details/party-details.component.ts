@@ -79,22 +79,20 @@ export class PartyDetailsComponent implements OnInit {
       const arrayBuffer = reader.result;
       const array = new Uint8Array(arrayBuffer);
       const binaryString = String.fromCharCode.apply(null, array);
+      this.party.certificateContent = binaryString;
+
       this.partyService.uploadCertificate({content: binaryString}, this.party.name)
         .subscribe(res => {
             this.alertService.success('Certificate uploaded', false);
             this.party.certificate = res;
           },
           err => {
-            if (!err.ok && err.statusText.length == 0) {
-              this.alertService.error('Error updating truststore file (' + fi.files[0].name + ')', false);
-            } else {
-              this.alertService.error(err.text() + ' (' + fi.files[0].name + ')', false);
-            }
+            this.alertService.exception('Error uploading certificate file ' + file.name, err);
           }
         );
     };
-    reader.onerror = function (err) {
-      console.warn(err);
+    reader.onerror = (err) => {
+      this.alertService.exception('Error reding certificate file ' + file.name, err);
     };
 
     reader.readAsArrayBuffer(file);
@@ -121,24 +119,6 @@ export class PartyDetailsComponent implements OnInit {
     this.identifiersRowColumnPicker.selectedColumns = this.identifiersRowColumnPicker.allColumns.filter(col => {
       return ['Party ID', 'Party Id Type', 'Party Id value'].indexOf(col.name) != -1
     });
-
-    // this.processesRowColumnPicker.allColumns = [
-    //   {
-    //     name: 'Process',
-    //     prop: 'name',
-    //   },
-    //   {
-    //     name: 'Initiator',
-    //     prop: 'isInitiator',
-    //   },
-    //   {
-    //     name: 'Responder',
-    //     prop: 'isResponder',
-    //   }
-    // ];
-    // this.processesRowColumnPicker.selectedColumns = this.processesRowColumnPicker.allColumns.filter(col => {
-    //   return ['Process', 'Initiator', 'Responder'].indexOf(col.name) != -1
-    // });
   }
 
   editIdentifier () {

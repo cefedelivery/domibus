@@ -219,43 +219,45 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   edit (row) {
     row = row || this.selected[0];
-    this.manageCertificate(row).then((cert: CertificateRo) => {
-      const rowCopy = JSON.parse(JSON.stringify(row));
-      const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
+    this.manageCertificate(row)
+      .then(() => {
+        const rowCopy = JSON.parse(JSON.stringify(row));
+        const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-      const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
-        data: {
-          edit: rowCopy,
-          allProcesses: allProcessesCopy
-        }
+        const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+          data: {
+            edit: rowCopy,
+            allProcesses: allProcessesCopy
+          }
+        });
+
+        dialogRef.afterClosed().subscribe(ok => {
+          if (ok) {
+            if (JSON.stringify(row) === JSON.stringify(rowCopy))
+              return; // nothing changed
+
+            Object.assign(row, rowCopy);
+            if (this.updatedParties.indexOf(row) < 0)
+              this.updatedParties.push(row);
+          }
+        });
       });
-
-      dialogRef.afterClosed().subscribe(ok => {
-        if (ok) {
-          if (JSON.stringify(row) === JSON.stringify(rowCopy))
-            return; // nothing changed
-
-          Object.assign(row, rowCopy);
-          if (this.updatedParties.indexOf(row) < 0)
-            this.updatedParties.push(row);
-        }
-      });
-    });
   }
 
   manageCertificate (party: PartyResponseRo): Promise<CertificateRo> {
-    if (!party.certificate) {
-      const res = this.partyService.getCertificate(party.name);
-      res.subscribe((cert: CertificateRo) => {
-          party.certificate = cert;
-        },
-        error => {
-          this.alertService.error('Could not load party certificate' + error);
-        });
-      return res.toPromise();
-    } else {
-      return Observable.empty<CertificateRo>().toPromise();
-    }
+    return new Promise((resolve, reject) => {
+      if (!party.certificate) {
+        this.partyService.getCertificate(party.name)
+          .subscribe((cert: CertificateRo) => {
+            party.certificate = cert;
+            resolve(party);
+          }, err => {
+            resolve(party);
+          });
+      } else {
+        resolve(party);
+      }
+    });
   }
 
   checkIsDirtyAndThen (func: Function) {
