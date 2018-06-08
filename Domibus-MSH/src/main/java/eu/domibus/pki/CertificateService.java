@@ -38,9 +38,24 @@ public interface CertificateService {
 
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
 
+    /**
+     * Returns the certificate deserialized from a base64 string
+     *
+     * @return a certificate
+     */
     X509Certificate loadCertificateFromString(String content);
 
-    TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException;
+    /**
+     * Returns the certificate entry from the trust store given an alias
+     *
+     * @return a certificate entry
+     */
+    TrustStoreEntry getPartyCertificateFromTruststore(String alias) throws KeyStoreException;
 
+    /**
+     * Returns a certificate entry converted from a base64 string
+     *
+     * @return a certificate entry
+     */
     TrustStoreEntry convertCertificateContent(String certificateContent);
 }

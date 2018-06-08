@@ -331,17 +331,21 @@ public class CertificateServiceImpl implements CertificateService {
 
     public TrustStoreEntry convertCertificateContent(String certificateContent) {
         X509Certificate cert = loadCertificateFromString(certificateContent);
-        TrustStoreEntry res = createTrustStoreEntry(null, cert);
+        TrustStoreEntry res = createTrustStoreEntry(cert);
         return  res;
     }
 
     public TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException {
         X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
-        LOG.debug("getCertificateFromTruststore for [{}] = [{}] ", partyName, cert);
-        TrustStoreEntry res = createTrustStoreEntry(partyName, cert);
+        LOG.debug("get certificate from truststore for [{}] = [{}] ", partyName, cert);
+        TrustStoreEntry res = createTrustStoreEntry(cert);
         if(res != null)
             res.setFingerprints(extractFingerprints(cert));
         return res;
+    }
+
+    private TrustStoreEntry createTrustStoreEntry(X509Certificate certificate) {
+        return createTrustStoreEntry(null, certificate);
     }
 
     private TrustStoreEntry createTrustStoreEntry(String alias, X509Certificate certificate) {

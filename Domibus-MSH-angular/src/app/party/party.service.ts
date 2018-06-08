@@ -16,14 +16,13 @@ export class PartyService {
   static readonly LIST_PROCESSES: string = 'rest/party/processes';
   static readonly LIST_PARTIES: string = 'rest/party/list';
   static readonly UPDATE_PARTIES: string = 'rest/party/update';
-  static readonly COUNT_PARTIES: string = 'rest/party/count';
   static readonly CSV_PARTIES: string = 'rest/party/csv';
 
   constructor (private http: Http, private alertService: AlertService) {
 
   }
 
-  uploadCertificate(payload, partyName: string): Observable<CertificateRo> {
+  uploadCertificate (payload, partyName: string): Observable<CertificateRo> {
     return this.http.put(PartyService.CERTIFICATE.replace('{partyName}', partyName), payload)
       .map(res => res.json());
   }
@@ -45,30 +44,23 @@ export class PartyService {
       const allRecords = res.json() as PartyResponseRo[];
       let records = allRecords.slice();
 
-      if (name)
+      if (name) {
         records = records.filter(party => party.name === name);
-      if (endPoint)
+      }
+      if (endPoint) {
         records = records.filter(party => party.endpoint === endPoint);
-      if (partyId)
+      }
+      if (partyId) {
         records = records.filter(party => party.identifiers.filter(x => x.partyId === partyId).length > 0);
-      if (process)
+      }
+      if (process) {
         records = records.filter(party => party.joinedProcesses.lastIndexOf(process) >= 0);
+      }
 
       const result = {data: records, allData: allRecords};
       return result;
     });
 
-  }
-
-  countParty (name: string, endPoint: string, partyId: string, process: string): Observable<number> {
-    let searchParams: URLSearchParams = new URLSearchParams();
-
-    searchParams.set('name', name);
-    searchParams.set('endPoint', endPoint);
-    searchParams.set('partyId', partyId);
-    searchParams.set('process', process);
-
-    return this.http.get(PartyService.COUNT_PARTIES, {search: searchParams}).map(res => res.json());
   }
 
   getFilterPath (name: string, endPoint: string, partyId: string, process: string) {
@@ -103,7 +95,6 @@ export class PartyService {
   }
 
   updateParties (partyList: PartyResponseRo[]) {
-    console.log('put ... ', PartyService.UPDATE_PARTIES)
     return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
   }
 }

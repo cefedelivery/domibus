@@ -83,7 +83,6 @@ export class PartyDetailsComponent implements OnInit {
 
       this.partyService.uploadCertificate({content: binaryString}, this.party.name)
         .subscribe(res => {
-            this.alertService.success('Certificate uploaded', false);
             this.party.certificate = res;
           },
           err => {
