@@ -16,6 +16,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
+import java.security.cert.X509Certificate;
 import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -321,7 +322,7 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public void updateParties(List<Party> partyList, List<Pair<String, String>> certificateList) {
+    public void updateParties(List<Party> partyList, Map<String, String> certificateList) {
         final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
         if (pModeArchiveInfo == null)
             throw new IllegalStateException("Could not update PMode parties: PMode not found!");
@@ -351,8 +352,13 @@ public class PartyServiceImpl implements PartyService {
             throw new IllegalStateException(e);
         }
 
-        certificateList.stream().forEach(pair -> {
-
+        certificateList.entrySet().stream()
+                .filter(pair -> pair.getValue() != null)
+                .forEach(pair -> {
+                    String partyName = pair.getKey();
+                    String certificateContent = pair.getValue();
+                    X509Certificate cert = certificateService.loadCertificateFromString(certificateContent);
+                    multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert, partyName, true);
         });
     }
 

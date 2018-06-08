@@ -6,6 +6,7 @@ import javafx.util.Pair;
 
 import java.security.KeyStoreException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Thomas Dussart
@@ -59,7 +60,7 @@ public interface PartyService {
      * Updates the list of parties.
      * @param partyList
      */
-    void updateParties(List<Party> partyList, List<Pair<String, String>> certificateList);
+    void updateParties(List<Party> partyList, Map<String, String> certificates);
 
     /**
      * Retrieve all the processes configured in the pmode.

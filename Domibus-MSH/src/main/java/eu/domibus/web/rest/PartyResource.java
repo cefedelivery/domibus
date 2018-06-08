@@ -73,11 +73,9 @@ public class PartyResource {
                         pageSize),
                 PartyResponseRo.class);
 
-
         flattenIdentifiers(partyResponseRos);
 
         flattenProcesses(partyResponseRos);
-
 
         partyResponseRos.forEach(partyResponseRo -> {
             final List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo
@@ -126,9 +124,9 @@ public class PartyResource {
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(@RequestParam(value = "name", required = false) String name,
-                                         @RequestParam(value = "endPoint", required = false) String endPoint,
-                                         @RequestParam(value = "partyId", required = false) String partyId,
-                                         @RequestParam(value = "process", required = false) String process) {
+            @RequestParam(value = "endPoint", required = false) String endPoint,
+            @RequestParam(value = "partyId", required = false) String partyId,
+            @RequestParam(value = "process", required = false) String process) {
         String resultText;
         final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
@@ -164,15 +162,16 @@ public class PartyResource {
             LOG.debug("Updating partyList [{}]", Arrays.toString(partyList.toArray()));
         }
 
-        List<Pair<String, String>> certificateList = partiesRo.stream().map(
-                party -> new Pair<String, String>(party.getName(), party.getCertificateContent()))
-                .collect(Collectors.toList());
+        Map<String, String> certificates = partiesRo.stream()
+                .filter(party -> party.getCertificateContent() != null)
+                .collect(Collectors.toMap(party -> party.getName(), party -> party.getCertificateContent()));
 
-        partyService.updateParties(partyList, certificateList);
+        partyService.updateParties(partyList, certificates);
     }
 
     /**
-     * Flatten the list of identifiers of each party into a comma separated list for displaying in the console.
+     * Flatten the list of identifiers of each party into a comma separated list
+     * for displaying in the console.
      *
      * @param partyResponseRos the list of party to be adapted.
      */
@@ -191,9 +190,9 @@ public class PartyResource {
                 });
     }
 
-
     /**
-     * Flatten the list of processes of each party into a comma separated list for displaying in the console.
+     * Flatten the list of processes of each party into a comma separated list
+     * for displaying in the console.
      *
      * @param partyResponseRos the list of party to be adapted.
      */
@@ -204,11 +203,11 @@ public class PartyResource {
                     List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator();
                     List<ProcessRo> processesWithPartyAsResponder = partyResponseRo.getProcessesWithPartyAsResponder();
 
-                    List<ProcessRo> processesWithPartyAsInitiatorAndResponder =
-                            processesWithPartyAsInitiator.
-                                    stream().
-                                    filter(processesWithPartyAsResponder::contains).
-                                    collect(Collectors.toList());
+                    List<ProcessRo> processesWithPartyAsInitiatorAndResponder
+                    = processesWithPartyAsInitiator.
+                            stream().
+                            filter(processesWithPartyAsResponder::contains).
+                            collect(Collectors.toList());
 
                     List<ProcessRo> processWithPartyAsInitiatorOnly = processesWithPartyAsInitiator
                             .stream()
@@ -269,8 +268,9 @@ public class PartyResource {
     public ResponseEntity<TrustStoreRO> getCertificateForParty(@PathVariable(name = "partyName") String partyName) {
         try {
             TrustStoreEntry cert = certificateService.getPartyCertificateFromTruststore(partyName);
-            if(cert == null)
+            if (cert == null) {
                 return ResponseEntity.notFound().build();
+            }
             TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);
             return ResponseEntity.ok(res);
         } catch (KeyStoreException e) {
@@ -280,24 +280,22 @@ public class PartyResource {
     }
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
-    public ResponseEntity<TrustStoreRO> convertCertificateContent(@PathVariable(name = "partyName") String partyName,
-                                                                @RequestBody CertificateContentRo certificate) {
-        if (certificate != null) {
-            try {
-                String content = certificate.getContent();
-                LOG.debug("certificate base 64 received [{}] ", content);
-
-                TrustStoreEntry cert = certificateService.convertCertificateContent(content);
-                if(cert == null)
-                    return ResponseEntity.notFound().build();
-                TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);
-                return ResponseEntity.ok(res);
-            } catch (Exception e) {
-                LOG.error("Failed to upload the truststore file", e);
-                return ResponseEntity.badRequest().build();
-            }
-        } else {
-            return ResponseEntity.badRequest().build();
+    public TrustStoreRO convertCertificateContent(@PathVariable(name = "partyName") String partyName,
+            @RequestBody CertificateContentRo certificate) {
+        
+        if (certificate == null) {
+            throw new IllegalArgumentException();
         }
+
+        String content = certificate.getContent();
+        LOG.debug("certificate base 64 received [{}] ", content);
+
+        TrustStoreEntry cert = certificateService.convertCertificateContent(content);
+        if (cert == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);
+        return res;
     }
 }
