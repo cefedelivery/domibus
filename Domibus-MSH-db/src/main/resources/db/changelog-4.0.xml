@@ -2070,7 +2070,7 @@
                         incrementBy="1" startValue="1" cacheSize="20" cycle="false" ordered="false"/>
     </changeSet>
 
-    <changeSet author="thomas dussart" id="EDELIVERY-2144">
+    <changeSet author="thomas dussart" id="EDELIVERY-2144_1">
         <insert tableName="TB_USER_ROLE">
             <column name="ID_PK" value="1" type="INT"/>
             <column name="ROLE_NAME" value="ROLE_ADMIN"/>
@@ -2078,28 +2078,6 @@
         <insert tableName="TB_USER_ROLE">
             <column name="ID_PK" value="2" type="INT"/>
             <column name="ROLE_NAME" value="ROLE_USER"/>
-        </insert>
-        <insert tableName="TB_USER">
-            <column name="ID_PK" value="1" type="INT"/>
-            <column name="USER_NAME" value="admin"/>
-            <column name="USER_PASSWORD" value="$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36"/>
-            <column name="USER_ENABLED" valueBoolean="true"/>
-            <column name="USER_DELETED" valueBoolean="false"/>
-        </insert>
-        <insert tableName="TB_USER">
-            <column name="ID_PK" value="2" type="INT"/>
-            <column name="USER_NAME" value="user"/>
-            <column name="USER_PASSWORD" value="$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu"/>
-            <column name="USER_ENABLED" valueBoolean="true"/>
-            <column name="USER_DELETED" valueBoolean="false"/>
-        </insert>
-        <insert tableName="TB_USER_ROLES">
-            <column name="USER_ID" value="1" type="INT"/>
-            <column name="ROLE_ID" value="1" type="INT"/>
-        </insert>
-        <insert tableName="TB_USER_ROLES">
-            <column name="USER_ID" value="2" type="INT"/>
-            <column name="ROLE_ID" value="2" type="INT"/>
         </insert>
     </changeSet>
 

@@ -94,14 +94,6 @@
             <column name="USER_NAME" value="super"/>
             <column name="PREFERRED_DOMAIN" value="default"/>
         </insert>
-        <insert tableName="TB_USER_DOMAIN">
-            <column name="USER_NAME" value="admin"/>
-            <column name="DOMAIN" value="default"/>
-        </insert>
-        <insert tableName="TB_USER_DOMAIN">
-            <column name="USER_NAME" value="user"/>
-            <column name="DOMAIN" value="default"/>
-        </insert>
 
     </changeSet>
 
