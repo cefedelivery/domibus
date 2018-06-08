@@ -3,11 +3,13 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -61,28 +63,33 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     @Autowired
     protected MultiDomainCryptoService multiDomainCertificateProvider;
 
-    @Cacheable(value = "lookupInfo", key = "#receiverId + #receiverIdType + #documentId + #processId + #processIdType")
-    public EndpointInfo lookupInformation(final String receiverId, final String receiverIdType,
-                                          final String documentId, final String processId,
-                                          final String processIdType) throws EbMS3Exception {
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
 
-        LOG.info("[OASIS SMP] Do the lookup by: " + receiverId + " " + receiverIdType + " " + documentId +
-                " " + processId + " " + processIdType);
+    @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
+    public EndpointInfo lookupInformation(final String participantId,
+                                          final String participantIdScheme,
+                                          final String documentId,
+                                          final String processId,
+                                          final String processIdScheme) throws EbMS3Exception {
+
+        LOG.info("[OASIS SMP] Do the lookup by: " + participantId + " " + participantIdScheme + " " + documentId +
+                " " + processId + " " + processIdScheme);
 
         try {
             DynamicDiscovery smpClient = createDynamicDiscoveryClient();
 
             LOG.debug("Preparing to request the ServiceMetadata");
-            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(receiverId, receiverIdType);
+            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, participantIdScheme);
             final DocumentIdentifier documentIdentifier = createDocumentIdentifier(documentId);
-            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdType);
+            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdScheme);
             ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
-                throw new ConfigurationException("Could not fetch metadata for: " + receiverId + " " + receiverIdType + " " + documentId +
-                        " " + processId + " " + processIdType + " using the AS4 Protocol " + transportProfileAS4);
+                throw new ConfigurationException("Could not fetch metadata for: " + participantId + " " + participantIdScheme + " " + documentId +
+                        " " + processId + " " + processIdScheme + " using the AS4 Protocol " + transportProfileAS4);
             }
 
             return new EndpointInfo(endpoint.getAddress(), endpoint.getCertificate());
@@ -143,33 +150,15 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DefaultProxy getConfiguredProxy() throws ConnectionException {
-        if (useProxy()) {
+        if (domibusConfigurationService.useProxy()) {
             String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
-            if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
-                    || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
-
-                return null;
-            }
-
-            LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                    httpProxyUser);
-
             return new DefaultProxy(httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
         return null;
-    }
-
-    private boolean useProxy() {
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-        if (StringUtils.isEmpty(useProxy)) {
-            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
-            return false;
-        }
-        return Boolean.parseBoolean(useProxy);
     }
 
     @Override
