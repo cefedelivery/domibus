@@ -56,7 +56,7 @@ public class PartyServiceImpl implements PartyService {
     protected DomainContextProvider domainProvider;
 
     @Autowired
-    private CertificateService certificateService;
+    protected CertificateService certificateService;
 
     /**
      * {@inheritDoc}

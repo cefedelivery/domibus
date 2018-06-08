@@ -10,6 +10,7 @@ import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.party.IdentifierRo;
 import eu.domibus.core.party.PartyResponseRo;
 import eu.domibus.core.party.ProcessRo;
+import eu.domibus.pki.CertificateService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -17,6 +18,7 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,9 @@ public class PartyResourceTest {
 
     @Injectable
     protected DomainContextProvider domainProvider;
+
+    @Injectable
+    private CertificateService certificateService;
 
     @Test
     public void listParties() throws Exception {

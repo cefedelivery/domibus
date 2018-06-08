@@ -2,19 +2,23 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.process.Process;
 import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
+import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
@@ -35,6 +39,15 @@ public class PartyServiceImplTest {
 
     @Injectable
     private PartyDao partyDao;
+
+    @Injectable
+    private MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    private DomainContextProvider domainProvider;
+
+    @Injectable
+    private CertificateService certificateService;
 
     @Tested
     private PartyServiceImpl partyService;
