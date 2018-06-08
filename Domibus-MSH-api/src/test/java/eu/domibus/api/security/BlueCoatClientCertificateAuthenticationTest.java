@@ -1,7 +1,5 @@
 package eu.domibus.api.security;
 
-import eu.domibus.api.security.BlueCoatClientCertificateAuthentication;
-import eu.domibus.api.security.CertificateDetails;
 import org.junit.Assert;
 import org.junit.Test;
 
