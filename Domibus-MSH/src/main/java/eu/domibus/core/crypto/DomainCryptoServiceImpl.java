@@ -95,35 +95,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         setTrustStore(trustStore);
     }
 
-//    @Override
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
-//    public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoException {
-//        String trustStoreFileValue = getTrustStoreLocation();
-//        File trustStoreFile = new File(trustStoreFileValue);
-//        if (!trustStoreFile.getParentFile().exists()) {
-//            LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
-//            try {
-//                FileUtils.forceMkdir(trustStoreFile.getParentFile());
-//            } catch (IOException e) {
-//                throw new CryptoException("Could not create parent directory for truststore", e);
-//            }
-//        }
-//
-//        LOG.debug("Replacing the existing trust store file [{}] with the provided one", trustStoreFileValue);
-//        try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
-//            certificateService.validateLoadOperation(newTrustStoreBytes, password);
-//
-//            truststore.load(newTrustStoreBytes, password.toCharArray());
-//            try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
-//                truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
-//            }
-//        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
-//            throw new CryptoException("Could not replace truststore", e);
-//        }
-//
-//        signalTrustStoreUpdate();
-//    }
-
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoException {

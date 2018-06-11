@@ -65,7 +65,7 @@ export class PartyService {
 
   getFilterPath (name: string, endPoint: string, partyId: string, process: string) {
     let result = '?';
-    //filters
+
     if (name) {
       result += 'name=' + name + '&';
     }
