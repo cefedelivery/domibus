@@ -1,13 +1,18 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,6 +39,15 @@ public class JmsResource {
     @Autowired
     CsvServiceImpl csvServiceImpl;
 
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private AuthUtils authUtils;
+
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
 
@@ -57,7 +71,21 @@ public class JmsResource {
 
         final MessagesResponseRO messagesResponseRO = new MessagesResponseRO();
         try {
-            messagesResponseRO.setMessages(jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector()));
+            if (domibusConfigurationService.isMultiTenantAware() && authUtils.isAdmin()) {
+                //get current domain and add it in the selector
+                final String domainCode = domainContextProvider.getCurrentDomainSafely().getCode();
+
+                String selector = request.getSelector() != null ? request.getSelector() : StringUtils.EMPTY;
+                if (StringUtils.isNotBlank(selector)) {
+                    selector += " AND ";
+                }
+                selector += " DOMAIN='" + domainCode + "'";
+
+                messagesResponseRO.setMessages(jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), selector));
+            } else {
+                messagesResponseRO.setMessages(jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector()));
+            }
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(APPLICATION_JSON))
                     .body(messagesResponseRO);
