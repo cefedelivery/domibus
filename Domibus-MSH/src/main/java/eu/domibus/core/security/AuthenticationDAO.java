@@ -9,6 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
@@ -57,5 +62,70 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
             authRoles.add(AuthRole.valueOf(StringUtils.strip(role)));
         }
         return authRoles;
+    } 
+    
+    public long countEntries(Map<String, Object> filters) {
+        CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<AuthenticationEntity> mle = cq.from(AuthenticationEntity.class);
+        cq.select(cb.count(mle));
+        List<Predicate> predicates = getPredicates(filters, cb, mle);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        TypedQuery<Long> query = em.createQuery(cq);
+        return query.getSingleResult();
+
     }
+
+    public List<AuthenticationEntity> findPaged(final int from, final int max, final String sortColumn, final boolean asc, final Map<String, Object> filters) {
+        final CriteriaBuilder cb = this.em.getCriteriaBuilder();
+        final CriteriaQuery<AuthenticationEntity> cq = cb.createQuery(AuthenticationEntity.class);
+        final Root<AuthenticationEntity> ele = cq.from(AuthenticationEntity.class);
+        cq.select(ele);
+        List<Predicate> predicates = getPredicates(filters, cb, ele);
+        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        if (sortColumn != null) {
+            if (asc) {
+                cq.orderBy(cb.asc(ele.get(sortColumn)));
+            } else {
+                cq.orderBy(cb.desc(ele.get(sortColumn)));
+            }
+
+        }
+        final TypedQuery<AuthenticationEntity> query = this.em.createQuery(cq);
+        query.setFirstResult(from);
+        query.setMaxResults(max);
+        return query.getResultList();
+    }
+    
+    
+    protected List<Predicate> getPredicates(Map<String, Object> filters, CriteriaBuilder cb, Root<AuthenticationEntity> ele) {
+        List<Predicate> predicates = new ArrayList<>();
+        for (final Map.Entry<String, Object> filter : filters.entrySet()) {
+            if (filter.getValue() != null) {
+                if (filter.getValue() instanceof String) {
+                    if (!filter.getValue().toString().isEmpty()) {
+                        switch (filter.getKey().toString()) {
+                            case "":
+                                break;
+                            case "authType":
+                                if (filter.getValue().equals("CERTIFICATE")) {
+                                    predicates.add(cb.isNotNull(ele.<String>get("certificateId")));
+                                } else {
+                                    predicates.add(cb.isNull(ele.<String>get("certificateId"))); 
+                                } 
+                                break;
+                            default:
+                                predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
+                                break;
+                        }
+                    } 
+                } else {
+                    predicates.add(cb.equal(ele.<String>get(filter.getKey()), filter.getValue()));
+                }
+            }
+        }
+        return predicates;
+    }
+    
+    
 }
