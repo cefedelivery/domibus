@@ -8,8 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Each PayloadInfo element identifies payload data associated with the message. The purpose of the
@@ -30,7 +29,8 @@ public class PayloadInfo {
     @XmlElement(name = "PartInfo", required = true)
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "PAYLOADINFO_ID")
-    protected Set<PartInfo> partInfo;
+    @OrderColumn(name="PART_ORDER")
+    protected List<PartInfo> partInfo;
 
     /**
      * This element occurs zero or more times. The PartInfo element is used to reference a MIME
@@ -55,9 +55,9 @@ public class PayloadInfo {
      */
 
     //TODO: support payloadreference?
-    public Set<PartInfo> getPartInfo() {
+    public List<PartInfo> getPartInfo() {
         if (this.partInfo == null) {
-            this.partInfo = new HashSet<>();
+            this.partInfo = new ArrayList<>();
         }
         return this.partInfo;
     }

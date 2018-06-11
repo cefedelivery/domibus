@@ -11,6 +11,7 @@ Domibus 4.0
 - Added OWASP Dependency Check Maven Plugin to identify vulnerable dependencies
 - Possibility to Test the connections for other Access Points
 Domibus 3.3.4
+- The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.
 - Change the pulling mechanism in order to have a better message per second throughput.
 - Changes to support the fixed values of PEPPOL AS4 profile in the dynamic discovery lookup.
 - Added new truststore entries for OASIS SMP.

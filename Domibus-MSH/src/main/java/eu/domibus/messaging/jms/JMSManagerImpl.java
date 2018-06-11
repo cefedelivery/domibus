@@ -109,4 +109,16 @@ public class JMSManagerImpl implements JMSManager {
         InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
     }
+
+    @Override
+    public long getDestinationSize(final String nameLike) {
+        final Map<String, InternalJMSDestination> destinationsGroupedByFQName = internalJmsManager.findDestinationsGroupedByFQName();
+        for (Map.Entry<String, InternalJMSDestination> entry : destinationsGroupedByFQName.entrySet()) {
+            if (StringUtils.containsIgnoreCase(entry.getKey(), nameLike)) {
+                final InternalJMSDestination value = entry.getValue();
+                return value.getNumberOfMessages();
+            }
+        }
+        return 0;
+    }
 }

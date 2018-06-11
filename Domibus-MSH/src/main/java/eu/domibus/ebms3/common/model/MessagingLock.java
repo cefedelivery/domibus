@@ -6,7 +6,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.Objects;
 
 import static eu.domibus.ebms3.common.model.MessageState.READY;
 
@@ -17,14 +16,16 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
 @Entity
 @Table(name = "TB_MESSAGING_LOCK")
 @NamedQueries({
-        @NamedQuery(name = "MessagingLock.findNexMessageToProcess",
-                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC ORDER BY m.received"),
-        @NamedQuery(name = "MessagingLock.findNexMessageToProcessExcludingLocked",
-                query = "select m from MessagingLock m where m.messageState=:MESSAGE_STATE and m.messageType=:MESSAGE_TYPE and m.initiator=:INITIATOR and m.mpc=:MPC and m.entityId not in(:LOCKED_IDS) ORDER BY m.received"),
+        @NamedQuery(name = "MessagingLock.findForMessageId",
+                query = "select m from MessagingLock m where m.messageId=:MESSAGE_ID"),
         @NamedQuery(name = "MessagingLock.delete",
                 query = "delete from MessagingLock m where m.messageId=:MESSAGE_ID"),
-        @NamedQuery(name = "MessagingLock.updateStatus",
-                query = "update MessagingLock m set m.messageState=:MESSAGE_STATE where m.messageId=:MESSAGE_ID")
+        @NamedQuery(name = "MessagingLock.findStalledMessages",
+                query = "SELECT m from MessagingLock m where m.staled<CURRENT_TIMESTAMP() and messageState != 'DEL'"),
+        @NamedQuery(name = "MessagingLock.findDeletedMessages",
+                query = "SELECT m from MessagingLock m where messageState = 'DEL'"),
+        @NamedQuery(name = "MessagingLock.findReadyToPull", query = "from MessagingLock where messageState = 'READY' and mpc=:MPC and initiator=:INITIATOR AND messageType='PULL' and nextAttempt<CURRENT_TIMESTAMP() and staled>CURRENT_TIMESTAMP() order by entityId"),
+        @NamedQuery(name = "MessagingLock.findWaitingForReceipt", query = "from MessagingLock where messageState = 'WAITING' AND nextAttempt<CURRENT_TIMESTAMP() order by entityId")
 })
 public class MessagingLock extends AbstractBaseEntity {
 
@@ -55,13 +56,39 @@ public class MessagingLock extends AbstractBaseEntity {
     @NotNull
     private String mpc;
 
-    public MessagingLock(final String messageId,final String initiator,final String mpc) {
-        this.received = new Date();
+    @Column(name = "MESSAGE_STALED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date staled;
+
+    @Column(name = "NEXT_ATTEMPT")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date nextAttempt;
+
+    @Column(name = "SEND_ATTEMPTS")
+    private int sendAttempts;
+
+    @Column(name = "SEND_ATTEMPTS_MAX")
+    private int sendAttemptsMax;
+
+    public MessagingLock(
+            final String messageId,
+            final String initiator,
+            final String mpc,
+            final Date received,
+            final Date staled,
+            final Date nextAttempt,
+            final int sendAttempts,
+            final int sendAttemptsMax) {
+        this.received = received;
+        this.staled=staled;
         this.messageId = messageId;
         this.initiator=initiator;
         this.mpc=mpc;
         this.messageType=PULL;
         this.messageState=READY;
+        this.nextAttempt=nextAttempt;
+        this.sendAttempts=sendAttempts;
+        this.sendAttemptsMax=sendAttemptsMax;
     }
 
     public MessagingLock() {
@@ -91,6 +118,35 @@ public class MessagingLock extends AbstractBaseEntity {
         return mpc;
     }
 
+    public Date getStaled() {
+        return staled;
+    }
+
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public int getSendAttempts() {
+        return sendAttempts;
+    }
+
+    public int getSendAttemptsMax() {
+        return sendAttemptsMax;
+    }
+
+    public void setMessageState(MessageState messageState) {
+        this.messageState = messageState;
+    }
+
+    public void setNextAttempt(Date nextAttempt) {
+        this.nextAttempt = nextAttempt;
+    }
+
+    public void setSendAttempts(int sendAttempts) {
+        this.sendAttempts = sendAttempts;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,6 +163,8 @@ public class MessagingLock extends AbstractBaseEntity {
                 .append(messageId, that.messageId)
                 .append(initiator, that.initiator)
                 .append(mpc, that.mpc)
+                .append(staled, that.staled)
+                .append(nextAttempt, that.nextAttempt)
                 .isEquals();
     }
 
@@ -120,18 +178,9 @@ public class MessagingLock extends AbstractBaseEntity {
                 .append(messageId)
                 .append(initiator)
                 .append(mpc)
+                .append(staled)
+                .append(nextAttempt)
                 .toHashCode();
     }
 
-    @Override
-    public String toString() {
-        return "MessagingLock{" +
-                "messageType='" + messageType + '\'' +
-                ", received=" + received +
-                ", messageState=" + messageState +
-                ", messageId='" + messageId + '\'' +
-                ", initiator='" + initiator + '\'' +
-                ", mpc='" + mpc + '\'' +
-                '}';
-    }
 }

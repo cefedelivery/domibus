@@ -67,4 +67,12 @@ public interface JMSManager {
      * @return a JmsMessage
      */
     JmsMessage consumeMessage(String source, String messageId);
+
+    /**
+     * Return the number of jms messages in the destination.
+     *
+     * @param nameLike patterne representing the name of the destination (EG:%name%)
+     * @return the number of messages contained in the destination.
+     */
+    long getDestinationSize(String nameLike);
 }
