@@ -364,7 +364,6 @@ public class PullMessageServiceImpl implements PullMessageService {
         LOG.debug("[PULL_RECEIPT]:Message:[{}] failed on pull message acknowledgement", userMessageLog.getMessageId());
         if (attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration)) {
             LOG.debug("[PULL_RECEIPT]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
             pullMessageStateService.reset(userMessageLog);
             LOG.debug("[pullFailedOnReceipt]:Message:[{}] add lock", userMessageLog.getMessageId());
             LOG.debug("[PULL_RECEIPT]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
@@ -420,6 +419,8 @@ public class PullMessageServiceImpl implements PullMessageService {
             lock.setMessageState(MessageState.DEL);
             lock.setNextAttempt(null);
             messagingLockDao.save(lock);
+            pullMessageStateService.sendFailed(userMessageLog);
+
         }
 
     }
