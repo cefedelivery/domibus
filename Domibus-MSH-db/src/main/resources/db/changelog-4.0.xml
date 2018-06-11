@@ -688,6 +688,9 @@
             <column name="MIME" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="PART_ORDER" type="int" defaultValueNumeric="0" >
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
 
@@ -1776,6 +1779,22 @@
 
         <createIndex indexName="UK_bpeflt902ybu9nshba2fjpv9d" tableName="TB_MESSAGE_LOG">
             <column name="MSH_ROLE"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID_VAL" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+            <column name="VALUE"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_MSG_LOG_RCV_MSG_ID" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+            <column name="MESSAGE_ID"/>
         </createIndex>
 
 
