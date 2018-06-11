@@ -1,6 +1,7 @@
 package eu.domibus.jms.activemq;
 
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -45,6 +46,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
 
+    /** in multi-tenancy mode domain admins should not see any count of messages */
+    static final long NB_MESSAGES_ADMIN = -1L;
+
     protected Map<String, ObjectName> queueMap;
 
     @Autowired
@@ -65,6 +69,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
     @Autowired
     JMSSelectorUtil jmsSelectorUtil;
+
+    @Autowired
+    private AuthUtils authUtils;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -89,7 +96,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         internalJmsDestination.setName(queueMbean.getName());
         internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
         internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
-        internalJmsDestination.setNumberOfMessages(queueMbean.getQueueSize());
+        internalJmsDestination.setNumberOfMessages(authUtils.isSuperAdmin() ? queueMbean.getQueueSize() : NB_MESSAGES_ADMIN);
         internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, name);
         return internalJmsDestination;
     }

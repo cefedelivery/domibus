@@ -16,6 +16,8 @@ public interface AuthUtils {
 
     boolean isSuperAdmin();
 
+    boolean isAdmin();
+
     void hasUserOrAdminRole();
 
     void hasAdminRole();
