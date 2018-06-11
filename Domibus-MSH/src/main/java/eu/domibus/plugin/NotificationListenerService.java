@@ -243,8 +243,6 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         int countOfMessagesIncluded = 0;
         for (JmsMessage message : messages) {
-//            if (notificationType.name().equals(message.getCustomStringProperty(MessageConstants.NOTIFICATION_TYPE))) {
-//                if (finalRecipient == null || (StringUtils.equals(finalRecipient, message.getStringProperty(MessageConstants.FINAL_RECIPIENT)))) {
                     String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
                     result.add(messageId);
                     countOfMessagesIncluded++;
@@ -253,8 +251,6 @@ public class NotificationListenerService implements MessageListener, JmsListener
                         LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
                         break;
                     }
-//                }
-//            }
         }
 
         return result;
