@@ -220,10 +220,10 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         return null;
     }
 
-    @Override
-    public List<InternalJmsMessage> browseMessages(String source) {
-        return browseMessages(source, null, null, null, null);
-    }
+//    @Override
+//    public List<InternalJmsMessage> browseMessages(String source) {
+//        return browseMessages(source, null, null, null, null);
+//    }
 
     @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
