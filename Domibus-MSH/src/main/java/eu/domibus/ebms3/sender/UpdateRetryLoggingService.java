@@ -84,7 +84,7 @@ public class UpdateRetryLoggingService {
                 messagingDao.clearPayloadData(messageId);
             }
         }
-    }
+
 
     @Transactional
     public void updateWaitingReceiptMessageRetryLogging(final String messageId, final LegConfiguration legConfiguration) {
