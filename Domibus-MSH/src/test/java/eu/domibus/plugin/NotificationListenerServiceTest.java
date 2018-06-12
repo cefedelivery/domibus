@@ -94,7 +94,7 @@ public class NotificationListenerServiceTest {
             domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
             result = 5;
 
-            jmsManager.browseMessages(withAny(new String()));
+            jmsManager.browseMessages((String)any, (String)any);
             result = messages;
 
         }};
@@ -112,7 +112,7 @@ public class NotificationListenerServiceTest {
     }
 
     @Test
-    public void testAddToListFromQueueMissingConfiguration(final @Injectable QueueBrowser queueBrowser) throws JMSException {
+    public void testAddToListFromQueueMaxCount(final @Injectable QueueBrowser queueBrowser) throws JMSException {
         mode = BackendConnector.Mode.PULL;
 
         final List<JmsMessage> messages = generateTestMessages();
@@ -120,9 +120,9 @@ public class NotificationListenerServiceTest {
         new Expectations() {{
 
             domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
-            result = 500;
+            result = 5;
 
-            jmsManager.browseMessages(withAny(new String()));
+            jmsManager.browseMessages((String)any, (String)any);
             result = messages;
 
         }};
@@ -130,7 +130,7 @@ public class NotificationListenerServiceTest {
         /* Expected scenario when max pending messages configuration is not specified */
         Collection<String> result = new ArrayList<String>();
         result.addAll(objNotificationListenerService.browseQueue(NotificationType.MESSAGE_RECEIVED, TEST_FINAL_RECIPIENT));
-        Assert.assertEquals(10, result.size());
+        Assert.assertEquals(5, result.size());
     }
 
     @Test
