@@ -43,10 +43,10 @@ export ADMIN_PASSW="123456"
 sudo apt-get install -y wget
 sudo apt-get install -y unzip
 
-sudo wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/public/content/eu/domibus/domibus-distribution/$DOMIBUS_VERSION/domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip \
+sudo wget https://ec.europa.eu/cefdigital/artifact/content/repositories/public/eu/domibus/domibus-distribution/$DOMIBUS_VERSION/domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip \
     && sudo unzip -o -d $TOMCAT_FULL_DISTRIBUTION domibus-distribution-$DOMIBUS_VERSION-tomcat-full.zip
 
-sudo wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/public/content/eu/domibus/domibus-distribution/$DOMIBUS_VERSION/domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
+sudo wget https://ec.europa.eu/cefdigital/artifact/content/repositories/public/eu/domibus/domibus-distribution/$DOMIBUS_VERSION/domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip \
     && sudo unzip -o -d $DOMIBUS_DIST domibus-distribution-$DOMIBUS_VERSION-sample-configuration-and-testing.zip
 
 sudo wget https://dev.mysql.com/get/Downloads/Connector-J/$MYSQL_CONNECTOR.zip \
