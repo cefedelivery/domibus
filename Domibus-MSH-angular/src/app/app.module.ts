@@ -78,7 +78,7 @@ import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.componen
 import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
 import { PluginUserComponent } from './pluginuser/pluginuser.component';
-import { EditPluginUserFormComponent } from './pluginuser/editpluginuser-form/editpluginuser-form.component';
+import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -131,7 +131,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AlertsComponent,
     TestServiceComponent,
     PluginUserComponent,
-    EditPluginUserFormComponent
+    EditbasicpluginuserFormComponent
   ],
   entryComponents: [
     AppComponent,
@@ -152,7 +152,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RollbackDialogComponent,
     ActionDirtyDialogComponent,
     PartyDetailsComponent,
-    EditPluginUserFormComponent
+    EditbasicpluginuserFormComponent
   ],
   imports: [
     BrowserModule,

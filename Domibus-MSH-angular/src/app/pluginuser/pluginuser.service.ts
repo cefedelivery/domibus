@@ -13,10 +13,7 @@ export class PluginUserService {
   }
 
   getUsers (filter?: PluginUserSearchCriteria): Observable<{ entries: PluginUserRO[], count: number }> {
-    let searchParams: URLSearchParams = new URLSearchParams();
-    // searchParams.set('page', offset.toString());
-    // searchParams.set('pageSize', pageSize.toString());
-    // searchParams.set('orderBy', orderBy);
+    const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', '0');
     searchParams.set('pageSize', '10');
     searchParams.set('orderBy', 'entityId');

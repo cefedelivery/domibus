@@ -7,12 +7,13 @@ import {PluginUserService, PluginUserSearchCriteria} from './pluginuser.service'
 import {PluginUserRO} from './pluginuser';
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {MdDialog, MdDialogRef} from '@angular/material';
-import {EditPluginUserFormComponent} from './editpluginuser-form/editpluginuser-form.component';
+import {EditbasicpluginuserFormComponent} from './editpluginuser-form/editbasicpluginuser-form.component';
+import {UserService} from '../user/user.service';
 
 @Component({
   templateUrl: './pluginuser.component.html',
   styleUrls: ['./pluginuser.component.css'],
-  providers: [PluginUserService]
+  providers: [PluginUserService, UserService]
 })
 export class PluginUserComponent implements OnInit, DirtyOperations {
 
@@ -29,7 +30,9 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
   filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
 
-  constructor (private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog) {
+  userRoles: Array<String> = [];
+
+  constructor (private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog, private userService: UserService) {
     this.initColumns();
   }
 
@@ -37,6 +40,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.users = [];
     this.dirty = false;
 
+    this.getUserRoles();
     this.search();
   }
 
@@ -90,6 +94,11 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     return this.dirty;
   }
 
+  async getUserRoles () {
+    const result = await this.userService.getUserRoles().toPromise();
+    this.userRoles = result;
+  }
+
   canSaveAsCSV (): boolean {
     return !this.loading && this.users.length > 0 && this.users.length < AlertComponent.MAX_COUNT_CSV;
   }
@@ -98,10 +107,6 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     if ('dblclick' === event.type) {
       this.edit(event.row);
     }
-  }
-
-  canEdit () {
-    return this.selected.length === 1;
   }
 
   add () {
@@ -113,16 +118,21 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.selected.push(newItem);
   }
 
+  canEdit () {
+    return this.selected.length === 1;
+  }
+
   edit (row) {
     row = row || this.selected[0];
     const rowCopy = JSON.parse(JSON.stringify(row));
 
-    const formRef: MdDialogRef<EditPluginUserFormComponent> = this.dialog.open(EditPluginUserFormComponent, {
+    const editForm = this.inBasicMode() ? EditbasicpluginuserFormComponent : null;
+
+    const formRef: MdDialogRef<any> = this.dialog.open(editForm, {
       data: {
         edit: true,
-        //user: this.users[rowNumber],
         user: rowCopy,
-        //userroles: this.userRoles,
+        userroles: this.userRoles,
       }
     });
     formRef.afterClosed().subscribe(ok => {

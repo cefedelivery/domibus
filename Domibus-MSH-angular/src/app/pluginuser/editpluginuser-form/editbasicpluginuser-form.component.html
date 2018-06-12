@@ -9,18 +9,11 @@
         </md-input-container>
       </div>
 
-      <div style="margin-top:-5px;">
-        <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Email" name="email" id="email_id" [value]="email" (blur)="updateEmail($event)" [formControl]="userForm.controls['email']" [pattern]=emailPattern maxlength="255">
-          <div *ngIf="userForm.controls['email'].hasError('pattern')" style="color:red; font-size: 70%">You should type an email</div>
-        </md-input-container>
-      </div>
-
       <div style="margin-top:10px;">
-        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" (change)="onRolesChanged()" required>
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['role']" [(ngModel)]="role" (change)="onRolesChanged()" required>
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
+        <div *ngIf="userForm.controls['role'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
       </div>
 
       <div style="margin-top:15px;">
@@ -47,9 +40,9 @@
         </md-input-container>
       </div>
 
-      <div>
-        Active<input type="checkbox" [checked]="active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">
-      </div>
+      <!--<div>-->
+        <!--Active<input type="checkbox" [checked]="active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">-->
+      <!--</div>-->
 
       <table class="buttonsRow">
         <tr>
