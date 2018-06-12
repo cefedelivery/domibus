@@ -1,0 +1,101 @@
+<page-header id="pluginusersheader_id">Plugin Users</page-header>
+<div class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+        <!--<md-input-container>
+          <input mdInput placeholder="Authentication type" [(ngModel)]="filter.authType" id="name_id">
+        </md-input-container>-->
+        <md-select placeholder="Authentication type" [(ngModel)]="filter.authType" id="authType_id">
+          <md-option *ngFor="let t of authenticationTypes" [value]="t">
+            {{t}}
+          </md-option>
+        </md-select>
+        <md-input-container>
+          <input mdInput placeholder="Role" [(ngModel)]="filter.authRole" id="endPoint_id">
+        </md-input-container>
+        <md-input-container>
+          <input mdInput placeholder="Original User" [(ngModel)]="filter.originalUser" id="process_id">
+        </md-input-container>
+        <md-input-container *ngIf="inBasicMode()">
+          <input mdInput placeholder="Username" [(ngModel)]="filter.userName" id="partyID_id">
+        </md-input-container>
+        <div class="searchArea">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="search()">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+        </div>
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+
+<div class="panel">
+
+  <div class="group-filter-button">
+    <span class="row-button">
+    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+                     (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
+    </span>
+    <span class="column-filter-button">
+    <app-column-picker [allColumns]="columnPicker().allColumns" [selectedColumns]="columnPicker().selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker().changeSelectedColumns($event)"></app-column-picker>
+    </span>
+    <button md-icon-button color="primary" [disabled]="!canSaveAsCSV()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id" md-tooltip="Export as CSV">
+      <img src="assets/images/exportCSV.svg" width="30" height="30">
+    </button>
+  </div>
+
+  <ngx-datatable
+    id="userTable"
+    class="material striped"
+    [rows]="users"
+    [columns]="columnPicker().selectedColumns"
+    [columnMode]="'force'"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    [rowHeight]="'auto'"
+    [scrollbarH]="true"
+    [externalPaging]="true"
+    [externalSorting]="true"
+    [loadingIndicator]="loading"
+    [selected]="selected"
+    [selectionType]="'single'"
+    [limit]="rowLimiter.pageSize"
+    [count]="count"
+    [offset]="offset"
+    (activate)="onActivate($event)"
+    >
+  </ngx-datatable>
+
+
+  <table class="group-action-button">
+    <tr>
+      <td>
+        <button id="userCancelButton" md-raised-button (click)="cancelDialog()" color="primary" [disabled]="!enableCancel">
+          <md-icon>cancel</md-icon>
+          <span>Cancel</span>
+        </button>
+        <button id="userSaveButton" md-raised-button (click)="save(false)" color="primary" [disabled]="!enableSave">
+          <md-icon>save</md-icon>
+          <span>Save</span>
+        </button>
+        <button id="userNewButton" md-raised-button (click)="buttonNew()" color="primary">
+          <md-icon>add</md-icon>
+          <span>New</span>
+        </button>
+        <button md-raised-button (click)="edit()" color="primary" [disabled]="!canEdit()">
+          <md-icon>edit</md-icon>
+          <span>Edit</span>
+        </button>
+        <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary"
+                [disabled]="!enableDelete">
+          <md-icon>delete</md-icon>
+          <span>Delete</span>
+        </button>
+      </td>
+    </tr>
+  </table>
+</div>
