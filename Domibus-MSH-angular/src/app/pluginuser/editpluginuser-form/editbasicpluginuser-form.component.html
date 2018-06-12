@@ -2,15 +2,23 @@
   <p class="domibusTextSmall" style="margin:0;font-weight: bold">{{formTitle}}</p>
   <form [formGroup]="userForm" (submit)="submitForm()">
     <md-card>
+
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Username" name="username" id="username_id" [value]="userName" (blur)="updateUserName($event)" [formControl]="userForm.controls['userName']" maxlength="255" required>
+          <input mdInput placeholder="Username" name="username" id="username_id" [(ngModel)]="user.username" [formControl]="userForm.controls['userName']" maxlength="255" required>
           <div *ngIf="userForm.controls['userName'].hasError('required')" style="color:red; font-size: 70%">You should type an username</div>
         </md-input-container>
       </div>
 
+      <div style="margin-top:15px;">
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="originalUser" name="originalUser" id="originalUser_id" [(ngModel)]="user.originalUser" [formControl]="userForm.controls['originalUser']" maxlength="255" required>
+          <div *ngIf="userForm.controls['originalUser'].hasError('required')" style="color:red; font-size: 70%">You should type an originalUser</div>
+        </md-input-container>
+      </div>
+
       <div style="margin-top:10px;">
-        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['role']" [(ngModel)]="role" (change)="onRolesChanged()" required>
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['role']" [(ngModel)]="user.authRoles" required>
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
         <div *ngIf="userForm.controls['role'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
@@ -18,7 +26,8 @@
 
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [value]="password" (blur)="updatePassword($event)" [formControl]="userForm.controls['password']" [pattern]=passwordPattern [required]="!editMode" >
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [(ngModel)]="user.password" [formControl]="userForm.controls['password']"
+                 [pattern]=passwordPattern [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
             Password should follow all of these rules:<br>
@@ -34,7 +43,7 @@
 
       <div>
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [value]="confirmation" [formControl]="userForm.controls['confirmation']" [required]="!editMode" >
+          <input mdInput placeholder="Confirmation" name="confirmation" id="confirmation_id" type="password" [(ngModel)]="confirmation" [formControl]="userForm.controls['confirmation']" [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['confirmation'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['confirmation'].hasError('confirmation')" style="color:red; font-size: 70%">Passwords do not match</div>
         </md-input-container>
