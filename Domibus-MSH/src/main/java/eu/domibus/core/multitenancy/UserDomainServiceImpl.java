@@ -147,11 +147,11 @@ public class UserDomainServiceImpl implements UserDomainService {
             throw new DomainException("Could not set domain", e);
         }
     }
-    
-    @Override  
+
+    @Override
     public void setPreferredDomainForUser(String user, String domainCode) {
         LOG.debug("Setting preferred domain [{}] for user [{}]", domainCode, user);
-        
+
         Future utrFuture = schedulingTaskExecutor.submit(() -> {
             userDomainDao.setPreferredDomainByUser(user, domainCode);
         });
@@ -159,6 +159,20 @@ public class UserDomainServiceImpl implements UserDomainService {
             utrFuture.get(3000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new DomainException("Could not set preferred domain", e);
+        }
+    }
+
+    @Override
+    public void deleteDomainForUser(String user) {
+        LOG.debug("Deleting domain for user [{}]", user);
+
+        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+            userDomainDao.deleteDomainByUser(user);
+        });
+        try {
+            utrFuture.get(3000L, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new DomainException("Could not delete domain", e);
         }
     }
 

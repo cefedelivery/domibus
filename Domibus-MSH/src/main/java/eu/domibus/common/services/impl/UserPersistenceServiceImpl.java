@@ -86,7 +86,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         List<User> usersEntities = domainConverter.convert(users, User.class);
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-        userDao.deleteAll(usersEntitiesToDelete);
+        deleteUsers(usersEntitiesToDelete);
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -121,10 +121,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
-            List<String> authorities = user.getAuthorities();
             User userEntity = domainConverter.convert(user, User.class);
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
-            addRoleToUser(authorities, userEntity);
+            addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
@@ -132,6 +131,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             } else {
                 userDomainService.setDomainForUser(user.getUserName(), user.getDomain());
             }
+        }
+    }
+
+    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
+        userDao.deleteAll(usersEntitiesToDelete);
+        for (User user : usersEntitiesToDelete) {
+            userDomainService.deleteDomainForUser(user.getUserName());
         }
     }
 
