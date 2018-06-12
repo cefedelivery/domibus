@@ -15,6 +15,9 @@ public interface InternalJMSManager {
 
     String QUEUE = "Queue";
 
+    /** in multi-tenancy mode domain admins should not see any count of messages so we set this value */
+    long NB_MESSAGES_ADMIN = -1L;
+
     Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 
     void sendMessage(InternalJmsMessage message, String destination);

@@ -48,9 +48,6 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
 
-    /** in multi-tenancy mode domain admins should not see any count of messages */
-    static final long NB_MESSAGES_ADMIN = -1L;
-
     protected Map<String, ObjectName> queueMap;
 
     @Autowired
@@ -102,7 +99,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
         internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
         /* in multi-tenancy mode we show the number of messages only to super admin */
-        internalJmsDestination.setNumberOfMessages( domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN : queueMbean.getQueueSize());
+        internalJmsDestination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN : queueMbean.getQueueSize());
         internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, name);
         return internalJmsDestination;
     }
