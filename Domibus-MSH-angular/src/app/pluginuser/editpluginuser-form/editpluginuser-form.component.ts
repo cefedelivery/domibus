@@ -66,7 +66,7 @@ export class EditPluginUserFormComponent {
       || (securityService.isCurrentUserAdmin() && this.isCurrentUser());
 
     if (this.editMode) {
-      this.existingRoles = this.getAllowedRoles(data.userroles, data.user.roles);
+      this.existingRoles = data.userroles;
 
       this.userForm = fb.group({
         'userName': new FormControl({value: this.userName, disabled: true}, Validators.nullValidator),
@@ -121,14 +121,6 @@ export class EditPluginUserFormComponent {
 
   isCurrentUser (): boolean {
     return this.securityService.getCurrentUser().username === this.userName;
-  }
-
-  // filters out roles so that the user cannot change from ap admin to the other 2 roles or vice-versa
-  getAllowedRoles(allRoles, userRoles) {
-    if(userRoles.includes(SecurityService.ROLE_AP_ADMIN))
-      return [SecurityService.ROLE_AP_ADMIN];
-    else
-      return allRoles.filter(role => role != SecurityService.ROLE_AP_ADMIN);
   }
 
 }

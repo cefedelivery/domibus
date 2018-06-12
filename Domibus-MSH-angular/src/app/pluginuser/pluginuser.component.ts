@@ -21,7 +21,6 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
   offset: number = 0;
-  count: number = 0;
   users: PluginUserRO[] = [];
   selected = [];
   loading: boolean = false;
@@ -30,19 +29,18 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
   filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
 
-  constructor(private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog) {
+  constructor (private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog) {
     this.initColumns();
   }
 
-  ngOnInit() {
+  ngOnInit () {
     this.users = [];
-    this.count = 0;
     this.dirty = false;
 
     this.search();
   }
 
-  private initColumns() {
+  private initColumns () {
     this.columnPickerBasic.allColumns = [
       {name: 'Username', prop: 'username', width: 20},
       {name: 'Password', prop: 'password', width: 20},
@@ -59,16 +57,15 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.columnPickerCert.selectedColumns = this.columnPickerCert.allColumns.filter(col => true);
   }
 
-  columnPicker(): ColumnPickerBase {
+  columnPicker (): ColumnPickerBase {
     return this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
   }
 
-  async search() {
+  async search () {
     try {
       this.loading = true;
-      let result = await this.pluginUserService.getUsers(this.filter).toPromise();
+      const result = await this.pluginUserService.getUsers(this.filter).toPromise();
       this.users = result.entries;
-      this.count = result.count;
       this.loading = false;
     } catch (err) {
       this.alertService.error(err);
@@ -76,28 +73,28 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  changePageSize(newPageSize: number) {
+  changePageSize (newPageSize: number) {
     this.rowLimiter.pageSize = newPageSize;
     this.search();
   }
 
-  inBasicMode(): boolean {
+  inBasicMode (): boolean {
     return this.filter.authType == 'BASIC';
   }
 
-  inCertificateMode(): boolean {
+  inCertificateMode (): boolean {
     return this.filter.authType == 'CERTIFICATE';
   }
 
-  isDirty(): boolean {
+  isDirty (): boolean {
     return this.dirty;
   }
 
-  canSaveAsCSV(): boolean {
+  canSaveAsCSV (): boolean {
     return !this.loading && this.users.length > 0 && this.users.length < AlertComponent.MAX_COUNT_CSV;
   }
 
-  onActivate(event) {
+  onActivate (event) {
     if ('dblclick' === event.type) {
       this.edit(event.row);
     }
@@ -107,7 +104,16 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     return this.selected.length === 1;
   }
 
-  edit(row) {
+  add () {
+    const newItem = this.pluginUserService.createNew();
+    newItem.authenticationType = this.filter.authType;
+    this.users.push(newItem);
+
+    this.selected.length = 0;
+    this.selected.push(newItem);
+  }
+
+  edit (row) {
     row = row || this.selected[0];
     const rowCopy = JSON.parse(JSON.stringify(row));
 
