@@ -18,7 +18,7 @@
           <input mdInput placeholder="Username" [(ngModel)]="filter.userName" id="partyID_id">
         </md-input-container>
         <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id" (click)="search()">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchIfOK()">
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -48,7 +48,7 @@
   <ngx-datatable
     id="userTable"
     class="material striped"
-    [rows]="users"
+    [rows]="displayedUsers"
     [columns]="columnPicker.selectedColumns"
     [columnMode]="'force'"
     [headerHeight]="50"
@@ -61,7 +61,7 @@
     [selected]="selected"
     [selectionType]="'single'"
     [limit]="rowLimiter.pageSize"
-    [count]="users.length"
+    [count]="displayedUsers.length"
     [offset]="offset"
     (activate)="onActivate($event)"
     >

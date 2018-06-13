@@ -26,7 +26,8 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   offset = 0;
   users: PluginUserRO[] = [];
-  selected = [];
+
+  selected: PluginUserRO[] = [];
   loading = false;
   dirty = false;
 
@@ -48,6 +49,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
     this.getUserRoles();
     this.search();
+  }
+
+  get displayedUsers (): PluginUserRO[] {
+    return this.users.filter(el => el.status !== UserState[UserState.DELETED]);
   }
 
   private initColumns () {
@@ -76,7 +81,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async search () {
     this.selected = [];
     this.dirty = false;
-    
+
     try {
       this.loading = true;
       const result = await this.pluginUserService.getUsers(this.filter).toPromise();
@@ -88,6 +93,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       this.alertService.error(err);
       this.loading = false;
     }
+  }
+
+  searchIfOK () {
+    this.checkIsDirtyAndThen(this.search);
   }
 
   changePageSize (newPageSize: number) {
@@ -186,8 +195,31 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   async cancel () {
     const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
-    if(ok) {
+    if (ok) {
       this.search();
     }
   }
+
+  delete () {
+    const itemToDelete = this.selected[0];
+    if (itemToDelete.status === UserState[UserState.NEW]) {
+      this.users.splice(this.users.indexOf(itemToDelete), 1);
+    } else {
+      itemToDelete.status = UserState[UserState.DELETED];
+    }
+    this.setIsDirty();
+    this.selected.length = 0;
+  }
+
+  async checkIsDirtyAndThen (func: Function) {
+    if (this.isDirty()) {
+      const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
+      if (ok) {
+        func.call(this);
+      }
+    } else {
+      func.call(this);
+    }
+  }
+
 }
