@@ -60,14 +60,24 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public List<JmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
+
+        Domain domain = domainContextProvider.getCurrentDomain();
+        if(domain != null) {
+            selector = (selector == null ? "" : (selector + " and ")) + MessageConstants.DOMAIN + "='" + domain.getCode() + "'";
+        }
+
         List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
         return jmsMessageMapper.convert(messagesSPI);
     }
 
     @Override
     public List<JmsMessage> browseMessages(String source) {
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source);
-        return jmsMessageMapper.convert(messagesSPI);
+        return browseMessages(source, null, null, null, null);
+    }
+
+    @Override
+    public List<JmsMessage> browseMessages(String source, String selector) {
+        return browseMessages(source, null, null, null, selector);
     }
 
     @Override

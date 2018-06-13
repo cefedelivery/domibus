@@ -86,7 +86,10 @@ public class AuthenticationDefaultService implements AuthenticationService {
             }
             LOG.securityInfo(DomibusMessageCode.SEC_X509CERTIFICATE_AUTHENTICATION_USE);
             final X509Certificate[] certificates = (X509Certificate[]) certificateAttribute;
-            X509CertificateAuthentication authentication = new X509CertificateAuthentication(certificates);
+            Authentication authentication = new X509CertificateAuthentication(certificates);
+            String user = ((X509CertificateAuthentication)authentication).getCertificateId();
+            final String domainForUser = userDomainService.getDomainForUser(user);
+            domainContextProvider.setCurrentDomain(domainForUser);
             authenticate(authentication, httpRequest);
         } else if ("http".equalsIgnoreCase(httpRequest.getScheme())) {
             if (certHeaderValue == null) {
@@ -94,6 +97,9 @@ public class AuthenticationDefaultService implements AuthenticationService {
             }
             LOG.securityInfo(DomibusMessageCode.SEC_BLUE_COAT_AUTHENTICATION_USE);
             Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
+            String user = ((BlueCoatClientCertificateAuthentication)authentication).getCertificateId();
+            final String domainForUser = userDomainService.getDomainForUser(user);
+            domainContextProvider.setCurrentDomain(domainForUser);
             authenticate(authentication, httpRequest);
         } else {
             throw new AuthenticationException("There is no valid authentication in this request and unsecure login is not allowed.");
