@@ -11,7 +11,7 @@ import java.sql.Timestamp;
  * It stores information about a delivery attempt for a certain message.
  *
  * @author Cosmin Baciu
- * @since 1.0
+ * @since 4.0
  */
 public class MessageAttemptDTO implements Serializable {
 

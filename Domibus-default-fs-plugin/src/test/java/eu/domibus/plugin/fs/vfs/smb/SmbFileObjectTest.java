@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs.vfs.smb;
 
 import java.lang.reflect.Field;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.FileType;
@@ -185,7 +186,7 @@ public class SmbFileObjectTest {
         
         String[] result = fileObject.doListChildren();
         
-        Assert.assertArrayEquals(new String[]{}, result);
+        Assert.assertArrayEquals(ArrayUtils.EMPTY_STRING_ARRAY, result);
     }
 
     @Test

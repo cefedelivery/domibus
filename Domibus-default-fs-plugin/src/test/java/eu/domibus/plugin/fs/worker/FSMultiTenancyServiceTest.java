@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static eu.domibus.plugin.fs.worker.FSSendMessagesService.DEFAULT_DOMAIN;
+
 /**
  * @author Tiago Miguel
  * @since 4.0
@@ -28,30 +30,6 @@ public class FSMultiTenancyServiceTest {
 
     @Injectable
     private DomainExtService domainExtService;
-
-    /*@Test
-    public void testGetDefaultDomainNameNonMultitenant() {
-        new Expectations() {{
-            domibusConfigurationExtService.isMultiTenantAware();
-            result = false;
-        }};
-
-        String defaultDomainName = multiTenancyService.getDefaultDomainName();
-
-        Assert.assertNull(defaultDomainName);
-    }
-
-    @Test
-    public void testGetDefaultDomainNameMultitenant() {
-        new Expectations() {{
-            domibusConfigurationExtService.isMultiTenantAware();
-            result = true;
-        }};
-
-        String defaultDomainName = multiTenancyService.getDefaultDomainName();
-
-        Assert.assertEquals("default", defaultDomainName);
-    }*/
 
     @Test
     public void testVerifyDomainExistsNonMultitenant() {
@@ -70,11 +48,11 @@ public class FSMultiTenancyServiceTest {
         new Expectations() {{
             domibusConfigurationExtService.isMultiTenantAware();
             result = true;
-            domainExtService.getDomain("default");
-            result = new DomainDTO("default", "Default");
+            domainExtService.getDomain(DEFAULT_DOMAIN);
+            result = new DomainDTO(DEFAULT_DOMAIN, "Default");
         }};
 
-        boolean verifyDomainExists = multiTenancyService.verifyDomainExists("default");
+        boolean verifyDomainExists = multiTenancyService.verifyDomainExists(DEFAULT_DOMAIN);
 
         Assert.assertTrue(verifyDomainExists);
     }
@@ -84,12 +62,12 @@ public class FSMultiTenancyServiceTest {
         new Expectations() {{
             domibusConfigurationExtService.isMultiTenantAware();
             result = true;
-            domainExtService.getDomain("default");
+            domainExtService.getDomain(DEFAULT_DOMAIN);
             result = null;
         }};
 
         try {
-            multiTenancyService.verifyDomainExists("default");
+            multiTenancyService.verifyDomainExists(DEFAULT_DOMAIN);
         } catch (FSSetUpException ex) {
             return;
         }

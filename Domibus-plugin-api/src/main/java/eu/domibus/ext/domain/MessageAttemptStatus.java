@@ -2,7 +2,7 @@ package eu.domibus.ext.domain;
 
 /**
  * @author Cosmin Baciu
- * @since 1.0
+ * @since 4.0
  */
 public enum MessageAttemptStatus {
     SUCCESS,

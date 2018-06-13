@@ -1,20 +1,21 @@
 package eu.domibus.plugin.fs.worker;
 
 import eu.domibus.ext.services.AuthenticationExtService;
-import eu.domibus.ext.services.DomainExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.FSFileNameHelper;
+import eu.domibus.plugin.fs.FSFilesManager;
+import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -26,6 +27,7 @@ public class FSSendMessagesService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
     public static final String METADATA_FILE_NAME = "metadata.xml";
+    public static final String DEFAULT_DOMAIN = "default";
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
@@ -66,7 +68,7 @@ public class FSSendMessagesService {
 
         if(domibusConfigurationExtService.isMultiTenantAware()) {
             if(domain == null) {
-                domain = "default";
+                domain = DEFAULT_DOMAIN;
             }
             authenticationExtService.basicAuthenticate(fsPluginProperties.getAuthenticationUser(domain), fsPluginProperties.getAuthenticationPassword(domain));
         }

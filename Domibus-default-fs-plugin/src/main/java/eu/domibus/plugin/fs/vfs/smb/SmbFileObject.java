@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileNotFoundException;
 import org.apache.commons.vfs2.FileObject;
@@ -137,7 +138,7 @@ public class SmbFileObject
     protected String[] doListChildren() throws Exception {
         // VFS-210: do not try to get listing for anything else than directories
         if (!file.isDirectory()) {
-            return new String[]{};
+            return ArrayUtils.EMPTY_STRING_ARRAY;
         }
 
         return UriParser.encode(file.list());
