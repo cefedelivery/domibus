@@ -284,7 +284,7 @@ public class PartyResource {
             @RequestBody CertificateContentRo certificate) {
         
         if (certificate == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("certificate parameter must be provided");
         }
 
         String content = certificate.getContent();
@@ -292,7 +292,7 @@ public class PartyResource {
 
         TrustStoreEntry cert = certificateService.convertCertificateContent(content);
         if (cert == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("certificate could not be parsed");
         }
         
         TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);

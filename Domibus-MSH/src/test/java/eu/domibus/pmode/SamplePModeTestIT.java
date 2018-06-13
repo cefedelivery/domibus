@@ -110,7 +110,6 @@ public class SamplePModeTestIT {
         eu.domibus.common.model.configuration.Configuration configuration = unmarshallerResult.getResult();
 
         byte[] bytes2 = xmlUtil.marshal(jaxbContext, configuration, xsdStream2);
-        // Files.write(bytes2, new File("/Users/pion/temp3.xml"));
         xmlStream = new ByteArrayInputStream(bytes2);
         unmarshallerResult = xmlUtil.unmarshal(false, jaxbContext, xmlStream, xsdStream3);
         eu.domibus.common.model.configuration.Configuration configuration2 = unmarshallerResult.getResult();

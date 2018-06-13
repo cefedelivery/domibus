@@ -5,6 +5,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ *
+ * DTO class used to link party with process
+ */
 public class PartyProcessLinkRo {
 
     private final static Logger LOG = LoggerFactory.getLogger(PartyProcessLinkRo.class);

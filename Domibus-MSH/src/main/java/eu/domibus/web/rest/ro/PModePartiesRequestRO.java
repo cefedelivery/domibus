@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @author Ion Perpegel
+ * @since 4.0
+ *
  * Request Object used when updating the list of PMode Parties.
  */
-
 public class PModePartiesRequestRO {
 
     private List<PartyResponseRo> added = new ArrayList<>();

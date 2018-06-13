@@ -66,10 +66,7 @@ public class UploadPModeIT extends AbstractIT {
 
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
-            //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
-            //String response = adminGui.uploadFileHandler(pModeContent);
             pModeProvider.updatePModes(IOUtils.toByteArray(is), "description");
-            //Assert.assertEquals("You successfully uploaded the PMode file.", response);
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
             throw ioEx;
@@ -194,8 +191,6 @@ public class UploadPModeIT extends AbstractIT {
             for (Mpc mpc : configuration.getMpcs()) {
                 Mpc savedMpc = savedMpcs.get(mpc.getName());
                 Assert.assertNotNull(savedMpc);
-                // Assert.assertEquals(mpc, savedMpc); This strangely seeems to work only with Strings!
-                //Assert.assertTrue(mpc.equals(savedMpc)); equals and hashcode are based on hibernate Ids !
                 Assert.assertEquals(mpc.getName(), savedMpc.getName());
                 Assert.assertEquals(mpc.getQualifiedName(), savedMpc.getQualifiedName());
                 Assert.assertEquals(mpc.getRetentionDownloaded(), savedMpc.getRetentionDownloaded());
@@ -250,34 +245,11 @@ public class UploadPModeIT extends AbstractIT {
             UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
             Configuration configuration = unmarshallerResult.getResult();
 
-            //final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
-
              Files.write(bytes, new File("/Users/pion/temp2.xml"));
-
-
-            // Configuration configuration = testUpdatePModes(IOUtils.toByteArray(is));
 
             byte[] x2 = pModeProvider.serializePModeConfiguration(configuration);
 
             Files.write(x2, new File("/Users/pion/temp4.xml"));
-
-//
-//            Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
-//            Validate.notNull(receiverParty, "Responder party was not found");
-//            Party senderParty = pModeProvider.getSenderParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
-//            Validate.notNull(senderParty, "Initiator party was not found");
-//            List<String> parties = new ArrayList<>();
-//            parties.add(receiverParty.getName());
-//            parties.add(senderParty.getName());
-//
-//            boolean partyFound = false;
-//            Iterator<Party> partyIterator = configuration.getBusinessProcesses().getParties().iterator();
-//            while (!partyFound && partyIterator.hasNext()) {
-//                Party party = partyIterator.next();
-//                partyFound = parties.contains(party.getName());
-//            }
-//            Assert.assertTrue(partyFound);
-
 
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());

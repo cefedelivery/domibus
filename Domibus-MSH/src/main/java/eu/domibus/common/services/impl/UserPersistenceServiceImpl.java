@@ -44,7 +44,8 @@ import eu.domibus.common.services.UserPersistenceService;
 import sun.security.validator.ValidatorException;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
+ * @since 4.0
  */
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {
