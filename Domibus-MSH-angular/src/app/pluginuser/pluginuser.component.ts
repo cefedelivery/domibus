@@ -8,6 +8,7 @@ import {PluginUserRO} from './pluginuser';
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {EditbasicpluginuserFormComponent} from './editpluginuser-form/editbasicpluginuser-form.component';
+import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/editcertificatepluginuser-form.component';
 import {UserService} from '../user/user.service';
 
 @Component({
@@ -21,18 +22,22 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   columnPickerCert: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  offset: number = 0;
+  offset = 0;
   users: PluginUserRO[] = [];
   selected = [];
-  loading: boolean = false;
-  dirty: boolean = false;
+  loading = false;
+  dirty = false;
 
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
   filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
+  columnPicker: ColumnPickerBase;
 
   userRoles: Array<String> = [];
 
-  constructor (private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog, private userService: UserService) {
+  constructor (private alertService: AlertService,
+               private pluginUserService: PluginUserService,
+               public dialog: MdDialog,
+               private userService: UserService) {
     this.initColumns();
   }
 
@@ -59,18 +64,28 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
     this.columnPickerBasic.selectedColumns = this.columnPickerBasic.allColumns.filter(col => true);
     this.columnPickerCert.selectedColumns = this.columnPickerCert.allColumns.filter(col => true);
+
+    this.setColumnPicker();
   }
 
-  columnPicker (): ColumnPickerBase {
-    return this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
+  setColumnPicker () {
+    this.columnPicker = this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
   }
+
+
+  // columnPicker (): ColumnPickerBase {
+  //   return this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
+  // }
 
   async search () {
+    console.log('search');
     try {
       this.loading = true;
       const result = await this.pluginUserService.getUsers(this.filter).toPromise();
       this.users = result.entries;
       this.loading = false;
+
+      this.setColumnPicker();
     } catch (err) {
       this.alertService.error(err);
       this.loading = false;
@@ -122,26 +137,24 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     return this.selected.length === 1;
   }
 
-  edit (row) {
+  async edit (row) {
     row = row || this.selected[0];
-    const rowCopy = JSON.parse(JSON.stringify(row));
+    const rowCopy = Object.assign({}, row);
 
-    const editForm = this.inBasicMode() ? EditbasicpluginuserFormComponent : null;
+    const editForm = this.inBasicMode() ? EditbasicpluginuserFormComponent : EditcertificatepluginuserFormComponent;
 
-    const formRef: MdDialogRef<any> = this.dialog.open(editForm, {
+    const ok = await this.dialog.open(editForm, {
       data: {
         edit: true,
         user: rowCopy,
         userroles: this.userRoles,
       }
-    });
-    formRef.afterClosed().subscribe(ok => {
-      if (ok) {
-        if (JSON.stringify(row) === JSON.stringify(rowCopy))
-          return; // nothing changed
-        Object.assign(row, rowCopy);
-      }
-    });
+    }).afterClosed().toPromise();
 
+    if (ok) {
+      if (JSON.stringify(row) === JSON.stringify(rowCopy))
+        return; // nothing changed
+      Object.assign(row, rowCopy);
+    }
   }
 }

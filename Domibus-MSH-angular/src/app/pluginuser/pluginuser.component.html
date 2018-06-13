@@ -3,9 +3,6 @@
   <md-card>
     <md-card-content>
       <div class="panel">
-        <!--<md-input-container>
-          <input mdInput placeholder="Authentication type" [(ngModel)]="filter.authType" id="name_id">
-        </md-input-container>-->
         <md-select placeholder="Authentication type" [(ngModel)]="filter.authType" id="authType_id">
           <md-option *ngFor="let t of authenticationTypes" [value]="t">
             {{t}}
@@ -39,8 +36,8 @@
                      (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
     </span>
     <span class="column-filter-button">
-    <app-column-picker [allColumns]="columnPicker().allColumns" [selectedColumns]="columnPicker().selectedColumns"
-                       (onSelectedColumnsChanged)="columnPicker().changeSelectedColumns($event)"></app-column-picker>
+    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
     <button md-icon-button color="primary" [disabled]="!canSaveAsCSV()" (click)="saveAsCSV()"
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
@@ -52,7 +49,7 @@
     id="userTable"
     class="material striped"
     [rows]="users"
-    [columns]="columnPicker().selectedColumns"
+    [columns]="columnPicker.selectedColumns"
     [columnMode]="'force'"
     [headerHeight]="50"
     [footerHeight]="50"
