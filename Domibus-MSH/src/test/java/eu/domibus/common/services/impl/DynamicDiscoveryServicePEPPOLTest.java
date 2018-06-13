@@ -1,9 +1,12 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
+import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -14,12 +17,12 @@ import no.difi.vefa.peppol.lookup.LookupClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -51,6 +54,12 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     @Injectable
     private CertificateService certificateService;
+
+    @Injectable
+    ProxyUtil proxyUtil;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
 
     @Tested
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
@@ -124,6 +133,9 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
+            domibusConfigurationService.useProxy();
+            result = true;
+
             domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
@@ -131,7 +143,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             result = Mode.TEST;
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
 
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());

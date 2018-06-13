@@ -41,6 +41,16 @@ public interface JMSManager {
     List<JmsMessage> browseMessages(String source);
 
     /**
+     * Operation to browse a JMS source with restrictions given by the selector.
+     *
+     * @param source   queue or topic
+     * @param selector selector
+     * @return a list of JmsMessage
+     */
+    List<JmsMessage> browseMessages(String source, String selector);
+
+
+    /**
      * Operation to browse a JMS source with restrictions given by the parameters.
      *
      * @param source   queue or topic

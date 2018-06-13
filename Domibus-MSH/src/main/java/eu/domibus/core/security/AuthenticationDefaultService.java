@@ -97,8 +97,10 @@ public class AuthenticationDefaultService implements AuthenticationService {
             }
             LOG.securityInfo(DomibusMessageCode.SEC_X509CERTIFICATE_AUTHENTICATION_USE);
             final X509Certificate[] certificates = (X509Certificate[]) certificateAttribute;
-            X509CertificateAuthentication authentication = new X509CertificateAuthentication(certificates);
-            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            Authentication authentication = new X509CertificateAuthentication(certificates);
+            String user = ((X509CertificateAuthentication)authentication).getCertificateId();
+            final String domainForUser = userDomainService.getDomainForUser(user);
+            domainContextProvider.setCurrentDomain(domainForUser);
             Authentication authenticationResult = authenticate(authentication);
             if(authenticationResult.isAuthenticated()) {
                 LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());
@@ -111,7 +113,9 @@ public class AuthenticationDefaultService implements AuthenticationService {
             }
             LOG.securityInfo(DomibusMessageCode.SEC_BLUE_COAT_AUTHENTICATION_USE);
             Authentication authentication = new BlueCoatClientCertificateAuthentication(certHeaderValue);
-            LOG.securityInfo(DomibusMessageCode.SEC_CONNECTION_ATTEMPT, httpRequest.getRemoteHost(), httpRequest.getRequestURL());
+            String user = ((BlueCoatClientCertificateAuthentication)authentication).getCertificateId();
+            final String domainForUser = userDomainService.getDomainForUser(user);
+            domainContextProvider.setCurrentDomain(domainForUser);
             Authentication authenticationResult = authenticate(authentication);
             if(authenticationResult.isAuthenticated()) {
                 LOG.securityInfo(DomibusMessageCode.SEC_AUTHORIZED_ACCESS, httpRequest.getRemoteHost(), httpRequest.getRequestURL(), authenticationResult.getAuthorities());

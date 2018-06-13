@@ -22,11 +22,14 @@ public class DomibusLogger extends CategoryLogger {
     public static final String MDC_MESSAGE_ID = "messageId";
     public static final String MDC_DOMAIN = "domain";
 
+    public static final String MDC_PROPERTY_PREFIX = "d_";
+
     public static final Marker BUSINESS_MARKER = MarkerFactory.getMarker("BUSINESS");
     public static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
 
+
     public DomibusLogger(Logger logger, MessageConverter messageConverter) {
-        super(logger, DomibusLogger.class.getName(),messageConverter, "d_");
+        super(logger, DomibusLogger.class.getName(),messageConverter, MDC_PROPERTY_PREFIX);
     }
 
     public DomibusLogger(Logger logger) {

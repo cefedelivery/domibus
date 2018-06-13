@@ -1,6 +1,8 @@
 package eu.domibus.util;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.HttpUtil;
 import eu.domibus.logging.DomibusLogger;
@@ -34,9 +36,12 @@ public class HttpUtilImpl implements HttpUtil {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
-        if (useProxy()) {
+        if (domibusConfigurationService.useProxy()) {
             String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
@@ -45,15 +50,6 @@ public class HttpUtilImpl implements HttpUtil {
             return downloadURLViaProxy(url, httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }
         return downloadURLDirect(url);
-    }
-
-    protected boolean useProxy() {
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-        if (StringUtils.isEmpty(useProxy)) {
-            LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
-            return false;
-        }
-        return Boolean.parseBoolean(useProxy);
     }
 
     @Override
