@@ -88,7 +88,7 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
         final DataBaseEngine dataBaseEngine = domibusConfigurationService.getDataBaseEngine();
         String result = "USE " + databaseSchema;
         if (DataBaseEngine.ORACLE == dataBaseEngine) {
-            result = "SET SCHEMA " + databaseSchema;
+            result = "ALTER SESSION SET CURRENT_SCHEMA = " + databaseSchema;
         }
         return result;
     }
