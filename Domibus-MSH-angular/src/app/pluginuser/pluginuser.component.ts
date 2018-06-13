@@ -96,12 +96,14 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   searchIfOK () {
-    this.checkIsDirtyAndThen(this.search);
+    this.checkIsDirty().then(() => this.search());
+    // this.checkIsDirtyAndThen(this.search);
   }
 
   changePageSize (newPageSize: number) {
+    this.offset = 0;
     this.rowLimiter.pageSize = newPageSize;
-    this.search();
+    this.refresh();
   }
 
   inBasicMode (): boolean {
@@ -220,6 +222,42 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     } else {
       func.call(this);
     }
+  }
+
+  async checkIsDirty () {
+    if (!this.isDirty()) {
+      return Promise.resolve();
+    }
+
+    const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
+    if (ok) {
+      return Promise.resolve();
+    } else {
+      return Promise.reject('user cancelled');
+    }
+  }
+
+  // changePageSize (newPageLimit: number) {
+  //   this.offset = 0;
+  //   this.pageSize = newPageLimit;
+  //
+  //   this.refresh();
+  // }
+
+  refresh () {
+    // ugly but the grid does not feel the paging changes otherwise
+    this.loading = true;
+    const rows = this.users;
+    this.users = [];
+
+    setTimeout(() => {
+      this.users = rows;
+
+      this.selected.length = 0;
+
+      this.loading = false;
+      this.setIsDirty();
+    }, 50);
   }
 
 }
