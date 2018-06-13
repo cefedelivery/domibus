@@ -283,6 +283,10 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
     protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
         Queue queue = getQueue(destination);
+        if(queue == null) {
+            LOG.warn("Couldn't find queue [{}]", destination);
+            return new ArrayList<>();
+        }
         return jmsOperations.browseSelected(queue, selector, new BrowserCallback<List<InternalJmsMessage>>() {
             @Override
             public List<InternalJmsMessage> doInJms(Session session, QueueBrowser browser) throws JMSException {
@@ -321,10 +325,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return result;
     }
 
-    protected Queue getQueue(String queueName) throws Exception {
+    protected Queue getQueue(String queueName) {
         final InternalJMSDestination internalJMSDestination = findDestinationsGroupedByFQName().get(queueName);
         if (internalJMSDestination == null) {
-            LOG.debug("Couldn't find queue [{}]", queueName);
             return null;
         }
         return new ActiveMQQueue(internalJMSDestination.getName());
