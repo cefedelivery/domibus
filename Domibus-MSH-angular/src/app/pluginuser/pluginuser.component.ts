@@ -10,6 +10,7 @@ import {MdDialog, MdDialogRef} from '@angular/material';
 import {EditbasicpluginuserFormComponent} from './editpluginuser-form/editbasicpluginuser-form.component';
 import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/editcertificatepluginuser-form.component';
 import {UserService} from '../user/user.service';
+import {UserState} from '../user/user';
 
 @Component({
   templateUrl: './pluginuser.component.html',
@@ -72,13 +73,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.columnPicker = this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
   }
 
-
-  // columnPicker (): ColumnPickerBase {
-  //   return this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
-  // }
-
   async search () {
-    console.log('search');
     try {
       this.loading = true;
       const result = await this.pluginUserService.getUsers(this.filter).toPromise();
@@ -124,37 +119,62 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  add () {
+  async add () {
     const newItem = this.pluginUserService.createNew();
     newItem.authenticationType = this.filter.authType;
     this.users.push(newItem);
 
     this.selected.length = 0;
     this.selected.push(newItem);
+
+    this.setIsDirty();
+    
+    const ok = await this.openItemInEditForm(newItem, false);
+    if (!ok) {
+      this.users.pop();
+      this.selected = [];
+      this.setIsDirty();
+    }
+
   }
 
   canEdit () {
     return this.selected.length === 1;
   }
 
-  async edit (row) {
+  async edit (row: PluginUserRO) {
     row = row || this.selected[0];
     const rowCopy = Object.assign({}, row);
 
-    const editForm = this.inBasicMode() ? EditbasicpluginuserFormComponent : EditcertificatepluginuserFormComponent;
+    const ok = await this.openItemInEditForm(rowCopy, true);
+    if (ok) {
+      if (JSON.stringify(row) !== JSON.stringify(rowCopy)) { // the object changed
+        Object.assign(row, rowCopy);
+        if (row.status === UserState[UserState.PERSISTED]) {
+          row.status = UserState[UserState.UPDATED];
+          this.setIsDirty();
+        }
+      }
+    }
+  }
 
+  private async openItemInEditForm (rowCopy: PluginUserRO, edit = true) {
+    const editForm = this.inBasicMode() ? EditbasicpluginuserFormComponent : EditcertificatepluginuserFormComponent;
     const ok = await this.dialog.open(editForm, {
       data: {
-        edit: true,
+        edit: edit,
         user: rowCopy,
         userroles: this.userRoles,
       }
     }).afterClosed().toPromise();
+    return ok;
+  }
 
-    if (ok) {
-      if (JSON.stringify(row) === JSON.stringify(rowCopy))
-        return; // nothing changed
-      Object.assign(row, rowCopy);
-    }
+  canSave () {
+    return this.isDirty();
+  }
+
+  setIsDirty () {
+    this.dirty = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
   }
 }
