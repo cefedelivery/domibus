@@ -1,0 +1,48 @@
+<div style="width: 700px">
+  <p class="domibusTextSmall" style="margin:0;font-weight: bold">{{formTitle}}</p>
+  <form [formGroup]="userForm" (submit)="submitForm()">
+    <md-card>
+
+      <div style="margin-top:15px;">
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="certificateId" name="certificateId" id="username_id" [(ngModel)]="user.certificateId" [formControl]="userForm.controls['certificateId']" maxlength="255" required>
+          <div *ngIf="userForm.controls['certificateId'].hasError('required')" style="color:red; font-size: 70%">You should type a certificate id</div>
+        </md-input-container>
+      </div>
+
+      <div style="margin-top:15px;">
+        <md-input-container [style.width]="'100%'">
+          <input mdInput placeholder="originalUser" name="originalUser" id="originalUser_id" [(ngModel)]="user.originalUser" [formControl]="userForm.controls['originalUser']" maxlength="255" required>
+          <div *ngIf="userForm.controls['originalUser'].hasError('required')" style="color:red; font-size: 70%">You should type an originalUser</div>
+        </md-input-container>
+      </div>
+
+      <div style="margin-top:10px;">
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['role']" [(ngModel)]="user.authRoles" required>
+          <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
+        </md2-select>
+        <div *ngIf="userForm.controls['role'].hasError('required')" style="color:red; font-size: 70%">You need to choose a role for this user</div>
+      </div>
+
+      <!--<div>-->
+        <!--Active<input type="checkbox" [checked]="active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">-->
+      <!--</div>-->
+
+      <table class="buttonsRow">
+        <tr>
+          <td>
+            <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" id="editbuttonok_id" [disabled]="!userForm.valid">
+              <md-icon>check_circle</md-icon>
+              <span>OK</span>
+            </button>
+            <button md-raised-button color="primary" id="editbuttoncancel_id" md-dialog-close>
+              <md-icon>cancel</md-icon>
+              <span>Cancel</span>
+            </button>
+          </td>
+        </tr>
+      </table>
+      <div  style="text-align: right; font-size: 70%">* required fields</div>
+    </md-card>
+  </form>
+</div>

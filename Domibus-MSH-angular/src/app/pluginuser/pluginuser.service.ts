@@ -8,6 +8,7 @@ import {UserState} from '../user/user';
 export class PluginUserService {
 
   static readonly PLUGIN_USERS_URL: string = 'rest/plugin/users';
+  public static passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
 
   constructor (private http: Http) {
   }

@@ -79,6 +79,7 @@ import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
 import { PluginUserComponent } from './pluginuser/pluginuser.component';
 import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
+import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -131,7 +132,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AlertsComponent,
     TestServiceComponent,
     PluginUserComponent,
-    EditbasicpluginuserFormComponent
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent
   ],
   entryComponents: [
     AppComponent,
@@ -152,7 +154,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RollbackDialogComponent,
     ActionDirtyDialogComponent,
     PartyDetailsComponent,
-    EditbasicpluginuserFormComponent
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent
   ],
   imports: [
     BrowserModule,
