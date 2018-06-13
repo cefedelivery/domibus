@@ -71,7 +71,7 @@
   <table class="group-action-button">
     <tr>
       <td>
-        <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary" [disabled]="!enableCancel">
+        <button id="userCancelButton" md-raised-button (click)="cancel()" color="primary" [disabled]="!canCancel()">
           <md-icon>cancel</md-icon>
           <span>Cancel</span>
         </button>
@@ -87,7 +87,7 @@
           <md-icon>edit</md-icon>
           <span>Edit</span>
         </button>
-        <button id="userDeleteButton" md-raised-button (click)="delete()" color="primary"
+        <button id="userDeleteButton" md-raised-button (click)="delete()" [disabled]="!canEdit()" color="primary"
                 [disabled]="!enableDelete">
           <md-icon>delete</md-icon>
           <span>Delete</span>

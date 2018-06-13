@@ -24,11 +24,7 @@
         <div *ngIf="userForm.controls['role'].hasError('required')" style="color:red; font-size: 70%">You need to choose a role for this user</div>
       </div>
 
-      <!--<div>-->
-        <!--Active<input type="checkbox" [checked]="active" (blur)="updateActive($event)" [formControl]="userForm.controls['active']">-->
-      <!--</div>-->
-
-      <table class="buttonsRow">
+      <table class="buttonsRow" style="margin-top:20px;">
         <tr>
           <td>
             <button md-raised-button color="primary" [md-dialog-close]="true" (click)="submitForm()" id="editbuttonok_id" [disabled]="!userForm.valid">

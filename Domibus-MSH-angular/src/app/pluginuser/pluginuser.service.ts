@@ -3,6 +3,8 @@ import {Http, URLSearchParams, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {PluginUserRO} from './pluginuser';
 import {UserState} from '../user/user';
+import {UserService} from '../user/user.service';
+import {SecurityService} from '../security/security.service';
 
 @Injectable()
 export class PluginUserService {
@@ -10,32 +12,31 @@ export class PluginUserService {
   static readonly PLUGIN_USERS_URL: string = 'rest/plugin/users';
   public static passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
 
-  constructor (private http: Http) {
+  readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
+
+  constructor (private http: Http, private userService: UserService) {
   }
 
-  getUsers (filter?: PluginUserSearchCriteria): Observable<{ entries: PluginUserRO[], count: number }> {
+  getUsers (filter?: PluginUserSearchCriteria)
+    : Observable<{ entries: PluginUserRO[], count: number }> {
     const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', '0');
     searchParams.set('pageSize', '10');
     searchParams.set('orderBy', 'entityId');
     if (filter.authType) {
-      console.log(' filter.authType ', filter.authType)
       searchParams.set('authType', filter.authType);
     }
     if (filter.authRole) {
-      console.log(' filter.authRole ', filter.authRole)
       searchParams.set('authRole', filter.authRole);
     }
     if (filter.userName) {
-      console.log(' filter.userName ', filter.userName)
       searchParams.set('userName', filter.userName);
     }
     if (filter.originalUser) {
-      console.log(' filter.originalUser ', filter.originalUser)
       searchParams.set('originalUser', filter.originalUser);
     }
-    console.log('filter : ', JSON.stringify(filter))
-    console.log('searchParams : ', JSON.stringify(searchParams), searchParams)
+    // console.log('filter : ', JSON.stringify(filter))
+    // console.log('searchParams : ', JSON.stringify(searchParams), searchParams)
 
     return this.http.get(PluginUserService.PLUGIN_USERS_URL, {search: searchParams})
       .map(this.extractData)
@@ -54,8 +55,13 @@ export class PluginUserService {
     return this.http.put(PluginUserService.PLUGIN_USERS_URL, users).toPromise();
   }
 
+
+  getUserRoles (): Observable<String[]> {
+    return this.userService.getUserRoles().map(items => items.filter(item => item !== this.ROLE_AP_ADMIN));
+  }
+
   private extractData (res: Response) {
-    let body = res.json();
+    const body = res.json();
     return body || {};
   }
 
@@ -68,7 +74,7 @@ export class PluginUserService {
     } else {
       errMsg = error.message ? error.message : error.toString();
     }
-    console.error(errMsg);
+    // console.error(errMsg);
     return Promise.reject(errMsg);
   }
 }

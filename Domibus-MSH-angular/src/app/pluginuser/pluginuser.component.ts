@@ -11,6 +11,7 @@ import {EditbasicpluginuserFormComponent} from './editpluginuser-form/editbasicp
 import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/editcertificatepluginuser-form.component';
 import {UserService} from '../user/user.service';
 import {UserState} from '../user/user';
+import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
@@ -37,8 +38,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   constructor (private alertService: AlertService,
                private pluginUserService: PluginUserService,
-               public dialog: MdDialog,
-               private userService: UserService) {
+               public dialog: MdDialog) {
     this.initColumns();
   }
 
@@ -74,6 +74,9 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   async search () {
+    this.selected = [];
+    this.dirty = false;
+    
     try {
       this.loading = true;
       const result = await this.pluginUserService.getUsers(this.filter).toPromise();
@@ -105,7 +108,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   async getUserRoles () {
-    const result = await this.userService.getUserRoles().toPromise();
+    const result = await this.pluginUserService.getUserRoles().toPromise();
     this.userRoles = result;
   }
 
@@ -128,14 +131,13 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.selected.push(newItem);
 
     this.setIsDirty();
-    
+
     const ok = await this.openItemInEditForm(newItem, false);
     if (!ok) {
       this.users.pop();
       this.selected = [];
       this.setIsDirty();
     }
-
   }
 
   canEdit () {
@@ -176,5 +178,16 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   setIsDirty () {
     this.dirty = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
+  }
+
+  canCancel () {
+    return this.isDirty();
+  }
+
+  async cancel () {
+    const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
+    if(ok) {
+      this.search();
+    }
   }
 }
