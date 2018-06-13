@@ -172,4 +172,6 @@
         </createTable>
     </changeSet>
 
+    <include file="changelog-4.0-quartz.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

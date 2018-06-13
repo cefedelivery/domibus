@@ -8,6 +8,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Trigger;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -20,14 +21,14 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
- * @author Cosmin Baciu
+ * @author Cosmin Baciu, Tiago Miguel
  * @since 4.0
  */
 @Configuration
@@ -35,6 +36,7 @@ import java.util.concurrent.Executor;
 public class DomainSchedulerFactoryConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainSchedulerFactoryConfiguration.class);
+    private static final String GROUP_GENERAL = "GENERAL";
 
     @Autowired
     @Qualifier("taskExecutor")
@@ -70,15 +72,58 @@ public class DomainSchedulerFactoryConfiguration {
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public SchedulerFactoryBean schedulerFactory(Domain domain) {
-        LOG.debug("Instantiating the scheduler factory for domain [{}]", domain);
+        // General schema
+        if(domain == null) {
+            return schedulerFactoryGeneral();
+        }
 
+        // Domain
+        return schedulerFactoryDomain(domain);
+    }
+
+    /**
+     * Sets the triggers only for general schema
+     * @return Scheduler Factory Bean changed
+     */
+    private SchedulerFactoryBean schedulerFactoryGeneral() {
+        LOG.debug("Instantiating the scheduler factory for general schema");
+        SchedulerFactoryBean schedulerFactoryBean = schedulerFactory("General", getGeneralSchemaPrefix(), null);
+        final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
+        List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
+                                                        .filter( trigger -> trigger instanceof CronTriggerImpl &&
+                                                                    ((CronTriggerImpl)trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
+                                                    .collect(Collectors.toList());
+        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
+        return schedulerFactoryBean;
+    }
+
+    /**
+     * Sets the triggers specific only for domain schema
+     * @param domain Domain
+     * @return Scheduler Factory Bean changed
+     */
+    private SchedulerFactoryBean schedulerFactoryDomain(Domain domain) {
+        LOG.debug("Instantiating the scheduler factory for domain [{}]", domain);
+        SchedulerFactoryBean schedulerFactoryBean = schedulerFactory(domainService.getSchedulerName(domain), getTablePrefix(domain), domain);
         //get all the Spring Bean Triggers so that new instances with scope prototype are injected
         final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
-        List<Trigger> domibusStandardTriggerList = new ArrayList<>(beansOfType.values());
+        List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
+                                                        .filter( trigger -> !(trigger instanceof CronTriggerImpl) ||
+                                                                    !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
+                                                    .collect(Collectors.toList());
+        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
+        return schedulerFactoryBean;
+    }
 
+    /**
+     * Creates a new Scheduler Factory Bean based on {@schedulerName}, {@tablePrefix} and {@domain}
+     * @param schedulerName Scheduler Name
+     * @param tablePrefix Table Prefix
+     * @param domain Domain
+     * @return Scheduler Factory Bean
+     */
+    private SchedulerFactoryBean schedulerFactory(String schedulerName, String tablePrefix, Domain domain) {
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-
-        final String schedulerName = domainService.getSchedulerName(domain);
         scheduler.setSchedulerName(schedulerName);
         scheduler.setTaskExecutor(executor);
         scheduler.setAutoStartup(false);
@@ -98,28 +143,49 @@ public class DomainSchedulerFactoryConfiguration {
         properties.setProperty("org.quartz.scheduler.jmx.export", "true");
         properties.setProperty("org.quartz.threadExecutor.class", DomibusQuartzThreadExecutor.class.getCanonicalName());
 
-        properties.setProperty("org.quartz.scheduler.instanceName", schedulerName);
-        final String tablePrefix = getTablePrefix(domain);
+        properties.setProperty("org.quartz.scheduler.instanceName", "general");
         if (StringUtils.isNotEmpty(tablePrefix)) {
-            LOG.debug("Using the Quartz tablePrefix [{}] for domain [{}]", tablePrefix, domain);
+            if (domain != null) {
+                LOG.debug("Using the Quartz tablePrefix [{}] for domain [{}]", tablePrefix, domain);
+            } else {
+                LOG.debug("Using the Quartz tablePrefix [{}] for general schema", tablePrefix);
+            }
             properties.setProperty("org.quartz.jobStore.tablePrefix", tablePrefix);
         }
 
         scheduler.setQuartzProperties(properties);
-
         scheduler.setJobFactory(autowiringSpringBeanJobFactory);
-        scheduler.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
 
         return scheduler;
     }
 
+    /**
+     * Returns the general schema prefix for QRTZ tables
+     * @return General schema prefix
+     */
+    protected String getGeneralSchemaPrefix() {
+        return getSchemaPrefix(domainService.getGeneralSchema());
+    }
 
+    /**
+     * Returns the schema prefix for QRTZ tables for the domain
+     * @param domain Domain
+     * @return Domain' schema prefix
+     */
     protected String getTablePrefix(Domain domain) {
-        final String databaseSchema = domainService.getDatabaseSchema(domain);
-        if (StringUtils.isEmpty(databaseSchema)) {
+        return getSchemaPrefix(domainService.getDatabaseSchema(domain));
+    }
+
+    /**
+     * Returns the Schema prefix for a specific schema
+     * @param schema Schema
+     * @return Schema prefix
+     */
+    private String getSchemaPrefix(String schema) {
+        if (StringUtils.isEmpty(schema)) {
             return null;
         }
 
-        return databaseSchema + ".QRTZ_";
+        return schema + ".QRTZ_";
     }
 }
