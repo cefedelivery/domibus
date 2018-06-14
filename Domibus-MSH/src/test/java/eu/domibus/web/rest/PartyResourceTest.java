@@ -108,7 +108,6 @@ public class PartyResourceTest {
         IdentifierRo firstId = new IdentifierRo();
         firstId.setPartyId("blue");
 
-
         IdentifierRo secondId = new IdentifierRo();
         secondId.setPartyId("pale blue");
 

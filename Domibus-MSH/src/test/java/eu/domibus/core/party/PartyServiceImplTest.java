@@ -51,6 +51,7 @@ public class PartyServiceImplTest {
 
     @Tested
     private PartyServiceImpl partyService;
+
     @Test
     public void getParties() throws Exception {
         String name = "name";
@@ -267,6 +268,14 @@ public class PartyServiceImplTest {
 
         // Then
         Assert.assertEquals(expectedGatewayPartyId, gatewayPartyId);
+    }
+
+    @Test
+    public void getProcesses() throws Exception {
+        partyService.getAllProcesses();
+        new Verifications(){{
+            pModeProvider.findAllProcesses();times=1;
+        }};
     }
 
 }

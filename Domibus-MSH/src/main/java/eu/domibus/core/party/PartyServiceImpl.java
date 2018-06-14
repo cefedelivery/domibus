@@ -352,7 +352,7 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public List<eu.domibus.api.process.Process> getAllProcesses() {
-        //Retrieve all processes
+        //Retrieve all processes, neede in UI console to be able to check
         List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
         if (LOG.isDebugEnabled()) {
             LOG.debug("findAllProcesses for pmode");

@@ -58,6 +58,4 @@ public interface PartyService {
      * @return a lit of processes.
      */
     List<Process> getAllProcesses();
-
-//    TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException;
 }
