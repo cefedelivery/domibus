@@ -1,8 +1,9 @@
 package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
 import eu.domibus.common.converters.UserConverter;
@@ -12,17 +13,10 @@ import eu.domibus.core.multitenancy.dao.UserDomainEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Cosmin Baciu
@@ -33,9 +27,8 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceImpl.class);
 
-    @Qualifier("taskExecutor")
     @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor;
+    protected DomainTaskExecutor domainTaskExecutor;
 
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
@@ -48,6 +41,9 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Autowired
     protected UserConverter userConverter;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     /**
      * Get the domain associated to the provided user from the general schema. <br/>
@@ -62,14 +58,8 @@ public class UserDomainServiceImpl implements UserDomainService {
             return DomainService.DEFAULT_DOMAIN.getCode();
         }
         LOG.debug("Searching domain for user [{}]", user);
-        Future<String> utrFuture = schedulingTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
-        String domain = null;
-        try {
-            domain = utrFuture.get(3000L, TimeUnit.SECONDS);
-            LOG.debug("Found domain [{}] for user [{}]", domain, user);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new AuthenticationServiceException("Could not determine the domain for user [" + user + "]", e);
-        }
+        String domain = domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
+        LOG.debug("Found domain [{}] for user [{}]", domain, user);
         return domain;
     }
 
@@ -80,21 +70,14 @@ public class UserDomainServiceImpl implements UserDomainService {
      * @return
      */
     @Override
-    public  String getPreferredDomainForUser(String user) {
+    public String getPreferredDomainForUser(String user) {
         if (!domibusConfigurationService.isMultiTenantAware()) {
             LOG.debug("Using default domain for user [{}]", user);
             return DomainService.DEFAULT_DOMAIN.getCode();
         }
         LOG.debug("Searching preferred domain for user [{}]", user);
-        Future<String> utrFuture = schedulingTaskExecutor.submit(() -> userDomainDao.findPreferredDomainByUser(user));
-        String domain = null;
-        try {
-            domain = utrFuture.get(3000L, TimeUnit.SECONDS);
-            LOG.debug("Found preferred domain [{}] for user [{}]", domain, user);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.debug("Could not determine the preferred domain for user [" + user + "], using default", e);
-            domain = DomainService.DEFAULT_DOMAIN.getCode();
-        }
+        String domain = domainTaskExecutor.submit(() -> userDomainDao.findPreferredDomainByUser(user));
+        LOG.debug("Found preferred domain [{}] for user [{}]", domain, user);
         return domain;
 
     }
@@ -111,7 +94,7 @@ public class UserDomainServiceImpl implements UserDomainService {
             return new ArrayList<>();
         }
         LOG.debug("Searching for super users");
-        Future<List<User>> utrFuture = schedulingTaskExecutor.submit(() -> {
+        return domainTaskExecutor.submit(() -> {
             List<eu.domibus.common.model.security.User> userEntities = userDao.listUsers();
             List<eu.domibus.api.user.User> users = userConverter.convert(userEntities);
 
@@ -124,57 +107,35 @@ public class UserDomainServiceImpl implements UserDomainService {
             });
             return users;
         });
-        List<User> users = null;
-        try {
-            users = utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not find super users", e);
-        }
-        return users; 
     }
-    
-    
+
+
     @Override
     public void setDomainForUser(String user, String domainCode) {
         LOG.debug("Setting domain [{}] for user [{}]", domainCode, user);
-        
-        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+
+        domainTaskExecutor.submit(() -> {
             userDomainDao.setDomainByUser(user, domainCode);
+            return null;
         });
-        try {
-            utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not set domain", e);
-        }
     }
-    
-    @Override  
+
+    @Override
     public void setPreferredDomainForUser(String user, String domainCode) {
         LOG.debug("Setting preferred domain [{}] for user [{}]", domainCode, user);
-        
-        Future utrFuture = schedulingTaskExecutor.submit(() -> {
+
+        domainTaskExecutor.submit(() -> {
             userDomainDao.setPreferredDomainByUser(user, domainCode);
+            return null;
         });
-        try {
-            utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not set preferred domain", e);
-        }
     }
 
     @Override
     public List<String> getAllUserNames() {
         LOG.debug("Setting preferred domain [{}] for user [{}]");
 
-        List<String> userNames = null;
-        Future<List<String>> utrFuture = schedulingTaskExecutor.submit(() -> {
+        return domainTaskExecutor.submit(() -> {
             return userDomainDao.listAllUserNames();
         });
-        try {
-            userNames = utrFuture.get(3000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not set preferred domain", e);
-        }
-        return userNames;
     }
 }

@@ -40,6 +40,19 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     }
 
     @Override
+    public DataBaseEngine getDataBaseEngine() {
+        if (dataBaseEngine == null) {
+            final String property = domibusPropertyProvider.getProperty(DATABASE_DIALECT);
+            if (property == null) {
+                throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
+            }
+            dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
+            LOG.info("Database engine:[{}]", dataBaseEngine);
+        }
+        return dataBaseEngine;
+    }
+
+    @Override
     public boolean useProxy() {
         String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
         if (StringUtils.isEmpty(useProxy)) {
@@ -65,19 +78,4 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
         return Boolean.parseBoolean(useProxy);
     }
-
-    @Override
-    public DataBaseEngine getDataBaseEngine() {
-        if (dataBaseEngine == null) {
-            final String property = domibusPropertyProvider.getProperty(DATABASE_DIALECT);
-            if (property == null) {
-                throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
-            }
-            dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
-            LOG.info("Database engine:[{}]", dataBaseEngine);
-        }
-        return dataBaseEngine;
-    }
-
-
 }
