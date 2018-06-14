@@ -90,7 +90,7 @@ public class JMSManagerImplTest {
         final List<InternalJmsMessage> internalJmsMessage = new ArrayList<>();
 
         new Expectations() {{
-            internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
+            internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, (String)any);
             result = internalJmsMessage;
         }};
 

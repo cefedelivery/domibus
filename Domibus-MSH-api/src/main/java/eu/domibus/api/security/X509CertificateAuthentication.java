@@ -23,6 +23,10 @@ public class X509CertificateAuthentication implements Authentication {
         this.certificateId = calculateCertificateId(getCertificate(certificates));
     }
 
+    public String getCertificateId() {
+        return certificateId;
+    }
+
     public String getOriginalUser() {
         return originalUser;
     }
@@ -70,7 +74,7 @@ public class X509CertificateAuthentication implements Authentication {
         return certificateId;
     }
 
-    private X509Certificate getCertificate(final X509Certificate[] requestCerts) {
+    protected X509Certificate getCertificate(final X509Certificate[] requestCerts) {
         if (requestCerts == null || requestCerts.length == 0) {
             // Empty array
             return null;
@@ -107,7 +111,7 @@ public class X509CertificateAuthentication implements Authentication {
         return nonIssuerCert;
     }
 
-    private String calculateCertificateId(final X509Certificate cert) {
+    protected String calculateCertificateId(final X509Certificate cert) {
         if(cert == null) {
             throw new IllegalArgumentException("Certificate is null");
         }
