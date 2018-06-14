@@ -6,9 +6,7 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +56,7 @@ public class DomibusQuartzStarter {
     public void initQuartzSchedulers() {
         // General Schedulers
         try {
-            startGeneralSchedulers();
+            startsSchedulers("general");
         } catch (SchedulerException e) {
             LOG.error("Could not initialize the Quartz Scheduler for general schema", e);
         }
@@ -117,18 +115,18 @@ public class DomibusQuartzStarter {
     }
 
     /**
-     * Starts General scheduler only if in multi tenant scenario
+     * Starts scheduler with trigger group equals to {@code triggerGroup}, only if in multi tenant scenario
      *
      * @throws SchedulerException Quartz scheduler exception
      */
-    private void startGeneralSchedulers() throws SchedulerException {
+    private void startsSchedulers(String triggerGroup) throws SchedulerException {
         if (!domibusConfigurationService.isMultiTenantAware()) {
             return;
         }
         Scheduler generalScheduler = domibusSchedulerFactory.createScheduler(null);
 
         //check Quartz scheduler jobs first
-        checkGeneralSchedulerSuspendedSuperUserJob(generalScheduler);
+        checkSchedulerJobsByTriggerGroup(generalScheduler, triggerGroup);
 
         generalScheduler.start();
         generalSchedulers.add(generalScheduler);
@@ -136,22 +134,27 @@ public class DomibusQuartzStarter {
     }
 
     /**
-     * Checks for the {@code activateSuspendedSuperUsersJob} in the specific {@code scheduler}
+     * Checks for all the jobs related with trigger group {@code triggerGroup}
      * @param scheduler Scheduler
+     * @param triggerGroup Trigger Group name
      */
-    protected void checkGeneralSchedulerSuspendedSuperUserJob(Scheduler scheduler) {
-        LOG.info("Start General Quartz jobs...");
+    protected void checkSchedulerJobsByTriggerGroup(Scheduler scheduler, String triggerGroup) throws SchedulerException {
+        LOG.info("Start Quartz jobs with trigger group [{}]...", triggerGroup);
 
-        JobKey jobKey = JobKey.jobKey("activateSuspendedSuperUsersJob");
-        try {
-            scheduler.getJobDetail(jobKey).getJobClass().getName();
-        } catch (SchedulerException se) {
-            if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
-                try {
-                    scheduler.deleteJob(jobKey);
-                    LOG.warn("DELETED Quartz job: {} from group: {} cause: {}", jobKey.getName(), jobKey.getGroup(), se.getMessage());
-                } catch (Exception e) {
-                    LOG.error("Error while deleting Quartz job: {}", jobKey.getName(), e);
+        for(TriggerKey triggerKey : scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(triggerGroup))) {
+            Trigger trigger = scheduler.getTrigger(triggerKey);
+            JobKey jobKey = trigger.getJobKey();
+
+            try {
+                scheduler.getJobDetail(jobKey).getJobClass().getName();
+            } catch (SchedulerException se) {
+                if (ExceptionUtils.getRootCause(se) instanceof ClassNotFoundException) {
+                    try {
+                        scheduler.deleteJob(jobKey);
+                        LOG.warn("DELETED Quartz job: {} from group: {} cause: {}", jobKey.getName(), jobKey.getGroup(), se.getMessage());
+                    } catch (Exception e) {
+                        LOG.error("Error while deleting Quartz job: {}", jobKey.getName(), e);
+                    }
                 }
             }
         }
