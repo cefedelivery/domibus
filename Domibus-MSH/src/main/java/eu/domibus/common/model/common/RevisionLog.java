@@ -30,11 +30,7 @@ public class RevisionLog {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RevisionLog.class);
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO,generator = "native")
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @RevisionNumber
     private int id;
 
