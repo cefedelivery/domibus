@@ -102,18 +102,6 @@ public class PartyResourceTest {
     }
 
     @Test
-    public void countParties() throws Exception {
-        final String name = "name";
-        final String endPoint = "endPoint";
-        final String partyId = "partyId";
-        final String processName = "processName";
-        partyResource.countParties(name, endPoint, partyId, processName);
-        new Verifications() {{
-            partyService.countParties(name, endPoint, partyId, processName);
-        }};
-    }
-
-    @Test
     public void flattenIdentifiers() throws Exception {
         PartyResponseRo partyResponseRo = new PartyResponseRo();
 

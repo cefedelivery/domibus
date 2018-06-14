@@ -33,16 +33,6 @@ public interface PartyService {
                            int pageSize);
 
     /**
-     * Count parties for the given search criteria.
-     * @param name criteria to search on the the name of the party
-     * @param endPoint criteria to search on the endPoint of the party
-     * @param partyId criteria to search within the partyids of the party.
-     * @param processName criteria to search party that are configured as initiator or responder in a process named like this criteria
-     * @return the number of party.
-     */
-    long countParties(String name, String endPoint, String partyId, String processName);
-
-    /**
      * Returns the list of Party Names for a specific Service and Action
      * @param service Service name
      * @param action Action name

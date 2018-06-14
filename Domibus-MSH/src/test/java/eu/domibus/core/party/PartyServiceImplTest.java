@@ -71,24 +71,6 @@ public class PartyServiceImplTest {
     }
 
     @Test
-    public void countParties() throws Exception {
-
-        String name = "name";
-        String endPoint = "endPoint";
-        String partyId = "partyId";
-        String processName = "processName";
-
-        new Expectations(partyService){{
-            partyService.getSearchPredicate(anyString,anyString,anyString,anyString);
-            partyService.linkPartyAndProcesses();times=1;
-        }};
-        partyService.countParties(name, endPoint, partyId, processName);
-        new Verifications(){{
-            partyService.getSearchPredicate(name,endPoint,partyId,processName);times=1;
-        }};
-    }
-
-    @Test
     public void linkPartyAndProcesses() throws Exception {
 
         eu.domibus.common.model.configuration.Party partyEntity=new eu.domibus.common.model.configuration.Party();

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.security.KeyStoreException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -95,28 +96,6 @@ public class PartyResource {
         return partyResponseRos;
     }
 
-    @RequestMapping(value = {"/count"}, method = RequestMethod.GET)
-    public long countParties(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "endPoint", required = false) String endPoint,
-            @RequestParam(value = "partyId", required = false) String partyId,
-            @RequestParam(value = "process", required = false) String process
-    ) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Counting party with parameters");
-            LOG.debug("name [{}]", name);
-            LOG.debug("endPoint [{}]", endPoint);
-            LOG.debug("partyId [{}]", partyId);
-            LOG.debug("processName [{}]", process);
-        }
-        return partyService.countParties(
-                name,
-                endPoint,
-                partyId,
-                process
-        );
-    }
-
     /**
      * This method returns a CSV file with the contents of Party table
      *
@@ -124,9 +103,9 @@ public class PartyResource {
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(@RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "endPoint", required = false) String endPoint,
-            @RequestParam(value = "partyId", required = false) String partyId,
-            @RequestParam(value = "process", required = false) String process) {
+                                         @RequestParam(value = "endPoint", required = false) String endPoint,
+                                         @RequestParam(value = "partyId", required = false) String partyId,
+                                         @RequestParam(value = "process", required = false) String process) {
         String resultText;
         final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
@@ -153,14 +132,10 @@ public class PartyResource {
 
     @RequestMapping(value = {"/update"}, method = RequestMethod.PUT)
     public void updateParties(@RequestBody List<PartyResponseRo> partiesRo) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
-        }
+        LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
 
         List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Updating partyList [{}]", Arrays.toString(partyList.toArray()));
-        }
+        LOG.debug("Updating partyList [{}]", Arrays.toString(partyList.toArray()));
 
         Map<String, String> certificates = partiesRo.stream()
                 .filter(party -> party.getCertificateContent() != null)
@@ -204,7 +179,7 @@ public class PartyResource {
                     List<ProcessRo> processesWithPartyAsResponder = partyResponseRo.getProcessesWithPartyAsResponder();
 
                     List<ProcessRo> processesWithPartyAsInitiatorAndResponder
-                    = processesWithPartyAsInitiator.
+                            = processesWithPartyAsInitiator.
                             stream().
                             filter(processesWithPartyAsResponder::contains).
                             collect(Collectors.toList());
@@ -281,8 +256,8 @@ public class PartyResource {
 
     @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
     public TrustStoreRO convertCertificateContent(@PathVariable(name = "partyName") String partyName,
-            @RequestBody CertificateContentRo certificate) {
-        
+                                                  @RequestBody CertificateContentRo certificate) {
+
         if (certificate == null) {
             throw new IllegalArgumentException("certificate parameter must be provided");
         }
@@ -294,7 +269,7 @@ public class PartyResource {
         if (cert == null) {
             throw new IllegalArgumentException("certificate could not be parsed");
         }
-        
+
         TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);
         return res;
     }

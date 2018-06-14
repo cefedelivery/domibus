@@ -83,18 +83,6 @@ public class PartyServiceImpl implements PartyService {
      * {@inheritDoc}
      */
     @Override
-    public long countParties(String name, String endPoint, String partyId, String processName) {
-        final Predicate<Party> searchPredicate = getSearchPredicate(name, endPoint, partyId, processName);
-        return linkPartyAndProcesses().
-                stream().
-                filter(searchPredicate).
-                count();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public List<String> findPartyNamesByServiceAndAction(String service, String action) {
         return pModeProvider.findPartyIdByServiceAndAction(service, action);
     }
