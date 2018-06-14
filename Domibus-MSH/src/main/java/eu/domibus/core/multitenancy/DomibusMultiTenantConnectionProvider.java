@@ -1,5 +1,7 @@
 package eu.domibus.core.multitenancy;
 
+import eu.domibus.api.configuration.DataBaseEngine;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
@@ -41,6 +43,9 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider; //NOSONAR: not necessary to be transient or serializable
 
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public Connection getAnyConnection() throws SQLException {
         return dataSource.getConnection();
@@ -71,13 +76,21 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
 
     protected void setSchema(final Connection connection, String databaseSchema) throws SQLException {
         try {
-            //TODO check how to set the schema dependent on MySQL or Oracle
-            try(final Statement statement = connection.createStatement()) {
-                statement.execute("USE " + databaseSchema);
+            try (final Statement statement = connection.createStatement()) {
+                statement.execute(getSchemaChangeSQL(databaseSchema));
             }
         } catch (final SQLException e) {
             throw new HibernateException("Could not alter JDBC connection to specified schema [" + databaseSchema + "]", e);
         }
+    }
+
+    protected String getSchemaChangeSQL(String databaseSchema) {
+        final DataBaseEngine dataBaseEngine = domibusConfigurationService.getDataBaseEngine();
+        String result = "USE " + databaseSchema;
+        if (DataBaseEngine.ORACLE == dataBaseEngine) {
+            result = "ALTER SESSION SET CURRENT_SCHEMA = " + databaseSchema;
+        }
+        return result;
     }
 
     @Override
