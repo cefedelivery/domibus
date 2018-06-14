@@ -33,12 +33,12 @@ public class MessagingLock extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_TYPE")
     @NotNull
-    private String messageType;
+    private String messageType; //NOSONAR
 
     @Column(name = "MESSAGE_RECEIVED")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
-    private Date received;
+    private Date received; //NOSONAR
 
     @Column(name = "MESSAGE_STATE")
     @Enumerated(EnumType.STRING)
@@ -46,15 +46,15 @@ public class MessagingLock extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
     @NotNull
-    private String messageId;
+    private String messageId; //NOSONAR
 
     @Column(name = "INITIATOR")
     @NotNull
-    private String initiator;
+    private String initiator; //NOSONAR
 
     @Column(name = "MPC")
     @NotNull
-    private String mpc;
+    private String mpc; //NOSONAR
 
     @Column(name = "MESSAGE_STALED")
     @Temporal(TemporalType.TIMESTAMP)

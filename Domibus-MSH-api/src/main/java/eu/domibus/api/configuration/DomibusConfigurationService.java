@@ -24,5 +24,4 @@ public interface DomibusConfigurationService {
 
     boolean useProxy();
 
-    DataBaseEngine getDataBaseEngine();
 }
