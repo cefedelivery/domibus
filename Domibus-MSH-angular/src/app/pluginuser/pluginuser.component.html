@@ -4,7 +4,7 @@
     <md-card-content>
       <div class="panel">
 
-        <md-select placeholder="Authentication type" [(ngModel)]="filter.authType" id="authType_id">
+        <md-select placeholder="Authentication type" [(ngModel)]="filter.authType" (change)="changeAuthType($event.value)" id="authType_id">
           <md-option *ngFor="let t of authenticationTypes" [value]="t">
             {{t}}
           </md-option>

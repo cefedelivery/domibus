@@ -75,7 +75,20 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   setColumnPicker () {
-    this.columnPicker = this.filter.authType == 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
+    this.columnPicker = this.filter.authType === 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
+  }
+
+  async changeAuthType (x) {
+    const ok = await this.searchIfOK();
+    if(!ok)
+      this.filter.authType = this.filter.authType === 'CERTIFICATE' ? 'BASIC' : 'CERTIFICATE';
+  }
+
+  async searchIfOK (): Promise<boolean> {
+    const ok = await this.checkIsDirty();
+    if (ok)
+      this.search();
+    return ok;
   }
 
   async search () {
@@ -95,11 +108,6 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  searchIfOK () {
-    this.checkIsDirty().then(() => this.search());
-    // this.checkIsDirtyAndThen(this.search);
-  }
-
   changePageSize (newPageSize: number) {
     this.offset = 0;
     this.rowLimiter.pageSize = newPageSize;
@@ -107,11 +115,11 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   inBasicMode (): boolean {
-    return this.filter.authType == 'BASIC';
+    return this.filter.authType === 'BASIC';
   }
 
   inCertificateMode (): boolean {
-    return this.filter.authType == 'CERTIFICATE';
+    return this.filter.authType === 'CERTIFICATE';
   }
 
   isDirty (): boolean {
@@ -213,36 +221,14 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.selected.length = 0;
   }
 
-  async checkIsDirtyAndThen (func: Function) {
-    if (this.isDirty()) {
-      const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
-      if (ok) {
-        func.call(this);
-      }
-    } else {
-      func.call(this);
-    }
-  }
-
-  async checkIsDirty () {
+  async checkIsDirty (): Promise<boolean> {
     if (!this.isDirty()) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
 
     const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
-    if (ok) {
-      return Promise.resolve();
-    } else {
-      return Promise.reject('user cancelled');
-    }
+    return Promise.resolve(ok);
   }
-
-  // changePageSize (newPageLimit: number) {
-  //   this.offset = 0;
-  //   this.pageSize = newPageLimit;
-  //
-  //   this.refresh();
-  // }
 
   refresh () {
     // ugly but the grid does not feel the paging changes otherwise

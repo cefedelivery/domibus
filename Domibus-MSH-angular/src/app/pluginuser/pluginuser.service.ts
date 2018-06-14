@@ -19,10 +19,12 @@ export class PluginUserService {
 
   getUsers (filter?: PluginUserSearchCriteria)
     : Observable<{ entries: PluginUserRO[], count: number }> {
+
     const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', '0');
     searchParams.set('pageSize', '10');
     searchParams.set('orderBy', 'entityId');
+
     if (filter.authType) {
       searchParams.set('authType', filter.authType);
     }
@@ -35,8 +37,6 @@ export class PluginUserService {
     if (filter.originalUser) {
       searchParams.set('originalUser', filter.originalUser);
     }
-    // console.log('filter : ', JSON.stringify(filter))
-    // console.log('searchParams : ', JSON.stringify(searchParams), searchParams)
 
     return this.http.get(PluginUserService.PLUGIN_USERS_URL, {search: searchParams})
       .map(this.extractData)
@@ -74,7 +74,6 @@ export class PluginUserService {
     } else {
       errMsg = error.message ? error.message : error.toString();
     }
-    // console.error(errMsg);
     return Promise.reject(errMsg);
   }
 }
