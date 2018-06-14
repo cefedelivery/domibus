@@ -5,7 +5,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @author Cosmin Baciu
- * @since 1.2
+ * @since 4.0
  */
 public class DomainDTO {
 

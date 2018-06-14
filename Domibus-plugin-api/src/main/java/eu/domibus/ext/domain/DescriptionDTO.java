@@ -10,7 +10,7 @@ import java.io.Serializable;
  * It stores information about Description details
  *
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class DescriptionDTO implements Serializable {
     private static final long serialVersionUID = 1L;

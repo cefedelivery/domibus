@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class CollaborationInfoDTO implements Serializable {
 

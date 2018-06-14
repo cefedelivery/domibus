@@ -10,7 +10,7 @@ import java.io.Serializable;
  * It stores information about Schema
  *
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class SchemaDTO implements Serializable {
 

@@ -11,7 +11,7 @@ import java.util.Set;
  * It stores information about To details
  *
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class ToDTO implements Serializable {
 

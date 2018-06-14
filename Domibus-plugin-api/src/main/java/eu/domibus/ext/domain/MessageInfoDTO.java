@@ -11,7 +11,7 @@ import java.util.Date;
  * It stores some information about a message
  *
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class MessageInfoDTO implements Serializable {
 

@@ -10,7 +10,7 @@ import java.io.Serializable;
  * It stores information about Part Info
  *
  * @author Tiago Miguel
- * @since 1.1
+ * @since 3.3
  */
 public class PartInfoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
