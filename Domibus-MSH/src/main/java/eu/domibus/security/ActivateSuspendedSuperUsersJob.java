@@ -26,9 +26,7 @@ public class ActivateSuspendedSuperUsersJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Executing job to unlock suspended account at {}", new Date());
-        }
+        LOG.debug("Executing job to unlock suspended account at {}", new Date());
         userService.findAndReactivateSuspendedUsers();
     }
 }

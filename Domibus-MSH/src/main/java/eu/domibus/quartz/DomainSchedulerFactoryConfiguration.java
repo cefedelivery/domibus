@@ -93,7 +93,7 @@ public class DomainSchedulerFactoryConfiguration {
                                                         .filter( trigger -> trigger instanceof CronTriggerImpl &&
                                                                     ((CronTriggerImpl)trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
                                                     .collect(Collectors.toList());
-        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
+        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
         return schedulerFactoryBean;
     }
 
@@ -111,7 +111,7 @@ public class DomainSchedulerFactoryConfiguration {
                                                         .filter( trigger -> !(trigger instanceof CronTriggerImpl) ||
                                                                     !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
                                                     .collect(Collectors.toList());
-        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[0]));
+        schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
         return schedulerFactoryBean;
     }
 
