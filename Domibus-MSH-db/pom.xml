@@ -46,20 +46,20 @@
                </configuration>
                <executions>
                    <execution>
-                       <id>generate-mysql-script-non-multitenancy-4.0</id>
+                       <id>generate-mysql-script-users_data-4.0</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-non-multitenancy.xml
+                               src/main/resources/db/changelog-4.0-users_data.xml
                            </changeLogFile>
                            <url>
-                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-non-multitenancy.mysql
+                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-users_data.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-non-multitenancy.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-users_data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -100,20 +100,20 @@
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-oracle-script-non-multitenancy-4.0</id>
+                       <id>generate-oracle-script-users_data-4.0</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-non-multitenancy.xml
+                               src/main/resources/db/changelog-4.0-users_data.xml
                            </changeLogFile>
                            <url>
-                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-non-multitenancy.oracle
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-users_data.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-non-multitenancy.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0-users_data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>

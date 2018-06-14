@@ -91,6 +91,7 @@
         </insert>
 
         <insert tableName="TB_USER_DOMAIN">
+            <column name="ID_PK" value="1" type="INT"/>
             <column name="USER_NAME" value="super"/>
             <column name="PREFERRED_DOMAIN" value="default"/>
         </insert>
