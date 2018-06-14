@@ -21,4 +21,6 @@ public interface DomibusConfigurationService {
     DataBaseEngine getDataBaseEngine();
 
     boolean isMultiTenantAware();
+
+    boolean useProxy();
 }
