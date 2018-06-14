@@ -12,7 +12,6 @@ const EDIT_MODE = 'User Edit';
 @Component({
   selector: 'editbasicpluginuser-form',
   templateUrl: './editbasicpluginuser-form.component.html',
-  styleUrls: ['./editbasicpluginuser-form.component.css'],
   providers: [UserValidatorService]
 })
 export class EditbasicpluginuserFormComponent {
@@ -24,6 +23,12 @@ export class EditbasicpluginuserFormComponent {
   formTitle: string;
   userForm: FormGroup;
   user: PluginUserRO;
+
+  public originalUserPattern = PluginUserService.originalUserPattern;
+  public originalUserMessage = PluginUserService.originalUserMessage;
+
+  public certificateIdPattern = PluginUserService.certificateIdPattern;
+  public certificateIdMessage = PluginUserService.certificateIdMessage;
 
   constructor (public dialogRef: MdDialogRef<EditbasicpluginuserFormComponent>,
                @Inject(MD_DIALOG_DATA) public data: any,

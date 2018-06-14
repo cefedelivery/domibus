@@ -12,6 +12,12 @@ export class PluginUserService {
   static readonly PLUGIN_USERS_URL: string = 'rest/plugin/users';
   public static passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
 
+  public static originalUserPattern = 'urn:oasis:names:tc:ebcore:partyid\\-type:[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+';
+  public static originalUserMessage = 'You should follow the rule: urn:oasis:names:tc:ebcore:partyid-type:[unregistered]:[corner]';
+
+  public static certificateIdPattern = '[a-zA-Z0-9_:-]+';
+  public static certificateIdMessage = 'You should follow the rule appropriate for certificate id';
+
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
   constructor (private http: Http, private userService: UserService) {
