@@ -15,8 +15,8 @@ export class PluginUserService {
   public static originalUserPattern = 'urn:oasis:names:tc:ebcore:partyid\\-type:[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+';
   public static originalUserMessage = 'You should follow the rule: urn:oasis:names:tc:ebcore:partyid-type:[unregistered]:[corner]';
 
-  public static certificateIdPattern = '[a-zA-Z0-9_:-]+';
-  public static certificateIdMessage = 'You should follow the rule appropriate for certificate id';
+  public static certificateIdPattern = 'CN=[a-zA-Z0-9_]+,O=[a-zA-Z0-9_]+,C=[a-zA-Z]{2}:[a-zA-Z0-9]+';
+  public static certificateIdMessage = 'You should follow the rule CN=[name],O=[name],C=[country code]:[id]';
 
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
