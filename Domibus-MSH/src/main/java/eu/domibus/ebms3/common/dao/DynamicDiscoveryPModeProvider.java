@@ -130,7 +130,18 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return result;
     }
 
-    /* In case the static configuration doesn't match, update the
+    /**
+     *  Method validates if domibus.smlzone is present for current domain. If values is null or empty then
+     *  dynamic discovery is must not used for message transfer.
+     *
+     */
+    protected boolean useDynamicDiscovery(){
+            String zone = domibusPropertyProvider.getProperty(domainProvider.getCurrentDomain(), DynamicDiscoveryService.SMLZONE_KEY );
+        return !StringUtils.isEmpty(zone);
+
+    }
+
+    /* In case the static configuration doesn't match, and Dynamic discovery zone is defined for domain update the
      * pMode using the dynamic discovery process and try again
      */
     @Override
@@ -139,13 +150,19 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         try {
             return super.findUserMessageExchangeContext(userMessage, mshRole);
         } catch (final EbMS3Exception e) {
-            LOG.info("PmodeKey not found, starting the dynamic discovery process");
-            doDynamicDiscovery(userMessage, mshRole);
-
+            if (useDynamicDiscovery()) {
+                LOG.info("PmodeKey not found, starting the dynamic discovery process");
+                doDynamicDiscovery(userMessage, mshRole);
+            } else {
+                LOG.debug("PmodeKey not found, dynamic discovery is not enabled! Check parameter {} for current domain.",  DynamicDiscoveryService.SMLZONE_KEY );
+                throw  e;
+            }
         }
         LOG.debug("Recalling findUserMessageExchangeContext after the dynamic discovery");
         return super.findUserMessageExchangeContext(userMessage, mshRole);
     }
+
+
 
     void doDynamicDiscovery(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         Collection<eu.domibus.common.model.configuration.Process> candidates = findCandidateProcesses(userMessage, mshRole);
