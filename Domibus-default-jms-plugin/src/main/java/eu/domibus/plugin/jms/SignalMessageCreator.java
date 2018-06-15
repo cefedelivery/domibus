@@ -2,19 +2,17 @@
 package eu.domibus.plugin.jms;
 
 import eu.domibus.common.NotificationType;
-import org.springframework.jms.core.MessageCreator;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import eu.domibus.ext.domain.JMSMessageDTOBuilder;
+import eu.domibus.ext.domain.JmsMessageDTO;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
-class SignalMessageCreator implements MessageCreator {
+public class SignalMessageCreator  {
     private NotificationType notificationType;
     private String messageId;
 
@@ -23,17 +21,15 @@ class SignalMessageCreator implements MessageCreator {
         this.notificationType = notificationType;
     }
 
-    @Override
-    public Message createMessage(Session session) throws JMSException {
-        Message message = session.createMapMessage();
-        String messageType;
+
+    public JmsMessageDTO createMessage() {
+        final JMSMessageDTOBuilder jmsMessageBuilder = JMSMessageDTOBuilder.create();
+        String messageType = null;
         if (this.notificationType == NotificationType.MESSAGE_SEND_SUCCESS) {
             messageType = JMSMessageConstants.MESSAGE_TYPE_SEND_SUCCESS;
-        } else {
-            throw new JMSException("unknown NotificationType: " + notificationType.name());
         }
-        message.setStringProperty(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
-        message.setStringProperty(MESSAGE_ID, messageId);
-        return message;
+        jmsMessageBuilder.property(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
+        jmsMessageBuilder.property(MESSAGE_ID, messageId);
+        return jmsMessageBuilder.build();
     }
 }

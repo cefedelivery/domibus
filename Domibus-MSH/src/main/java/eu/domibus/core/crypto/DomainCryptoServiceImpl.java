@@ -1,30 +1,29 @@
 package eu.domibus.core.crypto;
 
+import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
-import eu.domibus.api.crypto.CryptoException;
-import eu.domibus.core.crypto.api.DomainCryptoService;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import javax.jms.Topic;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -51,14 +50,16 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Autowired
-    DomibusPropertyProvider domibusPropertyProvider;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    CertificateService certificateService;
+    protected CertificateService certificateService;
 
-    @Qualifier("jmsTemplateCommand")
     @Autowired
-    private JmsOperations jmsOperations;
+    protected JMSManager jmsManager;
+
+    @Autowired
+    protected Topic clusterCommandTopic;
 
     @PostConstruct
     public void init() {
@@ -221,16 +222,9 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     protected void signalTrustStoreUpdate() {
         // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
-        jmsOperations.send(new ReloadTrustStoreMessageCreator());
-    }
-
-    class ReloadTrustStoreMessageCreator implements MessageCreator {
-        @Override
-        public Message createMessage(Session session) throws JMSException {
-            Message m = session.createMessage();
-            m.setStringProperty(Command.COMMAND, Command.RELOAD_TRUSTSTORE);
-            m.setStringProperty("domain", domain.getCode());
-            return m;
-        }
+        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
+                .property(MessageConstants.DOMAIN, domain.getCode())
+                .build(), clusterCommandTopic);
     }
 }

@@ -16,6 +16,7 @@ public class JmsMessage {
     // order of the fields is important for CSV generation
     protected String id;
     protected String type;
+    protected String jmsCorrelationId;
     protected Date timestamp;
     protected String content;
     protected Map<String, Object> customProperties;
@@ -59,6 +60,14 @@ public class JmsMessage {
 
     public void setProperty(String name, Object value) {
         properties.put(name, value);
+    }
+
+    public String getJmsCorrelationId() {
+        return jmsCorrelationId;
+    }
+
+    public void setJmsCorrelationId(String jmsCorrelationId) {
+        this.jmsCorrelationId = jmsCorrelationId;
     }
 
     public Map<String, Object> getJMSProperties() {

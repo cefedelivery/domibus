@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.message;
 
 import eu.domibus.ext.delegate.services.interceptor.ServiceInterceptor;
-import eu.domibus.ext.exceptions.MessageMonitorException;
+import eu.domibus.ext.exceptions.MessageMonitorExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,7 +23,7 @@ public class MessageMonitoringServiceInterceptor extends ServiceInterceptor {
 
     @Override
     public Exception convertCoreException(Exception e) {
-        return new MessageMonitorException(e);
+        return new MessageMonitorExtException(e);
     }
 
     @Override

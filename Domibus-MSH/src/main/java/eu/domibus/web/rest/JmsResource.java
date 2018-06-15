@@ -1,13 +1,18 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,10 +34,19 @@ public class JmsResource {
     private static final String APPLICATION_JSON = "application/json";
 
     @Autowired
-    JMSManager jmsManager;
+    protected JMSManager jmsManager;
 
     @Autowired
-    CsvServiceImpl csvServiceImpl;
+    protected CsvServiceImpl csvServiceImpl;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    protected AuthUtils authUtils;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
@@ -52,12 +66,31 @@ public class JmsResource {
         }
     }
 
+    protected String getDomainSelector(String selector) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return selector;
+        }
+        if(authUtils.isSuperAdmin()) {
+            return selector;
+        }
+        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        String domainClause = "DOMAIN ='" + currentDomain.getCode() + "'";
+
+        String result = null;
+        if(StringUtils.isBlank(selector)) {
+            result = domainClause;
+        } else {
+            result = selector + " AND " + domainClause;
+        }
+        return result;
+    }
+
     @RequestMapping(value = {"/messages"}, method = POST)
     public ResponseEntity<MessagesResponseRO> messages(@RequestBody MessagesRequestRO request) {
 
         final MessagesResponseRO messagesResponseRO = new MessagesResponseRO();
         try {
-            messagesResponseRO.setMessages(jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), request.getSelector()));
+            messagesResponseRO.setMessages(jmsManager.browseMessages(request.getSource(), request.getJmsType(), request.getFromDate(), request.getToDate(), getDomainSelector(request.getSelector())));
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(APPLICATION_JSON))
                     .body(messagesResponseRO);
@@ -120,7 +153,7 @@ public class JmsResource {
                 jmsType,
                 fromDate == null ? null : new Date(fromDate),
                 toDate == null ? null : new Date(toDate),
-                selector);
+                getDomainSelector(selector));
         customizeJMSProperties(jmsMessageList);
 
         // excluding unneeded columns
@@ -145,7 +178,7 @@ public class JmsResource {
     }
 
     private void customizeJMSProperties(List<JmsMessage> jmsMessageList) {
-        for(JmsMessage message : jmsMessageList) {
+        for (JmsMessage message : jmsMessageList) {
             message.setCustomProperties(message.getCustomProperties());
             message.setProperties(message.getJMSProperties());
         }

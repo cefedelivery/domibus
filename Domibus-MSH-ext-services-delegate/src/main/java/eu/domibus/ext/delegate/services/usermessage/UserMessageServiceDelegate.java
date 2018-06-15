@@ -4,8 +4,8 @@ import eu.domibus.api.usermessage.domain.UserMessage;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.UserMessageDTO;
-import eu.domibus.ext.exceptions.UserMessageException;
-import eu.domibus.ext.services.UserMessageService;
+import eu.domibus.ext.exceptions.UserMessageExtException;
+import eu.domibus.ext.services.UserMessageExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
  * @since 3.3.1
  */
 @Service
-public class UserMessageServiceDelegate implements UserMessageService{
+public class UserMessageServiceDelegate implements UserMessageExtService{
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageServiceDelegate.class);
 
@@ -30,7 +30,7 @@ public class UserMessageServiceDelegate implements UserMessageService{
     SecurityService securityService;
 
     @Override
-    public UserMessageDTO getMessage(String messageId) throws UserMessageException {
+    public UserMessageDTO getMessage(String messageId) throws UserMessageExtException {
         LOG.debug("Getting message with messageId='" + messageId + "'");
         securityService.checkMessageAuthorization(messageId);
 
