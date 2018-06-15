@@ -141,8 +141,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     }
 
-    /* In case the static configuration doesn't match, and Dynamic discovery zone is defined for domain update the
-     * pMode using the dynamic discovery process and try again
+    /* Method finds MessageExchangeConfiguration for given usermesage and role. If property domibus.smlzone is
+     * is not defined only static search is done else (if static search did not return result) also dynamic discovery is executed.
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
