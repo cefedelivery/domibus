@@ -3,7 +3,6 @@ package eu.domibus.web.rest;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
-import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.services.CsvService;
@@ -16,7 +15,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.PluginUserRO;
 import eu.domibus.web.rest.ro.PluginUserResultRO;
-import eu.domibus.web.rest.ro.UserResponseRO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,9 +131,8 @@ public class PluginUserResource {
 
     /**
      * convert plugin users to PluginUserROs.
-     *
-     * @param users
-     * @return a list of
+     * 
+     * @return a list of PluginUserROs and the pagination info
      */
     private PluginUserResultRO prepareResponse(List<AuthenticationEntity> users, Long count, int pageStart, int pageSize) {
         List<PluginUserRO> pluginUserROs = domainConverter.convert(users, PluginUserRO.class);

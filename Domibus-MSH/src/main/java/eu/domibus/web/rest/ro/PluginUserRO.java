@@ -10,7 +10,7 @@ public class PluginUserRO implements Serializable {
 
     private Integer entityId;
     private String username;
-    private String password;
+    private String passwd;
     private String certificateId;
     private String originalUser;
     private String authRoles; 
@@ -33,12 +33,12 @@ public class PluginUserRO implements Serializable {
         this.username = username;
     }
   
-    public String getPassword() {
-        return password;
+    public String getPasswd() {
+        return passwd;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
     
     public String getCertificateId() {
