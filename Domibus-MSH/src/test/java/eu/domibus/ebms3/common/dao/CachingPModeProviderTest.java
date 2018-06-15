@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
+import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -89,6 +90,9 @@ public class CachingPModeProviderTest {
 
     @Injectable
     ProcessDao processDao;
+
+    @Injectable
+    Topic clusterCommandTopic;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;
