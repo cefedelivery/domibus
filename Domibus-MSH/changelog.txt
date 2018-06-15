@@ -5,6 +5,10 @@ Domibus 3.3.4
 - Added new truststore entries for OASIS SMP.
 - Add proxy configuration option for Peppol lookup
 - Updated the configuration for using MySQL Connector/J 8.0.x
+- Added one property domibus.fourcornermodel.enabled=true. If the property is set to false, 'Final Recipient' and 'Original Sender'
+    criteria disappear from Messages Filter, Messages column picker and from Message details in the GUI. The internal SQL queries for
+    User and Signal Message do not use TB_PROPERTY.NAME = 'finalRecipient' and 'originalSender' anymore
+
 Domibus 3.3.3
 - Possibility to send a message to the same Access Point
 Domibus 3.3.2
