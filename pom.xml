@@ -25,7 +25,7 @@
     <properties>
         <cxf.version>3.2.1</cxf.version>
         <spring.version>4.3.14.RELEASE</spring.version>
-        <spring.security.version>4.2.4.RELEASE</spring.security.version>
+        <spring.security.version>4.2.6.RELEASE</spring.security.version>
         <activemq.version>5.15.2</activemq.version>
         <aspectj.version>1.8.13</aspectj.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -787,6 +787,7 @@
                             <skipRuntimeScope>true</skipRuntimeScope>
                             <!-- Disable .Net Assembly Analyzer -->
                             <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                            <suppressionFile>project-check-exclude.xml</suppressionFile>
                         </configuration>
                         <executions>
                             <execution>
