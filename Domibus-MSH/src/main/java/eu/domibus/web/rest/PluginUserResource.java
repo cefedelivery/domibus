@@ -79,6 +79,7 @@ public class PluginUserResource {
     }
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.PUT)
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void updateUsers(@RequestBody List<PluginUserRO> userROs) {
         LOG.debug("Update plugin users was called: " + userROs);
 
@@ -138,6 +139,7 @@ public class PluginUserResource {
         List<PluginUserRO> pluginUserROs = domainConverter.convert(users, PluginUserRO.class);
         for (PluginUserRO pluginUserRO : pluginUserROs) {
             pluginUserRO.setStatus(UserState.PERSISTED.name());
+            pluginUserRO.setPasswd(null);
             if (StringUtils.isEmpty(pluginUserRO.getCertificateId())) {
                 pluginUserRO.setAuthenticationType(AuthType.BASIC.name());
             } else {

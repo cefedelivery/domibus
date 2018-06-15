@@ -28,7 +28,7 @@ export class PluginUserService {
 
     const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', '0');
-    searchParams.set('pageSize', '10');
+    searchParams.set('pageSize', '10000');
     searchParams.set('orderBy', 'entityId');
 
     if (filter.authType) {
@@ -58,6 +58,7 @@ export class PluginUserService {
   }
 
   saveUsers (users: PluginUserRO[]): Promise<Response> {
+  	users = users.filter(el => el.status !== UserState[UserState.PERSISTED]);
     return this.http.put(PluginUserService.PLUGIN_USERS_URL, users).toPromise();
   }
 
@@ -68,7 +69,9 @@ export class PluginUserService {
 
   private extractData (res: Response) {
     const body = res.json();
-    return body || {};
+    const r = body || {};
+    r.entries.forEach(el => el.hiddenPassword = '******');
+    return r;
   }
 
   private handleError (error: Response | any) {

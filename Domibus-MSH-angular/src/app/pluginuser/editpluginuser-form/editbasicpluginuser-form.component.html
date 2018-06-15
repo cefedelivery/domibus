@@ -14,8 +14,7 @@
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
           <input mdInput placeholder="originalUser" name="originalUser" id="originalUser_id" [(ngModel)]="user.originalUser"
-                 [formControl]="userForm.controls['originalUser']" [pattern]="originalUserPattern" maxlength="255" required>
-          <div *ngIf="userForm.controls['originalUser'].hasError('required')" style="color:red; font-size: 70%">You should type an originalUser</div>
+                 [formControl]="userForm.controls['originalUser']" [pattern]="originalUserPattern" maxlength="255">
           <div *ngIf="userForm.controls['originalUser'].hasError('pattern')" style="color:red; font-size: 70%">{{originalUserMessage}}</div>
         </md-input-container>
       </div>
@@ -29,8 +28,8 @@
 
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [(ngModel)]="user.password" [formControl]="userForm.controls['password']"
-                 [pattern]=passwordPattern [required]="!editMode" >
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [(ngModel)]="user.passwd" [formControl]="userForm.controls['password']"
+                 [pattern]="passwordPattern" [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
             Password should follow all of these rules:<br>

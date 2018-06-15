@@ -52,13 +52,13 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   get displayedUsers (): PluginUserRO[] {
-    return this.users.filter(el => el.status !== UserState[UserState.DELETED]);
+    return this.users.filter(el => el.status !== UserState[UserState.REMOVED]);
   }
 
   private initColumns () {
     this.columnPickerBasic.allColumns = [
       {name: 'Username', prop: 'username', width: 20},
-      {name: 'Password', prop: 'password', width: 20},
+      {name: 'Password', prop: 'hiddenPassword', width: 20},
       {name: 'Role', prop: 'authRoles', width: 10},
       {name: 'Original User', prop: 'originalUser', width: 240},
     ];
@@ -195,6 +195,15 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     return this.isDirty();
   }
 
+  async save() {
+	try {
+		await this.pluginUserService.saveUsers(this.users);
+		this.search();
+	}catch(err) {
+		this.alertService.error(err);
+	}
+  }
+
   setIsDirty () {
     this.dirty = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
   }
@@ -215,7 +224,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     if (itemToDelete.status === UserState[UserState.NEW]) {
       this.users.splice(this.users.indexOf(itemToDelete), 1);
     } else {
-      itemToDelete.status = UserState[UserState.DELETED];
+      itemToDelete.status = UserState[UserState.REMOVED];
     }
     this.setIsDirty();
     this.selected.length = 0;

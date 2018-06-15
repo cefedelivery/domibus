@@ -8,10 +8,10 @@ export enum UserState {
 export class PluginUserRO {
   entityId: number;
   username: string;
-  password: string;
+  passwd: string;
   certificateId: string;
   originalUser: string;
   authRoles: string;
   authenticationType: string;
-  status: string; 
+  status: string;
 }

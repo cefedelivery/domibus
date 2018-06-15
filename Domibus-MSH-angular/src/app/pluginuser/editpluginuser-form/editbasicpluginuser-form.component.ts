@@ -46,7 +46,7 @@ export class EditbasicpluginuserFormComponent {
     if (this.editMode) {
       this.userForm = fb.group({
         'userName': new FormControl({value: this.user.username, disabled: true}, Validators.nullValidator),
-        'originalUser': new FormControl(this.user.originalUser, Validators.nullValidator),
+        'originalUser': new FormControl(this.user.originalUser, null),
         'role': new FormControl(this.user.authRoles, Validators.required),
         'password': [null, Validators.pattern],
         'confirmation': [null],
@@ -56,7 +56,7 @@ export class EditbasicpluginuserFormComponent {
     } else {
       this.userForm = fb.group({
         'userName': new FormControl(this.user.username, Validators.required),
-        'originalUser': new FormControl(this.user.originalUser, Validators.nullValidator),
+        'originalUser': new FormControl(this.user.originalUser, null),
         'role': new FormControl(this.user.authRoles, Validators.required),
         'password': [Validators.required, Validators.pattern],
         'confirmation': [Validators.required],

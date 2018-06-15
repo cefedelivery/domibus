@@ -2,7 +2,7 @@ export enum UserState {
   PERSISTED,
   NEW,
   UPDATED,
-  DELETED
+  REMOVED
 }
 
 export class UserResponseRO {

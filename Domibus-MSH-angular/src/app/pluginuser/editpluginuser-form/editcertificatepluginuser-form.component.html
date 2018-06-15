@@ -15,8 +15,7 @@
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
           <input mdInput placeholder="originalUser" name="originalUser" id="originalUser_id" [(ngModel)]="user.originalUser"
-                 [formControl]="userForm.controls['originalUser']" [pattern]="originalUserPattern" maxlength="255" required>
-          <div *ngIf="userForm.controls['originalUser'].hasError('required')" style="color:red; font-size: 70%">You should type an originalUser</div>
+                 [formControl]="userForm.controls['originalUser']" [pattern]="originalUserPattern" maxlength="255">
           <div *ngIf="userForm.controls['originalUser'].hasError('pattern')" style="color:red; font-size: 70%">{{originalUserMessage}}</div>
         </md-input-container>
       </div>

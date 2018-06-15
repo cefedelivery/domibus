@@ -41,13 +41,13 @@ export class EditcertificatepluginuserFormComponent {
     if (this.editMode) {
       this.userForm = fb.group({
         'certificateId': new FormControl({value: this.user.certificateId, disabled: true}, Validators.nullValidator),
-        'originalUser': new FormControl(this.user.originalUser, Validators.nullValidator),
+        'originalUser': new FormControl(this.user.originalUser, null),
         'role': new FormControl(this.user.authRoles, Validators.required),
       });
     } else {
       this.userForm = fb.group({
         'certificateId': new FormControl(this.user.certificateId, Validators.required),
-        'originalUser': new FormControl(this.user.originalUser, Validators.nullValidator),
+        'originalUser': new FormControl(this.user.originalUser, null),
         'role': new FormControl(this.user.authRoles, Validators.required),
       });
     }
