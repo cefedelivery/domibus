@@ -131,8 +131,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     /**
-     *  Method validates if domibus.smlzone is present for current domain. If values is null or empty then
-     *  dynamic discovery is must not used for message transfer.
+     *  Method validates if domibus.smlzone is present for current domain.
      *
      */
     protected boolean useDynamicDiscovery(){
@@ -141,7 +140,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
 
     }
 
-    /* Method finds MessageExchangeConfiguration for given usermesage and role. If property domibus.smlzone is
+    /* Method finds MessageExchangeConfiguration for given usermesage and role. If property domibus.smlzone
      * is not defined only static search is done else (if static search did not return result) also dynamic discovery is executed.
      */
     @Override
