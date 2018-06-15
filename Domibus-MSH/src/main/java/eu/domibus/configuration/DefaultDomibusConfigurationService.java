@@ -1,5 +1,6 @@
 package eu.domibus.configuration;
 
+import eu.domibus.api.configuration.DataBaseEngine;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
@@ -20,6 +21,9 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomibusConfigurationService.class);
 
+    private static final String DATABASE_DIALECT = "domibus.entityManagerFactory.jpaProperty.hibernate.dialect";
+
+    private DataBaseEngine dataBaseEngine;
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -33,6 +37,19 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     @Override
     public boolean isMultiTenantAware() {
         return StringUtils.isNotBlank(domibusPropertyProvider.getProperty(DomainService.GENERAL_SCHEMA_PROPERTY));
+    }
+
+    @Override
+    public DataBaseEngine getDataBaseEngine() {
+        if (dataBaseEngine == null) {
+            final String property = domibusPropertyProvider.getProperty(DATABASE_DIALECT);
+            if (property == null) {
+                throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
+            }
+            dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
+            LOG.info("Database engine:[{}]", dataBaseEngine);
+        }
+        return dataBaseEngine;
     }
 
     @Override
@@ -61,5 +78,4 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
         return Boolean.parseBoolean(useProxy);
     }
-
 }

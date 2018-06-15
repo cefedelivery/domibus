@@ -36,6 +36,12 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="activateSuspendedSuperUsersJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.security.ActivateSuspendedSuperUsersJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
     <bean id="saveCertificateAndLogRevocationJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.core.certificate.SaveCertificateAndLogRevocationJob"/>
@@ -58,6 +64,13 @@
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="activateSuspendedUsersJob"/>
         <property name="cronExpression" value="${domibus.account.unlock.cron}"/>
+    </bean>
+
+    <bean id="activateSuspendedSuperUserTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="activateSuspendedSuperUsersJob"/>
+        <property name="cronExpression" value="${domibus.account.unlock.cron}"/>
+        <property name="group" value="general"/>
     </bean>
 
     <bean id="saveCertificateAndLogRevocationTrigger"
