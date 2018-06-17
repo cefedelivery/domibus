@@ -46,6 +46,24 @@
                </configuration>
                <executions>
                    <execution>
+                       <id>generate-mysql-script-data-4.0</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>updateSQL</goal>
+                       </goals>
+                       <configuration>
+                           <changeLogFile>
+                               src/main/resources/db/changelog-4.0-data.xml
+                           </changeLogFile>
+                           <url>
+                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.mysql
+                           </url>
+                           <migrationSqlOutputFile>
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-data.ddl
+                           </migrationSqlOutputFile>
+                       </configuration>
+                   </execution>
+                   <execution>
                        <id>generate-mysql-script-multi-tenancy-4.0</id>
                        <phase>generate-resources</phase>
                        <goals>
@@ -78,6 +96,24 @@
                            </url>
                            <migrationSqlOutputFile>
                                ${project.build.directory}/sql-scripts/mysql5innoDb-4.0.ddl
+                           </migrationSqlOutputFile>
+                       </configuration>
+                   </execution>
+                   <execution>
+                       <id>generate-oracle-script-data-4.0</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>updateSQL</goal>
+                       </goals>
+                       <configuration>
+                           <changeLogFile>
+                               src/main/resources/db/changelog-4.0-data.xml
+                           </changeLogFile>
+                           <url>
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.oracle
+                           </url>
+                           <migrationSqlOutputFile>
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0-data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>

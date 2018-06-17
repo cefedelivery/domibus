@@ -58,9 +58,9 @@ public class FSXMLHelper {
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-        QName _QNAME = new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", clazz.getSimpleName());
+        QName qName = new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", clazz.getSimpleName());
 
-        marshaller.marshal(new JAXBElement(_QNAME, clazz, null, objectToWrite), outputStream);
+        marshaller.marshal(new JAXBElement(qName, clazz, null, objectToWrite), outputStream);
     }
 
     public static Schema loadSchema(String schemaName) throws SAXException {

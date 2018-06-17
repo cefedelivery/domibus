@@ -24,6 +24,11 @@ public class JMSMessageBuilder {
         return this;
     }
 
+    public JMSMessageBuilder jmsCorrelationId(String id) {
+        jmsMessage.setJmsCorrelationId(id);
+        return this;
+    }
+
     public JMSMessageBuilder content(String content) {
         jmsMessage.setContent(content);
         return this;

@@ -2,9 +2,9 @@ package eu.domibus.ext.delegate.services.security;
 
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
-import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.exceptions.DomibusServiceException;
+import eu.domibus.ext.exceptions.DomibusServiceExtException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -28,7 +28,7 @@ public class SecurityDefaultService implements SecurityService {
     UserMessageService userMessageService;
 
     @Override
-    public void checkMessageAuthorization(String messageId) throws AuthenticationException, DomibusServiceException {
+    public void checkMessageAuthorization(String messageId) throws DomibusServiceExtException {
         /* unsecured login allowed */
         if (authUtils.isUnsecureLoginAllowed()) {
             LOG.debug("Unsecured login is allowed");
@@ -37,13 +37,13 @@ public class SecurityDefaultService implements SecurityService {
 
         final String finalRecipient = userMessageService.getFinalRecipient(messageId);
         if (StringUtils.isEmpty(finalRecipient)) {
-            throw new DomibusServiceException(DomibusErrorCode.DOM_001, "Couldn't get the finalRecipient for message with ID [" + messageId + "]");
+            throw new DomibusServiceExtException(DomibusErrorCode.DOM_001, "Couldn't get the finalRecipient for message with ID [" + messageId + "]");
         }
         checkAuthorization(finalRecipient);
     }
 
     @Override
-    public void checkAuthorization(String finalRecipient) throws AuthenticationException, DomibusServiceException {
+    public void checkAuthorization(String finalRecipient) throws DomibusServiceExtException {
         /* unsecured login allowed */
         if (authUtils.isUnsecureLoginAllowed()) {
             LOG.debug("Unsecured login is allowed");
@@ -60,12 +60,12 @@ public class SecurityDefaultService implements SecurityService {
             LOG.debug("The provided finalRecipient [{}] is the same as the user's finalRecipient", finalRecipient);
         } else {
             LOG.securityInfo(DomibusMessageCode.SEC_UNAUTHORIZED_MESSAGE_ACCESS, originalUserFromSecurityContext, finalRecipient);
-            throw new AuthenticationException(DomibusErrorCode.DOM_002, "You are not allowed to access messages for finalRecipient [" + finalRecipient + "]. You are authorized as [" + originalUserFromSecurityContext + "]");
+            throw new AuthenticationExtException(DomibusErrorCode.DOM_002, "You are not allowed to access messages for finalRecipient [" + finalRecipient + "]. You are authorized as [" + originalUserFromSecurityContext + "]");
         }
     }
 
     @Override
-    public String getOriginalUserFromSecurityContext() throws AuthenticationException {
+    public String getOriginalUserFromSecurityContext() throws AuthenticationExtException {
         return authUtils.getOriginalUserFromSecurityContext();
     }
 }
