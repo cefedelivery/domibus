@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -103,7 +104,7 @@ public class MessageResource {
 
         Map<String, InputStream> ret = new HashMap<>();
 
-        final Set<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
+        final List<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
             try {
                 ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
