@@ -1,5 +1,5 @@
 
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;

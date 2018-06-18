@@ -1,7 +1,8 @@
 
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -31,7 +32,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProvider.class);
 
-    //Dont access directly, use getter instead
+    //Don't access directly, use getter instead
     private Configuration configuration;
 
     @Autowired
@@ -41,9 +42,17 @@ public class CachingPModeProvider extends PModeProvider {
 
     private Map<String, List<Process>> pullProcessByMpcCache = new HashMap<>();
 
+    protected Domain domain;
+
+    private Object configurationLock = new Object();
+
+    public CachingPModeProvider(Domain domain) {
+        this.domain = domain;
+    }
+
     protected Configuration getConfiguration() {
         if (this.configuration == null) {
-            synchronized (configuration) {
+            synchronized (configurationLock) {
                 if (this.configuration == null) {
                     this.init();
                 }

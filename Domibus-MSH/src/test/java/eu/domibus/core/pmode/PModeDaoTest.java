@@ -1,13 +1,16 @@
-package eu.domibus.common.dao;
+package eu.domibus.core.pmode;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.xml.XMLUtil;
+import eu.domibus.common.dao.ConfigurationRawDAO;
+import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.core.pmode.PModeDao;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import mockit.Expectations;

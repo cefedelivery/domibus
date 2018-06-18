@@ -1,9 +1,11 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ConfigurationRawDAO;
@@ -88,6 +90,9 @@ public class CachingPModeProviderTest {
 
     @Injectable
     ProcessDao processDao;
+
+    @Injectable
+    Domain domain = DomainService.DEFAULT_DOMAIN;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;

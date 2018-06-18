@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;

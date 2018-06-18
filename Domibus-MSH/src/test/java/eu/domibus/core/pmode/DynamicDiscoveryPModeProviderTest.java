@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
@@ -31,10 +31,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.xml.bind.JAXBContext;
 import java.io.File;
@@ -45,13 +47,14 @@ import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
-import java.util.*;
-import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DynamicDiscoveryPModeProviderTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
@@ -100,9 +103,6 @@ public class DynamicDiscoveryPModeProviderTest {
     @Spy
     private CertificateServiceImpl certificateService;
 
-    @InjectMocks
-    private DynamicDiscoveryPModeProvider dynamicDiscoveryPModeProvider;
-
     @Spy
     ConfigurationDAO configurationDAO;
 
@@ -114,6 +114,9 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Mock
     private DomibusPropertyProviderImpl domibusPropertyProvider;
+
+    @InjectMocks
+    private DynamicDiscoveryPModeProvider dynamicDiscoveryPModeProvider;
 
     @Before
     public void initMocks() {

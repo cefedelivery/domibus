@@ -79,8 +79,7 @@
                          value="eu.domibus.common.model.configuration"/>
     </bean>
 
-    <bean id="documentBuilderFactory" class="javax.xml.parsers.DocumentBuilderFactory" factory-method="newInstance"
-          scope="prototype"/>
+    <bean id="documentBuilderFactory" class="javax.xml.parsers.DocumentBuilderFactory" factory-method="newInstance" scope="prototype"/>
 
     <bean id="transformerFactory" class="javax.xml.transform.TransformerFactory" factory-method="newInstance"/>
 
