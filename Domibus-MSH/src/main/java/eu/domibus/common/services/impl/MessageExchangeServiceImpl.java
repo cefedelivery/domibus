@@ -3,7 +3,6 @@ package eu.domibus.common.services.impl;
 import com.google.common.collect.Lists;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeException;
@@ -108,8 +107,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private PullMessageService pullMessageService;
 
-    @Autowired
-    private JMSManager jmsManager;
 
     /**
      * {@inheritDoc}

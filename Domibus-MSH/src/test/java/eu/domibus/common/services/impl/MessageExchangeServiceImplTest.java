@@ -4,7 +4,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -75,9 +74,6 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private DomibusPropertyProvider domibusPropertyProvider;
-
-    @Mock
-    private JMSManager jmsManager;
 
     @Spy
     private ProcessValidator processValidator;
@@ -157,8 +153,6 @@ public class MessageExchangeServiceImplTest {
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
         verify(jmsManager, times(20)).sendMessageToQueue(mapArgumentCaptor.capture(), any(Queue.class));
-        //needed because the set does not return the values always in the same order.
-        //@thom this does work on my machine but not on bamboo. Fix this.
         TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
         testResult.chain(new TestResult("qn2", "party1:responder:service2:Mock:Mock:leg2", "false"));
         final List<JmsMessage> allValues = mapArgumentCaptor.getAllValues();
