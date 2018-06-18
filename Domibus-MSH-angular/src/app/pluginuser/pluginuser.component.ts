@@ -12,6 +12,8 @@ import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/edit
 import {UserService} from '../user/user.service';
 import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
+import {DownloadService} from '../download/download.service';
+import {UserComponent} from '../user/user.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
@@ -80,7 +82,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   async changeAuthType (x) {
     const ok = await this.searchIfOK();
-    if(!ok)
+    if (!ok)
       this.filter.authType = this.filter.authType === 'CERTIFICATE' ? 'BASIC' : 'CERTIFICATE';
   }
 
@@ -195,13 +197,13 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     return this.isDirty();
   }
 
-  async save() {
-	try {
-		await this.pluginUserService.saveUsers(this.users);
-		this.search();
-	}catch(err) {
-		this.alertService.error(err);
-	}
+  async save () {
+    try {
+      await this.pluginUserService.saveUsers(this.users);
+      this.search();
+    } catch (err) {
+      this.alertService.error(err);
+    }
   }
 
   setIsDirty () {
@@ -253,6 +255,15 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       this.loading = false;
       this.setIsDirty();
     }, 50);
+  }
+
+  /**
+   * Saves the content of the datatable into a CSV file
+   */
+  async saveAsCSV () {
+    const ok = await this.checkIsDirty();
+    if (ok)
+      DownloadService.downloadNative(PluginUserService.CSV_URL);
   }
 
 }

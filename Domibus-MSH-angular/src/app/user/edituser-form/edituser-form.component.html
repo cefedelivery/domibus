@@ -17,7 +17,7 @@
       </div>
 
       <div style="margin-top:10px;">
-        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" (change)="onRolesChanged()" required>
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" required>
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
         <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>

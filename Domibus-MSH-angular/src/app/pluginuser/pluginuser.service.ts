@@ -5,6 +5,7 @@ import {PluginUserRO} from './pluginuser';
 import {UserState} from '../user/user';
 import {UserService} from '../user/user.service';
 import {SecurityService} from '../security/security.service';
+import {UserComponent} from '../user/user.component';
 
 @Injectable()
 export class PluginUserService {
@@ -17,6 +18,8 @@ export class PluginUserService {
 
   public static certificateIdPattern = 'CN=[a-zA-Z0-9_]+,O=[a-zA-Z0-9_]+,C=[a-zA-Z]{2}:[a-zA-Z0-9]+';
   public static certificateIdMessage = 'You should follow the rule CN=[name],O=[name],C=[country code]:[id]';
+
+  public static CSV_URL: string = PluginUserService.PLUGIN_USERS_URL + '/csv';
 
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
