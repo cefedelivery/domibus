@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.XMLUtil;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
+import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -71,7 +73,7 @@ public class CachingPModeProviderTest {
     JAXBContext jaxbContextConfig;
 
     @Injectable
-    JmsOperations jmsTemplateCommand;
+    JMSManager jmsManager;
 
     @Injectable
     XMLUtil xmlUtil;
@@ -92,10 +94,13 @@ public class CachingPModeProviderTest {
     ProcessDao processDao;
 
     @Injectable
-    Domain domain = DomainService.DEFAULT_DOMAIN;
+    Topic clusterCommandTopic;
 
     @Tested
     CachingPModeProvider cachingPModeProvider;
+
+    @Injectable
+    Domain domain = DomainService.DEFAULT_DOMAIN;
 
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -261,10 +266,10 @@ public class CachingPModeProviderTest {
     @Test
     public void testRetrievePullProcessBasedOnInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
         configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
-        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Set<Party> parties = new HashSet<>(configuration.getBusinessProcesses().getParties());
         final Party red_gw = getPartyByName(parties, "red_gw");
         final Party blue_gw = getPartyByName(parties, "blue_gw");
-        final Set<Process> processes = configuration.getBusinessProcesses().getProcesses();
+        final Set<Process> processes = new HashSet<>(configuration.getBusinessProcesses().getProcesses());
         final Collection<Process> filter = Collections2.filter(processes, new Predicate<Process>() {
             @Override
             public boolean apply(Process process) {
@@ -297,7 +302,7 @@ public class CachingPModeProviderTest {
     @Test
     public void testRetrievePullProcessBasedOnPartyNotInInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
         configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
-        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Set<Party> parties = new HashSet<>(configuration.getBusinessProcesses().getParties());
         final Party white_gw = getPartyByName(parties, "white_gw");
         new Expectations() {{
             configurationDAO.configurationExists();
@@ -539,7 +544,7 @@ public class CachingPModeProviderTest {
         Assert.assertNull(agreementRef);
     }
 
-    private Process getTestProcess(Set<Process> processes) {
+    private Process getTestProcess(Collection<Process> processes) {
         for(Process process : processes) {
             if(process.getName().equals("testService")) {
                 return process;

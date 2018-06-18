@@ -6,7 +6,7 @@ import eu.domibus.ext.delegate.converter.DomainExtConverter;
 import eu.domibus.ext.delegate.services.security.SecurityService;
 import eu.domibus.ext.domain.UserMessageDTO;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.exceptions.UserMessageException;
+import eu.domibus.ext.exceptions.UserMessageExtException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -77,20 +77,20 @@ public class UserMessageServiceDelegateTest {
     @Test
     public void testGetMessageException() {
         // Given
-        final UserMessageException userMessageException = new UserMessageException(DomibusErrorCode.DOM_001, "test");
+        final UserMessageExtException userMessageExtException = new UserMessageExtException(DomibusErrorCode.DOM_001, "test");
         final String messageId = "messageId";
 
         new Expectations() {{
             userMessageService.getMessage(messageId);
-            result = userMessageException;
+            result = userMessageExtException;
         }};
 
         // When
         try {
             userMessageServiceDelegate.getMessage(messageId);
-        } catch (UserMessageException e) {
+        } catch (UserMessageExtException e) {
             // Then
-            Assert.assertTrue(userMessageException == e);
+            Assert.assertTrue(userMessageExtException == e);
             return;
         }
         Assert.fail();

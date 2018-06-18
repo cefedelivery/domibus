@@ -21,8 +21,8 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
-import eu.domibus.core.pull.MessagingLockService;
 import eu.domibus.core.pull.PartyExtractor;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -109,7 +109,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     private MessageExchangeService messageExchangeService;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullMessageService pullMessageService;
 
     @Autowired
     AuthUtils authUtils;
@@ -304,7 +304,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 userMessageService.scheduleSending(messageId);
             }
             else{
-                messagingLockService.addSearchInFormation(new PartyExtractor(to),messageId,message.getUserMessage().getMpc());
+                final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+                LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
+                pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
             userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),

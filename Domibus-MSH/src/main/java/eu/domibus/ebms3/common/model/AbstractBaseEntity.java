@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.common.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
@@ -15,7 +17,11 @@ public abstract class AbstractBaseEntity implements Serializable {
 
     @Id
     @XmlTransient
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO,generator = "native")
+    @GenericGenerator(
+            name = "native",
+            strategy = "native"
+    )
     @Column(name = "ID_PK")
     private int entityId;
 

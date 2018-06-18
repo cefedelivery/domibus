@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
@@ -47,6 +48,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
 
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
     /**
      * {@inheritDoc}
      */
@@ -56,19 +60,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void handlePullReceiptReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
-        try {
-            messageExchangeService.removeRawMessageIssuedByPullRequestInNewTransaction(messageId);
-        } catch (ReliabilityException e) {
-            LOG.warn("There should be a raw xml entry for this message.");
-        }
-        changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
-    }
 
     private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         switch (reliabilityCheckSuccessful) {
@@ -93,9 +84,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
-            case PULL_FAILED:
-                updateRetryLoggingService.updatePulledMessageRetryLogging(messageId, legConfiguration);
-                break;
+
         }
     }
 

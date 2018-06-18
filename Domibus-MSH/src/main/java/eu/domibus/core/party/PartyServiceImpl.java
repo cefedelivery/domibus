@@ -2,24 +2,32 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.dao.PartyDao;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.pki.CertificateService;
+import java.security.cert.X509Certificate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.*;
 
 /**
@@ -30,7 +38,7 @@ import static java.util.stream.Collectors.*;
 public class PartyServiceImpl implements PartyService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PartyServiceImpl.class);
-
+    private static final Predicate<Party> DEFAULT_PREDICATE = condition -> true;
 
     @Autowired
     private DomainCoreConverter domainCoreConverter;
@@ -41,7 +49,14 @@ public class PartyServiceImpl implements PartyService {
     @Autowired
     private PartyDao partyDao;
 
-    private static final Predicate<Party> DEFAULT_PREDICATE = condition -> true;
+    @Autowired
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Autowired
+    protected DomainContextProvider domainProvider;
+
+    @Autowired
+    protected CertificateService certificateService;
 
     /**
      * {@inheritDoc}
@@ -65,19 +80,7 @@ public class PartyServiceImpl implements PartyService {
     }
 
     /**
-     *{@inheritDoc}
-     */
-    @Override
-    public long countParties(String name, String endPoint, String partyId, String processName) {
-        final Predicate<Party> searchPredicate = getSearchPredicate(name, endPoint, partyId, processName);
-        return linkPartyAndProcesses().
-                stream().
-                filter(searchPredicate).
-                count();
-    }
-
-    /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public List<String> findPartyNamesByServiceAndAction(String service, String action) {
@@ -85,14 +88,14 @@ public class PartyServiceImpl implements PartyService {
     }
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String getGatewayPartyIdentifier() {
         String result = null;
         eu.domibus.common.model.configuration.Party gatewayParty = pModeProvider.getGatewayParty();
         // return the first identifier
-        if(!gatewayParty.getIdentifiers().isEmpty()) {
+        if (!gatewayParty.getIdentifiers().isEmpty()) {
             result = gatewayParty.getIdentifiers().iterator().next().getPartyId();
         }
         return result;
@@ -183,8 +186,6 @@ public class PartyServiceImpl implements PartyService {
                 and(processPredicate(processName));
     }
 
-
-
     protected Predicate<Party> namePredicate(final String name) {
 
         if (StringUtils.isNotEmpty(name)) {
@@ -245,4 +246,127 @@ public class PartyServiceImpl implements PartyService {
 
         return DEFAULT_PREDICATE;
     }
+
+    protected void replaceParties(List<Party> partyList, Configuration configuration) {
+
+        List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
+
+        BusinessProcesses bp = configuration.getBusinessProcesses();
+        Parties parties = bp.getPartiesXml();
+        parties.getParty().clear();
+        parties.getParty().addAll(list);
+
+        PartyIdTypes partyIdTypes = bp.getPartiesXml().getPartyIdTypes();
+        list.forEach(party -> {
+            party.getIdentifiers().forEach(identifier -> {
+                if (!partyIdTypes.getPartyIdType().contains(identifier.getPartyIdType())) {
+                    partyIdTypes.getPartyIdType().add(identifier.getPartyIdType());
+                }
+            });
+        });
+
+        List<Process> processes = bp.getProcesses();
+        processes.forEach(process -> {
+            // sync <initiatorParties> and <responderParties>
+            Set<String> iParties = partyList.stream()
+                    .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
+                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                    .map(p -> p.getName())
+                    .collect(Collectors.toSet());
+
+            if (process.getInitiatorPartiesXml() == null)
+                process.setInitiatorPartiesXml(new InitiatorParties());
+            List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
+            ip.removeIf(x -> !iParties.contains(x.getName()));
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name.equals(x.getName())))
+                    .map(name -> {
+                        InitiatorParty y = new InitiatorParty();
+                        y.setName(name);
+                        return y;
+                    }).collect(Collectors.toSet()));
+            if (ip.isEmpty())
+                process.setInitiatorPartiesXml(null);
+
+
+            Set<String> rParties = partyList.stream()
+                    .filter(p -> p.getProcessesWithPartyAsResponder().stream()
+                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                    .map(p -> p.getName())
+                    .collect(Collectors.toSet());
+
+            if (process.getResponderPartiesXml() == null)
+                process.setResponderPartiesXml(new ResponderParties());
+            List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
+            rp.removeIf(x -> !rParties.contains(x.getName()));
+            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equals(x.getName())))
+                    .map(name -> {
+                        ResponderParty y = new ResponderParty();
+                        y.setName(name);
+                        return y;
+                    }).collect(Collectors.toSet()));
+            if (rp.isEmpty())
+                process.setResponderPartiesXml(null);
+        });
+    }
+
+    @Override
+    public void updateParties(List<Party> partyList, Map<String, String> certificateList) {
+        final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
+        if (pModeArchiveInfo == null)
+            throw new IllegalStateException("Could not update PMode parties: PMode not found!");
+
+        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(pModeArchiveInfo.getId());
+
+        Configuration configuration;
+        try {
+            configuration = pModeProvider.getPModeConfiguration(rawConfiguration.getXml());
+        } catch (XmlProcessingException e) {
+            LOG.error("Error reading current PMode", e);
+            throw new IllegalStateException(e);
+        }
+
+        replaceParties(partyList, configuration);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        String updatedDescription = "Updated parties to version of " + confDate.format(formatter);
+
+        byte[] updatedPmode;
+        try {
+            updatedPmode = pModeProvider.serializePModeConfiguration(configuration);
+            pModeProvider.updatePModes(updatedPmode, updatedDescription);
+        } catch (XmlProcessingException e) {
+            LOG.error("Error writing current PMode", e);
+            throw new IllegalStateException(e);
+        }
+
+        certificateList.entrySet().stream()
+                .filter(pair -> pair.getValue() != null)
+                .forEach(pair -> {
+                    String partyName = pair.getKey();
+                    String certificateContent = pair.getValue();
+                    X509Certificate cert = certificateService.loadCertificateFromString(certificateContent);
+                    multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert, partyName, true);
+        });
+    }
+
+    @Override
+    public List<eu.domibus.api.process.Process> getAllProcesses() {
+        //Retrieve all processes, neede in UI console to be able to check
+        List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("findAllProcesses for pmode");
+            allProcesses.forEach(process -> LOG.debug("     [{}]", process));
+        }
+
+        List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("     party");
+            processes.forEach(party -> LOG.debug("[{}]", party));
+        }
+
+        return processes;
+    }
+
 }

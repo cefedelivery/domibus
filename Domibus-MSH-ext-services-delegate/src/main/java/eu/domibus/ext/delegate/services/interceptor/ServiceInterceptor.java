@@ -1,7 +1,7 @@
 package eu.domibus.ext.delegate.services.interceptor;
 
 import eu.domibus.api.util.AOPUtil;
-import eu.domibus.ext.exceptions.DomibusServiceException;
+import eu.domibus.ext.exceptions.DomibusServiceExtException;
 import eu.domibus.logging.DomibusLogger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public abstract class ServiceInterceptor {
         try {
             final Object proceed = joinPoint.proceed();
             return proceed;
-        } catch (DomibusServiceException e) {
+        } catch (DomibusServiceExtException e) {
             //nothing to convert; re-throw exception
             throw e;
         } catch (Exception e) {

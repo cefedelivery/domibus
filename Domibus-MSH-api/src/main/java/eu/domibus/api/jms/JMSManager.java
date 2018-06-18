@@ -1,6 +1,7 @@
 package eu.domibus.api.jms;
 
 import javax.jms.Queue;
+import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,12 @@ public interface JMSManager {
 
     void sendMessageToQueue(JmsMessage message, Queue destination);
 
+    void sendMapMessageToQueue(JmsMessage message, String destination);
+
+    void sendMapMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMessageToTopic(JmsMessage message, Topic destination);
+
     void deleteMessages(String source, String[] messageIds);
 
     void moveMessages(String source, String destination, String[] messageIds);
@@ -77,4 +84,12 @@ public interface JMSManager {
      * @return a JmsMessage
      */
     JmsMessage consumeMessage(String source, String messageId);
+
+    /**
+     * Return the number of jms messages in the destination.
+     *
+     * @param nameLike patterne representing the name of the destination (EG:%name%)
+     * @return the number of messages contained in the destination.
+     */
+    long getDestinationSize(String nameLike);
 }
