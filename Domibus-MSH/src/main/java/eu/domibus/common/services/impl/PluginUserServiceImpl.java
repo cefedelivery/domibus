@@ -102,6 +102,6 @@ public class PluginUserServiceImpl implements PluginUserService {
         securityAuthenticationDAO.delete(entity);
 
         String userIdentifier = u.getCertificateId() != null ? u.getCertificateId() : u.getUsername();
-        // userDomainService.removeDomainForUser(userIdentifier); // TODO
+        userDomainService.deleteDomainForUser(userIdentifier);
     }
 }
