@@ -1,4 +1,8 @@
 package eu.domibus.core.alerts.dao;
 
-public interface EventDao {
+import eu.domibus.core.alerts.model.persist.Event;
+
+public interface EventDao<E extends > {
+
+
 }

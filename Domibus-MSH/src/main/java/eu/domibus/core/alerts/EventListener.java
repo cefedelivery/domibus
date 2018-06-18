@@ -1,8 +1,6 @@
 package eu.domibus.core.alerts;
 
-import eu.domibus.core.alerts.model.Event;
-
-public interface EventListener<E extends Event> {
+public interface EventListener<E> {
 
     void onEvent(E e);
 }

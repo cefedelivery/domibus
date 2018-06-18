@@ -7,7 +7,7 @@ import org.springframework.jms.annotation.JmsListener;
 
 import javax.jms.JMSException;
 
-public class MessageEventListener implements EventListener<MessageEvent{
+public class MessageEventListener{
 
     private final static Logger LOG = LoggerFactory.getLogger(MessageEventListener.class);
 
@@ -15,7 +15,6 @@ public class MessageEventListener implements EventListener<MessageEvent{
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory",
             destination = "alertMessageQueue",
             selector = "eventType = 'message'")
-    @Override
     public void onEvent(MessageEvent messageEvent){
 
     }

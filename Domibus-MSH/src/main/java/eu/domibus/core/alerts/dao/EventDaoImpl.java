@@ -1,17 +1,33 @@
 package eu.domibus.core.alerts.dao;
 
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.core.alerts.model.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.common.util.AnnotationsUtil;
+import eu.domibus.core.alerts.model.MessageEvent;
+import eu.domibus.core.alerts.model.persist.Event;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class EventDaoImpl<E extends Event> extends BasicDao<E> implements EventDao{
+import java.util.Arrays;
+
+public abstract class EventDaoImpl extends BasicDao<Event>{
 
 
+    @Autowired
+    private AnnotationsUtil annotationsUtil;
     /**
      * @param typeOfT The entity class this DAO provides access to
      */
-    public EventDaoImpl(Class<E> typeOfT) {
+    public EventDaoImpl(Class<Event> typeOfT) {
         super(typeOfT);
     }
+
+    public void save(MessageEvent messageEvent){
+
+    }
+
+    private Event transform(MessageEvent messageEvent){
+        annotationsUtil.getValue()
+        Arrays.stream(messageEvent.getClass().getFields()).map(field -> annotationsUtil.getValue());
+    }
+
+
 }
