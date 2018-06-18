@@ -74,7 +74,6 @@ public class BackendNotificationService {
     @Autowired
     protected SubmissionValidatorListProvider submissionValidatorListProvider;
 
-
     protected List<NotificationListener> notificationListenerServices;
 
     @Resource(name = "routingCriteriaFactories")
@@ -95,7 +94,6 @@ public class BackendNotificationService {
 
     @Autowired
     private DomainCoreConverter coreConverter;
-
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
