@@ -1,7 +1,7 @@
 package eu.domibus.ext.web.interceptor;
 
-import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.services.AuthenticationService;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
+import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +20,16 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
     private static final Logger LOG = DomibusLoggerFactory.getLogger(AuthenticationInterceptor.class);
 
     @Autowired
-    AuthenticationService authenticationService;
+    AuthenticationExtService authenticationExtService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         LOG.debug("Intercepted request for " + request.getRequestURI());
 
         try {
-            authenticationService.authenticate(request);
+            authenticationExtService.authenticate(request);
             return  true;
-        } catch (AuthenticationException e) {
+        } catch (AuthenticationExtException e) {
             response.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
             return false;
         }

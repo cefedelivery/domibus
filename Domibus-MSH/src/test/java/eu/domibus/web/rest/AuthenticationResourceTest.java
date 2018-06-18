@@ -1,7 +1,10 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.multitenancy.*;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -18,7 +21,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.scheduling.SchedulingTaskExecutor;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,9 +36,6 @@ public class AuthenticationResourceTest {
 
     @Injectable
     AuthenticationService authenticationService;
-
-    @Injectable
-    SchedulingTaskExecutor taskExecutor;
 
     @Injectable
     UserDomainDao userDomainDao;

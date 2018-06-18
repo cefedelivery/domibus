@@ -99,7 +99,7 @@ public class FSFilesManagerTest {
         
         Assert.assertNotNull(result);
         Assert.assertTrue(result.exists());
-        Assert.assertEquals(result.getType(), FileType.FOLDER);
+        Assert.assertEquals(FileType.FOLDER, result.getType());
     }
 
     @Test(expected = FSSetUpException.class)

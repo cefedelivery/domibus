@@ -1,6 +1,7 @@
 package eu.domibus.api.jms;
 
 import javax.jms.Queue;
+import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,16 @@ public interface JMSManager {
     List<JmsMessage> browseMessages(String source);
 
     /**
+     * Operation to browse a JMS source with restrictions given by the selector.
+     *
+     * @param source   queue or topic
+     * @param selector selector
+     * @return a list of JmsMessage
+     */
+    List<JmsMessage> browseMessages(String source, String selector);
+
+
+    /**
      * Operation to browse a JMS source with restrictions given by the parameters.
      *
      * @param source   queue or topic
@@ -54,6 +65,12 @@ public interface JMSManager {
     void sendMessageToQueue(JmsMessage message, String destination);
 
     void sendMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMapMessageToQueue(JmsMessage message, String destination);
+
+    void sendMapMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMessageToTopic(JmsMessage message, Topic destination);
 
     void deleteMessages(String source, String[] messageIds);
 

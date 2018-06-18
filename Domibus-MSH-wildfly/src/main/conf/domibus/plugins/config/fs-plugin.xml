@@ -83,17 +83,4 @@
         <property name="jobDetail" ref="fsPluginSendMessagesWorkerJob"/>
         <property name="repeatInterval" value="${fsplugin.messages.send.worker.repeatInterval}"/>
     </bean>
-
-    <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="fsPluginTriggerList" class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list>
-                <ref bean="fsPluginPurgeSentWorkerTrigger"/>
-                <ref bean="fsPluginPurgeFailedWorkerTrigger"/>
-                <ref bean="fsPluginPurgeReceivedWorkerTrigger"/>
-                <ref bean="fsPluginSendMessagesWorkerTrigger"/>
-            </list>
-        </property>
-    </bean>
-
 </beans>

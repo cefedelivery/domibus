@@ -451,35 +451,6 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     }
 
     /**
-     * To be used to browse all the messages of a specific queue. It works also in a cluster.
-     *
-     * @param source
-     * @return
-     */
-    @Override
-    public List<InternalJmsMessage> browseMessages(String source) {
-        List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        final String sourceWithoutJMSModule = removeJmsModule(source);
-        List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
-        for (InternalJMSDestination destination : destinations) {
-            String destinationType = destination.getType();
-            if (QUEUE.equals(destinationType)) {
-                Map<String, Object> criteria = new HashMap<>();
-                String selector = jmsSelectorUtil.getSelector(criteria);
-                try {
-                    ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
-                    internalJmsMessages.addAll(getMessagesFromDestination(jmsDestination, selector));
-                } catch (Exception e) {
-                    throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-                }
-            } else {
-                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
-            }
-        }
-        return internalJmsMessages;
-    }
-
-    /**
      * To be used to browse messages for a specific queue and respecting certain criteria.
      *
      * @param source
