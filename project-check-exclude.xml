@@ -2,8 +2,9 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
     <suppress>
         <notes><![CDATA[
-      This suppresses the checks for any file name: domibus-ext-services-delegate-*.jar
-      ]]></notes>
+                This suppresses the checks for any file named: domibus-ext-services-delegate-*.jar
+                ]]>
+        </notes>
         <gav regex="true">^eu\.domibus:domibus-ext-services-delegate:.*$</gav>
         <cpe>cpe:/a:delegate:delegate</cpe>
     </suppress>
