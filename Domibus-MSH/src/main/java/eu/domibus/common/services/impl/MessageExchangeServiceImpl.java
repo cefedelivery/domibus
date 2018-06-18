@@ -1,9 +1,9 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -35,24 +35,20 @@ import eu.domibus.pki.PolicyService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
-import static eu.domibus.common.services.impl.PullContext.*;
+import static eu.domibus.common.services.impl.PullContext.MPC;
+import static eu.domibus.common.services.impl.PullContext.PMODE_KEY;
 
 /**
  * @author Thomas Dussart
@@ -82,7 +78,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private Queue pullMessageQueue;
 
     @Autowired
-    private JmsTemplate jmsPullTemplate;
+    protected JMSManager jmsManager;
 
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
@@ -111,8 +107,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private PullMessageService pullMessageService;
 
-    @Autowired
-    private JMSManager jmsManager;
 
     /**
      * {@inheritDoc}
@@ -183,22 +177,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(messageExchangeConfiguration.toString());
                         }
-                        final Map<String, String> map = Maps.newHashMap();
-                        map.put(MPC, mpcQualifiedName);
-                        map.put(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey());
-                        map.put(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()));
-                        MessagePostProcessor postProcessor = new MessagePostProcessor() {
-                            public Message postProcessMessage(Message message) throws JMSException {
-                                message.setStringProperty(MPC, map.get(MPC));
-                                message.setStringProperty(PMODE_KEY, map.get(PMODE_KEY));
-                                message.setStringProperty(NOTIFY_BUSINNES_ON_ERROR, map.get(NOTIFY_BUSINNES_ON_ERROR));
-                                return message;
-                            }
-                        };
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-                            jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
+                            jmsManager.sendMessageToQueue(JMSMessageBuilder.create()
+                                    .property(MPC, mpcQualifiedName)
+                                    .property(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey())
+                                    .property(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()))
+                                    .build(), pullMessageQueue);
                         }
 
                     }

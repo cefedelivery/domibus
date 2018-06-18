@@ -70,7 +70,7 @@ public class CachingPModeProvider extends PModeProvider {
             final List<Process> pullProcessByMpc = processDao.findPullProcessByMpc(qualifiedName);
             pullProcessByMpcCache.put(qualifiedName, pullProcessByMpc);
         }
-        final Set<Process> processes = this.configuration.getBusinessProcesses().getProcesses();
+        final List<Process> processes = this.configuration.getBusinessProcesses().getProcesses();
         Set<Party> initiators = new HashSet<>();
         for (Process process : processes) {
             initiators.addAll(process.getInitiatorParties());

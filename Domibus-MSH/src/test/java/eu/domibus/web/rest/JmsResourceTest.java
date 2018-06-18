@@ -44,10 +44,10 @@ public class JmsResourceTest {
     private DomibusConfigurationService domibusConfigurationService;
 
     @Injectable
-    private DomainContextProvider domainContextProvider;
+    private AuthUtils authUtils;
 
     @Injectable
-    private AuthUtils authUtils;
+    private DomainContextProvider domainContextProvider;
 
     @Test
     public void testDestinations() {

@@ -1,6 +1,9 @@
 package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomainExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -72,7 +75,13 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     
     @Autowired
     private FSPluginProperties fsPluginProperties;
-    
+
+    @Autowired
+    private DomibusConfigurationExtService domibusConfigurationExtService;
+
+    @Autowired
+    private DomainContextExtService domainContextExtService;
+
     private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
     /**
@@ -123,13 +132,22 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         //extract final recipient
         final String finalRecipient = getFinalRecipient(fsMessage.getMetadata());
         if (StringUtils.isBlank(finalRecipient)) {
-            throw new FSPluginException("Unable to extract finalRecipinet from message " + messageId);
+            throw new FSPluginException("Unable to extract finalRecipient from message " + messageId);
         }
         final String finalRecipientFolder = sanitizeFileName(finalRecipient);
 
+        // get multiTenantAware
+        boolean multiTenantAware = domibusConfigurationExtService.isMultiTenantAware();
+
+        // get domain info
+        String domain;
+        if(multiTenantAware) {
+            domain = domainContextExtService.getCurrentDomain().getCode();
+        } else {
+            domain = resolveDomain(fsMessage);
+        }
 
         // Persist message
-        String domain = resolveDomain(fsMessage);
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
              FileObject incomingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
              FileObject incomingFolderByRecipient = fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
@@ -290,7 +308,7 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } else {
             // This might occur when the destination host is unreachable
             content = "Error detail information is not available";
-            LOG.error(String.format("%s for [%s]", content, errorFileName));
+            LOG.error("{} for [{}]", content, errorFileName);
         }
         fsFilesManager.createFile(failedDirectory, errorFileName, content);
     }
@@ -360,10 +378,22 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     @Override
     public void messageStatusChanged(MessageStatusChangeEvent event) {
         String messageId = event.getMessageId();
-        Map<String, Object> properties = event.getProperties();
-        String service = (String) properties.get("service");
-        String action = (String) properties.get("action");
-        String domain = resolveDomain(service, action);
+
+        // get multiTenantAware
+        boolean multiTenantAware = domibusConfigurationExtService.isMultiTenantAware();
+
+        // get domain info
+        String domain;
+        if(multiTenantAware) {
+            domain = domainContextExtService.getCurrentDomain().getCode();
+        } else {
+
+            Map<String, Object> properties = event.getProperties();
+            String service = (String) properties.get("service");
+            String action = (String) properties.get("action");
+
+            domain = resolveDomain(service, action);
+        }
 
         LOG.debug("Message [{}] changed status from [{}] to [{}] in domain [{}]",
                 messageId, event.getFromStatus(), event.getToStatus(), domain);

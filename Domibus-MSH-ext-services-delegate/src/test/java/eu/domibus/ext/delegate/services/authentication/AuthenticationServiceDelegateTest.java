@@ -1,7 +1,6 @@
 package eu.domibus.ext.delegate.services.authentication;
 
-import eu.domibus.ext.delegate.services.authentication.AuthenticationServiceDelegate;
-import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -35,7 +34,7 @@ public class AuthenticationServiceDelegateTest {
     }
 
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = AuthenticationExtException.class)
     public void testAuthenticateWhenAuthenticationExceptionIsRaised(@Injectable final HttpServletRequest httpRequest) throws Exception {
         new Expectations(messageAcknowledgeServiceDelegate) {{
             authenticationService.authenticate(httpRequest);

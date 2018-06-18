@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.common.dao;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -35,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import javax.jms.Topic;
 import javax.persistence.EntityManagerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -46,6 +48,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Cosmin Baciu
@@ -122,6 +125,16 @@ public class PModeDaoTestIT {
         }
 
         @Bean
+        public JMSManager jmsManager() {
+            return Mockito.mock(JMSManager.class);
+        }
+
+        @Bean
+        public Topic clusterCommandTopic() {
+            return Mockito.mock(Topic.class);
+        }
+
+        @Bean
         public PartyDao partyDao() {
             return Mockito.mock(PartyDao.class);
         }
@@ -157,6 +170,9 @@ public class PModeDaoTestIT {
     PModeDao pModeDao;
 
     @Autowired
+    DomainContextProvider domainContextProvider;
+
+    @Autowired
     XMLUtil xmlUtil;
 
     @Autowired
@@ -172,11 +188,15 @@ public class PModeDaoTestIT {
     public void resetMocks() {
         Mockito.reset(configurationDAO);
         Mockito.reset(configurationRawDAO);
+
+        when(domainContextProvider.getCurrentDomain()).thenReturn(DomainService.DEFAULT_DOMAIN);
     }
 
 
     @Test
     public void testUpdatePModeWithPmodeContainingWhiteSpace() throws Exception {
+
+
         InputStream xmlStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-with-whitespaces.xml");
         byte[] pModeBytes = IOUtils.toByteArray(xmlStream);
         UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, new ByteArrayInputStream(pModeBytes), null);

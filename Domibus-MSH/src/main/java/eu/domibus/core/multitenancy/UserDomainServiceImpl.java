@@ -38,7 +38,7 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Autowired
     protected UserDao userDao;
-
+ 
     @Autowired
     protected UserConverter userConverter;
 
@@ -126,6 +126,16 @@ public class UserDomainServiceImpl implements UserDomainService {
 
         domainTaskExecutor.submit(() -> {
             userDomainDao.setPreferredDomainByUser(user, domainCode);
+            return null;
+        });
+    }
+
+    @Override
+    public void deleteDomainForUser(String user) {
+        LOG.debug("Deleting domain for user [{}]", user);
+
+        domainTaskExecutor.submit(() -> {
+            userDomainDao.deleteDomainByUser(user);
             return null;
         });
     }

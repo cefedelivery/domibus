@@ -50,10 +50,6 @@ public class RetryService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    @Qualifier("jmsTemplateDispatch")
-    private JmsOperations jmsOperations;
-
-    @Autowired
     @Qualifier("sendMessageQueue")
     private Queue dispatchQueue;
 

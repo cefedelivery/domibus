@@ -4,7 +4,7 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.util.AOPUtil;
 import eu.domibus.ext.domain.MessageAcknowledgementDTO;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.exceptions.MessageAcknowledgeException;
+import eu.domibus.ext.exceptions.MessageAcknowledgeExtException;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -42,7 +42,7 @@ public class MessageAcknowledgeServiceInterceptorTest {
 
     @Test
     public void testInterceptWhenExtExceptionIsRaised(@Injectable final ProceedingJoinPoint joinPoint) throws Throwable {
-        final MessageAcknowledgeException messageAcknowledgeException = new MessageAcknowledgeException(DomibusErrorCode.DOM_001, "test");
+        final MessageAcknowledgeExtException messageAcknowledgeException = new MessageAcknowledgeExtException(DomibusErrorCode.DOM_001, "test");
         new Expectations() {{
             joinPoint.proceed();
             result = messageAcknowledgeException;
@@ -50,7 +50,7 @@ public class MessageAcknowledgeServiceInterceptorTest {
 
         try {
             messageAcknowledgeServiceInterceptor.intercept(joinPoint);
-        } catch (MessageAcknowledgeException e) {
+        } catch (MessageAcknowledgeExtException e) {
             //the thrown exception object must be the same as the original exception raised(no mapping is needed)
             Assert.assertTrue(messageAcknowledgeException == e);
         }
@@ -66,7 +66,7 @@ public class MessageAcknowledgeServiceInterceptorTest {
 
         try {
             messageAcknowledgeServiceInterceptor.intercept(joinPoint);
-        } catch (MessageAcknowledgeException e) {
+        } catch (MessageAcknowledgeExtException e) {
             //the thrown exception object must be the same as the original exception raised(no mapping is needed)
             Assert.assertTrue(e.getCause() == messageAcknowledgeException);
         }
