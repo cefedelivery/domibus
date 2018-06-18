@@ -2,7 +2,6 @@ package eu.domibus.common;
 
 /**
  * @author Christian Koch, Stefan Mueller
- * @version 1.0
  * @since 3.0
  */
 public enum ErrorCode {

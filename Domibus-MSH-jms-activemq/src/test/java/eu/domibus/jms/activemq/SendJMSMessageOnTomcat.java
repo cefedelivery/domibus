@@ -22,6 +22,9 @@ public class SendJMSMessageOnTomcat {
             MapMessage messageMap = session.createMapMessage();
 
             // Declare message as submit
+            messageMap.setStringProperty("username", "plugin_admin");
+            messageMap.setStringProperty("password", "123456");
+
             messageMap.setStringProperty("messageType", "submitMessage");
             messageMap.setStringProperty("messageId", UUID.randomUUID().toString());
             // Uncomment to test refToMessageId that is too long, i.e. > 255

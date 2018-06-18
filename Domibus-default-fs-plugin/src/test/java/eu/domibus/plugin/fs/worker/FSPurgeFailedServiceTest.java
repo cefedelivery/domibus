@@ -1,12 +1,11 @@
 package eu.domibus.plugin.fs.worker;
 
-import java.io.IOException;
-import java.util.Collections;
-
-import javax.xml.bind.JAXBException;
-
+import eu.domibus.ext.services.DomibusConfigurationExtService;
+import eu.domibus.plugin.fs.FSFilesManager;
+import eu.domibus.plugin.fs.FSPluginProperties;
+import eu.domibus.plugin.fs.exception.FSSetUpException;
 import mockit.*;
-
+import mockit.integration.junit4.JMockit;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -16,11 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.fs.FSFilesManager;
-import eu.domibus.plugin.fs.FSPluginProperties;
-import eu.domibus.plugin.fs.exception.FSSetUpException;
-import mockit.integration.junit4.JMockit;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Collections;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -37,13 +34,19 @@ public class FSPurgeFailedServiceTest {
     @Injectable
     private FSFilesManager fsFilesManager;
 
+    @Injectable
+    private FSMultiTenancyService fsMultiTenancyService;
+
+    @Injectable
+    private DomibusConfigurationExtService domibusConfigurationExtService;
+
     private FileObject rootDir;
     private FileObject failedFolder;
     private FileObject oldFile;
     private FileObject recentFile;
 
     @Before
-    public void setUp() throws FileSystemException, IOException, JAXBException {
+    public void setUp() throws IOException {
         String location = "ram:///FSPurgeFailedServiceTest";
 
         FileSystemManager fsManager = VFS.getManager();
@@ -69,7 +72,7 @@ public class FSPurgeFailedServiceTest {
     }
 
     @Test
-    public void testPurgeMessages() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+    public void testPurgeMessages() throws FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
             result = Collections.emptyList();
@@ -95,8 +98,11 @@ public class FSPurgeFailedServiceTest {
     }
 
     @Test
-    public void testPurgeMessages_Domain1_BadConfiguration() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+    public void testPurgeMessages_Domain1_BadConfiguration() throws FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
+            fsMultiTenancyService.verifyDomainExists("DOMAIN1");
+            result = true;
+
             fsPluginProperties.getDomains();
             result = Collections.singletonList("DOMAIN1");
 

@@ -1,31 +1,31 @@
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package eu.domibus.plugin.jms;
 
 
+import eu.domibus.ext.domain.DomainDTO;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
 import javax.activation.URLDataSource;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Locale;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -35,28 +35,20 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * This class is responsible for transformations from {@link javax.jms.MapMessage} to {@link eu.domibus.plugin.Submission} and vice versa
  *
  * @author Padraig McGourty, Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 
 
-public class JMSMessageTransformer
-        implements MessageRetrievalTransformer<MapMessage>, MessageSubmissionTransformer<MapMessage> {
+@Service
+public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMessage>, MessageSubmissionTransformer<MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSMessageTransformer.class);
 
-    /**
-     * The default properties to be used
-     */
+    @Autowired
+    protected DomibusPropertyExtService domibusPropertyExtService;
 
-    private Properties properties;
-
-    public JMSMessageTransformer(){
-        properties=new Properties();
-    }
-
-    public JMSMessageTransformer(String defaultProperties) throws IOException {
-        properties=new Properties();
-        properties.load(new FileReader(defaultProperties));
-    }
+    @Autowired
+    protected DomainContextExtService domainContextExtService;
 
     /**
      * Transforms {@link eu.domibus.plugin.Submission} to {@link javax.jms.MapMessage}
@@ -115,7 +107,7 @@ public class JMSMessageTransformer
                 }
             }
 
-            final boolean putAttachmentsInQueue = Boolean.parseBoolean(properties.getProperty(PUT_ATTACHMENTS_IN_QUEUE, "true"));
+            final boolean putAttachmentsInQueue = Boolean.parseBoolean(getProperty(PUT_ATTACHMENTS_IN_QUEUE, "true"));
             for (final Submission.Payload p : submission.getPayloads()) {
                 transformFromSubmissionHandlePayload(messageOut, putAttachmentsInQueue, counter, p);
                 counter++;
@@ -129,9 +121,19 @@ public class JMSMessageTransformer
         return messageOut;
     }
 
+    protected String getProperty(String propertyName) {
+        return getProperty(propertyName, null);
+    }
+
+    protected String getProperty(String propertyName, String defaultValue) {
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+        return domibusPropertyExtService.getDomainProperty(currentDomain, JMS_PLUGIN_PROPERTY_PREFIX + "." + propertyName, defaultValue);
+    }
+
+
     private void transformFromSubmissionHandlePayload(MapMessage messageOut, boolean putAttachmentsInQueue, int counter, Submission.Payload p) throws JMSException, IOException {
         if (p.isInBody()) {
-            if(p.getPayloadDatahandler() != null) {
+            if (p.getPayloadDatahandler() != null) {
                 messageOut.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
             }
 
@@ -146,7 +148,7 @@ public class JMSMessageTransformer
             final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, counter));
             final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, counter));
             final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, counter));
-            if(p.getPayloadDatahandler() != null ) {
+            if (p.getPayloadDatahandler() != null) {
                 if (putAttachmentsInQueue) {
                     LOG.debug("putAttachmentsInQueue is true");
                     messageOut.setBytes(propPayload, IOUtils.toByteArray(p.getPayloadDatahandler().getInputStream()));
@@ -197,34 +199,34 @@ public class JMSMessageTransformer
 
             target.setFromRole(trim(messageIn.getStringProperty(FROM_ROLE)));
             if (isEmpty(target.getFromRole())) {
-                target.setFromRole(properties.getProperty(FROM_ROLE));
+                target.setFromRole(getProperty(FROM_ROLE));
             }
 
             setTargetToPartyIdAndToPartyType(messageIn, target);
 
             target.setToRole(trim(messageIn.getStringProperty(TO_ROLE)));
             if (isEmpty(target.getToRole())) {
-                target.setToRole(properties.getProperty(TO_ROLE));
+                target.setToRole(getProperty(TO_ROLE));
             }
 
             target.setAction(trim(messageIn.getStringProperty(ACTION)));
             if (isEmpty(target.getAction())) {
-                target.setAction(properties.getProperty(ACTION));
+                target.setAction(getProperty(ACTION));
             }
 
             target.setService(trim(messageIn.getStringProperty(SERVICE)));
             if (isEmpty(target.getService())) {
-                target.setService(properties.getProperty(SERVICE));
+                target.setService(getProperty(SERVICE));
             }
 
             target.setServiceType(trim(messageIn.getStringProperty(SERVICE_TYPE)));
             if (isEmpty(target.getServiceType())) {
-                target.setServiceType(properties.getProperty(SERVICE_TYPE));
+                target.setServiceType(getProperty(SERVICE_TYPE));
             }
 
             target.setAgreementRef(trim(messageIn.getStringProperty(AGREEMENT_REF)));
             if (isEmpty(target.getAgreementRef())) {
-                target.setAgreementRef(properties.getProperty(AGREEMENT_REF));
+                target.setAgreementRef(getProperty(AGREEMENT_REF));
             }
 
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
@@ -249,10 +251,7 @@ public class JMSMessageTransformer
             target.setRefToMessageId(trim(messageIn.getStringProperty(REF_TO_MESSAGE_ID)));
 
             final int numPayloads = messageIn.getIntProperty(TOTAL_NUMBER_OF_PAYLOADS);
-            String bodyloadEnabled = trim(messageIn.getStringProperty(JMSMessageConstants.P1_IN_BODY));
-            if (isEmpty(bodyloadEnabled)) {
-                bodyloadEnabled = properties.getProperty(P1_IN_BODY);
-            }
+
 
             Enumeration<String> allProps = messageIn.getPropertyNames();
             while (allProps.hasMoreElements()) {
@@ -263,7 +262,7 @@ public class JMSMessageTransformer
             }
 
             for (int i = 1; i <= numPayloads; i++) {
-                transformToSubmissionHandlePayload(messageIn, target, bodyloadEnabled, i);
+                transformToSubmissionHandlePayload(messageIn, target, i);
             }
         } catch (final JMSException ex) {
             LOG.error("Error while getting properties from MapMessage", ex);
@@ -275,12 +274,12 @@ public class JMSMessageTransformer
     private void setTargetToPartyIdAndToPartyType(MapMessage messageIn, Submission target) throws JMSException {
         String toPartyID = trim(messageIn.getStringProperty(TO_PARTY_ID));
         if (isEmpty(toPartyID)) {
-            toPartyID = properties.getProperty(TO_PARTY_ID);
+            toPartyID = getProperty(TO_PARTY_ID);
         }
 
         String toPartyType = trim(messageIn.getStringProperty(TO_PARTY_TYPE));
         if (isEmpty(toPartyType)) {
-            toPartyType = properties.getProperty(TO_PARTY_TYPE);
+            toPartyType = getProperty(TO_PARTY_TYPE);
         }
         target.addToParty(toPartyID, toPartyType);
     }
@@ -288,17 +287,17 @@ public class JMSMessageTransformer
     private void setTargetFromPartyIdAndFromPartyType(MapMessage messageIn, Submission target) throws JMSException {
         String fromPartyID = trim(messageIn.getStringProperty(FROM_PARTY_ID));
         if (isEmpty(fromPartyID)) {
-            fromPartyID = properties.getProperty(FROM_PARTY_ID);
+            fromPartyID = getProperty(FROM_PARTY_ID);
         }
 
         String fromPartyType = trim(messageIn.getStringProperty(FROM_PARTY_TYPE));
         if (isEmpty(fromPartyType)) {
-            fromPartyType = properties.getProperty(FROM_PARTY_TYPE);
+            fromPartyType = getProperty(FROM_PARTY_TYPE);
         }
         target.addFromParty(fromPartyID, fromPartyType);
     }
 
-    private void transformToSubmissionHandlePayload(MapMessage messageIn, Submission target, String bodyloadEnabled, int i) throws JMSException {
+    private void transformToSubmissionHandlePayload(MapMessage messageIn, Submission target, int i) throws JMSException {
         final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, i));
 
         final String contentId;
@@ -333,9 +332,8 @@ public class JMSMessageTransformer
                 throw new IllegalArgumentException(propPayload + " neither available as byte[] or URL, aborting transformation");
             }
         }
-        boolean inBody = (i == 1 && "true".equalsIgnoreCase(bodyloadEnabled));
 
-        String descriptionLanguage = trim(properties.getProperty(DESCRIPTION_LANGUAGE));
+        String descriptionLanguage = trim(getProperty(DESCRIPTION_LANGUAGE));
         Locale descriptionLocale = Locale.getDefault();
         if (!isEmpty(descriptionLanguage)) {
             try {
@@ -344,6 +342,7 @@ public class JMSMessageTransformer
                 LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
             }
         }
-        target.addPayload(contentId, payloadDataHandler, partProperties, inBody, new Submission.Description(descriptionLocale, description), null);
+        target.addPayload(contentId, payloadDataHandler, partProperties, false, new Submission.Description(descriptionLocale, description), null);
     }
+
 }
