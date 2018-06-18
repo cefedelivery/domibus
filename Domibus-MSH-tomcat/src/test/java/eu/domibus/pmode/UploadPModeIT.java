@@ -245,11 +245,7 @@ public class UploadPModeIT extends AbstractIT {
             UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
             Configuration configuration = unmarshallerResult.getResult();
 
-             Files.write(bytes, new File("/Users/pion/temp2.xml"));
-
             byte[] x2 = pModeProvider.serializePModeConfiguration(configuration);
-
-            Files.write(x2, new File("/Users/pion/temp4.xml"));
 
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
