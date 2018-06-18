@@ -59,7 +59,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   private initColumns () {
     this.columnPickerBasic.allColumns = [
-      {name: 'Username', prop: 'username', width: 20},
+      {name: 'User Name', prop: 'username', width: 20},
       {name: 'Password', prop: 'hiddenPassword', width: 20},
       {name: 'Role', prop: 'authRoles', width: 10},
       {name: 'Original User', prop: 'originalUser', width: 240},
