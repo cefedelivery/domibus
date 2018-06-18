@@ -23,4 +23,5 @@ public interface DomibusConfigurationService {
     boolean isMultiTenantAware();
 
     boolean useProxy();
+
 }

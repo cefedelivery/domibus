@@ -21,6 +21,10 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DefaultDomibusConfigurationService.class);
 
+    private static final String DATABASE_DIALECT = "domibus.entityManagerFactory.jpaProperty.hibernate.dialect";
+
+    private DataBaseEngine dataBaseEngine;
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 

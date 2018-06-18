@@ -40,6 +40,16 @@ public interface JMSManager {
     List<JmsMessage> browseMessages(String source);
 
     /**
+     * Operation to browse a JMS source with restrictions given by the selector.
+     *
+     * @param source   queue or topic
+     * @param selector selector
+     * @return a list of JmsMessage
+     */
+    List<JmsMessage> browseMessages(String source, String selector);
+
+
+    /**
      * Operation to browse a JMS source with restrictions given by the parameters.
      *
      * @param source   queue or topic
@@ -67,4 +77,12 @@ public interface JMSManager {
      * @return a JmsMessage
      */
     JmsMessage consumeMessage(String source, String messageId);
+
+    /**
+     * Return the number of jms messages in the destination.
+     *
+     * @param nameLike patterne representing the name of the destination (EG:%name%)
+     * @return the number of messages contained in the destination.
+     */
+    long getDestinationSize(String nameLike);
 }

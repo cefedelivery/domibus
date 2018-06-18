@@ -11,7 +11,7 @@ RUN apt-get update
 RUN apt-get install -y wget
 RUN apt-get install unzip
 
-RUN wget https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eDelivery/content/eu/domibus/domibus-MSH/$DOMIBUS_VERSION/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip \
+RUN wget https://ec.europa.eu/cefdigital/artifact/content/repositories/public/eu/domibus/domibus-MSH/$DOMIBUS_VERSION/domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip \
     && unzip  -d $SQL_SCRIPTS_HOME domibus-MSH-$DOMIBUS_VERSION-sql-scripts.zip
 
 RUN cp $SQL_SCRIPTS_HOME/sql-scripts/mysql5innoDb-$DOMIBUS_VERSION$DOMIBUS_VERSION_MINOR.ddl /docker-entrypoint-initdb.d/mysql5innoDb-$DOMIBUS_VERSION$DOMIBUS_VERSION_MINOR.sql

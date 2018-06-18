@@ -1,5 +1,6 @@
 package eu.domibus.quartz;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -12,7 +13,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.matchers.GroupMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -42,6 +42,9 @@ public class DomibusQuartzStarterTest {
 
     @Injectable
     protected DomainService domainService;
+
+    @Injectable
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Injectable
     protected Scheduler scheduler;
