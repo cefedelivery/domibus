@@ -125,7 +125,7 @@ public abstract class PModeProvider {
         return this.configurationRawDAO.getDetailedConfigurationRaw();
     }
 
-    public UnmarshallerResult parsePMode(byte[] bytes) throws XmlProcessingException {
+    protected UnmarshallerResult parsePMode(byte[] bytes) throws XmlProcessingException {
         //unmarshall the PMode with whitespaces ignored
         UnmarshallerResult unmarshalledConfigurationWithWhiteSpacesIgnored = unmarshall(bytes, true);
 
@@ -140,6 +140,7 @@ public abstract class PModeProvider {
         return  unmarshall(bytes, false);
 
     }
+
     public Configuration getPModeConfiguration(byte[] bytes) throws XmlProcessingException {
         final UnmarshallerResult unmarshallerResult = parsePMode(bytes);
         return unmarshallerResult.getResult();
@@ -202,6 +203,20 @@ public abstract class PModeProvider {
             throw new XmlProcessingException("Error unmarshalling the PMode: could not process the PMode file");
         }
         return unmarshallerResult;
+    }
+
+    public byte[] serializePModeConfiguration(Configuration configuration) throws XmlProcessingException {
+
+        InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+
+        byte[] serializedPMode;
+        try {
+            serializedPMode = xmlUtil.marshal(jaxbContext, configuration, xsdStream);
+        } catch (JAXBException | SAXException | ParserConfigurationException | XMLStreamException e) {
+            LOG.error("Error marshalling the PMode", e);
+            throw new XmlProcessingException("Error marshalling the PMode: " + e.getMessage(), e);
+        }
+        return serializedPMode;
     }
 
     @Transactional(propagation = Propagation.REQUIRED, noRollbackFor = IllegalStateException.class)

@@ -25,17 +25,4 @@ public interface ReliabilityService {
      */
     void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 
-
-    /**
-     * Method supposed to be called after the receive of the pull request receipt.
-     * It will handle the notifications and increase of messages attempts.
-     * In the case of a pull request, the transaction that handle the reliability should also remove the raw message saved in order to validate
-     * the non repudiation message.
-     *
-     * @param messageId
-     * @param reliabilityCheckSuccessful
-     * @param isOk
-     * @param legConfiguration
-     */
-    void handlePullReceiptReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 }

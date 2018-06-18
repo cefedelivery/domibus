@@ -5,7 +5,11 @@ package eu.domibus.core.party;
  * @since 4.0
  */
 public class IdentifierRo {
+
+
     private String partyId;
+
+    private PartyIdTypeRo partyIdType;
 
     public String getPartyId() {
         return partyId;
@@ -13,5 +17,13 @@ public class IdentifierRo {
 
     public void setPartyId(String partyId) {
         this.partyId = partyId;
+    }
+
+    public PartyIdTypeRo getPartyIdType() {
+        return partyIdType;
+    }
+
+    public void setPartyIdType(PartyIdTypeRo partyIdType) {
+        this.partyIdType = partyIdType;
     }
 }

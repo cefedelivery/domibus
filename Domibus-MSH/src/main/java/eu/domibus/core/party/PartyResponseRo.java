@@ -28,6 +28,8 @@ public class PartyResponseRo {
 
     private List<ProcessRo> processesWithPartyAsResponder =new ArrayList<>();
 
+    protected String certificateContent;
+
     public Set<IdentifierRo> getIdentifiers() {
         return identifiers;
     }
@@ -98,5 +100,12 @@ public class PartyResponseRo {
 
     public void setProcessesWithPartyAsResponder(List<ProcessRo> processesWithPartyAsResponder) {
         this.processesWithPartyAsResponder = processesWithPartyAsResponder;
+    }
+
+    public String getCertificateContent() {
+        return certificateContent;
+    }
+    public void setCertificateContent(String certificateContent) {
+        this.certificateContent = certificateContent;
     }
 }

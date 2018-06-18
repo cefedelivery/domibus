@@ -261,10 +261,10 @@ public class CachingPModeProviderTest {
     @Test
     public void testRetrievePullProcessBasedOnInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
         configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
-        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Set<Party> parties = new HashSet<>(configuration.getBusinessProcesses().getParties());
         final Party red_gw = getPartyByName(parties, "red_gw");
         final Party blue_gw = getPartyByName(parties, "blue_gw");
-        final Set<Process> processes = configuration.getBusinessProcesses().getProcesses();
+        final Set<Process> processes = new HashSet<>(configuration.getBusinessProcesses().getProcesses());
         final Collection<Process> filter = Collections2.filter(processes, new Predicate<Process>() {
             @Override
             public boolean apply(Process process) {
@@ -297,7 +297,7 @@ public class CachingPModeProviderTest {
     @Test
     public void testRetrievePullProcessBasedOnPartyNotInInitiator() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException {
         configuration = loadSamplePModeConfiguration(PULL_PMODE_CONFIG_URI);
-        final Set<Party> parties = configuration.getBusinessProcesses().getParties();
+        final Set<Party> parties = new HashSet<>(configuration.getBusinessProcesses().getParties());
         final Party white_gw = getPartyByName(parties, "white_gw");
         new Expectations() {{
             configurationDAO.configurationExists();
@@ -539,7 +539,7 @@ public class CachingPModeProviderTest {
         Assert.assertNull(agreementRef);
     }
 
-    private Process getTestProcess(Set<Process> processes) {
+    private Process getTestProcess(Collection<Process> processes) {
         for(Process process : processes) {
             if(process.getName().equals("testService")) {
                 return process;

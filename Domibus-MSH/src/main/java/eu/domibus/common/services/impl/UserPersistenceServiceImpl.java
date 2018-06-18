@@ -25,7 +25,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
+ * @since 4.0
  */
 @Service
 public class UserPersistenceServiceImpl implements UserPersistenceService {
