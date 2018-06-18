@@ -3,19 +3,25 @@ package eu.domibus.plugin.jms;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
+import eu.domibus.ext.domain.DomainDTO;
+import eu.domibus.ext.domain.JmsMessageDTO;
+import eu.domibus.ext.exceptions.DomibusPropertyExtException;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
+import eu.domibus.ext.services.JMSExtService;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.jms.core.MessageCreator;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
@@ -34,21 +40,25 @@ import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
 public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendJMSImpl.class);
+
+    protected static final String JMSPLUGIN_QUEUE_REPLY = "jmsplugin.queue.reply";
+    protected static final String JMSPLUGIN_QUEUE_CONSUMER_NOTIFICATION_ERROR = "jmsplugin.queue.consumer.notification.error";
+    protected static final String JMSPLUGIN_QUEUE_PRODUCER_NOTIFICATION_ERROR = "jmsplugin.queue.producer.notification.error";
+    protected static final String JMSPLUGIN_QUEUE_OUT = "jmsplugin.queue.out";
+
     @Autowired
-    @Qualifier(value = "replyJmsTemplate")
-    private JmsOperations replyJmsTemplate;
+    protected JMSExtService jmsExtService;
+
+    @Autowired
+    protected DomibusPropertyExtService domibusPropertyExtService;
+
+    @Autowired
+    protected DomainContextExtService domainContextExtService;
 
     @Autowired
     @Qualifier(value = "mshToBackendTemplate")
     private JmsOperations mshToBackendTemplate;
 
-    @Autowired
-    @Qualifier(value = "errorNotifyConsumerTemplate")
-    private JmsOperations errorNotifyConsumerTemplate;
-
-    @Autowired
-    @Qualifier(value = "errorNotifyProducerTemplate")
-    private JmsOperations errorNotifyProducerTemplate;
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
 
@@ -79,9 +89,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
      *
      * @param map The incoming JMS Message
      */
-    @JmsListener(destination = "${domibus.backend.jmsInQueue}", containerFactory = "backendJmsListenerContainerFactory")
-    //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void receiveMessage(final MapMessage map) {
         try {
             String messageID = map.getStringProperty(MESSAGE_ID);
@@ -110,44 +118,66 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
             LOG.info("Submitted message with messageId [" + messageID + "], jmsCorrelationID [" + jmsCorrelationID + "]");
         } catch (Exception e) {
-            LOG.error("Exception occurred while receiving message [" + map + "]" , e);
+            LOG.error("Exception occurred while receiving message [" + map + "]", e);
             throw new DefaultJmsPluginException("Exception occurred while receiving message [" + map + "]", e);
         }
     }
 
     protected String getWrongMessageTypeErrorMessage(String messageID, String jmsCorrelationID, String messageType) {
         return MessageFormat.format("Illegal messageType [{0}] on message with JMSCorrelationId [{1}] and messageId [{2}]. Only [{3}] messages are accepted on this queue",
-                            messageType, jmsCorrelationID, messageID, MESSAGE_TYPE_SUBMIT);
+                messageType, jmsCorrelationID, messageID, MESSAGE_TYPE_SUBMIT);
     }
 
     protected void sendReplyMessage(final String messageId, final String errorMessage, final String correlationId) {
-        final MessageCreator replyMessageCreator = new ReplyMessageCreator(messageId, errorMessage, correlationId);
-        replyJmsTemplate.send(replyMessageCreator);
+        final JmsMessageDTO jmsMessageDTO = new ReplyMessageCreator(messageId, errorMessage, correlationId).createMessage();
+        sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_REPLY);
     }
 
     @Override
     public void deliverMessage(final String messageId) {
-        mshToBackendTemplate.send(new DownloadMessageCreator(messageId));
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+        final String queueValue = domibusPropertyExtService.getDomainProperty(currentDomain, JMSPLUGIN_QUEUE_OUT);
+        if (StringUtils.isEmpty(queueValue)) {
+            throw new DomibusPropertyExtException("Error getting the queue [" + JMSPLUGIN_QUEUE_OUT + "]");
+        }
+        LOG.info("Sending message to queue [{}]", queueValue);
+        mshToBackendTemplate.send(queueValue, new DownloadMessageCreator(messageId));
     }
 
     @Override
     public void messageReceiveFailed(MessageReceiveFailureEvent messageReceiveFailureEvent) {
-        errorNotifyConsumerTemplate.send(
-                new ErrorMessageCreator(messageReceiveFailureEvent.getErrorResult(),
-                        messageReceiveFailureEvent.getEndpoint(),
-                        NotificationType.MESSAGE_RECEIVED_FAILURE)
-        );
+        final JmsMessageDTO jmsMessageDTO = new ErrorMessageCreator(messageReceiveFailureEvent.getErrorResult(),
+                messageReceiveFailureEvent.getEndpoint(),
+                NotificationType.MESSAGE_RECEIVED_FAILURE).createMessage();
+        sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_CONSUMER_NOTIFICATION_ERROR);
     }
 
     @Override
     public void messageSendFailed(final String messageId) {
         List<ErrorResult> errors = super.getErrorsForMessage(messageId);
-        errorNotifyProducerTemplate.send(new ErrorMessageCreator(errors.get(errors.size() - 1), null, NotificationType.MESSAGE_SEND_FAILURE));
+        final JmsMessageDTO jmsMessageDTO = new ErrorMessageCreator(errors.get(errors.size() - 1), null, NotificationType.MESSAGE_SEND_FAILURE).createMessage();
+        sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_PRODUCER_NOTIFICATION_ERROR);
     }
 
     @Override
     public void messageSendSuccess(String messageId) {
-        replyJmsTemplate.send(new SignalMessageCreator(messageId, NotificationType.MESSAGE_SEND_SUCCESS));
+        final JmsMessageDTO jmsMessageDTO = new SignalMessageCreator(messageId, NotificationType.MESSAGE_SEND_SUCCESS).createMessage();
+        sendJmsMessage(jmsMessageDTO, JMSPLUGIN_QUEUE_REPLY);
+    }
+
+    protected void sendJmsMessage(JmsMessageDTO message, String queueProperty) {
+        final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+        final String queueValue = domibusPropertyExtService.getDomainProperty(currentDomain, queueProperty);
+        if (StringUtils.isEmpty(queueValue)) {
+            throw new DomibusPropertyExtException("Error getting the queue [" + queueProperty + "]");
+        }
+        LOG.info("Sending message to queue [{}]", queueValue);
+        jmsExtService.sendMapMessageToQueue(message, queueValue);
+    }
+
+    @Override
+    public MapMessage downloadMessage(String messageId, MapMessage target) throws MessageNotFoundException {
+        return this.getMessageRetrievalTransformer().transformFromSubmission(this.messageRetriever.downloadMessage(messageId), target);
     }
 
     private class DownloadMessageCreator implements MessageCreator {
@@ -167,6 +197,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 throw new DefaultJmsPluginException("Unable to create push message", e);
             }
             mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_INCOMING);
+            final DomainDTO currentDomain = domainContextExtService.getCurrentDomain();
+            mapMessage.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
             return mapMessage;
         }
     }

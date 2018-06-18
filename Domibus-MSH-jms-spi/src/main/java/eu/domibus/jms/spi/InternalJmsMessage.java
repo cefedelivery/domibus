@@ -7,10 +7,18 @@ import java.util.*;
  * @since 3.2
  */
 public class InternalJmsMessage {
+
+	public enum MessageType {
+		TEXT_MESSAGE,
+		MAP_MESSAGE
+	}
+
 	protected String id;
 	protected String type;
+	protected String jmsCorrelationId;
 	protected String content;
 	protected Date timestamp;
+	protected MessageType messageType = MessageType.TEXT_MESSAGE;
 
 	protected Map<String, Object> properties = new HashMap<>();
 
@@ -48,6 +56,22 @@ public class InternalJmsMessage {
 
 	public Map<String, Object> getProperties() {
 		return properties;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
+
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType;
+	}
+
+	public String getJmsCorrelationId() {
+		return jmsCorrelationId;
+	}
+
+	public void setJmsCorrelationId(String jmsCorrelationId) {
+		this.jmsCorrelationId = jmsCorrelationId;
 	}
 
 	//TODO separate between headers and properties

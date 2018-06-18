@@ -9,8 +9,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
@@ -24,6 +22,9 @@ public abstract class FSAbstractPurgeService {
     @Autowired
     protected FSFilesManager fsFilesManager;
 
+    @Autowired
+    protected FSMultiTenancyService multiTenancyService;
+
     /**
      * Triggering the purge means that the message files from the target directory
      * older than X seconds will be removed
@@ -32,7 +33,9 @@ public abstract class FSAbstractPurgeService {
         purgeMessages(null);
 
         for (String domain : fsPluginProperties.getDomains()) {
-            purgeMessages(domain);
+            if (multiTenancyService.verifyDomainExists(domain)) {
+                purgeMessages(domain);
+            }
         }
     }
 
@@ -42,7 +45,7 @@ public abstract class FSAbstractPurgeService {
                 FileObject targetFolder = fsFilesManager.getEnsureChildFolder(rootDir, getTargetFolderName())) {
 
             contentFiles = findAllDescendants(targetFolder);
-            LOG.debug(Arrays.toString(contentFiles));
+            LOG.debug("{}", contentFiles);
             
             Integer expirationLimit = getExpirationLimit(domain);
 

@@ -1,6 +1,6 @@
 package eu.domibus.plugin.fs.worker;
 
-import eu.domibus.messaging.MessagingProcessingException;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.plugin.fs.FSFilesManager;
 import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
@@ -32,6 +32,12 @@ public class FSPurgeReceivedServiceTest {
 
     @Injectable
     private FSFilesManager fsFilesManager;
+
+    @Injectable
+    private FSMultiTenancyService fsMultiTenancyService;
+
+    @Injectable
+    private DomibusConfigurationExtService domibusConfigurationExtService;
 
     private FileObject rootDir;
     private FileObject incomingFolder;
@@ -81,7 +87,7 @@ public class FSPurgeReceivedServiceTest {
     }
 
     @Test
-    public void testPurgeMessages() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+    public void testPurgeMessages() throws FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
             fsPluginProperties.getDomains();
             result = Collections.emptyList();
@@ -107,8 +113,11 @@ public class FSPurgeReceivedServiceTest {
     }
 
     @Test
-    public void testPurgeMessages_Domain1_BadConfiguration() throws MessagingProcessingException, FileSystemException, FSSetUpException {
+    public void testPurgeMessages_Domain1_BadConfiguration() throws FileSystemException, FSSetUpException {
         new Expectations(1, instance) {{
+            fsMultiTenancyService.verifyDomainExists("DOMAIN1");
+            result = true;
+
             fsPluginProperties.getDomains();
             result = Collections.singletonList("DOMAIN1");
 

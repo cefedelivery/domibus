@@ -11,26 +11,27 @@ import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.ro.TrustStoreRO;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.*;
-
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 
@@ -172,12 +173,7 @@ public class CertificateServiceImpl implements CertificateService {
             while (aliases.hasMoreElements()) {
                 final String alias = aliases.nextElement();
                 final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
-                TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
-                        alias,
-                        certificate.getSubjectDN().getName(),
-                        certificate.getIssuerDN().getName(),
-                        certificate.getNotBefore(),
-                        certificate.getNotAfter());
+                TrustStoreEntry trustStoreEntry = createTrustStoreEntry(alias, certificate);
                 trustStoreEntries.add(trustStoreEntry);
             }
             return trustStoreEntries;
@@ -313,6 +309,76 @@ public class CertificateServiceImpl implements CertificateService {
             LOG.warn(e.getMessage(), e);
         }
         return Collections.unmodifiableList(certificates);
+    }
+
+
+    public X509Certificate loadCertificateFromString(String content) {
+        CertificateFactory certFactory = null;
+        X509Certificate cert = null;
+        try {
+            certFactory = CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        try {
+            cert = (X509Certificate) certFactory.generateCertificate(in);
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+        return cert;
+    }
+
+    public TrustStoreEntry convertCertificateContent(String certificateContent) {
+        X509Certificate cert = loadCertificateFromString(certificateContent);
+        TrustStoreEntry res = createTrustStoreEntry(cert);
+        return  res;
+    }
+
+    public TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException {
+        X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
+        LOG.debug("get certificate from truststore for [{}] = [{}] ", partyName, cert);
+        TrustStoreEntry res = createTrustStoreEntry(cert);
+        if(res != null)
+            res.setFingerprints(extractFingerprints(cert));
+        return res;
+    }
+
+    private TrustStoreEntry createTrustStoreEntry(X509Certificate certificate) {
+        return createTrustStoreEntry(null, certificate);
+    }
+
+    private TrustStoreEntry createTrustStoreEntry(String alias, X509Certificate certificate) {
+        if(certificate == null)
+            return null;
+        return new TrustStoreEntry(
+                alias,
+                certificate.getSubjectDN().getName(),
+                certificate.getIssuerDN().getName(),
+                certificate.getNotBefore(),
+                certificate.getNotAfter());
+    }
+
+    private String extractFingerprints(final X509Certificate certificate){
+        if(certificate == null)
+            return null;
+
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        byte[] der = new byte[0];
+        try {
+            der = certificate.getEncoded();
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+        }
+        md.update(der);
+        byte[] digest = md.digest();
+        String digestHex = DatatypeConverter.printHexBinary(digest);
+        return digestHex.toLowerCase();
     }
 
 }

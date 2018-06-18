@@ -3,18 +3,15 @@ package eu.domibus.plugin.jms;
 
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.NotificationType;
-import org.springframework.jms.core.MessageCreator;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import eu.domibus.ext.domain.JMSMessageDTOBuilder;
+import eu.domibus.ext.domain.JmsMessageDTO;
 
 import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
  */
-class ErrorMessageCreator implements MessageCreator {
+class ErrorMessageCreator {
 
     private final ErrorResult errorResult;
     private final String endpoint;
@@ -26,9 +23,8 @@ class ErrorMessageCreator implements MessageCreator {
         this.notificationType = notificationType;
     }
 
-    @Override
-    public Message createMessage(Session session) throws JMSException {
-        Message message = session.createMapMessage();
+    public JmsMessageDTO createMessage() {
+        final JMSMessageDTOBuilder jmsMessageBuilder = JMSMessageDTOBuilder.create();
         String messageType;
         switch (this.notificationType) {
             case MESSAGE_SEND_FAILURE:
@@ -38,21 +34,21 @@ class ErrorMessageCreator implements MessageCreator {
                 messageType = JMSMessageConstants.MESSAGE_TYPE_RECEIVE_FAILURE;
                 break;
             default:
-                throw new JMSException("unknown NotificationType: " + notificationType.name());
+                throw new DefaultJmsPluginException("unknown NotificationType: " + notificationType.name());
         }
-        message.setStringProperty(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
+        jmsMessageBuilder.property(JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, messageType);
 
         if (this.endpoint != null) {
-            message.setStringProperty(PROPERTY_ENDPOINT, endpoint);
+            jmsMessageBuilder.property(PROPERTY_ENDPOINT, endpoint);
         }
-        if(errorResult != null) {
-            if(errorResult.getErrorCode() != null) {
-                message.setStringProperty(JMSMessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
+        if (errorResult != null) {
+            if (errorResult.getErrorCode() != null) {
+                jmsMessageBuilder.property(JMSMessageConstants.ERROR_CODE, errorResult.getErrorCode().getErrorCodeName());
             }
-            message.setStringProperty(JMSMessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
-            message.setStringProperty(MESSAGE_ID, errorResult.getMessageInErrorId());
+            jmsMessageBuilder.property(JMSMessageConstants.ERROR_DETAIL, errorResult.getErrorDetail());
+            jmsMessageBuilder.property(MESSAGE_ID, errorResult.getMessageInErrorId());
         }
 
-        return message;
+        return jmsMessageBuilder.build();
     }
 }

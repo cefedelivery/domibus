@@ -5,10 +5,11 @@ import eu.domibus.api.user.User;
 import java.util.List;
 
 /**
- * Class responsible of conversion from the user entity to the corresponding api user object
- *
  * @author Ion Perpegel
  * @since 4.0
+ *
+ * Class responsible of conversion from the user entity to the corresponding api user object
+ *
  */
 public interface UserConverter {
 

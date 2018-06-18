@@ -53,4 +53,6 @@ public interface DomainCryptoService {
     boolean isCertificateChainValid(String alias) throws DomibusCertificateException;
 
     boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
+
+    X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException;
 }

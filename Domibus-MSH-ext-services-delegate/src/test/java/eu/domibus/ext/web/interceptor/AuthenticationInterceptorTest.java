@@ -1,8 +1,8 @@
 package eu.domibus.ext.web.interceptor;
 
-import eu.domibus.ext.exceptions.AuthenticationException;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.ext.exceptions.DomibusErrorCode;
-import eu.domibus.ext.services.AuthenticationService;
+import eu.domibus.ext.services.AuthenticationExtService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -27,7 +27,7 @@ public class AuthenticationInterceptorTest {
     AuthenticationInterceptor authenticationInterceptor;
 
     @Injectable
-    AuthenticationService authenticationService;
+    AuthenticationExtService authenticationExtService;
 
     @Test
     public void testPreHandle(@Injectable final HttpServletRequest httpRequest,
@@ -35,7 +35,7 @@ public class AuthenticationInterceptorTest {
                               @Injectable final Object handler) throws Exception {
 
         new Expectations() {{
-            authenticationService.authenticate(httpRequest);
+            authenticationExtService.authenticate(httpRequest);
         }};
 
         assertTrue(authenticationInterceptor.preHandle(httpRequest, httpServletResponse, handler));
@@ -48,8 +48,8 @@ public class AuthenticationInterceptorTest {
                               @Injectable final Object handler) throws Exception {
 
         new Expectations() {{
-            authenticationService.authenticate(httpRequest);
-            result = new AuthenticationException(DomibusErrorCode.DOM_002, "authentication error");
+            authenticationExtService.authenticate(httpRequest);
+            result = new AuthenticationExtException(DomibusErrorCode.DOM_002, "authentication error");
         }};
 
         assertFalse(authenticationInterceptor.preHandle(httpRequest, httpServletResponse, handler));

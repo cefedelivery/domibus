@@ -16,6 +16,8 @@ public interface UserDomainDao {
     
     void setPreferredDomainByUser(String userName, String domainCode);
 
+    void deleteDomainByUser(String userName);
+
     List<UserDomainEntity> listPreferredDomains();
 
     List<String> listAllUserNames();
