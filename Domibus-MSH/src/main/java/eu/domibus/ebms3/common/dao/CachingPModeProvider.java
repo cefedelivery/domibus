@@ -59,7 +59,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
-    public void init() {
+    protected void init() {
         if (!this.configurationDAO.configurationExists()) {
             throw new IllegalStateException("No processing modes found. To exchange messages, upload configuration file through the web gui.");
         }

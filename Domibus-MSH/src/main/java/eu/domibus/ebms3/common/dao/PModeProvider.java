@@ -93,7 +93,7 @@ public abstract class PModeProvider {
     @Autowired
     protected ProcessDao processDao;
 
-    public abstract void init();
+    protected abstract void init();
 
     public abstract void refresh();
 
