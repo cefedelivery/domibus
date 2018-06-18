@@ -39,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 
 
-@Service
+@Service("jmsMessageTransformer")
 public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMessage>, MessageSubmissionTransformer<MapMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSMessageTransformer.class);
