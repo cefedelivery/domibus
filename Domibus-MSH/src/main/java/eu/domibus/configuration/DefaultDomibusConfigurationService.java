@@ -28,10 +28,6 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
-    private static final String DATABASE_DIALECT = "domibus.entityManagerFactory.jpaProperty.hibernate.dialect";
-
-    private DataBaseEngine dataBaseEngine;
-
     @Override
     public String getConfigLocation() {
         return System.getProperty(DOMIBUS_CONFIG_LOCATION);
