@@ -4,7 +4,10 @@ import eu.domibus.common.ErrorResult;
 import eu.domibus.common.ErrorResultImpl;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
-import eu.domibus.plugin.Submission;
+import eu.domibus.ext.domain.JmsMessageDTO;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomibusPropertyExtService;
+import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import mockit.*;
@@ -45,6 +48,15 @@ public class BackendJMSImplTest {
     private JmsOperations errorNotifyProducerTemplate;
 
     @Injectable
+    protected JMSExtService jmsService;
+
+    @Injectable
+    protected DomibusPropertyExtService domibusPropertyService;
+
+    @Injectable
+    protected DomainContextExtService domainContextService;
+
+    @Injectable
     String name = "myjmsplugin";
 
     @Tested
@@ -68,6 +80,8 @@ public class BackendJMSImplTest {
 
             backendJMS.submit(withAny(new ActiveMQMapMessage()));
             result = messageId;
+
+            backendJMS.sendReplyMessage(messageId, anyString, jmsCorrelationId);
         }};
 
         backendJMS.receiveMessage(map);
@@ -100,6 +114,8 @@ public class BackendJMSImplTest {
 
             map.getStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY);
             result = unacceptedMessageType;
+
+            backendJMS.sendReplyMessage(messageId, anyString, jmsCorrelationId);
         }};
 
         backendJMS.receiveMessage(map);
@@ -124,6 +140,10 @@ public class BackendJMSImplTest {
         event.setEndpoint(myEndpoint);
         final String messageId = "1";
         event.setMessageId(messageId);
+
+        new Expectations(backendJMS) {{
+            backendJMS.sendJmsMessage(withAny(new JmsMessageDTO()), anyString);
+        }};
 
         backendJMS.messageReceiveFailed(event);
 

@@ -13,4 +13,8 @@ public class DefaultJmsPluginException extends RuntimeException {
     public DefaultJmsPluginException(String message, Exception e) {
         super(message, e);
     }
+
+    public DefaultJmsPluginException(String message) {
+        super(message);
+    }
 }

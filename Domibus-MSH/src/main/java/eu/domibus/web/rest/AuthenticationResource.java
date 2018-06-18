@@ -12,9 +12,7 @@ import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -42,10 +40,6 @@ public class AuthenticationResource {
 
     @Autowired
     protected AuthenticationService authenticationService;
-
-    @Qualifier("taskExecutor")
-    @Autowired
-    protected SchedulingTaskExecutor schedulingTaskExecutor;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -76,7 +70,7 @@ public class AuthenticationResource {
         LOG.debug("Determined domain [{}] for user [{}]", domainCode, loginRO.getUsername());
 
         if (domainCode != null) {   //domain user
-            domainContextProvider.setCurrentDomain(domainCode);            
+            domainContextProvider.setCurrentDomain(domainCode);
         } else {                    //ap user
             domainContextProvider.clearCurrentDomain();
             domainCode = userDomainService.getPreferredDomainForUser(loginRO.getUsername());
@@ -90,7 +84,7 @@ public class AuthenticationResource {
         }
 
         domainContextProvider.setCurrentDomain(domainCode);
-    
+
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
         for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
@@ -127,6 +121,7 @@ public class AuthenticationResource {
 
     /**
      * Retrieve the current domain of the current user (in multi-tenancy mode)
+     *
      * @return the current domain
      */
     @RequestMapping(value = "user/domain", method = RequestMethod.GET)

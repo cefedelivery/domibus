@@ -18,6 +18,7 @@ public class JMSMessageMapper {
     public InternalJmsMessage convert(JmsMessage message) {
         InternalJmsMessage result = new InternalJmsMessage();
         result.setId(message.getId());
+        result.setJmsCorrelationId(message.getJmsCorrelationId());
         result.setContent(message.getContent());
         result.setTimestamp(message.getTimestamp());
         result.setType(message.getType());
@@ -29,6 +30,7 @@ public class JMSMessageMapper {
         if (message == null) return null;
         JmsMessage result = new JmsMessage();
         result.setId(message.getId());
+        result.setJmsCorrelationId(message.getJmsCorrelationId());
         result.setContent(message.getContent());
         result.setTimestamp(message.getTimestamp());
         result.setType(message.getType());

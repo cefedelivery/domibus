@@ -43,6 +43,10 @@ public class BlueCoatClientCertificateAuthentication implements Authentication {
         this.certificateId = calculateCertificateId(certHeaderValue);
     }
 
+    public String getCertificateId() {
+        return certificateId;
+    }
+
     @Override
     public boolean isAuthenticated() {
         return authenticated;

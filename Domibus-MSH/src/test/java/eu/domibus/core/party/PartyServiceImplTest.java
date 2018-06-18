@@ -2,19 +2,23 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Identifier;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.process.Process;
 import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
+import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
@@ -36,8 +40,18 @@ public class PartyServiceImplTest {
     @Injectable
     private PartyDao partyDao;
 
+    @Injectable
+    private MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Injectable
+    private DomainContextProvider domainProvider;
+
+    @Injectable
+    private CertificateService certificateService;
+
     @Tested
     private PartyServiceImpl partyService;
+
     @Test
     public void getParties() throws Exception {
         String name = "name";
@@ -52,24 +66,6 @@ public class PartyServiceImplTest {
             partyService.linkPartyAndProcesses();times=1;
         }};
         partyService.getParties(name, endPoint, partyId, processName,pageStart,pageSize);
-        new Verifications(){{
-            partyService.getSearchPredicate(name,endPoint,partyId,processName);times=1;
-        }};
-    }
-
-    @Test
-    public void countParties() throws Exception {
-
-        String name = "name";
-        String endPoint = "endPoint";
-        String partyId = "partyId";
-        String processName = "processName";
-
-        new Expectations(partyService){{
-            partyService.getSearchPredicate(anyString,anyString,anyString,anyString);
-            partyService.linkPartyAndProcesses();times=1;
-        }};
-        partyService.countParties(name, endPoint, partyId, processName);
         new Verifications(){{
             partyService.getSearchPredicate(name,endPoint,partyId,processName);times=1;
         }};
@@ -272,6 +268,14 @@ public class PartyServiceImplTest {
 
         // Then
         Assert.assertEquals(expectedGatewayPartyId, gatewayPartyId);
+    }
+
+    @Test
+    public void getProcesses() throws Exception {
+        partyService.getAllProcesses();
+        new Verifications(){{
+            pModeProvider.findAllProcesses();times=1;
+        }};
     }
 
 }

@@ -26,17 +26,17 @@
         <!-- Domibus modules -->
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ext-services-api</artifactId>
-            <version>${domibus-ext-services-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.domibus</groupId>
             <artifactId>domibus-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-plugin-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- End Domibus modules -->
 

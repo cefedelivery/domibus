@@ -198,7 +198,7 @@ public class ReliabilityChecker {
     }
 
     public enum CheckResult {
-        OK, SEND_FAIL, PULL_FAILED, WAITING_FOR_CALLBACK
+        OK, SEND_FAIL, PULL_FAILED, WAITING_FOR_CALLBACK, ABORT
     }
 
 

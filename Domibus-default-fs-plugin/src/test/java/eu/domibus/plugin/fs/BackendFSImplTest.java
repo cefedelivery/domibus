@@ -1,6 +1,9 @@
 package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
+import eu.domibus.ext.services.DomainContextExtService;
+import eu.domibus.ext.services.DomainExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.plugin.MessageLister;
 import eu.domibus.plugin.Submission;
@@ -35,9 +38,6 @@ public class BackendFSImplTest {
 
     private static final String TEXT_XML = "text/xml";
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
-
     @Injectable
     protected MessageRetriever messageRetriever;
 
@@ -55,6 +55,15 @@ public class BackendFSImplTest {
 
     @Injectable
     private FSMessageTransformer defaultTransformer;
+
+    @Injectable
+    private DomibusConfigurationExtService domibusConfigurationExtService;
+
+    @Injectable
+    private DomainExtService domainExtService;
+
+    @Injectable
+    private DomainContextExtService domainContextExtService;
 
     @Injectable
     String name = "fsplugin";
@@ -128,22 +137,7 @@ public class BackendFSImplTest {
         final Map<String, FSPayload> fsPayloads = new HashMap<>();
         fsPayloads.put("cid:message", new FSPayload(TEXT_XML, payloadFileName, dataHandler));
 
-        new Expectations(1, backendFS) {{
-            backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(fsPayloads, userMessage);
-
-            fsFilesManager.setUpFileSystem(null);
-            result = rootDir;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
-            result = incomingFolder;
-
-            fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
-            result = incomingFolderByRecipient;
-
-            fsFilesManager.getEnsureChildFolder(incomingFolderByRecipient, messageId);
-            result = incomingFolderByMessageId;
-        }};
+        expectationsDeliverMessage(null, userMessage, fsPayloads);
 
         backendFS.deliverMessage(messageId);
 
@@ -170,6 +164,47 @@ public class BackendFSImplTest {
         payloadFile.close();
     }
 
+    private void expectationsDeliverMessage(String domain, UserMessage userMessage, Map<String, FSPayload> fsPayloads) throws MessageNotFoundException, FileSystemException {
+        new Expectations(1, backendFS) {{
+            backendFS.downloadMessage(messageId, null);
+            result = new FSMessage(fsPayloads, userMessage);
+
+            fsFilesManager.setUpFileSystem(domain);
+            result = rootDir;
+
+            domibusConfigurationExtService.isMultiTenantAware();
+            result = (domain != null);
+
+            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
+            result = incomingFolder;
+
+            fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
+            result = incomingFolderByRecipient;
+
+            fsFilesManager.getEnsureChildFolder(incomingFolderByRecipient, messageId);
+            result = incomingFolderByMessageId;
+        }};
+    }
+
+   /* @Test
+    public void testDeliverMessage_Multitenancy(@Injectable final FSMessage fsMessage) throws JAXBException, MessageNotFoundException, FileSystemException {
+
+        final UserMessage userMessage = FSTestHelper.getUserMessage(this.getClass(), "testDeliverMessageNormalFlow_metadata.xml");
+        final String messageContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGludm9pY2U+aGVsbG88L2ludm9pY2U+";
+        final String invoiceContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+
+
+        final DataHandler messageHandler = new DataHandler(new ByteArrayDataSource(messageContent.getBytes(), TEXT_XML));
+        final DataHandler invoiceHandler = new DataHandler(new ByteArrayDataSource(invoiceContent.getBytes(), TEXT_XML));
+        final Map<String, FSPayload> fsPayloads = new HashMap<>();
+        fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", messageHandler));
+        fsPayloads.put("cid:invoice", new FSPayload(TEXT_XML, "invoice.xml", invoiceHandler));
+
+        expectationsDeliverMessage("DOMAIN1", userMessage, fsPayloads);
+
+        backendFS.deliverMessage(messageId);
+    }*/
+
     @Test
     public void testDeliverMessage_MultiplePayloads(@Injectable final FSMessage fsMessage)
             throws MessageNotFoundException, JAXBException, IOException, FSSetUpException {
@@ -185,22 +220,7 @@ public class BackendFSImplTest {
         fsPayloads.put("cid:message", new FSPayload(TEXT_XML, "message.xml", messageHandler));
         fsPayloads.put("cid:invoice", new FSPayload(TEXT_XML, "invoice.xml", invoiceHandler));
 
-        new Expectations(1, backendFS) {{
-            backendFS.downloadMessage(messageId, null);
-            result = new FSMessage(fsPayloads, userMessage);
-            
-            fsFilesManager.setUpFileSystem(null);
-            result = rootDir;
-            
-            fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.INCOMING_FOLDER);
-            result = incomingFolder;
-
-            fsFilesManager.getEnsureChildFolder(incomingFolder, finalRecipientFolder);
-            result = incomingFolderByRecipient;
-
-            fsFilesManager.getEnsureChildFolder(incomingFolderByRecipient, messageId);
-            result = incomingFolderByMessageId;
-        }};
+        expectationsDeliverMessage(null, userMessage, fsPayloads);
 
         //tested method
         backendFS.deliverMessage(messageId);

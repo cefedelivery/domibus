@@ -10,14 +10,13 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import eu.domibus.common.services.UserPersistenceService;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
  * @since 4.0
  */
 @Service
@@ -69,7 +68,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         List<User> usersEntities = domainConverter.convert(users, User.class);
         List<User> allUsersEntities = userDao.listUsers();
         List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-        userDao.deleteAll(usersEntitiesToDelete);
+        deleteUsers(usersEntitiesToDelete);
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -104,10 +103,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
-            List<String> authorities = user.getAuthorities();
             User userEntity = domainConverter.convert(user, User.class);
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
-            addRoleToUser(authorities, userEntity);
+            addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
@@ -115,6 +113,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             } else {
                 userDomainService.setDomainForUser(user.getUserName(), user.getDomain());
             }
+        }
+    }
+
+    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
+        userDao.deleteAll(usersEntitiesToDelete);
+        for (User user : usersEntitiesToDelete) {
+            userDomainService.deleteDomainForUser(user.getUserName());
         }
     }
 

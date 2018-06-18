@@ -6,6 +6,7 @@ import eu.domibus.api.security.TrustStoreEntry;
 import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -36,4 +37,25 @@ public interface CertificateService {
     void saveCertificateAndLogRevocation(Domain domain);
 
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
+
+    /**
+     * Returns the certificate deserialized from a base64 string
+     *
+     * @return a certificate
+     */
+    X509Certificate loadCertificateFromString(String content);
+
+    /**
+     * Returns the certificate entry from the trust store given an alias
+     *
+     * @return a certificate entry
+     */
+    TrustStoreEntry getPartyCertificateFromTruststore(String alias) throws KeyStoreException;
+
+    /**
+     * Returns a certificate entry converted from a base64 string
+     *
+     * @return a certificate entry
+     */
+    TrustStoreEntry convertCertificateContent(String certificateContent);
 }

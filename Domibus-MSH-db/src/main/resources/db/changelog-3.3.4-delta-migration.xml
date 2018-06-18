@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="nperpion" id="EDELIVERY-3276">
+        <sql dbms="oracle">
+
+            UPDATE TB_PART_INFO A
+            SET PART_ORDER = (SELECT count(0) FROM TB_PART_INFO B WHERE B.PAYLOADINFO_ID = A.PAYLOADINFO_ID and B.ID_PK &lt; A.ID_PK);
+
+        </sql>
+
+        <sql dbms="mysql">
+            SET SQL_SAFE_UPDATES=0;
+
+            UPDATE TB_PART_INFO as X
+            INNER JOIN (
+                SELECT 	A.ID_PK,
+                        (SELECT count(0) FROM TB_PART_INFO as B WHERE B.PAYLOADINFO_ID = A.PAYLOADINFO_ID and B.ID_PK &lt; A.ID_PK) as PART_ORDER
+                FROM TB_PART_INFO as A
+            ) as Y ON X.ID_PK = Y.ID_PK
+            SET X.PART_ORDER = Y.PART_ORDER;
+
+            SET SQL_SAFE_UPDATES=1;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

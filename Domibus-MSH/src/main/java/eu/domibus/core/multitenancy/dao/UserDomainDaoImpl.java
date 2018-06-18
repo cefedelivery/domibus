@@ -81,6 +81,14 @@ public class UserDomainDaoImpl extends BasicDao<UserDomainEntity> implements Use
     }
 
     @Override
+    public void deleteDomainByUser(String userName) {
+        UserDomainEntity userDomainEntity = findUserDomainEntity(userName);
+        if (userDomainEntity != null) {
+            this.delete(userDomainEntity);
+        }
+    }
+
+    @Override
     public List<String> listAllUserNames() {
         TypedQuery<UserDomainEntity> namedQuery = em.createNamedQuery("UserDomainEntity.findAll", UserDomainEntity.class);
         return namedQuery.getResultList().stream().map(el->el.getUserName()).collect(Collectors.toList());

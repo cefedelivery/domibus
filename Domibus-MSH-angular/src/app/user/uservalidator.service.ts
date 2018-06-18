@@ -44,7 +44,7 @@ export class UserValidatorService {
     let seen = new Set();
     allUsers.every(function (user) {
       if (seen.size === seen.add(user.userName).size) {
-        errorMessage = errorMessage.concat('Duplicate user name with user ' + allUsers.indexOf(user) + ' ');
+        errorMessage = errorMessage.concat('Duplicate user name with user [' + allUsers.indexOf(user) + ']: ' + user.userName);
         return false;
       }
       return true;

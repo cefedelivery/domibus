@@ -251,4 +251,19 @@ public class Process extends AbstractBaseEntity {
         }
     }
 
+    public InitiatorParties getInitiatorPartiesXml() {
+        return this.initiatorPartiesXml;
+    }
+    
+    public void setInitiatorPartiesXml(InitiatorParties initiatorPartiesXml) {
+        this.initiatorPartiesXml = initiatorPartiesXml;
+    }
+    
+    public ResponderParties getResponderPartiesXml() {
+        return this.responderPartiesXml;
+    }   
+    
+    public void setResponderPartiesXml(ResponderParties responderPartiesXml) {
+        this.responderPartiesXml = responderPartiesXml;
+    }
 }

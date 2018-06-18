@@ -12,8 +12,8 @@ import {
   MdSelectModule,
   MdSidenavModule,
   MdTooltipModule,
-  MdExpansionModule
-} from "@angular/material";
+  MdExpansionModule, MdCheckboxModule
+} from '@angular/material';
 import "hammerjs";
 
 import {NgxDatatableModule} from "@swimlane/ngx-datatable";
@@ -80,6 +80,7 @@ import {TestServiceComponent} from "./testservice/testservice.component";
 import { PluginUserComponent } from './pluginuser/pluginuser.component';
 import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
 import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
+import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -133,7 +134,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     TestServiceComponent,
     PluginUserComponent,
     EditbasicpluginuserFormComponent,
-    EditcertificatepluginuserFormComponent
+    EditcertificatepluginuserFormComponent,
+    PartyIdentifierDetailsComponent
   ],
   entryComponents: [
     AppComponent,
@@ -155,7 +157,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ActionDirtyDialogComponent,
     PartyDetailsComponent,
     EditbasicpluginuserFormComponent,
-    EditcertificatepluginuserFormComponent
+    EditcertificatepluginuserFormComponent,
+    PartyIdentifierDetailsComponent
   ],
   imports: [
     BrowserModule,
@@ -177,7 +180,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     Md2Module,
     Md2SelectModule,
     SharedModule,
-    MdExpansionModule
+    MdExpansionModule,
+    MdCheckboxModule
   ],
   providers: [
     AuthenticatedGuard,

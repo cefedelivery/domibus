@@ -1,10 +1,10 @@
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.ext.domain.DomainDTO;
+import eu.domibus.ext.quartz.DomibusQuartzJobExtBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  * Quartz based worker responsible for the periodical execution of the FSPurgeFailedService.
@@ -12,13 +12,13 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * @author FERNANDES Henrique, GONCALVES Bruno
  */
 @DisallowConcurrentExecution // Only one FSPurgeFailedWorker runs at any time on the same node
-public class FSPurgeFailedWorker extends QuartzJobBean {
+public class FSPurgeFailedWorker extends DomibusQuartzJobExtBean {
 
     @Autowired
     private FSPurgeFailedService purgeFailedService;
 
     @Override
-    protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context, DomainDTO domain) {
         purgeFailedService.purgeMessages();
     }
 

@@ -18,7 +18,10 @@ public interface DomibusConfigurationService {
 
     String getConfigLocation();
 
+    DataBaseEngine getDataBaseEngine();
+
     boolean isMultiTenantAware();
 
     boolean useProxy();
+
 }
