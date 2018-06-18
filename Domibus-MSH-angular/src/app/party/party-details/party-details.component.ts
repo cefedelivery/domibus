@@ -23,6 +23,7 @@ export class PartyDetailsComponent implements OnInit {
   party: PartyResponseRo;
   identifiers: Array<IdentifierRo>;
   selectedIdentifiers = [];
+  dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
   @ViewChild('fileInput')
   private fileInput;
