@@ -23,6 +23,6 @@ public class PModeProviderFactoryImpl {
     public PModeProvider createDomainPModeProvider(Domain domain) {
         LOG.debug("Creating the PMode provider for domain [{}]", domain);
 
-        return applicationContext.getBean(CachingPModeProvider.class, domain);
+        return applicationContext.getBean(DynamicDiscoveryPModeProvider.class, domain);
     }
 }

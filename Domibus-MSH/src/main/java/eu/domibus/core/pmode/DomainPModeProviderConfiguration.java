@@ -19,11 +19,11 @@ public class DomainPModeProviderConfiguration {
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-    public CachingPModeProvider domainPModeProvider(Domain domain) {
+    public DynamicDiscoveryPModeProvider domainPModeProvider(Domain domain) {
         LOG.debug("Instantiating the PMode provider for domain [{}]", domain);
 
-        final CachingPModeProvider cachingPModeProvider = new CachingPModeProvider(domain);
-        return cachingPModeProvider;
+        final DynamicDiscoveryPModeProvider pModeProvider = new DynamicDiscoveryPModeProvider(domain);
+        return pModeProvider;
     }
 
 
