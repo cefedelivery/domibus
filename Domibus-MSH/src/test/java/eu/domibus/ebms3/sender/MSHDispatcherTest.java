@@ -126,6 +126,7 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = true;
+        final String domain = "default";
 
         new Expectations(mshDispatcher) {{
             mshDispatcher.isDispatchClientCacheActivated();
@@ -134,7 +135,7 @@ public class MSHDispatcherTest {
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
             result = algorithm;
 
-            dispatchClientProvider.getClient(endPoint, algorithm, policy, pModeKey, cacheable);
+            dispatchClientProvider.getClient(domain, endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
         }};
 
@@ -168,9 +169,10 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = false;
+        final String domain = "default";
 
         new Expectations(mshDispatcher) {{
-            dispatchClientProvider.getClient(endPoint, algorithm, policy, pModeKey, cacheable);
+            dispatchClientProvider.getClient(domain, endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
 
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
