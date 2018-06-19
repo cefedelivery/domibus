@@ -12,6 +12,10 @@ public interface DomibusPropertyProvider {
 
     String getProperty(String propertyName, String defaultValue);
 
+    String getDomainProperty(String propertyName);
+
+    String getDomainProperty(String propertyName, String defaultValue);
+
     String getProperty(Domain domain, String propertyName);
 
     String getProperty(Domain domain, String propertyName, String defaultValue);
