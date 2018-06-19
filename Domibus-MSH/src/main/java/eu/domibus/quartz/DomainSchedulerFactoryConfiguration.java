@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
+import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -73,7 +75,7 @@ public class DomainSchedulerFactoryConfiguration {
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public SchedulerFactoryBean schedulerFactory(Domain domain) {
         // General schema
-        if(domain == null) {
+        if (domain == null) {
             return schedulerFactoryGeneral();
         }
 
@@ -81,8 +83,27 @@ public class DomainSchedulerFactoryConfiguration {
         return schedulerFactoryDomain(domain);
     }
 
+    @Bean
+    public JobDetailFactoryBean retentionWorkerJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(eu.domibus.common.services.impl.RetentionWorker.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean retentionWorkerTrigger() {
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(retentionWorkerJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.retentionWorker.cronExpression"));//0 0/1 * * * ?
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
     /**
      * Sets the triggers only for general schema
+     *DomainDaoImpl
      * @return Scheduler Factory Bean changed
      */
     private SchedulerFactoryBean schedulerFactoryGeneral() {
@@ -90,15 +111,16 @@ public class DomainSchedulerFactoryConfiguration {
         SchedulerFactoryBean schedulerFactoryBean = schedulerFactory("General", getGeneralSchemaPrefix(), null);
         final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
         List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
-                                                        .filter( trigger -> trigger instanceof CronTriggerImpl &&
-                                                                    ((CronTriggerImpl)trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
-                                                    .collect(Collectors.toList());
+                .filter(trigger -> trigger instanceof CronTriggerImpl &&
+                        ((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
+                .collect(Collectors.toList());
         schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
         return schedulerFactoryBean;
     }
 
     /**
      * Sets the triggers specific only for domain schema
+     *
      * @param domain Domain
      * @return Scheduler Factory Bean changed
      */
@@ -108,18 +130,19 @@ public class DomainSchedulerFactoryConfiguration {
         //get all the Spring Bean Triggers so that new instances with scope prototype are injected
         final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
         List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
-                                                        .filter( trigger -> !(trigger instanceof CronTriggerImpl) ||
-                                                                    !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
-                                                    .collect(Collectors.toList());
+                .filter(trigger -> !(trigger instanceof CronTriggerImpl) ||
+                        !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
+                .collect(Collectors.toList());
         schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
         return schedulerFactoryBean;
     }
 
     /**
      * Creates a new Scheduler Factory Bean based on {@schedulerName}, {@tablePrefix} and {@domain}
+     *
      * @param schedulerName Scheduler Name
-     * @param tablePrefix Table Prefix
-     * @param domain Domain
+     * @param tablePrefix   Table Prefix
+     * @param domain        Domain
      * @return Scheduler Factory Bean
      */
     private SchedulerFactoryBean schedulerFactory(String schedulerName, String tablePrefix, Domain domain) {
@@ -161,6 +184,7 @@ public class DomainSchedulerFactoryConfiguration {
 
     /**
      * Returns the general schema prefix for QRTZ tables
+     *
      * @return General schema prefix
      */
     protected String getGeneralSchemaPrefix() {
@@ -169,6 +193,7 @@ public class DomainSchedulerFactoryConfiguration {
 
     /**
      * Returns the schema prefix for QRTZ tables for the domain
+     *
      * @param domain Domain
      * @return Domain' schema prefix
      */
@@ -178,6 +203,7 @@ public class DomainSchedulerFactoryConfiguration {
 
     /**
      * Returns the Schema prefix for a specific schema
+     *
      * @param schema Schema
      * @return Schema prefix
      */
