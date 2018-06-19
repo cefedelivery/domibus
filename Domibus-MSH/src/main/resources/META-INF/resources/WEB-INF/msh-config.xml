@@ -10,8 +10,6 @@
 
     <bean id="messageIdGenerator"
           class="eu.domibus.common.services.impl.MessageIdGenerator">
-        <property name="messageIdSuffix"
-                  value="${domibus.msh.messageid.suffix}"/>
     </bean>
 
     <bean id="retentionWorkerJob"
