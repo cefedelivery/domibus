@@ -83,6 +83,7 @@ public class DomainSchedulerFactoryConfiguration {
         return schedulerFactoryDomain(domain);
     }
 
+    //retention
     @Bean
     public JobDetailFactoryBean retentionWorkerJob() {
         JobDetailFactoryBean obj = new JobDetailFactoryBean();
@@ -96,7 +97,26 @@ public class DomainSchedulerFactoryConfiguration {
     public CronTriggerFactoryBean retentionWorkerTrigger() {
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(retentionWorkerJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.retentionWorker.cronExpression"));//0 0/1 * * * ?
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.retentionWorker.cronExpression"));
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
+    //retry
+    @Bean
+    public JobDetailFactoryBean retryWorkerJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(eu.domibus.ebms3.sender.SendRetryWorker.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean retryWorkerTrigger() {
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(retryWorkerJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.retry.cron"));
         obj.setStartDelay(20000);
         return obj;
     }

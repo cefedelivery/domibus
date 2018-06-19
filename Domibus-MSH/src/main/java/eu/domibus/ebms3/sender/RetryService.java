@@ -79,7 +79,8 @@ public class RetryService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
-        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(Integer.parseInt(domibusPropertyProvider.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(
+                Integer.parseInt(domibusPropertyProvider.getDomainProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
