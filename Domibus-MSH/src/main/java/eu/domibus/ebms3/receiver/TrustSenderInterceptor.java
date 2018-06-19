@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.receiver;
 
-import com.sun.org.apache.xerces.internal.dom.TextImpl;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
