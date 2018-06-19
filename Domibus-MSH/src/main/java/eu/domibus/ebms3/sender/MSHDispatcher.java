@@ -1,6 +1,8 @@
 
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -30,6 +32,8 @@ public class MSHDispatcher {
 
     public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
     public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
+    public static final String DOMIBUS_DISPATCHER_CACHEABLE = "domibus.dispatcher.cacheable";
+    public static final String DOMIBUS_DISPATCHER_CACHEABLE_DEFAULT = "false";
 
     @Autowired
     private DispatchClientProvider dispatchClientProvider;
@@ -37,10 +41,14 @@ public class MSHDispatcher {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @Transactional(propagation = Propagation.MANDATORY)
     public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
         boolean cacheable = isDispatchClientCacheActivated();
-        final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getClient(endpoint, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm(), policy, pModeKey, cacheable);
+        Domain domain = domainContextProvider.getCurrentDomain();
+        final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getClient(domain.getCode(), endpoint, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm(), policy, pModeKey, cacheable);
 
         final SOAPMessage result;
         try {
@@ -58,7 +66,7 @@ public class MSHDispatcher {
     }
 
     protected boolean isDispatchClientCacheActivated() {
-        String dispatchClientCacheable = domibusPropertyProvider.getProperty("domibus.dispatcher.cacheable", "false");
+        String dispatchClientCacheable = domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CACHEABLE, DOMIBUS_DISPATCHER_CACHEABLE_DEFAULT);
         return Boolean.valueOf(dispatchClientCacheable);
     }
 
