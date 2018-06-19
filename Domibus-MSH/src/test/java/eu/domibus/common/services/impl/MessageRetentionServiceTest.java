@@ -171,7 +171,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = null;
         }};
 
@@ -185,7 +185,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "a2";
         }};
 
@@ -199,7 +199,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "5";
         }};
 

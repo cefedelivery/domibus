@@ -1,5 +1,7 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
@@ -101,6 +103,9 @@ public class MSHDispatcherTest {
     @Injectable
     DispatchClientProvider dispatchClientProvider;
 
+    @Injectable
+    DomainContextProvider domainContextProvider;
+
     @Tested
     MSHDispatcher mshDispatcher;
 
@@ -126,16 +131,19 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = true;
-        final String domain = "default";
+        final Domain domain = new Domain("default", "Default");
 
         new Expectations(mshDispatcher) {{
+            domainContextProvider.getCurrentDomain();
+            result = domain;
+
             mshDispatcher.isDispatchClientCacheActivated();
             result = cacheable;
 
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
             result = algorithm;
 
-            dispatchClientProvider.getClient(domain, endPoint, algorithm, policy, pModeKey, cacheable);
+            dispatchClientProvider.getClient(domain.getCode(), endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
         }};
 
@@ -169,10 +177,13 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = false;
-        final String domain = "default";
+        final Domain domain = new Domain("default", "Default");
 
         new Expectations(mshDispatcher) {{
-            dispatchClientProvider.getClient(domain, endPoint, algorithm, policy, pModeKey, cacheable);
+            domainContextProvider.getCurrentDomain();
+            result = domain;
+
+            dispatchClientProvider.getClient(domain.getCode(), endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
 
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();

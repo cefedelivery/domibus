@@ -114,7 +114,7 @@ public class MessageRetentionService {
     }
 
     protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
-        final String propertyValueString = domibusPropertyProvider.getProperty(propertyName);
+        final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
             return defaultValue;
