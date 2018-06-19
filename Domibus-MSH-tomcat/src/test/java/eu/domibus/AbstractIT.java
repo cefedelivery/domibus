@@ -132,7 +132,7 @@ public abstract class AbstractIT {
 
 
     protected void waitUntilMessageHasStatus(String messageId, MessageStatus messageStatus) {
-        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(10, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(15, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
     }
 
     protected void waitUntilMessageIsAcknowledged(String messageId) {
