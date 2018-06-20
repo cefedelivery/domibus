@@ -175,7 +175,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
                         destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                         destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
+                        /* in multi-tenancy mode we show the number of messages only to super admin */
+                        destination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN :
+                                getMessagesTotalCount(mbsc, jmsDestination));
                         destinationsMap.put(destinationFQName, destination);
                     }
                 }

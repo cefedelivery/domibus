@@ -1,7 +1,9 @@
 package eu.domibus.messaging.jms;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -14,6 +16,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jms.Queue;
 import java.util.*;
@@ -42,6 +45,12 @@ public class JMSManagerImplTest {
 
     @Injectable
     AuditService auditService;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    AuthUtils authUtils;
 
     @Test
     public void testGetDestinations() throws Exception {
