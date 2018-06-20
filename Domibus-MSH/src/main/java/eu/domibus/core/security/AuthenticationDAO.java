@@ -38,7 +38,7 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         List<AuthRole> authRoles = new ArrayList<>();
         String rolesStr = query.getSingleResult();
         String[] roles = StringUtils.split(rolesStr, ';');
-        for(String role : roles) {
+        for (String role : roles) {
             authRoles.add(AuthRole.valueOf(StringUtils.strip(role)));
         }
         return authRoles;
@@ -58,12 +58,12 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         List<AuthRole> authRoles = new ArrayList<>();
         String rolesStr = query.getSingleResult();
         String[] roles = StringUtils.split(rolesStr, ';');
-        for(String role : roles) {
+        for (String role : roles) {
             authRoles.add(AuthRole.valueOf(StringUtils.strip(role)));
         }
         return authRoles;
-    } 
-    
+    }
+
     public long countEntries(Map<String, Object> filters) {
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
@@ -96,36 +96,23 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         query.setMaxResults(max);
         return query.getResultList();
     }
-    
-    
+
     protected List<Predicate> getPredicates(Map<String, Object> filters, CriteriaBuilder cb, Root<AuthenticationEntity> ele) {
         List<Predicate> predicates = new ArrayList<>();
         for (final Map.Entry<String, Object> filter : filters.entrySet()) {
-            if (filter.getValue() != null) {
-                if (filter.getValue() instanceof String) {
-                    if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey().toString()) {
-                            case "":
-                                break;
-                            case "authType":
-                                if (filter.getValue().equals("CERTIFICATE")) {
-                                    predicates.add(cb.isNotNull(ele.<String>get("certificateId")));
-                                } else {
-                                    predicates.add(cb.isNull(ele.<String>get("certificateId"))); 
-                                } 
-                                break;
-                            default:
-                                predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
-                                break;
-                        }
-                    } 
-                } else {
-                    predicates.add(cb.equal(ele.<String>get(filter.getKey()), filter.getValue()));
-                }
+            if (filter.getValue() == null || StringUtils.isEmpty((String) filter.getValue()) || StringUtils.isEmpty(filter.getKey()))
+                continue;
+
+            if (filter.getKey().equals("authType")) {
+                if (filter.getValue().equals("CERTIFICATE"))
+                    predicates.add(cb.isNotNull(ele.<String>get("certificateId")));
+                else
+                    predicates.add(cb.isNull(ele.<String>get("certificateId")));
+            } else {
+                predicates.add(cb.like(ele.<String>get(filter.getKey()), (String) filter.getValue()));
             }
         }
         return predicates;
     }
-    
-    
+
 }
