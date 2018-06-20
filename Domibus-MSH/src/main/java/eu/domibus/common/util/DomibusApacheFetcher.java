@@ -51,7 +51,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
             builder.setProxy(proxyUtil.getConfiguredProxy());
         }
 
-        builder.build();
+        requestConfig = builder.build();
     }
 
     @Override

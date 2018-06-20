@@ -49,7 +49,7 @@ public class ApacheFetcherForTest extends AbstractFetcher {
             this.credentialsProvider = credentialsProvider;
         }
 
-        builder.build();
+        requestConfig = builder.build();
     }
 
     @Override
