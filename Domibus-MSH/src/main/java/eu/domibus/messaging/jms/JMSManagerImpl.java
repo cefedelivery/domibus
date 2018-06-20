@@ -81,14 +81,14 @@ public class JMSManagerImpl implements JMSManager {
         if (!domibusConfigurationService.isMultiTenantAware()) {
             return selector;
         }
-        if(authUtils.isSuperAdmin()) {
+        if (authUtils.isSuperAdmin()) {
             return selector;
         }
         final Domain currentDomain = domainContextProvider.getCurrentDomain();
         String domainClause = "DOMAIN ='" + currentDomain.getCode() + "'";
 
         String result;
-        if(StringUtils.isBlank(selector)) {
+        if (StringUtils.isBlank(selector)) {
             result = domainClause;
         } else {
             result = selector + " AND " + domainClause;
