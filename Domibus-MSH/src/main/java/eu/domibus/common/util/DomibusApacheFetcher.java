@@ -42,6 +42,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
         super(mode);
 
         this.proxyUtil = proxyUtil;
+        this.domibusConfigurationService = domibusConfigurationService;
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
