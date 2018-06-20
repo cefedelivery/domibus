@@ -57,8 +57,18 @@ export class AlertService {
   }
 
   exception (message: string, error: any, keepAfterNavigationChange = false): void {
-    const errMsg = error.message || (error.json ? error.json().message : error );
-    this.error(message + ' \n' + errMsg, keepAfterNavigationChange);
+    let errMsg = error.message;
+    if (!errMsg) {
+      try {
+        if (error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8') {
+          errMsg = (error.json ? error.json().message : error);
+        } else {
+          errMsg = error;
+          errMsg = error._body ? error._body.match(/<h1>(.+)<\/h1>/)[1] : error;
+        }
+      } catch (e) { }
+    }
+    this.error(message + ' \n' + (errMsg || ''), keepAfterNavigationChange);
   }
 
   getMessage (): Observable<any> {

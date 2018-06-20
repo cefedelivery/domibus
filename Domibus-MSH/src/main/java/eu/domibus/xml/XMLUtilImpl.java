@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -19,6 +20,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 /**
@@ -59,5 +62,20 @@ public class XMLUtilImpl implements XMLUtil {
         return result;
     }
 
+    @Override
+    public byte[] marshal(JAXBContext jaxbContext, Object input, InputStream xsdStream) throws SAXException, JAXBException, ParserConfigurationException, XMLStreamException {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        if (xsdStream != null) {
+            Schema schema = schemaFactory.newSchema(new StreamSource(xsdStream));
+            marshaller.setSchema(schema);
+        }
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+        ByteArrayOutputStream xmlStream = new ByteArrayOutputStream();
+        marshaller.marshal(input, xmlStream);
+        return xmlStream.toByteArray();
+    }
 
 }

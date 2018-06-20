@@ -1,9 +1,11 @@
 package eu.domibus.ebms3.common.dao;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
+import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.ProcessDao;
@@ -35,6 +37,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.internal.util.reflection.Whitebox;
 
 import javax.xml.bind.JAXBContext;
 import java.io.File;
@@ -50,6 +53,7 @@ import java.util.*;
 import java.util.Properties;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class DynamicDiscoveryPModeProviderTest {
@@ -84,6 +88,7 @@ public class DynamicDiscoveryPModeProviderTest {
     private static final String PROCESSIDENTIFIER_ID = "testIdentifierId";
     private static final String PROCESSIDENTIFIER_SCHEME = "testIdentifierScheme";
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
+    private static final String DISCOVERY_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     @Mock
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
@@ -164,6 +169,20 @@ public class DynamicDiscoveryPModeProviderTest {
     }
 
     @Test
+    public void testUseDynamicDiscovery(){
+
+        doReturn(null).when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.SMLZONE_KEY));
+        assertFalse(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
+
+        doReturn("").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.SMLZONE_KEY));
+        assertFalse(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
+
+
+        doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.SMLZONE_KEY));
+        assertTrue(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
+    }
+
+    @Test
     public void testDoDynamicDiscoveryOnSender() throws Exception {
         Configuration testData = initializeConfiguration(DYNAMIC_DISCOVERY_ENABLED);
         doReturn(true).when(configurationDAO).configurationExists();
@@ -228,6 +247,40 @@ public class DynamicDiscoveryPModeProviderTest {
     }
 
     @Test
+    public void testFindUserMessageExchangeContextPartyNotFound() throws Exception {
+
+        Configuration testData = initializeConfiguration(NO_DYNINITIATOR_AND_NOT_SELF);
+
+        DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+        doReturn(testData).when(classUnderTest).getConfiguration();
+        Whitebox.setInternalState(classUnderTest, "domainProvider", domainProvider);
+        Whitebox.setInternalState(classUnderTest, "domibusPropertyProvider", domibusPropertyProvider);
+
+        classUnderTest.dynamicResponderProcesses = classUnderTest.findDynamicResponderProcesses();
+
+        UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
+
+        doReturn("").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.SMLZONE_KEY));
+        try {
+            classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            fail();
+        }catch (EbMS3Exception ex){
+            assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0003, ex.getErrorCode());
+            assertEquals("No matching party found" ,ex.getErrorDetail());
+        }
+
+        doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.SMLZONE_KEY));
+        try {
+            classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
+            fail();
+        }catch (EbMS3Exception ex){
+            assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ex.getErrorCode());
+            assertEquals("No matching dynamic discovery processes found for message." ,ex.getErrorDetail());
+        }
+    }
+
+
+        @Test
     public void testFindDynamicReceiverProcesses_DynResponderAndPartySelf_ProcessInResultExpected() throws Exception {
         Configuration testData = initializeConfiguration(DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));

@@ -1,9 +1,9 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -13,19 +13,17 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
-import eu.domibus.core.pull.MessagingLockService;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -37,24 +35,20 @@ import eu.domibus.pki.PolicyService;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Queue;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static eu.domibus.common.MessageStatus.READY_TO_PULL;
 import static eu.domibus.common.MessageStatus.SEND_ENQUEUED;
-import static eu.domibus.common.services.impl.PullContext.*;
+import static eu.domibus.common.services.impl.PullContext.MPC;
+import static eu.domibus.common.services.impl.PullContext.PMODE_KEY;
 
 /**
  * @author Thomas Dussart
@@ -71,7 +65,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     private static final String DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING = "domibus.sender.certificate.validation.onsending";
 
-    static final String DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE = "domibus.pull.request.send.per.job.cycle";
+    protected static final String DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE = "domibus.pull.request.send.per.job.cycle";
+
+    private static final String PULL = "pull";
 
     @Autowired
     private MessagingDao messagingDao;
@@ -82,7 +78,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     private Queue pullMessageQueue;
 
     @Autowired
-    private JmsTemplate jmsPullTemplate;
+    protected JMSManager jmsManager;
 
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
@@ -109,10 +105,8 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private MessagingLockService messagingLockService;
+    private PullMessageService pullMessageService;
 
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
 
     /**
      * {@inheritDoc}
@@ -159,7 +153,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
-        LOG.debug("Initiating pull requests:");
+        LOG.trace("Initiating pull requests:");
+        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+        if (pause(pullProcesses, numberOfPullRequestPerMpc)) {
+            return;
+        }
         for (Process pullProcess : pullProcesses) {
             try {
                 processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
@@ -179,23 +177,14 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(messageExchangeConfiguration.toString());
                         }
-                        final Map<String, String> map = Maps.newHashMap();
-                        map.put(MPC, mpcQualifiedName);
-                        map.put(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey());
-                        map.put(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()));
-                        MessagePostProcessor postProcessor = new MessagePostProcessor() {
-                            public Message postProcessMessage(Message message) throws JMSException {
-                                message.setStringProperty(MPC, map.get(MPC));
-                                message.setStringProperty(PMODE_KEY, map.get(PMODE_KEY));
-                                message.setStringProperty(NOTIFY_BUSINNES_ON_ERROR, map.get(NOTIFY_BUSINNES_ON_ERROR));
-                                return message;
-                            }
-                        };
 
-                        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-                            jmsPullTemplate.convertAndSend(pullMessageQueue, map, postProcessor);
+                            jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
+                                    .property(MPC, mpcQualifiedName)
+                                    .property(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey())
+                                    .property(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()))
+                                    .build(), pullMessageQueue);
                         }
 
                     }
@@ -207,6 +196,29 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     }
 
+    private boolean pause(List<Process> pullProcesses, int numberOfPullRequestPerMpc) {
+        LOG.trace("Checking if the system should pause the pulling mechanism.");
+        int numberOfPullMpc = 0;
+        final long queueMessageNumber = jmsManager.getDestinationSize(PULL);
+        for (Process pullProcess : pullProcesses) {
+            try {
+                processValidator.validatePullProcess(Lists.newArrayList(pullProcess));
+                numberOfPullMpc++;
+            } catch (PModeException e) {
+                LOG.warn("Invalid pull process configuration found during pull try " + e.getMessage());
+            }
+        }
+
+        final int pullRequestsToSendCount = numberOfPullMpc * numberOfPullRequestPerMpc;
+        final boolean shouldPause = queueMessageNumber > pullRequestsToSendCount;
+        if (shouldPause) {
+            LOG.debug("[PULL]:Size of the pulling queue:[{}] is higher then the number of pull requests to send:[{}]. Pause adding to the queue so the system can consume the requests.", queueMessageNumber, pullRequestsToSendCount);
+        } else {
+            LOG.trace("[PULL]:Size of the pulling queue:[{}], the number of pull requests to send:[{}].", queueMessageNumber, pullRequestsToSendCount);
+        }
+        return shouldPause;
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
@@ -216,20 +228,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        String pullMessageId = messagingLockService.getPullMessageId(partyId, mpc);
-        if (pullMessageId == null) {
-            return null;
-        }
-        //this code is needed because setting the message in pull failed occurs in another transaction, meaning that
-        //the locked message can not be deleted in the new transaction. Once both the pull
-        //and the set pull failed transaction are completed, the message is unlocked and can be retrieved again to be pulled, but because
-        //the status is now pull failed, the message is deleted.
-        MessageLog userMessageLog = userMessageLogDao.findByMessageId(pullMessageId);
-        if (MessageStatus.READY_TO_PULL != userMessageLog.getMessageStatus()) {
-            messagingLockService.delete(pullMessageId);
-            return null;
-        }
-        return pullMessageId;
+        return pullMessageService.getPullMessageId(partyId, mpc);
     }
 
     /**
@@ -252,11 +251,6 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void removeRawMessageIssuedByPullRequestInNewTransaction(String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-    }
 
     @Override
     @Transactional(noRollbackFor = ReliabilityException.class)
@@ -279,13 +273,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      */
     @Override
     @Transactional
-    public void removeAndSaveRawXml(String rawXml, String messageId) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
-        RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
-        rawEnvelopeLog.setRawXML(rawXml);
-        rawEnvelopeLog.setMessageId(messageId);
-        rawEnvelopeLogDao.create(rawEnvelopeLog);
-
+    public void saveRawXml(String rawXml, String messageId) {
+        RawEnvelopeLog newRawEnvelopeLog = new RawEnvelopeLog();
+        newRawEnvelopeLog.setRawXML(rawXml);
+        newRawEnvelopeLog.setMessageId(messageId);
+        rawEnvelopeLogDao.create(newRawEnvelopeLog);
     }
 
     @Override

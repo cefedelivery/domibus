@@ -6,22 +6,79 @@
  */
 export class PartyResponseRo {
 
-  entityId:string;
+  entityId: number;
 
-  identifiers; //NOSONAR
+  identifiers: Array<IdentifierRo>; //NOSONAR
 
-  name:string;
+  name: string;
 
-  endpoint:string;
-
-  partyIDs:string;
+  endpoint: string;
 
   processes;
 
-  joinedIdentifiers:string;
+  joinedIdentifiers: string;
 
-  joinedProcesses:string;
+  joinedProcesses: string;
+
+  processesWithPartyAsInitiator: Array<ProcessRo>;
+
+  processesWithPartyAsResponder: Array<ProcessRo>;
+
+  certificate: CertificateRo;
+
+  certificateContent: string;
+}
+
+export class IdentifierRo {
+
+  entityId: number;
+
+  partyId: string;
+
+  partyIdType: PartyIdTypeRo;
 
 }
 
+export class PartyIdTypeRo {
 
+  name: string;
+
+  value: string;
+
+}
+
+export class ProcessRo {
+
+  entityId: number;
+
+  name: string;
+
+}
+
+export class ProcessInfoRo {
+
+  name: string;
+
+  isInitiator: boolean;
+
+  isResponder: boolean;
+}
+
+export class PartyFilteredResult {
+  data: PartyResponseRo[];
+
+  allData: PartyResponseRo[];
+}
+
+export class CertificateRo {
+
+  subject: string;
+
+  validFrom: Date;
+
+  validUntil: Date;
+
+  issuer: string;
+
+  fingerprints: string;
+}

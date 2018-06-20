@@ -1,8 +1,11 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.web.rest.ro.*;
@@ -36,6 +39,15 @@ public class JmsResourceTest {
 
     @Injectable
     private CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    private DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    private AuthUtils authUtils;
+
+    @Injectable
+    private DomainContextProvider domainContextProvider;
 
     @Test
     public void testDestinations() {

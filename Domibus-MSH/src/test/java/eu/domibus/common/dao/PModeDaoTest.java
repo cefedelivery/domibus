@@ -1,6 +1,7 @@
 package eu.domibus.common.dao;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -20,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
+import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.xml.bind.JAXBContext;
@@ -43,6 +45,12 @@ public class PModeDaoTest {
 
     @Injectable
     private JmsOperations jmsTemplateCommand;
+
+    @Injectable
+    private JMSManager jmsManager;
+
+    @Injectable
+    private Topic clusterCommandTopic;
 
     @Injectable
     XMLUtil xmlUtil;

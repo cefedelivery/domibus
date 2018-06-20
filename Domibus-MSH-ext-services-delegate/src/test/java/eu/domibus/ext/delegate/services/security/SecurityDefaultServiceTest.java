@@ -2,8 +2,8 @@ package eu.domibus.ext.delegate.services.security;
 
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.security.AuthUtils;
-import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.exceptions.DomibusServiceException;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
+import eu.domibus.ext.exceptions.DomibusServiceExtException;
 import eu.domibus.logging.DomibusLogger;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -27,7 +27,7 @@ public class SecurityDefaultServiceTest {
     AuthUtils authUtils;
 
 
-    @Test(expected = DomibusServiceException.class)
+    @Test(expected = DomibusServiceExtException.class)
     public void testCheckMessageAuthorizationWithNonExistingMessage() throws Exception {
         final String messageId = "1";
         new Expectations() {{
@@ -68,7 +68,7 @@ public class SecurityDefaultServiceTest {
         }};
     }
 
-    @Test(expected = AuthenticationException.class)
+    @Test(expected = AuthenticationExtException.class)
     public void testCheckSecurityWhenOriginalUserFromSecurityContextIsDifferent() throws Exception {
         final String finalRecipient = "C4";
         final String originalUserFromSecurityContext = "differentRecipient";
