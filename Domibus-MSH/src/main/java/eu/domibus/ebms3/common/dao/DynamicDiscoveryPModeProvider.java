@@ -79,8 +79,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
     // default type in eDelivery profile
-    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
-    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
+//    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+//    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
     protected static final String MSH_ENDPOINT = "msh_endpoint";
 
     @Override
@@ -89,7 +89,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
-        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
+        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
             dynamicDiscoveryService = dynamicDiscoveryServicePEPPOL;
         } else { // OASIS client is used by default
             dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;
@@ -134,10 +134,9 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      *  Method validates if domibus.smlzone is present for current domain.
      *
      */
-    protected boolean useDynamicDiscovery(){
-            String zone = domibusPropertyProvider.getProperty(domainProvider.getCurrentDomain(), DynamicDiscoveryService.SMLZONE_KEY );
-        return !StringUtils.isEmpty(zone);
-
+    protected boolean useDynamicDiscovery() {
+        String val = domibusPropertyProvider.getProperty(domainProvider.getCurrentDomain(), DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY);
+        return Boolean.valueOf(val);
     }
 
     /* Method finds MessageExchangeConfiguration for given usermesage and role. If property domibus.smlzone
@@ -365,7 +364,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         LOG.info("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
 
         //lookup sml/smp - result is cached
-        final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
+        final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(domainProvider.getCurrentDomain().getCode(), finalRecipient.getValue(),
                 finalRecipient.getType(),
                 userMessage.getCollaborationInfo().getAction(),
                 userMessage.getCollaborationInfo().getService().getValue(),

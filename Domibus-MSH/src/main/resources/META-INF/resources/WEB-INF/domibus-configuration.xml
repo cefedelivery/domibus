@@ -18,12 +18,6 @@
 	      factory-bean="pModeProviderFactory">
 	</bean>  
 
-    <!-- quartz job for the retry  -->
-    <!--<bean id="retryWorkerJob"-->
-          <!--class="org.springframework.scheduling.quartz.JobDetailFactoryBean">-->
-        <!--<property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>-->
-        <!--<property name="durability" value="true"/>-->
-    <!--</bean>-->
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
@@ -48,11 +42,6 @@
         <property name="durability" value="true"/>
     </bean>
 
-    <!--<bean id="retryWorkerTrigger"-->
-          <!--class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">-->
-        <!--<property name="jobDetail" ref="retryWorkerJob"/>-->
-        <!--<property name="cronExpression" value="${domibus.msh.retry.cron}"/>-->
-    <!--</bean>-->
     <bean id="pullRequestTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="pullRequestJob"/>
