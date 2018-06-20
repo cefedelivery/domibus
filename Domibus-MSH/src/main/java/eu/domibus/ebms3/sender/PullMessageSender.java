@@ -99,9 +99,9 @@ public class PullMessageSender {
         Messaging messaging = null;
         String messageId = null;
         try {
-            final String mpc = map.getString(PullContext.MPC);
-            final String pMode = map.getString(PullContext.PMODE_KEY);
-            notifiyBusinessOnError = Boolean.valueOf(map.getString(PullContext.NOTIFY_BUSINNES_ON_ERROR));
+            final String mpc = map.getStringProperty(PullContext.MPC);
+            final String pMode = map.getStringProperty(PullContext.PMODE_KEY);
+            notifiyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
             SignalMessage signalMessage = new SignalMessage();
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
