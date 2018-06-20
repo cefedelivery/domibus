@@ -180,7 +180,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-                            jmsManager.sendMessageToQueue(JMSMessageBuilder.create()
+                            jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
                                     .property(MPC, mpcQualifiedName)
                                     .property(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey())
                                     .property(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()))

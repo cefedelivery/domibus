@@ -1,19 +1,18 @@
-package eu.domibus.common.util;
+package eu.domibus.dynamicdiscovery;
 
 import com.google.common.io.ByteStreams;
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
 import no.difi.vefa.peppol.mode.Mode;
+import org.apache.http.HttpHost;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -21,7 +20,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.UnknownHostException;
-
 /**
  * @author idragusa
  * @since 5/22/18.
@@ -31,24 +29,24 @@ import java.net.UnknownHostException;
 * the configuration of the proxy (if enabled)
 *
 * */
-public class DomibusApacheFetcher extends AbstractFetcher {
+public class ApacheFetcherForTest extends AbstractFetcher {
 
     protected RequestConfig requestConfig;
+    protected CredentialsProvider credentialsProvider;
 
-    protected DomibusConfigurationService domibusConfigurationService;
-    protected ProxyUtil proxyUtil;
+    public ApacheFetcherForTest(HttpHost proxy, CredentialsProvider credentialsProvider) {
+        super(Mode.of(Mode.TEST));
 
-    public DomibusApacheFetcher(Mode mode, DomibusConfigurationService domibusConfigurationService, ProxyUtil proxyUtil) {
-        super(mode);
-
-        this.proxyUtil = proxyUtil;
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
                 .setSocketTimeout(timeout);
 
-        if(domibusConfigurationService.useProxy()) {
-            builder.setProxy(proxyUtil.getConfiguredProxy());
+        if(proxy != null) {
+            builder.setProxy(proxy);
+        }
+        if(credentialsProvider != null) {
+            this.credentialsProvider = credentialsProvider;
         }
 
         requestConfig = builder.build();
@@ -88,8 +86,8 @@ public class DomibusApacheFetcher extends AbstractFetcher {
         HttpClientBuilder builder = HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig);
 
-        if(domibusConfigurationService.useProxy()) {
-            builder.setDefaultCredentialsProvider(proxyUtil.getConfiguredCredentialsProvider());
+        if(credentialsProvider != null) {
+            builder.setDefaultCredentialsProvider(credentialsProvider);
         }
 
         return builder.build();
