@@ -11,10 +11,7 @@ public class AlertDao extends BasicDao<Alert> {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertDao.class);
 
-    /**
-     * @param typeOfT The entity class this DAO provides access to
-     */
-    public AlertDao(Class<Alert> typeOfT) {
-        super(typeOfT);
+    public AlertDao() {
+        super(Alert.class);
     }
 }

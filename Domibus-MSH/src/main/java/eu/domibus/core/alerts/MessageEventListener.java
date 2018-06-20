@@ -18,8 +18,7 @@ public class MessageEventListener{
     @Autowired
     private AlertService alertService;
 
-    @JmsListener(containerFactory = "alertJmsListenerContainerFactory",
-            destination = "alertMessageQueue",
+    @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "eventType = 'message'")
     public void onEvent(final Event event){
         final Event enrichMessageEvent = eventService.enrichMessageEvent(event);

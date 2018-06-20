@@ -250,7 +250,7 @@
             TB_ACTION_AUDIT aa
         </createView>
     </changeSet>
-    
+
     <changeSet author="migueti" id="EDELIVERY-2754_AUDIT">
         <createTable tableName="TB_CONFIGURATION_RAW_AUD">
             <column name="ID_PK" type="INT"/>
@@ -287,5 +287,57 @@
         <addColumn tableName="TB_MESSAGE_LOG">
             <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
         </addColumn>
+    </changeSet>
+
+    <changeSet author="dussath" id="EDELIVERY-3303">
+        <createTable tableName="TB_ALERT">
+            <column name="ID_PK" type="INT"/>
+            <column name="ALERT_TYPE" type="VARCHAR(20)"/>
+            <column name="ATTEMPTS_NUMBER" type="INT"/>
+            <column name="MAX_ATTEMPTS_NUMBER" type="INT"/>
+            <column name="PROCESSED" type="BOOLEAN"/>
+            <column name="PROCESSED_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK"
+                constraintName="PK_ALERT"
+                tableName="TB_ALERT"/>
+
+        <createTable tableName="TB_EVENT">
+            <column name="ID_PK" type="INT"/>
+            <column name="EVENT_TYPE" type="VARCHAR(20)"/>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK"
+                constraintName="PK_EVENT"
+                tableName="TB_EVENT"/>
+
+        <createTable tableName="TB_EVENT_ALERT">
+            <column name="EVENT_ID" type="INT"/>
+            <column name="ALERT_ID" type="INT"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="EVENT_ID,ALERT_ID"
+                constraintName="PK_EVENT_ALERT"
+                tableName="TB_EVENT_ALERT"/>
+
+        <addForeignKeyConstraint baseColumnNames="EVENT_ID" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_EVENT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+        <addForeignKeyConstraint baseColumnNames="ALERT_ID" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_ALERT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_ALERT"/>
+
+
+
     </changeSet>
 </databaseChangeLog>

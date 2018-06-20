@@ -1622,35 +1622,6 @@
             FROM V_AUDIT_DETAIL VAD
             ORDER BY VAD.AUDIT_DATE DESC;
         </createView>
-
-        <sqlFile path="./scripts/mysql_procedure.sql" endDelimiter="$$" dbms="mysql" relativeToChangelogFile="true"/>
-
-        <createProcedure dbms="oracle">
-            create or replace procedure get_next(
-            message_type_in in VARCHAR2,
-            initiator_in in VARCHAR2,
-            mpc_in in VARCHAR2,
-            message_id_out out VARCHAR2)
-            is
-            resource_busy    EXCEPTION;
-            pragma exception_init( resource_busy, -54 );
-            begin
-            for x in ( select rowid rid from TB_MESSAGING_LOCK where MESSAGE_STATE = 'READY' and TB_MESSAGING_LOCK.MPC=mpc_in and TB_MESSAGING_LOCK.INITIATOR=initiator_in AND message_type=message_type_in order by ID_PK)
-            loop
-            begin
-            select TB_MESSAGING_LOCK.MESSAGE_ID into message_id_out from TB_MESSAGING_LOCK where rowid = x.rid for update nowait;
-            exit;
-            exception
-            when resource_busy then
-            message_id_out:=null;
-            end;
-            end loop;
-            exception
-            when NO_DATA_FOUND then
-            message_id_out:=null;
-            end;
-        </createProcedure>
-
     </changeSet>
 
     <changeSet dbms="oracle" author="martifp" id="changelog-3.2-delta-1">
@@ -1670,5 +1641,57 @@
     </changeSet>
 
     <include file="changelog-4.0-quartz.xml" relativeToChangelogFile="true"/>
+
+    <changeSet author="dussath" id="EDELIVERY-3303">
+        <createTable tableName="TB_ALERT">
+            <column name="ID_PK" type="INT"/>
+            <column name="ALERT_TYPE" type="VARCHAR(20)"/>
+            <column name="ATTEMPTS_NUMBER" type="INT"/>
+            <column name="MAX_ATTEMPTS_NUMBER" type="INT"/>
+            <column name="PROCESSED" type="BOOLEAN"/>
+            <column name="PROCESSED_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK"
+                constraintName="PK_ALERT"
+                tableName="TB_ALERT"/>
+
+        <createTable tableName="TB_EVENT">
+            <column name="ID_PK" type="INT"/>
+            <column name="EVENT_TYPE" type="VARCHAR(20)"/>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="ID_PK"
+                constraintName="PK_EVENT"
+                tableName="TB_EVENT"/>
+
+        <createTable tableName="TB_EVENT_ALERT">
+            <column name="EVENT_ID" type="INT"/>
+            <column name="ALERT_ID" type="INT"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="EVENT_ID,ALERT_ID"
+                constraintName="PK_EVENT_ALERT"
+                tableName="TB_EVENT_ALERT"/>
+
+        <addForeignKeyConstraint baseColumnNames="EVENT_ID" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_EVENT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+        <addForeignKeyConstraint baseColumnNames="ALERT_ID" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_ALERT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_ALERT"/>
+
+
+
+    </changeSet>
 
 </databaseChangeLog>

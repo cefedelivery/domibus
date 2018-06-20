@@ -9,15 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class EventDao extends BasicDao<Event> {
 
-
-    @Autowired
-    private AnnotationsUtil annotationsUtil;
-    /**
-     * @param typeOfT The entity class this DAO provides access to
-     */
-    public EventDao(Class<Event> typeOfT) {
-        super(typeOfT);
+    public EventDao() {
+        super(Event.class);
     }
-
-
 }
