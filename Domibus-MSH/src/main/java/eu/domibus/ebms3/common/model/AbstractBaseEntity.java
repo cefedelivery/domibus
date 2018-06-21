@@ -33,8 +33,7 @@ public abstract class AbstractBaseEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        //noinspection NonFinalFieldReferencedInHashCode
-        return this.entityId;
+        return 0;
     }
 
     @Override
