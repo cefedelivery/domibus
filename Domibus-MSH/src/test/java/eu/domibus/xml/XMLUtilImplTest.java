@@ -2,7 +2,7 @@ package eu.domibus.xml;
 
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import eu.domibus.logging.DomibusLogger;

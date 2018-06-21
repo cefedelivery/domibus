@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import static eu.domibus.plugin.BackendConnector.Mode.PULL;
 @Component
 public class ProcessPartyExtractorProvider {
 
-    ProcessTypePartyExtractor getProcessTypePartyExtractor(String processType, final String senderParty, final String receiverParty) {
+    public ProcessTypePartyExtractor getProcessTypePartyExtractor(String processType, final String senderParty, final String receiverParty) {
         ProcessTypePartyExtractor processTypePartyExtractor = new PushProcessPartyExtractor(senderParty, receiverParty);
         if (PULL.getFileMapping().equals(processType)) {
             processTypePartyExtractor = new PullProcessPartyExtractor(senderParty, receiverParty);

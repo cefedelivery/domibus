@@ -11,22 +11,26 @@ import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
-import java.security.cert.X509Certificate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.security.cert.X509Certificate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.*;
 
 /**
