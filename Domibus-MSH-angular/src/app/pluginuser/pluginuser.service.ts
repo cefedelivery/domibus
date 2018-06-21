@@ -11,6 +11,7 @@ import {UserComponent} from '../user/user.component';
 export class PluginUserService {
 
   static readonly PLUGIN_USERS_URL: string = 'rest/plugin/users';
+
   public static passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
 
   public static originalUserPattern = 'urn:oasis:names:tc:ebcore:partyid\\-type:[a-zA-Z0-9_:-]+:[a-zA-Z0-9_:-]+';
@@ -19,7 +20,7 @@ export class PluginUserService {
   public static certificateIdPattern = 'CN=[a-zA-Z0-9_]+,O=[a-zA-Z0-9_]+,C=[a-zA-Z]{2}:[a-zA-Z0-9]+';
   public static certificateIdMessage = 'You should follow the rule CN=[name],O=[name],C=[country code]:[id]';
 
-  public static CSV_URL: string = PluginUserService.PLUGIN_USERS_URL + '/csv';
+  public static CSV_URL: string = 'rest/plugin/csv';
 
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
