@@ -299,6 +299,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 throw ex;
             }
             MessageStatus messageStatus = messageExchangeService.getMessageStatus(userMessageExchangeConfiguration);
+            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
+                    MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
+                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
                 userMessageService.scheduleSending(messageId);
@@ -309,9 +312,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
-            userMessageLogService.save(messageId, messageStatus.toString(), getNotificationStatus(legConfiguration).toString(),
-                    MSHRole.SENDING.toString(), getMaxAttempts(legConfiguration), message.getUserMessage().getMpc(),
-                    backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
