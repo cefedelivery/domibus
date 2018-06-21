@@ -1,5 +1,5 @@
 Domibus 3.3.4 (from 3.3.3):
-                 - Run the appropriate DB migration script (mysql5innoDb-3.3.3-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.3-to-3.3.4-migration.ddl for Oracle)
+                 - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
                             domibus.pull.queue.concurency=1-1
                             domibus.internal.queue.concurency=3-10
