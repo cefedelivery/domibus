@@ -6,10 +6,7 @@ import org.slf4j.LoggerFactory;
 import sun.security.krb5.internal.crypto.Aes128;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "TB_EVENT")
@@ -24,6 +21,11 @@ public class Event extends AbstractBaseEntity {
     @Column(name = "REPORTING_TIME")
     private Date reportingTime;
 
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapKey(name = "PROPERTY_TYPE")
+    @MapKeyEnumerated
+    private Map<String, EventPropertyValue> properties = new HashMap<>();
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "TB_EVENT_ALERT",
@@ -36,4 +38,42 @@ public class Event extends AbstractBaseEntity {
         alerts.add(alert);
     }
 
+    public void addProperty(final String key,final  EventPropertyValue eventPropertyValue){
+        properties.put(key,eventPropertyValue);
+        eventPropertyValue.setEvent(this);
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public Date getReportingTime() {
+        return reportingTime;
+    }
+
+    public void setReportingTime(Date reportingTime) {
+        this.reportingTime = reportingTime;
+    }
+
+    public Set<Alert> getAlerts() {
+        return alerts;
+    }
+
+    public void setAlerts(Set<Alert> alerts) {
+        this.alerts = alerts;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "eventType='" + eventType + '\'' +
+                ", reportingTime=" + reportingTime +
+                ", properties=" + properties +
+                ", alerts=" + alerts +
+                '}';
+    }
 }

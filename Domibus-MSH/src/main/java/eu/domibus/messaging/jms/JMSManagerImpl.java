@@ -14,13 +14,14 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessagePostProcessor;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Topic;
+import javax.jms.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +51,13 @@ public class JMSManagerImpl implements JMSManager {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private MessageConverter messageConverter;
+
+    @Autowired
+    @Qualifier("jsonJmsTemplate")
+    private JmsTemplate jmsTemplate;
 
     @Override
     public Map<String, JMSDestination> getDestinations() {
@@ -94,9 +102,21 @@ public class JMSManagerImpl implements JMSManager {
         sendMessageToQueue(message, destination, InternalJmsMessage.MessageType.MAP_MESSAGE);
     }
 
+    @Override
+    public void convertAndSendToQueue(final Object message, final Queue destination, final String selector){
+        jmsTemplate.convertAndSend(destination, message, message1 -> {
+            final Domain currentDomain = domainContextProvider.getCurrentDomain();
+            message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
+            message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
+            message1.setStringProperty("selector", selector);
+            return message1;
+        });
+    }
+
+
     protected void sendMessageToQueue(JmsMessage message, String destination, InternalJmsMessage.MessageType messageType) {
-        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        message.getProperties().put(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination);
         message.getProperties().put(MessageConstants.DOMAIN, currentDomain.getCode());
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
         internalJmsMessage.setMessageType(messageType);

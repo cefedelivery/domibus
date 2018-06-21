@@ -64,6 +64,8 @@ public interface JMSManager {
 
     void sendMessageToQueue(JmsMessage message, String destination);
 
+    void convertAndSendToQueue(Object message, Queue destination, String selector);
+
     void sendMessageToQueue(JmsMessage message, Queue destination);
 
     void sendMapMessageToQueue(JmsMessage message, String destination);

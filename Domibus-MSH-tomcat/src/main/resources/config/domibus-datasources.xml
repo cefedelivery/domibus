@@ -85,6 +85,7 @@
         <property name="concurrency" value="${domibus.alert.queue.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
+        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
 
 </beans>

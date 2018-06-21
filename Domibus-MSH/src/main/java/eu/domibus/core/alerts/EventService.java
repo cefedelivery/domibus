@@ -8,5 +8,8 @@ public interface EventService {
 
     void sendMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role);
 
-    Event enrichMessageEvent(Event event);
+    void persistEvent(Event event);
+
+    void enrichMessage(Event event);
+
 }

@@ -29,10 +29,10 @@ public class AlertServiceImpl implements AlertService{
 
     @Override
     @Transactional
-    public void onEvent(Integer eventId) {
-        final Event event = eventDao.read(eventId);
+    public void processEvent(eu.domibus.core.alerts.model.Event event) {
+        final Event eventEntity = eventDao.read(event.getEntityId());
         Alert alert=new Alert();
-        alert.addEvent(event);
+        alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.MESSAGING);
         alert.setAttempts(0);
         alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS,"1")));
