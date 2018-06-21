@@ -610,7 +610,14 @@
       <soap12:address location="http://localhost:8080/domibus/services/backend"/>
     </wsdl:port>
   </wsdl:service>
-</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="dc567009-e72d-4167-9ec7-fe2ac1738684" isOneWay="false" action="" name="downloadMessage" bindingOperationName="downloadMessage" type="Request-Response" outputName="downloadMessageResponse" inputName="downloadMessage" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="3fe9115c-da9f-495b-90c5-4efabf0c9fa2" isOneWay="false" action="" name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" outputName="sendMessageResponse" inputName="sendMessage" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation></con:interface><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="Web Service Submission"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Business Scenario" searchProperties="true" id="86589e1f-bd28-4db0-b31c-ff7789eab78f">
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="dc567009-e72d-4167-9ec7-fe2ac1738684" isOneWay="false" action="" name="downloadMessage" bindingOperationName="downloadMessage" type="Request-Response" outputName="downloadMessageResponse" inputName="downloadMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="b6f2ae46-3d48-4e9e-a1e0-d178f487d228" name="Request 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8180/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+   <soap:Header/>
+   <soap:Body>
+      <_1:downloadMessageRequest>
+         <messageID>9f2fad78-aa46-4e00-b672-4fd9d84fe44d@domibus.eu</messageID>
+      </_1:downloadMessageRequest>
+   </soap:Body>
+</soap:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/downloadMessage"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation><con:operation id="3fe9115c-da9f-495b-90c5-4efabf0c9fa2" isOneWay="false" action="" name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" outputName="sendMessageResponse" inputName="sendMessage" receivesAttachments="false" sendsAttachments="false"><con:settings/></con:operation></con:interface><con:testSuite id="8345ac14-50f6-466e-8f9e-417c5c9280e5" name="Web Service Submission"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Business Scenario" searchProperties="true" id="86589e1f-bd28-4db0-b31c-ff7789eab78f">
    <con:settings/>
    <con:testStep type="request" name="sendMessage" id="e134bf83-9fde-4e3a-8391-d39e36559c4e">
       <con:settings/>
@@ -622,26 +629,27 @@
                <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
             </con:settings>
             <con:encoding>UTF-8</con:encoding>
-            <con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint>
+            <con:endpoint>http://localhost:8180/domibus/services/backend</con:endpoint>
             <con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header>
       <ns:Messaging>
          <ns:UserMessage>
             <ns:PartyInfo>
                <ns:From>
-                  <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">senderalias</ns:PartyId>
-                  <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
+                  <ns:PartyId type="urn:fdc:peppol.eu:2017:identifiers:ap">POP000004</ns:PartyId>
+                  <ns:Role>urn:fdc:peppol.eu:2017:roles:ap:as4</ns:Role>
                </ns:From>
                <ns:To>
                </ns:To>
             </ns:PartyInfo>
             <ns:CollaborationInfo>
-               <ns:Service type="cenbii-procid-ubl">urn:www.cenbii.eu:profile:bii05:ver2.0</ns:Service>
-			<ns:Action>urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1</ns:Action>
+               <AgreementRef>urn:fdc:peppol.eu:2017:agreements:tia:ap_provider</AgreementRef>
+               <ns:Service type="urn:fdc:peppol.eu:2017:identifiers:proc-id">cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0</ns:Service>
+			<ns:Action>urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0</ns:Action>
             </ns:CollaborationInfo>
             <ns:MessageProperties>
                <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
-               <ns:Property name="finalRecipient" type="iso6523-actorid-upis">0007:9340033829test1</ns:Property>
+               <ns:Property name="finalRecipient" type="iso6523-actorid-upis">0088:112233</ns:Property>
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">

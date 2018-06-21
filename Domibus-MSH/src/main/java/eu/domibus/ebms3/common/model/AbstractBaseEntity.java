@@ -41,7 +41,7 @@ public abstract class AbstractBaseEntity implements Serializable {
     public boolean equals(final Object other) {
         //noinspection NonFinalFieldReferenceInEquals
         return ((other != null) &&
-                this.getClass().equals(other.getClass()) &&
-                (this.entityId == ((AbstractBaseEntity) other).entityId));
+                this.getClass().equals(other.getClass())
+        );
     }
 }
