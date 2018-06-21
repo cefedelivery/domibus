@@ -1,11 +1,11 @@
-package eu.domibus.common.dao;
+package eu.domibus.core.pmode;
 
 import eu.domibus.common.ErrorCode;
+import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.logging.DomibusLogger;

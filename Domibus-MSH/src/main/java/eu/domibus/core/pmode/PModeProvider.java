@@ -1,5 +1,5 @@
 
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
@@ -98,7 +98,7 @@ public abstract class PModeProvider {
     @Autowired
     protected ProcessDao processDao;
 
-    public abstract void init();
+    protected abstract void init();
 
     public abstract void refresh();
 

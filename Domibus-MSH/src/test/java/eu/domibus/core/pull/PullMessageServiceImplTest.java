@@ -13,7 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -28,7 +28,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import static eu.domibus.core.pull.PullMessageServiceImpl.PULL_EXTRA_NUMBER_OF_ATTEMPT_TIME_FOR_EXPIRATION_DATE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

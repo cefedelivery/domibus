@@ -1,5 +1,6 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
@@ -83,6 +84,10 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
     protected static final String MSH_ENDPOINT = "msh_endpoint";
 
+    public DynamicDiscoveryPModeProvider(Domain domain) {
+        super(domain);
+    }
+
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
@@ -161,9 +166,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         return super.findUserMessageExchangeContext(userMessage, mshRole);
     }
 
-
-
-    void doDynamicDiscovery(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
+    protected void doDynamicDiscovery(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
         Collection<eu.domibus.common.model.configuration.Process> candidates = findCandidateProcesses(userMessage, mshRole);
 
         if (candidates == null || candidates.isEmpty()) {
