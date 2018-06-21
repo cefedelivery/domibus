@@ -8,7 +8,7 @@ import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Configuration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -132,7 +132,7 @@ public abstract class AbstractIT {
 
 
     protected void waitUntilMessageHasStatus(String messageId, MessageStatus messageStatus) {
-        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(10, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
+        with().pollInterval(500, TimeUnit.MILLISECONDS).await().atMost(15, TimeUnit.SECONDS).until(messageHasStatus(messageId, messageStatus));
     }
 
     protected void waitUntilMessageIsAcknowledged(String messageId) {

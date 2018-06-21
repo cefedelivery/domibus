@@ -1,10 +1,6 @@
 package eu.domibus.api.party;
 
 import eu.domibus.api.process.Process;
-import eu.domibus.api.security.TrustStoreEntry;
-import javafx.util.Pair;
-
-import java.security.KeyStoreException;
 import java.util.List;
 import java.util.Map;
 

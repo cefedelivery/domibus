@@ -19,7 +19,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullRequestResult;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;

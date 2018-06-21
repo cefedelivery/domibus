@@ -20,7 +20,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -152,7 +152,7 @@ public class MessageExchangeServiceImplTest {
         ArgumentCaptor<JmsMessage> mapArgumentCaptor = ArgumentCaptor.forClass(JmsMessage.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
-        verify(jmsManager, times(20)).sendMessageToQueue(mapArgumentCaptor.capture(), any(Queue.class));
+        verify(jmsManager, times(20)).sendMapMessageToQueue(mapArgumentCaptor.capture(), any(Queue.class));
         TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
         testResult.chain(new TestResult("qn2", "party1:responder:service2:Mock:Mock:leg2", "false"));
         final List<JmsMessage> allValues = mapArgumentCaptor.getAllValues();

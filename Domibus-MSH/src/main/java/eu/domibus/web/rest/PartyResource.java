@@ -13,7 +13,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
-import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -21,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -265,7 +265,12 @@ public class PartyResource {
         String content = certificate.getContent();
         LOG.debug("certificate base 64 received [{}] ", content);
 
-        TrustStoreEntry cert = certificateService.convertCertificateContent(content);
+        TrustStoreEntry cert = null;
+        try {
+            cert = certificateService.convertCertificateContent(content);
+        } catch (CertificateException e) {
+            throw new IllegalArgumentException("certificate could not be parsed");
+        }
         if (cert == null) {
             throw new IllegalArgumentException("certificate could not be parsed");
         }

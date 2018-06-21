@@ -25,7 +25,7 @@ import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -180,7 +180,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-                            jmsManager.sendMessageToQueue(JMSMessageBuilder.create()
+                            jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
                                     .property(MPC, mpcQualifiedName)
                                     .property(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey())
                                     .property(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()))

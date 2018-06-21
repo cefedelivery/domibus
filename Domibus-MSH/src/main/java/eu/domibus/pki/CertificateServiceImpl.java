@@ -312,24 +312,26 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
 
-    public X509Certificate loadCertificateFromString(String content) {
+    public X509Certificate loadCertificateFromString(String content) throws CertificateException {
         CertificateFactory certFactory = null;
         X509Certificate cert = null;
         try {
             certFactory = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {
-            e.printStackTrace();
+            LOG.warn("Error initializing certificate factory ", e);
+            throw new DomibusCertificateException("Could not initialize certificate factory", e);
         }
         InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
         try {
             cert = (X509Certificate) certFactory.generateCertificate(in);
         } catch (CertificateException e) {
-            e.printStackTrace();
+            LOG.warn("Error generating certificate ", e);
+            throw new DomibusCertificateException("Could not generate certificate", e);
         }
         return cert;
     }
 
-    public TrustStoreEntry convertCertificateContent(String certificateContent) {
+    public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
         X509Certificate cert = loadCertificateFromString(certificateContent);
         TrustStoreEntry res = createTrustStoreEntry(cert);
         return  res;
@@ -367,13 +369,15 @@ public class CertificateServiceImpl implements CertificateService {
         try {
             md = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            LOG.warn("Error initializing MessageDigest ", e);
+            throw new DomibusCertificateException("Could not initialize MessageDigest", e);
         }
         byte[] der = new byte[0];
         try {
             der = certificate.getEncoded();
         } catch (CertificateEncodingException e) {
-            e.printStackTrace();
+            LOG.warn("Error encoding certificate ", e);
+            throw new DomibusCertificateException("Could not encode certificate", e);
         }
         md.update(der);
         byte[] digest = md.digest();
