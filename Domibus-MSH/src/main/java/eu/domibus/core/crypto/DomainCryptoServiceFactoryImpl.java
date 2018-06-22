@@ -19,8 +19,8 @@ public class DomainCryptoServiceFactoryImpl implements DomainCryptoServiceFactor
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainCryptoServiceFactoryImpl.class);
 
-    @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
+//    @Autowired
+//    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     protected ApplicationContext applicationContext;
