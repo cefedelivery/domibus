@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "TB_EVENT_PROPERTY")
-public class EventPropertyValue extends AbstractBaseEntity {
+public class EventProperty extends AbstractBaseEntity {
 
     @NotNull
     @Column(name = "PROPERTY_TYPE")
@@ -22,7 +22,7 @@ public class EventPropertyValue extends AbstractBaseEntity {
     @JoinColumn(name="FK_EVENT")
     private Event event;
 
-    public EventPropertyValue() {
+    public EventProperty() {
     }
 
     public String getKey() {
@@ -51,7 +51,7 @@ public class EventPropertyValue extends AbstractBaseEntity {
 
     @Override
     public String toString() {
-        return "EventPropertyValue{" +
+        return "EventProperty{" +
                 "key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 '}';

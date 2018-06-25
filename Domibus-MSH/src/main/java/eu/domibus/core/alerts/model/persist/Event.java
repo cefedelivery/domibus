@@ -28,7 +28,7 @@ public class Event extends AbstractBaseEntity {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "key")
     @MapKeyEnumerated
-    private Map<String, EventPropertyValue> properties = new HashMap<>();
+    private Map<String, EventProperty> properties = new HashMap<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -42,13 +42,13 @@ public class Event extends AbstractBaseEntity {
         alerts.add(alert);
     }
 
-    public void addProperty(final String key,final  EventPropertyValue eventPropertyValue){
-        eventPropertyValue.setKey(key);
-        properties.put(key,eventPropertyValue);
-        eventPropertyValue.setEvent(this);
+    public void addProperty(final String key,final EventProperty eventProperty){
+        eventProperty.setKey(key);
+        properties.put(key, eventProperty);
+        eventProperty.setEvent(this);
     }
 
-    public Map<String, EventPropertyValue> getProperties() {
+    public Map<String, EventProperty> getProperties() {
         return Collections.unmodifiableMap(properties);
     }
 

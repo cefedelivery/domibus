@@ -31,6 +31,6 @@ public class DefaultMailModel<T> implements MailModel<T> {
 
     @Override
     public String getSubject() {
-        return null;
+        return subject;
     }
 }

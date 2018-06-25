@@ -12,6 +12,7 @@ import java.util.*;
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = Event.class)
 public class Event {
 
+
     private final static Logger LOG = LoggerFactory.getLogger(Event.class);
 
     private int entityId;
@@ -54,8 +55,6 @@ public class Event {
         this.type = type;
     }
 
-
-    @JsonBackReference
     public Map<String, EventPropertyValue> getProperties() {
         return properties;
     }

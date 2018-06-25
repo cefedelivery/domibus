@@ -110,7 +110,7 @@
     </bean>
 
     <bean class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
-        <property name="templateLoaderPath" value="/templates/"/>
+        <property name="templateLoaderPath" value="classpath:/templates"/>
     </bean>
 
     <bean class="org.springframework.mail.javamail.JavaMailSenderImpl"/>

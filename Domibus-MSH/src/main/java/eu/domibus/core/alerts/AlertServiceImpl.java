@@ -8,7 +8,6 @@ import eu.domibus.core.alerts.model.AlertType;
 import eu.domibus.core.alerts.model.DefaultMailModel;
 import eu.domibus.core.alerts.model.MailModel;
 import eu.domibus.core.alerts.model.persist.Alert;
-import eu.domibus.core.alerts.model.persist.AlertStatus;
 import eu.domibus.core.alerts.model.persist.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
 import org.slf4j.Logger;
@@ -68,6 +67,9 @@ public class AlertServiceImpl implements AlertService {
         alert.setReportingTime(event.getReportingTime());
         alertDao.create(alert);
         final eu.domibus.core.alerts.model.Alert convert = domainConverter.convert(alert, eu.domibus.core.alerts.model.Alert.class);
+        //to investigate later on but dozer does an incorrect mapping.
+        convert.getEvents().clear();
+        convert.getEvents().add(event);
         return convert;
     }
 
@@ -82,10 +84,13 @@ public class AlertServiceImpl implements AlertService {
         Map<String, String> mailModel = new HashMap<>();
         final Event next = read.getEvents().iterator().next();
         next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue()));
+        if(LOG.isDebugEnabled()){
+            mailModel.entrySet().forEach(entrySet -> LOG.debug("Mail template key[{}] value[{}]",entrySet.getKey(),entrySet.getValue()));
+        }
         final AlertType alertType = read.getAlertType();
         switch (alertType) {
             case MSG_COMMUNICATION_FAILURE:
-                return new DefaultMailModel<Map>(mailModel, "/templates/message.html", "Message status change");
+                return new DefaultMailModel<Map>(mailModel, "message.ftl", "Message status change");
             default:
                 LOG.error("Alert type[{}] is not supported for mail sending.", alertType);
                 throw new IllegalArgumentException("Unsuported alert type.");

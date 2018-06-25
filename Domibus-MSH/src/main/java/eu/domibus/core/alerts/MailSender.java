@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import static eu.domibus.core.alerts.model.Alert.DOMIBUS_ALERT_ACTIVE;
+
 @Component
 public class MailSender {
 
@@ -42,13 +44,18 @@ public class MailSender {
 
     @PostConstruct
     void init() {
-        final Boolean alertModuleEnabled = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.enable", "false"));
+        final Boolean alertModuleEnabled = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_ACTIVE));
+        LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
             //static properties.
             final String url = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.url");
             final Integer port = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.port"));
             final String user = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.user");
             final String password = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.password");
+            LOG.debug("Smtp url:[{}]", url);
+            LOG.debug("Smtp port:[{}]", port);
+            LOG.debug("Smtp user:[{}]", user);
+
             javaMailSender.setHost(url);
             javaMailSender.setPort(port);
             javaMailSender.setUsername(user);
@@ -57,9 +64,12 @@ public class MailSender {
             final Properties javaMailProperties = javaMailSender.getJavaMailProperties();
             final Set<String> mailPropertyNames = domibusPropertyProvider.filterPropertiesName(s -> s.startsWith("domibus.alert.mail"));
             mailPropertyNames.stream().
-                    map(domibusPropertyName->domibusPropertyName.substring(domibusPropertyName.indexOf(".mail"))).
-                    forEach(mailPropertyName -> javaMailProperties.put(mailPropertyName,domibusPropertyProvider.getProperty(mailPropertyName)));
-
+                    map(domibusPropertyName -> domibusPropertyName.substring(domibusPropertyName.indexOf(".mail"))).
+                    forEach(mailPropertyName -> {
+                        final String propertyValue = domibusPropertyProvider.getProperty(mailPropertyName);
+                        javaMailProperties.put(mailPropertyName, propertyValue);
+                        LOG.debug("mail property:[{}] value:[{}]", mailPropertyName, propertyValue);
+                    });
         }
     }
 
@@ -70,8 +80,9 @@ public class MailSender {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
 
-            Template t = freemarkerConfig.getTemplate(model.getTemplatePath());
-            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model.getModel());
+            Template template = freemarkerConfig.getTemplate(model.getTemplatePath());
+            final Object model1 = model.getModel();
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, model1);
 
             helper.setTo(to);
             helper.setText(html, true);

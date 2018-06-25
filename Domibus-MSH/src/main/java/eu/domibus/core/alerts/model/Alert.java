@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import eu.domibus.core.alerts.model.persist.AlertStatus;
@@ -12,6 +13,8 @@ import java.util.Set;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = Alert.class)
 public class Alert {
+
+    public static final String DOMIBUS_ALERT_ACTIVE = "domibus.alert.active";
 
     private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
 

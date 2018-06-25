@@ -12,6 +12,8 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.core.alerts.EventService;
+import eu.domibus.core.alerts.MultiDomainAlertConfigurationService;
+import eu.domibus.core.alerts.model.Alert;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -98,6 +100,9 @@ public class BackendNotificationService {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -301,6 +306,12 @@ public class BackendNotificationService {
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+
+        multiDomainAlertConfigurationService.getMessageCommunicationConfiguration(domibusPropertyProvider)
+        if(alertActif && messageAlertActif){
+            eventService.enqueueMessageEvent(messageLog.getMessageId(),messageLog.getMessageStatus(),newStatus,messageLog.getMshRole());
+        }
+
         if (isPluginNotificationDisabled()) {
             return;
         }
@@ -313,10 +324,10 @@ public class BackendNotificationService {
             return;
         }
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_CHANGED, messageLog.getMessageStatus(), newStatus);
-
         final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
-        eventService.enqueueMessageEvent(messageId,messageLog.getMessageStatus(),newStatus,messageLog.getMshRole());
+
+;
     }
 
     protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {

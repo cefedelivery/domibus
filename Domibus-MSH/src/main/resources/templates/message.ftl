@@ -1451,19 +1451,31 @@
                                                     <table class="callout">
                                                         <tr>
                                                             <th class="callout-inner primary">
-                                                                Message id: 10120
+                                                                Message id: ${MESSAGE_ID}
                                                             </th>
                                                             <th class="expander"></th>
                                                         </tr>
                                                         <tr>
                                                             <th class="callout-inner primary">
-                                                                <p>From status:</p>
+                                                                From party:${FROM_PARTY}
 
                                                             <th class="expander">Test</th>
                                                         </tr>
                                                         <tr>
                                                             <th class="callout-inner primary">
-                                                                <p>To status:</p>
+                                                                To party:${TO_PARTY}
+                                                            </th>
+                                                            <th class="expander"></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="callout-inner primary">
+                                                                Old status:${OLD_STATUS}
+                                                            </th>
+                                                            <th class="expander"></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="callout-inner primary">
+                                                                New status:${NEW_STATUS}
                                                             </th>
                                                             <th class="expander"></th>
                                                         </tr>
