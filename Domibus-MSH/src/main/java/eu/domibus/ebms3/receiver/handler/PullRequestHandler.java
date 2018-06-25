@@ -100,7 +100,7 @@ public class PullRequestHandler {
     }
 
     @Transactional
-    SOAPMessage handleRequest(String messageId, PullContext pullContext) {
+   public  SOAPMessage handleRequest(String messageId, PullContext pullContext) {
         LegConfiguration leg = null;
         ReliabilityChecker.CheckResult checkResult = ReliabilityChecker.CheckResult.PULL_FAILED;
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
@@ -137,7 +137,7 @@ public class PullRequestHandler {
 
         } catch (ChainCertificateInvalidException e) {
             checkResult = ABORT;
-            LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+            LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted",e);
             LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();

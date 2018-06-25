@@ -70,7 +70,7 @@ public class MessagingLock extends AbstractBaseEntity {
     @Column(name = "SEND_ATTEMPTS_MAX")
     private int sendAttemptsMax;
 
-    public MessagingLock(
+    public MessagingLock(             //NOSONAR
             final String messageId,
             final String initiator,
             final String mpc,
@@ -91,7 +91,7 @@ public class MessagingLock extends AbstractBaseEntity {
         this.sendAttemptsMax=sendAttemptsMax;
     }
 
-    public MessagingLock() {
+    public MessagingLock() {//NOSONAR
     }
 
     public String getMessageType() {
