@@ -52,10 +52,10 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
     private Properties domibusProperties;
 
     @Autowired
-    DomibusConfigurationService domibusConfigurationService;
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
-    ProxyUtil proxyUtil;
+    protected ProxyUtil proxyUtil;
 
     @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
     public EndpointInfo lookupInformation(final String participantId, final String participantIdScheme, final String documentId, final String processId, final String processIdScheme) throws
