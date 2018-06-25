@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Cosmin Baciu
@@ -33,7 +34,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     public String getProperty(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         String propertyValue = domibusProperties.getProperty(domainPropertyName);
-        if(StringUtils.isEmpty(propertyValue) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
+        if (StringUtils.isEmpty(propertyValue) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
             propertyValue = domibusProperties.getProperty(propertyName);
         }
         return propertyValue;
@@ -57,7 +58,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getProperty(String propertyName, String defaultValue) {
         String propertyValue = getProperty(propertyName);
-        if(StringUtils.isEmpty(propertyValue)) {
+        if (StringUtils.isEmpty(propertyValue)) {
             propertyValue = defaultValue;
         }
         return propertyValue;
@@ -67,7 +68,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     public String getResolvedProperty(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
         String resolvedProperty = propertyResolver.getResolvedProperty(domainPropertyName, domibusProperties, true);
-        if(StringUtils.isEmpty(resolvedProperty) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
+        if (StringUtils.isEmpty(resolvedProperty) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
             resolvedProperty = propertyResolver.getResolvedProperty(propertyName, domibusProperties, true);
         }
         return resolvedProperty;
@@ -76,5 +77,18 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getResolvedProperty(String propertyName) {
         return getResolvedProperty(DomainService.DEFAULT_DOMAIN, propertyName);
+    }
+
+    @Override
+    public Set<String> filterPropertiesName(Predicate<String> predicate) {
+        Set<String> filteredPropertyNames=new HashSet<>();
+        final Enumeration<?> enumeration = domibusProperties.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            final String propertyName = (String) enumeration.nextElement();
+            if (predicate.test(propertyName)){
+                filteredPropertyNames.add(propertyName);
+            }
+        }
+        return filteredPropertyNames;
     }
 }

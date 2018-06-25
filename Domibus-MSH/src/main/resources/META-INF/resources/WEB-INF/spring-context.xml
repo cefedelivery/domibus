@@ -109,4 +109,10 @@
         <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
 
+    <bean class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="templateLoaderPath" value="/templates/"/>
+    </bean>
+
+    <bean class="org.springframework.mail.javamail.JavaMailSenderImpl"/>
+
 </beans>

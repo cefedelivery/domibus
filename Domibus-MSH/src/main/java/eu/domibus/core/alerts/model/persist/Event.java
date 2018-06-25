@@ -1,11 +1,12 @@
 package eu.domibus.core.alerts.model.persist;
 
+import eu.domibus.core.alerts.model.EventType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.security.krb5.internal.crypto.Aes128;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Entity
@@ -15,22 +16,25 @@ public class Event extends AbstractBaseEntity {
     private final static Logger LOG = LoggerFactory.getLogger(Event.class);
 
     @Column(name = "EVENT_TYPE")
-    private String eventType;
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private EventType type;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "REPORTING_TIME")
+    @NotNull
     private Date reportingTime;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    @MapKey(name = "PROPERTY_TYPE")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapKey(name = "key")
     @MapKeyEnumerated
     private Map<String, EventPropertyValue> properties = new HashMap<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "TB_EVENT_ALERT",
-            joinColumns = {@JoinColumn(name = "EVENT_ID")},
-            inverseJoinColumns = {@JoinColumn(name = "ALERT_ID")}
+            joinColumns = {@JoinColumn(name = "FK_EVENT")},
+            inverseJoinColumns = {@JoinColumn(name = "FK_ALERT")}
     )
     private Set<Alert> alerts = new HashSet<>();
 
@@ -39,16 +43,21 @@ public class Event extends AbstractBaseEntity {
     }
 
     public void addProperty(final String key,final  EventPropertyValue eventPropertyValue){
+        eventPropertyValue.setKey(key);
         properties.put(key,eventPropertyValue);
         eventPropertyValue.setEvent(this);
     }
 
-    public String getEventType() {
-        return eventType;
+    public Map<String, EventPropertyValue> getProperties() {
+        return Collections.unmodifiableMap(properties);
     }
 
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
+    public EventType getType() {
+        return type;
+    }
+
+    public void setType(EventType type) {
+        this.type = type;
     }
 
     public Date getReportingTime() {
@@ -70,7 +79,7 @@ public class Event extends AbstractBaseEntity {
     @Override
     public String toString() {
         return "Event{" +
-                "eventType='" + eventType + '\'' +
+                "type='" + type + '\'' +
                 ", reportingTime=" + reportingTime +
                 ", properties=" + properties +
                 ", alerts=" + alerts +

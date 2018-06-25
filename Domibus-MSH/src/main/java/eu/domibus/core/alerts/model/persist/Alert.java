@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +32,10 @@ public class Alert extends AbstractBaseEntity{
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportingTime;
 
+    @Column(name = "NEXT_ATTEMPT")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date nextAttempt;
+
     @Column(name = "ATTEMPTS_NUMBER")
     private Integer attempts;
 
@@ -41,8 +46,13 @@ public class Alert extends AbstractBaseEntity{
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportingTimeFailure;
 
+    @Size(min=1)
     @ManyToMany(mappedBy = "alerts")
     private Set<Event> events = new HashSet<>();
+
+    @Column(name = "ALERT_STATUS")
+    @Enumerated(EnumType.STRING)
+    private AlertStatus alertStatus;
 
     public void addEvent(Event event){
         events.add(event);
@@ -81,6 +91,14 @@ public class Alert extends AbstractBaseEntity{
         this.reportingTime = reportingTime;
     }
 
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public void setNextAttempt(Date nextAttempt) {
+        this.nextAttempt = nextAttempt;
+    }
+
     public Integer getAttempts() {
         return attempts;
     }
@@ -103,5 +121,21 @@ public class Alert extends AbstractBaseEntity{
 
     public void setReportingTimeFailure(Date reportingTimeFailure) {
         this.reportingTimeFailure = reportingTimeFailure;
+    }
+
+    public Set<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Set<Event> events) {
+        this.events = events;
+    }
+
+    public AlertStatus getAlertStatus() {
+        return alertStatus;
+    }
+
+    public void setAlertStatus(AlertStatus alertStatus) {
+        this.alertStatus = alertStatus;
     }
 }

@@ -1,20 +1,36 @@
 package eu.domibus.core.alerts.model.persist;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.ManyToOne;
+import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
-@Embeddable
-public class EventPropertyValue {
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
+@Entity
+@Table(name = "TB_EVENT_PROPERTY")
+public class EventPropertyValue extends AbstractBaseEntity {
+
+    @NotNull
+    @Column(name = "PROPERTY_TYPE")
+    private String key;
+
+    @NotNull
     @Column(name = "PROPERTY_VALUE")
     private String value;
 
+    @NotNull
     @ManyToOne
+    @JoinColumn(name="FK_EVENT")
     private Event event;
 
-    public EventPropertyValue(String value) {
-        this.value = value;
+    public EventPropertyValue() {
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getValue() {
@@ -36,8 +52,8 @@ public class EventPropertyValue {
     @Override
     public String toString() {
         return "EventPropertyValue{" +
-                "value='" + value + '\'' +
-                ", event=" + event +
+                "key='" + key + '\'' +
+                ", value='" + value + '\'' +
                 '}';
     }
 }

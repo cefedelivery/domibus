@@ -6,7 +6,7 @@ import eu.domibus.core.alerts.model.Event;
 
 public interface EventService {
 
-    void sendMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role);
+    void enqueueMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role);
 
     void persistEvent(Event event);
 

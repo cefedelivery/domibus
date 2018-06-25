@@ -13,6 +13,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.Event;
 import eu.domibus.core.alerts.model.EventPropertyValue;
+import eu.domibus.core.alerts.model.EventType;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -60,28 +61,25 @@ public class EventServiceImpl implements EventService {
     private Queue alertMessageQueue;
 
     @Override
-    public void sendMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role) {
+    public void enqueueMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role) {
         //check is status is relevant.
-        Event event = new Event(MESSAGE.name());
+        Event event = new Event(EventType.MSG_COMMUNICATION_FAILURE);
         event.addKeyValue(OLD_STATUS.name(), oldStatus.name());
         event.addKeyValue(NEW_STATUS.name(), newStatus.name());
         event.addKeyValue(MESSAGE_ID.name(), messageId);
         event.addKeyValue(ROLE.name(), role.name());
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, "message");
-
-        //send event to queue.
-
     }
 
     @Override
     public void persistEvent(final Event event) {
         final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
-        LOG.debug("Converting jms event[{}] to persistent event[{}]", event, eventEntity);
+        LOG.debug("Converting jms event\n[{}] to persistent event\n[{}]", event, eventEntity);
         event.getProperties().entrySet().forEach(entry -> {
             final eu.domibus.core.alerts.model.persist.EventPropertyValue propertyValue = domainConverter.convert(entry.getValue(), eu.domibus.core.alerts.model.persist.EventPropertyValue.class);
             final String key = entry.getKey();
             eventEntity.addProperty(key, propertyValue);
-            LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key);
+            LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key,entry.getValue().getValue());
         });
         eventDao.create(eventEntity);
         event.setEntityId(eventEntity.getEntityId());
@@ -109,42 +107,4 @@ public class EventServiceImpl implements EventService {
             LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
         }
     }
-
-/*    @Override
-    public Event enrichMessageEvent(final Event event) {
-
-        final String messageId = event.findProperty(MESSAGE_ID.name()).get();
-        final String role = event.findProperty(ROLE.name()).get();
-        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        // final UserMessageLog byMessageId = userMessageLogDao.findByMessageId(messageId);
-        try {
-
-
-            final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
-            LOG.debug("Converting jms event[{}] to persistent event[{}]", event, eventEntity);
-            final Set<Map.Entry<String, EventPropertyValue>> entries = event.getProperties().entrySet();
-            for (Map.Entry<String, EventPropertyValue> entry : entries) {
-                final eu.domibus.core.alerts.model.persist.EventPropertyValue propertyValue = domainConverter.convert(entry.getValue(), eu.domibus.core.alerts.model.persist.EventPropertyValue.class);
-                final String key = entry.getKey();
-                eventEntity.addProperty(key, propertyValue);
-                LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key);
-            }
-            eventEntity.addProperty(FROM_PARTY.name(), new eu.domibus.core.alerts.model.persist.EventPropertyValue(senderParty.getName()));
-            eventEntity.addProperty(TO_PARTY.name(), new eu.domibus.core.alerts.model.persist.EventPropertyValue(receiverParty.getName()));
-
-            StringBuilder stringBuilder = new StringBuilder();
-            errorLogDao.
-                    getErrorsForMessage(messageId).
-                    stream().
-                    map(ErrorLogEntry::getErrorDetail).forEach(error -> stringBuilder.append(error));
-            event.addKeyValue(DESCRIPTION.name(), stringBuilder.toString());
-            final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
-            eventDao.create(eventEntity);
-            return domainConverter.convert(eventEntity, Event.class);
-        } catch (EbMS3Exception e) {
-            LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
-            return null;
-        }
-
-    }*/
 }

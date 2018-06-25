@@ -316,7 +316,7 @@ public class BackendNotificationService {
 
         final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
-        eventService.sendMessageEvent(messageId,messageLog.getMessageStatus(),newStatus,messageLog.getMshRole());
+        eventService.enqueueMessageEvent(messageId,messageLog.getMessageStatus(),newStatus,messageLog.getMshRole());
     }
 
     protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {

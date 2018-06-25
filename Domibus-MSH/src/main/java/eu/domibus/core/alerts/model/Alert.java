@@ -1,17 +1,21 @@
 package eu.domibus.core.alerts.model;
 
-import eu.domibus.core.alerts.model.persist.Event;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import eu.domibus.core.alerts.model.persist.AlertStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.ManyToMany;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = Alert.class)
 public class Alert {
 
     private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
+
+    private int entityId;
 
     private boolean processed;
 
@@ -27,7 +31,17 @@ public class Alert {
 
     private Date reportingTimeFailure;
 
+    private AlertStatus alertStatus;
+
     private Set<Event> events = new HashSet<>();
+
+    public int getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
 
     public boolean isProcessed() {
         return processed;
@@ -91,5 +105,28 @@ public class Alert {
 
     public void setEvents(Set<Event> events) {
         this.events = events;
+    }
+
+    public AlertStatus getAlertStatus() {
+        return alertStatus;
+    }
+
+    public void setAlertStatus(AlertStatus alertStatus) {
+        this.alertStatus = alertStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "Alert{" +
+                "entityId=" + entityId +
+                ", processed=" + processed +
+                ", processedTime=" + processedTime +
+                ", alertType=" + alertType +
+                ", reportingTime=" + reportingTime +
+                ", attempts=" + attempts +
+                ", maxAttempts=" + maxAttempts +
+                ", reportingTimeFailure=" + reportingTimeFailure +
+                ", events=" + events +
+                '}';
     }
 }

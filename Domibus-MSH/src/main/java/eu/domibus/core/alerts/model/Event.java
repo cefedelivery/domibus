@@ -1,6 +1,8 @@
 package eu.domibus.core.alerts.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +18,11 @@ public class Event {
 
     private Date reportingTime;
 
-    private String type;
+    private EventType type;
 
     private Map<String, EventPropertyValue> properties = new HashMap<>();
 
-    public Event(final String type) {
+    public Event(final EventType type) {
         this.reportingTime = new Date();
         this.type = type;
     }
@@ -44,14 +46,16 @@ public class Event {
         this.reportingTime = reportingTime;
     }
 
-    public String getType() {
+    public EventType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(EventType type) {
         this.type = type;
     }
 
+
+    @JsonBackReference
     public Map<String, EventPropertyValue> getProperties() {
         return properties;
     }
