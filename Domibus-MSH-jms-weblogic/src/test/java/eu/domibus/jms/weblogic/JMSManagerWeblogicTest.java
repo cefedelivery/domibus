@@ -1,6 +1,8 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJmsMessage;
 import eu.domibus.jms.spi.helper.JMSSelectorUtil;
@@ -10,8 +12,10 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 
+import javax.inject.Inject;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
@@ -47,6 +51,12 @@ public class JMSManagerWeblogicTest {
 
     @Injectable
     JMSSelectorUtil jmsSelectorUtil;
+
+    @Injectable
+    private AuthUtils authUtils;
+
+    @Injectable
+    private DomibusConfigurationService domibusConfigurationService;
 
     @Test
     public void testGetQueueName() throws Exception {

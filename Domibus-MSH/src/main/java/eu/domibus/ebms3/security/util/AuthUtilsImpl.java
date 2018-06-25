@@ -84,12 +84,12 @@ public class AuthUtilsImpl implements AuthUtils {
 
     @Override
     public boolean isSuperAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name()))) {
-            return true;
-        }
-        return false;
+        return checkAdminRights(AuthRole.ROLE_AP_ADMIN);
+    }
+
+    @Override
+    public boolean isAdmin() {
+        return checkAdminRights(AuthRole.ROLE_ADMIN);
     }
 
     @Override
@@ -120,6 +120,15 @@ public class AuthUtilsImpl implements AuthUtils {
                         user,
                         password,
                         Collections.singleton(new SimpleGrantedAuthority(authRole.name()))));
+    }
+
+    protected boolean checkAdminRights(AuthRole authRole) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if (authorities.contains(new SimpleGrantedAuthority(authRole.name()))) {
+            return true;
+        }
+        return false;
     }
 
 }
