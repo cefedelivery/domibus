@@ -148,6 +148,5 @@ export class EditUserComponent {
       return allRoles.filter(role => role != SecurityService.ROLE_AP_ADMIN);
   }
 
-  onRolesChanged () {
-  }
+
 }

@@ -55,7 +55,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     @Override
     public boolean useProxy() {
         String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-        if (StringUtils.isEmpty(useProxy)) {
+        if (StringUtils.isEmpty(useProxy) || !Boolean.parseBoolean(useProxy)) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;
         }
