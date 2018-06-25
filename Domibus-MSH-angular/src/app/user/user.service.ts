@@ -66,8 +66,7 @@ export class UserService {
   }
 
   private extractData (res: Response) {
-    let body = res.json();
-    return body || {};
+    return res.json() || {};
   }
 
   private handleError (error: Response | any) {

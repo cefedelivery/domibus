@@ -16,11 +16,11 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.security.cert.X509Certificate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -348,9 +348,15 @@ public class PartyServiceImpl implements PartyService {
                 .forEach(pair -> {
                     String partyName = pair.getKey();
                     String certificateContent = pair.getValue();
-                    X509Certificate cert = certificateService.loadCertificateFromString(certificateContent);
+                    X509Certificate cert = null;
+                    try {
+                        cert = certificateService.loadCertificateFromString(certificateContent);
+                    } catch (CertificateException e) {
+                        LOG.error("Error deserializing certificate", e);
+                        throw new IllegalStateException(e);
+                    }
                     multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert, partyName, true);
-        });
+                });
     }
 
     @Override

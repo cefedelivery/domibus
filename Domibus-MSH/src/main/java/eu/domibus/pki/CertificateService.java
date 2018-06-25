@@ -7,6 +7,7 @@ import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public interface CertificateService {
      *
      * @return a certificate
      */
-    X509Certificate loadCertificateFromString(String content);
+    X509Certificate loadCertificateFromString(String content) throws CertificateException;
 
     /**
      * Returns the certificate entry from the trust store given an alias
@@ -57,5 +58,5 @@ public interface CertificateService {
      *
      * @return a certificate entry
      */
-    TrustStoreEntry convertCertificateContent(String certificateContent);
+    TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException;
 }
