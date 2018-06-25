@@ -137,8 +137,8 @@ public class PullRequestHandler {
 
         } catch (ChainCertificateInvalidException e) {
             checkResult = ABORT;
-            LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted",e);
-            LOG.error("Cannot handle pullrequest for message: receiver " + pullContext.getInitiator().getName() + "  certificate is not valid or it has been revoked ");
+            LOG.debug("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
+            LOG.error("Cannot handle pullrequest for message:[{}], Receivever:[{}] certificate is not valid or it has been revoked ",messageId,pullContext.getInitiator().getName(),e);
         } catch (EbMS3Exception e) {
             attemptError = e.getMessage();
             attemptStatus = MessageAttemptStatus.ERROR;
