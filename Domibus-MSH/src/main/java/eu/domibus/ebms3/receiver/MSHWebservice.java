@@ -166,7 +166,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
-    SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
+    protected SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
@@ -219,7 +219,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return null;
     }
 
-    SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
+    protected SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
         SOAPMessage soapMessage;
         if (pullReceiptMatcher.matchReliableReceipt(legConfiguration) && legConfiguration.getReliability().isNonRepudiation()) {
             RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
@@ -234,9 +234,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return soapMessage;
     }
 
-
-    @Transactional
-    SOAPMessage handlePullRequest(Messaging messaging) {
+    protected SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
         String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
