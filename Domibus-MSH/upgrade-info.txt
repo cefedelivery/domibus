@@ -1,6 +1,6 @@
 Domibus 4.0 (from 3.3):
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
-
+               - Replace the Domibus war and the plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\conf" respectively into "\domibus\conf\domibus\plugins\lib"
                - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the of caches definition:
                     <ehcache>
                     ........................
