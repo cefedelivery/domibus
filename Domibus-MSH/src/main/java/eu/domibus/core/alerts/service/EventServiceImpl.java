@@ -9,8 +9,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.core.alerts.dao.EventDao;
-import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -29,6 +29,7 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 public class EventServiceImpl implements EventService {
 
     private final static Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
+    public static final String MESSAGE_EVENT_SELECTOR = "message";
 
     @Autowired
     private EventDao eventDao;
@@ -61,7 +62,8 @@ public class EventServiceImpl implements EventService {
         event.addKeyValue(NEW_STATUS.name(), newStatus.name());
         event.addKeyValue(MESSAGE_ID.name(), messageId);
         event.addKeyValue(ROLE.name(), role.name());
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, "message");
+        jmsManager.convertAndSendToQueue(event, alertMessageQueue, MESSAGE_EVENT_SELECTOR);
+        LOG.debug("Event:[{}] added to the queue", event);
     }
 
     @Override
@@ -74,7 +76,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void enrichMessage(final Event event) {
+    public void enrichMessageEvent(final Event event) {
         final String messageId = event.findProperty(MESSAGE_ID.name()).get();
         final String role = event.findProperty(ROLE.name()).get();
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);

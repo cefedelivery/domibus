@@ -10,6 +10,6 @@ public interface EventService {
 
     void persistEvent(Event event);
 
-    void enrichMessage(Event event);
+    void enrichMessageEvent(Event event);
 
 }

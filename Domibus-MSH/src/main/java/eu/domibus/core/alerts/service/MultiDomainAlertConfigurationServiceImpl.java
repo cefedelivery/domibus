@@ -4,9 +4,9 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
-import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.model.service.MessagingConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +39,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     public MessagingConfiguration getMessageCommunicationConfiguration() {
         final Domain domain = domainContextProvider.getCurrentDomain();
         MessagingConfiguration messagingConfiguration = this.messagingConfigurationMap.get(domain);
+        LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
         if (messagingConfiguration == null) {
             synchronized (messagingConfigurationMap) {
                 messagingConfiguration = this.messagingConfigurationMap.get(domain);
@@ -52,7 +53,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 }
             }
         }
-        return messagingConfigurationMap.get(domain);
+        messagingConfiguration = messagingConfigurationMap.get(domain);
+        LOG.debug("Alert messaging configuration:[{}]", messagingConfiguration);
+        return messagingConfiguration;
     }
 
     private MessagingConfiguration readMessageConfiguration(Domain domain) {
@@ -66,6 +69,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     final String[] states = messageCommunicationStates.split(",");
                     final String[] levels = messageCommunicationLevels.split(",");
                     if (states.length == levels.length) {
+                        LOG.trace("Each message status has his own level");
                         int i = 0;
                         for (String state : states) {
                             final MessageStatus messageStatus = MessageStatus.valueOf(state);
@@ -74,10 +78,12 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                         }
                     } else {
                         final AlertLevel alertLevel = AlertLevel.valueOf(levels[0]);
+                        LOG.trace("No one to one mapping between message status and alert level. All message status will have alert level:[{}]", alertLevel);
                         for (String state : states) {
                             final MessageStatus messageStatus = MessageStatus.valueOf(state);
                             messageStatusLevels.put(messageStatus, alertLevel);
                         }
+
                     }
                 }
             }

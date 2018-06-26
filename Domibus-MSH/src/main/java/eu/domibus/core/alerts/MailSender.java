@@ -28,6 +28,12 @@ import static eu.domibus.core.alerts.model.service.Alert.DOMIBUS_ALERT_ACTIVE;
 public class MailSender {
 
     private final static Logger LOG = LoggerFactory.getLogger(MailSender.class);
+    static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
+    static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
+    static final String MAIL = ".mail";
 
     @Autowired
     private Configuration freemarkerConfig;
@@ -47,10 +53,11 @@ public class MailSender {
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
             //static properties.
-            final String url = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.url");
-            final Integer port = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.port"));
-            final String user = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.user");
-            final String password = domibusPropertyProvider.getProperty("domibus.alert.sender.smtp.password");
+            final String url = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);
+            final Integer port = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PORT));
+            final String user = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_USER);
+            final String password = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PASSWORD);
+            LOG.debug("Configuring mail server.");
             LOG.debug("Smtp url:[{}]", url);
             LOG.debug("Smtp port:[{}]", port);
             LOG.debug("Smtp user:[{}]", user);
@@ -61,9 +68,9 @@ public class MailSender {
             javaMailSender.setPassword(password);
             //Non static properties.
             final Properties javaMailProperties = javaMailSender.getJavaMailProperties();
-            final Set<String> mailPropertyNames = domibusPropertyProvider.filterPropertiesName(s -> s.startsWith("domibus.alert.mail"));
+            final Set<String> mailPropertyNames = domibusPropertyProvider.filterPropertiesName(s -> s.startsWith(DOMIBUS_ALERT_MAIL));
             mailPropertyNames.stream().
-                    map(domibusPropertyName -> domibusPropertyName.substring(domibusPropertyName.indexOf(".mail"))).
+                    map(domibusPropertyName -> domibusPropertyName.substring(domibusPropertyName.indexOf(MAIL))).
                     forEach(mailPropertyName -> {
                         final String propertyValue = domibusPropertyProvider.getProperty(mailPropertyName);
                         javaMailProperties.put(mailPropertyName, propertyValue);

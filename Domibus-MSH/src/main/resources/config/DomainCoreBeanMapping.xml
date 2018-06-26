@@ -10,18 +10,6 @@
         <date-format>MM/dd/yyyy HH:mm</date-format>
         <wildcard>true</wildcard>
     </configuration>
-   <!-- <mapping wildcard="false">
-        <class-a>eu.domibus.core.alerts.model.service.EventPropertyValue</class-a>
-        <class-b>eu.domibus.core.alerts.model.persist.EventProperty</class-b>
-       &lt;!&ndash; <field>
-            <a>key</a>
-            <b>key</b>
-        </field>&ndash;&gt;
-        <field>
-            <a>value</a>
-            <b>value</b>
-        </field>
-    </mapping>-->
     <mapping wildcard="false">
         <class-a>eu.domibus.core.alerts.model.service.Event</class-a>
         <class-b>eu.domibus.core.alerts.model.persist.Event</class-b>

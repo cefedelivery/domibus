@@ -11,9 +11,9 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.core.alerts.model.service.MessagingConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -326,8 +326,6 @@ public class BackendNotificationService {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_CHANGED, messageLog.getMessageStatus(), newStatus);
         final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
-
-        ;
     }
 
     protected Map<String, Object> getMessageProperties(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {

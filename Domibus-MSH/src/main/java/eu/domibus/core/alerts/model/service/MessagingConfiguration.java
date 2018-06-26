@@ -36,4 +36,12 @@ public class MessagingConfiguration {
     public AlertLevel getAlertLevel(MessageStatus messageStatus) {
         return messageStatusLevels.get(messageStatus);
     }
+
+    @Override
+    public String toString() {
+        return "MessagingConfiguration{" +
+                "messageCommunicationActive=" + messageCommunicationActive +
+                ", messageStatusLevels=" + messageStatusLevels +
+                '}';
+    }
 }

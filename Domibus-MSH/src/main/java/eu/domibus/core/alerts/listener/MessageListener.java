@@ -1,9 +1,9 @@
 package eu.domibus.core.alerts.listener;
 
-import eu.domibus.core.alerts.service.AlertService;
-import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.service.Event;
+import eu.domibus.core.alerts.service.AlertService;
+import eu.domibus.core.alerts.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class MessageListener {
             selector = "selector = 'message'")
     public void onMessageEvent(final Event event) {
         LOG.debug("Message event received:[{}]", event);
-        eventService.enrichMessage(event);
+        eventService.enrichMessageEvent(event);
         eventService.persistEvent(event);
         final Alert alertOnEvent = alertService.createAlertOnEvent(event);
         alertService.enqueueAlert(alertOnEvent);
