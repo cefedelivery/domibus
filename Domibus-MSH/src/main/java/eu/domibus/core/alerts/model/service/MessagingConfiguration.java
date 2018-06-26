@@ -17,7 +17,6 @@ public class MessagingConfiguration {
 
     private Map<MessageStatus,AlertLevel> messageStatusLevels=new HashMap<>();
 
-
     public MessagingConfiguration(boolean messageCommunicationActive) {
         this.messageCommunicationActive = messageCommunicationActive;
     }

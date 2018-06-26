@@ -96,23 +96,4 @@
     </bean>
     <bean id="dateFormatter" class="eu.domibus.ebms3.common.model.TimestampDateFormatter"/>
 
-    <bean id="jackson2MessageConverter" class="org.springframework.jms.support.converter.MappingJackson2MessageConverter">
-        <property name="targetType" value="TEXT"/>
-        <property name="typeIdPropertyName" value="_type"/>
-
-    </bean>
-
-    <bean class="org.springframework.jms.core.JmsTemplate" id="jsonJmsTemplate">
-        <constructor-arg ref="domibusJMS-XAConnectionFactory"/>
-        <property name="sessionTransacted" value="false" />
-        <property name="sessionAcknowledgeModeName" value="AUTO_ACKNOWLEDGE" />
-        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
-    </bean>
-
-    <bean class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
-        <property name="templateLoaderPath" value="classpath:/templates"/>
-    </bean>
-
-    <bean class="org.springframework.mail.javamail.JavaMailSenderImpl"/>
-
 </beans>

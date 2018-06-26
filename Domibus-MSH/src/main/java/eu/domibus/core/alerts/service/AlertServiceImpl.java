@@ -2,16 +2,12 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
-import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.common.MessageEvent;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
 import eu.domibus.core.alerts.model.service.DefaultMailModel;
-import eu.domibus.core.alerts.model.service.EventPropertyValue;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.converter.DomainCoreConverter;
 import org.slf4j.Logger;
@@ -30,9 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static eu.domibus.core.alerts.model.common.AlertStatus.RETRY;
-import static eu.domibus.core.alerts.model.common.AlertStatus.SEND_ENQUEUED;
-import static eu.domibus.core.alerts.model.common.AlertStatus.SUCCESS;
+import static eu.domibus.core.alerts.model.common.AlertStatus.*;
 
 @Service
 public class AlertServiceImpl implements AlertService {
@@ -68,6 +62,9 @@ public class AlertServiceImpl implements AlertService {
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
+    @Autowired
+    private Map<AlertType, AlertLevelStrategy> alertLevelStrategyMap;
+
     @Override
     @Transactional
     public eu.domibus.core.alerts.model.service.Alert createAlertOnEvent(eu.domibus.core.alerts.model.service.Event event) {
@@ -80,10 +77,9 @@ public class AlertServiceImpl implements AlertService {
         alert.setReportingTime(event.getReportingTime());
         alert.setAlertStatus(SEND_ENQUEUED);
 
-        final EventPropertyValue eventPropertyValue = event.getProperties().get(MessageEvent.NEW_STATUS.name());
-        final MessageStatus newStatus = MessageStatus.valueOf(eventPropertyValue.getValue());
-        final AlertLevel alertLevel = multiDomainAlertConfigurationService.getMessageCommunicationConfiguration().getAlertLevel(newStatus);
-        alert.setAlertLevel(alertLevel);
+        final AlertLevelStrategy alertLevelStrategy = alertLevelStrategyMap.get(alert.getAlertType());
+        alert.setAlertLevel(alertLevelStrategy.getAlertLevel(event));
+
         LOG.debug("Saving new alert:\n[]\n",alert);
         alertDao.create(alert);
         return domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
@@ -107,13 +103,9 @@ public class AlertServiceImpl implements AlertService {
             mailModel.entrySet().forEach(entrySet -> LOG.debug("Mail template key[{}] value[{}]", entrySet.getKey(), entrySet.getValue()));
         }
         final AlertType alertType = read.getAlertType();
-        switch (alertType) {
-            case MSG_COMMUNICATION_FAILURE:
-                return new DefaultMailModel<Map>(mailModel, "message.ftl", "Message status change");
-            default:
-                LOG.error("Alert type[{}] is not supported for mail sending.", alertType);
-                throw new IllegalArgumentException("Unsuported alert type.");
-        }
+        final String subject = domibusPropertyProvider.getProperty(alertType.getSubjectProperty());
+        final String template = alertType.getTemplate();
+        return new DefaultMailModel(mailModel, template, subject);
     }
 
     @Override

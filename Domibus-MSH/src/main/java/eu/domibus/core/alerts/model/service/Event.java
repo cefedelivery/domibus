@@ -6,11 +6,13 @@ import eu.domibus.core.alerts.model.common.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = Event.class)
 public class Event {
-
 
     private final static Logger LOG = LoggerFactory.getLogger(Event.class);
 
@@ -61,8 +63,6 @@ public class Event {
     public void setProperties(Map<String, EventPropertyValue> properties) {
         this.properties = properties;
     }
-
-
 
     public Optional<String> findProperty(final String key) {
         final EventPropertyValue eventPropertyValue = properties.get(key);
