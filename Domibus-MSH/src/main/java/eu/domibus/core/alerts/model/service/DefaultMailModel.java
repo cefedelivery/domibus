@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

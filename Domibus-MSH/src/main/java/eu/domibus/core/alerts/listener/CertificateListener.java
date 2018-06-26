@@ -1,6 +1,6 @@
 package eu.domibus.core.alerts.listener;
 
-import eu.domibus.core.alerts.model.Event;
+import eu.domibus.core.alerts.model.service.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.annotation.JmsListener;

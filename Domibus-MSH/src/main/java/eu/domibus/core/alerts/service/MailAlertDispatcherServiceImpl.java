@@ -1,17 +1,18 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
-import eu.domibus.core.alerts.model.Alert;
-import eu.domibus.core.alerts.model.MailModel;
-import eu.domibus.core.alerts.model.persist.AlertStatus;
+import eu.domibus.core.alerts.MailSender;
+import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.model.service.MailModel;
+import eu.domibus.core.alerts.model.common.AlertStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MailAlertDispatcher implements AlertDispatcher {
+public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MailAlertDispatcher.class);
+    private final static Logger LOG = LoggerFactory.getLogger(MailAlertDispatcherServiceImpl.class);
 
     @Autowired
     private AlertService alertService;
@@ -25,9 +26,9 @@ public class MailAlertDispatcher implements AlertDispatcher {
         try {
             alert.setAlertStatus(AlertStatus.FAILED);
             mailSender.sendMail(mailModelForAlert, "to", "from");
-            alert.setAlertStatus(AlertStatus.SENT);
+            alert.setAlertStatus(AlertStatus.SUCCESS);
         } finally {
-            alertService.handleSendAlertStatus(alert);
+            alertService.handleAlertStatus(alert);
         }
     }
 

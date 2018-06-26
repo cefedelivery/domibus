@@ -299,6 +299,8 @@
             <column name="PROCESSED_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
+            <column name="ALERT_STATUS" type="VARCHAR(20)"/>
+            <column name="ALERT_LEVEL" type="VARCHAR(20)"/>
         </createTable>
 
         <addPrimaryKey

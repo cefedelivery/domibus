@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.service;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;

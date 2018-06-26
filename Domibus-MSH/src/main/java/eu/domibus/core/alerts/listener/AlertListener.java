@@ -1,9 +1,7 @@
 package eu.domibus.core.alerts.listener;
 
-import eu.domibus.core.alerts.AlertDispatcher;
-import eu.domibus.core.alerts.AlertService;
-import eu.domibus.core.alerts.model.Alert;
-import eu.domibus.core.alerts.model.MailModel;
+import eu.domibus.core.alerts.service.AlertDispatcherService;
+import eu.domibus.core.alerts.model.service.Alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +16,13 @@ public class AlertListener {
 
     @Autowired
     @Qualifier("alertDispatcher")
-    private AlertDispatcher alertDispatcher;
+    private AlertDispatcherService alertDispatcherService;
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'alert'")
     public void onAlert(final Alert alert) {
         LOG.debug("Alert received:[{}]", alert);
-        alertDispatcher.dispatch(alert);
+        alertDispatcherService.dispatch(alert);
     }
 
 

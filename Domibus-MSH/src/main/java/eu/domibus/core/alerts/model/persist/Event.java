@@ -1,6 +1,6 @@
 package eu.domibus.core.alerts.model.persist;
 
-import eu.domibus.core.alerts.model.EventType;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +42,14 @@ public class Event extends AbstractBaseEntity {
         alerts.add(alert);
     }
 
-    public void addProperty(final String key,final EventProperty eventProperty){
+    public void addProperty(final String key, final EventProperty eventProperty) {
         eventProperty.setKey(key);
         properties.put(key, eventProperty);
         eventProperty.setEvent(this);
     }
 
     public Map<String, EventProperty> getProperties() {
-        return Collections.unmodifiableMap(properties);
+        return properties;
     }
 
     public EventType getType() {
@@ -76,6 +76,10 @@ public class Event extends AbstractBaseEntity {
         this.alerts = alerts;
     }
 
+    public void setProperties(Map<String, EventProperty> properties) {
+        this.properties = properties;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -84,5 +88,13 @@ public class Event extends AbstractBaseEntity {
                 ", properties=" + properties +
                 ", alerts=" + alerts +
                 '}';
+    }
+
+    public void enrichProperties() {
+        getProperties().forEach((key, eventProperty) -> {
+            eventProperty.setKey(key);
+            eventProperty.setEvent(this);
+            LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key,eventProperty.getValue());
+        });
     }
 }

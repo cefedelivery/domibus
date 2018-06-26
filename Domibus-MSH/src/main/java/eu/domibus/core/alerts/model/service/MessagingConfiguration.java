@@ -1,7 +1,7 @@
-package eu.domibus.core.alerts.configuration;
+package eu.domibus.core.alerts.model.service;
 
 import eu.domibus.common.MessageStatus;
-import eu.domibus.core.alerts.model.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +23,18 @@ public class MessagingConfiguration {
     }
 
     public void addStatusLevelAssociation(MessageStatus messageStatus, AlertLevel alertLevel){
-
+        messageStatusLevels.put(messageStatus,alertLevel);
     }
 
     public Map<MessageStatus, AlertLevel> getMessageStatusLevels() {
         return Collections.unmodifiableMap(messageStatusLevels);
+    }
+
+    public boolean shouldMonitorMessageStatus(MessageStatus messageStatus) {
+        return messageCommunicationActive && messageStatusLevels.get(messageStatus)!=null;
+    }
+
+    public AlertLevel getAlertLevel(MessageStatus messageStatus) {
+        return messageStatusLevels.get(messageStatus);
     }
 }

@@ -1,11 +1,12 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.core.alerts.configuration.MessagingConfiguration;
-import eu.domibus.core.alerts.model.Alert;
-import eu.domibus.core.alerts.model.AlertLevel;
+import eu.domibus.core.alerts.model.service.MessagingConfiguration;
+import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +21,23 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private final static Logger LOG = LoggerFactory.getLogger(MultiDomainAlertConfigurationServiceImpl.class);
 
-    public static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE = "domibus.alert.msg.communication_failure.active";
+    private static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE = "domibus.alert.msg.communication_failure.active";
 
-    public static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES = "domibus.alert.msg.communication_failure.states";
-    public static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL = "domibus.alert.msg.communication_failure.level";
+    private static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES = "domibus.alert.msg.communication_failure.states";
+
+    private static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL = "domibus.alert.msg.communication_failure.level";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    private DomainContextProvider domainContextProvider;
+
     private final Map<Domain, MessagingConfiguration> messagingConfigurationMap = new HashMap<>();
 
     @Override
-    public MessagingConfiguration getMessageCommunicationConfiguration(final Domain domain) {
+    public MessagingConfiguration getMessageCommunicationConfiguration() {
+        final Domain domain = domainContextProvider.getCurrentDomain();
         MessagingConfiguration messagingConfiguration = this.messagingConfigurationMap.get(domain);
         if (messagingConfiguration == null) {
             synchronized (messagingConfigurationMap) {
@@ -58,7 +64,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 final String messageCommunicationLevels = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
                 if (StringUtils.isNotEmpty(messageCommunicationStates) && StringUtils.isNotEmpty(messageCommunicationLevels)) {
                     final String[] states = messageCommunicationStates.split(",");
-                    final String[] levels = messageCommunicationStates.split(",");
+                    final String[] levels = messageCommunicationLevels.split(",");
                     if (states.length == levels.length) {
                         int i = 0;
                         for (String state : states) {
@@ -82,6 +88,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 messagingConfiguration.addStatusLevelAssociation(messageStatus, alertLevel);
 
             });
+            return messagingConfiguration;
         } catch (Exception ex) {
             LOG.error("Error while configuring message communication alerts for domain:[{}], message alert module will be discarded.", domain, ex);
             return new MessagingConfiguration(false);

@@ -1,8 +1,8 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.core.alerts.model.Event;
+import eu.domibus.core.alerts.model.service.Event;
 
 public interface EventService {
 

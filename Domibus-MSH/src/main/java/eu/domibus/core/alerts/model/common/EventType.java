@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.common;
 
 public enum EventType {
     MSG_COMMUNICATION_FAILURE,

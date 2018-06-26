@@ -1,9 +1,10 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.service;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import eu.domibus.core.alerts.model.persist.AlertStatus;
+import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.AlertStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ public class Alert {
     private Date reportingTimeFailure;
 
     private AlertStatus alertStatus;
+
+    private AlertLevel alertLevel;
 
     private Set<Event> events = new HashSet<>();
 
@@ -116,6 +119,14 @@ public class Alert {
 
     public void setAlertStatus(AlertStatus alertStatus) {
         this.alertStatus = alertStatus;
+    }
+
+    public AlertLevel getAlertLevel() {
+        return alertLevel;
+    }
+
+    public void setAlertLevel(AlertLevel alertLevel) {
+        this.alertLevel = alertLevel;
     }
 
     @Override

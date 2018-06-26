@@ -1,23 +1,20 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
-import eu.domibus.core.alerts.model.Alert;
+import eu.domibus.core.alerts.model.service.Alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Qualifier("alertDispatcher")
 @Service
-public class AlertDispatcherImpl implements AlertDispatcher {
+public class AlertDispatcherServiceServiceImpl implements AlertDispatcherService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertDispatcherImpl.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AlertDispatcherServiceServiceImpl.class);
 
     @Autowired
-    private MailAlertDispatcher mailAlertDispatcher;
+    private MailAlertDispatcherServiceImpl mailAlertDispatcher;
 
     public void dispatch(Alert alert) {
         mailAlertDispatcher.dispatch(alert);

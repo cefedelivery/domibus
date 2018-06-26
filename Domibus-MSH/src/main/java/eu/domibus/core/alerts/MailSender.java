@@ -2,7 +2,7 @@ package eu.domibus.core.alerts;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.alerts.model.MailModel;
+import eu.domibus.core.alerts.model.service.MailModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -21,9 +21,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Set;
-import java.util.function.Predicate;
 
-import static eu.domibus.core.alerts.model.Alert.DOMIBUS_ALERT_ACTIVE;
+import static eu.domibus.core.alerts.model.service.Alert.DOMIBUS_ALERT_ACTIVE;
 
 @Component
 public class MailSender {

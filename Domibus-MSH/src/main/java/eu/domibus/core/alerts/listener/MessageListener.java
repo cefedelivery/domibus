@@ -1,9 +1,9 @@
 package eu.domibus.core.alerts.listener;
 
-import eu.domibus.core.alerts.AlertService;
-import eu.domibus.core.alerts.EventService;
-import eu.domibus.core.alerts.model.Alert;
-import eu.domibus.core.alerts.model.Event;
+import eu.domibus.core.alerts.service.AlertService;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.model.service.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1481,13 +1481,13 @@
                                                         </tr>
                                                         <tr>
                                                             <th class="callout-inner primary">
-                                                                <p>Alert level:</p>
+                                                                Alert level:${ALERT_LEVEL}
                                                             </th>
                                                             <th class="expander"></th>
                                                         </tr>
                                                         <tr>
                                                             <th class="callout-inner primary">
-                                                                <p>Alert time:</p>
+                                                                Reporting time:${REPORTING_TIME}
                                                             </th>
                                                             <th class="expander"></th>
                                                         </tr>

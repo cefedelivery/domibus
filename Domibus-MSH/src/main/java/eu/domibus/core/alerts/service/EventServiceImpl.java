@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.common.MSHRole;
@@ -9,9 +9,8 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.core.alerts.dao.EventDao;
-import eu.domibus.core.alerts.model.Event;
-import eu.domibus.core.alerts.model.EventType;
-import eu.domibus.core.alerts.model.persist.EventProperty;
+import eu.domibus.core.alerts.model.service.Event;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.jms.Queue;
 
-import static eu.domibus.core.alerts.model.MessageEvent.*;
+import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -69,12 +68,7 @@ public class EventServiceImpl implements EventService {
     public void persistEvent(final Event event) {
         final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
         LOG.debug("Converting jms event\n[{}] to persistent event\n[{}]", event, eventEntity);
-        event.getProperties().entrySet().forEach(entry -> {
-            final EventProperty propertyValue = domainConverter.convert(entry.getValue(), EventProperty.class);
-            final String key = entry.getKey();
-            eventEntity.addProperty(key, propertyValue);
-            LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key,entry.getValue().getValue());
-        });
+        eventEntity.enrichProperties();
         eventDao.create(eventEntity);
         event.setEntityId(eventEntity.getEntityId());
     }

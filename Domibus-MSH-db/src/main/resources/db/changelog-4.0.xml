@@ -1905,13 +1905,20 @@
                 <constraints nullable="false"/>
             </column>
             <column name="ATTEMPTS_NUMBER" type="INT"/>
-            <column name="MAX_ATTEMPTS_NUMBER" type="INT"/>
+            <column name="MAX_ATTEMPTS_NUMBER" type="INT">
+                <constraints nullable="false"/>
+            </column>
             <column name="PROCESSED" type="BOOLEAN"/>
             <column name="PROCESSED_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
             <column name="NEXT_ATTEMPT" type="TIMESTAMP"/>
-            <column name="ALERT_STATUS" type="VARCHAR(50)"/>
+            <column name="ALERT_STATUS" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ALERT_LEVEL" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
 

@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.service;
 
 public interface MailModel<T> {
 

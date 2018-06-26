@@ -1,4 +1,4 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.service;
 
 public enum AlertEventType {
     MESSAGE

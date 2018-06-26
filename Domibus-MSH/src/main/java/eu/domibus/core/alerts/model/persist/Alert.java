@@ -1,11 +1,14 @@
 package eu.domibus.core.alerts.model.persist;
 
-import eu.domibus.core.alerts.model.AlertType;
+import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertStatus;
+import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,6 +16,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "TB_ALERT")
+@NamedQueries({
+        @NamedQuery(name = "Alert.findRetry", query = "FROM Alert a where a.alertStatus='RETRY' and a.nextAttempt < CURRENT_TIMESTAMP()")
+})
 public class Alert extends AbstractBaseEntity{
 
     private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
@@ -26,6 +32,7 @@ public class Alert extends AbstractBaseEntity{
 
     @Column(name = "ALERT_TYPE")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private AlertType alertType;
 
     @Column(name = "REPORTING_TIME")
@@ -40,6 +47,7 @@ public class Alert extends AbstractBaseEntity{
     private Integer attempts;
 
     @Column(name = "MAX_ATTEMPTS_NUMBER")
+    @NotNull
     private Integer maxAttempts;
 
     @Column(name = "REPORTING_TIME_FAILURE")
@@ -52,7 +60,13 @@ public class Alert extends AbstractBaseEntity{
 
     @Column(name = "ALERT_STATUS")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private AlertStatus alertStatus;
+
+    @Column(name = "ALERT_LEVEL")
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private AlertLevel alertLevel;
 
     public void addEvent(Event event){
         events.add(event);
@@ -137,5 +151,29 @@ public class Alert extends AbstractBaseEntity{
 
     public void setAlertStatus(AlertStatus alertStatus) {
         this.alertStatus = alertStatus;
+    }
+
+    public AlertLevel getAlertLevel() {
+        return alertLevel;
+    }
+
+    public void setAlertLevel(AlertLevel alertLevel) {
+        this.alertLevel = alertLevel;
+    }
+
+    @Override
+    public String toString() {
+        return "Alert{" +
+                "processed=" + processed +
+                ", processedTime=" + processedTime +
+                ", alertType=" + alertType +
+                ", reportingTime=" + reportingTime +
+                ", nextAttempt=" + nextAttempt +
+                ", attempts=" + attempts +
+                ", maxAttempts=" + maxAttempts +
+                ", reportingTimeFailure=" + reportingTimeFailure +
+                ", alertStatus=" + alertStatus +
+                ", alertLevel=" + alertLevel +
+                '}';
     }
 }

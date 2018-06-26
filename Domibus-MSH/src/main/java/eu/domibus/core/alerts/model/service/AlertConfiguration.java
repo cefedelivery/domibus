@@ -1,10 +1,7 @@
-package eu.domibus.core.alerts.configuration;
+package eu.domibus.core.alerts.model.service;
 
-import eu.domibus.common.MessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class AlertConfiguration {
 

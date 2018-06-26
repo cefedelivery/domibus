@@ -1,9 +1,8 @@
-package eu.domibus.core.alerts.model;
+package eu.domibus.core.alerts.model.service;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import eu.domibus.core.alerts.model.common.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

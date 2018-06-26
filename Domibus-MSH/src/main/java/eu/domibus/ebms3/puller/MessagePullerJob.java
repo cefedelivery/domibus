@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @DisallowConcurrentExecution //Only one SenderWorker runs at any time
 public class MessagePullerJob extends DomibusQuartzJobBean {
+
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessagePullerJob.class);
+
     @Autowired
     private MessageExchangeService messageExchangeService;
 
