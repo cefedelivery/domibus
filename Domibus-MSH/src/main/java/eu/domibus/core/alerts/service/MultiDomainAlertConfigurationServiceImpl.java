@@ -35,6 +35,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private final Map<Domain, MessagingConfiguration> messagingConfigurationMap = new HashMap<>();
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public MessagingConfiguration getMessageCommunicationConfiguration() {
         final Domain domain = domainContextProvider.getCurrentDomain();

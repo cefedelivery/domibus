@@ -28,11 +28,17 @@ import static eu.domibus.core.alerts.model.service.Alert.DOMIBUS_ALERT_ACTIVE;
 public class MailSender {
 
     private final static Logger LOG = LoggerFactory.getLogger(MailSender.class);
+
     static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
+
     static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
+
     static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
+
     static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
+
     static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
+
     static final String MAIL = ".mail";
 
     @Autowired

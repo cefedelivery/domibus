@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
@@ -65,6 +66,9 @@ public class AlertServiceImpl implements AlertService {
     @Autowired
     private Map<AlertType, AlertLevelStrategy> alertLevelStrategyMap;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional
     public eu.domibus.core.alerts.model.service.Alert createAlertOnEvent(eu.domibus.core.alerts.model.service.Event event) {
@@ -78,19 +82,25 @@ public class AlertServiceImpl implements AlertService {
         alert.setAlertStatus(SEND_ENQUEUED);
 
         final AlertLevelStrategy alertLevelStrategy = alertLevelStrategyMap.get(alert.getAlertType());
-        alert.setAlertLevel(alertLevelStrategy.getAlertLevel(event));
-
-        LOG.debug("Saving new alert:\n[]\n",alert);
+        final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
+        final AlertLevel alertLevel = alertLevelStrategy.getAlertLevel(convertedAlert);
+        alert.setAlertLevel(alertLevel);
+        LOG.debug("Saving new alert:\n[]\n", alert);
         alertDao.create(alert);
         return domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
-
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void enqueueAlert(eu.domibus.core.alerts.model.service.Alert alert) {
         jmsManager.convertAndSendToQueue(alert, alertMessageQueue, "alert");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MailModel getMailModelForAlert(eu.domibus.core.alerts.model.service.Alert alert) {
         final Alert read = alertDao.read(alert.getEntityId());
@@ -108,6 +118,9 @@ public class AlertServiceImpl implements AlertService {
         return new DefaultMailModel(mailModel, template, subject);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleAlertStatus(eu.domibus.core.alerts.model.service.Alert alert) {
@@ -119,7 +132,7 @@ public class AlertServiceImpl implements AlertService {
             alertDao.update(alertEntity);
             return;
         }
-        final Integer attempts = alertEntity.getAttempts()+1;
+        final Integer attempts = alertEntity.getAttempts() + 1;
         final Integer maxAttempts = alertEntity.getMaxAttempts();
         if (attempts < maxAttempts) {
             final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.retry.time"));
@@ -132,6 +145,9 @@ public class AlertServiceImpl implements AlertService {
         alertDao.update(alertEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void retry() {
@@ -144,6 +160,5 @@ public class AlertServiceImpl implements AlertService {
         final eu.domibus.core.alerts.model.service.Alert convert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
         enqueueAlert(convert);
     }
-
 
 }

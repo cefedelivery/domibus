@@ -54,6 +54,9 @@ public class EventServiceImpl implements EventService {
     @Qualifier("alertMessageQueue")
     private Queue alertMessageQueue;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void enqueueMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role) {
         //check is status is relevant.
@@ -66,6 +69,9 @@ public class EventServiceImpl implements EventService {
         LOG.debug("Event:[{}] added to the queue", event);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void persistEvent(final Event event) {
         final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
@@ -75,6 +81,9 @@ public class EventServiceImpl implements EventService {
         event.setEntityId(eventEntity.getEntityId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void enrichMessageEvent(final Event event) {
         final String messageId = event.findProperty(MESSAGE_ID.name()).get();

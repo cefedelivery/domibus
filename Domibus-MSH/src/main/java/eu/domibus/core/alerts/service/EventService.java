@@ -6,10 +6,25 @@ import eu.domibus.core.alerts.model.service.Event;
 
 public interface EventService {
 
+    /**
+     * Will create an event linked to a message status change with the given parameter and enqueue it to the alert/event monitoring queue.
+     * @param messageId the id of the monitored message.
+     * @param oldStatus the oldstatus of the message.
+     * @param newStatus the new status of the message.
+     * @param role the role of the accesspoint.
+     */
     void enqueueMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role);
 
+    /**
+     * Save an event.
+     * @param event the event to save.
+     */
     void persistEvent(Event event);
 
+    /**
+     * Will enrich a message status change event with potential ebms error details.
+     * @param event the even to enrich.
+     */
     void enrichMessageEvent(Event event);
 
 }
