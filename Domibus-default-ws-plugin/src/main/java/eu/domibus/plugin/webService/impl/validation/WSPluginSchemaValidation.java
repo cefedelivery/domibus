@@ -1,6 +1,7 @@
 package eu.domibus.plugin.webService.impl.validation;
 
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.webService.generated.*;
@@ -40,7 +41,19 @@ public class WSPluginSchemaValidation {
     @Autowired
     protected BackendWebServiceFaultFactory backendWebServiceFaultFactory;
 
+    @Autowired
+    protected DomibusPropertyExtService domibusPropertyExtService;
+
+    protected boolean schemaValidationEnabled() {
+        return Boolean.valueOf(domibusPropertyExtService.getProperty("wsplugin.schema.validation.enabled", "true"));
+    }
+
     public void validateSubmitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
+        if(!schemaValidationEnabled()) {
+            LOG.debug("Schema validation is disabled");
+            return;
+        }
+
         try {
             final XMLValidationErrorHandler messagingValidationResult = validateMessaging(ebMSHeaderInfo);
             if (!messagingValidationResult.isValid()) {
@@ -57,6 +70,11 @@ public class WSPluginSchemaValidation {
     }
 
     public void validateRetrieveMessage(RetrieveMessageRequest retrieveMessageRequest) throws RetrieveMessageFault {
+        if(!schemaValidationEnabled()) {
+            LOG.debug("Schema validation is disabled");
+            return;
+        }
+
         try {
             final XMLValidationErrorHandler newStackTraceErrorHandler = validateRetrieveMessageRequest(retrieveMessageRequest);
             if (!newStackTraceErrorHandler.isValid()) {
@@ -70,6 +88,11 @@ public class WSPluginSchemaValidation {
 
 
     public void validateGetStatus(final StatusRequest statusRequest) throws StatusFault {
+        if(!schemaValidationEnabled()) {
+            LOG.debug("Schema validation is disabled");
+            return;
+        }
+
         try {
             final XMLValidationErrorHandler newStackTraceErrorHandler = validateGetStatusRequest(statusRequest);
             if (!newStackTraceErrorHandler.isValid()) {
@@ -83,6 +106,11 @@ public class WSPluginSchemaValidation {
 
 
     public void validateGetMessageErrorsRequest(final GetErrorsRequest messageErrorsRequest) {
+        if(!schemaValidationEnabled()) {
+            LOG.debug("Schema validation is disabled");
+            return;
+        }
+
         try {
             final XMLValidationErrorHandler newStackTraceErrorHandler = validateGetMessageErrors(messageErrorsRequest);
             if (!newStackTraceErrorHandler.isValid()) {
@@ -96,7 +124,7 @@ public class WSPluginSchemaValidation {
     }
 
 
-    public XMLValidationErrorHandler validateGetStatusRequest(StatusRequest statusRequest) throws IOException, SAXException, JAXBException {
+    protected XMLValidationErrorHandler validateGetStatusRequest(StatusRequest statusRequest) throws IOException, SAXException, JAXBException {
         LOG.debug("Validate [{}] against XSD", statusRequest.getClass());
 
         JAXBContext jaxbContext = JAXBContext.newInstance(eu.domibus.plugin.webService.generated.ObjectFactory.class);
@@ -112,7 +140,7 @@ public class WSPluginSchemaValidation {
         return validate(jaxbSource);
     }
 
-    public XMLValidationErrorHandler validateGetMessageErrors(GetErrorsRequest getErrorsRequest) throws JAXBException, IOException, SAXException {
+    protected XMLValidationErrorHandler validateGetMessageErrors(GetErrorsRequest getErrorsRequest) throws JAXBException, IOException, SAXException {
         LOG.debug("Validate Messaging object against XSD");
 
         JAXBContext jaxbContext = JAXBContext.newInstance(eu.domibus.plugin.webService.generated.ObjectFactory.class);

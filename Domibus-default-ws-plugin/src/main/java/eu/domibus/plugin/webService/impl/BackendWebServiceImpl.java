@@ -90,6 +90,8 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.info("Received message");
 
+
+
         wsPluginSchemaValidation.validateSubmitMessage(submitRequest, ebMSHeaderInfo);
 
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();

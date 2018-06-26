@@ -32,16 +32,9 @@
 
     <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
         <jaxws:properties>
-            <entry key="schema-validation-enabled" value="true"/>
-            <entry key="mtom-enabled" value="false"/>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="mtom-enabled" value="${wsplugin.mtom.enabled:false}"/>
         </jaxws:properties>
-
-        <jaxws:schemaLocations>
-            <jaxws:schemaLocation>schemas/domibus-header.xsd</jaxws:schemaLocation>
-            <jaxws:schemaLocation>schemas/xml.xsd</jaxws:schemaLocation>
-            <jaxws:schemaLocation>schemas/domibus-backend.xsd</jaxws:schemaLocation>
-            <jaxws:schemaLocation>schemas/xmlmime.xsd</jaxws:schemaLocation>
-        </jaxws:schemaLocations>
 
         <jaxws:inInterceptors>
             <ref bean="customAuthenticationInterceptor"/>
