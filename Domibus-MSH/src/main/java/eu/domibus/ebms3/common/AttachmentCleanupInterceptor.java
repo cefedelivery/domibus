@@ -48,18 +48,28 @@ public class AttachmentCleanupInterceptor extends AbstractPhaseInterceptor<Messa
         }
         if (exchange.getInMessage() != null) {
             LOG.debug("Closing inbound message attachments' input streams");
-            cleanAttachments(exchange.getInMessage().getAttachments());
+
+            //the attachment collection is not yet initialized when sending large files and the request is not XSD valid
+            try {
+                cleanAttachments(exchange.getInMessage().getAttachments());
+            } catch (Exception e) {
+                LOG.warn("Could not clean inbound message attachments", e);
+            }
+
         }
     }
 
     private void cleanAttachments(Collection<Attachment> attachments) {
-        if (attachments != null) {
-            for (Attachment attachment : attachments) {
-                try {
-                    cleanRequestAttachment(attachment);
-                } catch (IOException e) {
-                    LOG.error("Could not close the input stream of this attachment [" + attachment.getId() + "]", e);
-                }
+        if (attachments == null) {
+            LOG.debug("No attachments to clean");
+            return;
+        }
+
+        for (Attachment attachment : attachments) {
+            try {
+                cleanRequestAttachment(attachment);
+            } catch (IOException e) {
+                LOG.warn("Could not close the input stream of this attachment [" + attachment.getId() + "]", e);
             }
         }
     }
