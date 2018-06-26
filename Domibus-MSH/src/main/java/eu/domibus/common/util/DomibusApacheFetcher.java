@@ -6,14 +6,13 @@ import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
-import no.difi.vefa.peppol.mode.Mode;
+import no.difi.vefa.peppol.security.Mode;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -40,11 +39,12 @@ public class DomibusApacheFetcher extends AbstractFetcher {
     protected ProxyUtil proxyUtil;
 
     public DomibusApacheFetcher(Mode mode, DomibusConfigurationService domibusConfigurationService, ProxyUtil proxyUtil) {
-        super(mode);
+        super();
 
         this.domibusConfigurationService = domibusConfigurationService;
         this.proxyUtil = proxyUtil;
 
+        int timeout = -1;
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
@@ -58,7 +58,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
     }
 
     @Override
-    public FetcherResponse fetch(URI uri) throws LookupException, FileNotFoundException {
+    public FetcherResponse fetch(URI uri) throws LookupException {
         try (CloseableHttpClient httpClient = createClient()) {
             HttpGet httpGet = new HttpGet(uri);
 
@@ -80,7 +80,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
             }
         } catch (SocketTimeoutException | SocketException | UnknownHostException e) {
             throw new LookupException(String.format("Unable to fetch '%s'", uri), e);
-        } catch (LookupException | FileNotFoundException e) {
+        } catch (LookupException e) {
             throw e;
         } catch (Exception e) {
             throw new LookupException(e.getMessage(), e);

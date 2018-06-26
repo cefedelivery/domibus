@@ -8,27 +8,15 @@ import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Ignore;
+import no.difi.vefa.peppol.security.Mode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -113,23 +101,13 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
 
     private ServiceMetadata buildServiceMetadata() {
-
+        ServiceMetadata sm = new ServiceMetadata();
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
         ProcessIdentifier processIdentifier;
-        try {
-            processIdentifier = ProcessIdentifier.parse(TEST_SERVICE_VALUE);
-        } catch (PeppolParsingException e) {
-            return null;
-        }
+        processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, new Scheme(TEST_SERVICE_TYPE));
 
-        Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
-
-        List<ProcessMetadata<Endpoint>> processes = new ArrayList<>();
-        ProcessMetadata<Endpoint> process = ProcessMetadata.of(processIdentifier, endpoint);
-        processes.add(process);
-
-        ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
-
+        Endpoint endpoint = new Endpoint(processIdentifier, TransportProfile.AS4, ADDRESS, testData);
+        sm.addEndpoint(endpoint);
         return sm;
     }
 }

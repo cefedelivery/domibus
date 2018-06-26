@@ -1,7 +1,6 @@
 Domibus 3.3.4
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.
 - Change the pulling mechanism in order to have a better message per second throughput.
-- Changes to support the fixed values of PEPPOL AS4 profile in the dynamic discovery lookup.
 - Added new truststore entries for OASIS SMP.
 - Add proxy configuration option for Peppol lookup
 - Updated the configuration for using MySQL Connector/J 8.0.x
