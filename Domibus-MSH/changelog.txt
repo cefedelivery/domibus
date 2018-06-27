@@ -8,7 +8,7 @@ Domibus 3.3.4
 - Added one property domibus.fourcornermodel.enabled=true. If the property is set to false, 'Final Recipient' and 'Original Sender'
     criteria disappear from Messages Filter, Messages column picker and from Message details in the GUI. The internal SQL queries for
     User and Signal Message do not use TB_PROPERTY.NAME = 'finalRecipient' and 'originalSender' anymore
-- Fixed issue when starting Domibus on Tomcat with an exernal ActiveMQ broker
+- Fixed issue when starting Domibus on Tomcat with an external ActiveMQ broker
 - Default WS Plugin: listPendingMessages does not always retrieve all the pending messages
 - Domibus 3.3.x Admin Console doesn't open when using SSL
 - Uninitialized keystore error while getting certificate from the keystore
