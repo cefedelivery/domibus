@@ -11,6 +11,10 @@ Domibus 3.3.4
 - Fixed issue when starting Domibus on Tomcat with an exernal ActiveMQ broker
 - Default WS Plugin: listPendingMessages does not always retrieve all the pending messages
 - Domibus 3.3.x Admin Console doesn't open when using SSL
+- Uninitialized keystore error while getting certificate from the keystore
+- Oracle deletion script sample date or format is incorrect
+- Empty Lines in Oracle SQL Upgrade Script causes script failure
+- Self Send not working in Dynamic discovery
 
 Domibus 3.3.3
 - Possibility to send a message to the same Access Point
