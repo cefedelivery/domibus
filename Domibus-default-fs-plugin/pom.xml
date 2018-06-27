@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.4-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-default-fs-plugin</artifactId>
     <packaging>jar</packaging>
@@ -173,7 +173,9 @@
                 </executions>
                 <configuration>
                     <packageName>eu.domibus.plugin.fs.ebms3</packageName>
-                    <arguments>-Xcommons-lang</arguments>
+                    <arguments>
+                        <argument>-Xcommons-lang</argument>
+                    </arguments>
                 </configuration>
                 <dependencies>
                     <dependency>

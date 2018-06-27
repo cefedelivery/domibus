@@ -1,3 +1,21 @@
+Domibus 3.3.4
+- Performance improvement in the Messages page
+- The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.
+- Change the pulling mechanism in order to have a better message per second throughput.
+- Added new truststore entries for OASIS SMP.
+- Add proxy configuration option for Peppol lookup
+- Updated the configuration for using MySQL Connector/J 8.0.x
+- Added one property domibus.fourcornermodel.enabled=true. If the property is set to false, 'Final Recipient' and 'Original Sender'
+    criteria disappear from Messages Filter, Messages column picker and from Message details in the GUI. The internal SQL queries for
+    User and Signal Message do not use TB_PROPERTY.NAME = 'finalRecipient' and 'originalSender' anymore
+- Fixed issue when starting Domibus on Tomcat with an external ActiveMQ broker
+- Default WS Plugin: listPendingMessages does not always retrieve all the pending messages
+- Domibus 3.3.x Admin Console doesn't open when using SSL
+- Uninitialized keystore error while getting certificate from the keystore
+- Oracle deletion script sample date or format is incorrect
+- Empty Lines in Oracle SQL Upgrade Script causes script failure
+- Self Send not working in Dynamic discovery
+
 Domibus 3.3.3
 - Possibility to send a message to the same Access Point
 Domibus 3.3.2

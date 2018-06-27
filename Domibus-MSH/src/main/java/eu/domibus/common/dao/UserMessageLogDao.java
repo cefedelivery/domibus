@@ -192,8 +192,8 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
             LOG.debug("Filter empty");
             return countAll();
         }
-        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
-        TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
+        String filteredUserMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
+        TypedQuery<Number> countQuery = em.createQuery(filteredUserMessageLogQuery, Number.class);
         countQuery = userMessageLogInfoFilter.applyParameters(countQuery, filters);
         final Number count = countQuery.getSingleResult();
         return count.intValue();
@@ -229,7 +229,7 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         final List<MessageLogInfo> resultList = queryParameterized.getResultList();
         if (LOG.isDebugEnabled()) {
             final long endTime = System.currentTimeMillis();
-            LOG.debug(endTime - startTime + "milliscond to execute query for " + resultList.size() + " resuts");
+            LOG.debug( "{} milliseconds to execute query for {} results", endTime - startTime, resultList.size());
         }
         return resultList;
     }

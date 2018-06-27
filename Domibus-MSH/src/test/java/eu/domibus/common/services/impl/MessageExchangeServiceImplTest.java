@@ -3,17 +3,20 @@ package eu.domibus.common.services.impl;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.validators.ProcessValidator;
+import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.MessagePullDto;
@@ -22,7 +25,6 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.util.PojoInstaciatorUtil;
 import org.apache.commons.lang3.Validate;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +36,7 @@ import org.springframework.jms.core.MessagePostProcessor;
 import javax.jms.Destination;
 import java.util.*;
 
+import static eu.domibus.common.services.impl.MessageExchangeServiceImpl.DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -62,7 +65,16 @@ public class MessageExchangeServiceImplTest {
     private MessagingDao messagingDao;
 
     @Mock
-    private UserMessageLogService messageLogService;
+    private UserMessageLogDao userMessageLogDao;
+
+    @Mock
+    private PullMessageService pullMessageService;
+
+    @Mock
+    private java.util.Properties domibusProperties;
+
+    @Mock
+    private JMSManager jmsManager;
 
     @Spy
     private ProcessValidator processValidator;
@@ -137,10 +149,12 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
+        when(domibusProperties.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE,"1")).thenReturn("10");
+        when(jmsManager.getDestinationSize("pull")).thenReturn(0l);
         ArgumentCaptor<Map> mapArgumentCaptor= ArgumentCaptor.forClass(Map.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
-        verify(jmsPullTemplate,times(2)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
+        verify(jmsPullTemplate,times(20)).convertAndSend(any(Destination.class),mapArgumentCaptor.capture(), any(MessagePostProcessor.class));
         //needed because the set does not return the values always in the same order.
         //@thom this does work on my machine but not on bamboo. Fix this.
         TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
@@ -226,14 +240,45 @@ public class MessageExchangeServiceImplTest {
         when(party.getIdentifiers()).thenReturn(identifiers);
 
         final String testMessageId = "testMessageId";
-        final List<MessagePullDto> messagePullDtos = Lists.newArrayList(new MessagePullDto(testMessageId, DateTime.now().toDate()), new MessagePullDto("messageID2", DateTime.now().toDate()));
-        when(messagingDao.findMessagingOnStatusReceiverAndMpc(eq("party1"), eq(MessageStatus.READY_TO_PULL), eq(mpc))).thenReturn(messagePullDtos);
+        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(testMessageId);
+        UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setMessageStatus(MessageStatus.READY_TO_PULL);
+        when(userMessageLogDao.findByMessageId(testMessageId)).thenReturn(userMessageLog);
 
         final String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party);
-        verify(messageLogService, times(1)).setIntermediaryPullStatus(eq(testMessageId));
         assertEquals(testMessageId, messageId);
 
     }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageIdWithMessageWithEmptyIdentifier() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
+
+    }
+
+    @Test
+    public void testRetrieveReadyToPullUserMessageINoMessage() {
+        String mpc = "mpc";
+        Party party = Mockito.mock(Party.class);
+
+        Set<Identifier> identifiers = new HashSet<>();
+        Identifier identifier = new Identifier();
+        identifier.setPartyId("party1");
+        identifiers.add(identifier);
+
+        when(party.getIdentifiers()).thenReturn(identifiers);
+
+        when(pullMessageService.getPullMessageId(eq("party1"), eq(mpc))).thenReturn(null);
+        assertNull(messageExchangeService.retrieveReadyToPullUserMessageId(mpc, party));
+
+    }
+
 
     @Test
     public void testGetMessageStatusWhenNoPullProcessFound() {

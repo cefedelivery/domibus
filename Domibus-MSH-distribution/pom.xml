@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.4-SNAPSHOT</version>
     </parent>
     <packaging>pom</packaging>
     <artifactId>domibus-distribution</artifactId>
@@ -87,7 +87,7 @@
                                         <containerId>tomcat8x</containerId>
                                         <zipUrlInstaller>
                                             <url>
-                                                https://ec.europa.eu/cefdigital/artifact/service/local/repositories/eDelivery/content/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
+                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/public/org/apache/tomcat/tomcat/${tomcat.version}/tomcat-${tomcat.version}.zip
                                             </url>
                                         </zipUrlInstaller>
                                     </container>
@@ -186,7 +186,7 @@
                                         <containerId>wildfly9x</containerId>
                                         <zipUrlInstaller>
                                             <url>
-                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery/org/wildfly/as/wildfly-as-dist/9.0.2.Final/wildfly-as-dist-9.0.2.Final.zip
+                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/public/org/wildfly/as/wildfly-as-dist/9.0.2.Final/wildfly-as-dist-9.0.2.Final.zip
                                             </url>
                                         </zipUrlInstaller>
                                     </container>

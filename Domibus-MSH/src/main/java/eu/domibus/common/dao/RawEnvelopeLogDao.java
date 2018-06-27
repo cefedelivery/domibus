@@ -7,8 +7,8 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.List;
 
 /**
  * @author idragusa
@@ -20,18 +20,20 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(RawEnvelopeLogDao.class);
 
+    public static final String MESSAGE_ID = "MESSAGE_ID";
+
     public RawEnvelopeLogDao() {
         super(RawEnvelopeLog.class);
     }
 
-
     public RawEnvelopeDto findRawXmlByMessageId(final String messageId) {
         TypedQuery<RawEnvelopeDto> namedQuery = em.createNamedQuery("RawDto.findByMessageId", RawEnvelopeDto.class);
-        namedQuery.setParameter("MESSAGE_ID",messageId);
+        namedQuery.setParameter("MESSAGE_ID", messageId);
         try {
+            LOG.debug("[findRawXmlByMessageIdMessage][Message]:[{}]", messageId);
             return namedQuery.getSingleResult();
         } catch (NoResultException nr) {
-            LOG.warn("The message should have an associate raw xml saved in the database.");
+            LOG.trace("The message with id[{}] has no associated raw xml saved in the database.", messageId, nr);
             return null;
         }
     }
@@ -42,13 +44,9 @@ public class RawEnvelopeLogDao extends BasicDao<RawEnvelopeLog> {
      * @param messageId the id of the message.
      */
     public void deleteUserMessageRawEnvelope(final String messageId) {
-        TypedQuery<RawEnvelopeLog> namedQuery = em.createNamedQuery("Raw.findByMessageId", RawEnvelopeLog.class);
-        namedQuery.setParameter("MESSAGE_ID", messageId);
-        final List<RawEnvelopeLog> resultList = namedQuery.getResultList();
-        for (RawEnvelopeLog rawEnvelopeLog : resultList) {
-            delete(rawEnvelopeLog);
-        }
+        Query query = em.createNamedQuery("Raw.deleteByMessageID");
+        query.setParameter(MESSAGE_ID, messageId);
+        query.executeUpdate();
     }
-
 
 }

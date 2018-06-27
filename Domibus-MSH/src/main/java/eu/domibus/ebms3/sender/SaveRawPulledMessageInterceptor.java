@@ -42,9 +42,7 @@ public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {
         }
         try {
             SOAPMessage soapContent = message.getContent(SOAPMessage.class);
-            String rawXMLMessage = SoapUtil.getRawXMLMessage(soapContent);
-            messageExchangeService.removeRawMessageIssuedByPullRequest(messageId.toString());
-            messageExchangeService.savePulledMessageRawXml(rawXMLMessage,messageId.toString());
+            messageExchangeService.saveRawXml(SoapUtil.getRawXMLMessage(soapContent),messageId.toString());
         } catch (TransformerException e) {
             throw new WebServiceException(new IllegalArgumentException(e));
         }

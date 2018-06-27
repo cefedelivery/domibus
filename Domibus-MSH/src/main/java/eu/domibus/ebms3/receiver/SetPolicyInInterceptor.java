@@ -1,6 +1,5 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -11,6 +10,7 @@ import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.pki.PolicyService;
 import org.apache.cxf.attachment.AttachmentDataSource;
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -27,23 +27,18 @@ import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingInfo;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.service.model.EndpointInfo;
-import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -60,13 +55,11 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SetPolicyInInterceptor.class);
 
-    private JAXBContext jaxbContext;
-
-    @Autowired
-    private DomibusConfigurationService domibusConfigurationService;
-
     @Autowired
     private SoapService soapService;
+
+    @Autowired
+    private PolicyService policyService;
 
     private MessageLegConfigurationFactory messageLegConfigurationFactory;
 
@@ -78,10 +71,6 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
         super(phase);
         this.addBefore(PolicyInInterceptor.class.getName());
         this.addAfter(AttachmentInInterceptor.class.getName());
-    }
-
-    public void setJaxbContext(final JAXBContext jaxbContext) {
-        this.jaxbContext = jaxbContext;
     }
 
     public void setMessageLegConfigurationFactory(MessageLegConfigurationFactory messageLegConfigurationFactory) {
@@ -118,9 +107,9 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             if(legConfigurationExtractor ==null)return;
 
             final LegConfiguration legConfiguration= legConfigurationExtractor.extractMessageConfiguration();
-            final PolicyBuilder builder = message.getExchange().getBus().getExtension(PolicyBuilder.class);
             policyName = legConfiguration.getSecurity().getPolicy();
-            final Policy policy = builder.getPolicy(new FileInputStream(new File(domibusConfigurationService.getConfigLocation() + File.separator + "policies", policyName)));
+            Policy policy = policyService.parsePolicy("policies"+File.separator + policyName);
+
             LOG.businessInfo(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_USE, policyName);
             //FIXME: the exchange is shared by both the request and the response. This would result in a situation where the policy for an incoming request would be used for the response. I think this is what we want
             message.getExchange().put(PolicyConstants.POLICY_OVERRIDE, policy);
@@ -136,7 +125,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
             setBindingOperation(message);
             SetPolicyInInterceptor.LOG.debug("", e); // Those errors are expected (no PMode found, therefore DEBUG)
             throw new Fault(e);
-        } catch (IOException | ParserConfigurationException | SAXException | JAXBException e) {
+        } catch (IOException | JAXBException e) {
             setBindingOperation(message);
             LOG.businessError(DomibusMessageCode.BUS_SECURITY_POLICY_INCOMING_NOT_FOUND, e, policyName); // Those errors are not expected
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "no valid security policy found", messaging != null ? messageId : "unknown", e);

@@ -3,7 +3,7 @@
 @import '~@swimlane/ngx-datatable/release/index.css';
 @import '~@swimlane/ngx-datatable/release/themes/material.css';
 @import '~@swimlane/ngx-datatable/release/assets/icons.css';
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import 'assets/fonts/fonts.css';
 
 /*--------------------------------------------------
     [NORMALIZE]

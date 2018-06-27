@@ -17,6 +17,8 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.ToExtractor;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -90,6 +92,9 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private DomainExtConverter domainExtConverter;
 
+    @Autowired
+    private PullMessageService pullMessageService;
+
     @Override
     public String getFinalRecipient(String messageId) {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -142,6 +147,10 @@ public class UserMessageDefaultService implements UserMessageService {
 
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);
+        } else {
+            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            LOG.debug("[restoreFailedMessage]:Message:[{}] add lock", userMessageLog.getMessageId());
+            pullMessageService.addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
         }
     }
 

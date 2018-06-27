@@ -6,20 +6,22 @@ import eu.domibus.api.messaging.MessagingException;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.pull.PullRequestResult;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PullRequest;
-import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
@@ -42,6 +44,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.TransformerException;
 import javax.xml.ws.*;
+import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
@@ -97,7 +100,10 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private PullRequestHandler pullRequestHandler;
 
     @Autowired
-    private ReliabilityService reliabilityService;
+    private UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    private PullMessageService pullMessageService;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -110,11 +116,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         Messaging messaging;
         messaging = getMessage(request);
         UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+        LOG.trace("Message received");
         if (messaging.getSignalMessage() != null) {
             if (messaging.getSignalMessage().getPullRequest() != null) {
-                return handlePullRequest(messaging);
+                LOG.trace("before pull request.");
+                final SOAPMessage soapMessage = handlePullRequest(messaging);
+                LOG.trace("returning pull request message.");
+                return soapMessage;
             } else if (messaging.getSignalMessage().getReceipt() != null) {
-                handlePullRequestReceipt(request, messaging);
+                LOG.trace("before pull receipt.");
+                final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
+                LOG.trace("returning pull receipt.");
+                return soapMessage;
             }
         } else {
             String pmodeKey = null;
@@ -157,12 +170,29 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
         LegConfiguration legConfiguration = null;
+        UserMessage userMessage = null;
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        if (MessageStatus.WAITING_FOR_RECEIPT != userMessageLog.getMessageStatus()) {
+            LOG.error("[PULL_RECEIPT]:Message:[{}] receipt a pull acknowledgement but its status is [{}]", userMessageLog.getMessageId(), userMessageLog.getMessageStatus());
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("No message in waiting for callback state found for receipt referring to :[%s]", messageId), messageId, null);
+            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+        }
+        LOG.debug("[handlePullRequestReceipt]:Message:[{}] delete lock ", messageId);
+
+        final MessagingLock lock = pullMessageService.getLock(messageId);
+        if (lock == null || MessageState.WAITING != lock.getMessageState()) {
+            LOG.trace("Message[{}] could not acquire lock", messageId);
+            LOG.error("[PULL_RECEIPT]:Message:[{}] time to receipt a pull acknowledgement has expired.", messageId);
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, String.format("Time to receipt a pull acknowledgement for message:[%s] has expired", messageId), messageId, null);
+            return pullRequestHandler.getSoapMessage(ebMS3Exception);
+        }
+
         try {
-            final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+            userMessage = messagingDao.findUserMessageByMessageId(messageId);
             String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
-            LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
             SOAPMessage soapMessage = getSoapMessage(messageId, legConfiguration, userMessage);
             isOk = responseHandler.handle(request);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
@@ -175,14 +205,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
             } else {
-                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
+                LOG.warn("[PULL_RECEIPT]:Error for message with ID [" + messageId + "]", soapFEx);
             }
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
         } catch (ReliabilityException r) {
             LOG.warn(r.getMessage());
         } finally {
-            reliabilityService.handlePullReceiptReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+            final PullRequestResult pullRequestResult = pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful, isOk, userMessageLog, legConfiguration, userMessage);
+            pullMessageService.releaseLockAfterReceipt(pullRequestResult);
         }
         return null;
     }
@@ -203,6 +234,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
 
+    @Transactional
     SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
@@ -222,7 +254,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
 
 
     protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        LOG.debug("Unmarshalling the Messaging instance from the request");
+        LOG.trace("Unmarshalling the Messaging instance from the request");
         return userMessageHandlerService.getMessaging(request);
     }
 
