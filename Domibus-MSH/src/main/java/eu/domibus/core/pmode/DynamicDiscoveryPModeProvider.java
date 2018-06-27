@@ -89,7 +89,6 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
     public void init() {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
