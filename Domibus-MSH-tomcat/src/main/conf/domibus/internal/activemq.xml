@@ -45,6 +45,10 @@
             <queue id="unknownReceiverQueue"
                    physicalName="domibus.internal.notification.unknown"/>
 
+
+            <queue id="domibusUIReplicationQueue"
+                   physicalName="domibus.UI.replication"/>
+
             <!-- Backend plugin notification queues -->
             <queue id="webserviceBackendNotificationQueue"
                    physicalName="domibus.notification.webservice"/>

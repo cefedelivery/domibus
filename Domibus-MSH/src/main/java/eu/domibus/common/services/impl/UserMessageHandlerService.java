@@ -21,6 +21,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
@@ -123,6 +124,9 @@ public class UserMessageHandlerService {
 
     @Autowired
     protected NonRepudiationService nonRepudiationService;
+
+    @Autowired
+    protected UIReplicationSignalService uiReplicationSignalService;
 
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
@@ -284,6 +288,8 @@ public class UserMessageHandlerService {
                 to.getEndpoint(),
                 userMessage.getCollaborationInfo().getService().getValue(),
                 userMessage.getCollaborationInfo().getAction());
+
+        uiReplicationSignalService.signalMessageReceived(userMessage.getMessageInfo().getMessageId());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
