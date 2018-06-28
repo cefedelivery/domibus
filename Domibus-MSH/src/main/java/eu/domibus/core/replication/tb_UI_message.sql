@@ -118,3 +118,5 @@ select
 
 )
 
+alter table tb_ui_message add column `ID_PK` int(10) unsigned primary KEY AUTO_INCREMENT;
+
