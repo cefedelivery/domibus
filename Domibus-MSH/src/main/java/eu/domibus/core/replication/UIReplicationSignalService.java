@@ -18,8 +18,9 @@ import javax.jms.Queue;
 @Service
 public class UIReplicationSignalService {
 
+    @Autowired
     @Qualifier("domibusUIReplicationQueue")
-    protected Queue replicationQueue;
+    private Queue domibusUIReplicationQueue;
 
     @Autowired
     protected JMSManager jmsManager;
@@ -29,7 +30,7 @@ public class UIReplicationSignalService {
                 .type("messageReceived")
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
-        jmsManager.sendMapMessageToQueue(messageReceived, replicationQueue);
+        jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
     }
 
 
@@ -39,6 +40,14 @@ public class UIReplicationSignalService {
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .property("status", newStatus).build();
 
-        jmsManager.sendMapMessageToQueue(messageReceived, replicationQueue);
+        jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
+    }
+
+    public void signalMessageSubmitted(String messageId) {
+        final JmsMessage messageReceived = JMSMessageBuilder.create()
+                .type("messageSubmitted")
+                .property(MessageConstants.MESSAGE_ID, messageId).build();
+
+        jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
     }
 }

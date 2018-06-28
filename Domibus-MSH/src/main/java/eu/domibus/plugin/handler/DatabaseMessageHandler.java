@@ -23,6 +23,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -116,6 +117,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     @Autowired
     UserMessageService userMessageService;
+
+    @Autowired
+    UIReplicationSignalService uiReplicationSignalService;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -312,6 +316,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                 pullMessageService.addPullMessageLock(new PartyExtractor(to), userMessage, userMessageLog);
             }
 
+
+            uiReplicationSignalService.signalMessageSubmitted(userMessage.getMessageInfo().getMessageId());
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();

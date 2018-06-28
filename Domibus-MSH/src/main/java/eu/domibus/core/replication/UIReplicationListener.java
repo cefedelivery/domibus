@@ -1,5 +1,6 @@
 package eu.domibus.core.replication;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -22,15 +23,25 @@ public class UIReplicationListener {
     @Autowired
     protected UIReplicationDataService uiReplicationDataService;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @JmsListener(destination = "domibus.UI.replication", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
-    public void processPullRequest(final MapMessage map) throws JMSException {
+    public void processUIReplication(final MapMessage map) throws JMSException {
+        final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
+        final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
+        LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
+        domainContextProvider.setCurrentDomain(domainCode);
+
         final String jmsType = map.getJMSType();
 
         if("messageReceived".equalsIgnoreCase(jmsType)) {
-            uiReplicationDataService.updateMessageReceived(map.getStringProperty(MessageConstants.MESSAGE_ID));
+            uiReplicationDataService.messageReceived(messageId);
         } else if("status".equalsIgnoreCase(jmsType)) {
-            uiReplicationDataService.updateMessageStatusChange(map.getStringProperty(MessageConstants.MESSAGE_ID), MessageStatus.valueOf(map.getStringProperty("status")));
+            uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
+        } else if("messageSubmitted".equalsIgnoreCase(jmsType)) {
+            uiReplicationDataService.messageSubmitted(messageId);
         }
     }
 }

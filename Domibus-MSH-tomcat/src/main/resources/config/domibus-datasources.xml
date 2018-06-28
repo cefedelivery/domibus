@@ -33,6 +33,8 @@
     </amq:xaConnectionFactory>
 
 
+    <amq:queue id="domibusUIReplicationQueue"
+               physicalName="domibus.UI.replication"/>
     <amq:queue id="sendMessageQueue"
                physicalName="domibus.internal.dispatch.queue"/>
     <amq:queue id="pullMessageQueue"
