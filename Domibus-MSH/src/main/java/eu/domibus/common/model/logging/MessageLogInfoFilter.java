@@ -1,8 +1,13 @@
 package eu.domibus.common.model.logging;
 
+import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -29,6 +34,10 @@ public class MessageLogInfoFilter {
     private static final String LOG_FAILED = "log.failed";
     private static final String LOG_RESTORED = "log.restored";
     private static final String LOG_MESSAGE_SUBTYPE = "log.messageSubtype";
+
+    @Autowired
+    @Qualifier("domibusProperties")
+    private Properties domibusProperties;
 
     protected String getHQLKey(String originalColumn) {
         switch(originalColumn) {
@@ -127,5 +136,14 @@ public class MessageLogInfoFilter {
             }
         }
         return query;
+    }
+
+    /**
+     * in four corner model finalRecipient and originalSender exists as default properties
+     *
+     * @return true by default
+     */
+    protected boolean isFourCornerModel() {
+        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled", true);
     }
 }

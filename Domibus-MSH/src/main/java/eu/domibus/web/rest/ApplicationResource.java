@@ -10,6 +10,7 @@ import eu.domibus.web.rest.ro.DomainRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,7 @@ import java.util.List;
 public class ApplicationResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationResource.class);
+    static final String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
     protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
@@ -85,6 +87,12 @@ public class ApplicationResource {
     public List<DomainRO> getDomains() {
         LOG.debug("Getting domains");
         return domainCoreConverter.convert(domainService.getDomains(), DomainRO.class);
+    }
+
+    @RequestMapping(value = "fourcornerenabled", method = RequestMethod.GET)
+    public boolean getFourCornerModelEnabled() {
+        LOG.debug("Getting four corner enabled");
+        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
     }
 
 }
