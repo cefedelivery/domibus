@@ -48,9 +48,6 @@ public class ApplicationResourceTest {
     @Injectable
     DomainCoreConverter domainCoreConverter;
 
-    @Injectable
-    private Properties domibusProperties;
-
     @Test
     public void testGetDomibusInfo() throws Exception {
         // Given
@@ -136,7 +133,7 @@ public class ApplicationResourceTest {
     public void testGetFourCornerEnabled() throws Exception {
 
         new Expectations() {{
-            domibusProperties.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
+            domibusPropertyProvider.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
             result = "false";
         }};
 

@@ -6,33 +6,22 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.common.util.ProxyUtil;
-import eu.domibus.dynamicdiscovery.ApacheFetcherForTest;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
-import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
-import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.api.LookupException;
-import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
-import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
-import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
+import no.difi.vefa.peppol.security.Mode;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.URI;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -119,23 +108,13 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
 
     private ServiceMetadata buildServiceMetadata() {
-
+        ServiceMetadata sm = new ServiceMetadata();
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
         ProcessIdentifier processIdentifier;
-        try {
-            processIdentifier = ProcessIdentifier.parse(TEST_SERVICE_VALUE);
-        } catch (PeppolParsingException e) {
-            return null;
-        }
+        processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, new Scheme(TEST_SERVICE_TYPE));
 
-        Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
-
-        List<ProcessMetadata<Endpoint>> processes = new ArrayList<>();
-        ProcessMetadata<Endpoint> process = ProcessMetadata.of(processIdentifier, endpoint);
-        processes.add(process);
-
-        ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
-
+        Endpoint endpoint = new Endpoint(processIdentifier, TransportProfile.AS4, ADDRESS, testData);
+        sm.addEndpoint(endpoint);
         return sm;
     }
 
@@ -153,10 +132,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
             proxyUtil.getConfiguredProxy();
             result = getConfiguredProxy();
 
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
         }};
 
