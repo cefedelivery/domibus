@@ -11,6 +11,9 @@ import java.util.Date;
 
 @Entity
 @Table(name = "TB_MESSAGE_UI")
+@NamedQueries({
+        @NamedQuery(name = "UIMessageEntity.findUIMessageByMessageId",
+                query = "select uiMessageEntity from UIMessageEntity uiMessageEntity where uiMessageEntity.messageId=:MESSAGE_ID")})
 public class UIMessageEntity extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")

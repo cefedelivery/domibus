@@ -38,7 +38,7 @@ public class UIReplicationListener {
 
         if("messageReceived".equalsIgnoreCase(jmsType)) {
             uiReplicationDataService.messageReceived(messageId);
-        } else if("status".equalsIgnoreCase(jmsType)) {
+        } else if("messageStatusChange".equalsIgnoreCase(jmsType)) {
             uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
         } else if("messageSubmitted".equalsIgnoreCase(jmsType)) {
             uiReplicationDataService.messageSubmitted(messageId);

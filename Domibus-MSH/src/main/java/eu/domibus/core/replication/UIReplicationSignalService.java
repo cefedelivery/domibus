@@ -38,7 +38,7 @@ public class UIReplicationSignalService {
         final JmsMessage messageReceived = JMSMessageBuilder.create()
                 .type("messageStatusChange")
                 .property(MessageConstants.MESSAGE_ID, messageId)
-                .property("status", newStatus).build();
+                .property("status", newStatus.name()).build();
 
         jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
     }
