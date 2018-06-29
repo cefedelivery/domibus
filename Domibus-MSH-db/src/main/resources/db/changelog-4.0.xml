@@ -1894,6 +1894,63 @@
         </insert>
     </changeSet>
 
+    <changeSet id="EDELIVERY-3361" author="CatalinEnache">
+        <createTable tableName="TB_MESSAGE_UI">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <column name="MESSAGE_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MESSAGE_STATUS" type="VARCHAR(255)"/>
+            <column name="NOTIFICATION_STATUS" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MESSAGE_TYPE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="MSH_ROLE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="DELETED" type="DATETIME"/>
+            <column name="RECEIVED" type="DATETIME"/>
+            <column name="SEND_ATTEMPTS" type="INT"/>
+            <column name="SEND_ATTEMPTS_MAX" type="INT"/>
+            <column name="NEXT_ATTEMPT" type="DATETIME"/>
+            <column name="FAILED" type="DATETIME"/>
+            <column name="RESTORED" type="DATETIME"/>
+
+            <!-- user message columns -->
+            <column name="CONVERSATION_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- party columns -->
+            <column name="FROM_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="TO_ID" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- property columns -->
+            <column name="FROM_SCHEME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="TO_SCHEME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="REF_TO_MESSAGE_ID" type="VARCHAR(255)"/>
+
+        </createTable>
+    </changeSet>
+
     <include file="changelog-4.0-quartz.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

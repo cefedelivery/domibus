@@ -10,7 +10,11 @@ import org.springframework.stereotype.Service;
 
 
 /**
- * @author Cosmin Baciu
+ * Service dedicate to replicate
+ * data in <code>TB_MESSAGE_UI</> table
+ * It reads first existing data and then insert it
+ *
+ * @author Cosmin Baciu, Catalin Enache
  * @since 4.0
  */
 @Service

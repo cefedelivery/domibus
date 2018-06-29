@@ -10,8 +10,11 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "TB_UI_MESSAGE")
+@Table(name = "TB_MESSAGE_UI")
 public class UIMessageEntity extends AbstractBaseEntity {
+
+    @Column(name = "MESSAGE_ID")
+    private String messageId;
 
     @Column(name = "MESSAGE_STATUS")
     @Enumerated(EnumType.STRING)
@@ -21,19 +24,16 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
 
-    @Column(name = "MESSAGE_ID")
-    private String messageId;
-
-    @Column(name = "COLL_INFO_CONVERS_ID", nullable = false)
-    protected String conversationId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MESSAGE_TYPE")
+    private MessageType messageType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MSH_ROLE")
     private MSHRole mshRole;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "MESSAGE_TYPE")
-    private MessageType messageType;
+    @Column(name = "CONVERSATION_ID", nullable = false)
+    protected String conversationId;
 
     @Column(name = "DELETED")
     @Temporal(TemporalType.TIMESTAMP)
@@ -60,7 +60,6 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Column(name = "NEXT_ATTEMPT")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextAttempt;
-
 
     @Column(name = "FROM_ID")
     private String fromId;
