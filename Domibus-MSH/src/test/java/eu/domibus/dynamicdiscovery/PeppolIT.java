@@ -4,24 +4,23 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.util.EndpointInfo;
 import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
+import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
+import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
 import no.difi.vefa.peppol.lookup.LookupClientBuilder;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
-import no.difi.vefa.peppol.security.Mode;
-import no.difi.vefa.peppol.security.api.CertificateValidator;
-import no.difi.vefa.peppol.security.api.PeppolSecurityException;
+import no.difi.vefa.peppol.mode.Mode;
+import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.security.cert.X509Certificate;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -40,8 +39,8 @@ public class PeppolIT {
     /* This is not a unit tests but a useful test for a real SMP entry. */
     @Test
     public void testLookupInformation() throws Exception {
-        EndpointInfo endpoint = testLookupInformation("0088:112233", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "");
-        //EndpointInfo endpoint = testLookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "urn:www.cenbii.eu:profile:bii04:ver1.0", "");
+        EndpointInfo endpoint = testLookupInformation("0088:112233", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
+        //EndpointInfo endpoint = testLookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
 
         assertNotNull(endpoint);
         System.out.println(endpoint.getAddress());
@@ -54,20 +53,16 @@ public class PeppolIT {
             /* DifiCertificateValidator.validate fails when proxy is enabled */
             if(useProxy) {
                 lookupClientBuilder.fetcher(new ApacheFetcherForTest(getConfiguredProxy(), getConfiguredCredentialsProvider()));
-                lookupClientBuilder.providerCertificateValidator(new CertificateValidator() {
-                    @Override
-                    public void validate(X509Certificate certificate) throws PeppolSecurityException {
-                    }
-                });
+                lookupClientBuilder.certificateValidator(EmptyCertificateValidator.INSTANCE);
             } else {
                 lookupClientBuilder.fetcher(new ApacheFetcherForTest(null, null));
             }
 
             final LookupClient smpClient = lookupClientBuilder.build();
-            final ParticipantIdentifier participantIdentifier = new ParticipantIdentifier(participantId, new Scheme(participantIdScheme));
-            final DocumentTypeIdentifier documentIdentifier = new DocumentTypeIdentifier(documentId);
+            final ParticipantIdentifier participantIdentifier = ParticipantIdentifier.of(participantId, Scheme.of(participantIdScheme));
+            final DocumentTypeIdentifier documentIdentifier = DocumentTypeIdentifier.of(documentId);
 
-            final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId);
+            final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
 
@@ -75,7 +70,7 @@ public class PeppolIT {
                 throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);
             }
             return new EndpointInfo(endpoint.getAddress().toString(), endpoint.getCertificate());
-        } catch (final PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
+        } catch (final PeppolParsingException | PeppolLoadingException | PeppolSecurityException | LookupException | EndpointNotFoundException | IllegalStateException e) {
             throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId, e);
         }
     }

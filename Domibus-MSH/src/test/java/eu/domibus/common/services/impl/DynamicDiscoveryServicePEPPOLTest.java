@@ -6,22 +6,33 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.common.util.ProxyUtil;
+import eu.domibus.dynamicdiscovery.ApacheFetcherForTest;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
+import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
+import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.lookup.LookupClientBuilder;
+import no.difi.vefa.peppol.lookup.api.LookupException;
+import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
+import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.security.Mode;
+import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.URI;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -108,73 +119,22 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
 
     private ServiceMetadata buildServiceMetadata() {
-        ServiceMetadata sm = new ServiceMetadata();
+
         X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
         ProcessIdentifier processIdentifier;
-        processIdentifier = new ProcessIdentifier(TEST_SERVICE_VALUE, new Scheme(TEST_SERVICE_TYPE));
+        try {
+            processIdentifier = ProcessIdentifier.parse(TEST_SERVICE_VALUE);
+        } catch (PeppolParsingException e) {
+            return null;
+        }
 
-        Endpoint endpoint = new Endpoint(processIdentifier, TransportProfile.AS4, ADDRESS, testData);
-        sm.addEndpoint(endpoint);
+        Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
+
+        List<ProcessMetadata<Endpoint>> processes = new ArrayList<>();
+        ProcessMetadata<Endpoint> process = ProcessMetadata.of(processIdentifier, endpoint);
+        processes.add(process);
+
+        ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
         return sm;
-    }
-
-    /* This is not a unit tests but a useful test for a real SMP entry. */
-    @Test
-    @Ignore
-    public void testLookupInformation() throws Exception {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = false; // SET THIS VALUE TO TRUE
-
-            proxyUtil.getConfiguredCredentialsProvider();
-            result = getConfiguredCredentialsProvider();
-
-            proxyUtil.getConfiguredProxy();
-            result = getConfiguredProxy();
-
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
-            result = TEST_SML_ZONE;
-
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
-            result = Mode.TEST;
-        }};
-
-        // participantId = "0088:260420181111";
-        // participantIdScheme = "iso6523-actorid-upis";
-        // documentIdentifier = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0";
-        // processIdentifier = "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0";
-        // transportProfileAS4 = "bdxr-transport-ebms3-as4-v1p0"
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
-
-        assertNotNull(endpoint);
-        System.out.println(endpoint.getAddress());
-
-//        verify(getRequestedFor(urlMatching(".*"))
-//                .withRequestBody(matching(".*")));
-    }
-
-    // PUT YOUR VALUES HERE
-    private static String HOST = "somehost";
-    private static String PORT = "8280";
-    private static String USER = "idragusa";
-    private static String PASSWORD = "changeme";
-
-    private HttpHost getConfiguredProxy() {
-        String httpProxyHost = HOST;
-        String httpProxyPort = PORT;
-        return new HttpHost(httpProxyHost, Integer.parseInt(httpProxyPort));
-    }
-
-    private CredentialsProvider getConfiguredCredentialsProvider() {
-        String httpProxyHost = HOST;
-        String httpProxyPort = PORT;
-        String httpProxyUser = USER;
-        String httpProxyPassword = PASSWORD;
-
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(new AuthScope(httpProxyHost, Integer.parseInt(httpProxyPort)),
-                new UsernamePasswordCredentials(httpProxyUser, httpProxyPassword));
-
-        return credsProvider;
     }
 }
