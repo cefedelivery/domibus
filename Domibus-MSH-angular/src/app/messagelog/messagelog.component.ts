@@ -118,7 +118,8 @@ export class MessageLogComponent {
       {cellTemplate: this.rowWithDateFormatTpl,
         name: 'Deleted',
         width: 155
-      });
+      }
+    );
 
     if (this.app.fourCornerEnabled) {
       this.columnPicker.allColumns.push(
@@ -149,9 +150,8 @@ export class MessageLogComponent {
         name: 'Actions',
         width: 80,
         sortable: false
-      });
-
-    ];
+      }
+    );
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
