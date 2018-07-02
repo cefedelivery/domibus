@@ -2,7 +2,6 @@ package eu.domibus.common.util;
 
 import com.google.common.io.ByteStreams;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.util.HttpUtil;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
@@ -13,7 +12,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +34,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
     protected RequestConfig requestConfig;
 
     protected DomibusConfigurationService domibusConfigurationService;
+
     protected ProxyUtil proxyUtil;
 
     public DomibusApacheFetcher(Mode mode, DomibusConfigurationService domibusConfigurationService, ProxyUtil proxyUtil) {
@@ -43,6 +42,7 @@ public class DomibusApacheFetcher extends AbstractFetcher {
 
         this.proxyUtil = proxyUtil;
         this.domibusConfigurationService = domibusConfigurationService;
+
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)

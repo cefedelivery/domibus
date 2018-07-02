@@ -683,7 +683,7 @@ public class Submission {
 
         public TypedProperty(String key, String value, String type) {
             if(!StringUtils.hasLength(key) || !StringUtils.hasLength(value)) {
-                throw new IllegalArgumentException("message properties must have a non-empty name and value");
+                throw new IllegalArgumentException("message properties must have a non-empty name and value (key [" + key + "], value [" + value + "]");
             }
             this.key = key;
             this.value = value;

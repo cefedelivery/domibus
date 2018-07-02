@@ -37,7 +37,7 @@ Domibus 4.0 (from 3.3):
                                  domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
                     Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
 Domibus 3.3.4 (from 3.3.3):
-                 - Run the appropriate DB migration script (mysql5innoDb-3.3.3-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.3-to-3.3.4-migration.ddl for Oracle)
+                 - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
                             domibus.pull.queue.concurency=1-1
                             domibus.internal.queue.concurency=3-10

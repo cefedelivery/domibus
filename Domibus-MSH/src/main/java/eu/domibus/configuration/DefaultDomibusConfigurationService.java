@@ -78,5 +78,4 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
         return Boolean.parseBoolean(useProxy);
     }
-
 }

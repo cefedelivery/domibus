@@ -57,11 +57,11 @@
             <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
                    #refToMessageId="ngModel" id="referencemessageid_id">
           </md-input-container>
-          <md-input-container *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch&&app.fourCornerEnabled">
             <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
-                   #originalSender="ngModel" id="originalsender_id">
+                   #originalSender="ngModel" id="originalsender_id" >
           </md-input-container>
-          <md-input-container *ngIf="advancedSearch">
+          <md-input-container *ngIf="advancedSearch&&app.fourCornerEnabled">
             <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
                    #finalRecipient="ngModel" id="finalrecipient_id">
           </md-input-container>
