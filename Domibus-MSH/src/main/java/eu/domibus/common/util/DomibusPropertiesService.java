@@ -64,4 +64,8 @@ public class DomibusPropertiesService {
         return display.toString();
     }
 
+    //TODO to be replaced by the merge of Catalin from 3.3.4
+    public boolean isFourCornerEnabled() {
+        return Boolean.parseBoolean(domibusProps.getProperty("domibus.fourcornermodel.enabled", "true"));
+    }
 }
