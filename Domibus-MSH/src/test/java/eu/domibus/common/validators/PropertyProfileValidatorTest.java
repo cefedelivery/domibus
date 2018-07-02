@@ -100,7 +100,7 @@ public class PropertyProfileValidatorTest {
         }};
 
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
-        propertyProfileValidator.validateForuCornerModel(messaging);
+        propertyProfileValidator.validateForCornerModel(messaging);
     }
 
     @Test(expected = EbMS3Exception.class)
@@ -115,7 +115,7 @@ public class PropertyProfileValidatorTest {
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
         messaging.getUserMessage().setMessageProperties(null);
 
-        propertyProfileValidator.validateForuCornerModel(messaging);
+        propertyProfileValidator.validateForCornerModel(messaging);
     }
 
     @Test(expected = EbMS3Exception.class)
@@ -130,7 +130,7 @@ public class PropertyProfileValidatorTest {
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
         messaging.getUserMessage().getMessageProperties().getProperty().clear();
 
-        propertyProfileValidator.validateForuCornerModel(messaging);
+        propertyProfileValidator.validateForCornerModel(messaging);
     }
 
     private Property createProperty(String name, String key, String dataType, boolean required) {

@@ -39,7 +39,7 @@ public class PropertyProfileValidator {
 
     public void validate(final Messaging messaging, final String pmodeKey) throws EbMS3Exception {
         // in the 4-corner model, originalSender and finalRecipient are required properties
-        validateForuCornerModel(messaging);
+        validateForCornerModel(messaging);
 
         final List<Property> modifiablePropertyList = new ArrayList<>();
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
@@ -104,7 +104,7 @@ public class PropertyProfileValidator {
     }
 
     // in the 4-corner model, originalSender and finalRecipient are required properties
-    protected void validateForuCornerModel(final Messaging messaging) throws EbMS3Exception {
+    protected void validateForCornerModel(final Messaging messaging) throws EbMS3Exception {
         if(!domibusPropertiesService.isFourCornerEnabled()) {
             return;
         }
