@@ -5,8 +5,6 @@ import {SecurityEventService} from "./security/security.event.service";
 import {Title} from "@angular/platform-browser";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
-import {Http, Response} from "@angular/http";
-import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-root',
@@ -19,7 +17,6 @@ export class AppComponent implements OnInit {
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
   fourCornerEnabled: boolean = true;
-  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
