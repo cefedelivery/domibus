@@ -1,13 +1,11 @@
 package eu.domibus.common.model.logging;
 
-import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.persistence.TypedQuery;
 import java.util.Date;
