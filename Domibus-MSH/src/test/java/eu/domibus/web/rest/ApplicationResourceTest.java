@@ -10,6 +10,7 @@ import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import mockit.Expectations;
 import mockit.Injectable;
+import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -126,5 +127,19 @@ public class ApplicationResourceTest {
 
         // Then
         Assert.assertEquals(true, isMultiTenancy);
+    }
+
+    @Test
+    public void testGetFourCornerEnabled() throws Exception {
+
+        new Expectations() {{
+            domibusPropertyProvider.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
+            result = "false";
+        }};
+
+        //tested method
+        boolean isFourCornerEnabled = applicationResource.getFourCornerModelEnabled();
+
+        Assert.assertEquals(false, isFourCornerEnabled);
     }
 }

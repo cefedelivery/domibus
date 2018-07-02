@@ -36,7 +36,6 @@ public class ApacheFetcherForTest extends AbstractFetcher {
 
     public ApacheFetcherForTest(HttpHost proxy, CredentialsProvider credentialsProvider) {
         super(Mode.of(Mode.TEST));
-
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)

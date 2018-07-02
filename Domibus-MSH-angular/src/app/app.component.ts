@@ -5,6 +5,8 @@ import {SecurityEventService} from "./security/security.event.service";
 import {Title} from "@angular/platform-browser";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
+import {Http, Response} from "@angular/http";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-root',
@@ -14,8 +16,9 @@ import {Observable} from "rxjs/Observable";
 export class AppComponent implements OnInit {
 
   isAdmin: boolean;
-  _currentUser: string;
   fullMenu: boolean = true;
+  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
+  fourCornerEnabled: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
 
   @ViewChild(RouterOutlet)
@@ -30,6 +33,12 @@ export class AppComponent implements OnInit {
 
     applicationNameResponse.subscribe((name: Response) => {
       this.titleService.setTitle(name.json());
+    });
+
+    let fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
+
+    fourCornerModelResponse.subscribe((name: Response) => {
+      this.fourCornerEnabled = name.json();
     });
   }
 
