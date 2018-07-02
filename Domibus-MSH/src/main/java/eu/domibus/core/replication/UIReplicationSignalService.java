@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +20,8 @@ import javax.jms.Queue;
 @Service
 public class UIReplicationSignalService {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
+
     @Autowired
     @Qualifier("domibusUIReplicationQueue")
     private Queue domibusUIReplicationQueue;
@@ -25,9 +29,9 @@ public class UIReplicationSignalService {
     @Autowired
     protected JMSManager jmsManager;
 
-    public void signalMessageReceived(String messageId) {
+    public void userMessageReceived(String messageId) {
         final JmsMessage messageReceived = JMSMessageBuilder.create()
-                .type("messageReceived")
+                .type(UIJMSType.MESSAGE_RECEIVED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
         jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
@@ -36,18 +40,27 @@ public class UIReplicationSignalService {
 
     public void signalMessageStatusChange(String messageId, MessageStatus newStatus) {
         final JmsMessage messageReceived = JMSMessageBuilder.create()
-                .type("messageStatusChange")
+                .type(UIJMSType.MESSAGE_STATUS_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .property("status", newStatus.name()).build();
 
         jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
     }
 
-    public void signalMessageSubmitted(String messageId) {
+    public void userMessageSubmitted(String messageId) {
         final JmsMessage messageReceived = JMSMessageBuilder.create()
-                .type("messageSubmitted")
+                .type(UIJMSType.USER_MESSAGE_SUBMITTED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
         jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
     }
+
+    public void signalMessageSubmitted(String messageId) {
+        final JmsMessage messageReceived = JMSMessageBuilder.create()
+                .type(UIJMSType.SIGNAL_MESSAGE_SUBMITTED.name())
+                .property(MessageConstants.MESSAGE_ID, messageId).build();
+
+        jmsManager.sendMapMessageToQueue(messageReceived, domibusUIReplicationQueue);
+    }
+
 }

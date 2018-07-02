@@ -317,7 +317,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             }
 
 
-            uiReplicationSignalService.signalMessageSubmitted(userMessage.getMessageInfo().getMessageId());
+            uiReplicationSignalService.userMessageSubmitted(userMessage.getMessageInfo().getMessageId());
 
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();

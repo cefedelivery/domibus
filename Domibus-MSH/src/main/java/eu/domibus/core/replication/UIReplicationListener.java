@@ -35,13 +35,23 @@ public class UIReplicationListener {
         domainContextProvider.setCurrentDomain(domainCode);
 
         final String jmsType = map.getJMSType();
+        LOG.info("processUIReplication for jmsType=[{}]", jmsType);
 
-        if("messageReceived".equalsIgnoreCase(jmsType)) {
-            uiReplicationDataService.messageReceived(messageId);
-        } else if("messageStatusChange".equalsIgnoreCase(jmsType)) {
-            uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
-        } else if("messageSubmitted".equalsIgnoreCase(jmsType)) {
-            uiReplicationDataService.messageSubmitted(messageId);
+        switch (UIJMSType.valueOf(jmsType)) {
+            case MESSAGE_RECEIVED:
+                uiReplicationDataService.messageReceived(messageId);
+                break;
+            case USER_MESSAGE_SUBMITTED:
+                uiReplicationDataService.messageSubmitted(messageId);
+                break;
+            case MESSAGE_STATUS_CHANGE:
+                uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
+                break;
+            case SIGNAL_MESSAGE_SUBMITTED:
+                uiReplicationDataService.signalMessageSubmitted(messageId);
+                break;
+            default:
+                throw new AssertionError("Invalid UIJMSType enum value");
         }
     }
 }

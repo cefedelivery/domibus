@@ -289,7 +289,7 @@ public class UserMessageHandlerService {
                 userMessage.getCollaborationInfo().getService().getValue(),
                 userMessage.getCollaborationInfo().getAction());
 
-        uiReplicationSignalService.signalMessageReceived(userMessage.getMessageInfo().getMessageId());
+        uiReplicationSignalService.userMessageReceived(userMessage.getMessageInfo().getMessageId());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
@@ -473,6 +473,8 @@ public class UserMessageHandlerService {
             SignalMessageLog signalMessageLog = smlBuilder.build();
             signalMessageLog.setMessageSubtype(messageSubtype);
             signalMessageLogDao.create(signalMessageLog);
+
+            uiReplicationSignalService.signalMessageSubmitted(signalMessageLog.getMessageId());
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }
