@@ -14,6 +14,7 @@ import java.util.Map;
  * @author Thomas Dussart
  * @since 4.0
  */
+
 @EnableTransactionManagement
 @Profile("IN_MEMORY_DATABASE")
 public class InMemoryDataBaseConfig extends AbstractDatabaseConfig{

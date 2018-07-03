@@ -29,17 +29,17 @@ public class MailSender {
 
     private final static Logger LOG = LoggerFactory.getLogger(MailSender.class);
 
-    static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
+    private static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
 
-    static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
+    private static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
 
-    static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
+    private static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
 
-    static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
+    private static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
 
-    static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
+    private static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
 
-    static final String MAIL = ".mail";
+    private static final String MAIL = ".mail";
 
     @Autowired
     private Configuration freemarkerConfig;
@@ -63,6 +63,7 @@ public class MailSender {
             final Integer port = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PORT));
             final String user = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_USER);
             final String password = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PASSWORD);
+
             LOG.debug("Configuring mail server.");
             LOG.debug("Smtp url:[{}]", url);
             LOG.debug("Smtp port:[{}]", port);

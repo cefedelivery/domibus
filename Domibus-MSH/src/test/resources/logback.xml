@@ -10,6 +10,7 @@
     </appender>
     <logger name="eu.domibus" level="DEBUG"/>
     <logger name="com.atomikos" level="ERROR"/>
+    <logger name="org.hibernate.tool.hbm2ddl" level="DEBUG"/>
     <root level="INFO">
         <appender-ref ref="stdout"/>
     </root>

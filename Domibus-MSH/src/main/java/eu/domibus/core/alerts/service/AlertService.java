@@ -1,8 +1,11 @@
 package eu.domibus.core.alerts.service;
 
+import eu.domibus.core.alerts.dao.AlertCriteria;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.alerts.model.service.MailModel;
+
+import java.util.List;
 
 public interface AlertService {
 
@@ -36,4 +39,11 @@ public interface AlertService {
      * Call by the alert job. Try to resend failed alerts.
      */
     void retry();
+
+    /**
+     * Filter alerts based on criteria.
+     * @param alertCriteria the alert criteria.
+     * @return the filtered list of alerts.
+     */
+    List<Alert> findAlerts(AlertCriteria alertCriteria);
 }

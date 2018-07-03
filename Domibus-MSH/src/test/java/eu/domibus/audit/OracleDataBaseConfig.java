@@ -18,6 +18,7 @@ import java.util.Map;
  * H2 brower utility. When your test is working switch the profile to @ActiveProfiles("IN_MEMORY_DATABASE")
  * lik in {@link AuditTest}
  */
+
 @EnableTransactionManagement
 @Profile("ORACLE_DATABASE")
 public class OracleDataBaseConfig extends AbstractDatabaseConfig{

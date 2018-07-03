@@ -39,6 +39,11 @@ public class Alert extends AbstractBaseEntity{
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportingTime;
 
+    @Column(name = "CREATION_TIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    private Date creationTime;
+
     @Column(name = "NEXT_ATTEMPT")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextAttempt;
@@ -55,7 +60,7 @@ public class Alert extends AbstractBaseEntity{
     private Date reportingTimeFailure;
 
     @Size(min=1)
-    @ManyToMany(mappedBy = "alerts")
+    @ManyToMany(mappedBy = "alerts",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     private Set<Event> events = new HashSet<>();
 
     @Column(name = "ALERT_STATUS")
@@ -103,6 +108,14 @@ public class Alert extends AbstractBaseEntity{
 
     public void setReportingTime(Date reportingTime) {
         this.reportingTime = reportingTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 
     public Date getNextAttempt() {

@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.core.alerts.dao.AlertCriteria;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.AlertLevel;
@@ -61,9 +62,6 @@ public class AlertServiceImpl implements AlertService {
     private Queue alertMessageQueue;
 
     @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
-
-    @Autowired
     private Map<AlertType, AlertLevelStrategy> alertLevelStrategyMap;
 
     /**
@@ -110,7 +108,7 @@ public class AlertServiceImpl implements AlertService {
         mailModel.put(ALERT_LEVEL, alert.getAlertLevel().name());
         mailModel.put(REPORTING_TIME, alert.getReportingTime().toString());
         if (LOG.isDebugEnabled()) {
-            mailModel.entrySet().forEach(entrySet -> LOG.debug("Mail template key[{}] value[{}]", entrySet.getKey(), entrySet.getValue()));
+            mailModel.forEach((key,value)-> LOG.debug("Mail template key[{}] value[{}]", key, value));
         }
         final AlertType alertType = read.getAlertType();
         final String subject = domibusPropertyProvider.getProperty(alertType.getSubjectProperty());
@@ -153,6 +151,11 @@ public class AlertServiceImpl implements AlertService {
     public void retry() {
         final List<Alert> retryAlerts = alertDao.findRetryAlerts();
         retryAlerts.forEach(this::convertAndEnqueue);
+    }
+
+    @Override
+    public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
+        return domainConverter.convert(alertDao.filterAlerts(alertCriteria), eu.domibus.core.alerts.model.service.Alert.class);
     }
 
     private void convertAndEnqueue(Alert alert) {

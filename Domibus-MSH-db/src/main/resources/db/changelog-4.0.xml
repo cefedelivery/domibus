@@ -1910,6 +1910,7 @@
             </column>
             <column name="PROCESSED" type="BOOLEAN"/>
             <column name="PROCESSED_TIME" type="TIMESTAMP"/>
+            <column name="CREATION_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME" type="TIMESTAMP"/>
             <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
             <column name="NEXT_ATTEMPT" type="TIMESTAMP"/>
