@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
@@ -43,7 +44,7 @@ public class PropertyProfileValidatorTest {
     private PModeProvider pModeProvider;
 
     @Injectable
-    DomibusPropertiesService domibusPropertiesService;
+    DomibusConfigurationService domibusConfigurationService;
 
     private LegConfiguration legConfiguration = new LegConfiguration();
 
@@ -56,7 +57,7 @@ public class PropertyProfileValidatorTest {
         properties.add(createProperty(MessageConstants.ORIGINAL_SENDER, MessageConstants.ORIGINAL_SENDER, "String", true));
         properties.add(createProperty(MessageConstants.FINAL_RECIPIENT, MessageConstants.FINAL_RECIPIENT, "String", true));
         new NonStrictExpectations(legConfiguration, propertySet) {{
-            domibusPropertiesService.isFourCornerEnabled();
+            domibusConfigurationService.isFourCornerEnabled();
             result = true;
 
             legConfiguration.getPropertySet();
@@ -76,7 +77,7 @@ public class PropertyProfileValidatorTest {
         Set<Property> properties = new HashSet<>();
         properties.add(createProperty(MessageConstants.ORIGINAL_SENDER, MessageConstants.ORIGINAL_SENDER, "String", true));
         new NonStrictExpectations(legConfiguration, propertySet) {{
-            domibusPropertiesService.isFourCornerEnabled();
+            domibusConfigurationService.isFourCornerEnabled();
             result = true;
 
             legConfiguration.getPropertySet();
@@ -94,7 +95,7 @@ public class PropertyProfileValidatorTest {
     public void validate4CornerModelTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
 
         new Expectations() {{
-            domibusPropertiesService.isFourCornerEnabled();
+            domibusConfigurationService.isFourCornerEnabled();
             result = true;
 
         }};
@@ -107,7 +108,7 @@ public class PropertyProfileValidatorTest {
     public void validate4CornerModelMissingMessagePropertiesTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
 
         new Expectations() {{
-            domibusPropertiesService.isFourCornerEnabled();
+            domibusConfigurationService.isFourCornerEnabled();
             result = true;
 
         }};
@@ -122,7 +123,7 @@ public class PropertyProfileValidatorTest {
     public void validate4CornerModelMissingOriginalSenderTest() throws EbMS3Exception, FileNotFoundException, XMLStreamException, JAXBException, ParserConfigurationException, SAXException {
 
         new Expectations() {{
-            domibusPropertiesService.isFourCornerEnabled();
+            domibusConfigurationService.isFourCornerEnabled();
             result = true;
 
         }};
@@ -149,6 +150,4 @@ public class PropertyProfileValidatorTest {
         JAXBElement root = xmlUtil.unmarshal(true, jaxbContext, inputStream, null).getResult();
         return (Messaging) root.getValue();
     }
-
-
 }

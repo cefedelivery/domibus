@@ -1,5 +1,7 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.util.DomibusPropertiesService;
@@ -35,7 +37,7 @@ public class PropertyProfileValidator {
     private PModeProvider pModeProvider;
 
     @Autowired
-    DomibusPropertiesService domibusPropertiesService;
+    DomibusConfigurationService domibusConfigurationService;
 
     public void validate(final Messaging messaging, final String pmodeKey) throws EbMS3Exception {
         // in the 4-corner model, originalSender and finalRecipient are required properties
@@ -105,7 +107,7 @@ public class PropertyProfileValidator {
 
     // in the 4-corner model, originalSender and finalRecipient are required properties
     protected void validateForCornerModel(final Messaging messaging) throws EbMS3Exception {
-        if(!domibusPropertiesService.isFourCornerEnabled()) {
+        if(!domibusConfigurationService.isFourCornerEnabled()) {
             return;
         }
 
