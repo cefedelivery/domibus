@@ -38,7 +38,7 @@ public class UIReplicationListener {
         LOG.info("processUIReplication for jmsType=[{}]", jmsType);
 
         switch (UIJMSType.valueOf(jmsType)) {
-            case MESSAGE_RECEIVED:
+            case USER_MESSAGE_RECEIVED:
                 uiReplicationDataService.messageReceived(messageId);
                 break;
             case USER_MESSAGE_SUBMITTED:
@@ -49,6 +49,9 @@ public class UIReplicationListener {
                 break;
             case SIGNAL_MESSAGE_SUBMITTED:
                 uiReplicationDataService.signalMessageSubmitted(messageId);
+                break;
+            case SIGNAL_MESSAGE_RECEIVED:
+                uiReplicationDataService.signalMessageReceived(messageId);
                 break;
             default:
                 throw new AssertionError("Invalid UIJMSType enum value");
