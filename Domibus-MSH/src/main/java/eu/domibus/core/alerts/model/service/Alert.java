@@ -27,6 +27,8 @@ public class Alert {
 
     private AlertType alertType;
 
+    private Date creationTime;
+
     private Date reportingTime;
 
     private Integer attempts;
@@ -79,6 +81,14 @@ public class Alert {
 
     public void setReportingTime(Date reportingTime) {
         this.reportingTime = reportingTime;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 
     public Integer getAttempts() {

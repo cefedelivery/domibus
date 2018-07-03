@@ -1,44 +1,98 @@
 package eu.domibus.core.alerts;
 
-import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertStatus;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.service.Event;
-
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class AlertRo {
 
-    private int entityId;
+    private int alertId;
 
     private boolean processed;
 
-    private Date processedTime;
+    private String alertType;
 
-    private AlertType alertType;
+    private String alertLevel;
 
-    private Date reportingTime;
+    private String alertDescription;
 
-    private Integer attempts;
+    private Date creationDate;
 
-    private Integer maxAttempts;
+    private Date reportingDate;
 
-    private Date reportingTimeFailure;
+    private List<String> parameters;
 
-    private AlertStatus alertStatus;
-
-    private AlertLevel alertLevel;
-
-    private Set<Event> events = new HashSet<>();
-
-    public int getEntityId() {
-        return entityId;
+    public int getAlertId() {
+        return alertId;
     }
 
-    public void setEntityId(int entityId) {
-        this.entityId = entityId;
+    public void setAlertId(int alertId) {
+        this.alertId = alertId;
+    }
+
+    public boolean isProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
+
+    public String getAlertType() {
+        return alertType;
+    }
+
+    public void setAlertType(String alertType) {
+        this.alertType = alertType;
+    }
+
+    public String getAlertLevel() {
+        return alertLevel;
+    }
+
+    public void setAlertLevel(String alertLevel) {
+        this.alertLevel = alertLevel;
+    }
+
+    public String getAlertDescription() {
+        return alertDescription;
+    }
+
+    public void setAlertDescription(String alertDescription) {
+        this.alertDescription = alertDescription;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Date getReportingDate() {
+        return reportingDate;
+    }
+
+    public void setReportingDate(Date reportingDate) {
+        this.reportingDate = reportingDate;
+    }
+
+    public List<String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<String> parameters) {
+        this.parameters = parameters;
+    }
+
+    /* private Set<Event> events = new HashSet<>();
+
+    public int getAlertId() {
+        return alertId;
+    }
+
+    public void setAlertId(int alertId) {
+        this.alertId = alertId;
     }
 
     public boolean isProcessed() {
@@ -119,5 +173,5 @@ public class AlertRo {
 
     public void setEvents(Set<Event> events) {
         this.events = events;
-    }
+    }*/
 }
