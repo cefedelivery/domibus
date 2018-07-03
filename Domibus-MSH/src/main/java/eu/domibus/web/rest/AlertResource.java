@@ -1,14 +1,15 @@
-package eu.domibus.core.alerts;
+package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.util.DateUtil;
+import eu.domibus.core.alerts.AlertRo;
 import eu.domibus.core.alerts.dao.AlertCriteria;
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.MessageEvent;
-import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
-import eu.domibus.web.rest.ro.ErrorLogResultRO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +33,18 @@ public class AlertResource {
     @Autowired
     private DomainExtConverter domibusDomainConverter;
 
+    @Autowired
+    DateUtil dateUtil;
+
 
     @RequestMapping(method = RequestMethod.GET)
     public List<AlertRo> findAlerts(@RequestParam(value = "page", defaultValue = "1") int page,
                                     @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-                                    @RequestParam(value = "size", defaultValue = "10") int size,
+                                    @RequestParam(value = "asc", defaultValue = "true") Boolean ask,
                                     @RequestParam(value = "orderBy", required = false) String column,
-                                    @RequestParam(value = "processed", required = false) boolean processed,
+                                    @RequestParam(value = "processed", required = false) String processed,
                                     @RequestParam(value = "alertType", required = false) String alertType,
-                                    @RequestParam(value = "alertId", required = false) String alertId,
+                                    @RequestParam(value = "alertId", required = false) Integer alertId,
                                     @RequestParam(value = "alertLevel", required = false) String alertLevel,
                                     @RequestParam(value = "creationFrom", required = false) String creationFrom,
                                     @RequestParam(value = "creationTo", required = false) String creationTo,
@@ -50,6 +53,27 @@ public class AlertResource {
                                     @RequestParam(value = "parameters", required = false) String[] parameters
                                     ) {
         AlertCriteria alertCriteria=new AlertCriteria();
+        alertCriteria.setPage(page);
+        alertCriteria.setPageSize(pageSize);
+        alertCriteria.setAsk(ask);
+        alertCriteria.setColumn(column);
+        alertCriteria.setProcessed(processed);
+        alertCriteria.setAlertType(alertType);
+        alertCriteria.setAlertID(alertId);
+        alertCriteria.setAlertLevel(alertLevel);
+        if(StringUtils.isNotEmpty(creationFrom)) {
+            alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
+        }
+        if(StringUtils.isNotEmpty(creationTo)) {
+            alertCriteria.setCreationTo(dateUtil.fromString(creationTo));
+        }
+        if(StringUtils.isNotEmpty(reportingFrom)) {
+            alertCriteria.setReportingFrom(dateUtil.fromString(reportingFrom));
+        }
+
+        if(StringUtils.isNotEmpty(reportingTo)) {
+            alertCriteria.setReportingTo(dateUtil.fromString(reportingTo));
+        }
         final List<AlertRo> convert = domibusDomainConverter.convert(alertService.findAlerts(alertCriteria), AlertRo.class);
         return convert;
     }

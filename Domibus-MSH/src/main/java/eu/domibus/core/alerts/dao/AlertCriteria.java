@@ -1,8 +1,11 @@
 package eu.domibus.core.alerts.dao;
 
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -12,9 +15,19 @@ public class AlertCriteria {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertCriteria.class);
 
+    private int page;
+
+    private int pageSize;
+
+    private Boolean ask;
+
+    private String column;
+
     private Boolean processed;
 
     private AlertType alertType;
+
+    private AlertLevel alertLevel;
 
     private Integer alertID;
 
@@ -26,7 +39,43 @@ public class AlertCriteria {
 
     private Date reportingTo;
 
-    private Map<String,String> parameters=new HashMap<>();
+    private Map<String, String> parameters = new HashMap<>();
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Boolean getAsk() {
+        return ask;
+    }
+
+    public void setAsk(Boolean ask) {
+        this.ask = ask;
+    }
+
+    public String getColumn() {
+        return column;
+    }
+
+    public void setColumn(String column) {
+        this.column = column;
+    }
+
+    public Boolean getProcessed() {
+        return processed;
+    }
 
     public Boolean isProcessed() {
         return processed;
@@ -36,12 +85,38 @@ public class AlertCriteria {
         this.processed = processed;
     }
 
+    public void setProcessed(String processed) {
+        if(StringUtils.isNotEmpty(processed)) {
+            this.processed = Boolean.valueOf(processed);
+        }
+    }
+
     public AlertType getAlertType() {
         return alertType;
     }
 
     public void setAlertType(AlertType alertType) {
         this.alertType = alertType;
+    }
+
+    public void setAlertType(String alertType) {
+        if (StringUtils.isNotEmpty(alertType)) {
+            this.alertType = AlertType.valueOf(alertType);
+        }
+    }
+
+    public AlertLevel getAlertLevel() {
+        return alertLevel;
+    }
+
+    public void setAlertLevel(AlertLevel alertLevel) {
+        this.alertLevel = alertLevel;
+    }
+
+    public void setAlertLevel(String alertLevel) {
+        if (StringUtils.isNotEmpty(alertLevel)) {
+            this.alertLevel = AlertLevel.valueOf(alertLevel);
+        }
     }
 
     public Integer getAlertID() {
