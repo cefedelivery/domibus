@@ -8,6 +8,8 @@ import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.xml.XMLUtilImpl;
@@ -18,6 +20,8 @@ import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -45,6 +49,9 @@ public class PropertyProfileValidatorTest {
 
     @Injectable
     DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    UserMessageServiceHelper userMessageDefaultServiceHelper = new UserMessageDefaultServiceHelper();
 
     private LegConfiguration legConfiguration = new LegConfiguration();
 
@@ -101,7 +108,7 @@ public class PropertyProfileValidatorTest {
         }};
 
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
-        propertyProfileValidator.validateForCornerModel(messaging);
+        propertyProfileValidator.validateFourCornerModel(messaging);
     }
 
     @Test(expected = EbMS3Exception.class)
@@ -116,7 +123,7 @@ public class PropertyProfileValidatorTest {
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
         messaging.getUserMessage().setMessageProperties(null);
 
-        propertyProfileValidator.validateForCornerModel(messaging);
+        propertyProfileValidator.validateFourCornerModel(messaging);
     }
 
     @Test(expected = EbMS3Exception.class)
@@ -131,7 +138,7 @@ public class PropertyProfileValidatorTest {
         final Messaging messaging = createMessaging(new FileInputStream(new File(valid4CornerMessagePath)));
         messaging.getUserMessage().getMessageProperties().getProperty().clear();
 
-        propertyProfileValidator.validateForCornerModel(messaging);
+        propertyProfileValidator.validateFourCornerModel(messaging);
     }
 
     private Property createProperty(String name, String key, String dataType, boolean required) {
@@ -150,4 +157,5 @@ public class PropertyProfileValidatorTest {
         JAXBElement root = xmlUtil.unmarshal(true, jaxbContext, inputStream, null).getResult();
         return (Messaging) root.getValue();
     }
+
 }
