@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.core.alerts.AlertRo;
 import eu.domibus.core.alerts.dao.AlertCriteria;
-import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.common.MessageEvent;
+import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
@@ -133,15 +131,15 @@ public class AlertResource {
                 final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
                 return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
             case CERT_EXPIRED:
-                return null;
             case CERT_IMMINENT_EXPIRATION:
-                return null;
+                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
+                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
             case USER_ACCOUNT_DISABLED:
-                return null;
             case USER_LOGIN_FAILURE:
-                return null;
+                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
+                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
             default:
-                return null;
+                throw new IllegalArgumentException("Unsuported alert type.");
         }
 
     }
