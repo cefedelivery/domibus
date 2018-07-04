@@ -42,9 +42,8 @@ export class AlertsComponent {
 
   buttonsDisabled: boolean = true;
 
-  // Mocked values
-  aTypes = ['MSG_COMMUNICATION_FAILURE','MSG_TEST'];
-  aLevels = ['HIGH', 'MEDIUM', 'LOW'];
+  aTypes = [];
+  aLevels = [];
 
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
 
@@ -62,7 +61,41 @@ export class AlertsComponent {
   timestampReportingToMaxDate: Date = new Date();
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+    this.getAlertTypes();
+    this.getAlertLevels();
+  }
 
+  getAlertTypes() : void {
+    this.http.get(AlertsComponent.ALERTS_URL + "/types")
+      .map(this.extractData)
+      .catch(this.handleError)
+      .subscribe(aTypes => this.aTypes = aTypes);
+  }
+
+  getAlertLevels() : void {
+    this.http.get(AlertsComponent.ALERTS_URL + "/levels")
+      .map(this.extractData)
+      .catch(this.handleError)
+      .subscribe(aLevels => this.aLevels = aLevels);
+  }
+
+  private extractData (res: Response) {
+    let body = res.json();
+    return body || {};
+  }
+
+  private handleError (error: Response | any) {
+    this.alertService.error(error, false);
+    let errMsg: string;
+    if (error instanceof Response) {
+      const body = error.json() || '';
+      const err = body.error || JSON.stringify(body);
+      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+    } else {
+      errMsg = error.message ? error.message : error.toString();
+    }
+    console.error(errMsg);
+    return Promise.reject(errMsg);
   }
 
   ngOnInit() {
@@ -126,7 +159,7 @@ export class AlertsComponent {
     }
 
     if(this.dynamicFilters.length > 0) {
-      let d : string[];
+      let d : string[] = [];
       for(let i = 0; i < this.dynamicFilters.length; i++) {
         d[i] = '';
       }
@@ -197,20 +230,20 @@ export class AlertsComponent {
       }
 
       // information of parameters and values
-      let entry: any;
+      /*let entry: any;
       for(entry in newRows) {
         let buildParams = [], pos = 0, params = this.getDynamicParameters(newRows[entry].alertType);
         for(let param in params) {
           buildParams[pos] = params[param] + '=' + newRows[entry].parameters[pos++];
         }
         newRows[entry].parameters = buildParams;
-      }
+      }*/
 
       this.rows = newRows;
 
-      this.filter = result.filter;
+/*      this.filter = result.filter;
       this.aLevels = result.alertsLevels;
-      this.aTypes = result.alertsType;
+      this.aTypes = result.alertsType;*/
 
       this.loading = false;
 
@@ -234,12 +267,22 @@ export class AlertsComponent {
     return false;//to prevent default navigation
   }
 
-  onAlertTypeChanged(alertType: string) {
-    this.items = this.getDynamicParameters(alertType);
+  getAlertParameters(alertType: string) : void {
+    let searchParams: URLSearchParams = new URLSearchParams();
+    searchParams.set('alertType', alertType);
+    this.http.get(AlertsComponent.ALERTS_URL + "/params", {search: searchParams})
+      .map(this.extractData)
+      .subscribe( items => this.items = items);
   }
 
-  getDynamicParameters(alertType:string): string[] {
+  onAlertTypeChanged(alertType: string) {
+    this.getAlertParameters(alertType);
+  }
+
+  /*getDynamicParameters(alertType:string): string[] {
     if(!isNullOrUndefined(alertType) && alertType != '') {
+      this.getAlertParameters(alertType);
+
       // just for testing begin: MOCK
       if(alertType == 'MSG_COMMUNICATION_FAILURE') {
         return ['MSG_COMM1', 'MSG_COMM2', 'MSG_COMM3']
@@ -250,7 +293,7 @@ export class AlertsComponent {
     } else {
       return [];
     }
-  }
+  }*/
 
   onTimestampCreationFromChange(event) {
     this.timestampCreationToMinDate = event.value;
