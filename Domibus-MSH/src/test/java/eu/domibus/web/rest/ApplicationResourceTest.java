@@ -133,8 +133,8 @@ public class ApplicationResourceTest {
     public void testGetFourCornerEnabled() throws Exception {
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
-            result = "false";
+            domibusConfigurationService.isFourCornerEnabled();
+            result = false;
         }};
 
         //tested method

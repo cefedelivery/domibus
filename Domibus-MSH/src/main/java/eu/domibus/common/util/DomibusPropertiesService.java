@@ -63,5 +63,4 @@ public class DomibusPropertiesService {
         display.append("]");
         return display.toString();
     }
-
 }
