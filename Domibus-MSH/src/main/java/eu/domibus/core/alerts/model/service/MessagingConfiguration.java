@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public class MessagingConfiguration {
 
     private final static Logger LOG = LoggerFactory.getLogger(MessagingConfiguration.class);

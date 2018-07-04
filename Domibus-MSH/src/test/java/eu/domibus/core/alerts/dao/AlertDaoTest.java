@@ -23,7 +23,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
         OracleDataBaseConfig.class, AlertDaoConfig.class})

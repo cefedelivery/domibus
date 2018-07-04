@@ -1,12 +1,10 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.service.Alert;
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
+import eu.domibus.core.alerts.model.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAlertConfigurationService{
+public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAlertConfigurationService {
 
     private final static Logger LOG = LoggerFactory.getLogger(MultiDomainAlertConfigurationServiceImpl.class);
 
@@ -31,38 +29,36 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private DomainContextProvider domainContextProvider;
+    private ConfigurationLoader<MessagingConfiguration> messagingConfigurationLoader;
 
-    private final Map<Domain, MessagingConfiguration> messagingConfigurationMap = new HashMap<>();
+    @Autowired
+    private ConfigurationLoader<AuthenticatorConfiguration> authenticatorConfigurationLoader;
+
+    @Autowired
+    private ConfigurationLoader<CertificateScannerConfiguration> certificateScannerConfigurationLoader;
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public MessagingConfiguration getMessageCommunicationConfiguration() {
-        final Domain domain = domainContextProvider.getCurrentDomain();
-        MessagingConfiguration messagingConfiguration = this.messagingConfigurationMap.get(domain);
-        LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
-        if (messagingConfiguration == null) {
-            synchronized (messagingConfigurationMap) {
-                messagingConfiguration = this.messagingConfigurationMap.get(domain);
-                if(messagingConfiguration==null) {
-                    final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
-                    messagingConfiguration = new MessagingConfiguration(false);
-                    if (alertActive) {
-                        messagingConfiguration = readMessageConfiguration(domain);
-                    }
-                    messagingConfigurationMap.put(domain, messagingConfiguration);
-                }
-            }
-        }
-        messagingConfiguration = messagingConfigurationMap.get(domain);
-        LOG.debug("Alert messaging configuration:[{}]", messagingConfiguration);
-        return messagingConfiguration;
+        return messagingConfigurationLoader.getConfiguration(this::readMessageConfiguration);
+    }
+
+    public AuthenticatorConfiguration getAuthenticatorConfiguration() {
+        return authenticatorConfigurationLoader.getConfiguration(this::readAuthenticatorConfiguration);
+    }
+
+    public CertificateScannerConfiguration getCertificateScannerConfiguration() {
+        return certificateScannerConfigurationLoader.getConfiguration(this::readCertificateScannerConfiguration);
     }
 
     private MessagingConfiguration readMessageConfiguration(Domain domain) {
         try {
+            final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+            if (!alertActive) {
+                return new MessagingConfiguration(false);
+            }
             final Boolean messageAlertActif = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE));
             Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
             if (messageAlertActif) {
@@ -104,5 +100,63 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         }
 
     }
+
+    private AuthenticatorConfiguration readAuthenticatorConfiguration(Domain domain) {
+        try {
+            final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+            if (!alertActive) {
+                LOG.debug("Alert module is inactive");
+                return new AuthenticatorConfiguration(false, false);
+            }
+            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.active"));
+            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.active"));
+            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.level"));
+            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.level"));
+            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.moment"));
+            return new AuthenticatorConfiguration(loginFailureActive, accountDisabledActive, loginFailureAlertLevel, accountDisabledAlertLevel, accountDisabledMoment);
+
+        } catch (Exception e) {
+            LOG.error("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain);
+            return new AuthenticatorConfiguration(false, false);
+        }
+
+    }
+
+    private CertificateScannerConfiguration readCertificateScannerConfiguration(Domain domain) {
+        final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+        if (!alertActive) {
+            LOG.debug("Alert module is inactive");
+            return new CertificateScannerConfiguration(false, false);
+        }
+        try {
+        final Boolean imminentExpirationActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.active"));
+        final Integer imminentExpirationDelay = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.delay_days"));
+        final Integer imminentExpirationFrequency = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.frequency_days"));
+        final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.level"));
+
+        final Boolean revocatedActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.active"));
+        final Integer revocatedFrequency = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.frequency_days"));
+        final Integer revocatedDuration = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.duration_days"));
+        final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.level"));
+
+        return new CertificateScannerConfiguration(
+                imminentExpirationActive,
+                imminentExpirationDelay,
+                imminentExpirationFrequency,
+                imminentExpirationAlertLevel,
+                revocatedActive,
+                revocatedFrequency,
+                revocatedDuration,
+                revocationLevel);
+
+        } catch (Exception e) {
+            LOG.error("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain);
+            return new CertificateScannerConfiguration(false, false);
+        }
+
+
+
+    }
+
 
 }

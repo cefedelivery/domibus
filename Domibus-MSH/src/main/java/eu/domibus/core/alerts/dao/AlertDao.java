@@ -12,7 +12,10 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Repository
 public class AlertDao extends BasicDao<Alert> {
 
@@ -59,6 +62,15 @@ public class AlertDao extends BasicDao<Alert> {
 
         //create main query by retrieving alerts where ides are in the sub query selection.
         criteria.where(root.get(Alert_.entityId).in(subQuery)).distinct(true);
+        final Boolean ask = alertCriteria.getAsk();
+        final String column = alertCriteria.getColumn();
+        if(column !=null && ask !=null){
+            if(ask){
+                criteria.orderBy(builder.asc(root.get(column)));
+            }else{
+                criteria.orderBy(builder.desc(root.get(column)));
+            }
+        }
         final TypedQuery<Alert> query = em.createQuery(criteria);
         query.setFirstResult(alertCriteria.getPage());
         query.setMaxResults(alertCriteria.getPageSize());
@@ -99,6 +111,10 @@ public class AlertDao extends BasicDao<Alert> {
 
         if(alertCriteria.getAlertType()!=null){
             predicates.add(cb.equal(alertRoot.get(Alert_.alertType), alertCriteria.getAlertType()));
+        }
+
+        if(alertCriteria.getAlertLevel()!=null){
+            predicates.add(cb.equal(alertRoot.get(Alert_.alertLevel), alertCriteria.getAlertLevel()));
         }
 
         if(alertCriteria.getAlertID()!=null){
