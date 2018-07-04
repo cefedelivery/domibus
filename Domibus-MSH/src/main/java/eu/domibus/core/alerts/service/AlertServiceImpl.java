@@ -156,7 +156,20 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
-        return domainConverter.convert(alertDao.filterAlerts(alertCriteria), eu.domibus.core.alerts.model.service.Alert.class);
+        final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Find alerts:");
+            alerts.forEach(alert -> {
+                LOG.debug("Alert[{}]",alert);
+                alert.getEvents().forEach(event -> {
+                    LOG.debug("Event[{}]",event);
+                    event.getProperties().
+                            forEach((key, value) -> LOG.debug("Event property:[{}]->[{}]",key,value));
+                });
+            });
+
+        }
+        return domainConverter.convert(alerts, eu.domibus.core.alerts.model.service.Alert.class);
     }
 
     @Override

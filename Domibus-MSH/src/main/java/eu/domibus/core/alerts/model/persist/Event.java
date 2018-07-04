@@ -83,7 +83,8 @@ public class Event extends AbstractBaseEntity {
     @Override
     public String toString() {
         return "Event{" +
-                "type='" + type + '\'' +
+                "id="+getEntityId()+
+                "  type='" + type + '\'' +
                 ", reportingTime=" + reportingTime +
                 ", properties=" + properties +
                 ", alerts=" + alerts +

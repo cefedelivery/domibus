@@ -59,7 +59,10 @@ public class AlertDao extends BasicDao<Alert> {
 
         //create main query by retrieving alerts where ides are in the sub query selection.
         criteria.where(root.get(Alert_.entityId).in(subQuery)).distinct(true);
-        return em.createQuery(criteria).getResultList();
+        final TypedQuery<Alert> query = em.createQuery(criteria);
+        query.setFirstResult(alertCriteria.getPage());
+        query.setMaxResults(alertCriteria.getPageSize());
+        return query.getResultList();
     }
 
     public Long countAlerts(AlertCriteria alertCriteria){

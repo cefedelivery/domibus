@@ -67,6 +67,7 @@ public class Event {
     public Optional<String> findProperty(final String key) {
         final EventPropertyValue eventPropertyValue = properties.get(key);
         if(eventPropertyValue==null){
+            LOG.error("No event property with such key as key[{}]",key);
             throw new IllegalArgumentException("Invalid property key");
         }
         if(eventPropertyValue.getValue()==null){
