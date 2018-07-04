@@ -13,6 +13,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -74,6 +75,9 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     @Autowired
     private PModeProvider pModeProvider;
+
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -307,6 +311,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         userMessageLog.setMessageStatus(waitingForReceipt);
         messagingLockDao.save(lock);
         userMessageLogDao.update(userMessageLog);
+        uiReplicationSignalService.messageStatusChange(userMessageLog.getMessageId(), waitingForReceipt);
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
     }
 

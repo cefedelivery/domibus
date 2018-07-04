@@ -31,6 +31,8 @@ public interface UIReplicationDataService {
      */
     void messageStatusChange(final String messageId, MessageStatus newStatus);
 
+    void messageChange(final String messageId);
+
     void signalMessageSubmitted(final String messageId);
 
     void signalMessageReceived(final String messageId);

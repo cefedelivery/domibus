@@ -4,6 +4,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -30,6 +31,10 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "MESSAGE_TYPE")
     private MessageType messageType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MESSAGE_SUBTYPE")
+    private MessageSubtype messageSubtype;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MSH_ROLE")
@@ -76,6 +81,9 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Column(name = "TO_SCHEME")
     private String toScheme;
 
+    @Column(name = "REF_TO_MESSAGE_ID")
+    private String refToMessageId;
+
 
     public String getMessageId() {
         return messageId;
@@ -115,6 +123,14 @@ public class UIMessageEntity extends AbstractBaseEntity {
 
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
+    }
+
+    public MessageSubtype getMessageSubtype() {
+        return messageSubtype;
+    }
+
+    public void setMessageSubtype(MessageSubtype messageSubtype) {
+        this.messageSubtype = messageSubtype;
     }
 
     public String getConversationId() {
@@ -211,5 +227,13 @@ public class UIMessageEntity extends AbstractBaseEntity {
 
     public void setToScheme(String toScheme) {
         this.toScheme = toScheme;
+    }
+
+    public String getRefToMessageId() {
+        return refToMessageId;
+    }
+
+    public void setRefToMessageId(String refToMessageId) {
+        this.refToMessageId = refToMessageId;
     }
 }

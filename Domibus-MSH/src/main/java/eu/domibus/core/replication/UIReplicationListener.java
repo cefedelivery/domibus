@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 
-
+/**
+ * "
+ */
 @Component
 public class UIReplicationListener {
 
@@ -46,6 +48,9 @@ public class UIReplicationListener {
                 break;
             case MESSAGE_STATUS_CHANGE:
                 uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
+                break;
+            case MESSAGE_CHANGE:
+                uiReplicationDataService.messageChange(messageId);
                 break;
             case SIGNAL_MESSAGE_SUBMITTED:
                 uiReplicationDataService.signalMessageSubmitted(messageId);

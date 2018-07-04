@@ -32,20 +32,19 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationDataServiceImpl.class);
 
     @Autowired
-    UIMessageDao uiMessageDao;
+    private UIMessageDao uiMessageDao;
 
     @Autowired
-    UserMessageLogDao userMessageLogDao;
+    private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    MessagingDao messagingDao;
+    private MessagingDao messagingDao;
 
     @Autowired
-    SignalMessageLogDao signalMessageLogDao;
-
+    private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
-    UserMessageDefaultServiceHelper userMessageDefaultServiceHelper;
+    private UserMessageDefaultServiceHelper userMessageDefaultServiceHelper;
 
     @Override
     public void messageReceived(String messageId) {
@@ -69,12 +68,35 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
             entity.setMessageStatus(newStatus);
             entity.setDeleted(userMessageLog.getDeleted());
             entity.setFailed(userMessageLog.getFailed());
+            entity.setRestored(userMessageLog.getRestored());
             entity.setNextAttempt(userMessageLog.getNextAttempt());
-            //TODO check other fields
+            entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
 
             uiMessageDao.update(entity);
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
+        }
+        LOG.info("{}Message with messageId={} synced",
+                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId);
+    }
+
+    @Override
+    public void messageChange(String messageId) {
+
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
+
+        if (entity != null) {
+            entity.setMessageStatus(userMessageLog.getMessageStatus());
+            entity.setDeleted(userMessageLog.getDeleted());
+            entity.setFailed(userMessageLog.getFailed());
+            entity.setRestored(userMessageLog.getRestored());
+            entity.setNextAttempt(userMessageLog.getNextAttempt());
+            entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
+
+            uiMessageDao.update(entity);
+        } else {
+            UIReplicationDataServiceImpl.LOG.warn("messageChange failed for messageId={}", messageId);
         }
         LOG.info("{}Message with messageId={} synced",
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId);
@@ -106,18 +128,21 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setNotificationStatus(signalMessageLog.getNotificationStatus());
         entity.setMshRole(signalMessageLog.getMshRole());
         entity.setMessageType(signalMessageLog.getMessageType());
+
         entity.setDeleted(signalMessageLog.getDeleted());
         entity.setReceived(signalMessageLog.getReceived());
         entity.setSendAttempts(signalMessageLog.getSendAttempts());
         entity.setSendAttemptsMax(signalMessageLog.getSendAttemptsMax());
         entity.setNextAttempt(signalMessageLog.getNextAttempt());
-        entity.setFailed(signalMessageLog.getFailed());
-        entity.setRestored(signalMessageLog.getRestored());
         entity.setConversationId(StringUtils.EMPTY);
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
         entity.setToId(userMessage.getPartyInfo().getTo().getPartyId().iterator().next().getValue());
         entity.setFromScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setToScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
+        entity.setFailed(signalMessageLog.getFailed());
+        entity.setRestored(signalMessageLog.getRestored());
+        entity.setMessageSubtype(signalMessageLog.getMessageSubtype());
 
         uiMessageDao.create(entity);
     }
@@ -138,13 +163,15 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setSendAttempts(userMessageLog.getSendAttempts());
         entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
         entity.setNextAttempt(userMessageLog.getNextAttempt());
-        entity.setFailed(userMessageLog.getFailed());
-        entity.setRestored(userMessageLog.getRestored());
         entity.setConversationId(userMessage.getCollaborationInfo().getConversationId());
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
         entity.setToId(userMessage.getPartyInfo().getTo().getPartyId().iterator().next().getValue());
         entity.setFromScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setToScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setRefToMessageId(userMessage.getMessageInfo().getRefToMessageId());
+        entity.setFailed(userMessageLog.getFailed());
+        entity.setRestored(userMessageLog.getRestored());
+        entity.setMessageSubtype(userMessageLog.getMessageSubtype());
 
         uiMessageDao.create(entity);
     }

@@ -305,6 +305,7 @@
             <column name="MESSAGE_TYPE" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
 
             <column name="MSH_ROLE" type="VARCHAR(255)">
                 <constraints nullable="false"/>
