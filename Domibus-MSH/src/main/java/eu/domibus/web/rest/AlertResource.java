@@ -100,7 +100,7 @@ public class AlertResource {
     private AlertRo transform(Alert alert) {
         AlertRo alertRo = new AlertRo();
         alertRo.setProcessed(alert.isProcessed());
-        alertRo.setAlertId(alert.getEntityId());
+        alertRo.setEntityId(alert.getEntityId());
         alertRo.setAlertType(alert.getAlertType().name());
         alertRo.setAlertLevel(alert.getAlertLevel().name());
         alertRo.setCreationTime(alert.getCreationTime());
