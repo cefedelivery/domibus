@@ -298,7 +298,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
-    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws JMSActiveMQException {
+    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
         Queue queue;
 
         try {
@@ -357,5 +357,4 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         }
         return null;
     }
-
 }
