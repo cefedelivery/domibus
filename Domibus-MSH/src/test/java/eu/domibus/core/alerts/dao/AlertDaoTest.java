@@ -119,4 +119,21 @@ public class AlertDaoTest {
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         assertEquals(1,alerts.size());
     }
+
+    @Test
+    public void countAlerts() {
+        final org.joda.time.LocalDateTime now = org.joda.time.LocalDateTime.now();
+        final Date reportingDate = now.minusMinutes(15).toDate();
+        final Date reportingFrom = now.minusMinutes(16).toDate();
+        final Date reportingTo = now.minusMinutes(14).toDate();
+        createAlert("blue_gw","red_gw",true,reportingDate);
+        final AlertCriteria alertCriteria = new AlertCriteria();
+        alertCriteria.getParameters().put("FROM_PARTY","blue_gw");
+        alertCriteria.getParameters().put("TO_PARTY","red_gw");
+        alertCriteria.setReportingFrom(reportingFrom);
+        alertCriteria.setReportingTo(reportingTo);
+        alertCriteria.setProcessed(true);
+        final Long count = alertDao.countAlerts(alertCriteria);
+        assertEquals(1,count.intValue());
+    }
 }

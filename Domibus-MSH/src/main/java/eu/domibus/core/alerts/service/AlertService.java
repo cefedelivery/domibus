@@ -46,4 +46,6 @@ public interface AlertService {
      * @return the filtered list of alerts.
      */
     List<Alert> findAlerts(AlertCriteria alertCriteria);
+
+    Long countAlerts(AlertCriteria alertCriteria);
 }

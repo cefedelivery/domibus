@@ -62,6 +62,32 @@ public class AlertDao extends BasicDao<Alert> {
         return em.createQuery(criteria).getResultList();
     }
 
+    public Long countAlerts(AlertCriteria alertCriteria){
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+        Root<Alert> root=criteria.from(Alert.class);
+
+        //Do first a subQuery to retrieve the filtered alerts id based on criteria.
+        criteria.select( builder.count(root.get( Alert_.entityId)) );
+
+        List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, root));
+        final SetJoin<Alert, Event> eventJoin = root.join(Alert_.events);
+        final Map<String, String> parameters = alertCriteria.getParameters();
+        parameters.forEach((key, value) -> {
+            //because event properties are key value, we need to create a join on each parameters.
+            final MapJoin<Event, String, EventProperty> join = eventJoin.join(Event_.properties);
+            final Predicate parameterPredicate = builder.and(
+                    builder.equal(join.get(EventProperty_.key), key),
+                    builder.equal(join.get(EventProperty_.value), value));
+            predicates.add(parameterPredicate);
+
+        });
+        //add predicates to the sub query.
+        criteria.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
+        return em.createQuery(criteria).getSingleResult();
+
+    }
+
     private List<Predicate> getAlertPredicates(AlertCriteria alertCriteria, CriteriaBuilder cb, Root<Alert> alertRoot) {
         List<Predicate> predicates= Lists.newArrayList();
         if (alertCriteria.isProcessed() != null) {

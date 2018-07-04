@@ -159,6 +159,11 @@ public class AlertServiceImpl implements AlertService {
         return domainConverter.convert(alertDao.filterAlerts(alertCriteria), eu.domibus.core.alerts.model.service.Alert.class);
     }
 
+    @Override
+    public Long countAlerts(AlertCriteria alertCriteria) {
+        return alertDao.countAlerts(alertCriteria);
+    }
+
     private void convertAndEnqueue(Alert alert) {
         LOG.debug("Preparing alert\n[{}]\nfor retry", alert);
         final eu.domibus.core.alerts.model.service.Alert convert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);

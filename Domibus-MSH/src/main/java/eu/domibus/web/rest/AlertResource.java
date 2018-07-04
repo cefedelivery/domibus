@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping(value = "/rest/alerts")
@@ -29,9 +30,6 @@ public class AlertResource {
 
     @Autowired
     private AlertService alertService;
-
-    @Autowired
-    private DomainExtConverter domibusDomainConverter;
 
     @Autowired
     DateUtil dateUtil;
@@ -61,7 +59,8 @@ public class AlertResource {
         alertCriteria.setAlertType(alertType);
         alertCriteria.setAlertID(alertId);
         alertCriteria.setAlertLevel(alertLevel);
-        if (StringUtils.isNotEmpty(creationFrom)) {
+
+         if (StringUtils.isNotEmpty(creationFrom)) {
             alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
         }
         if (StringUtils.isNotEmpty(creationTo)) {
@@ -75,11 +74,24 @@ public class AlertResource {
             alertCriteria.setReportingTo(dateUtil.fromString(reportingTo));
         }
 
+        if(StringUtils.isEmpty(alertType)){
+             alertType=AlertType.MSG_COMMUNICATION_FAILURE.name();
+        }
+        if(parameters!=null) {
+            final List<String> alertParameters = getAlertParameters(alertType);
+            final Map<String, String> parametersMap = IntStream.
+                    range(0, parameters.length).
+                    mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
+                    filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
+                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+            alertCriteria.setParameters(parametersMap);
+        }
+
+        final Long aLong = alertService.countAlerts(alertCriteria);
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
         final AlertResult alertResult = new AlertResult();
-        alertResult.setPageSize(10);
-        alertResult.setCount(10);
+        alertResult.setCount(aLong.intValue());
         alertResult.setAlertsEntries(alertRoList);
         return alertResult;
     }
@@ -124,7 +136,6 @@ public class AlertResource {
         } catch (IllegalArgumentException e) {
             LOG.trace("Invalid or empty alert type:[{}] sent from the gui ", aType, e);
             return Lists.newArrayList();
-
         }
         switch (alertType) {
             case MSG_COMMUNICATION_FAILURE:

@@ -9,17 +9,9 @@ import java.util.List;
 
 public class AlertResult {
 
-    private int pageSize;
     private int count;
+
     private List<AlertRo> alertsEntries=new ArrayList<>();
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
 
     public int getCount() {
         return count;
