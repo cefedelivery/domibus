@@ -8,7 +8,6 @@ import {Observable} from "rxjs/Observable";
 import {AlertsResult} from "./alertsresult";
 import {Http, URLSearchParams, Response, Headers} from "@angular/http";
 import {AlertService} from "../alert/alert.service";
-import {AlertsEntry} from "./alertsentry";
 import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
 import {MdDialog} from "@angular/material";
 import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
@@ -35,7 +34,7 @@ export class AlertsComponent {
   // data table
   rows = [];
   count: number = 0;
-  offset: number = 10;
+  offset: number = 0;
   //default value
   orderBy: string = "creationTime";
   //default value
@@ -100,21 +99,19 @@ export class AlertsComponent {
   }
 
   ngOnInit() {
-    this.filter.alertType = null;
-
     this.columnPicker.allColumns = [
-      { name: 'Processed', cellTemplate: this.rowProcessed, width: 50 },
-      { name: 'Alert Id' },
+      { name: 'Processed', cellTemplate: this.rowProcessed, width: 20 },
+      { name: 'Alert Id', width: 20, prop: "entityId" },
       { name: 'Alert Type' },
       { name: 'Alert Level', width: 50 },
       { name: 'Alert Text' },
-      { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155, prop: "creationDate" },
-      { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155, prop: "reportingDate" },
+      { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
+      { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
       { name: 'Parameters', sortable: false }
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Processed", "ID", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"].indexOf(col.name) != -1
+      return ["Processed", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"].indexOf(col.name) != -1
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
@@ -184,35 +181,6 @@ export class AlertsComponent {
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
 
-    let newEntries: AlertsEntry[] = [];
-
-    // MOCK info
-    /*let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas','ddsdsd','ddd']);
-    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), ['tryrty','trurutru']);
-    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', this.aTypes[0], this.aLevels[0], 'aText3', new Date(), new Date(), ['aaaaa','bbbbb','cccccc']);
-    newEntries[0] = entry1;
-    newEntries[1] = entry2;
-    newEntries[2] = entry3;
-
-    // information of parameters and values
-    let entry: any;
-    for(entry in newEntries) {
-      let buildParams = [], pos = 0, params = this.getDynamicParameters(newEntries[entry].alertType);
-      for(let param in params) {
-        buildParams[pos] = params[param] + '=' + newEntries[entry].parameters[pos++];
-      }
-      newEntries[entry].parameters = buildParams;
-    }
-
-    this.rows = newEntries;
-
-    this.count = 3;
-    this.offset = offset;
-    this.rowLimiter.pageSize = pageSize;
-    this.orderBy = orderBy;
-    this.asc = asc;
-    this.loading = false;*/
-
     this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
       console.log("alerts response: " + result);
       this.offset = offset;
@@ -230,21 +198,7 @@ export class AlertsComponent {
         newRows[i] = result.alertsEntries[index++];
       }
 
-      // information of parameters and values
-      /*let entry: any;
-      for(entry in newRows) {
-        let buildParams = [], pos = 0, params = this.getDynamicParameters(newRows[entry].alertType);
-        for(let param in params) {
-          buildParams[pos] = params[param] + '=' + newRows[entry].parameters[pos++];
-        }
-        newRows[entry].parameters = buildParams;
-      }*/
-
       this.rows = newRows;
-
-/*      this.filter = result.filter;
-      this.aLevels = result.alertsLevels;
-      this.aTypes = result.alertsType;*/
 
       this.loading = false;
 
@@ -254,7 +208,7 @@ export class AlertsComponent {
     }, (error: any) => {
       console.log("error getting the alerts:" + error);
       this.loading = false;
-      this.alertService.error("Error occured:" + error);
+      this.alertService.error("Error occurred:" + error);
     });
   }
 
@@ -279,22 +233,6 @@ export class AlertsComponent {
   onAlertTypeChanged(alertType: string) {
     this.getAlertParameters(alertType);
   }
-
-  /*getDynamicParameters(alertType:string): string[] {
-    if(!isNullOrUndefined(alertType) && alertType != '') {
-      this.getAlertParameters(alertType);
-
-      // just for testing begin: MOCK
-      if(alertType == 'MSG_COMMUNICATION_FAILURE') {
-        return ['MSG_COMM1', 'MSG_COMM2', 'MSG_COMM3']
-      } else {
-        return ['MSG_TEST1', 'MSG_TEST2'];
-      }
-      // just for testing end
-    } else {
-      return [];
-    }
-  }*/
 
   onTimestampCreationFromChange(event) {
     this.timestampCreationToMinDate = event.value;

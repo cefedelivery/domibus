@@ -143,7 +143,6 @@
     [count]="count"
     [offset]="offset"
     [limit]="rowLimiter.pageSize"
-    [sorts]="[{prop: 'Creation Time', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)"
     (activate)="onActivate($event)">
