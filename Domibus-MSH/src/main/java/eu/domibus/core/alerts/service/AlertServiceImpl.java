@@ -78,6 +78,7 @@ public class AlertServiceImpl implements AlertService {
         alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
         alert.setReportingTime(event.getReportingTime());
         alert.setAlertStatus(SEND_ENQUEUED);
+        alert.setCreationTime(new Date());
 
         final AlertLevelStrategy alertLevelStrategy = alertLevelStrategyMap.get(alert.getAlertType());
         final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
