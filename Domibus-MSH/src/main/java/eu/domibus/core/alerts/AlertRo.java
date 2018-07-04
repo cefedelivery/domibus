@@ -5,7 +5,7 @@ import java.util.List;
 
 public class AlertRo {
 
-    private int alertId;
+    private int entityId;
 
     private boolean processed;
 
@@ -15,18 +15,18 @@ public class AlertRo {
 
     private String alertDescription;
 
-    private Date creationDate;
+    private Date creationTime;
 
-    private Date reportingDate;
+    private Date reportingTime;
 
     private List<String> parameters;
 
-    public int getAlertId() {
-        return alertId;
+    public int getEntityId() {
+        return entityId;
     }
 
-    public void setAlertId(int alertId) {
-        this.alertId = alertId;
+    public void setEntityId(int alertId) {
+        this.entityId = alertId;
     }
 
     public boolean isProcessed() {
@@ -61,20 +61,20 @@ public class AlertRo {
         this.alertDescription = alertDescription;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
+    public Date getCreationTime() {
+        return creationTime;
     }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 
-    public Date getReportingDate() {
-        return reportingDate;
+    public Date getReportingTime() {
+        return reportingTime;
     }
 
-    public void setReportingDate(Date reportingDate) {
-        this.reportingDate = reportingDate;
+    public void setReportingTime(Date reportingTime) {
+        this.reportingTime = reportingTime;
     }
 
     public List<String> getParameters() {

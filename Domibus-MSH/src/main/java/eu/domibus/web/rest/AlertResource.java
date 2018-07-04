@@ -103,8 +103,8 @@ public class AlertResource {
         alertRo.setAlertId(alert.getEntityId());
         alertRo.setAlertType(alert.getAlertType().name());
         alertRo.setAlertLevel(alert.getAlertLevel().name());
-        alertRo.setCreationDate(alert.getCreationTime());
-        alertRo.setReportingDate(alert.getReportingTime());
+        alertRo.setCreationTime(alert.getCreationTime());
+        alertRo.setReportingTime(alert.getReportingTime());
 
         final List<String> alertParameterNames = getAlertParameters(alert.getAlertType().name());
         final List<String> alertParameterValues = alertParameterNames.

@@ -109,8 +109,10 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 return new AuthenticatorConfiguration(false, false);
             }
             final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.active"));
-            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.active"));
             final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.level"));
+
+
+            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.active"));
             final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.level"));
             final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.moment"));
             return new AuthenticatorConfiguration(loginFailureActive, accountDisabledActive, loginFailureAlertLevel, accountDisabledAlertLevel, accountDisabledMoment);
