@@ -22,6 +22,7 @@ import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
 export class AlertsComponent {
 
   @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
+  @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
 
   static readonly ALERTS_URL: string = 'rest/alerts';
 
@@ -107,8 +108,8 @@ export class AlertsComponent {
       { name: 'Alert Type' },
       { name: 'Alert Level', width: 50 },
       { name: 'Alert Text' },
-      { name: 'Creation Time' },
-      { name: 'Reporting Time' },
+      { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155, prop: "creationDate" },
+      { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155, prop: "reportingDate" },
       { name: 'Parameters', sortable: false }
     ];
 
