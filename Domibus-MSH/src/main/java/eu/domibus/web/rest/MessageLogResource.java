@@ -71,23 +71,6 @@ public class MessageLogResource {
     @Autowired
     CsvServiceImpl csvServiceImpl;
 
-    //significant improvements to the query execution plan have been found by always passing the date.
-    //so we provide a default from and to.
-    Date defaultFrom;
-
-    Date defaultTo;
-
-    @PostConstruct
-    protected void init() {
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            defaultFrom = ft.parse("1977-10-25");
-            defaultTo = ft.parse("2977-10-25");
-        } catch (ParseException e) {
-            LOGGER.error("Impossible to initiate default dates");
-        }
-    }
-
     @RequestMapping(method = RequestMethod.GET)
     public MessageLogResultRO getMessageLog(
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -118,13 +101,8 @@ public class MessageLogResource {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
 
         Date from = dateUtil.fromString(receivedFrom);
-        if (from == null) {
-            from = defaultFrom;
-        }
         Date to = dateUtil.fromString(receivedTo);
-        if (to == null) {
-            to = defaultTo;
-        }
+
         filters.put(RECEIVED_FROM_STR, from);
         filters.put(RECEIVED_TO_STR, to);
 
@@ -147,12 +125,6 @@ public class MessageLogResource {
         //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
         //the result. Why??.
         filters.put("messageType", messageType);
-        if (filters.get(RECEIVED_FROM_STR).equals(defaultFrom)) {
-            filters.remove(RECEIVED_FROM_STR);
-        }
-        if (filters.get(RECEIVED_TO_STR).equals(defaultTo)) {
-            filters.remove(RECEIVED_TO_STR);
-        }
         result.setMessageLogEntries(convertMessageLogInfoList(resultList));
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
@@ -187,13 +159,8 @@ public class MessageLogResource {
             @RequestParam(value = "messageSubtype", required = false) MessageSubtype messageSubtype) {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
         Date from = dateUtil.fromString(receivedFrom);
-        if (from == null) {
-            from = defaultFrom;
-        }
         Date to = dateUtil.fromString(receivedTo);
-        if (to == null) {
-            to = defaultTo;
-        }
+
         filters.put(RECEIVED_FROM_STR, from);
         filters.put(RECEIVED_TO_STR, to);
 
