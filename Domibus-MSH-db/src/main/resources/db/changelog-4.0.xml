@@ -1894,6 +1894,23 @@
         </insert>
     </changeSet>
 
+    <changeSet author="CatalinEnache" id="EDELIVERY-3234">
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID_VAL" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+            <column name="VALUE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_LOG_RCV_MSG_ID" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
+
     <changeSet id="EDELIVERY-3361" author="CatalinEnache">
         <createTable tableName="TB_MESSAGE_UI">
             <column autoIncrement="true" name="ID_PK" type="INT">

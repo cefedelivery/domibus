@@ -27,7 +27,6 @@ import java.util.List;
 public class ApplicationResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationResource.class);
-    static final String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
     protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
@@ -91,7 +90,7 @@ public class ApplicationResource {
     @RequestMapping(value = "fourcornerenabled", method = RequestMethod.GET)
     public boolean getFourCornerModelEnabled() {
         LOG.debug("Getting four corner enabled");
-        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
+        return domibusConfigurationService.isFourCornerEnabled();
     }
 
 }

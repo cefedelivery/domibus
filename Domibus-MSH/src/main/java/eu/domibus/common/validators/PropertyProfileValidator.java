@@ -1,16 +1,27 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.util.DomibusPropertiesService;
+import eu.domibus.core.message.UserMessageDefaultService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Property;
 import eu.domibus.common.model.configuration.PropertySet;
+import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
+import eu.domibus.ebms3.common.model.MessageProperties;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.messaging.MessageConstants;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,11 +41,20 @@ public class PropertyProfileValidator {
     @Autowired
     private PModeProvider pModeProvider;
 
+    @Autowired
+    UserMessageServiceHelper userMessageDefaultServiceHelper;
+
+    @Autowired
+    DomibusConfigurationService domibusConfigurationService;
+
     public void validate(final Messaging messaging, final String pmodeKey) throws EbMS3Exception {
+        // in the 4-corner model, originalSender and finalRecipient are required properties
+        validateFourCornerModel(messaging);
+
         final List<Property> modifiablePropertyList = new ArrayList<>();
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         final PropertySet propSet = legConfiguration.getPropertySet();
-        if (propSet == null) {
+        if (propSet == null || CollectionUtils.isEmpty(propSet.getProperties())) {
             LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION_SKIP, legConfiguration.getName());
             // no profile means everything is valid
             return;
@@ -43,8 +63,12 @@ public class PropertyProfileValidator {
         final Set<Property> profile = propSet.getProperties();
 
         modifiablePropertyList.addAll(profile);
+        eu.domibus.ebms3.common.model.MessageProperties messageProperties = new MessageProperties();
+        if(messaging.getUserMessage().getMessageProperties() != null) {
+            messageProperties = messaging.getUserMessage().getMessageProperties();
+        }
 
-        for (final eu.domibus.ebms3.common.model.Property property : messaging.getUserMessage().getMessageProperties().getProperty()) {
+        for (final eu.domibus.ebms3.common.model.Property property : messageProperties.getProperty()) {
             Property profiled = null;
             for (final Property profiledProperty : modifiablePropertyList) {
                 if (profiledProperty.getKey().equals(property.getName())) {
@@ -87,5 +111,25 @@ public class PropertyProfileValidator {
         }
 
         LOG.businessInfo(DomibusMessageCode.BUS_PROPERTY_PROFILE_VALIDATION, propSet.getName());
+    }
+
+    // in the 4-corner model, originalSender and finalRecipient are required properties
+    protected void validateFourCornerModel(final Messaging messaging) throws EbMS3Exception {
+        if(!domibusConfigurationService.isFourCornerEnabled()) {
+            return;
+        }
+
+        LOG.debug("Validating 4-corner model properties.");
+
+        if(messaging.getUserMessage().getMessageProperties() == null) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "MessageProperties is REQUIRED in the four corner model.", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+        }
+
+        String a = userMessageDefaultServiceHelper.getOriginalSender(messaging.getUserMessage());
+        String b = userMessageDefaultServiceHelper.getOriginalSender(null);
+
+        if(StringUtils.isEmpty(userMessageDefaultServiceHelper.getOriginalSender(messaging.getUserMessage())) || StringUtils.isEmpty(userMessageDefaultServiceHelper.getFinalRecipient(messaging.getUserMessage()))) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "OriginalSender and FinalRecipient are REQUIRED properties in the four corner model.", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
+        }
     }
 }

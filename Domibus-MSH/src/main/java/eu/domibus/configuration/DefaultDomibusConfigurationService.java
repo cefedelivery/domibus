@@ -78,4 +78,9 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
         return Boolean.parseBoolean(useProxy);
     }
+
+    @Override
+    public boolean isFourCornerEnabled() {
+        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
+    }
 }
