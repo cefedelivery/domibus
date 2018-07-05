@@ -356,14 +356,14 @@ export class AlertsComponent {
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(() => {
           this.alertService.success("The operation 'update alerts' completed successfully.", false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
           if(withDownloadCSV) {
             DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv");
           }
         }, err => {
-          this.alertService.error("The operation 'update alerts' not completed successfully.", false);
+          this.alertService.error("The operation 'update alerts' not completed successfully (" + err.status + ").", false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
         });
       } else {
