@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.replication.UIMessageEntity;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -323,6 +324,39 @@ public class MessageLogResource {
         result.setFailed(messageLogInfo.getFailed());
         result.setRestored(messageLogInfo.getRestored());
         result.setMessageSubtype(messageLogInfo.getMessageSubtype());
+        return result;
+    }
+
+    /**
+     * Converts {@link UIMessageEntity} object to {@link MessageLogRO} to be used on GUI
+     * @param uiMessageEntity
+     * @return an {@link MessageLogRO} object
+     */
+    private MessageLogRO convertUIMessageEntity(UIMessageEntity uiMessageEntity) {
+        if(uiMessageEntity == null) {
+            return null;
+        }
+
+        MessageLogRO result = new MessageLogRO();
+        result.setConversationId(uiMessageEntity.getConversationId());
+        result.setFromPartyId(uiMessageEntity.getFromId());
+        result.setToPartyId(uiMessageEntity.getToId());
+        result.setOriginalSender(uiMessageEntity.getFromScheme());
+        result.setFinalRecipient(uiMessageEntity.getToScheme());
+        result.setRefToMessageId(uiMessageEntity.getRefToMessageId());
+        result.setMessageId(uiMessageEntity.getMessageId());
+        result.setMessageStatus(uiMessageEntity.getMessageStatus());
+        result.setNotificationStatus(uiMessageEntity.getNotificationStatus());
+        result.setMshRole(uiMessageEntity.getMshRole());
+        result.setMessageType(uiMessageEntity.getMessageType());
+        result.setDeleted(uiMessageEntity.getDeleted());
+        result.setReceived(uiMessageEntity.getReceived());
+        result.setSendAttempts(uiMessageEntity.getSendAttempts());
+        result.setSendAttemptsMax(uiMessageEntity.getSendAttemptsMax());
+        result.setNextAttempt(uiMessageEntity.getNextAttempt());
+        result.setFailed(uiMessageEntity.getFailed());
+        result.setRestored(uiMessageEntity.getRestored());
+        result.setMessageSubtype(uiMessageEntity.getMessageSubtype());
         return result;
     }
 }
