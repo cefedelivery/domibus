@@ -24,6 +24,10 @@ export class AlertsComponent {
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
 
   static readonly ALERTS_URL: string = 'rest/alerts';
+  static readonly ALERTS_CSV_URL: string = AlertsComponent.ALERTS_URL + "/csv";
+  static readonly ALERTS_TYPES_URL: string = AlertsComponent.ALERTS_URL + "/types";
+  static readonly ALERTS_LEVELS_URL: string = AlertsComponent.ALERTS_URL + "/levels";
+  static readonly ALERTS_PARAMS_URL: string = AlertsComponent.ALERTS_URL + "/params";
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
@@ -66,14 +70,14 @@ export class AlertsComponent {
   }
 
   getAlertTypes() : void {
-    this.http.get(AlertsComponent.ALERTS_URL + "/types")
+    this.http.get(AlertsComponent.ALERTS_TYPES_URL)
       .map(this.extractData)
       .catch(this.handleError)
       .subscribe(aTypes => this.aTypes = aTypes);
   }
 
   getAlertLevels() : void {
-    this.http.get(AlertsComponent.ALERTS_URL + "/levels")
+    this.http.get(AlertsComponent.ALERTS_LEVELS_URL)
       .map(this.extractData)
       .catch(this.handleError)
       .subscribe(aLevels => this.aLevels = aLevels);
@@ -225,7 +229,7 @@ export class AlertsComponent {
   getAlertParameters(alertType: string) : void {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('alertType', alertType);
-    this.http.get(AlertsComponent.ALERTS_URL + "/params", {search: searchParams})
+    this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams})
       .map(this.extractData)
       .subscribe( items => this.items = items);
   }
@@ -294,7 +298,7 @@ export class AlertsComponent {
     if(!this.buttonsDisabled) {
       this.save(true);
     } else {
-      DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv" + this.getFilterPath());
+      DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + this.getFilterPath());
     }
   }
 
@@ -356,19 +360,19 @@ export class AlertsComponent {
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
+        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(() => {
           this.alertService.success("The operation 'update alerts' completed successfully.", false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
           if(withDownloadCSV) {
-            DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv");
+            DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL);
           }
         }, err => {
-          this.alertService.error("The operation 'update alerts' not completed successfully.", false);
+          this.alertService.error("The operation 'update alerts' not completed successfully (" + err.status + ").", false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
         });
       } else {
         if(withDownloadCSV) {
-          DownloadService.downloadNative(AlertsComponent.ALERTS_URL + "/csv");
+          DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL);
         }
       }
     });
