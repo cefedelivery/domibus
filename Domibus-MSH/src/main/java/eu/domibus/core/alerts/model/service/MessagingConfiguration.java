@@ -2,38 +2,46 @@ package eu.domibus.core.alerts.model.service;
 
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
-public class MessagingConfiguration {
+public class MessagingConfiguration implements AlertConfiguration {
 
     private final static Logger LOG = LoggerFactory.getLogger(MessagingConfiguration.class);
 
     private boolean messageCommunicationActive;
 
-    private Map<MessageStatus,AlertLevel> messageStatusLevels=new HashMap<>();
+    private String mailSubject;
 
-    public MessagingConfiguration(boolean messageCommunicationActive) {
-        this.messageCommunicationActive = messageCommunicationActive;
+    private Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
+
+    public MessagingConfiguration(final String mailSubject) {
+        this.messageCommunicationActive = true;
+        this.mailSubject = mailSubject;
+
     }
 
-    public void addStatusLevelAssociation(MessageStatus messageStatus, AlertLevel alertLevel){
-        messageStatusLevels.put(messageStatus,alertLevel);
+    public MessagingConfiguration() {
+        this.messageCommunicationActive = false;
+
     }
 
-    public Map<MessageStatus, AlertLevel> getMessageStatusLevels() {
-        return Collections.unmodifiableMap(messageStatusLevels);
+    public void addStatusLevelAssociation(MessageStatus messageStatus, AlertLevel alertLevel) {
+        messageStatusLevels.put(messageStatus, alertLevel);
     }
 
     public boolean shouldMonitorMessageStatus(MessageStatus messageStatus) {
-        return messageCommunicationActive && messageStatusLevels.get(messageStatus)!=null;
+        return messageCommunicationActive && messageStatusLevels.get(messageStatus) != null;
     }
 
     public AlertLevel getAlertLevel(MessageStatus messageStatus) {
@@ -47,4 +55,28 @@ public class MessagingConfiguration {
                 ", messageStatusLevels=" + messageStatusLevels +
                 '}';
     }
+
+    @Override
+    public String getMailSubject() {
+        return mailSubject;
+    }
+
+    @Override
+    public boolean isActive() {
+        return messageCommunicationActive;
+    }
+
+    @Override
+    public AlertLevel getAlertLevel(Alert alert) {
+        if (AlertType.MSG_COMMUNICATION_FAILURE != alert.getAlertType()) {
+            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_COMMUNICATION_FAILURE);
+            throw new IllegalArgumentException("Invalid alert type of the strategy.");
+        }
+        final EventPropertyValue eventPropertyValue = alert.getEvents().iterator().next().getProperties().get(MessageEvent.NEW_STATUS.name());
+        final MessageStatus newStatus = MessageStatus.valueOf(eventPropertyValue.getValue());
+        final AlertLevel alertLevel = getAlertLevel(newStatus);
+        LOG.debug("Alert level for message change to status[{}] is [{}]", newStatus, alertLevel);
+        return alertLevel;
+    }
+
 }

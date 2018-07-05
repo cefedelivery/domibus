@@ -4,6 +4,8 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.service.Event;
 
+import java.util.Date;
+
 public interface EventService {
 
     /**
@@ -14,6 +16,20 @@ public interface EventService {
      * @param role the role of the accesspoint.
      */
     void enqueueMessageEvent(String messageId, MessageStatus oldStatus, MessageStatus newStatus, MSHRole role);
+
+    void enqueueLoginFailureEvent(
+            String userName,
+            Date loginTime,
+            boolean accountDisabled);
+
+    void enqueueAccountDisabledEvent(
+            String userName,
+            Date loginTime,
+            boolean accountDisabled);
+
+    void enqueueImminentCertificateExpirationEvent(String accessPoint, String alias, Date expirationDate);
+
+    void enqueueCertificateExpiredEvent(String accessPoint, String alias, Date expirationDate);
 
     /**
      * Save an event.

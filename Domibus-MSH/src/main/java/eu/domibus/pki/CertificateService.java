@@ -2,6 +2,8 @@ package eu.domibus.pki;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.TrustStoreEntry;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;
@@ -37,6 +39,9 @@ public interface CertificateService {
     void saveCertificateAndLogRevocation(Domain domain);
 
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void sendCertificateAlerts();
 
     /**
      * Returns the certificate deserialized from a base64 string

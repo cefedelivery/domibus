@@ -1,6 +1,6 @@
 package eu.domibus.core.alerts.service;
 
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
+import eu.domibus.core.alerts.model.service.*;
 
 /**
  * Retrieve the configuration for the different type of alert submodules.
@@ -13,4 +13,11 @@ public interface MultiDomainAlertConfigurationService {
      */
     MessagingConfiguration getMessageCommunicationConfiguration();
 
+    AccountDisabledConfiguration getAccountDisabledConfiguration();
+
+    LoginFailureConfiguration getLoginFailureConfigurationLoader();
+
+    ImminentExpirationCertificateConfiguration getImminentExpirationCertificateConfiguration();
+
+    ExpiredCertificateConfiguration getExpiredCertificateConfiguration();
 }

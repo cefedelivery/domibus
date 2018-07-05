@@ -2,6 +2,7 @@ package eu.domibus.core.certificate;
 
 import eu.domibus.common.model.certificate.Certificate;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,6 +12,10 @@ import java.util.List;
 public interface CertificateDao {
 
     void saveOrUpdate(Certificate certificate);
+
+    List<Certificate> findImminentExpirationToNotify(Date nextNotification, Date offset);
+
+    List<Certificate> findExpiredToNotify(Date endDuration, Date notificationDate);
 
     List<Certificate> getUnNotifiedSoonRevoked();
 

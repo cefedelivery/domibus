@@ -1,8 +1,5 @@
 package eu.domibus.core.alerts.configuration;
 
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.service.AlertLevelStrategy;
-import eu.domibus.core.alerts.service.MessagingAlertLevelStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,8 +11,6 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import javax.jms.ConnectionFactory;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.jms.support.converter.MessageType.TEXT;
 
@@ -24,17 +19,6 @@ public class AlertContextConfiguration {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertContextConfiguration.class);
 
-    @Bean
-    public AlertLevelStrategy messagingAlertLevelStrategy() {
-        return new MessagingAlertLevelStrategy();
-    }
-
-    @Bean
-    public Map<AlertType, AlertLevelStrategy> alertLevelStrategyMap(AlertLevelStrategy messagingAlertLevelStrategy) {
-        Map<AlertType, AlertLevelStrategy> alertStrategyMap = new HashMap<>();
-        alertStrategyMap.put(AlertType.MSG_COMMUNICATION_FAILURE, messagingAlertLevelStrategy);
-        return alertStrategyMap;
-    }
 
     @Bean
     public MappingJackson2MessageConverter jackson2MessageConverter() {

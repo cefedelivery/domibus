@@ -72,7 +72,7 @@ public class AlertDao extends BasicDao<Alert> {
             }
         }
         final TypedQuery<Alert> query = em.createQuery(criteria);
-        query.setFirstResult(alertCriteria.getPage());
+        query.setFirstResult(alertCriteria.getPage()*alertCriteria.getPageSize());
         query.setMaxResults(alertCriteria.getPageSize());
         return query.getResultList();
     }

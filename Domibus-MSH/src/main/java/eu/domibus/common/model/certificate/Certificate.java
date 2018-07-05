@@ -14,6 +14,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "TB_CERTIFICATE")
 @NamedQueries({
+        @NamedQuery(name = "Certificate.findExpiredToNotifyCertificate", query = "FROM Certificate c where (c.alertNotificationDate is null OR c.alertNotificationDate<=:NEXT_NOTIFICATION) AND c.certificateStatus='REVOKED' AND c.notAfter>=:END_NOTIFICATION"),
+        @NamedQuery(name = "Certificate.findImminentExpirationToNotifyCertificate", query = "FROM Certificate c where (c.alertNotificationDate is null OR c.alertNotificationDate<=:NEXT_NOTIFICATION) AND c.certificateStatus!='REVOKED' AND c.notAfter<=:OFFSET_DATE"),
         @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
         @NamedQuery(name = "Certificate.findByAliasAndType", query = "FROM Certificate c where c.alias=:ALIAS AND c.certificateType=:CERTIFICATE_TYPE"),
         @NamedQuery(name = "Certificate.findByStatusAndNotificationDate", query = "FROM Certificate c where c.certificateStatus=:CERTIFICATE_STATUS AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
@@ -37,6 +39,10 @@ public class Certificate extends AbstractBaseEntity {
     @Column(name = "REVOKE_NOTIFICATION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastNotification;
+
+    @Column(name = "ALERT_NOTIFICATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date alertNotificationDate;
 
     @Column(name = "CERTIFICATE_TYPE")
     @Enumerated(EnumType.STRING)
@@ -90,6 +96,14 @@ public class Certificate extends AbstractBaseEntity {
 
     public void setCertificateStatus(CertificateStatus certificateStatus) {
         this.certificateStatus = certificateStatus;
+    }
+
+    public Date getAlertNotificationDate() {
+        return alertNotificationDate;
+    }
+
+    public void setAlertNotificationDate(Date alertNotification) {
+        this.alertNotificationDate = alertNotification;
     }
 
     public void setCertificateType(CertificateType certificateType) {

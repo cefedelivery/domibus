@@ -1,5 +1,6 @@
 package eu.domibus.common.dao;
 
+import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.common.BasicAudit;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.springframework.transaction.annotation.Propagation;
@@ -7,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A basic DAO implementation providing the standard CRUD operations,
@@ -71,4 +74,6 @@ public abstract class BasicDao<T extends AbstractBaseEntity> {
     public void flush() {
         em.flush();
     }
+
+
 }
