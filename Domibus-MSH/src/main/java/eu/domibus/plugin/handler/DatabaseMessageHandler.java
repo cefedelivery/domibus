@@ -337,6 +337,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             backendMessageValidator.validateInitiatorParty(gatewayParty, from);
             backendMessageValidator.validateResponderParty(gatewayParty, to);
 
+            backendMessageValidator.validatePayloads(userMessage.getPayloadInfo());
+
             return to;
         } catch (IllegalArgumentException runTimEx) {
             LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]", runTimEx);
