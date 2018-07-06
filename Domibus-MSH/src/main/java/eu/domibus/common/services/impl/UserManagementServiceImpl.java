@@ -130,9 +130,9 @@ public class UserManagementServiceImpl implements UserService {
     private void triggerAlert(String userName, UserLoginErrorReason userLoginErrorReason) {
 
 
+        final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfigurationLoader();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
-                final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfigurationLoader();
                 if (loginFailureConfiguration.isActive()) {
                     eventService.enqueueLoginFailureEvent(userName, new Date(), false);
                 }
@@ -144,6 +144,8 @@ public class UserManagementServiceImpl implements UserService {
                 final AccountDisabledConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
                 if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
                     eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
+                }else if(loginFailureConfiguration.isActive()){
+                    eventService.enqueueLoginFailureEvent(userName, new Date(), true);
                 }
                 break;
         }

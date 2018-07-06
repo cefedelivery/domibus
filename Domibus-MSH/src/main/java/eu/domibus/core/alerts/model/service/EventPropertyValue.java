@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = EventPropertyValue.class)
 public class EventPropertyValue {
 

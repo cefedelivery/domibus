@@ -4,7 +4,10 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Entity
 @Table(name = "TB_EVENT_PROPERTY")
 public class EventProperty extends AbstractBaseEntity {

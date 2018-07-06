@@ -1,12 +1,15 @@
 package eu.domibus.core.alerts.service;
 
-import eu.domibus.core.alerts.dao.AlertCriteria;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.alerts.model.service.MailModel;
 
 import java.util.List;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public interface AlertService {
 
     /**
@@ -47,5 +50,15 @@ public interface AlertService {
      */
     List<Alert> findAlerts(AlertCriteria alertCriteria);
 
+    /**
+     * Count alerts for a given criteria.
+     * @param alertCriteria the alert criteria.
+     * @return the number of alerts corresponding to the criteria.
+     */
     Long countAlerts(AlertCriteria alertCriteria);
+
+    /**
+     * Clean alerts which have an expired lifetime base on properties.
+     */
+    void cleanAlerts();
 }

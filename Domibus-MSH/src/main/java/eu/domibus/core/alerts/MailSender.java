@@ -24,6 +24,10 @@ import java.util.Set;
 
 import static eu.domibus.core.alerts.model.service.Alert.DOMIBUS_ALERT_ACTIVE;
 
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Component
 public class MailSender {
 

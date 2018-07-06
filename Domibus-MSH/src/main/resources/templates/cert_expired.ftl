@@ -1801,7 +1801,7 @@
                                             <tr>
                                                 <th>
 
-                                                    <p class="lead">A message status change has triggered an alert.</p>
+                                                    <p class="lead">Certificate expired.</p>
                                                     <table class="callout">
                                                         <tr>
                                                             <th>

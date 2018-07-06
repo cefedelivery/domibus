@@ -2,7 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.alerts.dao.AlertCriteria;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.AlertLevel;
@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.domibus.core.alerts.model.common.AlertStatus.*;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Service
 public class AlertServiceImpl implements AlertService {
 
@@ -62,7 +65,8 @@ public class AlertServiceImpl implements AlertService {
     private Queue alertMessageQueue;
 
     @Autowired
-    private Map<AlertType, AlertLevelStrategy> alertLevelStrategyMap;
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
 
     /**
      * {@inheritDoc}
@@ -80,9 +84,8 @@ public class AlertServiceImpl implements AlertService {
         alert.setAlertStatus(SEND_ENQUEUED);
         alert.setCreationTime(new Date());
 
-        final AlertLevelStrategy alertLevelStrategy = alertLevelStrategyMap.get(alert.getAlertType());
         final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
-        final AlertLevel alertLevel = alertLevelStrategy.getAlertLevel(convertedAlert);
+        final AlertLevel alertLevel = multiDomainAlertConfigurationService.getAlertLevel(convertedAlert);
         alert.setAlertLevel(alertLevel);
         LOG.debug("Saving new alert:\n[]\n", alert);
         alertDao.create(alert);
@@ -112,7 +115,7 @@ public class AlertServiceImpl implements AlertService {
             mailModel.forEach((key,value)-> LOG.debug("Mail template key[{}] value[{}]", key, value));
         }
         final AlertType alertType = read.getAlertType();
-        final String subject = domibusPropertyProvider.getProperty(alertType.getSubjectProperty());
+        final String subject = multiDomainAlertConfigurationService.getMailSubject(alertType);
         final String template = alertType.getTemplate();
         return new DefaultMailModel(mailModel, template, subject);
     }
@@ -154,6 +157,9 @@ public class AlertServiceImpl implements AlertService {
         retryAlerts.forEach(this::convertAndEnqueue);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
@@ -172,9 +178,24 @@ public class AlertServiceImpl implements AlertService {
         return domainConverter.convert(alerts, eu.domibus.core.alerts.model.service.Alert.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Long countAlerts(AlertCriteria alertCriteria) {
         return alertDao.countAlerts(alertCriteria);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void cleanAlerts(){
+        final Integer alertLifeTimeInDays = multiDomainAlertConfigurationService.getAlertLifeTimeInDays();
+        final Date alertLimitDate = org.joda.time.LocalDateTime.now().minusDays(alertLifeTimeInDays).withTime(0,0,0,0).toDate();
+        LOG.debug("Cleaning alerts with creation time < [{}]",alertLimitDate);
+        final List<Alert> alerts = alertDao.retriveAlertsWithCreationDateSmallerThen(alertLimitDate);
+        alertDao.deleteAll(alerts);
     }
 
     private void convertAndEnqueue(Alert alert) {

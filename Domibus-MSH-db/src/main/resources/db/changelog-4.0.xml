@@ -114,7 +114,8 @@
             <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP"/>
             <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP"/>
             <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
-            <column name="ALERT_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="ALERT_IMM_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="ALERT_EXP_NOTIFICATION_DATE" type="TIMESTAMP"/>
             <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>

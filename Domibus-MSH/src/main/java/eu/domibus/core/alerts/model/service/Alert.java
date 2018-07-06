@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = Alert.class)
 public class Alert {
 

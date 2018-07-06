@@ -1,11 +1,8 @@
-package eu.domibus.core.alerts.dao;
+package eu.domibus.core.alerts.model.common;
 
-import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Date;
 import java.util.HashMap;

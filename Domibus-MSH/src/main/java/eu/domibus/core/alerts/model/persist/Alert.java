@@ -13,15 +13,17 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Entity
 @Table(name = "TB_ALERT")
 @NamedQueries({
-        @NamedQuery(name = "Alert.findRetry", query = "FROM Alert a where a.alertStatus='RETRY' and a.nextAttempt < CURRENT_TIMESTAMP()")
+        @NamedQuery(name = "Alert.findRetry", query = "FROM Alert a where a.alertStatus='RETRY' and a.nextAttempt < CURRENT_TIMESTAMP()"),
+        @NamedQuery(name = "Alert.findAlertToClean", query = "FROM Alert a where a.creationTime<:ALERT_LIMIT_DATE")
 })
 public class Alert extends AbstractBaseEntity{
-
-    private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
 
     @Column(name = "PROCESSED")
     private boolean processed;
@@ -60,7 +62,7 @@ public class Alert extends AbstractBaseEntity{
     private Date reportingTimeFailure;
 
     @Size(min=1)
-    @ManyToMany(mappedBy = "alerts",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @ManyToMany(mappedBy = "alerts",cascade = {CascadeType.PERSIST,CascadeType.MERGE,CascadeType.REMOVE})
     private Set<Event> events = new HashSet<>();
 
     @Column(name = "ALERT_STATUS")

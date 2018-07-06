@@ -1450,46 +1450,41 @@
                                                     <p class="lead">A message status change has triggered an alert.</p>
                                                     <table class="callout">
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th >
                                                                 Message id: ${MESSAGE_ID}
                                                             </th>
-                                                            <th class="expander"></th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th class="callout-inner primary">
-                                                                From party:${FROM_PARTY}
 
-                                                            <th class="expander">Test</th>
                                                         </tr>
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th>
+                                                                From party:${FROM_PARTY}
+                                                            </th>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <th >
                                                                 To party:${TO_PARTY}
                                                             </th>
-                                                            <th class="expander"></th>
                                                         </tr>
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th >
                                                                 Old status:${OLD_STATUS}
                                                             </th>
-                                                            <th class="expander"></th>
                                                         </tr>
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th >
                                                                 New status:${NEW_STATUS}
                                                             </th>
-                                                            <th class="expander"></th>
                                                         </tr>
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th >
                                                                 Alert level:${ALERT_LEVEL}
                                                             </th>
-                                                            <th class="expander"></th>
                                                         </tr>
                                                         <tr>
-                                                            <th class="callout-inner primary">
+                                                            <th >
                                                                 Reporting time:${REPORTING_TIME}
                                                             </th>
-                                                            <th class="expander"></th>
                                                         </tr>
                                                     </table>
                                                 </th>

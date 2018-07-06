@@ -2,7 +2,10 @@ package eu.domibus.core.alerts.model.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public class DefaultMailModel<T> implements MailModel<T> {
 
     private final static Logger LOG = LoggerFactory.getLogger(DefaultMailModel.class);

@@ -1,11 +1,14 @@
 package eu.domibus.core.alerts.model.common;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public enum AlertType {
-    MSG_COMMUNICATION_FAILURE("message.ftl", "domibus.alert.msg.communication_failure.mail.subject"),
-    CERT_IMMINENT_EXPIRATION("cert_imminent_expiration.ftl", ""),
-    CERT_EXPIRED("cert_expired.ftl", ""),
-    USER_LOGIN_FAILURE("login_failure.ftl", ""),
-    USER_ACCOUNT_DISABLED("account_disabled..ftl", "");
+    MSG_COMMUNICATION_FAILURE("message.ftl"),
+    CERT_IMMINENT_EXPIRATION("cert_imminent_expiration.ftl"),
+    CERT_EXPIRED("cert_expired.ftl"),
+    USER_LOGIN_FAILURE("login_failure.ftl"),
+    USER_ACCOUNT_DISABLED("account_disabled.ftl");
 
     //in the future an alert will not have one to one mapping.
     public static AlertType getAlertTypeFromEventType(EventType eventType) {
@@ -27,18 +30,14 @@ public enum AlertType {
 
     private String template;
 
-    private String subjectProperty;
-
-    AlertType(String template, String subjectProperty) {
+    AlertType(String template) {
         this.template = template;
-        this.subjectProperty = subjectProperty;
+
     }
 
     public String getTemplate() {
         return template;
     }
 
-    public String getSubjectProperty() {
-        return subjectProperty;
-    }
+
 }

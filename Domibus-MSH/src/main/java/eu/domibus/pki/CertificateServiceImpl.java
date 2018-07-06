@@ -248,13 +248,13 @@ public class CertificateServiceImpl implements CertificateService {
         final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
-        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and end date < then current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
+        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
         certificateDao.findImminentExpirationToNotify(notificationDate, offset).forEach(certificate -> {
-            certificate.setAlertNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+            certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
-            final String accesPointOrAlias = accessPoint == null ? alias : accessPoint;
-            eventService.enqueueImminentCertificateExpirationEvent(accesPointOrAlias, alias, new Date());
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueImminentCertificateExpirationEvent(accessPointOrAlias, alias, certificate.getNotAfter());
         });
     }
 
@@ -276,12 +276,13 @@ public class CertificateServiceImpl implements CertificateService {
         Date endNotification = LocalDateTime.now().minusDays(revokedDuration).toDate();
         Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
 
-        certificateDao.findExpiredToNotify(endNotification, notificationDate).forEach(certificate -> {
-            certificate.setAlertNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
+        certificateDao.findExpiredToNotify(notificationDate,endNotification).forEach(certificate -> {
+            certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
-            final String accesPointOrAlias = accessPoint == null ? alias : accessPoint;
-            eventService.enqueueCertificateExpiredEvent(accesPointOrAlias, alias, new Date());
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
         });
     }
 

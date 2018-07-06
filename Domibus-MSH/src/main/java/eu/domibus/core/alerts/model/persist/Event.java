@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Entity
 @Table(name = "TB_EVENT")
 public class Event extends AbstractBaseEntity {

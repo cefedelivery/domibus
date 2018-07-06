@@ -1,8 +1,11 @@
-package eu.domibus.core.alerts;
+package eu.domibus.core.alerts.model.web;
 
 import java.util.Date;
 import java.util.List;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public class AlertRo {
 
     private int entityId;

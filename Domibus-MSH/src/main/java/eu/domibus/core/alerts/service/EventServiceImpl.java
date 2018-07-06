@@ -30,7 +30,10 @@ import java.util.Date;
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.LOGIN_TIME;
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.USER;
 import static eu.domibus.core.alerts.model.common.MessageEvent.*;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Service
 public class EventServiceImpl implements EventService {
 

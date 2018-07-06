@@ -4,13 +4,18 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public class LoginFailureConfiguration implements AlertConfiguration{
 
     private final static Logger LOG = LoggerFactory.getLogger(LoginFailureConfiguration.class);
 
     private final Boolean loginFailureActive;
+
     private AlertLevel loginFailureAlertLevel;
+
     private String loginFailureMailSubject;
 
     public LoginFailureConfiguration(boolean loginFailureActive) {

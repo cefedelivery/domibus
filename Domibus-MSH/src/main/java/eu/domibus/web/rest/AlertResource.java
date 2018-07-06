@@ -2,8 +2,8 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.core.alerts.AlertRo;
-import eu.domibus.core.alerts.dao.AlertCriteria;
+import eu.domibus.core.alerts.model.web.AlertRo;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.service.AlertService;

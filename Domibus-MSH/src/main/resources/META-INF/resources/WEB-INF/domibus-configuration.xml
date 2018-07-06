@@ -50,7 +50,13 @@
 
     <bean id="alertRetryJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.core.alerts.AlertRetryJob"/>
+        <property name="jobClass" value="eu.domibus.core.alerts.job.AlertRetryJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="alertCleanerJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.core.alerts.job.AlertCleanerJob"/>
         <property name="durability" value="true"/>
     </bean>
 
@@ -90,6 +96,12 @@
         <property name="jobDetail" ref="alertRetryJob"/>
         <property name="cronExpression" value="${domibus.alert.retry.cron}"/>
     </bean>
+    <bean id="alertCleanerTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="alertCleanerJob"/>
+        <property name="cronExpression" value="${domibus.alert.cleaner.cron}"/>
+    </bean>
+
 
     <!-- customizable list of triggers to be executed by quartz -->
     <bean id="userdefinedTriggerList"
@@ -101,6 +113,7 @@
                 <ref bean="activateSuspendedUserTrigger"/>
                 <ref bean="saveCertificateAndLogRevocationTrigger"/>
                 <ref bean="alertRetryTrigger"/>
+                <ref bean="alertCleanerTrigger"/>
             </list>
         </property>
     </bean>

@@ -4,14 +4,20 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public class AccountDisabledConfiguration implements AlertConfiguration{
 
     private final static Logger LOG = LoggerFactory.getLogger(AccountDisabledConfiguration.class);
 
     private final Boolean accountDisabledActive;
+
     private AlertLevel accountDisabledAlertLevel;
+
     private AccountDisabledMoment accountDisabledMoment;
+
     private String accountDisabledMailSubject;
 
     public AccountDisabledConfiguration(boolean accountDisabledActive) {

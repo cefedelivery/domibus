@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Service
 public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
 
@@ -20,12 +24,18 @@ public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
     @Autowired
     private MailSender mailSender;
 
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
     @Override
     public void dispatch(Alert alert) {
         final MailModel mailModelForAlert = alertService.getMailModelForAlert(alert);
         try {
             alert.setAlertStatus(AlertStatus.FAILED);
-            mailSender.sendMail(mailModelForAlert, "to", "from");
+            mailSender.sendMail(
+                    mailModelForAlert,
+                    multiDomainAlertConfigurationService.getSendTo(),
+                    multiDomainAlertConfigurationService.getSendFrom());
             alert.setAlertStatus(AlertStatus.SUCCESS);
         } finally {
             alertService.handleAlertStatus(alert);

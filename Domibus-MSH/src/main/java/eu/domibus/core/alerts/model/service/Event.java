@@ -10,7 +10,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = Event.class)
 public class Event {
 

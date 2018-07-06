@@ -11,6 +11,9 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.core.alerts.model.service.AccountDisabledConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,6 +51,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     @Autowired
     protected UserDomainService userDomainService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    private EventService eventService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -135,6 +145,15 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         if (!userEntity.getActive() && user.isActive()) {
             userEntity.setSuspensionDate(null);
             userEntity.setAttemptCount(0);
+
+        }
+        if(!user.isActive() && userEntity.getActive()){
+            LOG.debug("User:[{}] has been disabled by administrator",user.getUserName());
+            final AccountDisabledConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            if (accountDisabledConfiguration.isActive()) {
+                LOG.debug("Sending account disabled event for user:[{}]",user.getUserName());
+                eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
+            }
         }
         userEntity.setActive(user.isActive());
         userEntity.setEmail(user.getEmail());
@@ -143,29 +162,14 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private Collection<eu.domibus.api.user.User> filterNewUsers(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.NEW.name().equals(user.getStatus());
-            }
-        });
+        return Collections2.filter(users, user -> UserState.NEW.name().equals(user.getStatus()));
     }
 
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithoutPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() == null;
-            }
-        });
+        return Collections2.filter(users, user -> UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() == null);
     }
 
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithPasswordChange(List<eu.domibus.api.user.User> users) {
-        return Collections2.filter(users, new Predicate<eu.domibus.api.user.User>() {
-            @Override
-            public boolean apply(eu.domibus.api.user.User user) {
-                return UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty();
-            }
-        });
+        return Collections2.filter(users, user -> UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty());
     }
 }

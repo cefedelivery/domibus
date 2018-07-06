@@ -4,6 +4,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Service
 public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAlertConfigurationService {
 
@@ -24,7 +28,48 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     private static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES = "domibus.alert.msg.communication_failure.states";
 
     private static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL = "domibus.alert.msg.communication_failure.level";
+
     public static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT = "domibus.alert.msg.communication_failure.mail.subject";
+
+    public static final String DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT = "domibus.alert.cert.expired.mail.subject";
+
+    public static final String DOMIBUS_ALERT_CERT_EXPIRED_LEVEL = "domibus.alert.cert.expired.level";
+
+    public static final String DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS = "domibus.alert.cert.expired.duration_days";
+
+    public static final String DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS = "domibus.alert.cert.expired.frequency_days";
+
+    public static final String DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE = "domibus.alert.cert.expired.active";
+
+    public static final String DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT = "domibus.alert.cert.imminent_expiration.mail.subject";
+
+    public static final String DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL = "domibus.alert.cert.imminent_expiration.level";
+
+    public static final String DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS = "domibus.alert.cert.imminent_expiration.frequency_days";
+
+    public static final String DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS = "domibus.alert.cert.imminent_expiration.delay_days";
+
+    public static final String DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE = "domibus.alert.cert.imminent_expiration.active";
+
+    public static final String DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT = "domibus.alert.user.login_failure.mail.subject";
+
+    public static final String DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL = "domibus.alert.user.login_failure.level";
+
+    public static final String DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE = "domibus.alert.user.login_failure.active";
+
+    public static final String DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT = "domibus.alert.user.account_disabled.subject";
+
+    public static final String DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT = "domibus.alert.user.account_disabled.moment";
+
+    public static final String DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL = "domibus.alert.user.account_disabled.level";
+
+    public static final String DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE = "domibus.alert.user.account_disabled.active";
+
+    public static final String DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME = "domibus.alert.cleaner.alert.lifetime";
+
+    public static final String DOMIBUS_ALERT_SENDER_EMAIL = "domibus.alert.sender.email";
+
+    public static final String DOMIBUS_ALERT_RECEIVER_EMAIL = "domibus.alert.receiver.email";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -43,6 +88,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     @Autowired
     private ConfigurationLoader<ExpiredCertificateConfiguration> expiredCertificateConfigurationLoader;
+
     /**
      * {@inheritDoc}
      */
@@ -69,6 +115,44 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public ExpiredCertificateConfiguration getExpiredCertificateConfiguration() {
         return expiredCertificateConfigurationLoader.getConfiguration(this::readExpiredCertificateConfiguration);
+    }
+
+    @Override
+    public AlertLevel getAlertLevel(Alert alert) {
+        switch (alert.getAlertType()) {
+            case MSG_COMMUNICATION_FAILURE:
+                return getMessageCommunicationConfiguration().getAlertLevel(alert);
+            case USER_ACCOUNT_DISABLED:
+                return getAccountDisabledConfiguration().getAlertLevel(alert);
+            case USER_LOGIN_FAILURE:
+                return getLoginFailureConfigurationLoader().getAlertLevel(alert);
+            case CERT_IMMINENT_EXPIRATION:
+                return getImminentExpirationCertificateConfiguration().getAlertLevel(alert);
+            case CERT_EXPIRED:
+                return getExpiredCertificateConfiguration().getAlertLevel(alert);
+            default:
+                LOG.error("Invalid alert type[{}]", alert.getAlertType());
+                throw new IllegalArgumentException("Invalid alert type");
+        }
+    }
+
+    @Override
+    public String getMailSubject(AlertType alertType) {
+        switch (alertType) {
+            case MSG_COMMUNICATION_FAILURE:
+                return getMessageCommunicationConfiguration().getMailSubject();
+            case USER_ACCOUNT_DISABLED:
+                return getAccountDisabledConfiguration().getMailSubject();
+            case USER_LOGIN_FAILURE:
+                return getLoginFailureConfigurationLoader().getMailSubject();
+            case CERT_IMMINENT_EXPIRATION:
+                return getImminentExpirationCertificateConfiguration().getMailSubject();
+            case CERT_EXPIRED:
+                return getExpiredCertificateConfiguration().getMailSubject();
+            default:
+                LOG.error("Invalid alert type[{}]", alertType);
+                throw new IllegalArgumentException("Invalid alert type");
+        }
     }
 
     private MessagingConfiguration readMessageConfiguration(Domain domain) {
@@ -124,13 +208,13 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
             if (!alertActive) {
                 LOG.debug("Alert module is inactive");
-                return new AccountDisabledConfiguration( false);
+                return new AccountDisabledConfiguration(false);
             }
 
-            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.active"));
-            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.level"));
-            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.moment"));
-            final String accountDisabledMailSubject = domibusPropertyProvider.getProperty("domibus.alert.user.account_disabled.subject");
+            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE));
+            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL));
+            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT));
+            final String accountDisabledMailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT);
 
             return new AccountDisabledConfiguration(
                     accountDisabledActive,
@@ -152,9 +236,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 LOG.debug("Alert module is inactive");
                 return new LoginFailureConfiguration(false);
             }
-            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.active"));
-            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.level"));
-            final String loginFailureMailSubject = domibusPropertyProvider.getProperty("domibus.alert.user.login_failure.mail.subject");
+            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE));
+            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL));
+            final String loginFailureMailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT);
 
             return new LoginFailureConfiguration(
                     loginFailureActive,
@@ -175,11 +259,11 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             return new ImminentExpirationCertificateConfiguration(false);
         }
         try {
-            final Boolean imminentExpirationActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.active"));
-            final Integer imminentExpirationDelay = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.delay_days"));
-            final Integer imminentExpirationFrequency = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.frequency_days"));
-            final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.level"));
-            final String imminentExpirationMailSubject = domibusPropertyProvider.getProperty("domibus.alert.cert.imminent_expiration.mail.subject");
+            final Boolean imminentExpirationActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE));
+            final Integer imminentExpirationDelay = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS));
+            final Integer imminentExpirationFrequency = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS));
+            final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL));
+            final String imminentExpirationMailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT);
 
             return new ImminentExpirationCertificateConfiguration(
                     imminentExpirationActive,
@@ -202,11 +286,11 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             return new ExpiredCertificateConfiguration(false);
         }
         try {
-            final Boolean revocatedActive = Boolean.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.active"));
-            final Integer revocatedFrequency = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.frequency_days"));
-            final Integer revocatedDuration = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.duration_days"));
-            final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty("domibus.alert.cert.expired.level"));
-            final String expiredMailSubject = domibusPropertyProvider.getProperty("domibus.alert.cert.expired.mail.subject");
+            final Boolean revocatedActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE));
+            final Integer revocatedFrequency = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS));
+            final Integer revocatedDuration = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS));
+            final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_LEVEL));
+            final String expiredMailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT);
 
             return new ExpiredCertificateConfiguration(
                     revocatedActive,
@@ -219,9 +303,21 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             LOG.error("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain);
             return new ExpiredCertificateConfiguration(false);
         }
-
-
     }
 
+    @Override
+    public Integer getAlertLifeTimeInDays(){
+        return Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME));
+    }
+
+    @Override
+    public String  getSendFrom(){
+        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_EMAIL);
+    }
+
+    @Override
+    public String  getSendTo(){
+        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RECEIVER_EMAIL);
+    }
 
 }

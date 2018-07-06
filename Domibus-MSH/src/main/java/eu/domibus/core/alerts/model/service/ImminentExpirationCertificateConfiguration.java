@@ -13,14 +13,15 @@ public class ImminentExpirationCertificateConfiguration implements AlertConfigur
 
     private final static Logger LOG = LoggerFactory.getLogger(ImminentExpirationCertificateConfiguration.class);
 
-
     private final Boolean imminentExpirationActive;
+
     private Integer imminentExpirationDelay;
+
     private Integer imminentExpirationFrequency;
+
     private AlertLevel imminentExpirationAlertLevel;
+
     private String imminentExpirationMailSubject;
-
-
 
     public ImminentExpirationCertificateConfiguration(Boolean imminentExpirationActive) {
         this.imminentExpirationActive = imminentExpirationActive;

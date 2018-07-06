@@ -1,8 +1,6 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.core.alerts.AlertRo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.core.alerts.model.web.AlertRo;
 
 import java.util.ArrayList;
 import java.util.List;

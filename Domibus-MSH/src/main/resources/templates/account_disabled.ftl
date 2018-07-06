@@ -1801,21 +1801,21 @@
                                             <tr>
                                                 <th>
 
-                                                    <p class="lead">Certificate imminent expiration</p>
+                                                    <p class="lead">Account disabled.</p>
                                                     <table class="callout">
                                                         <tr>
                                                             <th>
-                                                                Access point: ${ACCESS_POINT}
+                                                                User: ${USER}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th>
-                                                                Alias:${ALIAS}
+                                                                Login time:${LOGIN_TIME}
                                                             </th>
                                                         </tr>
                                                         <tr>
                                                             <th>
-                                                                Expiration date:${EXPIRATION_DATE}
+                                                                Account disabled:${ACCOUNT_DISABLED}
                                                             </th>
                                                         </tr>
                                                     </table>

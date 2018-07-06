@@ -5,7 +5,10 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.service.Event;
 
 import java.util.Date;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 public interface EventService {
 
     /**

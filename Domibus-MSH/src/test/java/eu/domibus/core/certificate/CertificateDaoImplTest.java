@@ -17,8 +17,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.PersistenceContext;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -235,7 +233,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateStatus(CertificateStatus.OK);
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(offset.minusDays(1).toDate());
-        certificate.setAlertNotificationDate(notification.plusDays(1).toDate());
+        certificate.setAlertImminentNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
         final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotify(notification.toDate(), offset.toDate());
         assertEquals(0,imminentExpirationToNotify.size());
@@ -254,7 +252,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateStatus(CertificateStatus.SOON_REVOKED);
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(offset.minusDays(1).toDate());
-        certificate.setAlertNotificationDate(notification.minusDays(1).toDate());
+        certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
         em.persist(certificate);
         final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotify(notification.toDate(), offset.toDate());
         assertEquals(1,imminentExpirationToNotify.size());
@@ -273,7 +271,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateStatus(CertificateStatus.REVOKED);
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(localDateTime.minusDays(1).toDate());
-        certificate.setAlertNotificationDate(notification.minusDays(1).toDate());
+        certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
         em.persist(certificate);
         final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotify(notification.toDate(), offset.toDate());
         assertEquals(1,imminentExpirationToNotify.size());
@@ -293,7 +291,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateStatus(CertificateStatus.REVOKED);
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(localDateTime.plusDays(1).toDate());
-        certificate.setAlertNotificationDate(notification.plusDays(1).toDate());
+        certificate.setAlertImminentNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
         final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotify(notification.toDate(), offset.toDate());
         assertEquals(0,imminentExpirationToNotify.size());

@@ -2,10 +2,7 @@ package eu.domibus.core.alerts.dao;
 
 import eu.domibus.audit.InMemoryDataBaseConfig;
 import eu.domibus.audit.OracleDataBaseConfig;
-import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertStatus;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
 import eu.domibus.core.alerts.model.persist.EventProperty;
