@@ -4,8 +4,6 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertStatus;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,8 +18,9 @@ import java.util.Set;
 @Entity
 @Table(name = "TB_ALERT")
 @NamedQueries({
-        @NamedQuery(name = "Alert.findRetry", query = "FROM Alert a where a.alertStatus='RETRY' and a.nextAttempt < CURRENT_TIMESTAMP()"),
-        @NamedQuery(name = "Alert.findAlertToClean", query = "FROM Alert a where a.creationTime<:ALERT_LIMIT_DATE")
+        @NamedQuery(name = "Alert.findRetry", query = "SELECT a FROM Alert a where a.alertStatus='RETRY' and a.nextAttempt < CURRENT_TIMESTAMP()"),
+        @NamedQuery(name = "Alert.findAlertToClean", query = "SELECT a FROM Alert a where a.creationTime<:ALERT_LIMIT_DATE"),
+        @NamedQuery(name = "Alert.updateProcess", query = "UPDATE Alert a set a.processed=:PROCESSED where a.entityId=:ALERT_ID")
 })
 public class Alert extends AbstractBaseEntity{
 

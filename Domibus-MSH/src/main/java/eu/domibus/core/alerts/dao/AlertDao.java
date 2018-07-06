@@ -141,10 +141,17 @@ public class AlertDao extends BasicDao<Alert> {
 
     }
 
-    public List<Alert> retriveAlertsWithCreationDateSmallerThen(final Date alertLimitDate){
+    public List<Alert> retrieveAlertsWithCreationDateSmallerThen(final Date alertLimitDate){
         final TypedQuery<Alert> namedQuery = em.createNamedQuery("Alert.findAlertToClean", Alert.class);
         namedQuery.setParameter("ALERT_LIMIT_DATE",alertLimitDate);
         return namedQuery.getResultList();
+    }
+
+    public void updateAlertProcessed(final Integer id,Boolean processed){
+        final Query namedQuery = em.createNamedQuery("Alert.updateProcess");
+        namedQuery.setParameter("ALERT_ID",id);
+        namedQuery.setParameter("PROCESSED",processed);
+        namedQuery.executeUpdate();
     }
 
 

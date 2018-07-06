@@ -61,4 +61,10 @@ public interface AlertService {
      * Clean alerts which have an expired lifetime base on properties.
      */
     void cleanAlerts();
+
+    /**
+     * Set alerts as processed true/false
+     * @param alerts the alerts to update.
+     */
+    void updateAlertProcessed(List<Alert> alerts);
 }

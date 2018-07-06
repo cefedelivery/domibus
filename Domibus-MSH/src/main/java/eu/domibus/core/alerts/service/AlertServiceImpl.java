@@ -190,12 +190,28 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public void cleanAlerts(){
         final Integer alertLifeTimeInDays = multiDomainAlertConfigurationService.getAlertLifeTimeInDays();
         final Date alertLimitDate = org.joda.time.LocalDateTime.now().minusDays(alertLifeTimeInDays).withTime(0,0,0,0).toDate();
         LOG.debug("Cleaning alerts with creation time < [{}]",alertLimitDate);
-        final List<Alert> alerts = alertDao.retriveAlertsWithCreationDateSmallerThen(alertLimitDate);
+        final List<Alert> alerts = alertDao.retrieveAlertsWithCreationDateSmallerThen(alertLimitDate);
         alertDao.deleteAll(alerts);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void updateAlertProcessed(List<eu.domibus.core.alerts.model.service.Alert> alerts){
+        alerts.forEach(alert -> {
+            final int entityId = alert.getEntityId();
+            final boolean processed = alert.isProcessed();
+            LOG.debug("Update alert with id[{}] set processed to[{}]",entityId,processed);
+            alertDao.updateAlertProcessed(entityId, processed);
+        });
+
     }
 
     private void convertAndEnqueue(Alert alert) {

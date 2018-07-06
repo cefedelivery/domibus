@@ -161,9 +161,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             if (!alertActive) {
                 return new MessagingConfiguration();
             }
-            final Boolean messageAlertActif = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE));
+            final Boolean messageAlertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE));
             Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
-            if (messageAlertActif) {
+            if (messageAlertActive) {
                 final String messageCommunicationStates = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
                 final String messageCommunicationLevels = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
                 if (StringUtils.isNotEmpty(messageCommunicationStates) && StringUtils.isNotEmpty(messageCommunicationLevels)) {
@@ -187,7 +187,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     }
                 }
             }
-            LOG.debug("Message communication module active:[{}]", messageAlertActif);
+            LOG.debug("Message communication module active:[{}]", messageAlertActive);
             final String mailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT);
             MessagingConfiguration messagingConfiguration = new MessagingConfiguration(mailSubject);
             messageStatusLevels.forEach((messageStatus, alertLevel) -> {
@@ -286,16 +286,16 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             return new ExpiredCertificateConfiguration(false);
         }
         try {
-            final Boolean revocatedActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE));
-            final Integer revocatedFrequency = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS));
-            final Integer revocatedDuration = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS));
+            final Boolean revokedActive = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE));
+            final Integer revokedFrequency = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS));
+            final Integer revokedDuration = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS));
             final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_LEVEL));
             final String expiredMailSubject = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT);
 
             return new ExpiredCertificateConfiguration(
-                    revocatedActive,
-                    revocatedFrequency,
-                    revocatedDuration,
+                    revokedActive,
+                    revokedFrequency,
+                    revokedDuration,
                     revocationLevel,
                     expiredMailSubject);
 

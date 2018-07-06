@@ -1,7 +1,11 @@
 package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
+import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.common.*;
@@ -11,10 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
@@ -35,6 +38,9 @@ public class AlertResource {
     @Autowired
     DateUtil dateUtil;
 
+    @Autowired
+    CsvServiceImpl csvServiceImpl;
+
 
     @RequestMapping(method = RequestMethod.GET)
     public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "1") int page,
@@ -51,6 +57,18 @@ public class AlertResource {
                                   @RequestParam(value = "reportingTo", required = false) String reportingTo,
                                   @RequestParam(value = "parameters", required = false) String[] parameters
     ) {
+        AlertCriteria alertCriteria = getAlertCriteria(page, pageSize, ask, column, processed, alertType, alertId, alertLevel, creationFrom, creationTo, reportingFrom, reportingTo, parameters);
+
+        final Long aLong = alertService.countAlerts(alertCriteria);
+        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        final AlertResult alertResult = new AlertResult();
+        alertResult.setCount(aLong.intValue());
+        alertResult.setAlertsEntries(alertRoList);
+        return alertResult;
+    }
+
+    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "1") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);
@@ -61,7 +79,7 @@ public class AlertResource {
         alertCriteria.setAlertID(alertId);
         alertCriteria.setAlertLevel(alertLevel);
 
-         if (StringUtils.isNotEmpty(creationFrom)) {
+        if (StringUtils.isNotEmpty(creationFrom)) {
             alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
         }
         if (StringUtils.isNotEmpty(creationTo)) {
@@ -75,10 +93,10 @@ public class AlertResource {
             alertCriteria.setReportingTo(dateUtil.fromString(reportingTo));
         }
 
-        if(StringUtils.isEmpty(alertType)){
-             alertType=AlertType.MSG_COMMUNICATION_FAILURE.name();
+        if (StringUtils.isEmpty(alertType)) {
+            alertType = AlertType.MSG_COMMUNICATION_FAILURE.name();
         }
-        if(parameters!=null) {
+        if (parameters != null) {
             final List<String> alertParameters = getAlertParameters(alertType);
             final Map<String, String> parametersMap = IntStream.
                     range(0, parameters.length).
@@ -87,14 +105,7 @@ public class AlertResource {
                     collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
             alertCriteria.setParameters(parametersMap);
         }
-
-        final Long aLong = alertService.countAlerts(alertCriteria);
-        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
-        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
-        final AlertResult alertResult = new AlertResult();
-        alertResult.setCount(aLong.intValue());
-        alertResult.setAlertsEntries(alertRoList);
-        return alertResult;
+        return alertCriteria;
     }
 
     private AlertRo transform(Alert alert) {
@@ -153,6 +164,72 @@ public class AlertResource {
             default:
                 throw new IllegalArgumentException("Unsuported alert type.");
         }
+
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    public void processAlerts(@RequestBody List<AlertRo> alertRos) {
+        final List<Alert> alerts = alertRos.stream().map(alertRo -> {
+            final int entityId = alertRo.getEntityId();
+            final boolean processed = alertRo.isProcessed();
+            Alert alert = new Alert();
+            alert.setEntityId(entityId);
+            alert.setProcessed(processed);
+            return alert;
+        }).collect(Collectors.toList());
+        alertService.updateAlertProcessed(alerts);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/csv")
+    public ResponseEntity<String> getCsv(@RequestParam(value = "page", defaultValue = "1") int page,
+                                         @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                         @RequestParam(value = "asc", defaultValue = "true") Boolean ask,
+                                         @RequestParam(value = "orderBy", required = false) String column,
+                                         @RequestParam(value = "processed", required = false) String processed,
+                                         @RequestParam(value = "alertType", required = false) String alertType,
+                                         @RequestParam(value = "alertId", required = false) Integer alertId,
+                                         @RequestParam(value = "alertLevel", required = false) String alertLevel,
+                                         @RequestParam(value = "creationFrom", required = false) String creationFrom,
+                                         @RequestParam(value = "creationTo", required = false) String creationTo,
+                                         @RequestParam(value = "reportingFrom", required = false) String reportingFrom,
+                                         @RequestParam(value = "reportingTo", required = false) String reportingTo,
+                                         @RequestParam(value = "parameters", required = false) String[] parameters
+    ) {
+        AlertCriteria alertCriteria = getAlertCriteria(
+                page,
+                pageSize,
+                ask,
+                column,
+                processed,
+                alertType,
+                alertId,
+                alertLevel,
+                creationFrom,
+                creationTo,
+                reportingFrom,
+                reportingTo,
+                parameters);
+
+        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        String resultText;
+        try {
+            // needed for empty csv file purposes
+            csvServiceImpl.setClass(AlertRo.class);
+
+            // column customization
+
+            csvServiceImpl.customizeColumn(CsvCustomColumns.ALERT_RESOURCE.getCustomColumns());
+            resultText = csvServiceImpl.exportToCSV(alertRoList);
+        } catch (CsvException e) {
+            LOG.error("Exception caught during export to CSV", e);
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("alerts"))
+                .body(resultText);
 
     }
 }
