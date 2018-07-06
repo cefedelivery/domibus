@@ -104,11 +104,10 @@ export class AlertsComponent {
 
   ngOnInit() {
     this.columnPicker.allColumns = [
-      { name: 'Processed', cellTemplate: this.rowProcessed, width: 20 },
       { name: 'Alert Id', width: 20, prop: "entityId" },
+      { name: 'Processed', cellTemplate: this.rowProcessed, width: 20 },
       { name: 'Alert Type' },
       { name: 'Alert Level', width: 50 },
-      { name: 'Alert Text' },
       { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
       { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
       { name: 'Parameters', sortable: false }
