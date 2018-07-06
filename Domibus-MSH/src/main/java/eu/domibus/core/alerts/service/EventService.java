@@ -35,7 +35,7 @@ public interface EventService {
     /**
      * Will create a account disabled event and enqueue it to the alert/event monitoring queue.
      * @param userName the user name that had a failure login
-     * @param accountDisabledTime the account disabledtime.
+     * @param accountDisabledTime the account disabled time.
      * @param accountDisabled whether the account has been disable or not.
      */
     void enqueueAccountDisabledEvent(

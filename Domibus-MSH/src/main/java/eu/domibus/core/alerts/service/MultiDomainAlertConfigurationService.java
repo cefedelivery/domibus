@@ -12,26 +12,64 @@ import eu.domibus.core.alerts.model.service.*;
 public interface MultiDomainAlertConfigurationService {
 
     /**
-     * The configuration of the messaging alert submodule.
-     * @return
+     *
+     * @return message communication module configuration
      */
     MessagingConfiguration getMessageCommunicationConfiguration();
 
+    /**
+     *
+     * @return account disabled module configuration
+     */
     AccountDisabledConfiguration getAccountDisabledConfiguration();
 
+    /**
+     *
+     * @return login failure module configuration
+     */
     LoginFailureConfiguration getLoginFailureConfigurationLoader();
 
+    /**
+     *
+     * @return certificate imminent expiration module configuration
+     */
     ImminentExpirationCertificateConfiguration getImminentExpirationCertificateConfiguration();
 
+    /**
+     *
+     * @return certificate expired module configuration
+     */
     ExpiredCertificateConfiguration getExpiredCertificateConfiguration();
 
+    /**
+     * Reurn alert level based on alert(type)
+     * @param alert the alert.
+     * @return the level.
+     */
     AlertLevel getAlertLevel(Alert alert);
 
+    /**
+     * Return the mail subject base on the alert type.
+     * @param alertType the type of the alert.
+     * @return the mail subject.
+     */
     String getMailSubject(AlertType alertType);
 
+    /**
+     * Get the umber of days an alert stays in the system before being removed.
+     * @return
+     */
     Integer getAlertLifeTimeInDays();
 
+    /**
+     * Get send from email.
+     * @return email.
+     */
     String  getSendFrom();
 
+    /**
+     * Get send to email.
+     * @return email.
+     */
     String  getSendTo();
 }

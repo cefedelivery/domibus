@@ -73,7 +73,6 @@ public enum CsvCustomColumns {
     static {
         alertMap = new HashMap<>();
         alertMap.put("entityId".toUpperCase(), "Alert Id");
-        alertMap.put("alertDescription".toUpperCase(), "Alert Text");
     }
 
 

@@ -68,66 +68,6 @@ public class AlertResource {
         return alertResult;
     }
 
-    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "1") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
-        AlertCriteria alertCriteria = new AlertCriteria();
-        alertCriteria.setPage(page);
-        alertCriteria.setPageSize(pageSize);
-        alertCriteria.setAsk(ask);
-        alertCriteria.setColumn(column);
-        alertCriteria.setProcessed(processed);
-        alertCriteria.setAlertType(alertType);
-        alertCriteria.setAlertID(alertId);
-        alertCriteria.setAlertLevel(alertLevel);
-
-        if (StringUtils.isNotEmpty(creationFrom)) {
-            alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
-        }
-        if (StringUtils.isNotEmpty(creationTo)) {
-            alertCriteria.setCreationTo(dateUtil.fromString(creationTo));
-        }
-        if (StringUtils.isNotEmpty(reportingFrom)) {
-            alertCriteria.setReportingFrom(dateUtil.fromString(reportingFrom));
-        }
-
-        if (StringUtils.isNotEmpty(reportingTo)) {
-            alertCriteria.setReportingTo(dateUtil.fromString(reportingTo));
-        }
-
-        if (StringUtils.isEmpty(alertType)) {
-            alertType = AlertType.MSG_COMMUNICATION_FAILURE.name();
-        }
-        if (parameters != null) {
-            final List<String> alertParameters = getAlertParameters(alertType);
-            final Map<String, String> parametersMap = IntStream.
-                    range(0, parameters.length).
-                    mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
-                    filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
-                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
-            alertCriteria.setParameters(parametersMap);
-        }
-        return alertCriteria;
-    }
-
-    private AlertRo transform(Alert alert) {
-        AlertRo alertRo = new AlertRo();
-        alertRo.setProcessed(alert.isProcessed());
-        alertRo.setEntityId(alert.getEntityId());
-        alertRo.setAlertType(alert.getAlertType().name());
-        alertRo.setAlertLevel(alert.getAlertLevel().name());
-        alertRo.setCreationTime(alert.getCreationTime());
-        alertRo.setReportingTime(alert.getReportingTime());
-
-        final List<String> alertParameterNames = getAlertParameters(alert.getAlertType().name());
-        final List<String> alertParameterValues = alertParameterNames.
-                stream().
-                map(paramName -> alert.getEvents().iterator().next().findProperty(paramName)).
-                filter(Optional::isPresent).
-                map(Optional::get).
-                collect(Collectors.toList());
-        alertRo.setParameters(alertParameterValues);
-        return alertRo;
-    }
-
     @RequestMapping(method = RequestMethod.GET, path = "/types")
     public List<String> getAlertTypes() {
         final List<AlertType> alertTypes = Lists.newArrayList(AlertType.values());
@@ -232,4 +172,65 @@ public class AlertResource {
                 .body(resultText);
 
     }
+
+    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "1") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
+        AlertCriteria alertCriteria = new AlertCriteria();
+        alertCriteria.setPage(page);
+        alertCriteria.setPageSize(pageSize);
+        alertCriteria.setAsk(ask);
+        alertCriteria.setColumn(column);
+        alertCriteria.setProcessed(processed);
+        alertCriteria.setAlertType(alertType);
+        alertCriteria.setAlertID(alertId);
+        alertCriteria.setAlertLevel(alertLevel);
+
+        if (StringUtils.isNotEmpty(creationFrom)) {
+            alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
+        }
+        if (StringUtils.isNotEmpty(creationTo)) {
+            alertCriteria.setCreationTo(dateUtil.fromString(creationTo));
+        }
+        if (StringUtils.isNotEmpty(reportingFrom)) {
+            alertCriteria.setReportingFrom(dateUtil.fromString(reportingFrom));
+        }
+
+        if (StringUtils.isNotEmpty(reportingTo)) {
+            alertCriteria.setReportingTo(dateUtil.fromString(reportingTo));
+        }
+
+        if (StringUtils.isEmpty(alertType)) {
+            alertType = AlertType.MSG_COMMUNICATION_FAILURE.name();
+        }
+        if (parameters != null) {
+            final List<String> alertParameters = getAlertParameters(alertType);
+            final Map<String, String> parametersMap = IntStream.
+                    range(0, parameters.length).
+                    mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
+                    filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
+                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+            alertCriteria.setParameters(parametersMap);
+        }
+        return alertCriteria;
+    }
+
+    private AlertRo transform(Alert alert) {
+        AlertRo alertRo = new AlertRo();
+        alertRo.setProcessed(alert.isProcessed());
+        alertRo.setEntityId(alert.getEntityId());
+        alertRo.setAlertType(alert.getAlertType().name());
+        alertRo.setAlertLevel(alert.getAlertLevel().name());
+        alertRo.setCreationTime(alert.getCreationTime());
+        alertRo.setReportingTime(alert.getReportingTime());
+
+        final List<String> alertParameterNames = getAlertParameters(alert.getAlertType().name());
+        final List<String> alertParameterValues = alertParameterNames.
+                stream().
+                map(paramName -> alert.getEvents().iterator().next().findProperty(paramName)).
+                filter(Optional::isPresent).
+                map(Optional::get).
+                collect(Collectors.toList());
+        alertRo.setParameters(alertParameterValues);
+        return alertRo;
+    }
+
 }

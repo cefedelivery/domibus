@@ -97,26 +97,41 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         return messagingConfigurationLoader.getConfiguration(this::readMessageConfiguration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AccountDisabledConfiguration getAccountDisabledConfiguration() {
         return accountDisabledConfigurationLoader.getConfiguration(this::readAuthenticatorConfiguration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LoginFailureConfiguration getLoginFailureConfigurationLoader() {
         return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ImminentExpirationCertificateConfiguration getImminentExpirationCertificateConfiguration() {
         return imminentExpirationCertificateConfigurationLoader.getConfiguration(this::readImminentExpirationCertificateConfiguration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ExpiredCertificateConfiguration getExpiredCertificateConfiguration() {
         return expiredCertificateConfigurationLoader.getConfiguration(this::readExpiredCertificateConfiguration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
         switch (alert.getAlertType()) {
@@ -136,6 +151,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getMailSubject(AlertType alertType) {
         switch (alertType) {
@@ -153,6 +171,21 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 LOG.error("Invalid alert type[{}]", alertType);
                 throw new IllegalArgumentException("Invalid alert type");
         }
+    }
+
+    @Override
+    public Integer getAlertLifeTimeInDays(){
+        return Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME));
+    }
+
+    @Override
+    public String  getSendFrom(){
+        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_EMAIL);
+    }
+
+    @Override
+    public String  getSendTo(){
+        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RECEIVER_EMAIL);
     }
 
     private MessagingConfiguration readMessageConfiguration(Domain domain) {
@@ -303,21 +336,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             LOG.error("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain);
             return new ExpiredCertificateConfiguration(false);
         }
-    }
-
-    @Override
-    public Integer getAlertLifeTimeInDays(){
-        return Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME));
-    }
-
-    @Override
-    public String  getSendFrom(){
-        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_EMAIL);
-    }
-
-    @Override
-    public String  getSendTo(){
-        return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RECEIVER_EMAIL);
     }
 
 }
