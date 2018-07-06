@@ -1375,23 +1375,6 @@
             <column name="MSH_ROLE"/>
         </createIndex>
 
-        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
-            <column name="NAME"/>
-            <column name="MESSAGEPROPERTIES_ID"/>
-        </createIndex>
-
-        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID_VAL" tableName="TB_PROPERTY">
-            <column name="NAME"/>
-            <column name="MESSAGEPROPERTIES_ID"/>
-            <column name="VALUE"/>
-        </createIndex>
-
-        <createIndex indexName="IDX_MSG_LOG_RCV_MSG_ID" tableName="TB_MESSAGE_LOG">
-            <column name="RECEIVED"/>
-            <column name="MESSAGE_ID"/>
-        </createIndex>
-
-
         <addForeignKeyConstraint baseColumnNames="FK_RELIABILITY" baseTableName="TB_LEG"
                                  constraintName="FK_13k2eptp1ejp5othy1njrg3p8" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
