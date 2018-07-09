@@ -57,9 +57,8 @@ export class PartyService {
         records = records.filter(party => party.joinedProcesses.lastIndexOf(process) >= 0);
       }
 
-      const result = {data: records, allData: allRecords};
-      return result;
-    });
+      return {data: records, allData: allRecords};
+    }).catch(() => Observable.throw(""));
 
   }
 
