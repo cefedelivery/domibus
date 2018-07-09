@@ -18,6 +18,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -95,6 +96,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private PullMessageService pullMessageService;
+
+    @Injectable
+    protected UIReplicationSignalService uiReplicationSignalService;
 
 
     @Test

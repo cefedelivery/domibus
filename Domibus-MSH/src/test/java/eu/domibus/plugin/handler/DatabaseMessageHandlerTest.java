@@ -24,6 +24,7 @@ import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -131,12 +132,14 @@ public class DatabaseMessageHandlerTest {
     @Injectable
     private PullMessageService pullMessageService;
 
-
     @Injectable
     AuthUtils authUtils;
 
     @Injectable
     private UserMessageService userMessageService;
+
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
 
     protected Property createProperty(String name, String value, String type) {

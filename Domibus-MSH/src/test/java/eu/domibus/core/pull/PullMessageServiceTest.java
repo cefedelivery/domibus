@@ -5,6 +5,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -58,6 +59,8 @@ public class PullMessageServiceTest {
     @Tested
     private PullMessageServiceImpl pullService;
 
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Test
     @Ignore

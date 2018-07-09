@@ -18,6 +18,7 @@ import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.replication.UIMessageDao;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -75,6 +76,9 @@ public class MessageLogResourceTest {
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    private UIMessageDao uiMessageDao;
 
     @Parameterized.Parameter(0)
     public MessageType messageType;

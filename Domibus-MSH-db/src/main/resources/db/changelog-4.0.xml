@@ -1939,18 +1939,37 @@
             </column>
 
             <!-- property columns -->
-            <column name="FROM_SCHEME" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="TO_SCHEME" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="FROM_SCHEME" type="VARCHAR(255)"/>
+
+            <column name="TO_SCHEME" type="VARCHAR(255)"/>
 
             <column name="REF_TO_MESSAGE_ID" type="VARCHAR(255)"/>
         </createTable>
         <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_TYPE"/>
         </createIndex>
+        <createIndex indexName="IDX_MSG_UI_MSG_ID" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_RECEIVED" tableName="TB_MESSAGE_UI">
+            <column name="RECEIVED"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_MSH_ROLE" tableName="TB_MESSAGE_UI">
+            <column name="MSH_ROLE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_FROM_SCHEME" tableName="TB_MESSAGE_UI">
+        <column name="FROM_SCHEME"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TO_SCHEME" tableName="TB_MESSAGE_UI">
+            <column name="TO_SCHEME"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_FROM_ID" tableName="TB_MESSAGE_UI">
+            <column name="FROM_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TO_ID" tableName="TB_MESSAGE_UI">
+            <column name="TO_ID"/>
+        </createIndex>
+
     </changeSet>
 
     <include file="changelog-4.0-quartz.xml" relativeToChangelogFile="true"/>

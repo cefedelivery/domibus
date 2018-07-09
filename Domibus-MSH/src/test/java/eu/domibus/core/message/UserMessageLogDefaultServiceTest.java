@@ -5,6 +5,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import mockit.Expectations;
@@ -25,14 +26,17 @@ import java.sql.Timestamp;
 @RunWith(JMockit.class)
 public class UserMessageLogDefaultServiceTest {
 
+    @Tested
+    UserMessageLogDefaultService userMessageLogDefaultService;
+
     @Injectable
     UserMessageLogDao userMessageLogDao;
 
     @Injectable
     BackendNotificationService backendNotificationService;
 
-    @Tested
-    UserMessageLogDefaultService userMessageLogDefaultService;
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Test
     public void testSave() throws Exception {

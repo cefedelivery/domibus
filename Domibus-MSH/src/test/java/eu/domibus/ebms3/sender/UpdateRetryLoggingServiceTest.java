@@ -12,6 +12,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReceptionAwareness;
 import eu.domibus.common.model.configuration.RetryStrategy;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -48,6 +49,9 @@ public class UpdateRetryLoggingServiceTest {
 
     @Injectable
     private MessagingDao messagingDao;
+
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     private LegConfiguration legConfiguration = new LegConfiguration();
 

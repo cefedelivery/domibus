@@ -64,7 +64,7 @@ public class UIMessageDao extends BasicDao<UIMessageEntity> {
      * @return number of messages
      */
     public int countMessages(Map<String, Object> filters) {
-
+        long startTime = System.currentTimeMillis();
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<UIMessageEntity> uiMessageEntity = cq.from(UIMessageEntity.class);
@@ -72,8 +72,6 @@ public class UIMessageDao extends BasicDao<UIMessageEntity> {
         List<Predicate> predicates = getPredicates(filters, cb, uiMessageEntity);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
         TypedQuery<Long> query = em.createQuery(cq);
-
-        long startTime = System.currentTimeMillis();
 
         Long result = query.getSingleResult();
         if (LOG.isDebugEnabled()) {
@@ -94,6 +92,8 @@ public class UIMessageDao extends BasicDao<UIMessageEntity> {
      * @return a list of {@link UIMessageEntity}
      */
     public List<UIMessageEntity> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
+        long startTime = System.currentTimeMillis();
+        List<UIMessageEntity> result = null;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<UIMessageEntity> cq = cb.createQuery(UIMessageEntity.class);
         Root<UIMessageEntity> ume = cq.from(UIMessageEntity.class);
@@ -111,36 +111,60 @@ public class UIMessageDao extends BasicDao<UIMessageEntity> {
         TypedQuery<UIMessageEntity> query = this.em.createQuery(cq);
         query.setFirstResult(from);
         query.setMaxResults(max);
-        return query.getResultList();
+
+        result = query.getResultList();
+        if (LOG.isDebugEnabled()) {
+            final long endTime = System.currentTimeMillis();
+            LOG.debug("[{}] milliseconds to findPaged [{}] messages", endTime - startTime, max);
+        }
+        return result;
     }
 
 
     protected List<Predicate> getPredicates(Map<String, Object> filters, CriteriaBuilder cb, Root<? extends UIMessageEntity> ume) {
         List<Predicate> predicates = new ArrayList<>();
         for (Map.Entry<String, Object> filter : filters.entrySet()) {
-            if (filter.getValue() != null) {
-                if (filter.getValue() instanceof String) {
-                    if (StringUtils.isNotBlank(filter.getKey()) && !filter.getValue().toString().isEmpty()) {
-                        predicates.add(cb.equal(ume.get(filter.getKey()), filter.getValue()));
+            String filterKey = filter.getKey();
+            Object filterValue = filter.getValue();
+            if (filterValue != null) {
+                if (filterValue instanceof String) {
+                    if (StringUtils.isNotBlank(filterKey) && !filter.getValue().toString().isEmpty()) {
+                        switch(filterKey) {
+                            case "fromPartyId":
+                                predicates.add(cb.equal(ume.get("fromId"), filterValue));
+                                break;
+                            case "toPartyId":
+                                predicates.add(cb.equal(ume.get("toId"), filterValue));
+                                break;
+                            case "originalSender":
+                                predicates.add(cb.equal(ume.get("fromScheme"), filterValue));
+                                break;
+                            case "finalRecipient":
+                                predicates.add(cb.equal(ume.get("toScheme"), filterValue));
+                                break;
+                            default:
+                                predicates.add(cb.equal(ume.get(filterKey), filterValue));
+                                break;
+                        }
                     }
-                } else if (filter.getValue() instanceof Date) {
-                    if (!filter.getValue().toString().isEmpty()) {
-                        switch (filter.getKey()) {
+                } else if (filterValue instanceof Date) {
+                    if (!filterValue.toString().isEmpty()) {
+                        switch (filterKey) {
                             case "receivedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
                                 break;
                             case "receivedTo":
-                                predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filter.getValue().toString())));
+                                predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
                                 break;
                             default:
                                 break;
                         }
                     }
                 } else {
-                    predicates.add(cb.equal(ume.<String>get(filter.getKey()), filter.getValue()));
+                    predicates.add(cb.equal(ume.<String>get(filterKey), filterValue));
                 }
             } else {
-                if (filter.getKey().equals("messageSubtype")) {
+                if (filterKey.equals("messageSubtype")) {
                     predicates.add(cb.isNull(ume.<MessageSubtype>get("messageSubtype")));
                 }
             }
