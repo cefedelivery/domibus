@@ -1948,6 +1948,9 @@
         <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_TYPE"/>
         </createIndex>
+        <createIndex indexName="IDX_MSG_UI_SUBTYPE" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_SUBTYPE"/>
+        </createIndex>
         <createIndex indexName="IDX_MSG_UI_MSG_ID" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_ID"/>
         </createIndex>
