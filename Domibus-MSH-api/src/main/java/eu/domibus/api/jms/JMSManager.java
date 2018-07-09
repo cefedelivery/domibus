@@ -64,6 +64,12 @@ public interface JMSManager {
 
     void sendMessageToQueue(JmsMessage message, String destination);
 
+    /**
+     * Send a basic pojo to a destination. it will be serialize to json and added to the queue.
+     * @param message the pojo to be serialized to json.
+     * @param destination the destination where the message should be send.
+     * @param selector a jms selector so that the message is retrieved by the correct jms listener.
+     */
     void convertAndSendToQueue(Object message, Queue destination, String selector);
 
     void sendMessageToQueue(JmsMessage message, Queue destination);

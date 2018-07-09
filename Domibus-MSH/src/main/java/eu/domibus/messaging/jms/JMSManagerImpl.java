@@ -37,6 +37,8 @@ public class JMSManagerImpl implements JMSManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerImpl.class);
 
+    private static final String SELECTOR = "selector";
+
     @Autowired
     InternalJMSManager internalJmsManager;
 
@@ -108,7 +110,7 @@ public class JMSManagerImpl implements JMSManager {
             final Domain currentDomain = domainContextProvider.getCurrentDomain();
             message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
             message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
-            message1.setStringProperty("selector", selector);
+            message1.setStringProperty(SELECTOR, selector);
             return message1;
         });
     }

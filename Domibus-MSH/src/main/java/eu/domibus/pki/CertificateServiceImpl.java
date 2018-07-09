@@ -232,16 +232,12 @@ public class CertificateServiceImpl implements CertificateService {
 
     private void sendCertificateImminentExpirationAlerts() {
         final ImminentExpirationCertificateConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
-        final Boolean activeModule = imminentExpirationCertificateConfiguration.getImminentExpirationActive();
+        final Boolean activeModule = imminentExpirationCertificateConfiguration.isActive();
         LOG.debug("Certificate Imminent expiration alert module activated:[{}]", activeModule);
         if (!activeModule) {
             return;
         }
-        String partyName = null;
-        if (pModeProvider.isConfigurationLoaded()) {
-            partyName = pModeProvider.getGatewayParty().getName();
-        }
-        final String accessPoint = partyName;
+        final String accessPoint = getAccesPointName();
         final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
         final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
 
@@ -258,6 +254,14 @@ public class CertificateServiceImpl implements CertificateService {
         });
     }
 
+    private String getAccesPointName() {
+        String partyName = null;
+        if (pModeProvider.isConfigurationLoaded()) {
+            partyName = pModeProvider.getGatewayParty().getName();
+        }
+        return partyName;
+    }
+
     private void sendCertificateExpiredAlerts() {
         final ExpiredCertificateConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
         final boolean activeModule = expiredCertificateConfiguration.isActive();
@@ -265,11 +269,7 @@ public class CertificateServiceImpl implements CertificateService {
         if (!activeModule) {
             return;
         }
-        String partyName = null;
-        if (pModeProvider.isConfigurationLoaded()) {
-            partyName = pModeProvider.getGatewayParty().getName();
-        }
-        final String accessPoint = partyName;
+        final String accessPoint = getAccesPointName();
         final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
         final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
 

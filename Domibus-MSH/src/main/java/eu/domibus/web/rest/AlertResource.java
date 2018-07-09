@@ -57,7 +57,20 @@ public class AlertResource {
                                   @RequestParam(value = "reportingTo", required = false) String reportingTo,
                                   @RequestParam(value = "parameters", required = false) String[] parameters
     ) {
-        AlertCriteria alertCriteria = getAlertCriteria(page, pageSize, ask, column, processed, alertType, alertId, alertLevel, creationFrom, creationTo, reportingFrom, reportingTo, parameters);
+        AlertCriteria alertCriteria = getAlertCriteria(
+                page,
+                pageSize,
+                ask,
+                column,
+                processed,
+                alertType,
+                alertId,
+                alertLevel,
+                creationFrom,
+                creationTo,
+                reportingFrom,
+                reportingTo,
+                parameters);
 
         final Long aLong = alertService.countAlerts(alertCriteria);
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
@@ -158,7 +171,6 @@ public class AlertResource {
             csvServiceImpl.setClass(AlertRo.class);
 
             // column customization
-
             csvServiceImpl.customizeColumn(CsvCustomColumns.ALERT_RESOURCE.getCustomColumns());
             resultText = csvServiceImpl.exportToCSV(alertRoList);
         } catch (CsvException e) {

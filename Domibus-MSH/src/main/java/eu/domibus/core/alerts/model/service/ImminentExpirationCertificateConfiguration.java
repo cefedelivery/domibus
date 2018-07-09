@@ -40,9 +40,6 @@ public class ImminentExpirationCertificateConfiguration implements AlertConfigur
         this.imminentExpirationMailSubject = imminentExpirationMailSubject;
     }
 
-    public Boolean getImminentExpirationActive() {
-        return imminentExpirationActive;
-    }
 
     public Integer getImminentExpirationDelay() {
         return imminentExpirationDelay;

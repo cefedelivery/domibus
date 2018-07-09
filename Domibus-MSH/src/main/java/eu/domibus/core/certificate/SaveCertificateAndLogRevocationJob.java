@@ -26,7 +26,7 @@ public class SaveCertificateAndLogRevocationJob extends DomibusQuartzJobBean {
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
         LOG.info("Checking certificate expiration");
         try {
-            //certificateService.saveCertificateAndLogRevocation(domain);
+            certificateService.saveCertificateAndLogRevocation(domain);
             certificateService.sendCertificateAlerts();
         } catch (eu.domibus.api.security.CertificateException ex) {
             LOG.warn("An problem occured while loading keystore:[{}]", ex.getMessage());

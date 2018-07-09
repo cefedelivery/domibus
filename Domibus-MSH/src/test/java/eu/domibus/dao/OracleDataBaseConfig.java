@@ -1,5 +1,6 @@
-package eu.domibus.audit;
+package eu.domibus.dao;
 
+import eu.domibus.audit.AuditTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -28,9 +29,9 @@ public class OracleDataBaseConfig extends AbstractDatabaseConfig{
     public DataSource dataSource() {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
         driverManagerDataSource.setDriverClassName("oracle.jdbc.OracleDriver");
-        driverManagerDataSource.setUrl("jdbc:oracle:thin:@localhost:1521:orcl");
-        driverManagerDataSource.setUsername("edelivery");
-        driverManagerDataSource.setPassword("edelivery");
+        driverManagerDataSource.setUrl("");
+        driverManagerDataSource.setUsername("");
+        driverManagerDataSource.setPassword("");
         return driverManagerDataSource;
     }
 

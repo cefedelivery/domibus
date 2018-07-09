@@ -1986,9 +1986,6 @@
         <createIndex indexName="IDX_FK_ALERT" tableName="TB_EVENT_ALERT">
             <column name="FK_ALERT"/>
         </createIndex>
-
-
-
     </changeSet>
 
 </databaseChangeLog>

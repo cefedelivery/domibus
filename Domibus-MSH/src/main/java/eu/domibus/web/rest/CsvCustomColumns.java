@@ -13,8 +13,7 @@ public enum CsvCustomColumns {
     PARTY_RESOURCE,
     TRUSTSTORE_RESOURCE,
     USER_RESOURCE,
-    ALERT_RESOURCE,
-    ;
+    ALERT_RESOURCE;
 
     private Map<String, String> customFields;
 

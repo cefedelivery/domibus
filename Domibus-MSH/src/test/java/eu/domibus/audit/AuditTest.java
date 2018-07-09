@@ -1,6 +1,8 @@
 package eu.domibus.audit;
 
 import eu.domibus.common.model.security.User;
+import eu.domibus.dao.InMemoryDataBaseConfig;
+import eu.domibus.dao.OracleDataBaseConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
