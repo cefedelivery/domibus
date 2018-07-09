@@ -137,7 +137,6 @@ public class DynamicDiscoveryServicePEPPOLTest {
         processes.add(process);
 
         ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
-
         return sm;
     }
 

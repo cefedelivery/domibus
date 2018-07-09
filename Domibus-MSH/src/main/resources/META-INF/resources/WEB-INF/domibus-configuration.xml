@@ -10,13 +10,13 @@
     http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-     <bean id="pModeProviderFactory" class="eu.domibus.ebms3.common.dao.PModeProviderFactory">
+    <bean id="pModeProviderFactory" class="eu.domibus.ebms3.common.dao.PModeProviderFactory">
 		  <property name="implementation" value="DynamicDiscoveryPModeProvider"/>
-	</bean>	
-	<bean id="pModeProvider" class="eu.domibus.ebms3.common.dao.PModeProvider" 
-		  factory-method="getObject"   
+	</bean>
+	<bean id="pModeProvider" class="eu.domibus.ebms3.common.dao.PModeProvider"
+		  factory-method="getObject"
 	      factory-bean="pModeProviderFactory">
-	</bean>  
+	</bean>
 
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">

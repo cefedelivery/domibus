@@ -77,6 +77,9 @@ import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
+import { PluginUserComponent } from './pluginuser/pluginuser.component';
+import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
+import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
@@ -129,6 +132,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DomainSelectorComponent,
     AlertsComponent,
     TestServiceComponent,
+    PluginUserComponent,
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent
   ],
   entryComponents: [
@@ -150,6 +156,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     RollbackDialogComponent,
     ActionDirtyDialogComponent,
     PartyDetailsComponent,
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent
   ],
   imports: [

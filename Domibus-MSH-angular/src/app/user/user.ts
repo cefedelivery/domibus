@@ -1,7 +1,8 @@
 export enum UserState {
   PERSISTED,
   NEW,
-  UPDATED
+  UPDATED,
+  REMOVED
 }
 
 export class UserResponseRO {

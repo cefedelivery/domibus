@@ -66,11 +66,11 @@
         <input mdInput placeholder="Restored" value="{{message.restored | domibusDate: dateFormat}}" readonly/>
       </md-input-container>
 
-      <md-input-container style="width:100%">
+      <md-input-container style="width:100%" *ngIf="fourCornerEnabled">
         <input mdInput placeholder="Original Sender" value="{{message.originalSender}}" readonly/>
       </md-input-container>
 
-      <md-input-container style="width:100%">
+      <md-input-container style="width:100%" *ngIf="fourCornerEnabled">
         <input mdInput placeholder="Final Recipient" value="{{message.finalRecipient}}" readonly/>
       </md-input-container>
 

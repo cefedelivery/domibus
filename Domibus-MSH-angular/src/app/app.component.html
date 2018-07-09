@@ -57,6 +57,10 @@
       <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
       <span>Users</span>
     </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pluginuser']" *ngIf="hasAdmin()" id="user_id">
+      <md-icon md-tooltip="Plugin Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people_outline</md-icon>
+      <span>Plugin Users</span>
+    </button>
     <button md-raised-button class="sideNavButton" [routerLink]="['/audit']" *ngIf="hasAdmin()" id="audit_id">
       <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">update</md-icon>
       <span>Audit</span>

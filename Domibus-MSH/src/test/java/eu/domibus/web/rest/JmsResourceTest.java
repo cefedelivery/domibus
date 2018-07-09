@@ -40,15 +40,6 @@ public class JmsResourceTest {
     @Injectable
     private CsvServiceImpl csvServiceImpl;
 
-    @Injectable
-    private DomibusConfigurationService domibusConfigurationService;
-
-    @Injectable
-    private AuthUtils authUtils;
-
-    @Injectable
-    private DomainContextProvider domainContextProvider;
-
     @Test
     public void testDestinations() {
         // Given

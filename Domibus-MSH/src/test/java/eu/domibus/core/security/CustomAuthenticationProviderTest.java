@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
@@ -55,6 +56,9 @@ public class CustomAuthenticationProviderTest {
 
     @Tested
     CustomAuthenticationProvider securityCustomAuthenticationProvider;
+
+    @Injectable
+    BCryptPasswordEncoder bcryptEncoder;
 
     @Test
     public void authenticateX509Test() {

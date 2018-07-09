@@ -1,6 +1,7 @@
 package eu.domibus.common.model.logging;
 
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -16,6 +18,9 @@ import java.util.HashMap;
  */
 @RunWith(JMockit.class)
 public class SignalMessageLogInfoFilterTest {
+
+    @Injectable
+    private Properties domibusProperties;
 
     public static final String QUERY = "select new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
             "SignalMessage message " +
@@ -43,6 +48,9 @@ public class SignalMessageLogInfoFilterTest {
         new Expectations(signalMessageLogInfoFilter) {{
             signalMessageLogInfoFilter.filterQuery(anyString,anyString,anyBoolean,filters);
             result = QUERY;
+
+            signalMessageLogInfoFilter.isFourCornerModel();
+            result = true;
         }};
 
         String query = signalMessageLogInfoFilter.filterSignalMessageLogQuery("column", true, filters);

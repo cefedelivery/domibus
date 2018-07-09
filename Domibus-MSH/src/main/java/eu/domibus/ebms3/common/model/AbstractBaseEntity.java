@@ -39,15 +39,14 @@ public abstract class AbstractBaseEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        //noinspection NonFinalFieldReferencedInHashCode
-        return this.entityId;
+        return 0;
     }
 
     @Override
     public boolean equals(final Object other) {
         //noinspection NonFinalFieldReferenceInEquals
         return ((other != null) &&
-                this.getClass().equals(other.getClass()) &&
-                (this.entityId == ((AbstractBaseEntity) other).entityId));
+                this.getClass().equals(other.getClass())
+        );
     }
 }
