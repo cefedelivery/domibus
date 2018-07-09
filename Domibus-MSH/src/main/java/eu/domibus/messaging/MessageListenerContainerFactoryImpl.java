@@ -24,8 +24,7 @@ public class MessageListenerContainerFactoryImpl implements MessageListenerConta
     @Override
     public MessageListenerContainer createMessageListenerContainer(Domain domain) {
         LOG.debug("Creating the MessageListenerContainer for domain [{}]", domain);
-
-        return applicationContext.getBean(DefaultMessageListenerContainer.class, domain);
+        return (DefaultMessageListenerContainer)applicationContext.getBean("dispatchContainer", domain);
     }
 
 }

@@ -62,7 +62,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     @Cacheable(value = "dispatchClient", key = "#domain + #endpoint + #pModeKey", condition = "#cacheable")
     @Override
     public Dispatch<SOAPMessage> getClient(String domain, String endpoint, String algorithm, Policy policy, final String pModeKey, boolean cacheable) {
-        LOG.debug("Getting the dispatch client for endpoint [{}]" ,endpoint);
+        LOG.debug("Getting the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
 
         final Dispatch<SOAPMessage> dispatch = createWSServiceDispatcher(endpoint);
         dispatch.getRequestContext().put(PolicyConstants.POLICY_OVERRIDE, policy);

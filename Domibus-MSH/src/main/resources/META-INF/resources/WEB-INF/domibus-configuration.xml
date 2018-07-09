@@ -69,6 +69,8 @@
     </bean>
 
     <!-- customizable list of triggers to be executed by quartz -->
+
+    <!--
     <bean id="userdefinedTriggerList"
           class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
@@ -80,5 +82,5 @@
             </list>
         </property>
     </bean>
-
+    -->
 </beans>

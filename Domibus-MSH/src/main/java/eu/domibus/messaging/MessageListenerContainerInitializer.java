@@ -43,7 +43,6 @@ public class MessageListenerContainerInitializer {
 
     @PostConstruct
     public void init() {
-        // Domain
         final List<Domain> domains = domainService.getDomains();
         for (Domain domain : domains) {
             createMessageListenerContainer(domain);
@@ -55,9 +54,9 @@ public class MessageListenerContainerInitializer {
      */
     public void createMessageListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createMessageListenerContainer(domain);
-
+        instance.start();
         instances.put(domain, instance);
-        LOG.info("Quartz scheduler started for domain [{}]", domain);
+        LOG.info("MessageListenerContainer initialized for domain [{}]", domain);
     }
 
 

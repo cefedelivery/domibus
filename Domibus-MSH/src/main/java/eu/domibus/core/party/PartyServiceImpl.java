@@ -351,20 +351,9 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public List<eu.domibus.api.process.Process> getAllProcesses() {
-        //Retrieve all processes, neede in UI console to be able to check
+        //Retrieve all processes, needed in UI console to be able to check
         List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("findAllProcesses for pmode");
-            allProcesses.forEach(process -> LOG.debug("     [{}]", process));
-        }
-
         List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("     party");
-            processes.forEach(party -> LOG.debug("[{}]", party));
-        }
-
         return processes;
     }
 

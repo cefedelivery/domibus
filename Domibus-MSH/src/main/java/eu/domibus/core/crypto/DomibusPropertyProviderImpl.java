@@ -4,6 +4,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.property.PropertyResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import java.util.Properties;
  */
 @Service
 public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusPropertyProviderImpl.class);
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -86,11 +90,9 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getDomainProperty(String propertyName) {
         final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        String propertyValue = getProperty(currentDomain, propertyName);
-        if (StringUtils.isEmpty(propertyValue) && !DomainService.DEFAULT_DOMAIN.equals(currentDomain)) {
-            propertyValue = getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
-        }
-        return propertyValue;
+        LOG.trace("getDomainProperty("+propertyName+") in domain [{}]", currentDomain);
+        assert currentDomain != null;
+        return getDomainProperty(currentDomain, propertyName);
     }
 
     @Override
@@ -101,4 +103,24 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         }
         return propertyValue;
     }
+
+    @Override
+    public String getDomainProperty(Domain domain, String propertyName) {
+        LOG.trace("getDomainProperty("+domain+","+propertyName+") ");
+        String propertyValue = getProperty(domain, propertyName);
+        if (StringUtils.isEmpty(propertyValue) && !DomainService.DEFAULT_DOMAIN.equals(domain)) {
+            propertyValue = getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
+        }
+        return propertyValue;
+    }
+
+    @Override
+    public String getDomainProperty(Domain domain, String propertyName, String defaultValue) {
+        String propertyValue = getDomainProperty(domain, propertyName);
+        if (StringUtils.isEmpty(propertyValue)) {
+            propertyValue = defaultValue;
+        }
+        return propertyValue;
+    }
+
 }

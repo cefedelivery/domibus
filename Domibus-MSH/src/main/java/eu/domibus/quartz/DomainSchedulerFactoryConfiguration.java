@@ -1,11 +1,13 @@
 package eu.domibus.quartz;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Trigger;
 import org.quartz.impl.triggers.CronTriggerImpl;
@@ -23,6 +25,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -71,6 +74,9 @@ public class DomainSchedulerFactoryConfiguration {
     @Autowired
     protected DomainService domainService;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public SchedulerFactoryBean schedulerFactory(Domain domain) {
@@ -95,6 +101,9 @@ public class DomainSchedulerFactoryConfiguration {
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean retentionWorkerTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null)
+            return null;
+
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(retentionWorkerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.retentionWorker.cronExpression"));
@@ -114,6 +123,9 @@ public class DomainSchedulerFactoryConfiguration {
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean retryWorkerTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null)
+            return null;
+
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(retryWorkerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.retry.cron"));
@@ -123,7 +135,7 @@ public class DomainSchedulerFactoryConfiguration {
 
     /**
      * Sets the triggers only for general schema
-     *DomainDaoImpl
+     *
      * @return Scheduler Factory Bean changed
      */
     private SchedulerFactoryBean schedulerFactoryGeneral() {
@@ -147,6 +159,9 @@ public class DomainSchedulerFactoryConfiguration {
     private SchedulerFactoryBean schedulerFactoryDomain(Domain domain) {
         LOG.debug("Instantiating the scheduler factory for domain [{}]", domain);
         SchedulerFactoryBean schedulerFactoryBean = schedulerFactory(domainService.getSchedulerName(domain), getTablePrefix(domain), domain);
+
+        domainContextProvider.setCurrentDomain(domain);
+
         //get all the Spring Bean Triggers so that new instances with scope prototype are injected
         final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
         List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
@@ -154,6 +169,10 @@ public class DomainSchedulerFactoryConfiguration {
                         !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
                 .collect(Collectors.toList());
         schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
+        LOG.trace("domibusStandardTriggerList: [{}]", domibusStandardTriggerList);
+
+        domainContextProvider.clearCurrentDomain();
+
         return schedulerFactoryBean;
     }
 
