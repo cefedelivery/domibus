@@ -104,6 +104,7 @@ public class BackendNotificationService {
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
     @Autowired
     UserMessageServiceHelper userMessageServiceHelper;
 

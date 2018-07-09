@@ -82,6 +82,8 @@ public class AlertDaoTest {
         final AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.getParameters().put("FROM_PARTY","blue_gw");
         alertCriteria.getParameters().put("TO_PARTY","red_gw");
+        alertCriteria.setPage(0);
+        alertCriteria.setPageSize(10);
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         assertEquals(2,alerts.size());
         alerts.forEach(alert1 -> alert1.getEvents().
@@ -96,6 +98,8 @@ public class AlertDaoTest {
         alertCriteria.getParameters().put("FROM_PARTY","black_gw");
         alertCriteria.getParameters().put("TO_PARTY","red_gw");
         alertCriteria.setProcessed(true);
+        alertCriteria.setPage(0);
+        alertCriteria.setPageSize(10);
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         assertEquals(1,alerts.size());
         alerts.forEach(alert1 -> alert1.getEvents().
@@ -116,6 +120,8 @@ public class AlertDaoTest {
         alertCriteria.setReportingFrom(reportingFrom);
         alertCriteria.setReportingTo(reportingTo);
         alertCriteria.setProcessed(true);
+        alertCriteria.setPage(0);
+        alertCriteria.setPageSize(10);
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         assertEquals(1,alerts.size());
     }
@@ -123,9 +129,9 @@ public class AlertDaoTest {
     @Test
     public void countAlerts() {
         final org.joda.time.LocalDateTime now = org.joda.time.LocalDateTime.now();
-        final Date reportingDate = now.minusMinutes(15).toDate();
-        final Date reportingFrom = now.minusMinutes(16).toDate();
-        final Date reportingTo = now.minusMinutes(14).toDate();
+        final Date reportingDate = now.minusMinutes(25).toDate();
+        final Date reportingFrom = now.minusMinutes(26).toDate();
+        final Date reportingTo = now.minusMinutes(24).toDate();
         createAlert("blue_gw","red_gw",true,reportingDate);
         final AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.getParameters().put("FROM_PARTY","blue_gw");

@@ -9,8 +9,11 @@ import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -59,6 +62,15 @@ public class CertificateServiceImplTest {
 
     @Injectable
     CertificateDao certificateDao;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Injectable
+    private EventService eventService;
+
+    @Injectable
+    private PModeProvider pModeProvider;
 
     PKIUtil pkiUtil = new PKIUtil();
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertNull;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
          CertificateDaoImplTest.CertificateDaoConfig.class})
+@ActiveProfiles("IN_MEMORY_DATABASE")
 public class CertificateDaoImplTest {
 
 
@@ -291,7 +293,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateStatus(CertificateStatus.REVOKED);
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(localDateTime.plusDays(1).toDate());
-        certificate.setAlertImminentNotificationDate(notification.plusDays(1).toDate());
+        certificate.setAlertExpiredNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
         final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotify(notification.toDate(), offset.toDate());
         assertEquals(0,imminentExpirationToNotify.size());
