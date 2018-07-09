@@ -1,6 +1,9 @@
 package eu.domibus.jms.activemq;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -66,6 +69,12 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Autowired
     JMSSelectorUtil jmsSelectorUtil;
 
+    @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
 
@@ -89,7 +98,8 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         internalJmsDestination.setName(queueMbean.getName());
         internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(queueMbean.getName()));
         internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
-        internalJmsDestination.setNumberOfMessages(queueMbean.getQueueSize());
+        /* in multi-tenancy mode we show the number of messages only to super admin */
+        internalJmsDestination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN : queueMbean.getQueueSize());
         internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, name);
         return internalJmsDestination;
     }
@@ -288,7 +298,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     }
 
     //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
-    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws JMSActiveMQException {
+    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
         Queue queue;
 
         try {
@@ -347,5 +357,4 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         }
         return null;
     }
-
 }

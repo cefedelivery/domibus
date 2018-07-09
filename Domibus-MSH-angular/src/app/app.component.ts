@@ -14,9 +14,9 @@ import {Observable} from "rxjs/Observable";
 export class AppComponent implements OnInit {
 
   isAdmin: boolean;
-  _currentUser: string;
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
+  fourCornerEnabled: boolean = true;
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
@@ -30,6 +30,12 @@ export class AppComponent implements OnInit {
 
     applicationNameResponse.subscribe((name: Response) => {
       this.titleService.setTitle(name.json());
+    });
+
+    let fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
+
+    fourCornerModelResponse.subscribe((name: Response) => {
+      this.fourCornerEnabled = name.json();
     });
   }
 

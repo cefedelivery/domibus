@@ -1,7 +1,8 @@
 
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -31,7 +32,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CachingPModeProvider.class);
 
-    //Dont access directly, use getter instead
+    //Don't access directly, use getter instead
     private Configuration configuration;
 
     @Autowired
@@ -41,9 +42,21 @@ public class CachingPModeProvider extends PModeProvider {
 
     private Map<String, List<Process>> pullProcessByMpcCache = new HashMap<>();
 
-    protected synchronized Configuration getConfiguration() {
+    protected Domain domain;
+
+    private Object configurationLock = new Object();
+
+    public CachingPModeProvider(Domain domain) {
+        this.domain = domain;
+    }
+
+    protected Configuration getConfiguration() {
         if (this.configuration == null) {
-            this.init();
+            synchronized (configurationLock) {
+                if (this.configuration == null) {
+                    this.init();
+                }
+            }
         }
         return this.configuration;
     }
@@ -54,23 +67,23 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = IllegalStateException.class)
-    public void init() {
+    protected void init() {
         if (!this.configurationDAO.configurationExists()) {
             throw new IllegalStateException("No processing modes found. To exchange messages, upload configuration file through the web gui.");
         }
+        LOG.debug("Initialising the configuration");
         this.configuration = this.configurationDAO.readEager();
         initPullProcessesCache();
     }
 
     private void initPullProcessesCache() {
-        final Set<Mpc> mpcs = this.configuration.getMpcs();
+        final Set<Mpc> mpcs = getConfiguration().getMpcs();
         for (Mpc mpc : mpcs) {
             final String qualifiedName = mpc.getQualifiedName();
             final List<Process> pullProcessByMpc = processDao.findPullProcessByMpc(qualifiedName);
             pullProcessByMpcCache.put(qualifiedName, pullProcessByMpc);
         }
-        final List<Process> processes = this.configuration.getBusinessProcesses().getProcesses();
+        final List<Process> processes = getConfiguration().getBusinessProcesses().getProcesses();
         Set<Party> initiators = new HashSet<>();
         for (Process process : processes) {
             initiators.addAll(process.getInitiatorParties());
@@ -353,7 +366,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public boolean isConfigurationLoaded() {
-        if(this.configuration != null) return true;
+        if (getConfiguration() != null) return true;
         return configurationDAO.configurationExists();
     }
 
@@ -394,7 +407,7 @@ public class CachingPModeProvider extends PModeProvider {
     public List<Process> findAllProcesses() {
         try {
             return Lists.newArrayList(getConfiguration().getBusinessProcesses().getProcesses());
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Lists.newArrayList();
         }
     }
@@ -403,7 +416,7 @@ public class CachingPModeProvider extends PModeProvider {
     public List<Party> findAllParties() {
         try {
             return Lists.newArrayList(getConfiguration().getBusinessProcesses().getParties());
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Lists.newArrayList();
         }
     }
@@ -411,8 +424,8 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public List<String> findPartyIdByServiceAndAction(String service, String action) {
         List result = new ArrayList<String>();
-        for(Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
-            for(LegConfiguration legConfiguration : process.getLegs()) {
+        for (Process process : this.getConfiguration().getBusinessProcesses().getProcesses()) {
+            for (LegConfiguration legConfiguration : process.getLegs()) {
                 result.addAll(handleLegConfiguration(legConfiguration, process, service, action));
             }
         }
@@ -429,7 +442,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     private void handleProcessParties(Process process, List result) {
         for (Party party : process.getResponderParties()) {
-            for(Identifier identifier : party.getIdentifiers()) {
+            for (Identifier identifier : party.getIdentifiers()) {
                 result.add(identifier.getPartyId());
             }
         }
@@ -439,7 +452,7 @@ public class CachingPModeProvider extends PModeProvider {
     public String getPartyIdType(String partyIdentifier) {
         for (Party party : getConfiguration().getBusinessProcesses().getParties()) {
             String partyIdTypeHandleParty = getPartyIdTypeHandleParty(party, partyIdentifier);
-            if(partyIdTypeHandleParty != null) {
+            if (partyIdTypeHandleParty != null) {
                 return partyIdTypeHandleParty;
             }
         }
@@ -447,8 +460,8 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     private String getPartyIdTypeHandleParty(Party party, String partyIdentifier) {
-        for(Identifier identifier : party.getIdentifiers()) {
-            if(identifier.getPartyId().equals(partyIdentifier)) {
+        for (Identifier identifier : party.getIdentifiers()) {
+            if (identifier.getPartyId().equals(partyIdentifier)) {
                 return identifier.getPartyIdType().getValue();
             }
         }
@@ -457,8 +470,8 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public String getServiceType(String serviceValue) {
-        for(Service service : getConfiguration().getBusinessProcesses().getServices()) {
-            if(service.getValue().equals(serviceValue)) {
+        for (Service service : getConfiguration().getBusinessProcesses().getServices()) {
+            if (service.getValue().equals(serviceValue)) {
                 return service.getServiceType();
             }
         }
@@ -467,9 +480,9 @@ public class CachingPModeProvider extends PModeProvider {
 
     protected List<Process> getProcessFromService(String serviceValue) {
         List<Process> result = new ArrayList<>();
-        for(Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
-            for(LegConfiguration legConfiguration : process.getLegs()) {
-                if(legConfiguration.getService().getValue().equals(serviceValue)) {
+        for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
+            for (LegConfiguration legConfiguration : process.getLegs()) {
+                if (legConfiguration.getService().getValue().equals(serviceValue)) {
                     result.add(process);
                 }
             }
@@ -479,9 +492,9 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public String getRole(String roleType, String serviceValue) {
-        for(Process found : getProcessFromService(serviceValue)) {
+        for (Process found : getProcessFromService(serviceValue)) {
             String roleHandleProcess = getRoleHandleProcess(found, roleType);
-            if(roleHandleProcess != null) {
+            if (roleHandleProcess != null) {
                 return roleHandleProcess;
             }
         }
@@ -505,7 +518,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public String getAgreementRef(String serviceValue) {
-        for(Process found : getProcessFromService(serviceValue)) {
+        for (Process found : getProcessFromService(serviceValue)) {
             String agreementRefHandleProcess = getAgreementRefHandleProcess(found);
             if (agreementRefHandleProcess != null) {
                 return agreementRefHandleProcess;

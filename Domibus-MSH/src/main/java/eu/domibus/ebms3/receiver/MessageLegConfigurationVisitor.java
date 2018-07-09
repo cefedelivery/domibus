@@ -2,7 +2,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

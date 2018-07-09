@@ -5,6 +5,11 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
+    <changeSet dbms="oracle" author="Cosmin Baciu" id="hibernate_sequence_multi_tenancy">
+        <createSequence sequenceName="HIBERNATE_SEQUENCE" minValue="2" maxValue="9999999999999999999999999999"
+                        incrementBy="1" startValue="2" cacheSize="20" cycle="false" ordered="false"/>
+    </changeSet>
+
     <changeSet author="Cosmin Baciu" id="EDELIVERY-964">
         <createTable tableName="TB_USER_DOMAIN">
             <column autoIncrement="true" name="ID_PK" type="BIGINT">

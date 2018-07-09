@@ -52,5 +52,5 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_FILENAME = "FileName";
 
     public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
+    public static final String PASSWORD = "password"; //NOSONAR
 }

@@ -1,6 +1,8 @@
 package eu.domibus.jms.activemq;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJmsMessage;
@@ -12,6 +14,7 @@ import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 
 import javax.management.MBeanServerConnection;
@@ -50,6 +53,12 @@ public class JMSManagerActiveMQTest {
 
     @Injectable
     BrokerService brokerService;
+
+    @Injectable
+    private AuthUtils authUtils;
+
+    @Injectable
+    private DomibusConfigurationService domibusConfigurationService;
 
     @Test
     public void testGetDestinations(final @Mocked ObjectName objectName1,

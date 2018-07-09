@@ -11,6 +11,7 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {DownloadService} from "../download/download.service";
 import {AlertComponent} from "../alert/alert.component";
 import {isNullOrUndefined} from "util";
+import {AppComponent} from "../app.component";
 
 @Component({
   moduleId: module.id,
@@ -58,11 +59,11 @@ export class MessageLogComponent {
 
   messageResent = new EventEmitter(false);
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent) {
   }
 
   ngOnInit() {
-    this.columnPicker.allColumns = [
+    this.columnPicker.allColumns .push(
       {
         name: 'Message Id',
         width: 275
@@ -114,17 +115,23 @@ export class MessageLogComponent {
         name: 'Message Subtype',
         width: 100
       },
-      {
-        cellTemplate: this.rowWithDateFormatTpl,
+      {cellTemplate: this.rowWithDateFormatTpl,
         name: 'Deleted',
         width: 155
-      },
+      }
+    );
+
+    if (this.app.fourCornerEnabled) {
+      this.columnPicker.allColumns.push(
       {
         name: 'Original Sender'
       },
       {
         name: 'Final Recipient'
-      },
+      });
+    }
+
+    this.columnPicker.allColumns.push(
       {
         name: 'Ref To Message Id'
       },
@@ -144,8 +151,7 @@ export class MessageLogComponent {
         width: 80,
         sortable: false
       }
-
-    ];
+    );
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ["Message Id", "From Party Id", "To Party Id", "Message Status", "Received", "AP Role", "Message Type", "Actions"].indexOf(col.name) != -1
@@ -455,6 +461,7 @@ export class MessageLogComponent {
   details(selectedRow: any) {
     let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
     dialogRef.componentInstance.message = selectedRow;
+    dialogRef.componentInstance.fourCornerEnabled = this.app.fourCornerEnabled;
     // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
     dialogRef.afterClosed().subscribe(result => {
       //Todo:

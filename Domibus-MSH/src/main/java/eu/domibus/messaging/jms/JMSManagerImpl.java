@@ -1,10 +1,12 @@
 package eu.domibus.messaging.jms;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -61,6 +63,12 @@ public class JMSManagerImpl implements JMSManager {
     @Qualifier("jsonJmsTemplate")
     private JmsTemplate jmsTemplate;
 
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    protected AuthUtils authUtils;
+
     @Override
     public Map<String, JMSDestination> getDestinations() {
         return jmsDestinationMapper.convert(internalJmsManager.findDestinationsGroupedByFQName());
@@ -75,13 +83,27 @@ public class JMSManagerImpl implements JMSManager {
     @Override
     public List<JmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector) {
 
-        Domain domain = domainContextProvider.getCurrentDomain();
-        if(domain != null) {
-            selector = (selector == null ? "" : (selector + " and ")) + MessageConstants.DOMAIN + "='" + domain.getCode() + "'";
-        }
-
-        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, getDomainSelector(selector));
         return jmsMessageMapper.convert(messagesSPI);
+    }
+
+    protected String getDomainSelector(String selector) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return selector;
+        }
+        if (authUtils.isSuperAdmin()) {
+            return selector;
+        }
+        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        String domainClause = "DOMAIN ='" + currentDomain.getCode() + "'";
+
+        String result;
+        if (StringUtils.isBlank(selector)) {
+            result = domainClause;
+        } else {
+            result = selector + " AND " + domainClause;
+        }
+        return result;
     }
 
     @Override

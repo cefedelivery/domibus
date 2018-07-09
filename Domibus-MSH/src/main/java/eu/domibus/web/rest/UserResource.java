@@ -10,7 +10,6 @@ import eu.domibus.api.user.UserState;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
-import eu.domibus.common.services.impl.SuperUserManagementServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;

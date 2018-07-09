@@ -7,7 +7,7 @@
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
                    id="jmsQueueSelector" style="width: 45%">
           <md-option *ngFor="let queue of queues" [value]="queue" style="width:95%">
-            {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+            {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
         <md2-datepicker id="jmsFromDatePicker" appClearInvalid

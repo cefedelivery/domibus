@@ -15,6 +15,7 @@ import eu.domibus.core.alerts.model.service.MessagingConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -103,6 +104,9 @@ public class BackendNotificationService {
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    @Autowired
+    UserMessageServiceHelper userMessageServiceHelper;
+
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -151,7 +155,7 @@ public class BackendNotificationService {
     protected void notifyOfIncoming(final BackendFilter matchingBackendFilter, final UserMessage userMessage, final NotificationType notificationType, Map<String, Object> properties) {
         if (matchingBackendFilter == null) {
             LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-            String finalRecipient = getFinalRecipient(userMessage);
+            String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
             jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties).createMessage(), unknownReceiverQueue);
             return;
@@ -211,17 +215,6 @@ public class BackendNotificationService {
         return backendFilters;
     }
 
-    private String getFinalRecipient(UserMessage userMessage) {
-        String finalRecipient = null;
-        for (final Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
-                finalRecipient = p.getValue();
-                break;
-            }
-        }
-        return finalRecipient;
-    }
-
     protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
         if (NotificationType.MESSAGE_RECEIVED != notificationType) {
             LOG.debug("Validation is not configured to be done for notification of type [" + notificationType + "]");
@@ -254,7 +247,7 @@ public class BackendNotificationService {
         LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
 
         validateSubmission(userMessage, backendName, notificationType);
-        String finalRecipient = getFinalRecipient(userMessage);
+        String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
         if (properties != null) {
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
         }

@@ -1,4 +1,4 @@
-package eu.domibus.ebms3.common.dao;
+package eu.domibus.core.pmode;
 
 /**
  * @author Ioana Dragusanu (idragusa)

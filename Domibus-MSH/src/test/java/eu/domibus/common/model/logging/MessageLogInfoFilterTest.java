@@ -1,6 +1,6 @@
 package eu.domibus.common.model.logging;
 
-import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Properties;
 
 import static org.mockito.Mockito.spy;
 
@@ -21,8 +22,12 @@ import static org.mockito.Mockito.spy;
 public class MessageLogInfoFilterTest {
 
     public static final String QUERY1 = "select * from table where z = 1 and log.notificationStatus = :notificationStatus and partyFrom.value = :fromPartyId and log.sendAttemptsMax = :sendAttemptsMax and propsFrom.value = :originalSender and log.received <= :receivedTo and message.collaborationInfo.conversationId = :conversationId and log.messageId = :messageId and info.refToMessageId = :refToMessageId and log.received = :received and log.sendAttempts = :sendAttempts and propsTo.value = :finalRecipient and log.nextAttempt = :nextAttempt and log.messageStatus = :messageStatus and log.deleted = :deleted and log.messageType = :messageType and log.received >= :receivedFrom and partyTo.value = :toPartyId and log.mshRole = :mshRole order by log.messageStatus";
+
     @Tested
     MessageLogInfoFilter messageLogInfoFilter;
+
+    @Injectable
+    private Properties domibusProperties;
 
     public static HashMap<String, Object> returnFilters() {
         HashMap<String, Object> filters = new HashMap<>();

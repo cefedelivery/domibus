@@ -5,8 +5,8 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.web.rest.ro.DomibusInfoRO;
 import eu.domibus.web.rest.ro.DomainRO;
+import eu.domibus.web.rest.ro.DomibusInfoRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +85,12 @@ public class ApplicationResource {
     public List<DomainRO> getDomains() {
         LOG.debug("Getting domains");
         return domainCoreConverter.convert(domainService.getDomains(), DomainRO.class);
+    }
+
+    @RequestMapping(value = "fourcornerenabled", method = RequestMethod.GET)
+    public boolean getFourCornerModelEnabled() {
+        LOG.debug("Getting four corner enabled");
+        return domibusConfigurationService.isFourCornerEnabled();
     }
 
 }

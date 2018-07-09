@@ -191,8 +191,8 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
             LOG.debug("Filter empty");
             return countAll();
         }
-        String filteredSignalMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
-        TypedQuery<Number> countQuery = em.createQuery(filteredSignalMessageLogQuery, Number.class);
+        String filteredUserMessageLogQuery = userMessageLogInfoFilter.countUserMessageLogQuery(asc, filters);
+        TypedQuery<Number> countQuery = em.createQuery(filteredUserMessageLogQuery, Number.class);
         countQuery = userMessageLogInfoFilter.applyParameters(countQuery, filters);
         final Number count = countQuery.getSingleResult();
         return count.intValue();

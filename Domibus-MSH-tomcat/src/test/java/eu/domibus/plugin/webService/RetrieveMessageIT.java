@@ -68,7 +68,7 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
     @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
     public void testMessageNotFound() throws RetrieveMessageFault {
-        retrieveMessageFail("notFound", "No message with id [notFound] pending for download");
+        retrieveMessageFail("notFound", "Message with id [notFound] was not found");
     }
 
     @DirtiesContext

@@ -1,7 +1,9 @@
 package eu.domibus.jms.wildfly;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -74,6 +76,12 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
 
@@ -86,7 +94,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
                 internalJmsDestination.setName(jmsQueueControl.getName());
                 internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
-                internalJmsDestination.setNumberOfMessages(jmsQueueControl.getMessageCount());
+                /* in multi-tenancy mode we show the number of messages only to super admin */
+                internalJmsDestination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN : jmsQueueControl.getMessageCount());
                 internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
                 internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
                 internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
