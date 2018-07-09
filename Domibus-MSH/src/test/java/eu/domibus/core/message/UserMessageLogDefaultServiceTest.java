@@ -8,10 +8,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,18 +79,20 @@ public class UserMessageLogDefaultServiceTest {
 
         userMessageLogDefaultService.updateMessageStatus(messageId, messageStatus);
 
-        new Verifications() {{
+        new FullVerifications() {{
             backendNotificationService.notifyOfMessageStatusChange(messageLog, messageStatus, withAny(new Timestamp(System.currentTimeMillis())));
             userMessageLogDao.setMessageStatus(messageLog, messageStatus);
+            uiReplicationSignalService.messageStatusChange(messageId, messageStatus);
         }};
     }
 
     @Test
-    public void testSetMessageAsDeleted() throws Exception {
+    public void testSetMessageAsDeleted(@Injectable final UserMessageLog messageLog) throws Exception {
         final String messageId = "1";
+
         userMessageLogDefaultService.setMessageAsDeleted(messageId);
 
-        new Verifications() {{
+        new FullVerifications() {{
             userMessageLogDefaultService.updateMessageStatus(messageId, MessageStatus.DELETED);
         }};
     }
@@ -103,7 +102,7 @@ public class UserMessageLogDefaultServiceTest {
         final String messageId = "1";
         userMessageLogDefaultService.setMessageAsDownloaded(messageId);
 
-        new Verifications() {{
+        new FullVerifications() {{
             userMessageLogDefaultService.updateMessageStatus(messageId, MessageStatus.DOWNLOADED);
         }};
     }

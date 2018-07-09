@@ -26,6 +26,9 @@ public class PullMessageServiceTest {
 
     private final static String MPC = "MPC";
 
+    @Tested
+    private PullMessageServiceImpl pullService;
+
     @Injectable
     private MessagingLockDao messagingLockDao;
 
@@ -55,9 +58,6 @@ public class PullMessageServiceTest {
 
     @Injectable
     private java.util.Properties domibusProperties;
-
-    @Tested
-    private PullMessageServiceImpl pullService;
 
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;

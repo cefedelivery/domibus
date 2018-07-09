@@ -25,10 +25,7 @@ import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -421,6 +418,7 @@ public class UserMessageHandlerServiceTest {
                                                      @Injectable final UserMessageLog userMessageLog)
             throws EbMS3Exception, TransformerException, SOAPException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String messageId = "TestMessageId123";
 
         new Expectations(userMessageHandlerService) {{
             messaging.getUserMessage();
@@ -433,7 +431,7 @@ public class UserMessageHandlerServiceTest {
             result = receiverParty;
 
             userMessage.getMessageInfo().getMessageId();
-            result = "TestMessageId123";
+            result = messageId;
 
         }};
         userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
@@ -443,6 +441,7 @@ public class UserMessageHandlerServiceTest {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
             messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            uiReplicationSignalService.userMessageReceived(messageId);
         }};
     }
 

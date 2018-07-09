@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.jms.Queue;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,7 +75,6 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private BackendNotificationService backendNotificationService;
-
 
     @Injectable
     private JMSManager jmsManager;
@@ -209,11 +209,16 @@ public class UserMessageDefaultServiceTest {
             userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
             result = newMaxAttempts;
 
+            userMessageLog.getMessageStatus();
+            result = MessageStatus.SEND_ENQUEUED;
+
         }};
 
         userMessageDefaultService.restoreFailedMessage(messageId);
 
-        new Verifications() {{
+        new FullVerifications(userMessageDefaultService) {{
+            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+
             userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
             userMessageLog.setRestored(withAny(new Date()));
             userMessageLog.setFailed(null);
@@ -221,7 +226,9 @@ public class UserMessageDefaultServiceTest {
             userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
             userMessageLogDao.update(userMessageLog);
+            uiReplicationSignalService.messageStatusChange(anyString, MessageStatus.SEND_ENQUEUED);
             userMessageDefaultService.scheduleSending(messageId);
+
         }};
     }
 
