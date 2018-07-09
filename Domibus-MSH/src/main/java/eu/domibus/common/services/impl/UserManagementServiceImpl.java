@@ -128,8 +128,6 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     private void triggerAlert(String userName, UserLoginErrorReason userLoginErrorReason) {
-
-
         final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfigurationLoader();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:

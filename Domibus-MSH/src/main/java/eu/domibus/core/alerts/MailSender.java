@@ -3,6 +3,7 @@ package eu.domibus.core.alerts;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.model.service.MailModel;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -21,8 +22,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Set;
-
-import static eu.domibus.core.alerts.model.service.Alert.DOMIBUS_ALERT_ACTIVE;
 
 /**
  * @author Thomas Dussart
@@ -57,9 +56,12 @@ public class MailSender {
     @Autowired
     protected DomainContextProvider domainProvider;
 
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
     @PostConstruct
     void init() {
-        final Boolean alertModuleEnabled = Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_ACTIVE));
+        final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
             //static properties.

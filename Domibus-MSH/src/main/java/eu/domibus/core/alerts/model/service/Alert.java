@@ -18,8 +18,6 @@ import java.util.Set;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = Alert.class)
 public class Alert {
 
-    public static final String DOMIBUS_ALERT_ACTIVE = "domibus.alert.active";
-
     private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
 
     private int entityId;

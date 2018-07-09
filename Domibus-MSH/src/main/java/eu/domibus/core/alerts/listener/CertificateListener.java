@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Component
 public class CertificateListener {
 

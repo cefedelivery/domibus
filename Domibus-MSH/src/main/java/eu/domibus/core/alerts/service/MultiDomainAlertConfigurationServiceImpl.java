@@ -71,6 +71,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     public static final String DOMIBUS_ALERT_RECEIVER_EMAIL = "domibus.alert.receiver.email";
 
+    public static final String DOMIBUS_ALERT_ACTIVE = "domibus.alert.active";
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -188,9 +190,14 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         return domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RECEIVER_EMAIL);
     }
 
+    @Override
+    public Boolean isAlertModuleEnabled() {
+        return Boolean.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_ACTIVE));
+    }
+
     private MessagingConfiguration readMessageConfiguration(Domain domain) {
         try {
-            final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+            final Boolean alertActive = isAlertModuleEnabled();
             if (!alertActive) {
                 return new MessagingConfiguration();
             }
@@ -238,7 +245,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private AccountDisabledConfiguration readAuthenticatorConfiguration(Domain domain) {
         try {
-            final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+            final Boolean alertActive = isAlertModuleEnabled();
             if (!alertActive) {
                 LOG.debug("Alert module is inactive");
                 return new AccountDisabledConfiguration(false);
@@ -264,7 +271,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private LoginFailureConfiguration readLoginFailureConfiguration(Domain domain) {
         try {
-            final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+            final Boolean alertActive = isAlertModuleEnabled();
             if (!alertActive) {
                 LOG.debug("Alert module is inactive");
                 return new LoginFailureConfiguration(false);
@@ -286,7 +293,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     private ImminentExpirationCertificateConfiguration readImminentExpirationCertificateConfiguration(Domain domain) {
-        final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+        final Boolean alertActive = isAlertModuleEnabled();
         if (!alertActive) {
             LOG.debug("Alert module is inactive");
             return new ImminentExpirationCertificateConfiguration(false);
@@ -313,7 +320,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     private ExpiredCertificateConfiguration readExpiredCertificateConfiguration(Domain domain) {
-        final Boolean alertActive = Boolean.valueOf(domibusPropertyProvider.getProperty(Alert.DOMIBUS_ALERT_ACTIVE));
+        final Boolean alertActive = isAlertModuleEnabled();
         if (!alertActive) {
             LOG.debug("Alert module is inactive");
             return new ExpiredCertificateConfiguration(false);

@@ -13,7 +13,10 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import javax.jms.ConnectionFactory;
 
 import static org.springframework.jms.support.converter.MessageType.TEXT;
-
+/**
+ * @author Thomas Dussart
+ * @since 4.0
+ */
 @Configuration
 public class AlertContextConfiguration {
 

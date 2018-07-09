@@ -63,7 +63,7 @@ public class AlertDao extends BasicDao<Alert> {
         //add predicates to the sub query.
         subQuery.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
 
-        //create main query by retrieving alerts where ides are in the sub query selection.
+        //create main query by retrieving alerts where ids are in the sub query selection.
         criteria.where(root.get(Alert_.entityId).in(subQuery)).distinct(true);
         final Boolean ask = alertCriteria.getAsk();
         final String column = alertCriteria.getColumn();
