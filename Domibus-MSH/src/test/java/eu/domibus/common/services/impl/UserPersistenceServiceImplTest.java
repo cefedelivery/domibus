@@ -7,6 +7,7 @@ import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.core.alerts.model.service.AccountDisabledConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -69,6 +70,29 @@ public class UserPersistenceServiceImplTest {
         User user1 = userPersistenceService.prepareUserForUpdate(user);
         assertNull(user1.getSuspensionDate());
         assertEquals(0, user1.getAttemptCount(), 0d);
+    }
+
+    @Test
+    public void prepareUserForUpdateSendAlert(@Mocked AccountDisabledConfiguration accountDisabledConfiguration) {
+        final User userEntity = new User();
+        userEntity.setActive(true);
+        eu.domibus.api.user.User user = new eu.domibus.api.user.User();
+        user.setActive(false);
+        user.setUserName("user");
+        new Expectations() {{
+            userDao.loadUserByUsername(anyString);
+            result = userEntity;
+
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            result=accountDisabledConfiguration;
+
+            accountDisabledConfiguration.isActive();
+            result=true;
+        }};
+        userPersistenceService.prepareUserForUpdate(user);
+        new Verifications(){{
+            eventService.enqueueAccountDisabledEvent(user.getUserName(), withAny(new Date()), true);times=1;
+        }};
     }
 
 }
