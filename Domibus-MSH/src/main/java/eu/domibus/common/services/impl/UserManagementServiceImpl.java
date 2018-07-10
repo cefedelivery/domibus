@@ -123,12 +123,12 @@ public class UserManagementServiceImpl implements UserService {
             applyAccountLockingPolicy(user);
         }
         userDao.flush();
-        triggerAlert(userName, userLoginErrorReason);
+        triggerEvent(userName, userLoginErrorReason);
         return userLoginErrorReason;
     }
 
-    private void triggerAlert(String userName, UserLoginErrorReason userLoginErrorReason) {
-        final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfigurationLoader();
+    protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
+        final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
                 if (loginFailureConfiguration.isActive()) {

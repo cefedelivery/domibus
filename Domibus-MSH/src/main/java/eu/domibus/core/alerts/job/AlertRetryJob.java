@@ -23,6 +23,6 @@ public class AlertRetryJob extends DomibusQuartzJobBean {
 
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
-        alertService.retry();
+        alertService.retrieveAndResendFailedAlerts();
     }
 }

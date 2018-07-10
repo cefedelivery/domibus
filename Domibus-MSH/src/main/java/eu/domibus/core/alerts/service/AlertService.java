@@ -41,7 +41,7 @@ public interface AlertService {
     /**
      * Call by the alert job. Try to resend failed alerts.
      */
-    void retry();
+    void retrieveAndResendFailedAlerts();
 
     /**
      * Filter alerts based on criteria.

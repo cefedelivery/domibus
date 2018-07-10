@@ -40,11 +40,16 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 public class EventServiceImpl implements EventService {
 
     private final static Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
-    public static final String MESSAGE_EVENT_SELECTOR = "message";
-    public static final String LOGIN_FAILURE = "loginFailure";
-    public static final String ACCOUNT_DISABLED = "accountDisabled";
-    public static final String CERTIFICATE_EXPIRED = "certificateExpired";
-    public static final String CERTIFICATE_IMMINENT_EXPIRATION = "certificateImminentExpiration";
+
+    static final String MESSAGE_EVENT_SELECTOR = "message";
+
+    static final String LOGIN_FAILURE = "loginFailure";
+
+    static final String ACCOUNT_DISABLED = "accountDisabled";
+
+    static final String CERTIFICATE_EXPIRED = "certificateExpired";
+
+    static final String CERTIFICATE_IMMINENT_EXPIRATION = "certificateImminentExpiration";
 
     @Autowired
     private EventDao eventDao;
@@ -78,7 +83,6 @@ public class EventServiceImpl implements EventService {
             final MessageStatus oldStatus,
             final MessageStatus newStatus,
             final MSHRole role) {
-        //check is status is relevant.
         Event event = new Event(EventType.MSG_COMMUNICATION_FAILURE);
         event.addKeyValue(OLD_STATUS.name(), oldStatus.name());
         event.addKeyValue(NEW_STATUS.name(), newStatus.name());
@@ -96,7 +100,6 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date loginTime,
             final boolean accountDisabled) {
-        //check is status is relevant.
         Event event = prepareAuthenticatorEvent(userName, loginTime.toString(), Boolean.valueOf(accountDisabled).toString(), EventType.USER_LOGIN_FAILURE);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
         LOG.debug("Event:[{}] added to the queue", event);
@@ -110,7 +113,6 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date accountDisabledTime,
             final boolean accountDisabled) {
-        //check is status is relevant.
         Event event = prepareAuthenticatorEvent(userName, accountDisabledTime.toString(), Boolean.valueOf(accountDisabled).toString(), EventType.USER_ACCOUNT_DISABLED);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
         LOG.debug("Event:[{}] added to the queue", event);
@@ -171,12 +173,12 @@ public class EventServiceImpl implements EventService {
             final Party receiverParty = pModeProvider.getReceiverParty(userMessageExchangeContext.getPmodeKey());
             event.addKeyValue(FROM_PARTY.name(), senderParty.getName());
             event.addKeyValue(TO_PARTY.name(), receiverParty.getName());
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder errors = new StringBuilder();
             errorLogDao.
                     getErrorsForMessage(messageId).
                     stream().
-                    map(ErrorLogEntry::getErrorDetail).forEach(stringBuilder::append);
-            event.addKeyValue(DESCRIPTION.name(), stringBuilder.toString());
+                    map(ErrorLogEntry::getErrorDetail).forEach(errors::append);
+            event.addKeyValue(DESCRIPTION.name(), errors.toString());
         } catch (EbMS3Exception e) {
             LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
         }

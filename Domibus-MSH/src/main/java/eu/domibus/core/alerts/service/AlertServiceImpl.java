@@ -38,11 +38,13 @@ public class AlertServiceImpl implements AlertService {
 
     private final static Logger LOG = LoggerFactory.getLogger(AlertServiceImpl.class);
 
-    private static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
+    static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
 
-    private static final String ALERT_LEVEL = "ALERT_LEVEL";
+    static final String ALERT_LEVEL = "ALERT_LEVEL";
 
-    private static final String REPORTING_TIME = "REPORTING_TIME";
+    static final String REPORTING_TIME = "REPORTING_TIME";
+
+    static final String ALERT_SELECTOR = "alert";
 
     @Autowired
     private EventDao eventDao;
@@ -67,7 +69,6 @@ public class AlertServiceImpl implements AlertService {
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
-
     /**
      * {@inheritDoc}
      */
@@ -80,7 +81,6 @@ public class AlertServiceImpl implements AlertService {
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
         alert.setAttempts(0);
         alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
-        alert.setReportingTime(event.getReportingTime());
         alert.setAlertStatus(SEND_ENQUEUED);
         alert.setCreationTime(new Date());
 
@@ -97,7 +97,7 @@ public class AlertServiceImpl implements AlertService {
      */
     @Override
     public void enqueueAlert(eu.domibus.core.alerts.model.service.Alert alert) {
-        jmsManager.convertAndSendToQueue(alert, alertMessageQueue, "alert");
+        jmsManager.convertAndSendToQueue(alert, alertMessageQueue, ALERT_SELECTOR);
     }
 
     /**
@@ -109,8 +109,8 @@ public class AlertServiceImpl implements AlertService {
         Map<String, String> mailModel = new HashMap<>();
         final Event next = read.getEvents().iterator().next();
         next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue()));
-        mailModel.put(ALERT_LEVEL, alert.getAlertLevel().name());
-        mailModel.put(REPORTING_TIME, alert.getReportingTime().toString());
+        mailModel.put(ALERT_LEVEL, read.getAlertLevel().name());
+        mailModel.put(REPORTING_TIME, read.getReportingTime().toString());
         if (LOG.isDebugEnabled()) {
             mailModel.forEach((key,value)-> LOG.debug("Mail template key[{}] value[{}]", key, value));
         }
@@ -152,7 +152,7 @@ public class AlertServiceImpl implements AlertService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void retry() {
+    public void retrieveAndResendFailedAlerts() {
         final List<Alert> retryAlerts = alertDao.findRetryAlerts();
         retryAlerts.forEach(this::convertAndEnqueue);
     }

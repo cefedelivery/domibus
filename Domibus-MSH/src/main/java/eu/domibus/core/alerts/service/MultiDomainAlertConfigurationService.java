@@ -25,7 +25,7 @@ public interface MultiDomainAlertConfigurationService {
     /**
      * @return login failure module configuration
      */
-    LoginFailureConfiguration getLoginFailureConfigurationLoader();
+    LoginFailureConfiguration getLoginFailureConfiguration();
 
     /**
      * @return certificate imminent expiration module configuration

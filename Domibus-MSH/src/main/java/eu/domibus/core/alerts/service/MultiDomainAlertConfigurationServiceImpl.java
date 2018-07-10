@@ -111,7 +111,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      * {@inheritDoc}
      */
     @Override
-    public LoginFailureConfiguration getLoginFailureConfigurationLoader() {
+    public LoginFailureConfiguration getLoginFailureConfiguration() {
         return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
     }
 
@@ -142,7 +142,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             case USER_ACCOUNT_DISABLED:
                 return getAccountDisabledConfiguration().getAlertLevel(alert);
             case USER_LOGIN_FAILURE:
-                return getLoginFailureConfigurationLoader().getAlertLevel(alert);
+                return getLoginFailureConfiguration().getAlertLevel(alert);
             case CERT_IMMINENT_EXPIRATION:
                 return getImminentExpirationCertificateConfiguration().getAlertLevel(alert);
             case CERT_EXPIRED:
@@ -164,7 +164,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             case USER_ACCOUNT_DISABLED:
                 return getAccountDisabledConfiguration().getMailSubject();
             case USER_LOGIN_FAILURE:
-                return getLoginFailureConfigurationLoader().getMailSubject();
+                return getLoginFailureConfiguration().getMailSubject();
             case CERT_IMMINENT_EXPIRATION:
                 return getImminentExpirationCertificateConfiguration().getMailSubject();
             case CERT_EXPIRED:

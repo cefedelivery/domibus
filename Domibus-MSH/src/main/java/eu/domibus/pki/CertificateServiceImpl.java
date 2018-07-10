@@ -220,7 +220,6 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
             throw new DomibusCertificateException("Could not load key store", e);
         }
-
     }
 
     @Override
@@ -230,7 +229,7 @@ public class CertificateServiceImpl implements CertificateService {
         sendCertificateExpiredAlerts();
     }
 
-    private void sendCertificateImminentExpirationAlerts() {
+    protected void sendCertificateImminentExpirationAlerts() {
         final ImminentExpirationCertificateConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
         final Boolean activeModule = imminentExpirationCertificateConfiguration.isActive();
         LOG.debug("Certificate Imminent expiration alert module activated:[{}]", activeModule);
@@ -239,9 +238,9 @@ public class CertificateServiceImpl implements CertificateService {
         }
         final String accessPoint = getAccesPointName();
         final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
-        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
-
         final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
+
+        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
         LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
@@ -254,15 +253,9 @@ public class CertificateServiceImpl implements CertificateService {
         });
     }
 
-    private String getAccesPointName() {
-        String partyName = null;
-        if (pModeProvider.isConfigurationLoaded()) {
-            partyName = pModeProvider.getGatewayParty().getName();
-        }
-        return partyName;
-    }
 
-    private void sendCertificateExpiredAlerts() {
+
+    protected void sendCertificateExpiredAlerts() {
         final ExpiredCertificateConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
         final boolean activeModule = expiredCertificateConfiguration.isActive();
         LOG.debug("Certificate expired alert module activated:[{}]", activeModule);
@@ -284,6 +277,14 @@ public class CertificateServiceImpl implements CertificateService {
             final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
             eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
         });
+    }
+
+    private String getAccesPointName() {
+        String partyName = null;
+        if (pModeProvider.isConfigurationLoaded()) {
+            partyName = pModeProvider.getGatewayParty().getName();
+        }
+        return partyName;
     }
 
 
