@@ -294,9 +294,8 @@
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-
             <column name="MESSAGE_ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="MESSAGE_STATUS" type="VARCHAR(255)"/>
             <column name="NOTIFICATION_STATUS" type="VARCHAR(255)">
@@ -367,6 +366,12 @@
         <createIndex indexName="IDX_MSG_UI_TO_ID" tableName="TB_MESSAGE_UI">
             <column name="TO_ID"/>
         </createIndex>
-
+        <createIndex indexName="IDX_MSG_UI_REF_MSG_ID" tableName="TB_MESSAGE_UI">
+            <column name="REF_TO_MESSAGE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_CONV_ID" tableName="TB_MESSAGE_UI">
+            <column name="CONVERSATION_ID"/>
+        </createIndex>
     </changeSet>
+
 </databaseChangeLog>
