@@ -34,7 +34,7 @@ export class PartyService {
 
   listProcesses (): Observable<ProcessRo> {
     return this.http.get(PartyService.LIST_PROCESSES)
-      .map(res => res.json());
+      .map(res => res.json()).catch(() => Observable.throw("No processes found"));
   }
 
   listParties (name: string, endPoint: string, partyId: string, process: string)
@@ -58,7 +58,7 @@ export class PartyService {
       }
 
       return {data: records, allData: allRecords};
-    }).catch(() => Observable.throw(""));
+    }).catch(() => Observable.throw("No parties found"));
 
   }
 
