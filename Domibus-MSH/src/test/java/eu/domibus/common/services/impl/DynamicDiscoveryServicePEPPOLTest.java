@@ -139,25 +139,4 @@ public class DynamicDiscoveryServicePEPPOLTest {
         ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
         return sm;
     }
-
-    /* This is not a unit tests but a useful test for a real SMP entry. */
-    @Test
-    @Ignore
-    public void testLookupInformation() throws Exception {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = true;
-
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
-            result = TEST_SML_ZONE;
-
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
-            result = Mode.TEST;
-        }};
-
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation(DOMAIN, "0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
-
-        assertNotNull(endpoint);
-        System.out.println(endpoint.getAddress());
-    }
 }
