@@ -88,7 +88,7 @@ SELECT
         partyid8_.VALUE AS TO_ID,
         property5_.VALUE AS ORIGINAL_SENDER,
         property6_.VALUE AS FINAL_RECIPIENT,
-        messageinf4_.REF_TO_MESSAGE_ID ,
+        message_info2.REF_TO_MESSAGE_ID ,
         message_log.FAILED ,
         message_log.RESTORED,
         message_log.MESSAGE_SUBTYPE
@@ -97,32 +97,32 @@ SELECT
     JOIN
         TB_MESSAGING messaging 
     INNER JOIN
-        TB_SIGNAL_MESSAGE signalmess2_ 
-            ON messaging.SIGNAL_MESSAGE_ID=signalmess2_.ID_PK 
+        TB_SIGNAL_MESSAGE signal_message 
+            ON messaging.SIGNAL_MESSAGE_ID=signal_message.ID_PK 
     LEFT OUTER JOIN
-        TB_MESSAGE_INFO messageinf4_ 
-            ON signalmess2_.messageInfo_ID_PK=messageinf4_.ID_PK 
+        TB_MESSAGE_INFO message_info2 
+            ON signal_message.messageInfo_ID_PK=message_info2.ID_PK 
     INNER JOIN
-        TB_USER_MESSAGE usermessag3_ 
-            ON messaging.USER_MESSAGE_ID=usermessag3_.ID_PK 
+        TB_USER_MESSAGE user_message 
+            ON messaging.USER_MESSAGE_ID=user_message.ID_PK 
     LEFT OUTER JOIN
         TB_PROPERTY property5_ 
-            ON usermessag3_.ID_PK=property5_.MESSAGEPROPERTIES_ID 
+            ON user_message.ID_PK=property5_.MESSAGEPROPERTIES_ID 
     LEFT OUTER JOIN
         TB_PROPERTY property6_ 
-            ON usermessag3_.ID_PK=property6_.MESSAGEPROPERTIES_ID 
+            ON user_message.ID_PK=property6_.MESSAGEPROPERTIES_ID 
     LEFT OUTER JOIN
         TB_PARTY_ID partyid7_ 
-            ON usermessag3_.ID_PK=partyid7_.FROM_ID 
+            ON user_message.ID_PK=partyid7_.FROM_ID 
     LEFT OUTER JOIN
         TB_PARTY_ID partyid8_ 
-            ON usermessag3_.ID_PK=partyid8_.TO_ID CROSS 
+            ON user_message.ID_PK=partyid8_.TO_ID CROSS 
     JOIN
-        TB_MESSAGE_INFO messageinf11_ 
+        TB_MESSAGE_INFO message_info 
     WHERE
-        usermessag3_.messageInfo_ID_PK=messageinf11_.ID_PK 
-        AND messageinf4_.MESSAGE_ID=message_log.MESSAGE_ID 
-        AND messageinf4_.REF_TO_MESSAGE_ID=messageinf11_.MESSAGE_ID 
+        user_message.messageInfo_ID_PK=message_info.ID_PK 
+        AND message_info2.MESSAGE_ID=message_log.MESSAGE_ID 
+        AND message_info2.REF_TO_MESSAGE_ID=message_info.MESSAGE_ID 
         AND property5_.NAME='originalSender' 
         AND property6_.NAME='finalRecipient' 
 	) result

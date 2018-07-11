@@ -29,6 +29,9 @@
     <bean id="unknownReceiverQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.unknown"/>
     </bean>
+    <bean id="domibusUIReplicationQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.UI.replication"/>
+    </bean>
 
     <bean id="clusterCommandTopic" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.command"/>
