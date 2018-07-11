@@ -38,9 +38,6 @@ public class MessageListenerContainerInitializer {
         }
     }
 
-    /**
-     * entry point method (post-construct)
-     */
     public void createMessageListenerContainer(Domain domain) {
         MessageListenerContainer instance = messageListenerContainerFactory.createMessageListenerContainer(domain);
         instance.start();
