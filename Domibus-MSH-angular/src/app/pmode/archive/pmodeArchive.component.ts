@@ -454,10 +454,10 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   private static downloadFile (data: any, domain: string, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
     let filename = 'PMode';
-    if (domain !== null && domain !== '') {
+    if (domain) {
       filename += '-' + domain;
     }
-    if (date !== '') {
+    if (date) {
       filename += '-' + date;
     }
     filename += '.xml';
