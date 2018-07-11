@@ -138,6 +138,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
+        this.offset = 0;
         this.allPModes = response.json();
         this.allPModes[0].current = true;
         this.actualId = this.allPModes[0].id;

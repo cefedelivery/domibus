@@ -152,33 +152,6 @@ export class AlertsComponent {
 
     let newEntries: AlertsEntry[] = [];
 
-    // MOCK info
-    /*let entry1: AlertsEntry = new AlertsEntry(true, 'alertId1', this.aTypes[0], this.aLevels[0], 'aText1', new Date(), new Date(), ['asasas','ddsdsd','ddd']);
-    let entry2: AlertsEntry = new AlertsEntry(false, 'alertId2', this.aTypes[1], this.aLevels[1], 'aText2', new Date(), new Date(), ['tryrty','trurutru']);
-    let entry3: AlertsEntry = new AlertsEntry(true, 'alertId3', this.aTypes[0], this.aLevels[0], 'aText3', new Date(), new Date(), ['aaaaa','bbbbb','cccccc']);
-    newEntries[0] = entry1;
-    newEntries[1] = entry2;
-    newEntries[2] = entry3;
-
-    // information of parameters and values
-    let entry: any;
-    for(entry in newEntries) {
-      let buildParams = [], pos = 0, params = this.getDynamicParameters(newEntries[entry].alertType);
-      for(let param in params) {
-        buildParams[pos] = params[param] + '=' + newEntries[entry].parameters[pos++];
-      }
-      newEntries[entry].parameters = buildParams;
-    }
-
-    this.rows = newEntries;
-
-    this.count = 3;
-    this.offset = offset;
-    this.rowLimiter.pageSize = pageSize;
-    this.orderBy = orderBy;
-    this.asc = asc;
-    this.loading = false;*/
-
     this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
       console.log("alerts response: " + result);
       this.offset = offset;
@@ -360,8 +333,8 @@ export class AlertsComponent {
   }
 
   cancel() {
-    let dialogRef = this.dialog.open(CancelDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+    this.dialog.open(CancelDialogComponent)
+      .afterClosed().subscribe(result => {
       if (result) {
         this.buttonsDisabled = true;
         this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
