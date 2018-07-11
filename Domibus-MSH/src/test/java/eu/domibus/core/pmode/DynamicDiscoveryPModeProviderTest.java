@@ -175,10 +175,10 @@ public class DynamicDiscoveryPModeProviderTest {
     @Test
     public void testUseDynamicDiscovery() {
 
-        doReturn("false").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
+        doReturn("false").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
         assertFalse(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
 
-        doReturn("true").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
+        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
         assertTrue(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
     }
 
@@ -262,7 +262,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
         UserMessage userMessage = buildUserMessageForDoDynamicThingsWithArguments(null, null, null, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_VALUE, UNKNOWN_DYNAMIC_RESPONDER_PARTYID_TYPE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_VALUE, UNKNOWN_DYNAMIC_INITIATOR_PARTYID_TYPE, UUID.randomUUID().toString());
 
-        doReturn("false").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
+        doReturn("false").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();
@@ -272,7 +272,7 @@ public class DynamicDiscoveryPModeProviderTest {
         }
 
         doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.SMLZONE_KEY));
-        doReturn("true").when(domibusPropertyProvider).getProperty(any(Domain.class), eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
+        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();

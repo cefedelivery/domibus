@@ -4,8 +4,6 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.property.PropertyResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +18,6 @@ import java.util.Properties;
  */
 @Service
 public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusPropertyProviderImpl.class);
 
     @Autowired
     @Qualifier("domibusProperties")

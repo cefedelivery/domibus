@@ -2,15 +2,12 @@ package eu.domibus.messaging;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.crypto.DomainCryptoServiceImpl;
-import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.ebms3.sender.MessageSender;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -74,7 +71,6 @@ public class MessageListenerContainerConfiguration {
         messageListenerContainer.setSessionAcknowledgeMode(0);
 
         messageListenerContainer.afterPropertiesSet();
-        // TODO: check if this is still needed
 
         return messageListenerContainer;
     }

@@ -7,7 +7,6 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.Trigger;
 import org.quartz.impl.triggers.CronTriggerImpl;
@@ -25,7 +24,6 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -141,6 +139,7 @@ public class DomainSchedulerFactoryConfiguration {
     private SchedulerFactoryBean schedulerFactoryGeneral() {
         LOG.debug("Instantiating the scheduler factory for general schema");
         SchedulerFactoryBean schedulerFactoryBean = schedulerFactory("General", getGeneralSchemaPrefix(), null);
+
         final Map<String, Trigger> beansOfType = applicationContext.getBeansOfType(Trigger.class);
         List<Trigger> domibusStandardTriggerList = beansOfType.values().stream()
                 .filter(trigger -> trigger instanceof CronTriggerImpl &&
@@ -169,7 +168,6 @@ public class DomainSchedulerFactoryConfiguration {
                         !((CronTriggerImpl) trigger).getGroup().equalsIgnoreCase(GROUP_GENERAL))
                 .collect(Collectors.toList());
         schedulerFactoryBean.setTriggers(domibusStandardTriggerList.toArray(new Trigger[domibusStandardTriggerList.size()]));
-        LOG.trace("domibusStandardTriggerList: [{}]", domibusStandardTriggerList);
 
         domainContextProvider.clearCurrentDomain();
 

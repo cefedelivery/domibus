@@ -80,8 +80,8 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     protected Collection<eu.domibus.common.model.configuration.Process> dynamicInitiatorProcesses;
 
     // default type in eDelivery profile
-//    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
-//    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
+    protected static final String URN_TYPE_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    protected static final String DEFAULT_RESPONDER_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
     protected static final String MSH_ENDPOINT = "msh_endpoint";
 
     public DynamicDiscoveryPModeProvider(Domain domain) {
@@ -139,7 +139,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      *
      */
     protected boolean useDynamicDiscovery() {
-        String val = domibusPropertyProvider.getProperty(domainProvider.getCurrentDomain(), DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY);
+        String val = domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY, "false");
         return Boolean.valueOf(val);
     }
 
