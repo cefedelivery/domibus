@@ -58,20 +58,5 @@
         <property name="jobDetail" ref="saveCertificateAndLogRevocationJob"/>
         <property name="cronExpression" value="${domibus.certificate.check.cron}"/>
     </bean>
-
-    <!-- customizable list of triggers to be executed by quartz -->
-
-    <!--
-    <bean id="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list>
-                <ref bean="retryWorkerTrigger"/>
-                <ref bean="pullRequestTrigger"/>
-                <ref bean="activateSuspendedUserTrigger"/>
-                <ref bean="saveCertificateAndLogRevocationTrigger"/>
-            </list>
-        </property>
-    </bean>
-    -->
+    
 </beans>

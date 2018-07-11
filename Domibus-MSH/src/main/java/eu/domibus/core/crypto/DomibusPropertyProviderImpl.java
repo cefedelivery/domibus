@@ -90,7 +90,6 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getDomainProperty(String propertyName) {
         final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        LOG.trace("getDomainProperty("+propertyName+") in domain [{}]", currentDomain);
         assert currentDomain != null;
         return getDomainProperty(currentDomain, propertyName);
     }
@@ -106,7 +105,6 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
     @Override
     public String getDomainProperty(Domain domain, String propertyName) {
-        LOG.trace("getDomainProperty("+domain+","+propertyName+") ");
         String propertyValue = getProperty(domain, propertyName);
         if (StringUtils.isEmpty(propertyValue) && !DomainService.DEFAULT_DOMAIN.equals(domain)) {
             propertyValue = getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
