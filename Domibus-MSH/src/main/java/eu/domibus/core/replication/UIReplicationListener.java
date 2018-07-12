@@ -30,7 +30,7 @@ public class UIReplicationListener {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
-    @JmsListener(destination = "jms/domibus.UI.replication", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processUIReplication(final MapMessage map) throws JMSException {
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);

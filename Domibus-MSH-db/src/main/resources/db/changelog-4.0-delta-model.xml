@@ -319,9 +319,7 @@
             <column name="RESTORED" type="DATETIME"/>
 
             <!-- user message columns -->
-            <column name="CONVERSATION_ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="CONVERSATION_ID" type="VARCHAR(255)"/>
 
             <!-- party columns -->
             <column name="FROM_ID" type="VARCHAR(255)">
