@@ -137,8 +137,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setConversationId(StringUtils.EMPTY);
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
         entity.setToId(userMessage.getPartyInfo().getTo().getPartyId().iterator().next().getValue());
-        entity.setFromScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
-        entity.setToScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setFromScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setToScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
         entity.setFailed(signalMessageLog.getFailed());
         entity.setRestored(signalMessageLog.getRestored());
@@ -166,8 +166,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setConversationId(userMessage.getCollaborationInfo().getConversationId());
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
         entity.setToId(userMessage.getPartyInfo().getTo().getPartyId().iterator().next().getValue());
-        entity.setFromScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
-        entity.setToScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setFromScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
+        entity.setToScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setRefToMessageId(userMessage.getMessageInfo().getRefToMessageId());
         entity.setFailed(userMessageLog.getFailed());
         entity.setRestored(userMessageLog.getRestored());

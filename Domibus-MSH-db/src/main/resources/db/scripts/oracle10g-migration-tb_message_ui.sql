@@ -99,7 +99,7 @@ INSERT INTO tb_message_ui (
                         message_log.send_attempts,
                         message_log.send_attempts_max,
                         message_log.next_attempt,
-                        ' ' AS conversation_id,
+                        '' AS conversation_id,
                         partyid7_.value AS from_id,
                         partyid8_.value AS to_id,
                         property.value AS original_sender,
