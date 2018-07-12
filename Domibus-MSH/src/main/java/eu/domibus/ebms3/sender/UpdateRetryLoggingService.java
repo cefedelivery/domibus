@@ -62,7 +62,7 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating retry for message");
         UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
-        userMessageLog.setNextAttempt(new Date());
+        userMessageLog.setNextAttempt(userMessageLog.getReceived()); // this is needed for the first computation of "next attempt" if receiver is down
         LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
