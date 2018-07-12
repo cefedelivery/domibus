@@ -81,6 +81,27 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * NgOnInit method
    */
   ngOnInit () {
+    this.loading = false;
+
+    this.allPModes = [];
+    this.tableRows = [];
+    this.selected = [];
+    this.count = 0;
+    this.offset = 0;
+
+    this.disabledSave = true;
+    this.disabledCancel = true;
+    this.disabledDownload = true;
+    this.disabledDelete = true;
+    this.disabledRestore = true;
+
+    this.actualId = 0;
+    this.actualRow = 0;
+
+    this.deleteList = [];
+
+    this.uploaded = false;
+  
     this.initializeArchivePmodes();
   }
 
