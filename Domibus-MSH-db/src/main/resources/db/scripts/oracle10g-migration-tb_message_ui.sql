@@ -3,6 +3,8 @@
 --
 -- For large volume of data is advisable to first create TB_MESSAGE_UI table,
 -- migrate the data and then create the indexes
+-- It uses 'hibernate_sequence' sequence - check if this exist already in
+-- the current schema
 --
 -- *********************************************************************
 INSERT INTO tb_message_ui (
