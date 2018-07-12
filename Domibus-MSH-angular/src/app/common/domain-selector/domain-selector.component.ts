@@ -23,33 +23,37 @@ export class DomainSelectorComponent implements OnInit {
   constructor (private domainService: DomainService, private securityService: SecurityService, private dialog: MdDialog) {
   }
 
-  ngOnInit () {
-    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
-      if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
-        this.showDomains = true;
-        this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.domainCode = this.currentDomainCode = domain ? domain.code : null);
-        this.domainService.getDomains().subscribe((domains: Domain[]) => this.domains = domains);
-      }
-    });
+  async ngOnInit () {
+    const isMultiDomain = await this.domainService.isMultiDomain().first().toPromise();
+
+    if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
+      this.showDomains = true;
+      const domain = await this.domainService.getCurrentDomain().first().toPromise();
+      this.domainCode = this.currentDomainCode = domain ? domain.code : null;
+      const domains = await this.domainService.getDomains().toPromise();
+      this.domains = domains;
+    }
   }
 
-  changeDomain () {
+  async changeDomain () {
     let canChangeDomain = Promise.resolve(true);
     if (this.currentComponent && this.currentComponent.isDirty && this.currentComponent.isDirty()) {
       canChangeDomain = this.dialog.open(CancelDialogComponent).afterClosed().toPromise<boolean>();
     }
 
-    canChangeDomain.then((canChange: boolean) => {
+    try {
+      const canChange = await canChangeDomain;
       if (!canChange) throw false;
 
-      let domain = this.domains.find(d => d.code == this.domainCode);
-      this.domainService.setCurrentDomain(domain).then(() => {
-        if (this.currentComponent.ngOnInit)
-          this.currentComponent.ngOnInit();
-      });
+      const domain = this.domains.find(d => d.code == this.domainCode);
+      await this.domainService.setCurrentDomain(domain);
+      if (this.currentComponent.ngOnInit)
+        this.currentComponent.ngOnInit();
 
-    }).catch(() => { // domain not changed -> reset the combo value
+    } catch (ex) { // domain not changed -> reset the combo value
       this.domainCode = this.currentDomainCode;
-    });
+    }
   }
+
 }
+
