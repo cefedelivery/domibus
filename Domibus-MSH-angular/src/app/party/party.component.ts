@@ -93,7 +93,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
           this.resetDirty();
         },
         error => {
-          this.alertService.error('Could not load parties' + error);
+          this.alertService.error('Could not load parties due to: "' + error + '"');
           this.loading = false;
         }
       );
