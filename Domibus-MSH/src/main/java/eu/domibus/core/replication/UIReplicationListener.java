@@ -15,7 +15,9 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 
 /**
- * "
+ * JMS listener for the queue {@code domibus.UI.replication}
+ * @author Catalin Enache
+ * @since 4.0
  */
 @Component
 public class UIReplicationListener {
@@ -28,7 +30,7 @@ public class UIReplicationListener {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
-    @JmsListener(destination = "domibus.UI.replication", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "jms/domibus.UI.replication", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processUIReplication(final MapMessage map) throws JMSException {
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
@@ -47,7 +49,8 @@ public class UIReplicationListener {
                 uiReplicationDataService.messageSubmitted(messageId);
                 break;
             case MESSAGE_STATUS_CHANGE:
-                uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(map.getStringProperty("status")));
+                uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(
+                        map.getStringProperty(UIReplicationSignalService.JMS_PROPERTY_STATUS)));
                 break;
             case MESSAGE_CHANGE:
                 uiReplicationDataService.messageChange(messageId);
