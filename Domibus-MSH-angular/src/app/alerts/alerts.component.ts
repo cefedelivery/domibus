@@ -177,7 +177,7 @@ export class AlertsComponent {
     this.rowLimiter.pageSize = pageSize;
     this.orderBy = orderBy;
     this.asc = asc;
-    this.loading = false;
+    this.loading = false;*/
 
     this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
       console.log("alerts response: " + result);
