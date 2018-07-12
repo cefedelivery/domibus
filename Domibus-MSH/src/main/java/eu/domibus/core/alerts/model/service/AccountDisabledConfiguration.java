@@ -20,16 +20,15 @@ public class AccountDisabledConfiguration implements AlertConfiguration{
 
     private String accountDisabledMailSubject;
 
-    public AccountDisabledConfiguration(boolean accountDisabledActive) {
-        this.accountDisabledActive = accountDisabledActive;
+    public AccountDisabledConfiguration() {
+        this.accountDisabledActive = false;
     }
 
     public AccountDisabledConfiguration(
-            Boolean accountDisabledActive,
             AlertLevel accountDisabledAlertLevel,
             AccountDisabledMoment accountDisabledMoment,
             String accountDisabledMailSubject) {
-        this(accountDisabledActive);
+        this.accountDisabledActive = true;
         this.accountDisabledAlertLevel = accountDisabledAlertLevel;
         this.accountDisabledMoment = accountDisabledMoment;
         this.accountDisabledMailSubject=accountDisabledMailSubject;

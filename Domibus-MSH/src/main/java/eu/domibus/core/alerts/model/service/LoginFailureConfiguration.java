@@ -18,15 +18,14 @@ public class LoginFailureConfiguration implements AlertConfiguration{
 
     private String loginFailureMailSubject;
 
-    public LoginFailureConfiguration(boolean loginFailureActive) {
-        this.loginFailureActive = loginFailureActive;
+    public LoginFailureConfiguration() {
+        this.loginFailureActive = false;
     }
 
     public LoginFailureConfiguration(
-            Boolean loginFailureActive,
             AlertLevel loginFailureAlertLevel,
             String loginFailureMailSubject) {
-        this(loginFailureActive);
+        this.loginFailureActive=true;
         this.loginFailureAlertLevel = loginFailureAlertLevel;
         this.loginFailureMailSubject=loginFailureMailSubject;
     }

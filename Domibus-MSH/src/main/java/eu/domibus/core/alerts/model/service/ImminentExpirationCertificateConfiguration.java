@@ -23,17 +23,16 @@ public class ImminentExpirationCertificateConfiguration implements AlertConfigur
 
     private String imminentExpirationMailSubject;
 
-    public ImminentExpirationCertificateConfiguration(Boolean imminentExpirationActive) {
-        this.imminentExpirationActive = imminentExpirationActive;
+    public ImminentExpirationCertificateConfiguration() {
+        this.imminentExpirationActive = false;
     }
 
     public ImminentExpirationCertificateConfiguration(
-            Boolean imminentExpirationActive,
             Integer imminentExpirationDelay,
             Integer imminentExpirationFrequency,
             AlertLevel imminentExpirationAlertLevel,
             String imminentExpirationMailSubject) {
-        this(imminentExpirationActive);
+        this.imminentExpirationActive=true;
         this.imminentExpirationDelay = imminentExpirationDelay;
         this.imminentExpirationFrequency = imminentExpirationFrequency;
         this.imminentExpirationAlertLevel = imminentExpirationAlertLevel;

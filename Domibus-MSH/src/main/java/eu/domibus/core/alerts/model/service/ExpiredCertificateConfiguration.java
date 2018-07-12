@@ -23,17 +23,16 @@ public class ExpiredCertificateConfiguration implements AlertConfiguration {
 
     private String expiredMailSubject;
 
-    public ExpiredCertificateConfiguration(Boolean expiredActive) {
-        this.expiredActive = expiredActive;
+    public ExpiredCertificateConfiguration() {
+        this.expiredActive = false;
     }
 
     public ExpiredCertificateConfiguration(
-            Boolean expiredActive,
             Integer expiredFrequency,
             Integer expiredDuration,
             AlertLevel expiredLevel,
             String expiredMailSubject) {
-        this(expiredActive);
+        this.expiredActive=true;
         this.expiredFrequency = expiredFrequency;
         this.expiredDuration = expiredDuration;
         this.expiredLevel = expiredLevel;

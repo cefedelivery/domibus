@@ -45,6 +45,7 @@ public class AlertServiceImpl implements AlertService {
     static final String REPORTING_TIME = "REPORTING_TIME";
 
     static final String ALERT_SELECTOR = "alert";
+    public static final String DOMIBUS_ALERT_RETRY_TIME = "domibus.alert.retry.time";
 
     @Autowired
     private EventDao eventDao;
@@ -136,9 +137,9 @@ public class AlertServiceImpl implements AlertService {
         }
         final Integer attempts = alertEntity.getAttempts() + 1;
         final Integer maxAttempts = alertEntity.getMaxAttempts();
-        if (attempts < maxAttempts) {
-            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty("domibus.alert.retry.time"));
-            final Date nextAttempt = Date.from(LocalDateTime.now().plusMinutes(minutesBetweenAttempt).atZone(ZoneId.systemDefault()).toInstant());
+        if (attempts <= maxAttempts) {
+            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_TIME));
+            final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
             alertEntity.setAttempts(attempts);
             alertEntity.setAlertStatus(RETRY);
