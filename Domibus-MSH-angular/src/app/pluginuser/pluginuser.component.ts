@@ -46,6 +46,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit () {
+    this.offset = 0;
+    this.selected = [];
+    this.loading = false;
+    this.userRoles = [];
     this.users = [];
     this.dirty = false;
 

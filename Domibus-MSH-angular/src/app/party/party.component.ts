@@ -54,6 +54,19 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit () {
+
+    this.rows = [];
+    this.allRows = [];
+    this.selected = [];
+
+    this.offset = 0;
+    this.count = 0;
+    this.loading = false;
+
+    this.newParties = [];
+    this.updatedParties = [];
+    this.deletedParties = [];
+
     this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
     this.listPartiesAndProcesses();
