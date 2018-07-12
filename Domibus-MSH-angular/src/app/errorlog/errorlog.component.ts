@@ -308,13 +308,6 @@ export class ErrorLogComponent implements AfterViewInit {
   }
 
   ngAfterViewInit () {
-    // var inputs = this.elementRef.nativeElement.getElementsByTagName('input');
-    // console.log( 'inputs[0] ', inputs )
-    // inputs[2].onblur =  () => { console.log('on blur ');
-    //    if (!this.filter.timestampFrom)
-    //      inputs[2].value = '';
-    // }
-
   }
 
   onClick (event) {
