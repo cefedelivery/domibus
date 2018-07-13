@@ -46,14 +46,17 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   selected = [];
 
-  enableCancel:boolean = false;
-  enableSave:boolean = false;
-  enableDelete:boolean = false;
-  enableEdit:boolean = false;
+  enableCancel: boolean = false;
+  enableSave: boolean = false;
+  enableDelete: boolean = false;
+  enableEdit: boolean = false;
 
   rowNumber = -1;
 
   editedUser: UserResponseRO;
+
+  dirty: boolean;
+  areRowsDeleted: boolean;
 
   constructor (private http: Http,
                private userService: UserService,
@@ -142,10 +145,15 @@ export class UserComponent implements OnInit, DirtyOperations {
     if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error('Maximum number of rows reached for downloading CSV');
     }
+
+    this.dirty = false;
+    this.areRowsDeleted = false;
   }
 
   getUsers (): void {
     this.userService.getUsers().subscribe(users => this.users = users);
+    this.dirty = false;
+    this.areRowsDeleted = false;
   }
 
   getUserRoles (): void {
@@ -188,6 +196,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
+    this.setIsDirty();
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: false,
@@ -205,6 +214,7 @@ export class UserComponent implements OnInit, DirtyOperations {
         this.selected = [];
         this.enableEdit = false;
         this.enableDelete = false;
+        this.setIsDirty();
       }
     });
   }
@@ -238,12 +248,20 @@ export class UserComponent implements OnInit, DirtyOperations {
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
-    if (UserState[UserState.PERSISTED] === user.status) {
-      user.status = UserState[UserState.UPDATED]
+    if(editForm.userForm.dirty) {
+      if (UserState[UserState.PERSISTED] === user.status) {
+        user.status = UserState[UserState.UPDATED]
+      }
     }
 
-    this.enableSave = editForm.userForm.dirty;
-    this.enableCancel = editForm.userForm.dirty;
+    this.setIsDirty();
+  }
+
+  setIsDirty () {
+    this.dirty = this.areRowsDeleted || this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
+
+    this.enableSave = this.dirty;
+    this.enableCancel = this.dirty;
   }
 
   buttonDelete () {
@@ -252,8 +270,6 @@ export class UserComponent implements OnInit, DirtyOperations {
       return;
     }
 
-    this.enableCancel = true;
-    this.enableSave = true;
     this.enableDelete = false;
     this.enableEdit = false;
 
@@ -263,6 +279,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
 
     this.selected = [];
+    this.areRowsDeleted = true;
+    this.setIsDirty();
   }
 
   buttonDeleteAction (row) {
@@ -271,8 +289,6 @@ export class UserComponent implements OnInit, DirtyOperations {
       return;
     }
 
-    this.enableCancel = true;
-    this.enableSave = true;
     this.enableDelete = false;
     this.enableEdit = false;
 
@@ -280,6 +296,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.users.splice(row.$$index, 1);
 
     this.selected = [];
+    this.areRowsDeleted = true;
+    this.setIsDirty();
   }
 
   private disableSelectionAndButtons () {
@@ -303,7 +321,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   save (withDownloadCSV: boolean) {
     try {
       const isValid = this.userValidatorService.validateUsers(this.users);
-      if(!isValid) return;
+      if (!isValid) return;
 
       const headers = new Headers({'Content-Type': 'application/json'});
       this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
