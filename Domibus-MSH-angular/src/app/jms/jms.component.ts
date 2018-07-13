@@ -184,26 +184,10 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.timestampFromMaxDate = event.value;
   }
 
-
   updateSelectedQueueInfo () {
 
-    const observableResponse: Observable<Response> = this.http.get('rest/jms/destinations');
-
-    observableResponse.subscribe(
-      (response: Response) => {
-        const destinations = response.json().jmsDestinations;
-        for (let key in destinations) {
-          if (key === this.selectedSource.name) {
-            this.selectedSource.numberOfMessages = destinations[key].numberOfMessages;
-          }
-        }
-      },
-      (error: Response) => {
-        this.alertService.error('Could not load queues: ' + error);
-      }
-    );
-
-    return observableResponse;
+    if (this.selectedSource)
+      this.selectedSource.numberOfMessages = this.rows.length;
   }
 
   canSearch () {
@@ -234,7 +218,6 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.rows = response.json().messages;
         this.loading = false;
 
-        //todo: get just the needed que info by sending a param to the server
         this.updateSelectedQueueInfo();
 
         if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
