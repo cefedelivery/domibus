@@ -184,7 +184,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.timestampFromMaxDate = event.value;
   }
 
+
   updateSelectedQueueInfo () {
+
     const observableResponse: Observable<Response> = this.http.get('rest/jms/destinations');
 
     observableResponse.subscribe(
@@ -204,7 +206,19 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return observableResponse;
   }
 
+  canSearch () {
+    return this.request.source && !this.loading;
+  }
+
   search () {
+    if (!this.request.source) {
+      this.alertService.error('Source should be set');
+      return;
+    }
+    if (this.loading) {
+      return;
+    }
+
     this.loading = true;
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];

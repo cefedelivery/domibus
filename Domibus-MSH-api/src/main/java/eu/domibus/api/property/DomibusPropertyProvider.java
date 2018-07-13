@@ -20,4 +20,18 @@ public interface DomibusPropertyProvider {
 
     String getResolvedProperty(String propertyName);
 
+
+    /*
+    The getDomainProperty methods retrieve the specified property
+    falling back to the property from the DEFAULT domain if not found.
+     */
+
+    String getDomainProperty(String propertyName);
+
+    String getDomainProperty(String propertyName, String defaultValue);
+
+    String getDomainProperty(Domain domain, String propertyName);
+
+    String getDomainProperty(Domain domain, String propertyName, String defaultValue);
+
 }

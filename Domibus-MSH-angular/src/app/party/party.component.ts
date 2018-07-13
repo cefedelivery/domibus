@@ -74,6 +74,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   listPartiesAndProcesses () {
+    this.offset = 0;
     return Observable.forkJoin([
       this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process),
       this.partyService.listProcesses()
