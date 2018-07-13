@@ -3,6 +3,7 @@ Domibus 4.0 (from 3.3):
                     o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
+               - Remove Description and Schema headers from PartInfo. The headers were deprecated in ebMS3.
                In case users were manually added to TB_AUTHENTICATION_ENTRY, migrate their password.
                Default users ('admin' and 'user') were migrated by the sql migration scripts.
                - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the of caches definition:

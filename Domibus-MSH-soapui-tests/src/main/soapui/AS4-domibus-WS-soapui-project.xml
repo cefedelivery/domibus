@@ -674,11 +674,6 @@
             <ns:PayloadInfo>\r
                <!--1 or more repetitions:-->\r
                <ns:PartInfo href="?">\r
-                  <!--You may enter the following 3 items in any order-->\r
-                  <!--Optional:-->\r
-                  <ns:Schema location="?" version="?" namespace="?"/>\r
-                  <!--Optional:-->\r
-                  <ns:Description xml:lang="?">?</ns:Description>\r
                   <!--Optional:-->\r
                   <ns:PartProperties>\r
                      <!--1 or more repetitions:-->\r
@@ -15612,7 +15607,6 @@ Domibus.uploadPmode("receiver","default","\\cloud\\weblogic\\red\\domibus-pmode-
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">
-               <ns:Description xml:lang="en-US">As4Message</ns:Description>
                   <ns:PartProperties>
                      <ns:Property name="MimeType">application/xml</ns:Property>
                   </ns:PartProperties>
@@ -15654,7 +15648,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">
-                  <ns:Description xml:lang="en-US">As4Message</ns:Description>
                   <ns:PartProperties>
                      <ns:Property name="MimeType">application/xml</ns:Property>
                   </ns:PartProperties>

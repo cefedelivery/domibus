@@ -139,9 +139,6 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
             messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), p.getContentId());
-            if (p.getDescription() != null) {
-                messageOut.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), p.getDescription().getValue());
-            }
         } else {
             final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, counter));
             final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, counter));
@@ -159,10 +156,6 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             }
             messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
             messageOut.setStringProperty(payContID, p.getContentId());
-
-            if (p.getDescription() != null) {
-                messageOut.setStringProperty(payDescrip, p.getDescription().getValue());
-            }
         }
     }
 
