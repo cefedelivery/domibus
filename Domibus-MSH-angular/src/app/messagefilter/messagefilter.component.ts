@@ -359,21 +359,14 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   buttonDeleteAction(row) {
-    this.setDirty(true);
-    // this.enableCancel = true;
-    // this.enableSave = true;
-    this.enableDelete = false;
-    this.enableEdit = false;
-
-    this.enableMoveUp = false;
-    this.enableMoveDown = false;
-
-    this.rows.splice(row.$$index, 1);
-
-    this.selected = [];
+    this.deleteItems([row]);
   }
 
   buttonDelete() {
+    this.deleteItems(this.selected);
+  }
+
+  private deleteItems(items: any[]) {
     this.setDirty(true);
     // this.enableCancel = true;
     // this.enableSave = true;
@@ -384,8 +377,8 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableMoveDown = false;
 
     // we need to use the old for loop approach to don't mess with the entries on the top before
-    for (let i = this.selected.length - 1; i >= 0; i--) {
-      this.rows.splice(this.selected[i].$$index, 1);
+    for (let i = items.length - 1; i >= 0; i--) {
+      this.rows.splice(items[i].$$index, 1);
     }
 
     this.selected = [];
