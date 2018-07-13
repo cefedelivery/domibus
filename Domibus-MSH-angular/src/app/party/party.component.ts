@@ -30,21 +30,21 @@ export class PartyComponent implements OnInit, DirtyOperations {
   partyID: string;
   process: string;
 
-  rows: PartyResponseRo[] = [];
-  allRows: PartyResponseRo[] = [];
-  selected: PartyResponseRo[] = [];
+  rows: PartyResponseRo[];
+  allRows: PartyResponseRo[];
+  selected: PartyResponseRo[];
 
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
-  offset: number = 0;
+  offset: number;
   pageSize: number;
-  count: number = 0;
-  loading: boolean = false;
+  count: number;
+  loading: boolean;
 
-  newParties: PartyResponseRo[] = [];
-  updatedParties: PartyResponseRo[] = [];
-  deletedParties: PartyResponseRo[] = [];
+  newParties: PartyResponseRo[];
+  updatedParties: PartyResponseRo[];
+  deletedParties: PartyResponseRo[];
 
   allProcesses: string[];
 

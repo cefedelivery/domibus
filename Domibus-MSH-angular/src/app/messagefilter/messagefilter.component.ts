@@ -23,22 +23,21 @@ import {DownloadService} from '../download/download.service';
 export class MessageFilterComponent implements OnInit, DirtyOperations {
   static readonly MESSAGE_FILTER_URL: string = 'rest/messagefilters';
 
-  rows = [];
-  selected = [];
+  rows: any [];
+  selected: any[];
 
-  backendFilterNames = [];
+  backendFilterNames: any[];
 
-  rowNumber = -1;
+  rowNumber: number;
 
-  enableCancel = false;
-  enableSave = false;
-  enableDelete = false;
-  enableEdit = false;
+  enableCancel: boolean;
+  enableSave: boolean;
+  enableDelete: boolean;
+  enableEdit: boolean;
+  enableMoveUp: boolean;
+  enableMoveDown: boolean;
 
-  enableMoveUp = false;
-  enableMoveDown = false;
-
-  loading: boolean = false;
+  loading: boolean;
 
   areFiltersPersisted: boolean;
 

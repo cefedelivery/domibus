@@ -38,35 +38,35 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  loading = false;
-
-  allPModes = [];
-  tableRows = [];
-  selected = [];
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
-  count = 0;
-  offset = 0;
 
-  disabledSave = true;
-  disabledCancel = true;
-  disabledDownload = true;
-  disabledDelete = true;
-  disabledRestore = true;
+  private headers = new Headers({'Content-Type': 'application/json'});
 
-  actualId = 0;
-  actualRow = 0;
+  loading: boolean;
 
-  deleteList = [];
+  allPModes: any[];
+  tableRows: any[];
+  selected: any[];
+  count: number;
+  offset: number;
+
+  disabledSave: boolean;
+  disabledCancel: boolean;
+  disabledDownload: boolean;
+  disabledDelete: boolean;
+  disabledRestore: boolean;
+
+  actualId: number;
+  actualRow: number;
+
+  deleteList: any [];
 
   // needed for the first request after upload
   // datatable was empty if we don't do the request again
   // resize window shows information
   // check: @selectedIndexChange(value)
-  private uploaded = false;
-
-  private headers = new Headers({'Content-Type': 'application/json'});
-
+  private uploaded: boolean;
 
   /**
    * Constructor
@@ -101,7 +101,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     this.deleteList = [];
 
     this.uploaded = false;
-  
+
     this.initializeArchivePmodes();
   }
 
