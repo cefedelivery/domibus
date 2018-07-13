@@ -115,13 +115,6 @@ public class SubmissionAS4Transformer {
                 partProperties.getProperties().add(property);
             }
 
-            if(payload.getDescription() != null) {
-                final Description description = new Description();
-                description.setValue(payload.getDescription().getValue());
-                description.setLang(payload.getDescription().getLang().getLanguage());
-                partInfo.setDescription(description);
-            }
-
             partInfo.setPartProperties(partProperties);
             payloadInfo.getPartInfo().add(partInfo);
 
