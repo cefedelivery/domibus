@@ -82,7 +82,7 @@
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="${domibus.alert.queue.concurency}"/>
+        <property name="concurrency" value="${domibus.alert.queue.concurrency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>

@@ -4,6 +4,8 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertStatus;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -189,5 +191,47 @@ public class Alert extends AbstractBaseEntity{
                 ", alertStatus=" + alertStatus +
                 ", alertLevel=" + alertLevel +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof Alert)) return false;
+
+        Alert alert = (Alert) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(processed, alert.processed)
+                .append(processedTime, alert.processedTime)
+                .append(alertType, alert.alertType)
+                .append(reportingTime, alert.reportingTime)
+                .append(creationTime, alert.creationTime)
+                .append(nextAttempt, alert.nextAttempt)
+                .append(attempts, alert.attempts)
+                .append(maxAttempts, alert.maxAttempts)
+                .append(reportingTimeFailure, alert.reportingTimeFailure)
+                .append(alertStatus, alert.alertStatus)
+                .append(alertLevel, alert.alertLevel)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(processed)
+                .append(processedTime)
+                .append(alertType)
+                .append(reportingTime)
+                .append(creationTime)
+                .append(nextAttempt)
+                .append(attempts)
+                .append(maxAttempts)
+                .append(reportingTimeFailure)
+                .append(alertStatus)
+                .append(alertLevel)
+                .toHashCode();
     }
 }

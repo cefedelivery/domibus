@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.configuration;
 
+import freemarker.cache.ClassTemplateLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,7 +46,7 @@ public class AlertContextConfiguration {
     public FreeMarkerConfigurationFactoryBean freeMarkerConfigurationFactoryBean() {
         final FreeMarkerConfigurationFactoryBean freeMarkerConfigurationFactoryBean =
                 new FreeMarkerConfigurationFactoryBean();
-        freeMarkerConfigurationFactoryBean.setTemplateLoaderPath("classpath:/templates");
+        freeMarkerConfigurationFactoryBean.setPreTemplateLoaders(new ClassTemplateLoader(AlertContextConfiguration.class,"/templates"));
         return freeMarkerConfigurationFactoryBean;
     }
 

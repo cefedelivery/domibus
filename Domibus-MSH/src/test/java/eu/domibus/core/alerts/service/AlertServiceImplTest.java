@@ -125,8 +125,6 @@ public class AlertServiceImplTest {
         persistedAlert.setAlertType(alertType);
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         Date reportingTime = parser.parse("25/10/1977 00:00:00");
-        persistedAlert.setReportingTime(reportingTime);
-
         persistedAlert.setAlertLevel(alertLevel);
 
         final eu.domibus.core.alerts.model.persist.Event event = new eu.domibus.core.alerts.model.persist.Event();
@@ -152,7 +150,7 @@ public class AlertServiceImplTest {
         assertEquals(messageId, model.get(MESSAGE_ID.name()));
         assertEquals(MessageStatus.SEND_ENQUEUED.name(), model.get(OLD_STATUS.name()));
         assertEquals(alertLevel.name(), model.get(ALERT_LEVEL));
-        assertEquals(reportingTime.toString(), model.get(REPORTING_TIME));
+        assertNotNull(reportingTime.toString(), model.get(REPORTING_TIME));
 
     }
 

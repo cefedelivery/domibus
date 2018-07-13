@@ -105,8 +105,10 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public MailModel getMailModelForAlert(eu.domibus.core.alerts.model.service.Alert alert) {
         final Alert read = alertDao.read(alert.getEntityId());
+        read.setReportingTime(new Date());
         Map<String, String> mailModel = new HashMap<>();
         final Event next = read.getEvents().iterator().next();
         next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue()));
@@ -132,12 +134,11 @@ public class AlertServiceImpl implements AlertService {
         alertEntity.setNextAttempt(null);
         if (SUCCESS == alertEntity.getAlertStatus()) {
             alertEntity.setReportingTime(new Date());
-            alertDao.update(alertEntity);
             return;
         }
         final Integer attempts = alertEntity.getAttempts() + 1;
         final Integer maxAttempts = alertEntity.getMaxAttempts();
-        if (attempts <= maxAttempts) {
+        if (attempts < maxAttempts) {
             final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_TIME));
             final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
@@ -145,7 +146,6 @@ public class AlertServiceImpl implements AlertService {
             alertEntity.setAlertStatus(RETRY);
         }
         alertEntity.setReportingTimeFailure(new Date());
-        alertDao.update(alertEntity);
     }
 
     /**
