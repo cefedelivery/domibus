@@ -43,11 +43,14 @@ export class MessageFilterComponent implements DirtyOperations {
 
   static readonly MESSAGE_FILTER_URL: string = 'rest/messagefilters';
 
+  dirty:boolean;
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
 
   getBackendFiltersInfo() {
+    this.dirty = false;
     this.getMessageFilterEntries().subscribe((result: MessageFilterResult) => {
       console.log("messagefilter response: " + result);
 
@@ -92,6 +95,7 @@ export class MessageFilterComponent implements DirtyOperations {
     this.loading = true;
 
     this.getBackendFiltersInfo();
+
   }
 
   createValueProperty(cell, newProp, row) {
@@ -131,8 +135,9 @@ export class MessageFilterComponent implements DirtyOperations {
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
         if (this.findRowsIndex(backendEntry) == -1) {
           this.rows.push(backendEntry);
-          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          // this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+          // this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          this.setDirty(formRef.componentInstance.messageFilterForm.dirty);
         } else {
           this.alertService.error("Impossible to insert a duplicate entry");
         }
@@ -198,8 +203,9 @@ export class MessageFilterComponent implements DirtyOperations {
           this.updateSelectedAction(formRef.componentInstance.action);
           this.updateSelectedService(formRef.componentInstance.service);
 
-          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          // this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
+          // this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          this.setDirty(formRef.componentInstance.messageFilterForm.dirty);
         } else {
           if (this.findRowsIndex(backendEntry) != this.rowNumber) {
             this.alertService.error("Impossible to insert a duplicate entry");
@@ -353,8 +359,9 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   buttonDeleteAction(row) {
-    this.enableCancel = true;
-    this.enableSave = true;
+    this.setDirty(true);
+    // this.enableCancel = true;
+    // this.enableSave = true;
     this.enableDelete = false;
     this.enableEdit = false;
 
@@ -367,8 +374,9 @@ export class MessageFilterComponent implements DirtyOperations {
   }
 
   buttonDelete() {
-    this.enableCancel = true;
-    this.enableSave = true;
+    this.setDirty(true);
+    // this.enableCancel = true;
+    // this.enableSave = true;
     this.enableDelete = false;
     this.enableEdit = false;
 
@@ -399,8 +407,10 @@ export class MessageFilterComponent implements DirtyOperations {
       this.enableMoveUp = false;
     }
     this.enableMoveDown = true;
-    this.enableSave = true;
-    this.enableCancel = true;
+
+    this.setDirty(true);
+    // this.enableSave = true;
+    // this.enableCancel = true;
   }
 
   buttonMoveUpAction(row) {
@@ -431,8 +441,10 @@ export class MessageFilterComponent implements DirtyOperations {
       this.enableMoveDown = false;
     }
     this.enableMoveUp = true;
-    this.enableSave = true;
-    this.enableCancel = true;
+
+    this.setDirty(true);
+    // this.enableSave = true;
+    // this.enableCancel = true;
   }
 
   buttonMoveDownAction(row) {
@@ -472,5 +484,11 @@ export class MessageFilterComponent implements DirtyOperations {
 
   isDirty(): boolean {
     return this.enableCancel;
+  }
+
+  setDirty(itemValue: boolean) {
+    this.dirty = this.dirty || itemValue;
+    this.enableSave = this.dirty;
+    this.enableCancel = this.dirty;
   }
 }
