@@ -98,6 +98,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   async search () {
+    this.offset = 0;
     this.selected = [];
     this.dirty = false;
 

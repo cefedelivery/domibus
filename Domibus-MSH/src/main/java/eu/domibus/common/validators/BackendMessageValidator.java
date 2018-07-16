@@ -92,7 +92,7 @@ public class BackendMessageValidator {
         }
 
         //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-        String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
+        String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
         LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
         if (StringUtils.isNotBlank(messageIdPattern)) {
             Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
@@ -120,7 +120,7 @@ public class BackendMessageValidator {
             }
 
             //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-            String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
+            String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
             LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
             if (StringUtils.isNotBlank(messageIdPattern)) {
                 Pattern patternNoControlChar = Pattern.compile(messageIdPattern);

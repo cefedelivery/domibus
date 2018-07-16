@@ -18,6 +18,8 @@ import {AlertComponent} from 'app/alert/alert.component';
 import {RestoreDialogComponent} from '../restore-dialog/restore-dialog.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';
 import {CurrentPModeComponent} from '../current/currentPMode.component';
+import {DomainService} from "../../security/domain.service";
+import {Domain} from "../../security/domain";
 
 @Component({
   moduleId: module.id,
@@ -62,6 +64,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
 
   deleteList: any [];
 
+  currentDomain: Domain;
+
   // needed for the first request after upload
   // datatable was empty if we don't do the request again
   // resize window shows information
@@ -74,7 +78,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {AlertService} alertService Alert Service object used for alerting success and error messages
    * @param {MdDialog} dialog Object used for opening dialogs
    */
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, private domainService: DomainService) {
   }
 
   /**
@@ -103,6 +107,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     this.uploaded = false;
 
     this.initializeArchivePmodes();
+
+    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
   }
 
   /**
@@ -159,6 +165,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
+        this.offset = 0;
         this.allPModes = response.json();
         this.allPModes[0].current = true;
         this.actualId = this.allPModes[0].id;
@@ -435,7 +442,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   download (row) {
     this.http.get(PModeArchiveComponent.PMODE_URL + '/' + row.id).subscribe(res => {
       const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
-      PModeArchiveComponent.downloadFile(res.text(), uploadDateStr);
+      PModeArchiveComponent.downloadFile(res.text(), this.currentDomain.name, uploadDateStr);
     }, err => {
       this.alertService.error(err._body);
     });
@@ -463,11 +470,16 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Downloader for the XML file
    * @param data
+   * @param domain
+   * @param date
    */
-  private static downloadFile (data: any, date: string) {
+  private static downloadFile (data: any, domain: string, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
     let filename = 'PMode';
-    if (date !== '') {
+    if (domain) {
+      filename += '-' + domain;
+    }
+    if (date) {
       filename += '-' + date;
     }
     filename += '.xml';

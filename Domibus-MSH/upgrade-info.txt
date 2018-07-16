@@ -1,4 +1,6 @@
 Domibus 4.0 (from 3.3):
+               - Modify file "\conf\domibus\domibus.properties":
+                    o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
                In case users were manually added to TB_AUTHENTICATION_ENTRY, migrate their password.
