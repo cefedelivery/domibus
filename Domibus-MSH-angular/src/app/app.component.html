@@ -22,15 +22,15 @@
       <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <md-expansion-panel>
+    <md-expansion-panel *ngIf="hasAdmin()">
       <md-expansion-panel-header>
-        <button md-raised-button class="sideNavButton" *ngIf="hasAdmin()" id="pmode_id">
+        <button md-raised-button class="sideNavButton" id="pmode_id">
           <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
           <span *ngIf="fullMenu">PMode</span>
         </button>
       </md-expansion-panel-header>
       <!--[ngClass]="{ 'alert': message, 'alert-success': message.type === 'success', 'alert-error': message.type === 'error' }"-->
-      <div *ngIf="hasAdmin()" class="sideNavSubmenu">
+      <div class="sideNavSubmenu">
         <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-current']" >
           <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">receipt</md-icon>
           <span>Current</span>
