@@ -223,7 +223,7 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
     });
   }
 
-  privatedeleteRoutingCriteria (rc: string) {
+  private deleteRoutingCriteria (rc: string) {
     let numRoutingCriterias = this.rows[this.rowNumber].routingCriterias.length;
     for (let i = 0; i < numRoutingCriterias; i++) {
       let routCriteria = this.rows[this.rowNumber].routingCriterias[i];
