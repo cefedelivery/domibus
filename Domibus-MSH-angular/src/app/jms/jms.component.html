@@ -39,7 +39,7 @@
         </md-input-container>
 
         <div class="searchArea">
-          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">
+          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()" [disabled]="!canSearch()">
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>

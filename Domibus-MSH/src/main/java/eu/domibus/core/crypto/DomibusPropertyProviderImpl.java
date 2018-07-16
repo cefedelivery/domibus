@@ -1,6 +1,7 @@
 package eu.domibus.core.crypto;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.property.PropertyResolver;
@@ -25,6 +26,9 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
     @Autowired
     protected PropertyResolver propertyResolver;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     protected String getPropertyName(Domain domain, String propertyName) {
         return domain.getCode() + "." + propertyName;
@@ -78,6 +82,42 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     public String getResolvedProperty(String propertyName) {
         return getResolvedProperty(DomainService.DEFAULT_DOMAIN, propertyName);
     }
+
+
+    @Override
+    public String getDomainProperty(String propertyName) {
+        final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        assert currentDomain != null;
+        return getDomainProperty(currentDomain, propertyName);
+    }
+
+    @Override
+    public String getDomainProperty(String propertyName, String defaultValue) {
+        String propertyValue = getDomainProperty(propertyName);
+        if (StringUtils.isEmpty(propertyValue)) {
+            propertyValue = defaultValue;
+        }
+        return propertyValue;
+    }
+
+    @Override
+    public String getDomainProperty(Domain domain, String propertyName) {
+        String propertyValue = getProperty(domain, propertyName);
+        if (StringUtils.isEmpty(propertyValue) && !DomainService.DEFAULT_DOMAIN.equals(domain)) {
+            propertyValue = getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
+        }
+        return propertyValue;
+    }
+
+    @Override
+    public String getDomainProperty(Domain domain, String propertyName, String defaultValue) {
+        String propertyValue = getDomainProperty(domain, propertyName);
+        if (StringUtils.isEmpty(propertyValue)) {
+            propertyValue = defaultValue;
+        }
+        return propertyValue;
+    }
+
 
     @Override
     public Set<String> filterPropertiesName(Predicate<String> predicate) {

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RollbackDialogComponent } from './rollback-dialog.component';
+import { RestoreDialogComponent } from './restore-dialog.component';
 
-describe('RollbackDialogComponent', () => {
-  let component: RollbackDialogComponent;
-  let fixture: ComponentFixture<RollbackDialogComponent>;
+describe('RestoreDialogComponent', () => {
+  let component: RestoreDialogComponent;
+  let fixture: ComponentFixture<RestoreDialogComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RollbackDialogComponent ]
+      declarations: [ RestoreDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RollbackDialogComponent);
+    fixture = TestBed.createComponent(RestoreDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

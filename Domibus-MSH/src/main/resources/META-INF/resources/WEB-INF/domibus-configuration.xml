@@ -9,12 +9,6 @@
     http://www.springframework.org/schema/util
     http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <!-- quartz job for the retry  -->
-    <bean id="retryWorkerJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>
-        <property name="durability" value="true"/>
-    </bean>
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
@@ -108,5 +102,6 @@
             </list>
         </property>
     </bean>
+
 
 </beans>

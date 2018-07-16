@@ -15,9 +15,11 @@ import {Observable} from 'rxjs/Observable';
 import {DateFormatService} from 'app/customDate/dateformat.service';
 import {DownloadService} from 'app/download/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
-import {RollbackDialogComponent} from '../rollback-dialog/rollback-dialog.component';
+import {RestoreDialogComponent} from '../restore-dialog/restore-dialog.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';
 import {CurrentPModeComponent} from '../current/currentPMode.component';
+import {DomainService} from "../../security/domain.service";
+import {Domain} from "../../security/domain";
 
 @Component({
   moduleId: module.id,
@@ -52,12 +54,14 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   disabledCancel = true;
   disabledDownload = true;
   disabledDelete = true;
-  disabledRollback = true;
+  disabledRestore = true;
 
   actualId = 0;
   actualRow = 0;
 
   deleteList = [];
+
+  currentDomain: Domain;
 
   // needed for the first request after upload
   // datatable was empty if we don't do the request again
@@ -74,7 +78,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * @param {AlertService} alertService Alert Service object used for alerting success and error messages
    * @param {MdDialog} dialog Object used for opening dialogs
    */
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, private domainService: DomainService) {
   }
 
   /**
@@ -82,6 +86,8 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   ngOnInit () {
     this.initializeArchivePmodes();
+
+    this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
   }
 
   /**
@@ -138,6 +144,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
+        this.offset = 0;
         this.allPModes = response.json();
         this.allPModes[0].current = true;
         this.actualId = this.allPModes[0].id;
@@ -190,7 +197,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     this.disabledCancel = true;
     this.disabledDownload = true;
     this.disabledDelete = true;
-    this.disabledRollback = true;
+    this.disabledRestore = true;
   }
 
   /**
@@ -202,7 +209,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     this.disabledCancel = false;
     this.disabledDownload = true;
     this.disabledDelete = true;
-    this.disabledRollback = true;
+    this.disabledRestore = true;
   }
 
   /**
@@ -217,7 +224,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
 
     this.disabledDownload = !(this.selected[0] != null && this.selected.length === 1);
     this.disabledDelete = this.selected.findIndex(sel => sel.id === this.actualId) !== -1;
-    this.disabledRollback = !(this.selected[0] != null && this.selected.length === 1 && this.selected[0].id !== this.actualId);
+    this.disabledRestore = !(this.selected[0] != null && this.selected.length === 1 && this.selected[0].id !== this.actualId);
   }
 
   /**
@@ -268,7 +275,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     });
     this.disabledDownload = true;
     this.disabledDelete = true;
-    this.disabledRollback = true;
+    this.disabledRestore = true;
     this.selected = [];
   }
 
@@ -345,48 +352,48 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   }
 
   /**
-   * Method called when Rollback button is clicked
-   * Rollbacks the PMode for the selected row
+   * Method called when Restore button is clicked
+   * Restores the PMode for the selected row
    * - Creates a similar entry like @selectedRow
    * - Sets that entry as current
    *
    * @param selectedRow Selected Row
    */
-  rollbackArchive (selectedRow) {
+  restoreArchive (selectedRow) {
     if (!this.isDirty()) {
-      this.dialog.open(RollbackDialogComponent).afterClosed().subscribe(ok => {
+      this.dialog.open(RestoreDialogComponent).afterClosed().subscribe(ok => {
         if (ok) {
-          this.rollBack(selectedRow);
+          this.restore(selectedRow);
         }
       });
     } else {
       this.dialog.open(ActionDirtyDialogComponent, {
         data: {
-          actionTitle: 'You will now rollback to an older PMode version',
-          actionName: 'rollback',
+          actionTitle: 'You will now also Restore an older version of the PMode',
+          actionName: 'restore',
           actionIconName: 'settings_backup_restore'
         }
       }).afterClosed().subscribe(result => {
         if (result === 'ok') {
           this.http.delete(PModeArchiveComponent.PMODE_URL, {params: {ids: JSON.stringify(this.deleteList)}}).subscribe(result => {
-              this.rollBack(selectedRow);
+              this.restore(selectedRow);
             },
             error => {
               this.alertService.error('The operation \'update pmodes\' not completed successfully.', false);
               this.enableSaveAndCancelButtons();
               this.selected = [];
             });
-        } else if (result === 'rollback') {
-          this.rollBack(selectedRow);
+        } else if (result === 'restore') {
+          this.restore(selectedRow);
         }
       });
     }
     this.page(0, this.rowLimiter.pageSize);
   }
 
-  private rollBack (selectedRow) {
+  private restore (selectedRow) {
     this.allPModes[this.actualRow].current = false;
-    this.http.put(PModeArchiveComponent.PMODE_URL + '/rollback/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
+    this.http.put(PModeArchiveComponent.PMODE_URL + '/restore/' + selectedRow.id, null, {headers: this.headers}).subscribe(res => {
         this.deleteList = [];
         this.disableAllButtons();
         this.selected = [];
@@ -395,7 +402,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         this.getAllPModeEntries();
       },
       error => {
-        this.alertService.error('The operation \'rollback pmode\' not completed successfully.');
+        this.alertService.error('The operation \'restore pmode\' not completed successfully.');
       });
   }
 
@@ -414,7 +421,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   download (row) {
     this.http.get(PModeArchiveComponent.PMODE_URL + '/' + row.id).subscribe(res => {
       const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
-      PModeArchiveComponent.downloadFile(res.text(), uploadDateStr);
+      PModeArchiveComponent.downloadFile(res.text(), this.currentDomain.name, uploadDateStr);
     }, err => {
       this.alertService.error(err._body);
     });
@@ -442,11 +449,16 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   /**
    * Downloader for the XML file
    * @param data
+   * @param domain
+   * @param date
    */
-  private static downloadFile (data: any, date: string) {
+  private static downloadFile (data: any, domain: string, date: string) {
     const blob = new Blob([data], {type: 'text/xml'});
     let filename = 'PMode';
-    if (date !== '') {
+    if (domain) {
+      filename += '-' + domain;
+    }
+    if (date) {
       filename += '-' + date;
     }
     filename += '.xml';

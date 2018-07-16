@@ -345,8 +345,8 @@ export class AlertsComponent {
   }
 
   cancel() {
-    let dialogRef = this.dialog.open(CancelDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+    this.dialog.open(CancelDialogComponent)
+      .afterClosed().subscribe(result => {
       if (result) {
         this.buttonsDisabled = true;
         this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);

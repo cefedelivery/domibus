@@ -401,6 +401,11 @@
             <version>1.7.25</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-MSH</artifactId>
+            <version>4.0-SNAPSHOT</version>
+        </dependency>
         <!-- End Test dependencies -->
     </dependencies>
 
