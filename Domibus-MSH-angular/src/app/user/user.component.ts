@@ -39,19 +39,19 @@ export class UserComponent implements OnInit, DirtyOperations {
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  users: Array<UserResponseRO> = [];
-  userRoles: Array<String> = [];
+  users: Array<UserResponseRO>;
+  userRoles: Array<String>;
   domains: Domain[];
   currentDomain: Domain;
 
-  selected = [];
+  selected: any[];
 
-  enableCancel: boolean = false;
-  enableSave: boolean = false;
-  enableDelete: boolean = false;
-  enableEdit: boolean = false;
+  enableCancel: boolean;
+  enableSave: boolean;
+  enableDelete: boolean;
+  enableEdit: boolean;
 
-  rowNumber = -1;
+  rowNumber: number;
 
   editedUser: UserResponseRO;
 
