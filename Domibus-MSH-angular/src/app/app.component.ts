@@ -13,7 +13,6 @@ import {Observable} from 'rxjs/Observable';
 })
 export class AppComponent implements OnInit {
 
-  // isAdmin: boolean;
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
   fourCornerEnabled: boolean = true;
