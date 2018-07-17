@@ -5,10 +5,12 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.listener.AbstractJmsListeningContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,19 @@ public class MessageListenerContainerInitializer {
         final List<Domain> domains = domainService.getDomains();
         for (Domain domain : domains) {
             createMessageListenerContainer(domain);
+        }
+    }
+
+    @PreDestroy
+    public void destroy() throws InterruptedException {
+        LOG.info("Shutting down MessageListenerContainer instances");
+
+        for (MessageListenerContainer instance: instances.values()) {
+            try {
+                ((AbstractJmsListeningContainer) instance).shutdown();
+            }catch(Exception e) {
+                LOG.error("Error while shutting down MessageListenerContainer", e);
+            }
         }
     }
 
