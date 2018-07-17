@@ -43,7 +43,7 @@ public interface MultiDomainAlertConfigurationService {
     CommonConfiguration getCommonConfiguration();
 
     /**
-     * Reurn alert level based on alert(type)
+     * Return alert level based on alert(type)
      *
      * @param alert the alert.
      * @return the level.

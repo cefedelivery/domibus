@@ -15,9 +15,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -249,20 +246,20 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             final String mailSubject = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT, MESSAGE_STATUS_CHANGE_MAIL_SUBJECT);
 
             if (StringUtils.isEmpty(messageCommunicationStates) || StringUtils.isEmpty(messageCommunicationLevels)) {
-                LOG.warn("Message status change alert module is missconfigured -> states[{}], levels[{}]", messageCommunicationStates, messageCommunicationLevels);
+                LOG.warn("Message status change alert module misconfiguration -> states[{}], levels[{}]", messageCommunicationStates, messageCommunicationLevels);
                 return new MessagingModuleConfiguration();
             }
             final String[] states = messageCommunicationStates.split(",");
             final String[] levels = messageCommunicationLevels.split(",");
             final boolean eachStatusHasALevel = (states.length == levels.length);
+            LOG.debug("Each message status has his own level[{}]",eachStatusHasALevel);
 
             MessagingModuleConfiguration messagingConfiguration = new MessagingModuleConfiguration(mailSubject);
             IntStream.
                     range(0, states.length).
                     mapToObj(i -> new AbstractMap.SimpleImmutableEntry<>(MessageStatus.valueOf(states[i]), AlertLevel.valueOf(levels[eachStatusHasALevel ? i : 0]))).
                     forEach(entry -> messagingConfiguration.addStatusLevelAssociation(entry.getKey(), entry.getValue()));
-            LOG.trace("Each message status has his own level");
-            LOG.info("Alert message module activated for domain:[{}]", domain);
+            LOG.info("Alert message status change module activated for domain:[{}]", domain);
             return messagingConfiguration;
         } catch (Exception ex) {
             LOG.warn("Error while configuring message communication alerts for domain:[{}], message alert module will be discarded.", domain, ex);

@@ -23,7 +23,7 @@ public class AlertCleanerJob extends DomibusQuartzJobBean {
     private AlertService alertService;
 
     @Override
-    protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
+    protected void executeJob(JobExecutionContext context, Domain domain) {
         alertService.cleanAlerts();
     }
 }

@@ -12,13 +12,13 @@ public class CommonConfiguration {
     private final static Logger LOG = LoggerFactory.getLogger(CommonConfiguration.class);
 
 
-    private Integer alertLifeTimeInDays;
+    private final Integer alertLifeTimeInDays;
 
-    private String sendFrom;
+    private final String sendFrom;
 
-    private String sendTo;
+    private final String sendTo;
 
-    public CommonConfiguration(Integer alertLifeTimeInDays, String sendFrom, String sendTo) {
+    public CommonConfiguration(final Integer alertLifeTimeInDays, final String sendFrom, final String sendTo) {
         this.alertLifeTimeInDays = alertLifeTimeInDays;
         this.sendFrom = sendFrom;
         this.sendTo = sendTo;

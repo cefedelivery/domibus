@@ -28,7 +28,7 @@ public enum AlertType {
         }
     }
 
-    private String template;
+    private final String template;
 
     AlertType(String template) {
         this.template = template;

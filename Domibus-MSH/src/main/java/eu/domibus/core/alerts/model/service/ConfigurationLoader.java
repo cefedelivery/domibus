@@ -34,11 +34,7 @@ public class ConfigurationLoader<E> {
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
         if (configuration == null) {
             synchronized (this.configuration) {
-                configuration = this.configuration.get(domain);
-                if (configuration == null) {
-                    configuration = configurationReader.readConfiguration(domain);
-                    this.configuration.put(domain, configuration);
-                }
+                this.configuration.computeIfAbsent(domain, configurationReader::readConfiguration);
             }
         }
         configuration = this.configuration.get(domain);

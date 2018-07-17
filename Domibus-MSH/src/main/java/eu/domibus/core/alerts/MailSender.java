@@ -15,7 +15,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class MailSender {
     private boolean mailSenderInitiated;
 
 
-    void initMailSender() {
+    private void initMailSender() {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
