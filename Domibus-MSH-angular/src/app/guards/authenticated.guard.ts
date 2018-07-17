@@ -25,6 +25,6 @@ export class AuthenticatedGuard implements CanActivate {
         subject.next(false);
       }
     });
-    return subject.asObservable()
+    return subject.asObservable();
   }
 }
