@@ -153,7 +153,7 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
         userMessageLogDao.update(userMessageLog);
-        uiReplicationSignalService.messageStatusChange(userMessageLog.getMessageId(), newMessageStatus);
+        uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
 
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);

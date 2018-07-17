@@ -6,12 +6,14 @@ import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -99,6 +101,9 @@ public class BackendNotificationService {
 
     @Autowired
     UserMessageServiceHelper userMessageServiceHelper;
+
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
 
     //TODO move this into a dedicate provider(a different spring bean class)
@@ -279,6 +284,8 @@ public class BackendNotificationService {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
         userMessageLogDao.setAsNotified(messageId);
+
+        uiReplicationSignalService.messageNotificationStatusChange(messageId, NotificationStatus.NOTIFIED);
     }
 
     public void notifyOfSendSuccess(final String messageId) {
@@ -288,6 +295,8 @@ public class BackendNotificationService {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
         userMessageLogDao.setAsNotified(messageId);
+
+        uiReplicationSignalService.messageNotificationStatusChange(messageId, NotificationStatus.NOTIFIED);
     }
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)

@@ -108,6 +108,7 @@ public class UpdateRetryLoggingService {
         userMessageLog.setMessageStatus(messageStatus);
         LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
         userMessageLogDao.update(userMessageLog);
+
     }
 
     public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {

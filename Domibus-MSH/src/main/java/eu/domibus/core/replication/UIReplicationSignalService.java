@@ -4,6 +4,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -53,6 +54,15 @@ public class UIReplicationSignalService {
                 .type(UIJMSType.MESSAGE_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .build();
+
+        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+    }
+
+    public void messageNotificationStatusChange(String messageId, NotificationStatus newStatus) {
+        final JmsMessage message = JMSMessageBuilder.create()
+                .type(UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE.name())
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(JMS_PROPERTY_STATUS, newStatus.name()).build();
 
         jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
     }

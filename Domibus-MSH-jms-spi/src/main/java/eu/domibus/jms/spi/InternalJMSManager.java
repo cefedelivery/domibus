@@ -18,6 +18,9 @@ public interface InternalJMSManager {
     /** in multi-tenancy mode domain admins should not see any count of messages so we set this value */
     long NB_MESSAGES_ADMIN = -1L;
 
+    /** queue names to be skip from showing into GUI interface */
+    String[] SKIP_QUEUE_NAMES = {"domibus.UI.replication"};
+
     Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 
     void sendMessage(InternalJmsMessage message, String destination);

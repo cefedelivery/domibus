@@ -2,6 +2,7 @@ package eu.domibus.core.replication;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -30,7 +31,7 @@ public class UIReplicationListener {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
-    @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "internalJmsListenerContainerFactory")
+    @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "uiReplicationJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processUIReplication(final MapMessage map) throws JMSException {
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
@@ -50,6 +51,10 @@ public class UIReplicationListener {
                 break;
             case MESSAGE_STATUS_CHANGE:
                 uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(
+                        map.getStringProperty(UIReplicationSignalService.JMS_PROPERTY_STATUS)));
+                break;
+            case MESSAGE_NOTIFICATION_STATUS_CHANGE:
+                uiReplicationDataService.messageNotificationStatusChange(messageId, NotificationStatus.valueOf(
                         map.getStringProperty(UIReplicationSignalService.JMS_PROPERTY_STATUS)));
                 break;
             case MESSAGE_CHANGE:

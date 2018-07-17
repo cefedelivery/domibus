@@ -1,6 +1,7 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -65,19 +66,33 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
         if (entity != null) {
-            entity.setMessageStatus(newStatus);
+            entity.setMessageStatus(userMessageLog.getMessageStatus());
             entity.setDeleted(userMessageLog.getDeleted());
-            entity.setFailed(userMessageLog.getFailed());
-            entity.setRestored(userMessageLog.getRestored());
             entity.setNextAttempt(userMessageLog.getNextAttempt());
-            entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
+            entity.setFailed(userMessageLog.getFailed());
 
             uiMessageDao.update(entity);
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
         }
-        LOG.info("{}Message with messageId={} synced",
-                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId);
+        LOG.info("{}Message with messageId={} synced, status={}",
+                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId, newStatus);
+    }
+
+    @Override
+    public void messageNotificationStatusChange(String messageId, NotificationStatus newStatus) {
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
+
+        if (entity != null) {
+            entity.setNotificationStatus(userMessageLog.getNotificationStatus());
+            uiMessageDao.update(entity);
+        } else {
+            UIReplicationDataServiceImpl.LOG.warn("messageNotificationStatusChange failed for messageId={}", messageId);
+        }
+        LOG.info("{}Message with messageId={} synced, notificationStatus={}",
+                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId, newStatus);
+
     }
 
     @Override
@@ -87,12 +102,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
         if (entity != null) {
-            entity.setMessageStatus(userMessageLog.getMessageStatus());
-            entity.setDeleted(userMessageLog.getDeleted());
-            entity.setFailed(userMessageLog.getFailed());
-            entity.setRestored(userMessageLog.getRestored());
-            entity.setNextAttempt(userMessageLog.getNextAttempt());
-            entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
+            updateUIMessage(userMessageLog, entity);
 
             uiMessageDao.update(entity);
         } else {
@@ -174,6 +184,23 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setMessageSubtype(userMessageLog.getMessageSubtype());
 
         uiMessageDao.create(entity);
+    }
+
+    /**
+     * Updates {@link UIMessageEntity} fields with info from {@link UserMessageLog}
+     *
+     * @param userMessageLog
+     * @param entity
+     */
+    private void updateUIMessage(UserMessageLog userMessageLog, UIMessageEntity entity) {
+        entity.setMessageStatus(userMessageLog.getMessageStatus());
+        entity.setNotificationStatus(userMessageLog.getNotificationStatus());
+        entity.setDeleted(userMessageLog.getDeleted());
+        entity.setFailed(userMessageLog.getFailed());
+        entity.setRestored(userMessageLog.getRestored());
+        entity.setNextAttempt(userMessageLog.getNextAttempt());
+        entity.setSendAttempts(userMessageLog.getSendAttempts());
+        entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
     }
 
 

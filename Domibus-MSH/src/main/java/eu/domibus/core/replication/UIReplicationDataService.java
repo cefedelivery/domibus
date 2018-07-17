@@ -1,6 +1,7 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
 
 /**
@@ -30,6 +31,13 @@ public interface UIReplicationDataService {
      * @param newStatus
      */
     void messageStatusChange(final String messageId, MessageStatus newStatus);
+
+    /**
+     * updates/sync data on receiver/sender side when a change in messages notification status appears
+     * @param messageId
+     * @param newStatus
+     */
+    void messageNotificationStatusChange(final String messageId, NotificationStatus newStatus);
 
     void messageChange(final String messageId);
 
