@@ -57,13 +57,17 @@ export class AppComponent implements OnInit {
       });
   }
 
-  hasAdmin(): boolean {
+  isAdmin(): boolean {
     return this.securityService.isCurrentUserAdmin();
   }
 
+  isUser(): boolean {
+    return !!this.currentUser;
+  }
+
   get currentUser(): string {
-    let user = this.securityService.getCurrentUser();
-    return user ? user.username : "";
+    const user = this.securityService.getCurrentUser();
+    return user ? user.username : '';
   }
 
   logout(event: Event): void {
