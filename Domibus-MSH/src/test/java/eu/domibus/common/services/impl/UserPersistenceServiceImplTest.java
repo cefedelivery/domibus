@@ -1,13 +1,10 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
-import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
-import eu.domibus.core.alerts.model.service.AccountDisabledConfiguration;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -15,7 +12,6 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
@@ -73,7 +69,7 @@ public class UserPersistenceServiceImplTest {
     }
 
     @Test
-    public void prepareUserForUpdateSendAlert(@Mocked AccountDisabledConfiguration accountDisabledConfiguration) {
+    public void prepareUserForUpdateSendAlert(@Mocked AccountDisabledModuleConfiguration accountDisabledConfiguration) {
         final User userEntity = new User();
         userEntity.setActive(true);
         eu.domibus.api.user.User user = new eu.domibus.api.user.User();

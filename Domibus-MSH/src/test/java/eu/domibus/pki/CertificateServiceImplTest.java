@@ -9,8 +9,8 @@ import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
-import eu.domibus.core.alerts.model.service.ExpiredCertificateConfiguration;
-import eu.domibus.core.alerts.model.service.ImminentExpirationCertificateConfiguration;
+import eu.domibus.core.alerts.model.service.ExpiredCertificateModuleConfiguration;
+import eu.domibus.core.alerts.model.service.ImminentExpirationCertificateModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.certificate.CertificateDao;
@@ -19,11 +19,8 @@ import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.hibernate.validator.internal.util.logging.Log;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -411,7 +408,7 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void sendCertificateImminentExpirationAlerts(final @Mocked ImminentExpirationCertificateConfiguration imminentExpirationCertificateConfiguration,
+    public void sendCertificateImminentExpirationAlerts(final @Mocked ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration,
                                                         @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
 
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
@@ -470,7 +467,7 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void sendCertificateExpiredAlerts(final @Mocked ExpiredCertificateConfiguration expiredCertificateConfiguration,
+    public void sendCertificateExpiredAlerts(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
                                                         @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
 
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
@@ -529,7 +526,7 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void sendCertificateExpiredAlertsModuleInactive(final @Mocked ExpiredCertificateConfiguration expiredCertificateConfiguration,
+    public void sendCertificateExpiredAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
                                              @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
         new Expectations() {{
             multiDomainAlertConfigurationService.getExpiredCertificateConfiguration().isActive();
@@ -542,7 +539,7 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void sendCertificateImminentExpirationAlertsModuleInactive(final @Mocked ExpiredCertificateConfiguration expiredCertificateConfiguration,
+    public void sendCertificateImminentExpirationAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
                                                            @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
         new Expectations() {{
             multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration().isActive();

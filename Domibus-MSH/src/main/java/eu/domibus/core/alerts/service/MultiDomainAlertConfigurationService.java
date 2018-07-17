@@ -15,27 +15,32 @@ public interface MultiDomainAlertConfigurationService {
     /**
      * @return message communication module configuration
      */
-    MessagingConfiguration getMessageCommunicationConfiguration();
+    MessagingModuleConfiguration getMessageCommunicationConfiguration();
 
     /**
      * @return account disabled module configuration
      */
-    AccountDisabledConfiguration getAccountDisabledConfiguration();
+    AccountDisabledModuleConfiguration getAccountDisabledConfiguration();
 
     /**
      * @return login failure module configuration
      */
-    LoginFailureConfiguration getLoginFailureConfiguration();
+    LoginFailureModuleConfiguration getLoginFailureConfiguration();
 
     /**
      * @return certificate imminent expiration module configuration
      */
-    ImminentExpirationCertificateConfiguration getImminentExpirationCertificateConfiguration();
+    ImminentExpirationCertificateModuleConfiguration getImminentExpirationCertificateConfiguration();
 
     /**
      * @return certificate expired module configuration
      */
-    ExpiredCertificateConfiguration getExpiredCertificateConfiguration();
+    ExpiredCertificateModuleConfiguration getExpiredCertificateConfiguration();
+
+    /**
+     * @return alert common configuration
+     */
+    CommonConfiguration getCommonConfiguration();
 
     /**
      * Reurn alert level based on alert(type)
@@ -52,27 +57,6 @@ public interface MultiDomainAlertConfigurationService {
      * @return the mail subject.
      */
     String getMailSubject(AlertType alertType);
-
-    /**
-     * Get the umber of days an alert stays in the system before being removed.
-     *
-     * @return
-     */
-    Integer getAlertLifeTimeInDays();
-
-    /**
-     * Get send from email.
-     *
-     * @return email.
-     */
-    String getSendFrom();
-
-    /**
-     * Get send to email.
-     *
-     * @return email.
-     */
-    String getSendTo();
 
     /**
      * Check if the alert module is enabled.

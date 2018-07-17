@@ -11,12 +11,11 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
+import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -301,7 +300,7 @@ public class BackendNotificationService {
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
 
-        final MessagingConfiguration messagingConfiguration = multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
         if (messagingConfiguration.shouldMonitorMessageStatus(newStatus)) {
             eventService.enqueueMessageEvent(messageLog.getMessageId(), messageLog.getMessageStatus(), newStatus, messageLog.getMshRole());
         }

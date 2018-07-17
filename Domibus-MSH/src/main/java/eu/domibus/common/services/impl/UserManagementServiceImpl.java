@@ -9,8 +9,8 @@ import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserService;
-import eu.domibus.core.alerts.model.service.AccountDisabledConfiguration;
-import eu.domibus.core.alerts.model.service.LoginFailureConfiguration;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
@@ -128,7 +128,7 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
-        final LoginFailureConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
+        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
                 if (loginFailureConfiguration.isActive()) {
@@ -139,7 +139,7 @@ public class UserManagementServiceImpl implements UserService {
                 break;
             case INACTIVE:
             case SUSPENDED:
-                final AccountDisabledConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
                 if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
                     eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
                 }else if(loginFailureConfiguration.isActive()){
@@ -184,7 +184,7 @@ public class UserManagementServiceImpl implements UserService {
             final Date suspensionDate = new Date(System.currentTimeMillis());
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
-            final AccountDisabledConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
             }

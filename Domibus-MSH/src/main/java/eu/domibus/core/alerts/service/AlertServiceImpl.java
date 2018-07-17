@@ -145,7 +145,7 @@ public class AlertServiceImpl implements AlertService {
             alertEntity.setAttempts(attempts);
             alertEntity.setAlertStatus(RETRY);
         }
-        alertEntity.setReportingTimeFailure(new Date());
+        alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
     }
 
     /**
@@ -193,7 +193,7 @@ public class AlertServiceImpl implements AlertService {
     @Override
     @Transactional
     public void cleanAlerts(){
-        final Integer alertLifeTimeInDays = multiDomainAlertConfigurationService.getAlertLifeTimeInDays();
+        final Integer alertLifeTimeInDays = multiDomainAlertConfigurationService.getCommonConfiguration().getAlertLifeTimeInDays();
         final Date alertLimitDate = org.joda.time.LocalDateTime.now().minusDays(alertLifeTimeInDays).withTime(0,0,0,0).toDate();
         LOG.debug("Cleaning alerts with creation time < [{}]",alertLimitDate);
         final List<Alert> alerts = alertDao.retrieveAlertsWithCreationDateSmallerThen(alertLimitDate);

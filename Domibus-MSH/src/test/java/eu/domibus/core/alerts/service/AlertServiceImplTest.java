@@ -155,93 +155,91 @@ public class AlertServiceImplTest {
     }
 
     @Test
-    public void handleAlertStatusSuccess() {
+    public void handleAlertStatusSuccess(final @Mocked eu.domibus.core.alerts.model.persist.Alert persistedAlert) {
         final Alert alert = new Alert();
         final int entityId = 1;
         alert.setEntityId(entityId);
         alert.setAlertStatus(AlertStatus.SUCCESS);
-
-        final eu.domibus.core.alerts.model.persist.Alert persistedAlert = new eu.domibus.core.alerts.model.persist.Alert();
-        persistedAlert.setNextAttempt(new Date());
-
         new Expectations() {{
-            alertDao.read(entityId);
+            alertDao.read(entityId);times=1;
             result = persistedAlert;
+            persistedAlert.getAlertStatus();
+            result=AlertStatus.SUCCESS;
         }};
         alertService.handleAlertStatus(alert);
         new VerificationsInOrder() {{
-            eu.domibus.core.alerts.model.persist.Alert capture;
-            alertDao.update(capture = withCapture());
-            times = 1;
-            assertEquals(AlertStatus.SUCCESS, capture.getAlertStatus());
-            assertNull(capture.getNextAttempt());
-            assertNotNull(capture.getReportingTime());
-
+            persistedAlert.setAlertStatus(AlertStatus.SUCCESS);times=1;
+            persistedAlert.setNextAttempt(null);times=1;
+            persistedAlert.setReportingTime(withAny(new Date()));times=1;
         }};
     }
 
     @Test
-    public void handleAlertStatusFailedWithRemainingAttempts() {
+    public void handleAlertStatusFailedWithRemainingAttempts(final @Mocked eu.domibus.core.alerts.model.persist.Alert persistedAlert, @Mocked final org.joda.time.LocalDateTime dateTime) throws ParseException {
         final int nextAttemptInMinutes = 10;
         final Alert alert = new Alert();
         final int entityId = 1;
         alert.setEntityId(entityId);
         alert.setAlertStatus(AlertStatus.FAILED);
 
-        final eu.domibus.core.alerts.model.persist.Alert persistedAlert = new eu.domibus.core.alerts.model.persist.Alert();
-        persistedAlert.setNextAttempt(new Date());
-        persistedAlert.setAttempts(0);
-        persistedAlert.setMaxAttempts(2);
+        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        Date nextAttempt = parser.parse("25/10/1977 00:00:00");
 
         new Expectations() {{
-            alertDao.read(entityId);
+            alertDao.read(entityId);times=1;
             result = persistedAlert;
+
+            persistedAlert.getAlertStatus();
+            result=AlertStatus.FAILED;
+            persistedAlert.getAttempts();
+            result=0;
+            persistedAlert.getMaxAttempts();
+            result=2;
+
             domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_TIME);
-            this.result = nextAttemptInMinutes;
+            result = nextAttemptInMinutes;
+
+            dateTime.now().plusMinutes(nextAttemptInMinutes).toDate();
+            result=nextAttempt;
+
         }};
         alertService.handleAlertStatus(alert);
         new VerificationsInOrder() {{
-            eu.domibus.core.alerts.model.persist.Alert capture;
-            alertDao.update(capture = withCapture());
-            times = 1;
-            assertEquals(AlertStatus.RETRY, capture.getAlertStatus());
-            assertNull(capture.getReportingTime());
-            assertNotNull(capture.getNextAttempt());
-            assertNotNull(capture.getReportingTimeFailure());
-            final LocalDateTime downLimit = LocalDateTime.now().plusMinutes(nextAttemptInMinutes - 1);
-            final LocalDateTime upLimit = LocalDateTime.now().plusMinutes(nextAttemptInMinutes + 1);
-            final LocalDateTime nextAttempt = LocalDateTime.fromDateFields(capture.getNextAttempt());
-            assertTrue(nextAttempt.isBefore(upLimit));
-            assertTrue(nextAttempt.isAfter(downLimit));
+            persistedAlert.setAlertStatus(AlertStatus.FAILED);times=1;
+            persistedAlert.setNextAttempt(nextAttempt);
+            persistedAlert.setAttempts(1);times=1;
+            persistedAlert.setAlertStatus(AlertStatus.RETRY);times=1;
 
         }};
     }
 
     @Test
-    public void handleAlertStatusFailedWithNoMoreAttempts() {
+    public void handleAlertStatusFailedWithNoMoreAttempts(final @Mocked eu.domibus.core.alerts.model.persist.Alert persistedAlert, @Mocked final org.joda.time.LocalDateTime dateTime) throws ParseException {
         final Alert alert = new Alert();
         final int entityId = 1;
         alert.setEntityId(entityId);
         alert.setAlertStatus(AlertStatus.FAILED);
 
-        final eu.domibus.core.alerts.model.persist.Alert persistedAlert = new eu.domibus.core.alerts.model.persist.Alert();
-        persistedAlert.setNextAttempt(new Date());
-        persistedAlert.setAttempts(2);
-        persistedAlert.setMaxAttempts(2);
+        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        Date failureTime = parser.parse("25/10/1977 00:00:00");
 
         new Expectations() {{
-            alertDao.read(entityId);
+            alertDao.read(entityId);times=1;
             result = persistedAlert;
+
+            persistedAlert.getAlertStatus();
+            result=AlertStatus.FAILED;
+
+            dateTime.now().toDate();
+            result=failureTime;
         }};
         alertService.handleAlertStatus(alert);
         new VerificationsInOrder() {{
-            eu.domibus.core.alerts.model.persist.Alert capture;
-            alertDao.update(capture = withCapture());
-            times = 1;
-            assertEquals(AlertStatus.FAILED, capture.getAlertStatus());
-            assertNull(capture.getReportingTime());
-            assertNull(capture.getNextAttempt());
-            assertNotNull(capture.getReportingTimeFailure());
+            persistedAlert.setAlertStatus(AlertStatus.FAILED);times=1;
+            persistedAlert.setNextAttempt(null);
+
+            persistedAlert.setAttempts(withAny(0));times=0;
+            persistedAlert.setReportingTimeFailure(failureTime);times=1;
         }};
     }
 
@@ -304,7 +302,7 @@ public class AlertServiceImplTest {
         Date alertLimitDate = parser.parse("25/10/1977 00:00:00");
         final List<eu.domibus.core.alerts.model.persist.Alert> alerts = Lists.newArrayList(new eu.domibus.core.alerts.model.persist.Alert());
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAlertLifeTimeInDays();
+            multiDomainAlertConfigurationService.getCommonConfiguration().getAlertLifeTimeInDays();
             result = alertLifeTimeInDays;
             localDateTime.now().minusDays(alertLifeTimeInDays).withTime(0, 0, 0, 0).toDate();
             result = alertLimitDate;

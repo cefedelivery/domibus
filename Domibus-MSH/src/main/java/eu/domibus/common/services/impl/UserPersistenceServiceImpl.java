@@ -1,6 +1,5 @@
 package eu.domibus.common.services.impl;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthRole;
@@ -11,7 +10,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.core.alerts.model.service.AccountDisabledConfiguration;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -25,12 +24,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import eu.domibus.common.services.UserPersistenceService;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author Ion Perpegel
@@ -153,7 +148,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
         if(!user.isActive() && userEntity.getActive()){
             LOG.debug("User:[{}] has been disabled by administrator",user.getUserName());
-            final AccountDisabledConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
                 LOG.debug("Sending account disabled event for user:[{}]",user.getUserName());
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);

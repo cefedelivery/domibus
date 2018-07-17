@@ -13,7 +13,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.core.alerts.model.service.MessagingConfiguration;
+import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -30,7 +30,6 @@ import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
-import eu.domibus.plugin.webService.generated.MshRole;
 import eu.domibus.submission.SubmissionValidatorListProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -39,7 +38,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import javax.jms.Queue;
@@ -559,7 +557,7 @@ public class BackendNotificationServiceTest {
 
     @Test
     public void testNotifyOfMessageStatusChange(@Injectable final MessageLog messageLog,
-                                                @Injectable final MessagingConfiguration messageCommunicationConfiguration) throws Exception {
+                                                @Injectable final MessagingModuleConfiguration messageCommunicationConfiguration) throws Exception {
         final String messageId = "1";
         final String backend = "JMS";
         final MSHRole role = MSHRole.SENDING;

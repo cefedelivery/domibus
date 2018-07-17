@@ -30,6 +30,7 @@ public abstract class AbstractDatabaseConfig {
         jpaProperties.put("hibernate.hbm2ddl.auto","update");
         jpaProperties.put("hibernate.show_sql","true");
         jpaProperties.put("hibernate.format_sql","true");
+        jpaProperties.put("hibernate.id.new_generator_mappings","false");
 
 
         jpaProperties.putAll(getProperties());

@@ -36,8 +36,8 @@ public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
             alert.setAlertStatus(AlertStatus.FAILED);
             mailSender.sendMail(
                     mailModelForAlert,
-                    multiDomainAlertConfigurationService.getSendTo(),
-                    multiDomainAlertConfigurationService.getSendFrom());
+                    multiDomainAlertConfigurationService.getCommonConfiguration().getSendFrom(),
+                    multiDomainAlertConfigurationService.getCommonConfiguration().getSendFrom());
             alert.setAlertStatus(AlertStatus.SUCCESS);
         } finally {
             alertService.handleAlertStatus(alert);

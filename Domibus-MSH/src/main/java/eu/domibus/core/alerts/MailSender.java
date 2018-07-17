@@ -59,8 +59,10 @@ public class MailSender {
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
-    @PostConstruct
-    void init() {
+    private boolean mailSenderInitiated;
+
+
+    void initMailSender() {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
@@ -93,6 +95,15 @@ public class MailSender {
     }
 
     public <T extends MailModel> void sendMail(final T model, final String to, final String from) {
+        if(!mailSenderInitiated){
+            mailSenderInitiated=true;
+            try {
+                initMailSender();
+            }catch (Exception ex){
+                LOG.error("Could initiate mail sender",ex);
+            }
+
+        }
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message,

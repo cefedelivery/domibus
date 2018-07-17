@@ -30,20 +30,20 @@ public class ConfigurationLoader<E> {
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
         final Domain domain = domainContextProvider.getCurrentDomain();
-        E messagingConfiguration = this.configuration.get(domain);
+        E configuration = this.configuration.get(domain);
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
-        if (messagingConfiguration == null) {
-            synchronized (configuration) {
-                messagingConfiguration = this.configuration.get(domain);
-                if (messagingConfiguration == null) {
-                    messagingConfiguration = configurationReader.readConfiguration(domain);
-                    configuration.put(domain, messagingConfiguration);
+        if (configuration == null) {
+            synchronized (this.configuration) {
+                configuration = this.configuration.get(domain);
+                if (configuration == null) {
+                    configuration = configurationReader.readConfiguration(domain);
+                    this.configuration.put(domain, configuration);
                 }
             }
         }
-        messagingConfiguration = configuration.get(domain);
-        LOG.debug("Alert messaging configuration:[{}]", messagingConfiguration);
-        return messagingConfiguration;
+        configuration = this.configuration.get(domain);
+        LOG.debug("Alert messaging configuration:[{}]", configuration);
+        return configuration;
 
     }
 
