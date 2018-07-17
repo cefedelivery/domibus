@@ -37,15 +37,19 @@ export class SecurityService {
 
   logout () {
     console.log('Logging out');
-    this.domainService.resetDomain();
+    this.clearSession();
+
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
-        localStorage.removeItem('currentUser');
         this.securityEventService.notifyLogoutSuccessEvent(res);
       },
       (error: any) => {
-        console.debug('error logging out [' + error + ']');
         this.securityEventService.notifyLogoutErrorEvent(error);
       });
+  }
+
+  clearSession () {
+    this.domainService.resetDomain();
+    localStorage.removeItem('currentUser');
   }
 
   getCurrentUser (): User {

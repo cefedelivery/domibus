@@ -13,7 +13,7 @@ import {Observable} from "rxjs/Observable";
 })
 export class AppComponent implements OnInit {
 
-  isAdmin: boolean;
+  // isAdmin: boolean;
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
   fourCornerEnabled: boolean = true;
@@ -42,17 +42,17 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.securityEventService.onLoginSuccessEvent().subscribe(
       data => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
+        // this.isAdmin = this.securityService.isCurrentUserAdmin();
       });
 
     this.securityEventService.onLoginErrorEvent().subscribe(
       error => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
+        // this.isAdmin = this.securityService.isCurrentUserAdmin();
       });
 
     this.securityEventService.onLogoutSuccessEvent().subscribe(
       data => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
+        // this.isAdmin = this.securityService.isCurrentUserAdmin();
         this.router.navigate(['/login']);
       });
   }
