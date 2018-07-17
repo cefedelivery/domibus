@@ -14,8 +14,11 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author Thomas Dussart
@@ -241,42 +244,24 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 LOG.debug("domain:[{}] Alert message status change module is inactive for the following reason:global alert module active[{}], message status change module active[{}]", domain, alertActive, messageAlertActive);
                 return new MessagingModuleConfiguration();
             }
-            Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
             final String messageCommunicationStates = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
-            final String messageCommunicationLevels = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL,LOW);
+            final String messageCommunicationLevels = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
             final String mailSubject = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT, MESSAGE_STATUS_CHANGE_MAIL_SUBJECT);
+
             if (StringUtils.isEmpty(messageCommunicationStates) || StringUtils.isEmpty(messageCommunicationLevels)) {
-                LOG.warn("If message alert module is active, states and levels should be configured.");
+                LOG.warn("Message status change alert module is missconfigured -> states[{}], levels[{}]", messageCommunicationStates, messageCommunicationLevels);
                 return new MessagingModuleConfiguration();
             }
-            if (StringUtils.isNotEmpty(messageCommunicationStates) && StringUtils.isNotEmpty(messageCommunicationLevels)) {
-                final String[] states = messageCommunicationStates.split(",");
-                final String[] levels = messageCommunicationLevels.split(",");
-                if (states.length == levels.length) {
-                    LOG.trace("Each message status has his own level");
-                    int i = 0;
-                    for (String state : states) {
-                        final MessageStatus messageStatus = MessageStatus.valueOf(state);
-                        final AlertLevel alertLevel = AlertLevel.valueOf(levels[i++]);
-                        messageStatusLevels.put(messageStatus, alertLevel);
-                    }
-                } else {
-                    final AlertLevel alertLevel = AlertLevel.valueOf(levels[0]);
-                    LOG.trace("No one to one mapping between message status and alert level. All message status will have alert level:[{}]", alertLevel);
-                    for (String state : states) {
-                        final MessageStatus messageStatus = MessageStatus.valueOf(state);
-                        messageStatusLevels.put(messageStatus, alertLevel);
-                    }
-                }
-            }
-            LOG.debug("Alert Message communication module active:[{}]", messageAlertActive);
+            final String[] states = messageCommunicationStates.split(",");
+            final String[] levels = messageCommunicationLevels.split(",");
+            final boolean eachStatusHasALevel = (states.length == levels.length);
 
             MessagingModuleConfiguration messagingConfiguration = new MessagingModuleConfiguration(mailSubject);
-            messageStatusLevels.forEach((messageStatus, alertLevel) -> {
-                LOG.debug("Watched message status:[{}] with level[{}]", messageStatus, alertLevel);
-                messagingConfiguration.addStatusLevelAssociation(messageStatus, alertLevel);
-
-            });
+            IntStream.
+                    range(0, states.length).
+                    mapToObj(i -> new AbstractMap.SimpleImmutableEntry<>(MessageStatus.valueOf(states[i]), AlertLevel.valueOf(levels[eachStatusHasALevel ? i : 0]))).
+                    forEach(entry -> messagingConfiguration.addStatusLevelAssociation(entry.getKey(), entry.getValue()));
+            LOG.trace("Each message status has his own level");
             LOG.info("Alert message module activated for domain:[{}]", domain);
             return messagingConfiguration;
         } catch (Exception ex) {
