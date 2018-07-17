@@ -26,9 +26,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
-  timestampFromMaxDate: Date = new Date();
-  timestampToMinDate: Date = null;
-  timestampToMaxDate: Date = new Date();
+  timestampFromMaxDate: Date;
+  timestampToMinDate: Date;
+  timestampToMaxDate: Date;
 
   defaultQueueSet: EventEmitter<boolean>;
   queuesInfoGot: EventEmitter<boolean>;
@@ -37,38 +37,41 @@ export class JmsComponent implements OnInit, DirtyOperations {
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  queues = [];
+  queues: any[];
+
+  currentSearchSelectedSource;
+
+  selectedMessages: Array<any>;
+  markedForDeletionMessages: Array<any>;
+  loading: boolean;
+
+  rows: Array<any>;
+  request: MessagesRequestRO;
+  private headers = new Headers({'Content-Type': 'application/json'});
 
   private _selectedSource: any;
   get selectedSource (): any {
     return this._selectedSource;
   }
-
   set selectedSource (value: any) {
-    //poor man's binding between 2 objects;
-    //whenever selectedSource is set the request.source is also set
     this._selectedSource = value;
     this.request.source = value.name;
     this.defaultQueueSet.emit();
   }
 
-  currentSearchSelectedSource;
-
-  selectedMessages: Array<any> = [];
-  markedForDeletionMessages: Array<any> = [];
-  loading: boolean = false;
-
-  rows: Array<any> = [];
-  request = new MessagesRequestRO();
-  private headers = new Headers({'Content-Type': 'application/json'});
-
   constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+    this.request = new MessagesRequestRO();
   }
 
   ngOnInit () {
+    this.timestampFromMaxDate = new Date();
+    this.timestampToMinDate = null;
+    this.timestampToMaxDate = new Date();
 
     this.defaultQueueSet = new EventEmitter(false);
     this.queuesInfoGot = new EventEmitter(false);
+
+    this.queues = [];
 
     this.columnPicker.allColumns = [
       {
@@ -120,6 +123,12 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.request.toDate = new Date();
     this.request.toDate.setHours(23, 59, 59, 999);
 
+    this.selectedMessages = [];
+    this.markedForDeletionMessages = [];
+    this.loading = false;
+
+    this.rows = [];
+
     this.getDestinations();
 
     this.queuesInfoGot.subscribe(result => {
@@ -152,11 +161,12 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   private setDefaultQueue (queueName: string) {
-    this.queues.forEach(queue => {
-      if (queue.name.match(queueName)) {
-        this.selectedSource = queue;
-      }
-    });
+    if (!this.queues || this.queues.length == 0) return;
+
+    const matching = this.queues.find((el => el.name && el.name.match(queueName)));
+    const toSelect = matching != null ? matching : this.queues.length[0];
+
+    this.selectedSource = toSelect;
   }
 
   changePageSize (newPageSize: number) {
@@ -183,24 +193,10 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.timestampFromMaxDate = event.value;
   }
 
-  updateQueuesInfo () {
-    const observableResponse: Observable<Response> = this.http.get('rest/jms/destinations');
+  updateSelectedQueueInfo () {
 
-    observableResponse.subscribe(
-      (response: Response) => {
-        const destinations = response.json().jmsDestinations;
-        for (let key in destinations) {
-          if (key === this.selectedSource.name) {
-            this.selectedSource.numberOfMessages = destinations[key].numberOfMessages;
-          }
-        }
-      },
-      (error: Response) => {
-        this.alertService.error('Could not load queues: ' + error);
-      }
-    );
-
-    return observableResponse;
+    if (this.selectedSource)
+      this.selectedSource.numberOfMessages = this.rows.length;
   }
 
   canSearch () {
@@ -231,7 +227,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.rows = response.json().messages;
         this.loading = false;
 
-        this.updateQueuesInfo();
+        this.updateSelectedQueueInfo();
 
         if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
           this.alertService.error('Maximum number of rows reached for downloading CSV');

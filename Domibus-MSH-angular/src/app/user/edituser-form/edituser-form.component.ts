@@ -27,7 +27,6 @@ export class EditUserComponent {
   email = '';
   active = true;
   roles: string[] = [];
-  oldRoles = [];
   domain: string;
 
   public emailPattern = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}';
@@ -61,7 +60,6 @@ export class EditUserComponent {
     this.domain = data.user.domain;
     if (data.user.roles) {
       this.roles = data.user.roles.split(',');
-      this.oldRoles = this.roles;
     }
     this.password = data.user.password;
     this.confirmation = data.user.password;

@@ -41,7 +41,6 @@ public class UserMessageLog extends MessageLog {
 
         setMessageType(MessageType.USER_MESSAGE);
         setReceived(new Date());
-        setNextAttempt(getReceived());
         setSendAttempts(0);
     }
 

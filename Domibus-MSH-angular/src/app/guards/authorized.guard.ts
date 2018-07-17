@@ -10,14 +10,14 @@ export class AuthorizedGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    console.debug("AuthorizedGuard");
+    console.log("AuthorizedGuard");
     let allowedRoles = this.getAllowedRoles(route);
     let subject = new ReplaySubject();
     this.securityService.isAuthorized(allowedRoles).subscribe((isAuthorized:boolean) => {
-      console.debug("AuthorizedGuard canActivate [" + isAuthorized + "]");
+      console.log("AuthorizedGuard canActivate [" + isAuthorized + "]");
       subject.next(isAuthorized);
     },(error:any) => {
-      console.debug("AuthorizedGuard canActivate error [" + error + "]");
+      console.log("AuthorizedGuard canActivate error [" + error + "]");
     });
     return subject.asObservable();
   }
