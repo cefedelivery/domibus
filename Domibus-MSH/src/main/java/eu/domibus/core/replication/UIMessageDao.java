@@ -30,13 +30,11 @@ import java.util.Map;
 @Component
 public class UIMessageDao extends BasicDao<UIMessageEntity> {
 
-    /**
-     * logger
-     */
+    /** logger */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIMessageDao.class);
 
+    /** message id */
     private static final String MESSAGE_ID = "MESSAGE_ID";
-
 
     public UIMessageDao() {
         super(UIMessageEntity.class);

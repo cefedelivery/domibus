@@ -226,7 +226,7 @@ public class UserMessageDefaultServiceTest {
             userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
             userMessageLogDao.update(userMessageLog);
-            uiReplicationSignalService.messageStatusChange(anyString, MessageStatus.SEND_ENQUEUED);
+            uiReplicationSignalService.messageChange(anyString);
             userMessageDefaultService.scheduleSending(messageId);
 
         }};

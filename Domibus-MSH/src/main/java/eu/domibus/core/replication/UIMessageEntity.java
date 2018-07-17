@@ -10,6 +10,13 @@ import eu.domibus.ebms3.common.model.MessageType;
 import javax.persistence.*;
 import java.util.Date;
 
+/**
+ * Entity which maps 1 record of {@code TB_MESSAGE_UI} table
+ *
+ * @author Catalin Enache
+ * @since 4.0
+ *
+ */
 @Entity
 @Table(name = "TB_MESSAGE_UI")
 @NamedQueries({
