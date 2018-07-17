@@ -26,9 +26,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
 
-  timestampFromMaxDate: Date = new Date();
-  timestampToMinDate: Date = null;
-  timestampToMaxDate: Date = new Date();
+  timestampFromMaxDate: Date;
+  timestampToMinDate: Date;
+  timestampToMaxDate: Date;
 
   defaultQueueSet: EventEmitter<boolean>;
   queuesInfoGot: EventEmitter<boolean>;
@@ -37,38 +37,41 @@ export class JmsComponent implements OnInit, DirtyOperations {
   @ViewChild('rowWithJSONTpl') rowWithJSONTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  queues = [];
+  queues: any[];
+
+  currentSearchSelectedSource;
+
+  selectedMessages: Array<any>;
+  markedForDeletionMessages: Array<any>;
+  loading: boolean;
+
+  rows: Array<any>;
+  request: MessagesRequestRO;
+  private headers = new Headers({'Content-Type': 'application/json'});
 
   private _selectedSource: any;
   get selectedSource (): any {
     return this._selectedSource;
   }
-
   set selectedSource (value: any) {
-    //poor man's binding between 2 objects;
-    //whenever selectedSource is set the request.source is also set
     this._selectedSource = value;
     this.request.source = value.name;
     this.defaultQueueSet.emit();
   }
 
-  currentSearchSelectedSource;
-
-  selectedMessages: Array<any> = [];
-  markedForDeletionMessages: Array<any> = [];
-  loading: boolean = false;
-
-  rows: Array<any> = [];
-  request = new MessagesRequestRO();
-  private headers = new Headers({'Content-Type': 'application/json'});
-
   constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+    this.request = new MessagesRequestRO();
   }
 
   ngOnInit () {
+    this.timestampFromMaxDate = new Date();
+    this.timestampToMinDate = null;
+    this.timestampToMaxDate = new Date();
 
     this.defaultQueueSet = new EventEmitter(false);
     this.queuesInfoGot = new EventEmitter(false);
+
+    this.queues = [];
 
     this.columnPicker.allColumns = [
       {
@@ -119,6 +122,12 @@ export class JmsComponent implements OnInit, DirtyOperations {
     // set toDate equals to now
     this.request.toDate = new Date();
     this.request.toDate.setHours(23, 59, 59, 999);
+
+    this.selectedMessages = [];
+    this.markedForDeletionMessages = [];
+    this.loading = false;
+
+    this.rows = [];
 
     this.getDestinations();
 
