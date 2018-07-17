@@ -163,8 +163,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
   private setDefaultQueue (queueName: string) {
     if (!this.queues || this.queues.length == 0) return;
 
-    const matching = this.queues.filter((el => el.name && el.name.match(queueName)));
-    const toSelect = matching.length > 0 ? matching[0] : this.queues.length[0];
+    const matching = this.queues.find((el => el.name && el.name.match(queueName)));
+    const toSelect = matching != null ? matching : this.queues.length[0];
 
     this.selectedSource = toSelect;
   }
