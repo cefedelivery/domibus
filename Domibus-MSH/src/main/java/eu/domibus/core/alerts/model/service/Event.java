@@ -17,7 +17,7 @@ import java.util.Optional;
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = Event.class)
 public class Event {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Event.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Event.class);
 
     private int entityId;
 
@@ -77,7 +77,14 @@ public class Event {
             return Optional.empty();
         }
         return Optional.of(eventPropertyValue.getValue());
+    }
 
+    public Optional<String> findOptionalProperty(final String key) {
+        final EventPropertyValue eventPropertyValue = properties.get(key);
+        if(eventPropertyValue==null || eventPropertyValue.getValue()==null){
+            return Optional.empty();
+        }
+        return Optional.of(eventPropertyValue.getValue());
     }
 
     public void addKeyValue(final String key, final String value) {

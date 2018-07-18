@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Queue;
-
 import java.util.Date;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private  static final Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
 
     static final String MESSAGE_EVENT_SELECTOR = "message";
 
@@ -180,7 +179,9 @@ public class EventServiceImpl implements EventService {
                     getErrorsForMessage(messageId).
                     stream().
                     map(ErrorLogEntry::getErrorDetail).forEach(errors::append);
-            event.addKeyValue(DESCRIPTION.name(), errors.toString());
+            if (!errors.toString().isEmpty()) {
+                event.addKeyValue(DESCRIPTION.name(), errors.toString());
+            }
         } catch (EbMS3Exception e) {
             LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
         }

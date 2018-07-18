@@ -1486,6 +1486,11 @@
                                                                 Reporting time:${REPORTING_TIME}
                                                             </th>
                                                         </tr>
+                                                        <tr>
+                                                            <th >
+                                                                Description:${($DESCRIPTION)!""}
+                                                            </th>
+                                                        </tr>
                                                     </table>
                                                 </th>
                                                 <th class="expander"></th>

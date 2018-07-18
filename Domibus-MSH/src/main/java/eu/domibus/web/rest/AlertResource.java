@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 @RequestMapping(value = "/rest/alerts")
 public class AlertResource {
 
-    private static final  Logger LOG = LoggerFactory.getLogger(AlertResource.class);
+    private static final   Logger LOG = LoggerFactory.getLogger(AlertResource.class);
 
     @Autowired
     private AlertService alertService;
@@ -235,7 +235,7 @@ public class AlertResource {
         final List<String> alertParameterNames = getAlertParameters(alert.getAlertType().name());
         final List<String> alertParameterValues = alertParameterNames.
                 stream().
-                map(paramName -> alert.getEvents().iterator().next().findProperty(paramName)).
+                map(paramName -> alert.getEvents().iterator().next().findOptionalProperty(paramName)).
                 filter(Optional::isPresent).
                 map(Optional::get).
                 collect(Collectors.toList());
