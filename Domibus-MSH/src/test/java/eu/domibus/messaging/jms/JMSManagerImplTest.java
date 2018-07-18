@@ -14,7 +14,9 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MessageConverter;
 
 import javax.jms.Queue;
 import java.util.*;
@@ -49,6 +51,12 @@ public class JMSManagerImplTest {
 
     @Injectable
     AuthUtils authUtils;
+
+    @Injectable
+    private MessageConverter messageConverter;
+
+    @Injectable
+    private JmsTemplate jsonJmsTemplate;
 
     @Test
     public void testGetDestinations() throws Exception {

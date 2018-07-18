@@ -6,12 +6,16 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.MessageExchangeService;
+import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -27,10 +31,7 @@ import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -104,6 +105,12 @@ public class BackendNotificationServiceTest {
 
     @Injectable
     UserMessageServiceHelper userMessageServiceHelper;
+
+    @Injectable
+    private EventService eventService;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
     @Test
     public void testValidateSubmissionForUnsupportedNotificationType(@Injectable final Submission submission, @Injectable final UserMessage userMessage) throws Exception {
@@ -549,30 +556,44 @@ public class BackendNotificationServiceTest {
     }
 
     @Test
-    public void testNotifyOfMessageStatusChange(@Injectable final MessageLog messageLog) throws Exception {
+    public void testNotifyOfMessageStatusChange(@Injectable final MessageLog messageLog,
+                                                @Injectable final MessagingModuleConfiguration messageCommunicationConfiguration) throws Exception {
         final String messageId = "1";
         final String backend = "JMS";
+        final MSHRole role = MSHRole.SENDING;
 
+        MessageStatus status = MessageStatus.ACKNOWLEDGED;
+        final MessageStatus previousStatus = MessageStatus.SEND_ENQUEUED;
         new Expectations(backendNotificationService) {{
             backendNotificationService.isPluginNotificationDisabled();
             result = false;
 
             messageLog.getMessageStatus();
-            result = null;
+            result = previousStatus;
 
             messageLog.getMessageId();
             result = messageId;
 
+            messageLog.getMshRole();
+            result= role;
+
             messageLog.getBackend();
             result = backend;
+
+            multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+            result=messageCommunicationConfiguration;
+
+            messageCommunicationConfiguration.shouldMonitorMessageStatus(status);
+            result=true;
 
             backendNotificationService.notify(anyString, anyString, NotificationType.MESSAGE_STATUS_CHANGE, withAny(new HashMap<String, Object>()));
         }};
 
-        MessageStatus status = MessageStatus.ACKNOWLEDGED;
+
         backendNotificationService.notifyOfMessageStatusChange(messageLog, status, new Timestamp(System.currentTimeMillis()));
 
-        new Verifications() {{
+        new VerificationsInOrder() {{
+            eventService.enqueueMessageEvent(messageId,previousStatus, status, role);
             String capturedMessageId = null;
             String capturedBackend = null;
             Map<String, Object> properties = null;
@@ -582,4 +603,6 @@ public class BackendNotificationServiceTest {
             Assert.assertEquals(capturedBackend, backend);
         }};
     }
+
+
 }

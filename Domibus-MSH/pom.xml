@@ -19,6 +19,8 @@
         <hibernate.version>5.2.12.Final</hibernate.version>
         <dom4j.version>1.6.1</dom4j.version>
         <xstream.version>1.4.10</xstream.version>
+        <freemarker.version>2.3.23</freemarker.version>
+        <mail.version>1.6.1</mail.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
@@ -231,6 +233,11 @@
             <artifactId>hibernate-validator</artifactId>
             <version>5.1.2.Final</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
         <!-- End Hibernate -->
 
         <dependency>
@@ -301,6 +308,20 @@
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
             <version>${xstream.version}</version>
+        </dependency>
+
+        <!-- FreeMarker-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
+        </dependency>
+
+        <!-- Java mail -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>${mail.version}</version>
         </dependency>
 
         <!-- Test dependencies -->
