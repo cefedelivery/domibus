@@ -38,7 +38,7 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Autowired
     protected UserDao userDao;
- 
+
     @Autowired
     protected UserConverter userConverter;
 
@@ -112,6 +112,10 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Override
     public void setDomainForUser(String user, String domainCode) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return;
+        }
+
         LOG.debug("Setting domain [{}] for user [{}]", domainCode, user);
 
         domainTaskExecutor.submit(() -> {
@@ -122,6 +126,10 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Override
     public void setPreferredDomainForUser(String user, String domainCode) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return;
+        }
+
         LOG.debug("Setting preferred domain [{}] for user [{}]", domainCode, user);
 
         domainTaskExecutor.submit(() -> {
@@ -132,6 +140,10 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Override
     public void deleteDomainForUser(String user) {
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return;
+        }
+
         LOG.debug("Deleting domain for user [{}]", user);
 
         domainTaskExecutor.submit(() -> {
@@ -140,9 +152,16 @@ public class UserDomainServiceImpl implements UserDomainService {
         });
     }
 
+    /**
+     * Retrieves all users from general schema
+     */
     @Override
     public List<String> getAllUserNames() {
-        LOG.debug("Setting preferred domain [{}] for user [{}]");
+        if (!domibusConfigurationService.isMultiTenantAware()) {
+            return new ArrayList<>();
+        }
+
+        LOG.debug("Get all users from general schema");
 
         return domainTaskExecutor.submit(() -> {
             return userDomainDao.listAllUserNames();
