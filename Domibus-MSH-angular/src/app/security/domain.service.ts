@@ -63,4 +63,8 @@ export class DomainService {
     });
   }
 
+  getTitle (): Promise<string> {
+    return this.http.get('rest/application/name').map((resp: Response) => resp.json()).toPromise();
+  }
+
 }

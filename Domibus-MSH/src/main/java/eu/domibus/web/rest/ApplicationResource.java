@@ -64,7 +64,7 @@ public class ApplicationResource {
     @RequestMapping(value = "name", method = RequestMethod.GET)
     public String getDomibusName() {
         LOG.debug("Getting application name");
-        return domibusPropertyProvider.getProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
+        return domibusPropertyProvider.getDomainProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
     }
 
     /**
