@@ -155,7 +155,7 @@ public class AuditServiceImpl implements AuditService {
     public void addJmsMessageMovedAudit(
             final String messageId,
             final String fromQueue, final String toQueue) {
-        saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.DEL);
+        saveJmsMessage(messageId, fromQueue, toQueue, ModificationType.MOVED);
 
     }
 

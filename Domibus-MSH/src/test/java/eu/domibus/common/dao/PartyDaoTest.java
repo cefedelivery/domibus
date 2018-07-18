@@ -1,7 +1,7 @@
 package eu.domibus.common.dao;
 
-import eu.domibus.audit.InMemoryDataBaseConfig;
-import eu.domibus.audit.OracleDataBaseConfig;
+import eu.domibus.dao.InMemoryDataBaseConfig;
+import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;

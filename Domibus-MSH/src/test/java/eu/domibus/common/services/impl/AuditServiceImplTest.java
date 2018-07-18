@@ -167,7 +167,7 @@ public class AuditServiceImplTest {
         JmsMessageAudit value = jmsMessageAuditCaptor.getValue();
         assertEquals("resendMessageId", value.getId());
         assertEquals("thomas", value.getUserName());
-        assertEquals(ModificationType.DEL, value.getModificationType());
+        assertEquals(ModificationType.MOVED, value.getModificationType());
         assertEquals("fromQueue", value.getFromQueue());
         assertEquals("toQueue", value.getToQueue());
     }

@@ -37,7 +37,13 @@ public interface CertificateService {
      */
     void saveCertificateAndLogRevocation(Domain domain);
 
+
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
+
+    /**
+     * Check if alerts need to be send for expired or soon expired certificate. Send if true.
+     */
+    void sendCertificateAlerts();
 
     /**
      * Returns the certificate deserialized from a base64 string

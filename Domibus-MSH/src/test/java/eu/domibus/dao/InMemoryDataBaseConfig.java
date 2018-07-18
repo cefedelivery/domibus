@@ -1,6 +1,7 @@
-package eu.domibus;
+package eu.domibus.dao;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -13,7 +14,9 @@ import java.util.Map;
  * @author Thomas Dussart
  * @since 4.0
  */
+
 @EnableTransactionManagement
+@Profile("IN_MEMORY_DATABASE")
 public class InMemoryDataBaseConfig extends AbstractDatabaseConfig{
 
 

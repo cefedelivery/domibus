@@ -9,12 +9,15 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
@@ -48,8 +51,12 @@ public class UserManagementServiceImplTest {
     @Injectable
     private UserConverter userConverter;
 
-    @Tested
-    private UserManagementServiceImpl userService;
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Injectable
+    private EventService eventService;
+
 
     @Tested
     private UserManagementServiceImpl userManagementService;
@@ -81,6 +88,7 @@ public class UserManagementServiceImplTest {
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 0;
+
         }};
     }
 
@@ -92,10 +100,12 @@ public class UserManagementServiceImplTest {
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
-        userManagementService.handleWrongAuthentication("");
+        final String userName = "test";
+        userManagementService.handleWrongAuthentication(userName);
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 1;
+            userManagementService.triggerEvent(userName,UserLoginErrorReason.BAD_CREDENTIALS);
         }};
     }
 
@@ -287,6 +297,75 @@ public class UserManagementServiceImplTest {
         userManagementService.handleCorrectAuthentication(userName);
         new Verifications(){{
             userDao.update(withAny(new User()));times=0;
+        }};
+    }
+
+    @Test
+    public void triggerAlertBadCredential(){
+        final String userName="test";
+        new Expectations(){{
+           multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+           result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.BAD_CREDENTIALS);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), false);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertInactiveDisableEventOnEachLogin(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.INACTIVE);
+        new VerificationsInOrder(){{
+            eventService.enqueueAccountDisabledEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertSuspendedDisableEventOnEachLogin(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.SUSPENDED);
+        new VerificationsInOrder(){{
+            eventService.enqueueAccountDisabledEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertInactiveDisableEventOnlyAtTheMoment(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=false;
+            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.INACTIVE);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertSuspendedDisableEventOnlyAtTheMoment(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=false;
+            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.SUSPENDED);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);times=1;
         }};
     }
 
