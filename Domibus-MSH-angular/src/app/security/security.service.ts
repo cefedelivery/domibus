@@ -33,9 +33,7 @@ export class SecurityService {
           console.log('Login success');
           localStorage.setItem('currentUser', JSON.stringify(response.json()));
 
-          this.domainService.getTitle().then((title) => {
-            this.titleService.setTitle(title);
-          });
+          this.domainService.setAppTitle();
 
           this.securityEventService.notifyLoginSuccessEvent(response);
         },

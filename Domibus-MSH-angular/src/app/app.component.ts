@@ -28,9 +28,7 @@ export class AppComponent implements OnInit {
                private domainService: DomainService,
                private titleService: Title) {
 
-    this.domainService.getTitle().then((title) => {
-      this.titleService.setTitle(title);
-    });
+    this.domainService.setAppTitle();
 
     const fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
 

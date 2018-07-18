@@ -52,9 +52,7 @@ export class DomainSelectorComponent implements OnInit {
       const domain = this.domains.find(d => d.code == this.domainCode);
       await this.domainService.setCurrentDomain(domain);
 
-      this.domainService.getTitle().then((title) => {
-        this.titleService.setTitle(title);
-      });
+      this.domainService.setAppTitle();
 
       if (this.currentComponent.ngOnInit)
         this.currentComponent.ngOnInit();
