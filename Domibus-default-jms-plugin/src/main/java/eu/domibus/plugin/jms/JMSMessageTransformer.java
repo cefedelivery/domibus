@@ -139,12 +139,8 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), findMime(p.getPayloadProperties()));
             messageOut.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), p.getContentId());
-            if (p.getDescription() != null) {
-                messageOut.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), p.getDescription().getValue());
-            }
         } else {
             final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, counter));
-            final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, counter));
             final String propPayload = String.valueOf(MessageFormat.format(PAYLOAD_NAME_FORMAT, counter));
             final String payMimeTypeProp = String.valueOf(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, counter));
             final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, counter));
@@ -159,10 +155,6 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             }
             messageOut.setStringProperty(payMimeTypeProp, findMime(p.getPayloadProperties()));
             messageOut.setStringProperty(payContID, p.getContentId());
-
-            if (p.getDescription() != null) {
-                messageOut.setStringProperty(payDescrip, p.getDescription().getValue());
-            }
         }
     }
 
@@ -308,10 +300,6 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
         mimeType = trim(messageIn.getStringProperty(payMimeTypeProp));
         final String payFileNameProp = String.valueOf(MessageFormat.format(PAYLOAD_FILE_NAME_FORMAT, i));
         fileName = trim(messageIn.getStringProperty(payFileNameProp));
-        final String payDescrip = String.valueOf(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, i));
-        if (messageIn.getStringProperty(payDescrip) != null) {
-            description = trim(messageIn.getStringProperty(payDescrip));
-        }
         final String payContID = String.valueOf(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, i));
         contentId = trim(messageIn.getStringProperty(payContID));
         final Collection<Submission.TypedProperty> partProperties = new ArrayList<>();
@@ -333,16 +321,7 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
             }
         }
 
-        String descriptionLanguage = trim(getProperty(DESCRIPTION_LANGUAGE));
-        Locale descriptionLocale = Locale.getDefault();
-        if (!isEmpty(descriptionLanguage)) {
-            try {
-                descriptionLocale = new Locale(descriptionLanguage);
-            } catch (RuntimeException rEx) {
-                LOG.warn(DESCRIPTION_LANGUAGE + " could not be parsed. Using JVM locale", rEx);
-            }
-        }
-        target.addPayload(contentId, payloadDataHandler, partProperties, false, new Submission.Description(descriptionLocale, description), null);
+        target.addPayload(contentId, payloadDataHandler, partProperties, false, null, null);
     }
 
 }

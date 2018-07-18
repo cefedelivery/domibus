@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.pmode.PModeException;
@@ -74,6 +75,9 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Mock
+    private DomibusConfigurationService domibusConfigurationService;
 
     @Spy
     private ProcessValidator processValidator;
@@ -149,6 +153,8 @@ public class MessageExchangeServiceImplTest {
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
         when(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1")).thenReturn("10");
+        when(domibusConfigurationService.isMultiTenantAware()).thenReturn(false);
+
         ArgumentCaptor<JmsMessage> mapArgumentCaptor = ArgumentCaptor.forClass(JmsMessage.class);
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();

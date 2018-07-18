@@ -17,7 +17,9 @@ public interface CsvService {
     String DOUBLE_QUOTES = "\"";
 
     String exportToCSV(List<?> list);
+
     void createCSVColumnHeader(StringBuilder result, Field[] fields);
+
     void createCSVContents(List<?> list, StringBuilder result, Field[] fields);
 
     void setExcludedItems(List<String> excludedItems);

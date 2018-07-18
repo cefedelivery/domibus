@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Properties;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author Cosmin Baciu
@@ -117,4 +118,17 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         return propertyValue;
     }
 
+
+    @Override
+    public Set<String> filterPropertiesName(Predicate<String> predicate) {
+        Set<String> filteredPropertyNames=new HashSet<>();
+        final Enumeration<?> enumeration = domibusProperties.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            final String propertyName = (String) enumeration.nextElement();
+            if (predicate.test(propertyName)){
+                filteredPropertyNames.add(propertyName);
+            }
+        }
+        return filteredPropertyNames;
+    }
 }

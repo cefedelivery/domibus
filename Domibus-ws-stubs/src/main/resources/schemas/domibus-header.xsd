@@ -108,8 +108,6 @@
 
     <xsd:complexType name="PartInfo">
         <xsd:all>
-            <xsd:element type="Schema" name="Schema" minOccurs="0"/>
-            <xsd:element name="Description" type="tns:Description" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="PartProperties" type="tns:PartProperties" minOccurs="0"/>
         </xsd:all>
         <xsd:attribute name="href" type="xsd:token" use="required"/>
@@ -134,20 +132,6 @@
         <xsd:sequence>
             <xsd:element name="Property" type="Property" maxOccurs="unbounded"/>
         </xsd:sequence>
-    </xsd:complexType>
-
-    <xsd:complexType name="Schema">
-        <xsd:attribute type="xsd:anyURI" name="location" use="optional"/>
-        <xsd:attribute type="tns:max255-non-empty-string" name="version" use="optional"/>
-        <xsd:attribute type="tns:max255-non-empty-string" name="namespace" use="optional"/>
-    </xsd:complexType>
-
-    <xsd:complexType name="Description">
-        <xsd:simpleContent>
-            <xsd:extension base="tns:max255-non-empty-string">
-                <xsd:attribute ref="xml:lang" use="required"/>
-            </xsd:extension>
-        </xsd:simpleContent>
     </xsd:complexType>
 
     <xsd:simpleType name="max255-non-empty-string">

@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
@@ -107,6 +108,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private PullMessageService pullMessageService;
 
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
 
     /**
      * {@inheritDoc}
@@ -154,8 +158,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         LOG.trace("Initiating pull requests:");
+        if(pullProcesses.isEmpty()){
+            LOG.trace("No pull process configured !");
+        }
         final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
-        if (pause(pullProcesses, numberOfPullRequestPerMpc)) {
+        if (!domibusConfigurationService.isMultiTenantAware() && pause(pullProcesses, numberOfPullRequestPerMpc)) {
             return;
         }
         for (Process pullProcess : pullProcesses) {

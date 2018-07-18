@@ -11,6 +11,7 @@ Domibus 4.0
 - Added OWASP Dependency Check Maven Plugin to identify vulnerable dependencies
 - Possibility to Test the connections for other Access Points
 - Possibility to reactivate suspended super users
+- Removed ebMS3 deprecated headers Description and Schema from PartInfo. If received on the MSH, these headers are ignored.
 Domibus 3.3.4
 - Performance improvement in the Messages page
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.

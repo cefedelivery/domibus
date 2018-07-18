@@ -11,9 +11,11 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
-import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -75,7 +77,6 @@ public class BackendNotificationService {
     @Autowired
     protected SubmissionValidatorListProvider submissionValidatorListProvider;
 
-
     protected List<NotificationListener> notificationListenerServices;
 
     @Resource(name = "routingCriteriaFactories")
@@ -96,6 +97,12 @@ public class BackendNotificationService {
 
     @Autowired
     private DomainCoreConverter coreConverter;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
     @Autowired
     UserMessageServiceHelper userMessageServiceHelper;
@@ -292,6 +299,12 @@ public class BackendNotificationService {
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+
+        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+        if (messagingConfiguration.shouldMonitorMessageStatus(newStatus)) {
+            eventService.enqueueMessageEvent(messageLog.getMessageId(), messageLog.getMessageStatus(), newStatus, messageLog.getMshRole());
+        }
+
         if (isPluginNotificationDisabled()) {
             return;
         }
@@ -304,7 +317,6 @@ public class BackendNotificationService {
             return;
         }
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_CHANGED, messageLog.getMessageStatus(), newStatus);
-
         final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
     }
