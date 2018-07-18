@@ -39,7 +39,7 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
+    private  static final Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
 
     static final String MESSAGE_EVENT_SELECTOR = "message";
 
@@ -50,6 +50,8 @@ public class EventServiceImpl implements EventService {
     static final String CERTIFICATE_EXPIRED = "certificateExpired";
 
     static final String CERTIFICATE_IMMINENT_EXPIRATION = "certificateImminentExpiration";
+
+    private static final String EVENT_ADDED_TO_THE_QUEUE = "Event:[{}] added to the queue";
 
     @Autowired
     private EventDao eventDao;
@@ -89,7 +91,7 @@ public class EventServiceImpl implements EventService {
         event.addKeyValue(MESSAGE_ID.name(), messageId);
         event.addKeyValue(ROLE.name(), role.name());
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, MESSAGE_EVENT_SELECTOR);
-        LOG.debug("Event:[{}] added to the queue", event);
+        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
     /**
@@ -100,9 +102,9 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date loginTime,
             final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, loginTime.toString(), Boolean.valueOf(accountDisabled).toString(), EventType.USER_LOGIN_FAILURE);
+        Event event = prepareAuthenticatorEvent(userName, loginTime.toString(), Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
-        LOG.debug("Event:[{}] added to the queue", event);
+        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
     /**
@@ -113,9 +115,9 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date accountDisabledTime,
             final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime.toString(), Boolean.valueOf(accountDisabled).toString(), EventType.USER_ACCOUNT_DISABLED);
+        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime.toString(), Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
-        LOG.debug("Event:[{}] added to the queue", event);
+        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
     /**
@@ -126,7 +128,7 @@ public class EventServiceImpl implements EventService {
         EventType eventType = EventType.CERT_IMMINENT_EXPIRATION;
         final Event event = prepareCertificateEvent(accessPoint, alias, expirationDate, eventType);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, CERTIFICATE_IMMINENT_EXPIRATION);
-        LOG.debug("Event:[{}] added to the queue", event);
+        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
     /**
@@ -137,7 +139,7 @@ public class EventServiceImpl implements EventService {
         EventType eventType = EventType.CERT_EXPIRED;
         final Event event = prepareCertificateEvent(accessPoint, alias, expirationDate, eventType);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, CERTIFICATE_EXPIRED);
-        LOG.debug("Event:[{}] added to the queue", event);
+        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
     /**

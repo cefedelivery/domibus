@@ -29,7 +29,7 @@ import java.util.Set;
 @Component
 public class MailSender {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MailSender.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MailSender.class);
 
     private static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
 
@@ -99,7 +99,7 @@ public class MailSender {
             try {
                 initMailSender();
             }catch (Exception ex){
-                LOG.error("Could initiate mail sender",ex);
+                LOG.error("Could not initiate mail sender",ex);
             }
 
         }

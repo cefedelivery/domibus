@@ -13,9 +13,9 @@ public interface CertificateDao {
 
     void saveOrUpdate(Certificate certificate);
 
-    List<Certificate> findImminentExpirationToNotify(Date nextNotification, Date offset);
+    List<Certificate> findImminentExpirationToNotifyAsAlert(Date nextNotification, Date offset);
 
-    List<Certificate> findExpiredToNotify(final Date nextNotification, final Date endNotification);
+    List<Certificate> findExpiredToNotifyAsAlert(final Date nextNotification, final Date endNotification);
 
     List<Certificate> getUnNotifiedSoonRevoked();
 

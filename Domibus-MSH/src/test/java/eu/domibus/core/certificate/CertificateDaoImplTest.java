@@ -218,7 +218,7 @@ public class CertificateDaoImplTest {
         certificate.setCertificateType(CertificateType.PRIVATE);
         certificate.setNotAfter(offset.minusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotify(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
         assertEquals(1,imminentExpirationToNotify.size());
     }
 
@@ -237,7 +237,7 @@ public class CertificateDaoImplTest {
         certificate.setNotAfter(offset.minusDays(1).toDate());
         certificate.setAlertImminentNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotify(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
         assertEquals(0,imminentExpirationToNotify.size());
     }
 
@@ -256,7 +256,7 @@ public class CertificateDaoImplTest {
         certificate.setNotAfter(offset.minusDays(1).toDate());
         certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotify(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findImminentExpirationToNotifyAsAlert(notification.toDate(), offset.toDate());
         assertEquals(1,imminentExpirationToNotify.size());
     }
 
@@ -275,7 +275,7 @@ public class CertificateDaoImplTest {
         certificate.setNotAfter(localDateTime.minusDays(1).toDate());
         certificate.setAlertImminentNotificationDate(notification.minusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotify(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotifyAsAlert(notification.toDate(), offset.toDate());
         assertEquals(1,imminentExpirationToNotify.size());
 
     }
@@ -295,7 +295,7 @@ public class CertificateDaoImplTest {
         certificate.setNotAfter(localDateTime.plusDays(1).toDate());
         certificate.setAlertExpiredNotificationDate(notification.plusDays(1).toDate());
         em.persist(certificate);
-        final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotify(notification.toDate(), offset.toDate());
+        final List<Certificate> imminentExpirationToNotify = certificateDao.findExpiredToNotifyAsAlert(notification.toDate(), offset.toDate());
         assertEquals(0,imminentExpirationToNotify.size());
 
     }

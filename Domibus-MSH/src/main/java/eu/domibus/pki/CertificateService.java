@@ -2,8 +2,6 @@ package eu.domibus.pki;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.TrustStoreEntry;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;

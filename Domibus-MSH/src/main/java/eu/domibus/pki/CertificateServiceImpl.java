@@ -117,7 +117,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
-            LOG.warn("Certificate is not valid: " + cert);
+            LOG.warn("Certificate is not valid:[{}] ",cert);
             return false;
         }
         try {
@@ -143,7 +143,7 @@ public class CertificateServiceImpl implements CertificateService {
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is: " + dn);
+        LOG.debug("DN is:[{}]",dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
             if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
@@ -244,7 +244,7 @@ public class CertificateServiceImpl implements CertificateService {
         final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
 
         LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
-        certificateDao.findImminentExpirationToNotify(notificationDate, offset).forEach(certificate -> {
+        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset).forEach(certificate -> {
             certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
@@ -270,7 +270,7 @@ public class CertificateServiceImpl implements CertificateService {
         Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
 
         LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
-        certificateDao.findExpiredToNotify(notificationDate,endNotification).forEach(certificate -> {
+        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
             certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
             certificateDao.saveOrUpdate(certificate);
             final String alias = certificate.getAlias();
@@ -356,10 +356,11 @@ public class CertificateServiceImpl implements CertificateService {
      * @return the certificate status.
      */
     protected CertificateStatus getCertificateStatus(Date notAfter) {
-        int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
+        int revocationOffsetInDays = Integer.parseInt(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
-            revocationOffsetInDays = Integer.valueOf(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+            revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
+            LOG.trace("Property:[{}] is invalid, should be a number.",REVOCATION_TRIGGER_OFFSET_PROPERTY,n);
 
         }
         LocalDateTime now = LocalDateTime.now();
@@ -415,8 +416,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
         X509Certificate cert = loadCertificateFromString(certificateContent);
-        TrustStoreEntry res = createTrustStoreEntry(cert);
-        return res;
+        return createTrustStoreEntry(cert);
     }
 
     public TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException {

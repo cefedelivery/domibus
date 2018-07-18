@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 @Service
 public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAlertConfigurationService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MultiDomainAlertConfigurationServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MultiDomainAlertConfigurationServiceImpl.class);
 
     static final String DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE = "domibus.alert.msg.communication_failure.active";
 
@@ -213,7 +213,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         final String alertEmailSender = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_SENDER_EMAIL);
         final String alertEmailReceiver = domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_RECEIVER_EMAIL);
         boolean missConfigured = false;
-        if (StringUtils.isEmpty(alertEmailReceiver) || StringUtils.isEmpty(alertEmailReceiver)) {
+        if (StringUtils.isEmpty(alertEmailReceiver) || StringUtils.isEmpty(alertEmailSender)) {
             missConfigured = true;
         } else {
             try {

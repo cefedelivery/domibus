@@ -3,13 +3,11 @@ package eu.domibus.web.rest;
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
-import eu.domibus.core.alerts.model.web.AlertRo;
-import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ import java.util.stream.IntStream;
 @RequestMapping(value = "/rest/alerts")
 public class AlertResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertResource.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(AlertResource.class);
 
     @Autowired
     private AlertService alertService;
@@ -42,7 +40,7 @@ public class AlertResource {
     CsvServiceImpl csvServiceImpl;
 
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "1") int page,
                                   @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                   @RequestParam(value = "asc", defaultValue = "true") Boolean ask,
@@ -81,19 +79,19 @@ public class AlertResource {
         return alertResult;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/types")
+    @GetMapping( path = "/types")
     public List<String> getAlertTypes() {
         final List<AlertType> alertTypes = Lists.newArrayList(AlertType.values());
         return alertTypes.stream().map(Enum::name).collect(Collectors.toList());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/levels")
+    @GetMapping(path = "/levels")
     public List<String> getAlertLevels() {
         final List<AlertLevel> alertLevels = Lists.newArrayList(AlertLevel.values());
         return alertLevels.stream().map(Enum::name).collect(Collectors.toList());
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/params")
+    @GetMapping(path = "/params")
     public List<String> getAlertParameters(@RequestParam(value = "alertType") String aType) {
         AlertType alertType;
         try {
@@ -120,7 +118,7 @@ public class AlertResource {
 
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @PutMapping
     public void processAlerts(@RequestBody List<AlertRo> alertRos) {
         final List<Alert> alerts = alertRos.stream().map(alertRo -> {
             final int entityId = alertRo.getEntityId();
@@ -133,7 +131,7 @@ public class AlertResource {
         alertService.updateAlertProcessed(alerts);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/csv")
+    @GetMapping(path = "/csv")
     public ResponseEntity<String> getCsv(@RequestParam(value = "page", defaultValue = "1") int page,
                                          @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                          @RequestParam(value = "asc", defaultValue = "true") Boolean ask,

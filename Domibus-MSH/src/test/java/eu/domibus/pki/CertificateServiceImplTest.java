@@ -448,7 +448,7 @@ public class CertificateServiceImplTest {
             now1.minusDays(imminentExpirationFrequency).toDate();
             result=notificationDate;
 
-            certificateDao.findImminentExpirationToNotify(notificationDate, offset);
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
             result=Lists.newArrayList(certificate);
 
             certificate.getAlias();
@@ -460,7 +460,7 @@ public class CertificateServiceImplTest {
         }};
         certificateService.sendCertificateImminentExpirationAlerts();
         new VerificationsInOrder(){{
-            certificateDao.findImminentExpirationToNotify(notificationDate, offset);times=1;
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);times=1;
             certificateDao.saveOrUpdate(certificate);times=1;
             eventService.enqueueImminentCertificateExpirationEvent(accesPoint, alias, notAfter);times=1;
         }};
@@ -507,7 +507,7 @@ public class CertificateServiceImplTest {
             now1.minusDays(revokedFrequency).toDate();
             result=notificationDate;
 
-            certificateDao.findExpiredToNotify(notificationDate, endNotification);
+            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);
             result=Lists.newArrayList(certificate);
 
             certificate.getAlias();
@@ -519,7 +519,7 @@ public class CertificateServiceImplTest {
         }};
         certificateService.sendCertificateExpiredAlerts();
         new VerificationsInOrder(){{
-            certificateDao.findExpiredToNotify(notificationDate, endNotification);times=1;
+            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);times=1;
             certificateDao.saveOrUpdate(certificate);times=1;
             eventService.enqueueCertificateExpiredEvent(accesPoint, alias, notAfter);times=1;
         }};

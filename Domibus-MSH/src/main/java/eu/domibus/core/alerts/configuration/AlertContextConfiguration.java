@@ -1,8 +1,6 @@
 package eu.domibus.core.alerts.configuration;
 
 import freemarker.cache.ClassTemplateLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +18,6 @@ import static org.springframework.jms.support.converter.MessageType.TEXT;
  */
 @Configuration
 public class AlertContextConfiguration {
-
-    private final static Logger LOG = LoggerFactory.getLogger(AlertContextConfiguration.class);
-
 
     @Bean
     public MappingJackson2MessageConverter jackson2MessageConverter() {
