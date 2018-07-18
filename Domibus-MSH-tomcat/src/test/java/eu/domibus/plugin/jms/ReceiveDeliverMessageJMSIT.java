@@ -26,13 +26,11 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.Date;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
-import static eu.domibus.plugin.jms.JMSMessageConstants.PAYLOAD_DESCRIPTION_FORMAT;
 
 
 /**
@@ -84,7 +82,6 @@ public class ReceiveDeliverMessageJMSIT extends AbstractBackendJMSIT {
         String messageId = UUID.randomUUID().toString();
         mapMessage.setStringProperty(MESSAGE_ID, messageId); // Cleaning the message ID since it is supposed to submit a new message.
         mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_SUBMIT);
-        mapMessage.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "message");
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);
         // Verifies that the message is really in the queue
@@ -155,7 +152,6 @@ public class ReceiveDeliverMessageJMSIT extends AbstractBackendJMSIT {
 
         System.out.println("MapMessage: " + mapMessage);
         mapMessage.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, JMSMessageConstants.MESSAGE_TYPE_SUBMIT);
-        mapMessage.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "message");
         // The downloaded MapMessage is used as input parameter for the real Test case here!
         backendJMSImpl.receiveMessage(mapMessage);
         // Verifies that the message is really in the queue
