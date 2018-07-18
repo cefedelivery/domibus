@@ -1,4 +1,67 @@
 Domibus 4.0 (from 3.3):
+               - Execute the following actions:
+                    - [WebLogic only]
+                        Modify file "\conf\domibus\domibus.properties":
+                             o add the folloging property:
+                                 domibus.jms.queue.alert=jms/domibus.internal.alert.queue
+                             o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3(+)-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
+                    - [Tomcat only]
+                         Modify file "\conf\domibus\domibus.properties":
+                              o add the folloging property:
+                                  domibus.jms.queue.alert=domibus.internal.alert.queue
+                              o in file "cef_edelivery_path\domibus\conf\domibus\insternal\activemq.xml":
+                                  - in the destinations section add the following queue:
+                                             .............................
+                                             <destinations>
+                                                 .............................
+                                                  <queue id="alertMessageQueue"
+                                                                     physicalName="domibus.internal.alert.queue"/>
+                                                 .............................
+                                             </destinations>
+                                             .............................
+                                  -  in the redeliveryPolicyEntries section add the following redeliveryPolicy:
+                                                 .............................
+                                                 <redeliveryPolicyEntries>
+                                                     .............................
+                                                     <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
+                                                     .............................
+                                                 </redeliveryPolicyEntries>
+                                                 .............................
+                                  -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the droponly parameter:
+                                            E.G:
+                                                - original:
+                                                    <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
+                                                -new configuration:
+                                                    <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue domibus.internal.alert.queue" reportInterval="10000"/>
+                     - [Wildfly only]
+                         Modify file "\conf\domibus\domibus.properties":
+                              o add the following property:
+                                  domibus.jms.queue.alert=jms/domibus.internal.alert.queue
+                              o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
+                               - add the following queue in the destination section
+                                           .............................
+                                           <jms-destinations>
+                                               .............................
+                                                <jms-queue name="DomibusAlertMessageQueue">
+                                                    <entry name="java:/jms/domibus.internal.alert.queue"/>
+                                                    <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
+                                                    <durable>true</durable>
+                                                </jms-queue>
+                                               .............................
+                                           </jms-destinations>
+                                           .............................
+                                -  in the address-settings section
+                                        o add the following address-setting configurations:
+                                               .............................
+                                               <address-settings>
+                                                   .............................
+                                                   <address-setting match="jms.queue.DomibusAlertMessageQueue">
+                                                      <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                                                      <max-delivery-attempts>1</max-delivery-attempts>
+                                                   </address-setting>
+                                                   .............................
+                                               </address-settings>
+                                               .............................
                - Modify file "\conf\domibus\domibus.properties":
                     o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
