@@ -47,7 +47,8 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         if (event.url == '/login') {
-          if (!!this.securityService.getCurrentUser()) {
+          const currentUser = this.securityService.getCurrentUser();
+          if (!!currentUser) {
             this.router.navigate(['/']);
           }
 
@@ -71,7 +72,7 @@ export class AppComponent implements OnInit {
 
   logout (event: Event): void {
     event.preventDefault();
-    this.router.navigate(['/login']).then((ok) => {
+    this.router.navigate(['/login'], {queryParams: {force: true}}).then((ok) => {
       if (ok) {
         this.securityService.logout();
       }
