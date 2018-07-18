@@ -40,7 +40,7 @@ public class UIReplicationListener {
         domainContextProvider.setCurrentDomain(domainCode);
 
         final String jmsType = map.getJMSType();
-        LOG.info("processUIReplication for jmsType=[{}]", jmsType);
+        LOG.debug("processUIReplication for jmsType=[{}]", jmsType);
 
         switch (UIJMSType.valueOf(jmsType)) {
             case USER_MESSAGE_RECEIVED:

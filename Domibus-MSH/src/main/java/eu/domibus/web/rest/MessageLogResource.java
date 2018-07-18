@@ -15,12 +15,12 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageDao;
+import eu.domibus.core.replication.UIMessageDaoImpl;
 import eu.domibus.core.replication.UIMessageEntity;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
-import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -363,7 +360,7 @@ public class MessageLogResource {
      * @return
      */
     private MessageLogInfo convertToMessageLogInfo(UIMessageEntity uiMessageEntity) {
-        if(uiMessageEntity == null) {
+        if (uiMessageEntity == null) {
             return null;
         }
 

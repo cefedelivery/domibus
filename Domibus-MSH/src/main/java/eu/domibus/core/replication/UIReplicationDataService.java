@@ -4,6 +4,8 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.UserMessageLog;
 
+import java.util.List;
+
 /**
  * @author Catalin Enache
  * @since 4.0
@@ -44,5 +46,7 @@ public interface UIReplicationDataService {
     void signalMessageSubmitted(final String messageId);
 
     void signalMessageReceived(final String messageId);
+
+    public void findAndSyncUIMessages();
 
 }

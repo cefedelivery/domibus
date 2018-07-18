@@ -1,25 +1,5 @@
 package eu.domibus.core.replication;
 
-import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.MessageLog;
-import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.model.MessageSubtype;
-import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,146 +7,116 @@ import java.util.Map;
  * @author Catalin Enache
  * @since 4.0
  */
-@Component
-public class UIMessageDao extends BasicDao<UIMessageEntity> {
+public interface UIMessageDao {
+    UIMessageEntity findUIMessageByMessageId(String messageId);
 
-    /** logger */
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIMessageDao.class);
+    int countMessages(Map<String, Object> filters);
+
+    List<UIMessageEntity> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters);
+
+    void saveOrUpdate(UIMessageEntity uiMessageEntity);
+
+    List<Object[]> findUIMessagesNotSynced();
+
 
     /** message id */
-    private static final String MESSAGE_ID = "MESSAGE_ID";
+    String MESSAGE_ID = "MESSAGE_ID";
 
-    public UIMessageDao() {
-        super(UIMessageEntity.class);
-    }
-
-    /**
-     * find {@link UIMessageEntity} by messageId
-     *
-     * @param messageId
-     * @return an instance of {@link UIMessageEntity}
-     */
-    public UIMessageEntity findUIMessageByMessageId(final String messageId) {
-
-        final TypedQuery<UIMessageEntity> query = this.em.createNamedQuery("UIMessageEntity.findUIMessageByMessageId", UIMessageEntity.class);
-        query.setParameter(MESSAGE_ID, messageId);
-
-        return DataAccessUtils.singleResult(query.getResultList());
-    }
-
-    /**
-     * Counts the messages from {@code TB_MESSAGE_UI} table
-     * filter object should contain messageType
-     *
-     * @param filters it should include messageType always - User or Signal message
-     * @return number of messages
-     */
-    public int countMessages(Map<String, Object> filters) {
-        long startTime = System.currentTimeMillis();
-        CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<UIMessageEntity> uiMessageEntity = cq.from(UIMessageEntity.class);
-        cq.select(cb.count(uiMessageEntity));
-        List<Predicate> predicates = getPredicates(filters, cb, uiMessageEntity);
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        TypedQuery<Long> query = em.createQuery(cq);
-
-        Long result = query.getSingleResult();
-        if (LOG.isDebugEnabled()) {
-            final long endTime = System.currentTimeMillis();
-            LOG.debug("[{}] milliseconds to countMessages", endTime - startTime);
-        }
-        return result.intValue();
-    }
-
-    /**
-     * list the messages from {@code TB_MESSAGE_UI} table with pagination
-     *
-     * @param from    the beginning of the page
-     * @param max     how many messages in a page
-     * @param column  which column to order by
-     * @param asc     ordering type - ascending or descending
-     * @param filters it should include messageType always - User or Signal message
-     * @return a list of {@link UIMessageEntity}
-     */
-    public List<UIMessageEntity> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
-        long startTime = System.currentTimeMillis();
-        List<UIMessageEntity> result = null;
-        CriteriaBuilder cb = this.em.getCriteriaBuilder();
-        CriteriaQuery<UIMessageEntity> cq = cb.createQuery(UIMessageEntity.class);
-        Root<UIMessageEntity> ume = cq.from(UIMessageEntity.class);
-        cq.select(ume);
-        List<Predicate> predicates = getPredicates(filters, cb, ume);
-        cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
-        if (column != null) {
-            if (asc) {
-                cq.orderBy(cb.asc(ume.get(column)));
-            } else {
-                cq.orderBy(cb.desc(ume.get(column)));
-            }
-
-        }
-        TypedQuery<UIMessageEntity> query = this.em.createQuery(cq);
-        query.setFirstResult(from);
-        query.setMaxResults(max);
-
-        result = query.getResultList();
-        if (LOG.isDebugEnabled()) {
-            final long endTime = System.currentTimeMillis();
-            LOG.debug("[{}] milliseconds to findPaged [{}] messages", endTime - startTime, max);
-        }
-        return result;
-    }
-
-
-    protected List<Predicate> getPredicates(Map<String, Object> filters, CriteriaBuilder cb, Root<? extends UIMessageEntity> ume) {
-        List<Predicate> predicates = new ArrayList<>();
-        for (Map.Entry<String, Object> filter : filters.entrySet()) {
-            String filterKey = filter.getKey();
-            Object filterValue = filter.getValue();
-            if (filterValue != null) {
-                if (filterValue instanceof String) {
-                    if (StringUtils.isNotBlank(filterKey) && !filter.getValue().toString().isEmpty()) {
-                        switch(filterKey) {
-                            case "fromPartyId":
-                                predicates.add(cb.equal(ume.get("fromId"), filterValue));
-                                break;
-                            case "toPartyId":
-                                predicates.add(cb.equal(ume.get("toId"), filterValue));
-                                break;
-                            case "originalSender":
-                                predicates.add(cb.equal(ume.get("fromScheme"), filterValue));
-                                break;
-                            case "finalRecipient":
-                                predicates.add(cb.equal(ume.get("toScheme"), filterValue));
-                                break;
-                            default:
-                                predicates.add(cb.equal(ume.get(filterKey), filterValue));
-                                break;
-                        }
-                    }
-                } else if (filterValue instanceof Date) {
-                    if (!filterValue.toString().isEmpty()) {
-                        switch (filterKey) {
-                            case "receivedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
-                                break;
-                            case "receivedTo":
-                                predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                } else {
-                    predicates.add(cb.equal(ume.<String>get(filterKey), filterValue));
-                }
-            } else {
-                if (filterKey.equals("messageSubtype")) {
-                    predicates.add(cb.isNull(ume.<MessageSubtype>get("messageSubtype")));
-                }
-            }
-        }
-        return predicates;
-    }
+    /** oracle query for finding differences */
+    String DIFF_QUERY_ORACLE = "SELECT *\n" +
+            "FROM\n" +
+            "    (\n" +
+            "        SELECT\n" +
+            "            message_log.message_id,\n" +
+            "            message_log.message_status,\n" +
+            "            message_log.notification_status,\n" +
+            "            message_log.msh_role,\n" +
+            "            message_log.message_type,\n" +
+            "            message_log.deleted,\n" +
+            "            message_log.received,\n" +
+            "            message_log.send_attempts,\n" +
+            "            message_log.send_attempts_max,\n" +
+            "            message_log.next_attempt,\n" +
+            "            user_message.coll_info_convers_id AS conversation_id,\n" +
+            "            partyid5_.value AS from_id,\n" +
+            "            partyid6_.value AS to_id,\n" +
+            "            property.value AS from_scheme,\n" +
+            "            property2.value AS to_scheme,\n" +
+            "            message_info.ref_to_message_id,\n" +
+            "            message_log.failed,\n" +
+            "            message_log.restored,\n" +
+            "            message_log.message_subtype\n" +
+            "        FROM\n" +
+            "            tb_message_log message_log\n" +
+            "            LEFT OUTER JOIN tb_message_info message_info ON message_log.message_id = message_info.message_id,tb_user_message user_message\n" +
+            "            LEFT OUTER JOIN tb_property property ON user_message.id_pk = property.messageproperties_id\n" +
+            "            LEFT OUTER JOIN tb_property property2 ON user_message.id_pk = property2.messageproperties_id\n" +
+            "            LEFT OUTER JOIN tb_party_id partyid5_ ON user_message.id_pk = partyid5_.from_id\n" +
+            "            LEFT OUTER JOIN tb_party_id partyid6_ ON user_message.id_pk = partyid6_.to_id\n" +
+            "        WHERE\n" +
+            "            user_message.messageinfo_id_pk = message_info.id_pk\n" +
+            "            AND property.name = 'originalSender'\n" +
+            "            AND property2.name = 'finalRecipient'\n" +
+            "        UNION\n" +
+            "        SELECT\n" +
+            "            message_log.message_id,\n" +
+            "            message_log.message_status,\n" +
+            "            message_log.notification_status,\n" +
+            "            message_log.msh_role,\n" +
+            "            message_log.message_type,\n" +
+            "            message_log.deleted,\n" +
+            "            message_log.received,\n" +
+            "            message_log.send_attempts,\n" +
+            "            message_log.send_attempts_max,\n" +
+            "            message_log.next_attempt,\n" +
+            "            '' AS conversation_id,\n" +
+            "            partyid7_.value AS from_id,\n" +
+            "            partyid8_.value AS to_id,\n" +
+            "            property.value AS from_scheme,\n" +
+            "            property2.value AS to_scheme,\n" +
+            "            message_info.ref_to_message_id,\n" +
+            "            message_log.failed,\n" +
+            "            message_log.restored,\n" +
+            "            message_log.message_subtype\n" +
+            "        FROM\n" +
+            "            tb_message_log message_log\n" +
+            "            CROSS JOIN tb_messaging messaging\n" +
+            "            INNER JOIN tb_signal_message signalmess2_ ON messaging.signal_message_id = signalmess2_.id_pk\n" +
+            "            LEFT OUTER JOIN tb_message_info message_info ON signalmess2_.messageinfo_id_pk = message_info.id_pk\n" +
+            "            INNER JOIN tb_user_message user_message ON messaging.user_message_id = user_message.id_pk\n" +
+            "            LEFT OUTER JOIN tb_property property ON user_message.id_pk = property.messageproperties_id\n" +
+            "            LEFT OUTER JOIN tb_property property2 ON user_message.id_pk = property2.messageproperties_id\n" +
+            "            LEFT OUTER JOIN tb_party_id partyid7_ ON user_message.id_pk = partyid7_.from_id\n" +
+            "            LEFT OUTER JOIN tb_party_id partyid8_ ON user_message.id_pk = partyid8_.to_id\n" +
+            "            CROSS JOIN tb_message_info message_info2\n" +
+            "        WHERE\n" +
+            "            user_message.messageinfo_id_pk = message_info2.id_pk\n" +
+            "            AND message_info.message_id = message_log.message_id\n" +
+            "            AND message_info.ref_to_message_id = message_info2.message_id\n" +
+            "            AND property.name = 'originalSender'\n" +
+            "            AND property2.name = 'finalRecipient'\n" +
+            "    ) result\n" +
+            "MINUS\n" +
+            "SELECT\n" +
+            "    message_id,\n" +
+            "    message_status,\n" +
+            "    notification_status,\n" +
+            "    msh_role,\n" +
+            "    message_type,\n" +
+            "    deleted,\n" +
+            "    received,\n" +
+            "    send_attempts,\n" +
+            "    send_attempts_max,\n" +
+            "    next_attempt,\n" +
+            "    conversation_id,\n" +
+            "    from_id,\n" +
+            "    to_id,\n" +
+            "    from_scheme,\n" +
+            "    to_scheme,\n" +
+            "    ref_to_message_id,\n" +
+            "    failed,\n" +
+            "    restored,\n" +
+            "    message_subtype\n" +
+            "FROM\n" +
+            "    tb_message_ui";
 }
