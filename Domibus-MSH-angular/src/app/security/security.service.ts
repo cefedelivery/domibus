@@ -15,8 +15,7 @@ export class SecurityService {
 
   constructor (private http: Http,
                private securityEventService: SecurityEventService,
-               private domainService: DomainService,
-               private titleService: Title) {
+               private domainService: DomainService) {
   }
 
   login (username: string, password: string) {

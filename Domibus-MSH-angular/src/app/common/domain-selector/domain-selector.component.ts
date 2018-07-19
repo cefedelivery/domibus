@@ -23,8 +23,7 @@ export class DomainSelectorComponent implements OnInit {
 
   constructor (private domainService: DomainService,
                private securityService: SecurityService,
-               private dialog: MdDialog,
-               private titleService: Title) {
+               private dialog: MdDialog) {
   }
 
   async ngOnInit () {

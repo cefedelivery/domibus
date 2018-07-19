@@ -25,8 +25,7 @@ export class AppComponent implements OnInit {
                private router: Router,
                private securityEventService: SecurityEventService,
                private http: Http,
-               private domainService: DomainService,
-               private titleService: Title) {
+               private domainService: DomainService) {
 
     this.domainService.setAppTitle();
 
