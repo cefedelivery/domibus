@@ -118,6 +118,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         saveUIMessageFromSignalMessageLog(messageId);
     }
 
+    @Override
+    public void signalMessageReceived(String messageId) {
+        saveUIMessageFromSignalMessageLog(messageId);
+    }
+
     public void findAndSyncUIMessages() {
         LOG.info("start counting differences for UIReplication");
 
@@ -129,17 +134,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
         LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", uiMessageEntityList.size());
 
-        LOG.info("start to update TB_MESSAGE_UI");
-        for (UIMessageEntity uiMessageEntity: uiMessageEntityList) {
-            uiMessageDao.saveOrUpdate(uiMessageEntity);
+        if (uiMessageEntityList.size() > 0) {
+            LOG.info("start to update TB_MESSAGE_UI");
+            uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> uiMessageDao.saveOrUpdate(uiMessageEntity));
+            LOG.info("finish to update TB_MESSAGE_UI");
         }
-        LOG.info("finish to update TB_MESSAGE_UI");
-
-    }
-
-    @Override
-    public void signalMessageReceived(String messageId) {
-        saveUIMessageFromSignalMessageLog(messageId);
     }
 
     /**
@@ -231,6 +230,12 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
     }
 
+    /**
+     * Converts one record of the diff query to {@link UIMessageEntity}
+     *
+     * @param diffRecord
+     * @return
+     */
     private UIMessageEntity convertToUIMessageEntity(Object[] diffRecord) {
         if (null == diffRecord) {
             return null;

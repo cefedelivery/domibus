@@ -17,6 +17,7 @@ import javax.jms.MapMessage;
 
 /**
  * JMS listener for the queue {@code domibus.UI.replication}
+ *
  * @author Catalin Enache
  * @since 4.0
  */

@@ -47,6 +47,6 @@ public interface UIReplicationDataService {
 
     void signalMessageReceived(final String messageId);
 
-    public void findAndSyncUIMessages();
+   void findAndSyncUIMessages();
 
 }

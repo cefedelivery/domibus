@@ -15,6 +15,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -119,6 +121,11 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         return result;
     }
 
+    /**
+     * Creates or updates an existing {@link UIMessageEntity}
+     *
+     * @param uiMessageEntity
+     */
     @Override
     public void saveOrUpdate(final UIMessageEntity uiMessageEntity) {
         UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId());
@@ -135,16 +142,9 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     @Override
     @Transactional(readOnly = true, timeout = 300)
     public List<Object[]> findUIMessagesNotSynced() {
-
         long startTime = System.currentTimeMillis();
 
-//        org.hibernate.engine.spi.SessionImplementor sessionImp =
-//                (org.hibernate.engine.spi.SessionImplementor) em.getDelegate();
-//        DatabaseMetaData metadata = sessionImp.connection().getMetaData();
-//        //do whatever you need with the metadata object...
-//        metadata.getDatabaseProductName();
-
-        Query q = em.createNativeQuery(DIFF_QUERY_ORACLE);
+        Query q = em.createNativeQuery("SELECT * FROM V_MESSAGE_UI_DIFF");
         List<Object[]> result = q.getResultList();
 
         LOG.debug("[{}] milliseconds to findUIMessagesNotSynced", System.currentTimeMillis() - startTime);
