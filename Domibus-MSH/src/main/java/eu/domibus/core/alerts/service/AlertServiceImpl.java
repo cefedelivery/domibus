@@ -34,7 +34,7 @@ import static eu.domibus.core.alerts.model.common.AlertStatus.*;
 @Service
 public class AlertServiceImpl implements AlertService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlertServiceImpl.class);
 
     static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
 
@@ -86,7 +86,8 @@ public class AlertServiceImpl implements AlertService {
         final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
         final AlertLevel alertLevel = multiDomainAlertConfigurationService.getAlertLevel(convertedAlert);
         alert.setAlertLevel(alertLevel);
-        LOG.debug("Saving new alert:\n[]\n", alert);
+        LOG.debug("Saving new alert:\n" +
+                "[]\n", alert);
         alertDao.create(alert);
         return domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
     }
@@ -132,17 +133,21 @@ public class AlertServiceImpl implements AlertService {
         alertEntity.setNextAttempt(null);
         if (SUCCESS == alertEntity.getAlertStatus()) {
             alertEntity.setReportingTime(new Date());
+            LOG.debug("Alert[{}]: send successfully",alert.getEntityId());
             return;
         }
         final Integer attempts = alertEntity.getAttempts() + 1;
         final Integer maxAttempts = alertEntity.getMaxAttempts();
+        LOG.debug("Alert[{}]: send unsuccessfully",alert.getEntityId());
         if (attempts < maxAttempts) {
+            LOG.debug("Alert[{}]: send attempts[{}], max attempts[{}]",alert.getEntityId(),attempts,maxAttempts);
             final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_TIME));
             final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
             alertEntity.setAttempts(attempts);
             alertEntity.setAlertStatus(RETRY);
         }
+        LOG.debug("Alert[{}]: change status to:[]",alert.getEntityId(),alertEntity.getAlertStatus());
         alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
     }
 
