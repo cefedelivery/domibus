@@ -6,9 +6,7 @@ import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
+import mockit.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -45,22 +43,21 @@ public class UserDomainServiceMultiDomainTest {
     public void testGetDomainForUser() {
         String user = "user1";
         String domain = "domain1";
-        //Callable<String> task = () -> userDomainDao.findDomainByUser(user);
+        Callable<String> f;
 
-        Expectations expectations = new Expectations() {{
-            //domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser((String) any));
-            domainTaskExecutor.submit((Callable<String>)any);
-            result = userDomainDao.findDomainByUser(user);
-
-            userDomainDao.findDomainByUser(user);
+        new Expectations() {{
+            //domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
+            //result = userDomainDao.findDomainByUser(user);
+            domainTaskExecutor.submit((Callable<String>) any);
             result = domain;
 
+//            userDomainDao.findDomainByUser(user);
+//            result = domain;
         }};
 
         String result = userDomainServiceMultiDomainImpl.getDomainForUser(user);
         assertEquals(result, domain);
     }
-
 
 
 }
