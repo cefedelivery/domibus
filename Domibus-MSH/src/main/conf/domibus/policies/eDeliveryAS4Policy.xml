@@ -39,7 +39,6 @@ A subject key identifier MAY only be used to reference an X.509v3 certificate.â€
                             <sp:Strict/>
                         </wsp:Policy>
                     </sp:Layout>
-                    <sp:IncludeTimestamp/>
                     <sp:SignBeforeEncrypting />
                     <sp:AlgorithmSuite>
                         <wsp:Policy>

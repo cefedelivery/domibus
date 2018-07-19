@@ -34,7 +34,6 @@
                             <sp:Strict/>
                         </wsp:Policy>
                     </sp:Layout>
-                    <sp:IncludeTimestamp/>
                     <sp:SignBeforeEncrypting />
                     <sp:AlgorithmSuite>
                         <wsp:Policy>

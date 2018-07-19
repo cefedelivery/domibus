@@ -37,7 +37,6 @@ local <wsse:BinarySecurityToken> element or a remote data source that contains t
                             <sp:Strict/>
                         </wsp:Policy>
                     </sp:Layout>
-                    <sp:IncludeTimestamp/>
                     <sp:SignBeforeEncrypting />
                     <sp:AlgorithmSuite>
                         <wsp:Policy>
