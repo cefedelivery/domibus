@@ -5,6 +5,7 @@ import {SecurityEventService} from './security/security.event.service';
 import {Title} from '@angular/platform-browser';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
+import {DomainService} from './security/domain.service';
 
 @Component({
   selector: 'app-root',
@@ -24,12 +25,9 @@ export class AppComponent implements OnInit {
                private router: Router,
                private securityEventService: SecurityEventService,
                private http: Http,
-               private titleService: Title) {
-    const applicationNameResponse: Observable<Response> = this.http.get('rest/application/name');
+               private domainService: DomainService) {
 
-    applicationNameResponse.subscribe((name: Response) => {
-      this.titleService.setTitle(name.json());
-    });
+    this.domainService.setAppTitle();
 
     const fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
 

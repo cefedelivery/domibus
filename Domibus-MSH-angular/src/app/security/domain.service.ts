@@ -4,6 +4,7 @@ import {Observable} from 'rxjs/Observable';
 import {ReplaySubject} from 'rxjs';
 import 'rxjs/add/operator/map';
 import {Domain} from './domain';
+import {Title} from '@angular/platform-browser';
 
 @Injectable()
 export class DomainService {
@@ -15,7 +16,7 @@ export class DomainService {
   private isMultiDomainSubject: ReplaySubject<boolean>;
   private domainSubject: ReplaySubject<Domain>;
 
-  constructor (private http: Http) {
+  constructor (private http: Http, private titleService: Title) {
   }
 
   isMultiDomain (): Observable<boolean> {
@@ -60,6 +61,16 @@ export class DomainService {
       if (this.domainSubject) {
         this.domainSubject.next(domain);
       }
+    });
+  }
+
+  private getTitle (): Promise<string> {
+    return this.http.get('rest/application/name').map((resp: Response) => resp.json()).toPromise();
+  }
+
+  setAppTitle() {
+    this.getTitle().then((title) => {
+      this.titleService.setTitle(title);
     });
   }
 
