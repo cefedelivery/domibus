@@ -43,7 +43,8 @@ public class AlertServiceImpl implements AlertService {
     static final String REPORTING_TIME = "REPORTING_TIME";
 
     static final String ALERT_SELECTOR = "alert";
-    public static final String DOMIBUS_ALERT_RETRY_TIME = "domibus.alert.retry.time";
+
+    static final String DOMIBUS_ALERT_RETRY_TIME = "domibus.alert.retry.time";
 
     @Autowired
     private EventDao eventDao;
@@ -86,8 +87,7 @@ public class AlertServiceImpl implements AlertService {
         final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
         final AlertLevel alertLevel = multiDomainAlertConfigurationService.getAlertLevel(convertedAlert);
         alert.setAlertLevel(alertLevel);
-        LOG.debug("Saving new alert:\n" +
-                "[]\n", alert);
+        LOG.debug("Saving new alert:\n[{}]\n", alert);
         alertDao.create(alert);
         return domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
     }
@@ -147,7 +147,7 @@ public class AlertServiceImpl implements AlertService {
             alertEntity.setAttempts(attempts);
             alertEntity.setAlertStatus(RETRY);
         }
-        LOG.debug("Alert[{}]: change status to:[]",alert.getEntityId(),alertEntity.getAlertStatus());
+        LOG.debug("Alert[{}]: change status to:[{}]",alert.getEntityId(),alertEntity.getAlertStatus());
         alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
     }
 
