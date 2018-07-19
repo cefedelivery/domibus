@@ -21,7 +21,6 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
 
     /**
      * Get the domain associated to the provided user from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
      * @return
      */
@@ -33,7 +32,6 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
 
     /**
      * Get the preferred domain associated to the super user from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
      * @return
      */
@@ -44,7 +42,6 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
 
     /**
      * Get all super users from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
      * @return
      */
