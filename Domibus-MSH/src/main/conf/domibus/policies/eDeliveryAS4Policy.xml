@@ -2,7 +2,7 @@
 Reference to a Subject Key Identifier
 The <wsse:SecurityTokenReference> element contains a <wsse:KeyIdentifier> element that specifies the
 token data by means of a X.509 SubjectKeyIdentifier reference.
-A subject key identifier MAY only be used to reference an X.509v3 certificate.”
+A subject key identifier MAY only be used to reference an X.509v3 certificate.
 -->
 
 <wsp:Policy xmlns:wsp="http://www.w3.org/ns/ws-policy"
