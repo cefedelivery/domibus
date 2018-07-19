@@ -2,7 +2,6 @@ package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
@@ -15,11 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Cosmin Baciu
+ * @author Ion Perpegel(nperpion)
  * @since 4.0
  */
 @Service
@@ -71,7 +69,6 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
         String domain = domainTaskExecutor.submit(() -> userDomainDao.findPreferredDomainByUser(user));
         LOG.debug("Found preferred domain [{}] for user [{}]", domain, user);
         return domain;
-
     }
 
     /**
@@ -136,8 +133,6 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     public List<String> getAllUserNames() {
         LOG.debug("Get all users from general schema");
 
-        return domainTaskExecutor.submit(() -> {
-            return userDomainDao.listAllUserNames();
-        });
+        return domainTaskExecutor.submit(() -> userDomainDao.listAllUserNames());
     }
 }
