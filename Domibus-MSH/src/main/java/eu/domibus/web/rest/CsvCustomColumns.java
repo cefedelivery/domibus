@@ -34,6 +34,7 @@ public enum CsvCustomColumns {
     private static final Map<String, String> jmsMap;
     static {
         jmsMap = new HashMap<>();
+        jmsMap.put("id".toUpperCase(), "ID");
         jmsMap.put("type".toUpperCase(), "JMS Type");
         jmsMap.put("Timestamp".toUpperCase(), "Time");
         jmsMap.put("CustomProperties".toUpperCase(), "Custom prop");

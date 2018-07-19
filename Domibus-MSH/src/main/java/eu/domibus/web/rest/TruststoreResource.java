@@ -84,6 +84,9 @@ public class TruststoreResource {
         String resultText;
         final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
 
+        // excluding unneeded columns
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.TRUSTSTORE_RESOURCE.getExcludedItems());
+
         // needed for empty csv file purposes
         csvServiceImpl.setClass(TrustStoreRO.class);
 

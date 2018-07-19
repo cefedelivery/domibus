@@ -142,7 +142,7 @@ public class JmsResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jms"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jmsmonitoring"))
                 .body(resultText);
     }
 
