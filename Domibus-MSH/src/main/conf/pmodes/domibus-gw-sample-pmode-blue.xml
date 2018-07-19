@@ -21,15 +21,11 @@
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
 			<party name="red_gw"
-				    endpoint="http://<red_hostname>:8080/domibus/services/msh"
-					allowChunking="false"
->
+				    endpoint="http://<red_hostname>:8080/domibus/services/msh">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="blue_gw" 
-					endpoint="http://<blue_hostname>:8080/domibus/services/msh"
-					allowChunking="false"
->
+					endpoint="http://<blue_hostname>:8080/domibus/services/msh">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
@@ -48,7 +44,7 @@
 					key="finalRecipient" 
 					datatype="string" 
 					required="true"/>
-			<propertySet name="ecodexPropertySet">
+			<propertySet name="eDeliveryPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
 			</propertySet>
@@ -62,8 +58,7 @@
 					cid="cid:attachment" 
 					required="false"
 					mimeType="application/octet-stream"/>
-			<payloadProfile name="MessageProfile" 
-					maxSize="40894464">
+			<payloadProfile name="MessageProfile">
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
 			</payloadProfile>
@@ -76,9 +71,9 @@
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" 
 					errorAsResponse="true" 
-					businessErrorNotifyProducer="false"
-					businessErrorNotifyConsumer="false" 
-					deliveryFailureNotifyProducer="false"/>
+					businessErrorNotifyProducer="true"
+					businessErrorNotifyConsumer="true"
+					deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
 		<agreements>
             <agreement name="agreement1" value="A1" type=""/>
@@ -97,7 +92,6 @@
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
 			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
-			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase1tc1Action" 
@@ -107,7 +101,7 @@
 					reliability="AS4Reliability" 
 					security="eDeliveryAS4Policy"
 					receptionAwareness="receptionAwareness" 
-					propertySet="ecodexPropertySet"
+					propertySet="eDeliveryPropertySet"
 					payloadProfile="MessageProfile"
 					errorHandling="demoErrorHandling"
 					compressPayloads="true"/>
@@ -118,7 +112,7 @@
 							  reliability="AS4Reliability"
 							  security="eDeliveryAS4Policy"
 							  receptionAwareness="receptionAwareness"
-							  propertySet="ecodexPropertySet"
+							  propertySet="eDeliveryPropertySet"
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
@@ -129,7 +123,7 @@
 							  reliability="AS4Reliability"
 							  security="eDeliveryAS4Policy"
 							  receptionAwareness="receptionAwareness"
-							  propertySet="ecodexPropertySet"
+							  propertySet="eDeliveryPropertySet"
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
