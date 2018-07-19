@@ -230,7 +230,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 mpc,
                 messageLog.getReceived(),
                 staledDate,
-                messageLog.getNextAttempt(),
+                messageLog.getNextAttempt()==null?new Date():messageLog.getNextAttempt(),
                 messageLog.getSendAttempts(),
                 messageLog.getSendAttemptsMax());
     }
@@ -268,7 +268,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
-        if (userMessageLog.getReceived().compareTo(userMessageLog.getNextAttempt()) < 0) {
+        if (userMessageLog.getNextAttempt() !=null) {
             nextAttempt = userMessageLog.getNextAttempt();
         }
         userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
