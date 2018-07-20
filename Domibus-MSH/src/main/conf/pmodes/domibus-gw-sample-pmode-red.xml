@@ -58,7 +58,7 @@
 					 cid="cid:attachment"
 					 required="false"
 					 mimeType="application/octet-stream"/>
-			<payloadProfile name="MessageProfile">
+			<payloadProfile name="MessageProfile" maxSize="40894464"> <!-- maxSize is currently ignored -->
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
 			</payloadProfile>
@@ -76,9 +76,7 @@
 						   deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
 		<agreements>
-			<agreement name="agreement1" value="A1" type=""/>
-			<agreement name="agreement2" value="A2" type=""/>
-			<agreement name="agreement3" value="A3" type=""/>
+			<agreement name="agreement1" value="A1" type="T1"/>
 		</agreements>
 		<services>
 			<service name="testService1" value="bdx:noprocess" type="tc1"/>
@@ -86,7 +84,6 @@
 		</services>
 		<actions>
 			<action name="tc1Action" value="TC1Leg1"/>
-			<action name="tc2Action" value="TC2Leg1"/>
 			<action name="testAction" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test"/>
 		</actions>
 		<as4>
@@ -97,17 +94,6 @@
 			<legConfiguration name="pushTestcase1tc1Action"
 							  service="testService1"
 							  action="tc1Action"
-							  defaultMpc="defaultMpc"
-							  reliability="AS4Reliability"
-							  security="eDeliveryAS4Policy"
-							  receptionAwareness="receptionAwareness"
-							  propertySet="eDeliveryPropertySet"
-							  payloadProfile="MessageProfile"
-							  errorHandling="demoErrorHandling"
-							  compressPayloads="true"/>
-			<legConfiguration name="pushTestcase1tc2Action"
-							  service="testService1"
-							  action="tc2Action"
 							  defaultMpc="defaultMpc"
 							  reliability="AS4Reliability"
 							  security="eDeliveryAS4Policy"
@@ -129,7 +115,6 @@
 							  compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc1Process"
-				 agreement=""
 				 mep="oneway"
 				 binding="push"
 				 initiatorRole="defaultInitiatorRole"
@@ -144,7 +129,6 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase1tc1Action"/>
-				<leg name="pushTestcase1tc2Action"/>
 				<leg name="testServiceCase"/>
 			</legs>
 		</process>

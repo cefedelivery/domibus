@@ -36,7 +36,7 @@
 		<payloadProfiles>
 			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
 			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf"/>
-			<payloadProfile name="MessageProfile">
+			<payloadProfile name="MessageProfile" maxSize="40894464"> <!-- maxSize is currently ignored -->
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
 			</payloadProfile>
@@ -47,15 +47,11 @@
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="true" businessErrorNotifyConsumer="true" deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
-		<agreements>
-			<agreement name="agreementEmpty" value="" type=""/>
-		</agreements>
 		<services>
 			<service name="testService1" value="urn:www.cenbii.eu:profile:bii04:ver1.0" type="cenbii-procid-ubl"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="ehealth-resid-qns::urn::epsos##services:extended:epsos::107"/>
-			<action name="tc2Action" value="TC2Leg1"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -63,9 +59,8 @@
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_BST" receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase2tc2Action" service="testService2" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_BST" receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
-		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc1Process" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="sender"/>
 			</initiatorParties>
