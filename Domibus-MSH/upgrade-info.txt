@@ -9,7 +9,7 @@ Domibus 4.0 (from 3.3):
                          Modify file "\conf\domibus\domibus.properties":
                               o add the folloging property:
                                   domibus.jms.queue.alert=domibus.internal.alert.queue
-                              o in file "cef_edelivery_path\domibus\conf\domibus\insternal\activemq.xml":
+                              o in file "cef_edelivery_path\domibus\conf\domibus\internal\activemq.xml":
                                   - in the destinations section add the following queue:
                                              .............................
                                              <destinations>
