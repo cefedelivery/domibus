@@ -7,16 +7,22 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
+import eu.domibus.core.alerts.model.service.ExpiredCertificateModuleConfiguration;
+import eu.domibus.core.alerts.model.service.ImminentExpirationCertificateModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.web.rest.ro.TrustStoreRO;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -32,6 +38,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.*;
+
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 
@@ -62,6 +69,15 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Autowired
     private CertificateDao certificateDao;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private PModeProvider pModeProvider;
 
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
@@ -101,7 +117,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
-            LOG.warn("Certificate is not valid: " + cert);
+            LOG.warn("Certificate is not valid:[{}] ",cert);
             return false;
         }
         try {
@@ -127,7 +143,7 @@ public class CertificateServiceImpl implements CertificateService {
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is: " + dn);
+        LOG.debug("DN is:[{}]",dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
             if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
@@ -187,6 +203,7 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCertificateAndLogRevocation(final Domain currentDomain) {
         final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(currentDomain);
         final KeyStore keyStore = multiDomainCertificateProvider.getKeyStore(currentDomain);
@@ -203,8 +220,73 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
             throw new DomibusCertificateException("Could not load key store", e);
         }
-
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendCertificateAlerts() {
+        sendCertificateImminentExpirationAlerts();
+        sendCertificateExpiredAlerts();
+    }
+
+    protected void sendCertificateImminentExpirationAlerts() {
+        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
+        final Boolean activeModule = imminentExpirationCertificateConfiguration.isActive();
+        LOG.debug("Certificate Imminent expiration alert module activated:[{}]", activeModule);
+        if (!activeModule) {
+            return;
+        }
+        final String accessPoint = getAccesPointName();
+        final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
+        final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
+
+        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
+        final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
+
+        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
+        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset).forEach(certificate -> {
+            certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+            certificateDao.saveOrUpdate(certificate);
+            final String alias = certificate.getAlias();
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueImminentCertificateExpirationEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+        });
+    }
+
+
+
+    protected void sendCertificateExpiredAlerts() {
+        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+        final boolean activeModule = expiredCertificateConfiguration.isActive();
+        LOG.debug("Certificate expired alert module activated:[{}]", activeModule);
+        if (!activeModule) {
+            return;
+        }
+        final String accessPoint = getAccesPointName();
+        final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
+        final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
+
+        Date endNotification = LocalDateTime.now().minusDays(revokedDuration).toDate();
+        Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
+
+        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
+        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
+            certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+            certificateDao.saveOrUpdate(certificate);
+            final String alias = certificate.getAlias();
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+        });
+    }
+
+    private String getAccesPointName() {
+        String partyName = null;
+        if (pModeProvider.isConfigurationLoaded()) {
+            partyName = pModeProvider.getGatewayParty().getName();
+        }
+        return partyName;
+    }
+
 
     /**
      * Create or update certificate in the db.
@@ -274,16 +356,17 @@ public class CertificateServiceImpl implements CertificateService {
      * @return the certificate status.
      */
     protected CertificateStatus getCertificateStatus(Date notAfter) {
-        int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
+        int revocationOffsetInDays = Integer.parseInt(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
-            revocationOffsetInDays = Integer.valueOf(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+            revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
+            LOG.trace("Property:[{}] is invalid, should be a number.",REVOCATION_TRIGGER_OFFSET_PROPERTY,n);
 
         }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
         LocalDateTime certificateEnd = LocalDateTime.fromDateFields(notAfter);
-        LOG.debug("Current date[{}], offset date[{}], certificate end date:[{}]",now,offsetDate,certificateEnd);
+        LOG.debug("Current date[{}], offset date[{}], certificate end date:[{}]", now, offsetDate, certificateEnd);
         if (now.isAfter(certificateEnd)) {
             return CertificateStatus.REVOKED;
         } else if (offsetDate.isAfter(certificateEnd)) {
@@ -333,15 +416,14 @@ public class CertificateServiceImpl implements CertificateService {
 
     public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
         X509Certificate cert = loadCertificateFromString(certificateContent);
-        TrustStoreEntry res = createTrustStoreEntry(cert);
-        return  res;
+        return createTrustStoreEntry(cert);
     }
 
     public TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException {
         X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
         LOG.debug("get certificate from truststore for [{}] = [{}] ", partyName, cert);
         TrustStoreEntry res = createTrustStoreEntry(cert);
-        if(res != null)
+        if (res != null)
             res.setFingerprints(extractFingerprints(cert));
         return res;
     }
@@ -351,7 +433,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     private TrustStoreEntry createTrustStoreEntry(String alias, X509Certificate certificate) {
-        if(certificate == null)
+        if (certificate == null)
             return null;
         return new TrustStoreEntry(
                 alias,
@@ -361,8 +443,8 @@ public class CertificateServiceImpl implements CertificateService {
                 certificate.getNotAfter());
     }
 
-    private String extractFingerprints(final X509Certificate certificate){
-        if(certificate == null)
+    private String extractFingerprints(final X509Certificate certificate) {
+        if (certificate == null)
             return null;
 
         MessageDigest md = null;
@@ -386,3 +468,5 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
 }
+
+

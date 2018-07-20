@@ -125,9 +125,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-            final Schema schema = new Schema();
-            schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();
@@ -136,18 +133,10 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 property.setType(entry.getType());
                 partProperties.getProperty().add(property);
             }
-            if (payload.getDescription() != null) {
-                final Description description = new Description();
-                description.setValue(payload.getDescription().getValue());
-                description.setLang(payload.getDescription().getLang().getLanguage());
-                partInfo.setDescription(description);
-            }
             partInfo.setPartProperties(partProperties);
             payloadInfo.getPartInfo().add(partInfo);
             result.setPayloadInfo(payloadInfo);
         }
-
-
     }
 
 
@@ -192,11 +181,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                         properties.add(new Submission.TypedProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType())));
                     }
                 }
-                Submission.Description description = null;
-                if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trim(partInfo.getDescription().getValue()));
-                }
-                result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
+                result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), null, null);
             }
         }
 

@@ -125,9 +125,6 @@ public class PropertyProfileValidator {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "MessageProperties is REQUIRED in the four corner model.", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
         }
 
-        String a = userMessageDefaultServiceHelper.getOriginalSender(messaging.getUserMessage());
-        String b = userMessageDefaultServiceHelper.getOriginalSender(null);
-
         if(StringUtils.isEmpty(userMessageDefaultServiceHelper.getOriginalSender(messaging.getUserMessage())) || StringUtils.isEmpty(userMessageDefaultServiceHelper.getFinalRecipient(messaging.getUserMessage()))) {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "OriginalSender and FinalRecipient are REQUIRED properties in the four corner model.", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
         }

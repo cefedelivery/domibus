@@ -674,11 +674,6 @@
             <ns:PayloadInfo>\r
                <!--1 or more repetitions:-->\r
                <ns:PartInfo href="?">\r
-                  <!--You may enter the following 3 items in any order-->\r
-                  <!--Optional:-->\r
-                  <ns:Schema location="?" version="?" namespace="?"/>\r
-                  <!--Optional:-->\r
-                  <ns:Description xml:lang="?">?</ns:Description>\r
                   <!--Optional:-->\r
                   <ns:PartProperties>\r
                      <!--1 or more repetitions:-->\r
@@ -4325,7 +4320,7 @@ test.finalize();
          <messageID>-Dom091-</messageID>\r
       </_1:retrieveMessageRequest>\r
    </soap:Body>\r
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="e94010e0-4889-42b6-b1f0-40e061f77c3e"/><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="dbb51f66-3fef-4299-8e7e-b70fbe1757cc"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="8cb80ec5-cdc8-4533-ac3f-f1d3b42db788"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="3d56ae27-a9e9-4821-a542-aac3ed8fd2ed"><con:configuration><token>No message with id</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains 1" id="5af843b0-9817-49c6-9d89-24b443afb8b1"><con:configuration><token>pending for download</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="e94010e0-4889-42b6-b1f0-40e061f77c3e"/><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="dbb51f66-3fef-4299-8e7e-b70fbe1757cc"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="8cb80ec5-cdc8-4533-ac3f-f1d3b42db788"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="3d56ae27-a9e9-4821-a542-aac3ed8fd2ed"><con:configuration><token>Message with id</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains 1" id="5af843b0-9817-49c6-9d89-24b443afb8b1"><con:configuration><token>was not found</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/retrieveMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>
 //ExcelReporting.reportTestCase(testRunner, log)</con:tearDownScript><con:properties/>
         <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f84a4b44-9f2f-41e5-aeb5-ad4b50027daf</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Dom092-Push-Download Message-Space-Tab" searchProperties="true" id="6a57dd63-8887-4529-b18b-f6caf26dedaf">
             <con:settings/>
@@ -8788,7 +8783,7 @@ test.finalize()
    </soap:Body>\r
 </soap:Envelope>]]></con:request><con:assertion type="SOAP Response" name="SOAP Response" id="625d333e-06a2-4c7b-ab0b-4130871f4912"/><con:assertion type="GroovyScriptAssertion" name="Script Assertion" id="5d9f3b62-d6c1-442b-978d-aef6231971cb"><con:configuration><scriptText>def test = new Domibus(log,messageExchange,context);
 test.verifyMessagePresence(0,0,"-Dom370-");
-test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="8554764b-3775-441b-be4a-921983c46929"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="58652b32-898a-4a24-9ca0-1782161c68e5"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="6db97034-0ab6-45ea-9996-403641225834"><con:configuration><token>(?s).*FinalRecipient.*[Rr][Ee][Qq][Uu][Ii][rR][eE][dD].*[Ff]our.*[Cc]orner.*[Mm]odel.*</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
+test.finalize();</scriptText></con:configuration></con:assertion><con:assertion type="Not SOAP Fault Assertion" name="SOAP Fault" id="8554764b-3775-441b-be4a-921983c46929"/><con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="58652b32-898a-4a24-9ca0-1782161c68e5"><con:configuration><codes>500</codes></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains" id="6db97034-0ab6-45ea-9996-403641225834"><con:configuration><token>(?s).*FinalRecipient.*[Rr][Ee][Qq][Uu][Ii][rR][eE][dD].*[Ff]our.*[Cc]orner.*[Mm]odel.*</token><ignoreCase>false</ignoreCase><useRegEx>true</useRegEx></con:configuration></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:tearDownScript>def test = new Domibus(log,null,context)
 def msgID = context.expand( '${Submit Message#Response#//messageID}' )
 test.cleanDBMessageID(msgID)
 test.finalize()
@@ -15612,7 +15607,6 @@ Domibus.uploadPmode("receiver","default","\\cloud\\weblogic\\red\\domibus-pmode-
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">
-               <ns:Description xml:lang="en-US">As4Message</ns:Description>
                   <ns:PartProperties>
                      <ns:Property name="MimeType">application/xml</ns:Property>
                   </ns:PartProperties>
@@ -15654,7 +15648,6 @@ test.finalize();</scriptText></con:configuration></con:assertion><con:credential
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">
-                  <ns:Description xml:lang="en-US">As4Message</ns:Description>
                   <ns:PartProperties>
                      <ns:Property name="MimeType">application/xml</ns:Property>
                   </ns:PartProperties>

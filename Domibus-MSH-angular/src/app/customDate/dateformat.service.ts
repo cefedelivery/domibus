@@ -4,14 +4,14 @@ import {Injectable} from "@angular/core";
 export class DateFormatService {
 
   private static getFormattedDate(date: Date): string {
-    return ("0" + date.getDate()).slice(-2).toString()+"-"+
+    return date.getFullYear().toString()+"-"+
       ("0" + (date.getMonth() + 1)).slice(-2).toString()+"-"+
-      date.getFullYear().toString();
+      ("0" + date.getDate()).slice(-2).toString();
   }
 
   private static getFormattedTime(date: Date): string {
-    return ("0" + date.getHours()).slice(-2).toString()+"h"+
-      ("0" + date.getMinutes()).slice(-2).toString()+"m"+
+    return ("0" + date.getHours()).slice(-2).toString()+
+      ("0" + date.getMinutes()).slice(-2).toString()+
       ("0" + date.getSeconds()).slice(-2).toString();
   }
 

@@ -107,6 +107,7 @@ public class UpdateRetryLoggingServiceTest {
         updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
 
         assertEquals(3, userMessageLog.getSendAttempts());
+        assertEquals(new Date(FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016), userMessageLog.getNextAttempt());
 
         new Verifications() {{
             messageLogService.setMessageAsSendFailure(messageId);

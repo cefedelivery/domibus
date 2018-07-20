@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -170,6 +171,25 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return transformer.transformFromMessaging(userMessage);
     }
 
+    protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, List<String> recipients) {
+        if (authOriginalUser != null) {
+            LOG.debug("OriginalUser is [{}]", authOriginalUser);
+            /* check the message belongs to the authenticated user */
+            boolean found = false;
+            for(String recipient : recipients) {
+                String originalUser = getOriginalUser(userMessage, recipient);
+                if (originalUser != null && originalUser.equals(authOriginalUser)) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                LOG.debug("User [{}] is trying to submit/access a message having as final recipients: [{}]", authOriginalUser, recipients);
+                throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
+            }
+        }
+    }
+
     protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
             LOG.debug("OriginalUser is [{}]", authOriginalUser);
@@ -214,11 +234,13 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         // check if user can get the status of that message (only admin or original users are authorized to do that)
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
+        List<String> recipients = new ArrayList<>();
+        recipients.add(MessageConstants.ORIGINAL_SENDER);
+        recipients.add(MessageConstants.FINAL_RECIPIENT);
+        validateOriginalUser(userMessage, originalUser, recipients);
 
         return userMessageLogDao.getMessageStatus(messageId);
     }
-
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
@@ -342,6 +364,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             Party gatewayParty = pModeProvider.getGatewayParty();
             backendMessageValidator.validateInitiatorParty(gatewayParty, from);
             backendMessageValidator.validateResponderParty(gatewayParty, to);
+
+            backendMessageValidator.validatePayloads(userMessage.getPayloadInfo());
 
             return to;
         } catch (IllegalArgumentException runTimEx) {

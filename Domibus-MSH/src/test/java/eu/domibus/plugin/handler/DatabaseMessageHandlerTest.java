@@ -1213,7 +1213,7 @@ public class DatabaseMessageHandlerTest {
             authUtils.isUnsecureLoginAllowed();
             result = false;
 
-            dmh.validateOriginalUser((UserMessage)any, anyString, anyString);
+            dmh.validateOriginalUser((UserMessage)any, anyString, (List<String>)any);
             result = new AccessDeniedException("");
         }};
 

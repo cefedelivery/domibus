@@ -30,21 +30,21 @@ export class PartyComponent implements OnInit, DirtyOperations {
   partyID: string;
   process: string;
 
-  rows: PartyResponseRo[] = [];
-  allRows: PartyResponseRo[] = [];
-  selected: PartyResponseRo[] = [];
+  rows: PartyResponseRo[];
+  allRows: PartyResponseRo[];
+  selected: PartyResponseRo[];
 
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
-  offset: number = 0;
+  offset: number;
   pageSize: number;
-  count: number = 0;
-  loading: boolean = false;
+  count: number;
+  loading: boolean;
 
-  newParties: PartyResponseRo[] = [];
-  updatedParties: PartyResponseRo[] = [];
-  deletedParties: PartyResponseRo[] = [];
+  newParties: PartyResponseRo[];
+  updatedParties: PartyResponseRo[];
+  deletedParties: PartyResponseRo[];
 
   allProcesses: string[];
 
@@ -54,6 +54,19 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit () {
+
+    this.rows = [];
+    this.allRows = [];
+    this.selected = [];
+
+    this.offset = 0;
+    this.count = 0;
+    this.loading = false;
+
+    this.newParties = [];
+    this.updatedParties = [];
+    this.deletedParties = [];
+
     this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
     this.listPartiesAndProcesses();
@@ -74,6 +87,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   listPartiesAndProcesses () {
+    this.offset = 0;
     return Observable.forkJoin([
       this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process),
       this.partyService.listProcesses()
@@ -93,7 +107,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
           this.resetDirty();
         },
         error => {
-          this.alertService.error('Could not load parties' + error);
+          this.alertService.error('Could not load parties due to: "' + error + '"');
           this.loading = false;
         }
       );

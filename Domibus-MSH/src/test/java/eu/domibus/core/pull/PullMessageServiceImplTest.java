@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 @RunWith(JMockit.class)
@@ -80,15 +81,7 @@ public class PullMessageServiceImplTest {
     }
 
     @Test
-    public void hasAttemptsLeft() {
-    }
-
-    @Test
     public void updatePullMessageAfterReceipt() {
-    }
-
-    @Test
-    public void addPullMessageLock() {
     }
 
     @Test
@@ -243,6 +236,8 @@ public class PullMessageServiceImplTest {
             result = messageId;
             messageLog.getMpc();
             result = mpc;
+            messageLog.getNextAttempt();
+            result=null;
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             result = pmodeKey;
             pModeProvider.getLegConfiguration(pmodeKey);
@@ -258,7 +253,7 @@ public class PullMessageServiceImplTest {
             assertEquals(mpc, messagingLock.getMpc());
             assertEquals(messageId, messagingLock.getMessageId());
             assertEquals(staledDate, messagingLock.getStaled());
-
+            assertNotNull(messagingLock.getNextAttempt());
         }};
     }
 

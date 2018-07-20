@@ -1,10 +1,11 @@
-import {Component, OnInit, ViewChild} from "@angular/core";
-import {SecurityService} from "./security/security.service";
-import {Router, RouterOutlet} from "@angular/router";
-import {SecurityEventService} from "./security/security.event.service";
-import {Title} from "@angular/platform-browser";
-import {Http, Response} from "@angular/http";
-import {Observable} from "rxjs/Observable";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {SecurityService} from './security/security.service';
+import {NavigationStart, Router, RouterOutlet} from '@angular/router';
+import {SecurityEventService} from './security/security.event.service';
+import {Title} from '@angular/platform-browser';
+import {Http, Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import {DomainService} from './security/domain.service';
 
 @Component({
   selector: 'app-root',
@@ -13,73 +14,74 @@ import {Observable} from "rxjs/Observable";
 })
 export class AppComponent implements OnInit {
 
-  isAdmin: boolean;
   fullMenu: boolean = true;
-  menuClass: string = this.fullMenu ? "menu-expanded" : "menu-collapsed";
+  menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
   fourCornerEnabled: boolean = true;
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
 
-  constructor(private securityService: SecurityService,
-              private router: Router,
-              private securityEventService: SecurityEventService,
-              private http: Http,
-              private titleService: Title) {
-    let applicationNameResponse: Observable<Response> = this.http.get('rest/application/name');
+  constructor (private securityService: SecurityService,
+               private router: Router,
+               private securityEventService: SecurityEventService,
+               private http: Http,
+               private domainService: DomainService) {
 
-    applicationNameResponse.subscribe((name: Response) => {
-      this.titleService.setTitle(name.json());
-    });
+    this.domainService.setAppTitle();
 
-    let fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
+    const fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
 
     fourCornerModelResponse.subscribe((name: Response) => {
       this.fourCornerEnabled = name.json();
     });
   }
 
-  ngOnInit() {
-    this.securityEventService.onLoginSuccessEvent().subscribe(
-      data => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
-      });
-
-    this.securityEventService.onLoginErrorEvent().subscribe(
-      error => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
-      });
-
+  ngOnInit () {
     this.securityEventService.onLogoutSuccessEvent().subscribe(
       data => {
-        this.isAdmin = this.securityService.isCurrentUserAdmin();
         this.router.navigate(['/login']);
       });
+
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        if (event.url == '/login') {
+          const currentUser = this.securityService.getCurrentUser();
+          if (!!currentUser) {
+            this.router.navigate(['/']);
+          }
+
+        }
+      }
+    });
   }
 
-  hasAdmin(): boolean {
+  isAdmin (): boolean {
     return this.securityService.isCurrentUserAdmin();
   }
 
-  get currentUser(): string {
-    let user = this.securityService.getCurrentUser();
-    return user ? user.username : "";
+  isUser (): boolean {
+    return !!this.currentUser;
   }
 
-  logout(event: Event): void {
+  get currentUser (): string {
+    const user = this.securityService.getCurrentUser();
+    return user ? user.username : '';
+  }
+
+  logout (event: Event): void {
     event.preventDefault();
-    this.router.navigate(['/login']).then((ok) => {
+    this.router.navigate(['/login'], {queryParams: {force: true}}).then((ok) => {
       if (ok) {
         this.securityService.logout();
       }
     })
   }
 
-  toggleMenu() {
+  toggleMenu () {
     this.fullMenu = !this.fullMenu
-    this.menuClass = this.fullMenu ? "menu-expanded" : "menu-collapsed"
+    this.menuClass = this.fullMenu ? 'menu-expanded' : 'menu-collapsed'
     setTimeout(() => {
-      var evt = document.createEvent("HTMLEvents")
+      var evt = document.createEvent('HTMLEvents')
       evt.initEvent('resize', true, false)
       window.dispatchEvent(evt)
     }, 500)

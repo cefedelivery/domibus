@@ -53,7 +53,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
         try {
             result = getCurrentDomain();
         } catch (DomainException e) {
-            LOG.trace("Could not get current domain", e);
+            LOG.trace("Could not get current domain [{}]", e.getMessage());
         }
         return result;
 

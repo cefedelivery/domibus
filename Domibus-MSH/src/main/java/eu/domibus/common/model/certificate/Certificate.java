@@ -14,6 +14,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "TB_CERTIFICATE")
 @NamedQueries({
+        @NamedQuery(name = "Certificate.findExpiredToNotifyCertificate", query = "FROM Certificate c where (c.alertExpiredNotificationDate is null OR c.alertExpiredNotificationDate<=:NEXT_NOTIFICATION) AND c.certificateStatus='REVOKED' AND c.notAfter>=:END_NOTIFICATION"),
+        @NamedQuery(name = "Certificate.findImminentExpirationToNotifyCertificate", query = "FROM Certificate c where (c.alertImminentNotificationDate is null OR c.alertImminentNotificationDate<=:NEXT_NOTIFICATION) AND c.certificateStatus!='REVOKED' AND c.notAfter<=:OFFSET_DATE"),
         @NamedQuery(name = "Certificate.findByAlias", query = "FROM Certificate c where c.alias=:ALIAS"),
         @NamedQuery(name = "Certificate.findByAliasAndType", query = "FROM Certificate c where c.alias=:ALIAS AND c.certificateType=:CERTIFICATE_TYPE"),
         @NamedQuery(name = "Certificate.findByStatusAndNotificationDate", query = "FROM Certificate c where c.certificateStatus=:CERTIFICATE_STATUS AND (c.lastNotification is null OR c.lastNotification<:CURRENT_DATE)")
@@ -37,6 +39,14 @@ public class Certificate extends AbstractBaseEntity {
     @Column(name = "REVOKE_NOTIFICATION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastNotification;
+
+    @Column(name = "ALERT_IMM_NOTIFICATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date alertImminentNotificationDate;
+
+    @Column(name = "ALERT_EXP_NOTIFICATION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date alertExpiredNotificationDate;
 
     @Column(name = "CERTIFICATE_TYPE")
     @Enumerated(EnumType.STRING)
@@ -90,6 +100,22 @@ public class Certificate extends AbstractBaseEntity {
 
     public void setCertificateStatus(CertificateStatus certificateStatus) {
         this.certificateStatus = certificateStatus;
+    }
+
+    public Date getAlertImminentNotificationDate() {
+        return alertImminentNotificationDate;
+    }
+
+    public void setAlertImminentNotificationDate(Date alertNotification) {
+        this.alertImminentNotificationDate = alertNotification;
+    }
+
+    public Date getAlertExpiredNotificationDate() {
+        return alertExpiredNotificationDate;
+    }
+
+    public void setAlertExpiredNotificationDate(Date alertExpiredNotificationDate) {
+        this.alertExpiredNotificationDate = alertExpiredNotificationDate;
     }
 
     public void setCertificateType(CertificateType certificateType) {
