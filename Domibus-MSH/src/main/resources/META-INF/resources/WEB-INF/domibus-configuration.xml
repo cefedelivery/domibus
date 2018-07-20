@@ -80,7 +80,7 @@
     <bean id="uiReplicationTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="uiReplicationJob"/>
-        <property name="cronExpression" value="0 02 10 * * ? *"/>
+        <property name="cronExpression" value="${domibus.ui.replication.sync.cron}"/>
         <property name="startDelay" value="30000"/>
     </bean>
 
