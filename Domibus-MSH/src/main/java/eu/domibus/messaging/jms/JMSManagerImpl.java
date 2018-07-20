@@ -195,6 +195,7 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public JmsMessage consumeMessage(String source, String messageId) {
+        messageId = StringUtils.replaceAll(messageId, "'", "''");
         InternalJmsMessage internalJmsMessage = internalJmsManager.consumeMessage(source, messageId);
         return jmsMessageMapper.convert(internalJmsMessage);
     }
