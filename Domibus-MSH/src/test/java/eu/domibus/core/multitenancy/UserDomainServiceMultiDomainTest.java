@@ -11,6 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
@@ -40,24 +43,66 @@ public class UserDomainServiceMultiDomainTest {
     UserDomainServiceMultiDomainImpl userDomainServiceMultiDomainImpl;
 
     @Test
-    public void testGetDomainForUser() {
+    public void testGetDomainForUser( ) {
         String user = "user1";
         String domain = "domain1";
-        Callable<String> f;
 
         new Expectations() {{
-            //domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
-            //result = userDomainDao.findDomainByUser(user);
-            domainTaskExecutor.submit((Callable<String>) any);
+            userDomainDao.findDomainByUser(user);
             result = domain;
+        }};
 
-//            userDomainDao.findDomainByUser(user);
-//            result = domain;
+        String dom = userDomainDao.findDomainByUser(user);
+
+        new Expectations() {{
+//            domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
+            domainTaskExecutor.submit((Callable<String>) any);
+            result = dom;
         }};
 
         String result = userDomainServiceMultiDomainImpl.getDomainForUser(user);
-        assertEquals(result, domain);
+        assertEquals(domain, result);
     }
 
+    @Test
+    public void testGetPreferredDomainForUser( ) {
+        String user = "user1";
+        String domain = "default";
 
+        new Expectations() {{
+            userDomainDao.findPreferredDomainByUser(user);
+            result = domain;
+        }};
+
+        String dom = userDomainDao.findPreferredDomainByUser(user);
+
+        new Expectations() {{
+//            domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
+            domainTaskExecutor.submit((Callable<String>) any);
+            result = dom;
+        }};
+
+        String result = userDomainServiceMultiDomainImpl.getPreferredDomainForUser(user);
+        assertEquals(domain, result);
+    }
+
+    @Test
+    public void testGetAllUserNames( ) {
+        List<String> userNames = Arrays.asList("user1", "user2", "user3");
+
+        new Expectations() {{
+            userDomainDao.listAllUserNames();
+            result = userNames;
+        }};
+
+        List<String> userNames2 = userDomainDao.listAllUserNames();
+
+        new Expectations() {{
+            domainTaskExecutor.submit((Callable<String>) any);
+            result = userNames2;
+        }};
+
+        List<String> result = userDomainServiceMultiDomainImpl.getAllUserNames();
+        assertEquals(userNames, result);
+    }
 }
