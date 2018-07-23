@@ -91,6 +91,11 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Column(name = "REF_TO_MESSAGE_ID")
     private String refToMessageId;
 
+    @Version
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "VERSION")
+    private Date version;
+
 
     public String getMessageId() {
         return messageId;
@@ -242,5 +247,13 @@ public class UIMessageEntity extends AbstractBaseEntity {
 
     public void setRefToMessageId(String refToMessageId) {
         this.refToMessageId = refToMessageId;
+    }
+
+    public Date getVersion() {
+        return version;
+    }
+
+    public void setVersion(Date version) {
+        this.version = version;
     }
 }

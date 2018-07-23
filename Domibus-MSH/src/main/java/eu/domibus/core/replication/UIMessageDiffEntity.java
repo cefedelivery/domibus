@@ -15,10 +15,14 @@ import java.util.Date;
 /**
  * It maps to {@code V_MESSAGE_UI_DIFF} view which tracks differences
  * between native tables and {@code TB_MESSAGE_UI}
- *
  */
 @Immutable
-@Entity (name = "V_MESSAGE_UI_DIFF")
+@Entity
+@Table(name = "V_MESSAGE_UI_DIFF")
+@NamedQueries({
+        @NamedQuery(name = "UIMessageDiffEntity.findDiffMessages", query = "select e from UIMessageDiffEntity e"),
+        @NamedQuery(name = "UIMessageDiffEntity.countDiffMessages", query = "select count(e.messageId)  from UIMessageDiffEntity e")
+})
 public class UIMessageDiffEntity {
 
     @Id

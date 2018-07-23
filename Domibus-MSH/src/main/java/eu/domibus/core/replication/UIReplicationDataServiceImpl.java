@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.OptimisticLockException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -46,6 +47,9 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     @Autowired
     private UIMessageDaoImpl uiMessageDao;
+
+    @Autowired
+    private UIMessageDiffDao uiMessageDiffDao;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -151,7 +155,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     public void findAndSyncUIMessages() {
         LOG.debug("start counting differences for UIReplication");
 
-        int rowsToSyncCount = uiMessageDao.countUIMessageDiffRows();
+        int rowsToSyncCount = uiMessageDiffDao.countAll();
         LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
 
         if (rowsToSyncCount > maxRowsToSync) {
@@ -161,14 +165,18 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         }
 
         List<UIMessageEntity> uiMessageEntityList =
-                uiMessageDao.findUIMessagesNotSynced().
+                uiMessageDiffDao.findAll().
                         stream().
                         map(objects -> convertToUIMessageEntity(objects)).
                         collect(Collectors.toList());
 
         if (uiMessageEntityList.size() > 0) {
             LOG.info("start to update TB_MESSAGE_UI");
-            uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> uiMessageDao.saveOrUpdate(uiMessageEntity));
+            try {
+                uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> uiMessageDao.saveOrUpdate(uiMessageEntity));
+            } catch (OptimisticLockException e) {
+                LOG.warn("Optimistic lock exception detected");
+            }
             LOG.info("finish to update TB_MESSAGE_UI");
         }
     }

@@ -131,6 +131,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId());
         if (uiMessageEntityFound != null) {
             uiMessageEntity.setEntityId(uiMessageEntityFound.getEntityId());
+            uiMessageEntity.setVersion(uiMessageEntityFound.getVersion());
             em.merge(uiMessageEntity);
             LOG.info("uiMessageEntity having messageId={} have been updated", uiMessageEntity.getMessageId());
             return;
@@ -144,7 +145,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     public List<UIMessageDiffEntity> findUIMessagesNotSynced() {
         long startTime = System.currentTimeMillis();
 
-        Query q = em.createNativeQuery("SELECT * FROM V_MESSAGE_UI_DIFF", UIMessageDiffEntity.class);
+        Query q = em.createQuery("Select * from U", UIMessageDiffEntity.class);
         List<UIMessageDiffEntity> result = q.getResultList();
 
         LOG.debug("[{}] milliseconds to findUIMessagesNotSynced", System.currentTimeMillis() - startTime);

@@ -2022,6 +2022,7 @@
             <column name="FAILED" type="DATETIME"/>
             <column name="RESTORED" type="DATETIME"/>
             <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
+            <column name="VERSION" type="TIMESTAMP"/>
         </createTable>
         <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_TYPE"/>
