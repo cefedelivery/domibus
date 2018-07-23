@@ -5,8 +5,16 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Role;
+import eu.domibus.common.services.impl.CompressionService;
+import eu.domibus.ebms3.common.model.PartInfo;
+import eu.domibus.ebms3.common.model.PartProperties;
+import eu.domibus.ebms3.common.model.PayloadInfo;
+import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.Submission;
+import eu.domibus.plugin.validation.SubmissionValidationException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -83,7 +92,7 @@ public class BackendMessageValidator {
         }
 
         //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-        String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
+        String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
         LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
         if (StringUtils.isNotBlank(messageIdPattern)) {
             Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
@@ -111,7 +120,7 @@ public class BackendMessageValidator {
             }
 
             //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-            String messageIdPattern = domibusPropertyProvider.getProperty(KEY_MESSAGEID_PATTERN);
+            String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
             LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
             if (StringUtils.isNotBlank(messageIdPattern)) {
                 Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
@@ -185,5 +194,26 @@ public class BackendMessageValidator {
         }
     }
 
+    public void validatePayloads(PayloadInfo payloadInfo) throws EbMS3Exception {
+        if(payloadInfo == null || CollectionUtils.isEmpty(payloadInfo.getPartInfo())) {
+            return;
+        }
 
+
+        for(PartInfo partInfo : payloadInfo.getPartInfo()) {
+            validateCompressionProperty(partInfo.getPartProperties());
+        }
+    }
+
+    protected void validateCompressionProperty(PartProperties properties) throws SubmissionValidationException{
+        if(properties == null || CollectionUtils.isEmpty(properties.getProperties())) {
+            return;
+        }
+
+        for(Property property : properties.getProperties()) {
+            if(CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName())) {
+                throw new SubmissionValidationException("The occurrence of the property " + CompressionService.COMPRESSION_PROPERTY_KEY + " and its value are fully controlled by the AS4 compression feature");
+            }
+        }
+    }
 }

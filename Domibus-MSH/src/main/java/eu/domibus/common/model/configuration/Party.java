@@ -209,10 +209,39 @@ public class Party extends AbstractBaseEntity {
 
         return new EqualsBuilder()
                 .appendSuper(super.equals(o))
-                .append(identifiers, party.identifiers)
+                .appendSuper(equalIdentifiers(identifiers, party.identifiers))
                 .append(name, party.name)
                 .append(endpoint, party.endpoint)
                 .isEquals();
+    }
+
+    protected boolean equalIdentifiers(Set<Identifier> identifiers, Set<Identifier> identifiers1) {
+
+        if(identifiers == null && identifiers1 == null) {
+            return true;
+        }
+
+        if(identifiers == null || identifiers1 == null) {
+            return false;
+        }
+
+        if(identifiers.size() != identifiers1.size()) {
+            return false;
+        }
+
+        for(Identifier identifier : identifiers) {
+            boolean found = false;
+            for (Identifier identifier1 : identifiers1) {
+                if (identifier.equals(identifier1)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

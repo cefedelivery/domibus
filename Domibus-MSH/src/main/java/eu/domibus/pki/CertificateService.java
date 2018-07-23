@@ -7,6 +7,7 @@ import javax.naming.InvalidNameException;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
@@ -36,14 +37,20 @@ public interface CertificateService {
      */
     void saveCertificateAndLogRevocation(Domain domain);
 
+
     void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password);
+
+    /**
+     * Check if alerts need to be send for expired or soon expired certificate. Send if true.
+     */
+    void sendCertificateAlerts();
 
     /**
      * Returns the certificate deserialized from a base64 string
      *
      * @return a certificate
      */
-    X509Certificate loadCertificateFromString(String content);
+    X509Certificate loadCertificateFromString(String content) throws CertificateException;
 
     /**
      * Returns the certificate entry from the trust store given an alias
@@ -57,5 +64,5 @@ public interface CertificateService {
      *
      * @return a certificate entry
      */
-    TrustStoreEntry convertCertificateContent(String certificateContent);
+    TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException;
 }

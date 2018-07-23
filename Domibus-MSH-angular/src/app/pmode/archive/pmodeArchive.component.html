@@ -55,8 +55,8 @@
                   (click)="downloadArchive(row.$$index)">
             <md-icon>file_download</md-icon>
           </button>
-          <button md-icon-button color="primary" id="rollbackButtonRow{{row.$$index}}_id" tooltip="Rollback"
-                  [disabled]="row.current" (click)="rollbackArchive(row)">
+          <button md-icon-button color="primary" id="restoreButtonRow{{row.$$index}}_id" tooltip="Restore"
+                  [disabled]="row.current" (click)="restoreArchive(row)">
             <md-icon>settings_backup_restore</md-icon>
           </button>
         </ng-template>
@@ -80,9 +80,9 @@
                 <md-icon>file_download</md-icon>
                 <span>Download</span>
               </button>
-              <button md-raised-button color="primary" (click)="rollbackArchive(selected[0])" id="rollbackArchivebutton_id" [disabled]="disabledRollback">
+              <button md-raised-button color="primary" (click)="restoreArchive(selected[0])" id="restoreArchivebutton_id" [disabled]="disabledRestore">
                 <md-icon>settings_backup_restore</md-icon>
-                <span>Rollback</span>
+                <span>Restore</span>
               </button>
             </td>
           </tr>

@@ -28,7 +28,6 @@
                 </ns:MessageProperties>
                 <ns:PayloadInfo>
                     <ns:PartInfo href="testPayload">
-                        <ns:Description xml:lang="en-US">e-sens-sbdh-order</ns:Description>
                         <ns:PartProperties>
                             <ns:Property name="MimeType" type="int">application/xml</ns:Property>
                         </ns:PartProperties>

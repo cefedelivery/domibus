@@ -6,7 +6,7 @@ import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -115,26 +114,26 @@ public class PModeResource {
             LOG.error("Impossible to delete PModes", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Impossible to delete PModes due to \n" + ex.getMessage());
         }
-        LOG.debug("PModes " + pmodesString + " were deleted");
+        LOG.debug("PModes {} were deleted", pmodesString);
         return ResponseEntity.ok("PModes were deleted\n");
     }
 
-    @RequestMapping(value = {"/rollback/{id}"}, method = RequestMethod.PUT)
+    @RequestMapping(value = {"/restore/{id}"}, method = RequestMethod.PUT)
     public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
-        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
-        rawConfiguration.setEntityId(0);
+        ConfigurationRaw existingRawConfiguration = pModeProvider.getRawConfiguration(id);
+        ConfigurationRaw newRawConfiguration = new ConfigurationRaw();
+        newRawConfiguration.setEntityId(0);
         
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
-        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
-        rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(existingRawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        newRawConfiguration.setDescription("Restored version of " + confDate.format(formatter));
 
-        rawConfiguration.setConfigurationDate(new Date());
+        newRawConfiguration.setConfigurationDate(new Date());
+        newRawConfiguration.setXml(existingRawConfiguration.getXml());
 
         String message = "PMode was successfully uploaded";
         try {
-            byte[] bytes = rawConfiguration.getXml();
-
-            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes, rawConfiguration.getDescription());
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(newRawConfiguration.getXml(), newRawConfiguration.getDescription());
 
             if (pmodeUpdateMessage != null && !pmodeUpdateMessage.isEmpty()) {
                 message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");

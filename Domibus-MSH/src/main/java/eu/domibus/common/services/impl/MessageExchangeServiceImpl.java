@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
@@ -25,7 +26,7 @@ import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -107,6 +108,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Autowired
     private PullMessageService pullMessageService;
 
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
 
     /**
      * {@inheritDoc}
@@ -154,8 +158,11 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         Party initiator = pModeProvider.getGatewayParty();
         List<Process> pullProcesses = pModeProvider.findPullProcessesByInitiator(initiator);
         LOG.trace("Initiating pull requests:");
-        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
-        if (pause(pullProcesses, numberOfPullRequestPerMpc)) {
+        if(pullProcesses.isEmpty()){
+            LOG.trace("No pull process configured !");
+        }
+        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+        if (!domibusConfigurationService.isMultiTenantAware() && pause(pullProcesses, numberOfPullRequestPerMpc)) {
             return;
         }
         for (Process pullProcess : pullProcesses) {
@@ -180,7 +187,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
                         LOG.debug("Sending:[{}] pull request for mpc:[{}]", numberOfPullRequestPerMpc, mpcQualifiedName);
                         for (int i = 0; i < numberOfPullRequestPerMpc; i++) {
-                            jmsManager.sendMessageToQueue(JMSMessageBuilder.create()
+                            jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
                                     .property(MPC, mpcQualifiedName)
                                     .property(PMODE_KEY, messageExchangeConfiguration.getReversePmodeKey())
                                     .property(PullContext.NOTIFY_BUSINNES_ON_ERROR, String.valueOf(legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()))
@@ -287,7 +294,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
@@ -308,7 +315,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusPropertyProvider.getProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);

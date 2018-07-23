@@ -4,7 +4,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -171,7 +171,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = null;
         }};
 
@@ -185,7 +185,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "a2";
         }};
 
@@ -199,7 +199,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "5";
         }};
 

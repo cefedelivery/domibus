@@ -170,7 +170,7 @@
                         localhost
                     </xa-datasource-property>
                     <xa-datasource-property name="DatabaseName">
-                        domibus?noAccessToProcedureBodies=true&amp;sessionVariables=innodb_lock_wait_timeout=1
+                        domibus
                     </xa-datasource-property>
                     <driver>com.mysql</driver>
                     <security>
@@ -454,6 +454,7 @@
                 <address-setting name="#" dead-letter-address="jms.queue.DLQ" expiry-address="jms.queue.ExpiryQueue" max-size-bytes="10485760" page-size-bytes="2097152" message-counter-history-day-limit="10"/>
                 <address-setting name="jms.queue.DomibusSendMessageQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
                 <address-setting name="jms.queue.DomibusPullMessageQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
+                <address-setting name="jms.queue.DomibusAlertMessageQueue" expiry-address="jms.queue.ExpiryQueue" max-delivery-attempts="1"/>
                 <address-setting name="jms.queue.DomibusBusinessMessageOutQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
                 <address-setting name="jms.queue.DomibusNotifyBackendJmsQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
                 <address-setting name="jms.queue.DomibusErrorNotifyConsumerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
@@ -490,6 +491,7 @@
                 <jms-queue name="DomibusPluginToBackendQueue" entries="java:/jms/domibus.backend.jms.replyQueue java:/jms/queue/DomibusPluginToBackendQueue" durable="true"/>
                 <jms-queue name="DomibusSendMessageQueue" entries="java:/jms/domibus.internal.dispatch.queue java:/jms/queue/DomibusSendMessageQueue" durable="true"/>
                 <jms-queue name="DomibusPullMessageQueue" entries="java:/jms/domibus.internal.pull.queue java:/jms/queue/DomibusPullMessageQueue" durable="true"/>
+                <jms-queue name="DomibusAlertMessageQueue" entries="java:/jms/domibus.internal.alert.queue java:/jms/queue/DomibusAlertMessageQueue" durable="true"/>
                 <jms-queue name="DomibusNotifyBackendWebServiceQueue" entries="java:/jms/domibus.notification.webservice java:/jms/queue/DomibusNotifyBackendWebServiceQueue" durable="true"/>
                 <jms-queue name="DomibusNotifyBackendFileSystemQueue" entries="java:/jms/domibus.notification.filesystem java:/jms/queue/DomibusNotifyBackendFileSystemQueue" durable="true"/>
                 <jms-queue name="DomibusUnknownReceiverQueue" entries="java:/jms/domibus.internal.notification.unknown java:/jms/queue/DomibusUnknownReceiverQueue" durable="true"/>

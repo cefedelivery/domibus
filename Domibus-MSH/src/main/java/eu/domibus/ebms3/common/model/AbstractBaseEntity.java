@@ -1,7 +1,5 @@
 package eu.domibus.ebms3.common.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
@@ -17,11 +15,7 @@ public abstract class AbstractBaseEntity implements Serializable {
 
     @Id
     @XmlTransient
-    @GeneratedValue(strategy = GenerationType.AUTO,generator = "native")
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID_PK")
     private int entityId;
 
@@ -39,15 +33,14 @@ public abstract class AbstractBaseEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        //noinspection NonFinalFieldReferencedInHashCode
-        return this.entityId;
+        return 0;
     }
 
     @Override
     public boolean equals(final Object other) {
         //noinspection NonFinalFieldReferenceInEquals
         return ((other != null) &&
-                this.getClass().equals(other.getClass()) &&
-                (this.entityId == ((AbstractBaseEntity) other).entityId));
+                this.getClass().equals(other.getClass())
+        );
     }
 }

@@ -40,6 +40,7 @@ export class SecurityEventService {
   }
 
   notifyLogoutErrorEvent(error: any) {
+    console.log('error logging out [' + error + ']');
     this.logoutErrorSubject.next(error);
   }
 

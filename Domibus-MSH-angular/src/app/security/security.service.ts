@@ -6,18 +6,22 @@ import {User} from './user';
 import {ReplaySubject} from 'rxjs';
 import {SecurityEventService} from './security.event.service';
 import {DomainService} from './domain.service';
+import {Title} from '@angular/platform-browser';
 
 @Injectable()
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
 
-  constructor (private http: Http, private securityEventService: SecurityEventService, private domainService: DomainService) {
+  constructor (private http: Http,
+               private securityEventService: SecurityEventService,
+               private domainService: DomainService) {
   }
 
   login (username: string, password: string) {
     this.domainService.resetDomain();
-    let headers = new Headers({'Content-Type': 'application/json'});
+
+    const headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication',
       JSON.stringify({
         username: username,
@@ -27,6 +31,9 @@ export class SecurityService {
       .subscribe((response: Response) => {
           console.log('Login success');
           localStorage.setItem('currentUser', JSON.stringify(response.json()));
+
+          this.domainService.setAppTitle();
+
           this.securityEventService.notifyLoginSuccessEvent(response);
         },
         (error: any) => {
@@ -37,15 +44,19 @@ export class SecurityService {
 
   logout () {
     console.log('Logging out');
-    this.domainService.resetDomain();
+    this.clearSession();
+
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
-        localStorage.removeItem('currentUser');
         this.securityEventService.notifyLogoutSuccessEvent(res);
       },
       (error: any) => {
-        console.debug('error logging out [' + error + ']');
         this.securityEventService.notifyLogoutErrorEvent(error);
       });
+  }
+
+  clearSession () {
+    this.domainService.resetDomain();
+    localStorage.removeItem('currentUser');
   }
 
   getCurrentUser (): User {

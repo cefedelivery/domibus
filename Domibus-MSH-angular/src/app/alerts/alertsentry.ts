@@ -3,7 +3,6 @@ export class AlertsEntry {
               public alertId: string,
               public alertType: string,
               public alertLevel: string,
-              public alertText: string,
               public creationTime: Date,
               public reportingTime: Date,
               public parameters: string[])

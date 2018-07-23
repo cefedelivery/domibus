@@ -143,11 +143,14 @@
     [count]="count"
     [offset]="offset"
     [limit]="rowLimiter.pageSize"
-    [sorts]="[{prop: 'Creation Time', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)"
     (activate)="onActivate($event)">
   </ngx-datatable>
+
+  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <span class="text-select">{{value| domibusDate: dateFormat}}</span>
+  </ng-template>
 
   <div class="group-action-button">
     <button id="alertsCancelButton" md-raised-button color="primary" (click)="cancel()"

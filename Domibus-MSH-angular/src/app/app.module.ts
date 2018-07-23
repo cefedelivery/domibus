@@ -21,7 +21,6 @@ import {Md2Module, Md2SelectModule} from "md2";
 
 import {AppComponent} from "./app.component";
 import {LoginComponent} from "./login/login.component";
-import {HomeComponent} from "./home/home.component";
 import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
 import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
@@ -66,7 +65,7 @@ import {TrustStoreUploadComponent} from "./truststore/truststore-upload/truststo
 import {ColumnPickerComponent} from "./common/column-picker/column-picker.component";
 import {PageHelperComponent} from "./common/page-helper/page-helper.component";
 import {SharedModule} from "./common/module/SharedModule";
-import {RollbackDialogComponent} from "./pmode/rollback-dialog/rollback-dialog.component";
+import {RestoreDialogComponent} from "./pmode/restore-dialog/restore-dialog.component";
 import {ActionDirtyDialogComponent} from "./pmode/action-dirty-dialog/action-dirty-dialog.component";
 import {AuditComponent} from "./audit/audit.component";
 import {PartyComponent} from "./party/party.component";
@@ -77,6 +76,9 @@ import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
+import { PluginUserComponent } from './pluginuser/pluginuser.component';
+import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
+import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
@@ -87,7 +89,6 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
   declarations: [
     AppComponent,
     LoginComponent,
-    HomeComponent,
     MessageFilterComponent,
     MessageLogComponent,
     UserComponent,
@@ -119,7 +120,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     ColumnPickerComponent,
     TrustStoreUploadComponent,
     PageHelperComponent,
-    RollbackDialogComponent,
+    RestoreDialogComponent,
     ActionDirtyDialogComponent,
     AuditComponent,
     PartyComponent,
@@ -129,6 +130,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     DomainSelectorComponent,
     AlertsComponent,
     TestServiceComponent,
+    PluginUserComponent,
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent
   ],
   entryComponents: [
@@ -147,9 +151,11 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditUserComponent,
     TruststoreDialogComponent,
     TrustStoreUploadComponent,
-    RollbackDialogComponent,
+    RestoreDialogComponent,
     ActionDirtyDialogComponent,
     PartyDetailsComponent,
+    EditbasicpluginuserFormComponent,
+    EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent
   ],
   imports: [

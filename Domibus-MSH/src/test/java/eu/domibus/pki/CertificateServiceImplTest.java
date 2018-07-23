@@ -9,8 +9,13 @@ import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
+import eu.domibus.core.alerts.model.service.ExpiredCertificateModuleConfiguration;
+import eu.domibus.core.alerts.model.service.ImminentExpirationCertificateModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.certificate.CertificateDao;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -59,6 +64,15 @@ public class CertificateServiceImplTest {
 
     @Injectable
     CertificateDao certificateDao;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Injectable
+    private EventService eventService;
+
+    @Injectable
+    private PModeProvider pModeProvider;
 
     PKIUtil pkiUtil = new PKIUtil();
 
@@ -235,7 +249,7 @@ public class CertificateServiceImplTest {
     }
 
     @Test
-    public void saveCertificateAndLogRevocation(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore){
+    public void saveCertificateAndLogRevocation(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore) {
         final Domain currentDomain = DomainService.DEFAULT_DOMAIN;
 
         new Expectations() {{
@@ -247,101 +261,109 @@ public class CertificateServiceImplTest {
         }};
 
         certificateService.saveCertificateAndLogRevocation(currentDomain);
-        new Verifications(){{
-           certificateService.saveCertificateData(trustStore, keyStore); times=1;
-           certificateService.logCertificateRevocationWarning();times=1;
+        new Verifications() {{
+            certificateService.saveCertificateData(trustStore, keyStore);
+            times = 1;
+            certificateService.logCertificateRevocationWarning();
+            times = 1;
         }};
     }
 
     @Test
-    public void saveCertificateData(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore){
+    public void saveCertificateData(@Injectable KeyStore keyStore, @Injectable KeyStore trustStore) {
         final Certificate cert1 = new Certificate();
         final Certificate cert2 = new Certificate();
-        final List<Certificate> certificates=Lists.newArrayList(cert1, cert2);
-        new Expectations(certificateService){{
+        final List<Certificate> certificates = Lists.newArrayList(cert1, cert2);
+        new Expectations(certificateService) {{
             certificateService.groupAllKeystoreCertificates(trustStore, keyStore);
-            result=certificates;
+            result = certificates;
         }};
-        certificateService.saveCertificateData(trustStore , keyStore);
-        new Verifications(){{
-            certificateDao.saveOrUpdate(withInstanceOf(Certificate.class));times=2;
+        certificateService.saveCertificateData(trustStore, keyStore);
+        new Verifications() {{
+            certificateDao.saveOrUpdate(withInstanceOf(Certificate.class));
+            times = 2;
         }};
     }
 
     @Test
-    public void logCertificateRevocationWarning(@Mocked final DomibusLogger LOG){
+    public void logCertificateRevocationWarning(@Mocked final DomibusLogger LOG) {
         final Certificate soonRevokedCertificate = new Certificate();
         final Date now = new Date();
         final String soonRevokedAlias = "Cert1";
         soonRevokedCertificate.setNotAfter(now);
         soonRevokedCertificate.setAlias(soonRevokedAlias);
-        final List<Certificate> unNotifiedSoonRevokedCertificates= Lists.newArrayList(soonRevokedCertificate);
+        final List<Certificate> unNotifiedSoonRevokedCertificates = Lists.newArrayList(soonRevokedCertificate);
 
         final String revokedAlias = "Cert2";
         final Certificate revokedCertificate = new Certificate();
         revokedCertificate.setNotAfter(now);
         revokedCertificate.setAlias(revokedAlias);
-        final List<Certificate> unNotifiedRevokedCertificates= Lists.newArrayList(revokedCertificate);
+        final List<Certificate> unNotifiedRevokedCertificates = Lists.newArrayList(revokedCertificate);
 
-        new Expectations(){{
+        new Expectations() {{
             certificateDao.getUnNotifiedSoonRevoked();
-            result=unNotifiedSoonRevokedCertificates;
+            result = unNotifiedSoonRevokedCertificates;
             certificateDao.getUnNotifiedRevoked();
-            result=unNotifiedRevokedCertificates;
+            result = unNotifiedRevokedCertificates;
         }};
         certificateService.logCertificateRevocationWarning();
 
-        new Verifications(){{
-            LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, soonRevokedAlias, now);times=1;
-            LOG.securityError(SEC_CERTIFICATE_REVOKED, revokedAlias, now);times=1;
-            certificateDao.updateRevocation(soonRevokedCertificate);times=1;
-            certificateDao.updateRevocation(revokedCertificate);times=1;
+        new Verifications() {{
+            LOG.securityWarn(SEC_CERTIFICATE_SOON_REVOKED, soonRevokedAlias, now);
+            times = 1;
+            LOG.securityError(SEC_CERTIFICATE_REVOKED, revokedAlias, now);
+            times = 1;
+            certificateDao.updateRevocation(soonRevokedCertificate);
+            times = 1;
+            certificateDao.updateRevocation(revokedCertificate);
+            times = 1;
         }};
     }
+
     @Test
-    public void retrieveCertificates(@Mocked final KeyStore keyStore,@Mocked final KeyStore trustStore){
+    public void retrieveCertificates(@Mocked final KeyStore keyStore, @Mocked final KeyStore trustStore) {
 
         Certificate certificate = new Certificate();
         certificate.setNotAfter(new Date());
-        final List<Certificate> trustStoreCertificates= Lists.newArrayList(certificate);
+        final List<Certificate> trustStoreCertificates = Lists.newArrayList(certificate);
         certificate = new Certificate();
         certificate.setNotAfter(new Date());
-        final List<Certificate> keyStoreCertificates= Lists.newArrayList(certificate);
+        final List<Certificate> keyStoreCertificates = Lists.newArrayList(certificate);
 
-        new Expectations(certificateService){{
+        new Expectations(certificateService) {{
             certificateService.extractCertificateFromKeyStore(trustStore);
-            result=trustStoreCertificates;
+            result = trustStoreCertificates;
             certificateService.extractCertificateFromKeyStore(keyStore);
-            result=keyStoreCertificates;
+            result = keyStoreCertificates;
         }};
 
         List<Certificate> certificates = certificateService.groupAllKeystoreCertificates(trustStore, keyStore);
-        assertEquals(CertificateType.PUBLIC,certificates.get(0).getCertificateType());
-        assertEquals(CertificateType.PRIVATE,certificates.get(1).getCertificateType());
+        assertEquals(CertificateType.PUBLIC, certificates.get(0).getCertificateType());
+        assertEquals(CertificateType.PRIVATE, certificates.get(1).getCertificateType());
 
     }
 
     @Test
-    public void updateCertificateStatus(){
-        Date now=new Date();
+    public void updateCertificateStatus() {
+        Date now = new Date();
 
         Calendar c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, 16);
         CertificateStatus certificateStatus = certificateService.getCertificateStatus(c.getTime());
-        assertEquals(CertificateStatus.OK,certificateStatus);
+        assertEquals(CertificateStatus.OK, certificateStatus);
 
         c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, 14);
         certificateStatus = certificateService.getCertificateStatus(c.getTime());
-        assertEquals(CertificateStatus.SOON_REVOKED,certificateStatus);
+        assertEquals(CertificateStatus.SOON_REVOKED, certificateStatus);
 
         c = Calendar.getInstance();
         c.setTime(now);
         c.add(Calendar.DATE, -1);
         certificateStatus = certificateService.getCertificateStatus(c.getTime());
-        assertEquals(CertificateStatus.REVOKED,certificateStatus);
+        assertEquals(CertificateStatus.REVOKED, certificateStatus);
     }
 
 
@@ -354,32 +376,178 @@ public class CertificateServiceImplTest {
         final Date notBefore = format.parse("2017/02/20");
         final Date notAfter = format.parse("2017/04/20");
 
-        new Expectations(){{
+        new Expectations() {{
 
             keyStore.aliases();
-            result=aliases;
+            result = aliases;
 
-            aliases.hasMoreElements();times=2;
-            result=true;
-            result=false;
+            aliases.hasMoreElements();
+            times = 2;
+            result = true;
+            result = false;
 
-            aliases.nextElement();times=1;
-            result= keystoreAlias;
+            aliases.nextElement();
+            times = 1;
+            result = keystoreAlias;
 
             keyStore.getCertificate(keystoreAlias);
-            result=x509Certificate;
+            result = x509Certificate;
 
             x509Certificate.getNotBefore();
-            result=notBefore;
+            result = notBefore;
 
             x509Certificate.getNotAfter();
-            result=notAfter;
+            result = notAfter;
 
         }};
 
         List<Certificate> certificates = certificateService.extractCertificateFromKeyStore(keyStore);
-        assertEquals(1,certificates.size());
-        assertEquals(certificates.get(0).getNotBefore(),notBefore);
-        assertEquals(certificates.get(0).getNotAfter(),notAfter);
+        assertEquals(1, certificates.size());
+        assertEquals(certificates.get(0).getNotBefore(), notBefore);
+        assertEquals(certificates.get(0).getNotAfter(), notAfter);
+    }
+
+    @Test
+    public void sendCertificateImminentExpirationAlerts(final @Mocked ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration,
+                                                        @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+
+        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        Date offset = parser.parse("25/10/1977 00:00:00");
+        Date notificationDate = parser.parse("25/10/1977 00:00:00");
+        Date notAfter = parser.parse("23/10/1977 00:00:00");
+        final int imminentExpirationDelay = 10;
+        final int imminentExpirationFrequency = 14;
+        final String accesPoint = "red_gw";
+        final String alias = "blue_gw";
+
+        new Expectations() {{
+
+            pModeProvider.isConfigurationLoaded();
+            result=true;
+
+            pModeProvider.getGatewayParty().getName();
+            result= accesPoint;
+
+            multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
+            result = imminentExpirationCertificateConfiguration;
+
+            imminentExpirationCertificateConfiguration.isActive();
+            result = true;
+
+            imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
+            result = imminentExpirationDelay;
+
+            imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
+            result = imminentExpirationFrequency;
+
+            final LocalDateTime now = dateTime.now();
+            now.plusDays(imminentExpirationDelay).toDate();
+            result = offset;
+
+            final LocalDateTime now1 = dateTime.now();
+            now1.minusDays(imminentExpirationFrequency).toDate();
+            result=notificationDate;
+
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);
+            result=Lists.newArrayList(certificate);
+
+            certificate.getAlias();
+            result= alias;
+
+            certificate.getNotAfter();
+            result=notAfter;
+
+        }};
+        certificateService.sendCertificateImminentExpirationAlerts();
+        new VerificationsInOrder(){{
+            certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset);times=1;
+            certificateDao.saveOrUpdate(certificate);times=1;
+            eventService.enqueueImminentCertificateExpirationEvent(accesPoint, alias, notAfter);times=1;
+        }};
+    }
+
+    @Test
+    public void sendCertificateExpiredAlerts(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
+                                                        @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+
+        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        Date endNotification = parser.parse("25/10/1977 00:00:00");
+        Date notificationDate = parser.parse("25/10/1977 00:00:00");
+        Date notAfter = parser.parse("23/10/1977 00:00:00");
+        final int revokedDuration = 10;
+        final int revokedFrequency = 14;
+        final String accesPoint = "red_gw";
+        final String alias = "blue_gw";
+
+        new Expectations() {{
+
+            pModeProvider.isConfigurationLoaded();
+            result=true;
+
+            pModeProvider.getGatewayParty().getName();
+            result= accesPoint;
+
+            multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+            result = expiredCertificateConfiguration;
+
+            expiredCertificateConfiguration.isActive();
+            result = true;
+
+            expiredCertificateConfiguration.getExpiredDuration();
+            result = revokedDuration;
+
+            expiredCertificateConfiguration.getExpiredFrequency();
+            result = revokedFrequency;
+
+            final LocalDateTime now = dateTime.now();
+            now.minusDays(revokedDuration).toDate();
+            result = endNotification;
+
+            final LocalDateTime now1 = dateTime.now();
+            now1.minusDays(revokedFrequency).toDate();
+            result=notificationDate;
+
+            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);
+            result=Lists.newArrayList(certificate);
+
+            certificate.getAlias();
+            result= alias;
+
+            certificate.getNotAfter();
+            result=notAfter;
+
+        }};
+        certificateService.sendCertificateExpiredAlerts();
+        new VerificationsInOrder(){{
+            certificateDao.findExpiredToNotifyAsAlert(notificationDate, endNotification);times=1;
+            certificateDao.saveOrUpdate(certificate);times=1;
+            eventService.enqueueCertificateExpiredEvent(accesPoint, alias, notAfter);times=1;
+        }};
+    }
+
+    @Test
+    public void sendCertificateExpiredAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
+                                             @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+        new Expectations() {{
+            multiDomainAlertConfigurationService.getExpiredCertificateConfiguration().isActive();
+            result = false;
+        }};
+        certificateService.sendCertificateExpiredAlerts();
+        new VerificationsInOrder(){{
+            pModeProvider.isConfigurationLoaded();times=0;
+        }};
+    }
+
+    @Test
+    public void sendCertificateImminentExpirationAlertsModuleInactive(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration,
+                                                           @Mocked LocalDateTime dateTime,@Mocked final Certificate certificate) throws ParseException {
+        new Expectations() {{
+            multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration().isActive();
+            result = false;
+        }};
+        certificateService.sendCertificateImminentExpirationAlerts();
+        new VerificationsInOrder(){{
+            pModeProvider.isConfigurationLoaded();times=0;
+        }};
     }
 }

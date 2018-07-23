@@ -4,7 +4,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -114,7 +114,7 @@ public class MessageRetentionService {
     }
 
     protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
-        final String propertyValueString = domibusPropertyProvider.getProperty(propertyName);
+        final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
             return defaultValue;

@@ -13,7 +13,7 @@ public enum CsvCustomColumns {
     PARTY_RESOURCE,
     TRUSTSTORE_RESOURCE,
     USER_RESOURCE,
-    ;
+    ALERT_RESOURCE;
 
     private Map<String, String> customFields;
 
@@ -68,6 +68,12 @@ public enum CsvCustomColumns {
         truststoreMap.put("ValidUntil".toUpperCase(), "Valid until");
     }
 
+    private static final Map<String, String> alertMap;
+    static {
+        alertMap = new HashMap<>();
+        alertMap.put("entityId".toUpperCase(), "Alert Id");
+    }
+
 
     static {
         AUDIT_RESOURCE.customFields = auditMap;
@@ -77,6 +83,7 @@ public enum CsvCustomColumns {
         PARTY_RESOURCE.customFields = partyMap;
         TRUSTSTORE_RESOURCE.customFields = truststoreMap;
         USER_RESOURCE.customFields = userMap;
+        ALERT_RESOURCE.customFields=alertMap;
     }
 
     public Map<String, String> getCustomColumns() {

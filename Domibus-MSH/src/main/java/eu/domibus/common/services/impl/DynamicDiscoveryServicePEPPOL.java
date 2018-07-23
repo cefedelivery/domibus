@@ -2,7 +2,6 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.DomibusApacheFetcher;
@@ -20,7 +19,6 @@ import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import no.difi.vefa.peppol.mode.Mode;
 import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
-import no.difi.vefa.peppol.security.util.DifiCertificateValidator;
 import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,20 +47,20 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    DomibusConfigurationService domibusConfigurationService;
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
-    ProxyUtil proxyUtil;
+    protected ProxyUtil proxyUtil;
 
-    @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
-    public EndpointInfo lookupInformation(final String participantId, final String participantIdScheme, final String documentId, final String processId, final String processIdScheme) {
+    @Cacheable(value = "lookupInfo", key = "#domain + #participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
+    public EndpointInfo lookupInformation(final String domain, final String participantId, final String participantIdScheme, final String documentId, final String processId, final String processIdScheme) {
 
-        LOG.info("[PEPPOL SMP] Do the lookup by: " + participantId + " " + participantIdScheme + " " + documentId + " " + processId + " " + processIdScheme);
-        final String smlInfo = domibusPropertyProvider.getProperty(SMLZONE_KEY);
+        LOG.info("[PEPPOL SMP] Do the lookup by: [{}] [{}] [{}] [{}] [{}]", participantId, participantIdScheme, documentId, processId, processIdScheme);
+        final String smlInfo = domibusPropertyProvider.getDomainProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
-        String mode = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
+        String mode = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_MODE, Mode.TEST);
         try {
             final LookupClientBuilder lookupClientBuilder = LookupClientBuilder.forMode(mode);
             lookupClientBuilder.locator(new BusdoxLocator(smlInfo));
@@ -92,12 +90,12 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     @Override
     public String getPartyIdType() {
-        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, PARTYID_TYPE);
+        return domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, PARTYID_TYPE);
     }
 
     @Override
     public String getResponderRole(){
-        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
+        return domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, RESPONDER_ROLE);
     }
 
 }

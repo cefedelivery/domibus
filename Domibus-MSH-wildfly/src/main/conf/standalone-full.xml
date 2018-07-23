@@ -152,6 +152,9 @@
                 <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
                     <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <!--Connector/J 8.0.x
+                        <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+                    -->
                     <driver>com.mysql</driver>
                     <security>
                         <user-name>edelivery</user-name>
@@ -188,6 +191,10 @@
                     <driver name="com.mysql" module="com.mysql">
                         <driver-class>com.mysql.jdbc.Driver</driver-class>
                         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+                        <!--Connector/J 8.0.x
+                        <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+                        <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
+                        -->
                     </driver>
                 </drivers>
             </datasources>
@@ -397,6 +404,10 @@
                         <redelivery-delay>1000</redelivery-delay>
                         <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusAlertMessageQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <max-delivery-attempts>1</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -543,6 +554,11 @@
                     <jms-queue name="DomibusPullMessageQueue">
                         <entry name="java:/jms/domibus.internal.pull.queue"/>
                         <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusAlertMessageQueue">
+                        <entry name="java:/jms/domibus.internal.alert.queue"/>
+                        <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">

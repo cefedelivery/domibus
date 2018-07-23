@@ -15,6 +15,7 @@ public interface DomibusConfigurationService {
     String DOMIBUS_PROXY_PASSWORD = "domibus.proxy.password"; //NOSONAR: This is not a hardcoded password, it is just the name of a property
     String DOMIBUS_PROXY_NON_PROXY_HOSTS = "domibus.proxy.nonProxyHosts";
 
+    String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
 
     String getConfigLocation();
 
@@ -23,5 +24,7 @@ public interface DomibusConfigurationService {
     boolean isMultiTenantAware();
 
     boolean useProxy();
+
+    boolean isFourCornerEnabled();
 
 }

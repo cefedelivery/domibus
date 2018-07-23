@@ -144,7 +144,6 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "1");
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), PAYLOAD_ID);
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), DEFAULT_MT);
-        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "message");
         String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         byte[] payload = pay1.getBytes();
         messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);
@@ -213,7 +212,6 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "1");
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), "\t" + PAYLOAD_ID + "   ");
         messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), "   " + DEFAULT_MT + "\t\t");
-        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_DESCRIPTION_FORMAT, 1), "\t\tmessage    ");
         String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         byte[] payload = pay1.getBytes();
         messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);

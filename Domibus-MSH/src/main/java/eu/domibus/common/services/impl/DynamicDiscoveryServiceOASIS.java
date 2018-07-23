@@ -66,8 +66,9 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     @Autowired
     DomibusConfigurationService domibusConfigurationService;
 
-    @Cacheable(value = "lookupInfo", key = "#participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
-    public EndpointInfo lookupInformation(final String participantId,
+    @Cacheable(value = "lookupInfo", key = "#domain + #participantId + #participantIdScheme + #documentId + #processId + #processIdScheme")
+    public EndpointInfo lookupInformation(final String domain,
+                                          final String participantId,
                                           final String participantIdScheme,
                                           final String documentId,
                                           final String processId,
@@ -100,12 +101,12 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
     }
 
     protected DynamicDiscovery createDynamicDiscoveryClient() {
-        final String smlInfo = domibusPropertyProvider.getProperty(SMLZONE_KEY);
+        final String smlInfo = domibusPropertyProvider.getDomainProperty(SMLZONE_KEY);
         if (smlInfo == null) {
             throw new ConfigurationException("SML Zone missing. Configure in domibus-configuration.xml");
         }
 
-        final String certRegex = domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
+        final String certRegex = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_CERT_REGEX);
         if(StringUtils.isEmpty(certRegex)) {
             LOG.debug("The value for property domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation is empty.");
         }
@@ -163,11 +164,11 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
 
     @Override
     public String getPartyIdType() {
-        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, URN_TYPE_VALUE);
+        return domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_PARTYID_TYPE, URN_TYPE_VALUE);
     }
 
     @Override
     public String getResponderRole(){
-        return domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
+        return domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE, DEFAULT_RESPONDER_ROLE);
     }
 }

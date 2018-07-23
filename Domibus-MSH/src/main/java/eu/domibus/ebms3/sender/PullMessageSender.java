@@ -11,8 +11,8 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullReceiptSender;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
@@ -99,9 +99,9 @@ public class PullMessageSender {
         Messaging messaging = null;
         String messageId = null;
         try {
-            final String mpc = map.getString(PullContext.MPC);
-            final String pMode = map.getString(PullContext.PMODE_KEY);
-            notifiyBusinessOnError = Boolean.valueOf(map.getString(PullContext.NOTIFY_BUSINNES_ON_ERROR));
+            final String mpc = map.getStringProperty(PullContext.MPC);
+            final String pMode = map.getStringProperty(PullContext.PMODE_KEY);
+            notifiyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
             SignalMessage signalMessage = new SignalMessage();
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);

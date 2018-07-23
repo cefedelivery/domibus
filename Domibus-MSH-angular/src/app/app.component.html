@@ -8,29 +8,29 @@
       </div>
     </div>
 
-    <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/']" id="messages_id" *ngIf="isUser()">
       <md-icon md-tooltip="Messages" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">message</md-icon>
       <span>Messages</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="hasAdmin()"
+    <button md-raised-button class="sideNavButton" [routerLink]="['/messagefilter']" *ngIf="isAdmin()"
             id="messagefilter_id">
       <md-icon md-tooltip="Message Filter" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">filter_list
       </md-icon>
       <span>Message Filter</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/errorlog']" id="errorlog_id" *ngIf="isUser()">
       <md-icon md-tooltip="Error Log" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">sms_failed</md-icon>
       <span>Error Log</span>
     </button>
-    <md-expansion-panel>
+    <md-expansion-panel *ngIf="isAdmin()">
       <md-expansion-panel-header>
-        <button md-raised-button class="sideNavButton" *ngIf="hasAdmin()" id="pmode_id">
+        <button md-raised-button class="sideNavButton" id="pmode_id">
           <md-icon md-tooltip="PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">description</md-icon>
           <span *ngIf="fullMenu">PMode</span>
         </button>
       </md-expansion-panel-header>
       <!--[ngClass]="{ 'alert': message, 'alert-success': message.type === 'success', 'alert-error': message.type === 'error' }"-->
-      <div *ngIf="hasAdmin()" class="sideNavSubmenu">
+      <div class="sideNavSubmenu">
         <button md-raised-button class="sideNavButton" [routerLink]="['/pmode-current']" >
           <md-icon md-tooltip="Current PMode" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">receipt</md-icon>
           <span>Current</span>
@@ -45,27 +45,31 @@
         </button>
       </div>
     </md-expansion-panel>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="hasAdmin()" id="jmsmonitoring_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/jms']" *ngIf="isAdmin()" id="jmsmonitoring_id">
       <md-icon md-tooltip="JMS Monitoring" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">computer</md-icon>
       <span>JMS Monitoring</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="hasAdmin()" id="truststore_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/truststore']" *ngIf="isAdmin()" id="truststore_id">
       <md-icon md-tooltip="Truststore" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">vpn_key</md-icon>
       <span>Truststore</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="hasAdmin()" id="user_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/user']" *ngIf="isAdmin()" id="user_id">
       <md-icon md-tooltip="Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people</md-icon>
       <span>Users</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/audit']" *ngIf="hasAdmin()" id="audit_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/pluginuser']" *ngIf="isAdmin()" id="user_id">
+      <md-icon md-tooltip="Plugin Users" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">people_outline</md-icon>
+      <span>Plugin Users</span>
+    </button>
+    <button md-raised-button class="sideNavButton" [routerLink]="['/audit']" *ngIf="isAdmin()" id="audit_id">
       <md-icon md-tooltip="Audit" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">update</md-icon>
       <span>Audit</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/alerts']" *ngIf="hasAdmin()" id="alerts_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/alerts']" *ngIf="isAdmin()" id="alerts_id">
       <md-icon md-tooltip="Alerts" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">add_alert</md-icon>
       <span>Alerts</span>
     </button>
-    <button md-raised-button class="sideNavButton" [routerLink]="['/testservice']" *ngIf="hasAdmin()" id="testservice_id">
+    <button md-raised-button class="sideNavButton" [routerLink]="['/testservice']" *ngIf="isAdmin()" id="testservice_id">
       <md-icon md-tooltip="Test Service" mdTooltipDisabled="{{fullMenu}}" mdTooltipPosition="right">import_export</md-icon>
       <span *ngIf="fullMenu">Test Service</span>
     </button>

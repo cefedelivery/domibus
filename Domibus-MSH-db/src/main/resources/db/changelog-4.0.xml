@@ -114,6 +114,8 @@
             <column name="NOT_VALID_BEFORE_DATE" type="TIMESTAMP"/>
             <column name="NOT_VALID_AFTER_DATE" type="TIMESTAMP"/>
             <column name="REVOKE_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="ALERT_IMM_NOTIFICATION_DATE" type="TIMESTAMP"/>
+            <column name="ALERT_EXP_NOTIFICATION_DATE" type="TIMESTAMP"/>
             <column name="CERTIFICATE_STATUS" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -1375,23 +1377,6 @@
             <column name="MSH_ROLE"/>
         </createIndex>
 
-        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
-            <column name="NAME"/>
-            <column name="MESSAGEPROPERTIES_ID"/>
-        </createIndex>
-
-        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID_VAL" tableName="TB_PROPERTY">
-            <column name="NAME"/>
-            <column name="MESSAGEPROPERTIES_ID"/>
-            <column name="VALUE"/>
-        </createIndex>
-
-        <createIndex indexName="IDX_MSG_LOG_RCV_MSG_ID" tableName="TB_MESSAGE_LOG">
-            <column name="RECEIVED"/>
-            <column name="MESSAGE_ID"/>
-        </createIndex>
-
-
         <addForeignKeyConstraint baseColumnNames="FK_RELIABILITY" baseTableName="TB_LEG"
                                  constraintName="FK_13k2eptp1ejp5othy1njrg3p8" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -1501,23 +1486,12 @@
 
         <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_AUD" constraintName="FK_CONFIGURATION_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
-        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_AUD"
-                                 constraintName="FK_CONFIGURATION_AUD_REV" deferrable="false" initiallyDeferred="false"
-                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID"
-                                 referencedTableName="TB_REV_INFO"/>
-
-
         <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_CONFIGURATION_RAW_AUD"
                                  constraintName="FK_CONFIGURATION_RAW_AUD" deferrable="false" initiallyDeferred="false"
                                  onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID"
                                  referencedTableName="TB_REV_INFO"/>
 
         <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP" constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK" referencedTableName="TB_MESSAGE_ACKNW"/>
-
-        <addForeignKeyConstraint baseColumnNames="FK_MSG_ACKNOWLEDGE" baseTableName="TB_MESSAGE_ACKNW_PROP"
-                                 constraintName="FK_MSG_ACK_PROP_MSG_ACK" deferrable="false" initiallyDeferred="false"
-                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID_PK"
-                                 referencedTableName="TB_MESSAGE_ACKNW"/>
 
 
         <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_PARTY_AUD" constraintName="FK_PARTY_AUD_REV"
@@ -1549,10 +1523,6 @@
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
         <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_AUD" constraintName="FK_USER_AUD_REV" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
-
-        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_USER_AUD" constraintName="FK_USER_AUD_REV"
-                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
-                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
 
         <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_ROLES"
@@ -1909,6 +1879,113 @@
         </insert>
     </changeSet>
 
+    <changeSet author="CatalinEnache" id="EDELIVERY-3234">
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+        </createIndex>
+
+        <createIndex indexName="IDX_PROP_NAME_MSGPROPS_ID_VAL" tableName="TB_PROPERTY">
+            <column name="NAME"/>
+            <column name="MESSAGEPROPERTIES_ID"/>
+            <column name="VALUE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_LOG_RCV_MSG_ID" tableName="TB_MESSAGE_LOG">
+            <column name="RECEIVED"/>
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+    </changeSet>
+
     <include file="changelog-4.0-quartz.xml" relativeToChangelogFile="true"/>
+
+    <changeSet author="dussath" id="EDELIVERY-3303">
+        <createTable tableName="TB_ALERT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ALERT_TYPE" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ATTEMPTS_NUMBER" type="INT"/>
+            <column name="MAX_ATTEMPTS_NUMBER" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROCESSED" type="BOOLEAN"/>
+            <column name="PROCESSED_TIME" type="TIMESTAMP"/>
+            <column name="CREATION_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+            <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
+            <column name="NEXT_ATTEMPT" type="TIMESTAMP"/>
+            <column name="ALERT_STATUS" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ALERT_LEVEL" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createTable tableName="TB_EVENT">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="EVENT_TYPE" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REPORTING_TIME" type="TIMESTAMP"/>
+        </createTable>
+
+        <createTable tableName="TB_EVENT_PROPERTY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PROPERTY_TYPE" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FK_EVENT" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="IDX_FK_EVENT_PROPERTY" tableName="TB_EVENT_PROPERTY">
+            <column name="FK_EVENT"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="FK_EVENT" baseTableName="TB_EVENT_PROPERTY"
+                                 constraintName="FK_EVENT_PROPERTY_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+        <createTable tableName="TB_EVENT_ALERT">
+            <column name="FK_EVENT" type="INT"/>
+            <column name="FK_ALERT" type="INT"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="FK_EVENT,FK_ALERT"
+                constraintName="PK_EVENT_ALERT"
+                tableName="TB_EVENT_ALERT"/>
+
+        <addForeignKeyConstraint baseColumnNames="FK_EVENT" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_EVENT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+        <createIndex indexName="IDX_FK_EVENT" tableName="TB_EVENT_ALERT">
+            <column name="FK_EVENT"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="FK_ALERT" baseTableName="TB_EVENT_ALERT"
+                                 constraintName="FK_ALERT_ID" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_ALERT"/>
+
+        <createIndex indexName="IDX_FK_ALERT" tableName="TB_EVENT_ALERT">
+            <column name="FK_ALERT"/>
+        </createIndex>
+    </changeSet>
 
 </databaseChangeLog>

@@ -10,4 +10,26 @@
         <date-format>MM/dd/yyyy HH:mm</date-format>
         <wildcard>true</wildcard>
     </configuration>
+    <mapping wildcard="false">
+        <class-a>eu.domibus.core.alerts.model.service.Event</class-a>
+        <class-b>eu.domibus.core.alerts.model.persist.Event</class-b>
+        <field>
+            <a>entityId</a>
+            <b>entityId</b>
+        </field>
+        <field>
+            <a>type</a>
+            <b>type</b>
+        </field>
+        <field>
+            <a>reportingTime</a>
+            <b>reportingTime</b>
+        </field>
+        <field>
+            <a>properties</a>
+            <b>properties</b>
+            <a-hint>eu.domibus.core.alerts.model.service.EventPropertyValue</a-hint>
+            <b-hint>eu.domibus.core.alerts.model.persist.EventProperty</b-hint>
+        </field>
+    </mapping>
 </mappings>

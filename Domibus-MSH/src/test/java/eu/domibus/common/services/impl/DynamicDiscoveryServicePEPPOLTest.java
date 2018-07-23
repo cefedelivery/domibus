@@ -2,22 +2,33 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.common.util.ProxyUtil;
+import eu.domibus.dynamicdiscovery.ApacheFetcherForTest;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
+import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
+import no.difi.vefa.peppol.lookup.LookupClientBuilder;
+import no.difi.vefa.peppol.lookup.api.LookupException;
+import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
 import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
+import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
+import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.security.cert.X509Certificate;
@@ -35,7 +46,8 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String TEST_KEYSTORE = "testkeystore.jks";
 
     //The (sub)domain of the SML, e.g. acc.edelivery.tech.ec.europa.eu
-    private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
+    //private static final String TEST_SML_ZONE = "isaitb.acc.edelivery.tech.ec.europa.eu";
+    private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
@@ -46,6 +58,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
     private static final String TEST_SERVICE_VALUE = "scheme::serviceValue";
     private static final String TEST_SERVICE_TYPE = "serviceType";
     private static final String TEST_INVALID_SERVICE_VALUE = "invalidServiceValue";
+    private static final String DOMAIN = "default";
 
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
@@ -67,10 +80,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Test
     public void testLookupInformationMock(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -79,7 +92,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         assertNotNull(endpoint);
         assertEquals(ADDRESS, endpoint.getAddress());
 
@@ -91,10 +104,10 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -103,7 +116,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
         }};
 
-        dynamicDiscoveryServicePEPPOL.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        dynamicDiscoveryServicePEPPOL.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
     }
 
 
@@ -124,28 +137,6 @@ public class DynamicDiscoveryServicePEPPOLTest {
         processes.add(process);
 
         ServiceMetadata sm = ServiceMetadata.of(null, null, processes);
-
         return sm;
-    }
-
-    /* This is not a unit tests but a useful test for a real SMP entry. */
-    @Test
-    @Ignore
-    public void testLookupInformation() throws Exception {
-        new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
-            result = true;
-
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
-            result = TEST_SML_ZONE;
-
-            domibusPropertyProvider.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
-            result = Mode.TEST;
-        }};
-
-        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
-
-        assertNotNull(endpoint);
-        System.out.println(endpoint.getAddress());
     }
 }

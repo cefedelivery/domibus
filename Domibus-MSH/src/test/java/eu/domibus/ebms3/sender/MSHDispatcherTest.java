@@ -1,12 +1,14 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Configuration;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -101,6 +103,9 @@ public class MSHDispatcherTest {
     @Injectable
     DispatchClientProvider dispatchClientProvider;
 
+    @Injectable
+    DomainContextProvider domainContextProvider;
+
     @Tested
     MSHDispatcher mshDispatcher;
 
@@ -126,15 +131,19 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = true;
+        final Domain domain = new Domain("default", "Default");
 
         new Expectations(mshDispatcher) {{
+            domainContextProvider.getCurrentDomain();
+            result = domain;
+
             mshDispatcher.isDispatchClientCacheActivated();
             result = cacheable;
 
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();
             result = algorithm;
 
-            dispatchClientProvider.getClient(endPoint, algorithm, policy, pModeKey, cacheable);
+            dispatchClientProvider.getClient(domain.getCode(), endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
         }};
 
@@ -168,9 +177,13 @@ public class MSHDispatcherTest {
         final String algorithm = "algorithm";
         final String pModeKey = "myPmodeKey";
         final boolean cacheable = false;
+        final Domain domain = new Domain("default", "Default");
 
         new Expectations(mshDispatcher) {{
-            dispatchClientProvider.getClient(endPoint, algorithm, policy, pModeKey, cacheable);
+            domainContextProvider.getCurrentDomain();
+            result = domain;
+
+            dispatchClientProvider.getClient(domain.getCode(), endPoint, algorithm, policy, pModeKey, cacheable);
             result = dispatch;
 
             legConfiguration.getSecurity().getSignatureMethod().getAlgorithm();

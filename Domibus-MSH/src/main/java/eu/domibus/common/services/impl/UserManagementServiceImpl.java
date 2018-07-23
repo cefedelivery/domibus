@@ -9,6 +9,10 @@ import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserService;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -59,6 +63,12 @@ public class UserManagementServiceImpl implements UserService {
 
     @Autowired
     protected UserPersistenceService userPersistenceService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    private EventService eventService;
 
 
     /**
@@ -113,10 +123,34 @@ public class UserManagementServiceImpl implements UserService {
             applyAccountLockingPolicy(user);
         }
         userDao.flush();
+        triggerEvent(userName, userLoginErrorReason);
         return userLoginErrorReason;
     }
 
+    protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
+        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
+        switch (userLoginErrorReason) {
+            case BAD_CREDENTIALS:
+                if (loginFailureConfiguration.isActive()) {
+                    eventService.enqueueLoginFailureEvent(userName, new Date(), false);
+                }
+                break;
+            case UNKNOWN:
+                break;
+            case INACTIVE:
+            case SUSPENDED:
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+                if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
+                    eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
+                }else if(loginFailureConfiguration.isActive()){
+                    eventService.enqueueLoginFailureEvent(userName, new Date(), true);
+                }
+                break;
+        }
+    }
+
     UserLoginErrorReason canApplyAccountLockingPolicy(String userName, User user) {
+
         if (user == null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
             return UserLoginErrorReason.UNKNOWN;
@@ -129,6 +163,7 @@ public class UserManagementServiceImpl implements UserService {
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
             return UserLoginErrorReason.SUSPENDED;
         }
+
         LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_BAD_CREDENTIALS, userName);
         return BAD_CREDENTIALS;
     }
@@ -146,8 +181,13 @@ public class UserManagementServiceImpl implements UserService {
                 LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]", maxAttemptAmount, user.getUserName());
             }
             user.setActive(false);
-            user.setSuspensionDate(new Date(System.currentTimeMillis()));
+            final Date suspensionDate = new Date(System.currentTimeMillis());
+            user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            if (accountDisabledConfiguration.isActive()) {
+                eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
+            }
         }
         userDao.update(user);
     }
