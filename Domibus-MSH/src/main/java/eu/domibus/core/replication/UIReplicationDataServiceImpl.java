@@ -264,34 +264,34 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     /**
      * Converts one record of the diff query to {@link UIMessageEntity}
      *
-     * @param diffRecord
+     * @param diffEntity
      * @return
      */
-    private UIMessageEntity convertToUIMessageEntity(Object[] diffRecord) {
-        if (null == diffRecord) {
+    private UIMessageEntity convertToUIMessageEntity(UIMessageDiffEntity diffEntity) {
+        if (null == diffEntity) {
             return null;
         }
 
         UIMessageEntity entity = new UIMessageEntity();
-        entity.setMessageId((String) diffRecord[0]);
-        entity.setMessageStatus(MessageStatus.valueOf((String) diffRecord[1]));
-        entity.setNotificationStatus(NotificationStatus.valueOf((String) diffRecord[2]));
-        entity.setMshRole(MSHRole.valueOf((String) diffRecord[3]));
-        entity.setMessageType(MessageType.valueOf((String) diffRecord[4]));
-        entity.setDeleted(diffRecord[5] != null ? (Timestamp) diffRecord[5] : null);
-        entity.setReceived(diffRecord[6] != null ? (Timestamp) diffRecord[6] : null);
-        entity.setSendAttempts(((BigDecimal) diffRecord[7]).intValueExact());
-        entity.setSendAttemptsMax(((BigDecimal) diffRecord[8]).intValueExact());
-        entity.setNextAttempt(diffRecord[9] != null ? (Timestamp) diffRecord[9] : null);
-        entity.setConversationId((String) diffRecord[10]);
-        entity.setFromId((String) diffRecord[11]);
-        entity.setToId((String) diffRecord[12]);
-        entity.setFromScheme((String) diffRecord[13]);
-        entity.setToScheme((String) diffRecord[14]);
-        entity.setRefToMessageId(((String) diffRecord[15]));
-        entity.setFailed(diffRecord[16] != null ? (Timestamp) diffRecord[16] : null);
-        entity.setRestored(diffRecord[17] != null ? (Timestamp) diffRecord[17] : null);
-        entity.setMessageSubtype(diffRecord[18] != null ? MessageSubtype.valueOf((String) diffRecord[18]) : null);
+        entity.setMessageId(diffEntity.getMessageId());
+        entity.setMessageStatus(diffEntity.getMessageStatus());
+        entity.setNotificationStatus(diffEntity.getNotificationStatus());
+        entity.setMshRole(diffEntity.getMshRole());
+        entity.setMessageType(diffEntity.getMessageType());
+        entity.setDeleted(diffEntity.getDeleted());
+        entity.setReceived(diffEntity.getReceived());
+        entity.setSendAttempts(diffEntity.getSendAttempts());
+        entity.setSendAttemptsMax(diffEntity.getSendAttemptsMax());
+        entity.setNextAttempt(diffEntity.getNextAttempt());
+        entity.setConversationId(diffEntity.getConversationId());
+        entity.setFromId(diffEntity.getFromId());
+        entity.setToId(diffEntity.getToId());
+        entity.setFromScheme(diffEntity.getFromScheme());
+        entity.setToScheme(diffEntity.getToScheme());
+        entity.setRefToMessageId(diffEntity.getRefToMessageId());
+        entity.setFailed(diffEntity.getFailed());
+        entity.setRestored(diffEntity.getRestored());
+        entity.setMessageSubtype(diffEntity.getMessageSubtype());
 
         return entity;
     }

@@ -141,11 +141,11 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
 
     @Override
     @Transactional(readOnly = true, timeout = 300)
-    public List<Object[]> findUIMessagesNotSynced() {
+    public List<UIMessageDiffEntity> findUIMessagesNotSynced() {
         long startTime = System.currentTimeMillis();
 
-        Query q = em.createNativeQuery("SELECT * FROM V_MESSAGE_UI_DIFF");
-        List<Object[]> result = q.getResultList();
+        Query q = em.createNativeQuery("SELECT * FROM V_MESSAGE_UI_DIFF", UIMessageDiffEntity.class);
+        List<UIMessageDiffEntity> result = q.getResultList();
 
         LOG.debug("[{}] milliseconds to findUIMessagesNotSynced", System.currentTimeMillis() - startTime);
 

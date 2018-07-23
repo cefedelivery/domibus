@@ -8,6 +8,9 @@ import java.util.Map;
  * @since 4.0
  */
 public interface UIMessageDao {
+    /** message id */
+    String MESSAGE_ID = "MESSAGE_ID";
+
     UIMessageEntity findUIMessageByMessageId(String messageId);
 
     int countMessages(Map<String, Object> filters);
@@ -16,9 +19,6 @@ public interface UIMessageDao {
 
     void saveOrUpdate(UIMessageEntity uiMessageEntity);
 
-    List<Object[]> findUIMessagesNotSynced();
-
-    /** message id */
-    String MESSAGE_ID = "MESSAGE_ID";
+    List<UIMessageDiffEntity> findUIMessagesNotSynced();
 
 }
