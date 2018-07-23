@@ -19,7 +19,7 @@ public interface InternalJMSManager {
     long NB_MESSAGES_ADMIN = -1L;
 
     /** queue names to be skip from showing into GUI interface */
-    String[] SKIP_QUEUE_NAMES = {"domibus.UI.replication"};
+    String[] SKIP_QUEUE_NAMES = {};
 
     Map<String, InternalJMSDestination> findDestinationsGroupedByFQName();
 

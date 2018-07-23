@@ -1,5 +1,6 @@
 package eu.domibus.core.replication;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -8,15 +9,18 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.common.util.WarningUtil;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
@@ -36,6 +40,10 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationDataServiceImpl.class);
 
+    private static final String MAX_ROWS_KEY = "domibus.ui.replication.sync.cron.max.rows";
+
+    private int maxRowsToSync;
+
     @Autowired
     private UIMessageDaoImpl uiMessageDao;
 
@@ -50,6 +58,14 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     @Autowired
     private UserMessageDefaultServiceHelper userMessageDefaultServiceHelper;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @PostConstruct
+    public void init() {
+        maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
+    }
 
     @Override
     public void messageReceived(String messageId) {
@@ -118,11 +134,20 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         saveUIMessageFromSignalMessageLog(messageId);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void signalMessageReceived(String messageId) {
         saveUIMessageFromSignalMessageLog(messageId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void findAndSyncUIMessages() {
         LOG.info("start counting differences for UIReplication");
 
@@ -132,7 +157,13 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                         map(objects -> convertToUIMessageEntity(objects) ).
                         collect(Collectors.toList());
 
-        LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", uiMessageEntityList.size());
+        int rowsToSyncCount =  uiMessageEntityList.size();
+        LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
+
+        if (rowsToSyncCount > maxRowsToSync) {
+            LOG.warn(WarningUtil.warnOutput("There are more than {} rows to sync into TB_MESSAGE_UI table please use the REST resource instead."), maxRowsToSync);
+            return;
+        }
 
         if (uiMessageEntityList.size() > 0) {
             LOG.info("start to update TB_MESSAGE_UI");
