@@ -32,15 +32,13 @@ public class ClassBasedResourceResolver implements LSResourceResolver {
                  * errors about duplicate definitions
                  */
                 if (!resolvedResources.contains(systemId)) {
-                    String path = systemId;
-
-                    if (path.startsWith("http")) {
+                    if (systemId.startsWith("http")) {
                         // Don't try to handle urls
                         return null;
                     }
 
                     resolvedResources.add(systemId);
-                    return classForResourceResolution.getResourceAsStream(path);
+                    return classForResourceResolution.getResourceAsStream(systemId);
                 } else {
                     return null;
                 }
