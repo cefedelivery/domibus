@@ -14,7 +14,7 @@ import java.util.Date;
 
 /**
  * It maps to {@code V_MESSAGE_UI_DIFF} view which tracks differences
- * between
+ * between native tables and {@code TB_MESSAGE_UI}
  *
  */
 @Immutable

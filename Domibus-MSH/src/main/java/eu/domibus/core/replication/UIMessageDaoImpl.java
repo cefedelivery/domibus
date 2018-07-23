@@ -152,6 +152,14 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         return result;
     }
 
+    @Override
+    @Transactional(readOnly = true, timeout = 300)
+    public int countUIMessageDiffRows() {
+        final Query nativeQuery = em.createNativeQuery("SELECT count(mud.MESSAGE_ID) FROM  V_MESSAGE_UI_DIFF mud");
+        final Number singleResult = (Number) nativeQuery.getSingleResult();
+        return singleResult.intValue();
+    }
+
     /**
      * builds the predicates list based on search criteria (filters)
      *

@@ -149,21 +149,22 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void findAndSyncUIMessages() {
-        LOG.info("start counting differences for UIReplication");
+        LOG.debug("start counting differences for UIReplication");
+
+        int rowsToSyncCount = uiMessageDao.countUIMessageDiffRows();
+        LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
+
+        if (rowsToSyncCount > maxRowsToSync) {
+            LOG.warn(WarningUtil.warnOutput("There are more than {} rows to sync into TB_MESSAGE_UI table " +
+                    "please use the REST resource instead."), maxRowsToSync);
+            return;
+        }
 
         List<UIMessageEntity> uiMessageEntityList =
                 uiMessageDao.findUIMessagesNotSynced().
                         stream().
-                        map(objects -> convertToUIMessageEntity(objects) ).
+                        map(objects -> convertToUIMessageEntity(objects)).
                         collect(Collectors.toList());
-
-        int rowsToSyncCount =  uiMessageEntityList.size();
-        LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
-
-        if (rowsToSyncCount > maxRowsToSync) {
-            LOG.warn(WarningUtil.warnOutput("There are more than {} rows to sync into TB_MESSAGE_UI table please use the REST resource instead."), maxRowsToSync);
-            return;
-        }
 
         if (uiMessageEntityList.size() > 0) {
             LOG.info("start to update TB_MESSAGE_UI");
