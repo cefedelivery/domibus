@@ -37,7 +37,7 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl<MessageFilterRO>
     private String routingCriteriasToCsvString(List<RoutingCriteria> routingCriterias) {
         List<String> result = new ArrayList<>();
         // initialize with empty strings
-        for (String ignored : routingCriteriasArray) {
+        for (String ignored : routingCriteriasArray) { //squid:S1481
             result.add("");
         }
 
@@ -70,7 +70,10 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl<MessageFilterRO>
                 result.append(toCsvString((MessageFilterRO) messageFilterRO));
             }
         }
-        return result.toString().replace("[","").replace("]", "");
+        return result.toString()
+                .replace("[","")
+                .replace("]", "")
+                .replace(" ", "");
     }
 
     @Override

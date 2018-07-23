@@ -54,8 +54,8 @@ public class PModeResource {
     @Autowired
     private AuditService auditService;
 
-    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
-    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
+    @GetMapping(path = "{id}", produces = "application/xml")
+    public ResponseEntity<Resource> downloadPmode(@PathVariable(value="id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
 
         final byte[] rawConfiguration = pModeProvider.getPModeFile(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -76,7 +76,7 @@ public class PModeResource {
                 .body(resource);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode, @RequestParam("description") String pModeDescription) {
         if (pmode.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the PMode file since it was empty.");
@@ -99,7 +99,7 @@ public class PModeResource {
         }
     }
 
-    @RequestMapping(method = RequestMethod.DELETE)
+    @DeleteMapping
     public ResponseEntity<String> deletePmodes(@RequestParam("ids") List<String> pmodesString) {
         if (pmodesString.isEmpty()) {
             LOG.error("Failed to delete PModes since the list of ids was empty.");
@@ -118,7 +118,7 @@ public class PModeResource {
         return ResponseEntity.ok("PModes were deleted\n");
     }
 
-    @RequestMapping(value = {"/restore/{id}"}, method = RequestMethod.PUT)
+    @PutMapping(value = {"/restore/{id}"})
     public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
         ConfigurationRaw existingRawConfiguration = pModeProvider.getRawConfiguration(id);
         ConfigurationRaw newRawConfiguration = new ConfigurationRaw();
@@ -144,7 +144,7 @@ public class PModeResource {
         return ResponseEntity.ok(message);
     }
 
-    @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
+    @GetMapping(value = {"/list"})
     public List<PModeResponseRO> pmodeList() {
         return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
@@ -154,7 +154,7 @@ public class PModeResource {
      *
      * @return CSV file with the contents of PMode Archive table
      */
-    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    @GetMapping(path = "/csv")
     public ResponseEntity<String> getCsv() {
         String resultText;
 
@@ -181,7 +181,7 @@ public class PModeResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmodearchive"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode-archive"))
                 .body(resultText);
     }
 

@@ -46,7 +46,7 @@ public class PartyResource {
     @Autowired
     private CertificateService certificateService;
 
-    @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
+    @GetMapping(value = {"/list"})
     public List<PartyResponseRo> listParties(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "endPoint", required = false) String endPoint,
@@ -101,7 +101,7 @@ public class PartyResource {
      *
      * @return CSV file with the contents of Party table
      */
-    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    @GetMapping(path = "/csv")
     public ResponseEntity<String> getCsv(@RequestParam(value = "name", required = false) String name,
                                          @RequestParam(value = "endPoint", required = false) String endPoint,
                                          @RequestParam(value = "partyId", required = false) String partyId,
@@ -126,20 +126,20 @@ public class PartyResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("party"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("parties"))
                 .body(resultText);
     }
 
-    @RequestMapping(value = {"/update"}, method = RequestMethod.PUT)
+    @PutMapping(value = {"/update"})
     public void updateParties(@RequestBody List<PartyResponseRo> partiesRo) {
-        LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
+        LOG.debug("Updating parties [{}]", partiesRo.toArray());
 
         List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
-        LOG.debug("Updating partyList [{}]", Arrays.toString(partyList.toArray()));
+        LOG.debug("Updating partyList [{}]", partyList.toArray());
 
         Map<String, String> certificates = partiesRo.stream()
                 .filter(party -> party.getCertificateContent() != null)
-                .collect(Collectors.toMap(party -> party.getName(), party -> party.getCertificateContent()));
+                .collect(Collectors.toMap(PartyResponseRo::getName, PartyResponseRo::getCertificateContent));
 
         partyService.updateParties(partyList, certificates);
     }
@@ -234,12 +234,12 @@ public class PartyResource {
                 });
     }
 
-    @RequestMapping(value = {"/processes"}, method = RequestMethod.GET)
+    @GetMapping(value = {"/processes"})
     public List<ProcessRo> listProcesses() {
         return domainConverter.convert(partyService.getAllProcesses(), ProcessRo.class);
     }
 
-    @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.GET)
+    @GetMapping(value = "/{partyName}/certificate")
     public ResponseEntity<TrustStoreRO> getCertificateForParty(@PathVariable(name = "partyName") String partyName) {
         try {
             TrustStoreEntry cert = certificateService.getPartyCertificateFromTruststore(partyName);
@@ -254,7 +254,7 @@ public class PartyResource {
         }
     }
 
-    @RequestMapping(value = "/{partyName}/certificate", method = RequestMethod.PUT)
+    @PutMapping(value = "/{partyName}/certificate")
     public TrustStoreRO convertCertificateContent(@PathVariable(name = "partyName") String partyName,
                                                   @RequestBody CertificateContentRo certificate) {
 
@@ -275,7 +275,6 @@ public class PartyResource {
             throw new IllegalArgumentException("certificate could not be parsed");
         }
 
-        TrustStoreRO res = domainConverter.convert(cert, TrustStoreRO.class);
-        return res;
+        return domainConverter.convert(cert, TrustStoreRO.class);
     }
 }

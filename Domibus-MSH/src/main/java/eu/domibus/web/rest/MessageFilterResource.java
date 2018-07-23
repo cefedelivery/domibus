@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,7 +53,7 @@ public class MessageFilterResource {
         return new ImmutablePair<>(messageFilterResultROS,areFiltersPersisted);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public MessageFilterResultRO getMessageFilter() {
         final Pair<List<MessageFilterRO>, Boolean> backendFiltersInformation = getBackendFiltersInformation();
 
@@ -66,7 +63,7 @@ public class MessageFilterResource {
         return resultRO;
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @PutMapping
     public void updateMessageFilters(@RequestBody List<MessageFilterRO> messageFilterROS) {
         List<BackendFilter> backendFilters = coreConverter.convert(messageFilterROS, BackendFilter.class);
         routingService.updateBackendFilters(backendFilters);
@@ -77,7 +74,7 @@ public class MessageFilterResource {
      *
      * @return CSV file with the contents of Message Filter table
      */
-    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    @GetMapping(path = "/csv")
     public ResponseEntity<String> getCsv() {
         String resultText;
         try {
@@ -89,7 +86,7 @@ public class MessageFilterResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + messageFilterCsvServiceImpl.getCsvFilename("messagefilter"))
+                .header("Content-Disposition", "attachment; filename=" + messageFilterCsvServiceImpl.getCsvFilename("message-filter"))
                 .body(resultText);
     }
 }
