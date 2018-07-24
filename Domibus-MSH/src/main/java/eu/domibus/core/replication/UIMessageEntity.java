@@ -93,8 +93,8 @@ public class UIMessageEntity extends AbstractBaseEntity {
 
     @Version
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "VERSION")
-    private Date version;
+    @Column(name = "LAST_MODIFIED")
+    private Date lastModified;
 
 
     public String getMessageId() {
@@ -249,11 +249,11 @@ public class UIMessageEntity extends AbstractBaseEntity {
         this.refToMessageId = refToMessageId;
     }
 
-    public Date getVersion() {
-        return version;
+    public Date getLastModified() {
+        return lastModified;
     }
 
-    public void setVersion(Date version) {
-        this.version = version;
+    public void setLastModified(Date version) {
+        this.lastModified = version;
     }
 }

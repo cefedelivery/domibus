@@ -15,8 +15,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -131,7 +129,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId());
         if (uiMessageEntityFound != null) {
             uiMessageEntity.setEntityId(uiMessageEntityFound.getEntityId());
-            uiMessageEntity.setVersion(uiMessageEntityFound.getVersion());
+            uiMessageEntity.setLastModified(uiMessageEntityFound.getLastModified());
             em.merge(uiMessageEntity);
             LOG.info("uiMessageEntity having messageId={} have been updated", uiMessageEntity.getMessageId());
             return;

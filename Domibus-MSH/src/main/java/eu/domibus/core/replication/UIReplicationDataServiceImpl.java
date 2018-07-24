@@ -16,6 +16,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.hibernate.StaleObjectStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,7 +93,12 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
             entity.setNextAttempt(userMessageLog.getNextAttempt());
             entity.setFailed(userMessageLog.getFailed());
 
-            uiMessageDao.update(entity);
+            try {
+                uiMessageDao.update(entity);
+                uiMessageDao.flush();
+            } catch (StaleObjectStateException | OptimisticLockException e) {
+                LOG.warn("Optimistic lock detected for messageStatusChange");
+            }
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
         }
