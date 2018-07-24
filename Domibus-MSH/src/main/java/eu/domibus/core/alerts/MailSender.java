@@ -31,15 +31,15 @@ public class MailSender {
 
     private static final Logger LOG = LoggerFactory.getLogger(MailSender.class);
 
-    private static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
 
-    private static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_PORT = "domibus.alert.sender.smtp.port";
 
-    private static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
 
-    private static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
+    static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
 
-    private static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
+    static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
 
     private static final String MAIL = ".mail";
 
@@ -60,8 +60,7 @@ public class MailSender {
 
     private boolean mailSenderInitiated;
 
-
-    private void initMailSender() {
+    protected void initMailSender() {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
         if (alertModuleEnabled) {
@@ -83,16 +82,17 @@ public class MailSender {
             //Non static properties.
             final Properties javaMailProperties = javaMailSender.getJavaMailProperties();
             final Set<String> mailPropertyNames = domibusPropertyProvider.filterPropertiesName(s -> s.startsWith(DOMIBUS_ALERT_MAIL));
-            mailPropertyNames.stream().
-                    map(domibusPropertyName -> domibusPropertyName.substring(domibusPropertyName.indexOf(MAIL))).
-                    forEach(mailPropertyName -> {
-                        final String propertyValue = domibusPropertyProvider.getProperty(mailPropertyName);
-                        javaMailProperties.put(mailPropertyName, propertyValue);
+            mailPropertyNames.
+                    forEach(domibusPropertyName -> {
+                        final String mailPropertyName = domibusPropertyName.substring(domibusPropertyName.indexOf(MAIL) + 1);
+                        final String propertyValue = domibusPropertyProvider.getProperty(domibusPropertyName);
                         LOG.debug("mail property:[{}] value:[{}]", mailPropertyName, propertyValue);
+                        javaMailProperties.put(mailPropertyName, propertyValue);
                     });
         }
     }
 
+    //TODO add unit test here.
     public <T extends MailModel> void sendMail(final T model, final String to, final String from) {
         if(!mailSenderInitiated){
             mailSenderInitiated=true;
