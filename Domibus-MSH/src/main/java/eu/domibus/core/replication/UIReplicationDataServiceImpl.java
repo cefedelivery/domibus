@@ -1,9 +1,6 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -11,7 +8,10 @@ import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +19,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.StaleObjectStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.OptimisticLockException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,7 +80,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     }
 
     @Override
-    public void messageStatusChange(String messageId, MessageStatus newStatus) {
+    public void messageStatusChange(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
@@ -97,28 +94,36 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                 uiMessageDao.update(entity);
                 uiMessageDao.flush();
             } catch (StaleObjectStateException | OptimisticLockException e) {
-                LOG.warn("Optimistic lock detected for messageStatusChange");
+                LOG.debug("Optimistic lock detected for messageStatusChange on messageId={}", messageId);
             }
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced, status={}",
-                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId, newStatus);
+                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId,
+                userMessageLog.getMessageStatus());
     }
 
     @Override
-    public void messageNotificationStatusChange(String messageId, NotificationStatus newStatus) {
+    public void messageNotificationStatusChange(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
         if (entity != null) {
             entity.setNotificationStatus(userMessageLog.getNotificationStatus());
-            uiMessageDao.update(entity);
+
+            try {
+                uiMessageDao.update(entity);
+                uiMessageDao.flush();
+            } catch (StaleObjectStateException | OptimisticLockException e) {
+                LOG.debug("Optimistic lock detected for messageNotificationStatusChange on messageId={}", messageId);
+            }
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageNotificationStatusChange failed for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced, notificationStatus={}",
-                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId, newStatus);
+                MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId,
+                userMessageLog.getNotificationStatus());
 
     }
 

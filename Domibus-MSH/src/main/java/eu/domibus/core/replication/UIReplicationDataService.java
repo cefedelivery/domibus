@@ -1,11 +1,5 @@
 package eu.domibus.core.replication;
 
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.model.logging.UserMessageLog;
-
-import java.util.List;
-
 /**
  * Replication Data service interface - all operations of writing data into {@code TB_MESSAGE_UI} table
  *
@@ -30,19 +24,17 @@ public interface UIReplicationDataService {
 
     /**
      * updates/sync data on receiver/sender side when a change in messages status appears
+     *  @param messageId
      *
-     * @param messageId
-     * @param newStatus
      */
-    void messageStatusChange(final String messageId, MessageStatus newStatus);
+    void messageStatusChange(final String messageId);
 
     /**
      * updates/sync data on receiver/sender side when a change in messages notification status appears
+     *  @param messageId
      *
-     * @param messageId
-     * @param newStatus
      */
-    void messageNotificationStatusChange(final String messageId, NotificationStatus newStatus);
+    void messageNotificationStatusChange(final String messageId);
 
     void messageChange(final String messageId);
 

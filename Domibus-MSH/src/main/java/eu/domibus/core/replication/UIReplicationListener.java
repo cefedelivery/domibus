@@ -1,8 +1,6 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -51,12 +49,10 @@ public class UIReplicationListener {
                 uiReplicationDataService.messageSubmitted(messageId);
                 break;
             case MESSAGE_STATUS_CHANGE:
-                uiReplicationDataService.messageStatusChange(messageId, MessageStatus.valueOf(
-                        map.getStringProperty(UIReplicationSignalService.JMS_PROPERTY_STATUS)));
+                uiReplicationDataService.messageStatusChange(messageId);
                 break;
             case MESSAGE_NOTIFICATION_STATUS_CHANGE:
-                uiReplicationDataService.messageNotificationStatusChange(messageId, NotificationStatus.valueOf(
-                        map.getStringProperty(UIReplicationSignalService.JMS_PROPERTY_STATUS)));
+                uiReplicationDataService.messageNotificationStatusChange(messageId);
                 break;
             case MESSAGE_CHANGE:
                 uiReplicationDataService.messageChange(messageId);

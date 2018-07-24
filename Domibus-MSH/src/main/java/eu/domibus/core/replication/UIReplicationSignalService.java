@@ -22,7 +22,6 @@ import javax.jms.Queue;
 public class UIReplicationSignalService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
-    static final String JMS_PROPERTY_STATUS = "status";
 
     @Autowired
     @Qualifier("domibusUIReplicationQueue")
@@ -43,7 +42,7 @@ public class UIReplicationSignalService {
         final JmsMessage message = JMSMessageBuilder.create()
                 .type(UIJMSType.MESSAGE_STATUS_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(JMS_PROPERTY_STATUS, newStatus.name()).build();
+                .build();
 
         jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
     }
@@ -61,7 +60,7 @@ public class UIReplicationSignalService {
         final JmsMessage message = JMSMessageBuilder.create()
                 .type(UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(JMS_PROPERTY_STATUS, newStatus.name()).build();
+                .build();
 
         jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
     }
