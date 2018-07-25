@@ -429,10 +429,4 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
         return null;
     }
-
-    @Override
-    public List<String> findPartyIdByServiceAndAction(String service, String action) {
-        // not used in DynamicDiscoveryPModeProvider
-        return Collections.emptyList();
-    }
 }

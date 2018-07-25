@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
  */
 @DirtiesContext
 @Rollback
-public class SubmitMessageEncryptAllIT extends AbstractBackendWSIT {
+public class SubmitMessageIT extends AbstractBackendWSIT {
 
     @Before
     public void before() throws IOException, XmlProcessingException {
@@ -57,7 +57,9 @@ public class SubmitMessageEncryptAllIT extends AbstractBackendWSIT {
         waitUntilMessageIsInWaitingForRetry(messageId);
 
         verify(postRequestedFor(urlMatching("/domibus/services/msh"))
-                .withRequestBody(containing("EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p\""))
-                .withHeader("Content-Type", notMatching("application/soap+xml")));
+                .withRequestBody(containing("EncryptionMethod Algorithm=\"http://www.w3.org/2009/xmlenc11#rsa-oaep\""))
+                .withRequestBody(containing("MGF xmlns:xenc11=\"http://www.w3.org/2009/xmlenc11#\" Algorithm=\"http://www.w3.org/2009/xmlenc11#mgf1sha256"))
+                .withRequestBody(containing("DigestMethod xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" Algorithm=\"http://www.w3.org/2001/04/xmlenc#sha256"))
+                .withHeader("Content-Type", containing("application/soap+xml")));
     }
 }
