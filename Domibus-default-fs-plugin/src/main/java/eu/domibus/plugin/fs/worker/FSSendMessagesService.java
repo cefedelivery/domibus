@@ -67,10 +67,20 @@ public class FSSendMessagesService {
         FileObject[] contentFiles = null;
 
         if(domibusConfigurationExtService.isMultiTenantAware()) {
+            String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
+            if(authenticationUser == null) {
+                LOG.error("Authentication User not defined for domain '{}'", domain);
+            }
+
+            String authenticationPassword = fsPluginProperties.getAuthenticationPassword(domain);
+            if(authenticationPassword == null) {
+                LOG.error("Authentication Password not defined for domain '{}'", domain);
+            }
+
             if(domain == null) {
                 domain = DEFAULT_DOMAIN;
             }
-            authenticationExtService.basicAuthenticate(fsPluginProperties.getAuthenticationUser(domain), fsPluginProperties.getAuthenticationPassword(domain));
+            authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
         }
 
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
