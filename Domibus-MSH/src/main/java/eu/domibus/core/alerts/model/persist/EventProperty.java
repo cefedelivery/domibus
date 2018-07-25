@@ -14,19 +14,16 @@ public class EventProperty extends AbstractBaseEntity {
 
     @NotNull
     @Column(name = "PROPERTY_TYPE")
-    private String key;
+    private String key; //NOSONAR
 
     @NotNull
     @Column(name = "PROPERTY_VALUE")
-    private String value;
+    private String value; //NOSONAR
 
     @NotNull
     @ManyToOne
     @JoinColumn(name="FK_EVENT")
-    private Event event;
-
-    public EventProperty() {
-    }
+    private Event event; //NOSONAR
 
     public String getKey() {
         return key;

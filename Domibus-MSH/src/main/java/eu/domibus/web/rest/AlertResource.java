@@ -218,7 +218,7 @@ public class AlertResource {
                     range(0, parameters.length).
                     mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
                     filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
-                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue)); //NOSONAR
             alertCriteria.setParameters(parametersMap);
         }
         return alertCriteria;

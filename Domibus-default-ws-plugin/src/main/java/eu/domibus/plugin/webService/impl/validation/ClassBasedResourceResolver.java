@@ -27,6 +27,9 @@ public class ClassBasedResourceResolver implements LSResourceResolver {
             }
 
             public InputStream getByteStream() {
+                if(systemId == null) {
+                    return null;
+                }
                 /*
                  * Only resolve each include once. Otherwise there will be
                  * errors about duplicate definitions
