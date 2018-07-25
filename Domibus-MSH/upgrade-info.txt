@@ -66,7 +66,6 @@ Domibus 4.0 (from 3.3):
                     o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                - Run the appropriate DB migration script(mysql5innoDb-3.3-to-4.0-migration.ddl for MySQL or oracle10g-3.3-to-4.0-migration.ddl for Oracle)
                - Replace the Domibus war and the plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\conf" respectively into "\domibus\conf\domibus\plugins\lib"
-
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
                - Remove Description and Schema headers from PartInfo. The headers were deprecated in ebMS3.
                In case users were manually added to TB_AUTHENTICATION_ENTRY, migrate their password.
@@ -106,6 +105,8 @@ Domibus 4.0 (from 3.3):
                                  domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?pinGlobalTxToPhysicalConnection=true
                                  domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
                     Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
+                - Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
+                Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
 Domibus 3.3.4 (from 3.3.3):
                  - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
