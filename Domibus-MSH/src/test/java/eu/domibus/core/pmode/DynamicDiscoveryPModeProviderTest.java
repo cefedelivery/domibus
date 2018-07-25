@@ -28,6 +28,7 @@ import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
+import mockit.Expectations;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,10 +50,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
@@ -378,20 +376,6 @@ public class DynamicDiscoveryPModeProviderTest {
 
         certificateService.extractCommonName(testData);
     }
-
-    @Test
-    public void testFindPartyIdByServiceAndAction() {
-        // Given
-        String service = "service";
-        String action = "action";
-
-        // When
-        List<String> partyIdByServiceAndAction = dynamicDiscoveryPModeProvider.findPartyIdByServiceAndAction(service, action);
-
-        // Then
-        Assert.assertEquals(Collections.emptyList(), partyIdByServiceAndAction);
-    }
-
 
     /**
      * Build UserMessage for testing. Only the fields that are mandatory for the testing doDynamicThings are filled.
