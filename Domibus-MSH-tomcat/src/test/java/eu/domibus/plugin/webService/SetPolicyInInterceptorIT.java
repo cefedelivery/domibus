@@ -41,7 +41,7 @@ public class SetPolicyInInterceptorIT extends AbstractBackendWSIT {
 
     @Test
     public void testHandleMessage() {
-        String expectedPolicy = "eDeliveryPolicy";
+        String expectedPolicy = "eDeliveryAS4Policy";
         String expectedSecurityAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
         String filename = "SOAPMessage2.xml";
