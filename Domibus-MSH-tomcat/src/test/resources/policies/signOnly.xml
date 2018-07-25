@@ -34,10 +34,11 @@
                             <sp:Strict/>
                         </wsp:Policy>
                     </sp:Layout>
-                    <sp:OnlySignEntireHeadersAndBody/>
+                    <sp:SignBeforeEncrypting />
                     <sp:AlgorithmSuite>
                         <wsp:Policy>
-                            <sp:Basic128Sha256/>
+                            <sp-cxf:Basic128GCMSha256MgfSha256
+                                    xmlns:sp-cxf="http://e-delivery.eu/custom/security-policy"/>
                         </wsp:Policy>
                     </sp:AlgorithmSuite>
                 </wsp:Policy>

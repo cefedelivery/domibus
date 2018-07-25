@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="/schemas/xml.xsd" />
+    <xs:import namespace="http://www.w3.org/2005/05/xmlmime" schemaLocation="/schemas/xmlmime.xsd" />
+    <xs:import namespace="http://www.w3.org/2003/05/soap-envelope" schemaLocation="/schemas/envelope.xsd" />
+    <xs:import namespace="http://org.ecodex.backend/1_1/" schemaLocation="/schemas/domibus-backend.xsd" />
+    <xs:import namespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" schemaLocation="/schemas/domibus-header.xsd" />
+
+</xs:schema>

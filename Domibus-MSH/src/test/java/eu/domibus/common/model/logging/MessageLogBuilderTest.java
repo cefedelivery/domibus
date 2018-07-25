@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Federico Martini
@@ -31,13 +32,13 @@ public class MessageLogBuilderTest {
 
         SignalMessageLog signalMessageLog = smlBuilder.build();
 
-        assertEquals(signalMessageLog.getMessageType(), MessageType.SIGNAL_MESSAGE);
-        assertEquals(signalMessageLog.getMessageId(), messageId);
-        assertEquals(signalMessageLog.getMessageStatus(), MessageStatus.ACKNOWLEDGED);
-        assertEquals(signalMessageLog.getMshRole(), MSHRole.RECEIVING);
-        assertEquals(signalMessageLog.getNotificationStatus(), NotificationStatus.NOT_REQUIRED);
-        assertEquals(signalMessageLog.getReceived(), signalMessageLog.getNextAttempt());
-        assertEquals(signalMessageLog.getSendAttempts(), 0);
+        assertEquals(MessageType.SIGNAL_MESSAGE, signalMessageLog.getMessageType());
+        assertEquals(messageId, signalMessageLog.getMessageId());
+        assertEquals(MessageStatus.ACKNOWLEDGED, signalMessageLog.getMessageStatus());
+        assertEquals(MSHRole.RECEIVING, signalMessageLog.getMshRole());
+        assertEquals(NotificationStatus.NOT_REQUIRED, signalMessageLog.getNotificationStatus());
+        assertNull(signalMessageLog.getNextAttempt());
+        assertEquals(0, signalMessageLog.getSendAttempts());
 
     }
 
@@ -64,17 +65,17 @@ public class MessageLogBuilderTest {
 
         UserMessageLog userMessageLog = umlBuilder.build();
 
-        assertEquals(userMessageLog.getMessageType(), MessageType.USER_MESSAGE);
-        assertEquals(userMessageLog.getMessageId(), messageId);
-        assertEquals(userMessageLog.getMessageStatus(), MessageStatus.SEND_ENQUEUED);
-        assertEquals(userMessageLog.getMshRole(), MSHRole.SENDING);
-        assertEquals(userMessageLog.getNotificationStatus(), NotificationStatus.REQUIRED);
-        assertEquals(userMessageLog.getMpc(), defaultMpcQualifiedName);
-        assertEquals(userMessageLog.getSendAttempts(), 0);
-        assertEquals(userMessageLog.getSendAttemptsMax(), 5);
-        assertEquals(userMessageLog.getBackend(), backendName);
-        assertEquals(userMessageLog.getEndpoint(), endpoint);
-        assertEquals(userMessageLog.getReceived(), userMessageLog.getNextAttempt());
+        assertEquals(MessageType.USER_MESSAGE, userMessageLog.getMessageType());
+        assertEquals(messageId, userMessageLog.getMessageId());
+        assertEquals(MessageStatus.SEND_ENQUEUED, userMessageLog.getMessageStatus());
+        assertEquals(MSHRole.SENDING, userMessageLog.getMshRole());
+        assertEquals(NotificationStatus.REQUIRED, userMessageLog.getNotificationStatus());
+        assertEquals(defaultMpcQualifiedName, userMessageLog.getMpc());
+        assertEquals(0, userMessageLog.getSendAttempts());
+        assertEquals(5, userMessageLog.getSendAttemptsMax());
+        assertEquals(backendName, userMessageLog.getBackend());
+        assertEquals(endpoint, userMessageLog.getEndpoint());
+        assertNull(userMessageLog.getNextAttempt());
 
     }
 

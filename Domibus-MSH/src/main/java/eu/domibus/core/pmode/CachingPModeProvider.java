@@ -366,7 +366,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     public boolean isConfigurationLoaded() {
-        if (getConfiguration() != null) return true;
+        if(this.configuration != null) return true;
         return configurationDAO.configurationExists();
     }
 

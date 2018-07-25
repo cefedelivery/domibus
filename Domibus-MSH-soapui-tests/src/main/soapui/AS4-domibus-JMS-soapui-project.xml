@@ -674,11 +674,6 @@
             <ns:PayloadInfo>\r
                <!--1 or more repetitions:-->\r
                <ns:PartInfo href="?">\r
-                  <!--You may enter the following 3 items in any order-->\r
-                  <!--Optional:-->\r
-                  <ns:Schema location="?" version="?" namespace="?"/>\r
-                  <!--Optional:-->\r
-                  <ns:Description xml:lang="?">?</ns:Description>\r
                   <!--Optional:-->\r
                   <ns:PartProperties>\r
                      <!--1 or more repetitions:-->\r

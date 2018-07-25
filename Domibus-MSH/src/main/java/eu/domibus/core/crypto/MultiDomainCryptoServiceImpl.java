@@ -52,7 +52,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         DomainCryptoService domainCertificateProvider = domainCertificateProviderMap.get(domain);
         if (domainCertificateProvider == null) {
             synchronized (domainCertificateProviderMap) {
-                if (domainCertificateProvider == null) { //NOSONAR: double-check locking
+                if (domainCertificateProviderMap.get(domain) == null) { //NOSONAR: double-check locking
                     LOG.debug("Creating domain CertificateProvider for domain [{}]", domain);
                     domainCertificateProvider = domainCertificateProviderFactory.createDomainCryptoService(domain);
                     domainCertificateProviderMap.put(domain, domainCertificateProvider);

@@ -26,18 +26,18 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   columnPickerCert: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  offset = 0;
-  users: PluginUserRO[] = [];
+  offset: number;
+  users: PluginUserRO[];
 
-  selected: PluginUserRO[] = [];
-  loading = false;
-  dirty = false;
+  selected: PluginUserRO[];
+  loading: boolean;
+  dirty: boolean;
 
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
   filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
   columnPicker: ColumnPickerBase;
 
-  userRoles: Array<String> = [];
+  userRoles: Array<String> ;
 
   constructor (private alertService: AlertService,
                private pluginUserService: PluginUserService,
@@ -46,6 +46,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit () {
+    this.offset = 0;
+    this.selected = [];
+    this.loading = false;
+    this.userRoles = [];
     this.users = [];
     this.dirty = false;
 
@@ -94,6 +98,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   async search () {
+    this.offset = 0;
     this.selected = [];
     this.dirty = false;
 

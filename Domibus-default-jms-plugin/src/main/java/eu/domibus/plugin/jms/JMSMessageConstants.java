@@ -37,11 +37,8 @@ public class JMSMessageConstants {
     public static final String ERROR_DETAIL = "errorDetail";
     public static final String PROPERTY_PREFIX = "property_";
     public static final String PROPERTY_TYPE_PREFIX = "propertyType_";
-    public static final String DESCRIPTION_LANGUAGE = "descriptionLanguage";
     private static final String PAYLOAD_NAME_PREFIX = "payload_";
     public static final String PAYLOAD_NAME_FORMAT = PAYLOAD_NAME_PREFIX + "{0}";
-    private static final String PAYLOAD_DESCRIPTION_SUFFIX = "_description";
-    public static final String PAYLOAD_DESCRIPTION_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_DESCRIPTION_SUFFIX;
     private static final String PAYLOAD_MIME_TYPE_SUFFIX = "_mimeType";
     public static final String PAYLOAD_MIME_TYPE_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_TYPE_SUFFIX;
     private static final String PAYLOAD_FILE_NAME_SUFFIX = "_fileName";

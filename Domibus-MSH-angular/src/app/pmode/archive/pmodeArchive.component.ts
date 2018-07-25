@@ -40,26 +40,29 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
-  loading = false;
-
-  allPModes = [];
-  tableRows = [];
-  selected = [];
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
-  count = 0;
-  offset = 0;
 
-  disabledSave = true;
-  disabledCancel = true;
-  disabledDownload = true;
-  disabledDelete = true;
-  disabledRestore = true;
+  private headers = new Headers({'Content-Type': 'application/json'});
 
-  actualId = 0;
-  actualRow = 0;
+  loading: boolean;
 
-  deleteList = [];
+  allPModes: any[];
+  tableRows: any[];
+  selected: any[];
+  count: number;
+  offset: number;
+
+  disabledSave: boolean;
+  disabledCancel: boolean;
+  disabledDownload: boolean;
+  disabledDelete: boolean;
+  disabledRestore: boolean;
+
+  actualId: number;
+  actualRow: number;
+
+  deleteList: any [];
 
   currentDomain: Domain;
 
@@ -67,10 +70,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   // datatable was empty if we don't do the request again
   // resize window shows information
   // check: @selectedIndexChange(value)
-  private uploaded = false;
-
-  private headers = new Headers({'Content-Type': 'application/json'});
-
+  private uploaded: boolean;
 
   /**
    * Constructor
@@ -85,6 +85,27 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * NgOnInit method
    */
   ngOnInit () {
+    this.loading = false;
+
+    this.allPModes = [];
+    this.tableRows = [];
+    this.selected = [];
+    this.count = 0;
+    this.offset = 0;
+
+    this.disabledSave = true;
+    this.disabledCancel = true;
+    this.disabledDownload = true;
+    this.disabledDelete = true;
+    this.disabledRestore = true;
+
+    this.actualId = 0;
+    this.actualRow = 0;
+
+    this.deleteList = [];
+
+    this.uploaded = false;
+
     this.initializeArchivePmodes();
 
     this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
@@ -144,6 +165,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    */
   getAllPModeEntries () {
     this.getResultObservable().subscribe((response: Response) => {
+        this.offset = 0;
         this.allPModes = response.json();
         this.allPModes[0].current = true;
         this.actualId = this.allPModes[0].id;

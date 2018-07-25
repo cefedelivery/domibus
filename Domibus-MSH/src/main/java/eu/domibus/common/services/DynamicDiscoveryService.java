@@ -14,8 +14,10 @@ public interface DynamicDiscoveryService {
     String DYNAMIC_DISCOVERY_CERT_REGEX = "domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation";
     String DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE = "domibus.dynamicdiscovery.partyid.responder.role";
     String DYNAMIC_DISCOVERY_PARTYID_TYPE = "domibus.dynamicdiscovery.partyid.type";
+    String USE_DYNAMIC_DISCOVERY = "domibus.dynamicdiscovery.useDynamicDiscovery";
 
-    EndpointInfo lookupInformation(final String participantId,
+    EndpointInfo lookupInformation(final String domain,
+                                   final String participantId,
                                    final String participantIdScheme,
                                    final String documentId,
                                    final String processId,

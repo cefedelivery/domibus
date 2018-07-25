@@ -661,7 +661,6 @@
             </ns:MessageProperties>
             <ns:PayloadInfo>
                <ns:PartInfo href="cid:message">
-                  <ns:Description xml:lang="en-US">As4Message</ns:Description>
                   <ns:PartProperties>
                      <ns:Property name="MimeType">text/xml</ns:Property>
                   </ns:PartProperties>

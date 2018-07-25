@@ -197,12 +197,12 @@
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eDeliveryPolicy_CA" policy="eDeliveryPolicy_CA.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy_CA" policy="eDeliveryAS4Policy_CA.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy" policy="eSensPolicy.v2.0.xml" signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy_CA" policy="eSensPolicy.v2.0_CA.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy_CA" policy="eDeliveryAS4Policy_CA.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
@@ -226,11 +226,11 @@
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="simple_twowayACT_SIMPLE_TWOWAY" service="testService1" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy" receptionAwareness="receptionAwareness" errorHandling="demoErrorHandling" compressPayloads="true"/>		
-			<legConfiguration name="pushTestcase3tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase4tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eSensPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase5tc1Action" service="testService3" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryPolicy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="simple_twowayACT_SIMPLE_TWOWAY" service="testService1" action="tc2Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase3tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase4tc1Action" service="testService1" action="tc3Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase5tc1Action" service="testService3" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_CA" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>							
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<responderParties>
