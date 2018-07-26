@@ -69,13 +69,13 @@ public class FSSendMessagesService {
         if(domibusConfigurationExtService.isMultiTenantAware()) {
             String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
             if(authenticationUser == null) {
-                LOG.error("Authentication User not defined for domain '{}'", domain);
+                LOG.error("Authentication User not defined for domain [{}]", domain);
                 return;
             }
 
             String authenticationPassword = fsPluginProperties.getAuthenticationPassword(domain);
             if(authenticationPassword == null) {
-                LOG.error("Authentication Password not defined for domain '{}'", domain);
+                LOG.error("Authentication Password not defined for domain [{}]", domain);
                 return;
             }
 
