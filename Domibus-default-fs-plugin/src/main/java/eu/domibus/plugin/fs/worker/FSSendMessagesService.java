@@ -67,6 +67,10 @@ public class FSSendMessagesService {
         FileObject[] contentFiles = null;
 
         if(domibusConfigurationExtService.isMultiTenantAware()) {
+            if(domain == null) {
+                domain = DEFAULT_DOMAIN;
+            }
+
             String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
             if(authenticationUser == null) {
                 LOG.error("Authentication User not defined for domain [{}]", domain);
@@ -79,9 +83,6 @@ public class FSSendMessagesService {
                 return;
             }
 
-            if(domain == null) {
-                domain = DEFAULT_DOMAIN;
-            }
             authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
         }
 
