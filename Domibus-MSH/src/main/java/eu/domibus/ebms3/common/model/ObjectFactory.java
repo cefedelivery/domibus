@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  * This object contains factory methods for each Java content interface and Java
  * element interface generated in the
  * org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704 package.
- * <p/>
+ * <p>
  * An ObjectFactory allows you to programatically construct new instances of the
  * Java representation for XML content. The Java representation of XML content
  * can consist of schema derived interfaces and classes representing the binding
@@ -42,6 +42,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Messaging }
+     * @return a new instance of {@link Messaging }
      */
     public Messaging createMessaging() {
         return new Messaging();
@@ -49,6 +50,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link MessageInfo }
+     * @return a new instance of {@link MessageInfo }
      */
     public MessageInfo createMessageInfo() {
         return new MessageInfo();
@@ -56,6 +58,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Description }
+     * @return a new instance of {@link Description }
      */
     public Description createDescription() {
         return new Description();
@@ -63,6 +66,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Service }
+     * @return a new instance of {@link Service }
      */
     public Service createService() {
         return new Service();
@@ -70,6 +74,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartyId }
+     * @return a new instance of {@link PartyId }
      */
     public PartyId createPartyId() {
         return new PartyId();
@@ -77,6 +82,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CollaborationInfo }
+     * @return a new instance of {@link CollaborationInfo }
      */
     public CollaborationInfo createCollaborationInfo() {
         return new CollaborationInfo();
@@ -84,6 +90,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link To }
+     * @return a new instance of {@link To }
      */
     public To createTo() {
         return new To();
@@ -91,6 +98,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PullRequest }
+     * @return a new instance of {@link PullRequest }
      */
     public PullRequest createPullRequest() {
         return new PullRequest();
@@ -98,6 +106,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AgreementRef }
+     * @return a new instance of {@link AgreementRef }
      */
     public AgreementRef createAgreementRef() {
         return new AgreementRef();
@@ -105,6 +114,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartProperties }
+     * @return a new instance of {@link PartProperties }
      */
     public PartProperties createPartProperties() {
         return new PartProperties();
@@ -112,6 +122,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Property }
+     * @return a new instance of {@link Property }
      */
     public Property createProperty() {
         return new Property();
@@ -119,6 +130,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartyInfo }
+     * @return a new instance of {@link PartyInfo }
      */
     public PartyInfo createPartyInfo() {
         return new PartyInfo();
@@ -126,6 +138,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link MessageProperties }
+     * @return a new instance of {@link MessageProperties }
      */
     public MessageProperties createMessageProperties() {
         return new MessageProperties();
@@ -133,6 +146,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Error }
+     * @return a new instance of {@link Error }
      */
     public Error createError() {
         return new Error();
@@ -140,6 +154,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PayloadInfo }
+     * @return a new instance of {@link PayloadInfo }
      */
     public PayloadInfo createPayloadInfo() {
         return new PayloadInfo();
@@ -147,6 +162,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SignalMessage }
+     * @return a new instance of {@link SignalMessage }
      */
     public SignalMessage createSignalMessage() {
         return new SignalMessage();
@@ -154,6 +170,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartInfo }
+     * @return a new instance of {@link PartInfo }
      */
     public PartInfo createPartInfo() {
         return new PartInfo();
@@ -161,6 +178,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UserMessage }
+     * @return a new instance of {@link UserMessage }
      */
     public UserMessage createUserMessage() {
         return new UserMessage();
@@ -168,6 +186,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Receipt }
+     * @return a new instance of {@link Receipt }
      */
     public Receipt createReceipt() {
         return new Receipt();
@@ -175,6 +194,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link From }
+     * @return a new instance of {@link From }
      */
     public From createFrom() {
         return new From();
@@ -183,6 +203,10 @@ public class ObjectFactory {
     /**
      * Create an instance of
      * {@link JAXBElement }{@code <}{@link Messaging }{@code >}}
+     *
+     * @param value the {@link Messaging } value
+     *
+     * @return a new instance of {@link JAXBElement }{@code <}{@link Messaging }{@code >}}
      */
     @XmlElementDecl(namespace = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", name = "Messaging")
     public JAXBElement<Messaging> createMessaging(final Messaging value) {

@@ -21,51 +21,47 @@ public class HashUtilImpl implements HashUtil {
     /**
      * Returns the MD5 hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the MD5 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the MD5 algorithm is not supported
      */
     @Override
-    public String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "MD5");
     }
 
     /**
      * Returns the SHA224 hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the SHA224 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the SHA224 algorithm is not supported
      */
     @Override
-    public String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "SHA224");
     }
     
     /**
      * Returns the SHA256 hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the SHA256 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the SHA256 algorithm is not supported
      */
     @Override
-    public String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException {
         return getHash(stringToBeHashed, "SHA256");
     }
     
     /**
      * Returns the hash of the given String
      *
-     * @param stringToBeHashed
+     * @param stringToBeHashed the string to be hashed
      * @return the SHA224 hash of the given string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException if the hashing algorithm is unknown
      */
-    private String getHash(String stringToBeHashed, String algorithm) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private String getHash(String stringToBeHashed, String algorithm) throws NoSuchAlgorithmException {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         }

@@ -20,10 +20,10 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
     private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceSingleDomainImpl.class);
 
     /**
-     * Get the domain associated to the provided user from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
+     * Get the domain associated to the provided user. <br>
+     * In single domain mode, this is always the DEFAULT domain.
      *
-     * @return
+     * @return the code of the default domain
      */
     @Override
     public String getDomainForUser(String user) {
@@ -32,10 +32,10 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
     }
 
     /**
-     * Get the preferred domain associated to the super user from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
+     * Get the preferred domain associated to a super user. <br>
+     * In single domain mode, this is always the DEFAULT domain.
      *
-     * @return
+     * @return the code of the default domain
      */
     @Override
     public String getPreferredDomainForUser(String user) {
@@ -43,10 +43,9 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
     }
 
     /**
-     * Get all super users from the general schema. <br/>
-     * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
+     * Get all super users: in single domain mode, this is an empty list
      *
-     * @return
+     * @return an empty list
      */
     @Override
     public List<User> getSuperUsers() {
@@ -70,7 +69,8 @@ public class UserDomainServiceSingleDomainImpl implements UserDomainService {
     }
 
     /**
-     * Retrieves all users from general schema
+     * Retrieves all users from general schema.
+     * In single domain mode, this is always an empty list.
      */
     @Override
     public List<String> getAllUserNames() {

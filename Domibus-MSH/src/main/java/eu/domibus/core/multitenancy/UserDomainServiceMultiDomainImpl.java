@@ -44,10 +44,10 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     protected DomainContextProvider domainContextProvider;
 
     /**
-     * Get the domain associated to the provided user from the general schema. <br/>
+     * Get the domain associated to the provided user from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the domain code of the user
      */
     @Override
     public String getDomainForUser(String user) {
@@ -58,10 +58,10 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     }
 
     /**
-     * Get the preferred domain associated to the super user from the general schema. <br/>
+     * Get the preferred domain associated to the super user from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the code of the preferred domain of a super user
      */
     @Override
     public String getPreferredDomainForUser(String user) {
@@ -72,10 +72,10 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     }
 
     /**
-     * Get all super users from the general schema. <br/>
+     * Get all super users from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the list of users from the general schema
      */
     @Override
     public List<User> getSuperUsers() {

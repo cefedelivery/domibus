@@ -9,9 +9,9 @@ import java.security.NoSuchAlgorithmException;
  */
 public interface HashUtil {
 
-    String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+    String getMD5Hash(String stringToBeHashed) throws NoSuchAlgorithmException;
 
-    String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+    String getSHA224Hash(String stringToBeHashed) throws NoSuchAlgorithmException;
 
-    String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+    String getSHA256Hash(String stringToBeHashed) throws NoSuchAlgorithmException;
 }

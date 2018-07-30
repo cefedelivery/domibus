@@ -46,7 +46,7 @@ public class CRLUtil {
      * @see CRLUtil#downloadCRLFromWebOrClasspath(String)
      * @see CRLUtil#downloadCRLfromLDAP(String)
      *
-     * @param crlURL
+     * @param crlURL the CRL url
      * @return {@link X509CRL} certificate to download
      * @throws DomibusCRLException runtime exception in case of error
      */
@@ -145,6 +145,10 @@ public class CRLUtil {
     /**
      * Extracts all CRL distribution point URLs from the "CRL Distribution Point" extension of X.509 pki.
      * If the CRL distribution point extension is unavailable, returns an empty list.
+     *
+     * @param cert a X509 certificate
+     *
+     * @return the list of CRL urls of this certificate
      */
     public List<String> getCrlDistributionPoints(X509Certificate cert) {
         byte[] crldpExt = cert.getExtensionValue(org.bouncycastle.asn1.x509.Extension.cRLDistributionPoints.getId());

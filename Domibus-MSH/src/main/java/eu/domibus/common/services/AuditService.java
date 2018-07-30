@@ -80,6 +80,7 @@ public interface AuditService {
     /**
      * Add message deleted audit for a jms message.
      * @param messageId the id of the message.
+     * @param fromQueue the queue from which the message was deleted.
      */
     void addJmsMessageDeletedAudit(
             String messageId,
@@ -88,6 +89,8 @@ public interface AuditService {
     /**
      * Add message moved audit for a message.
      * @param messageId the id of the message.
+     * @param fromQueue the queue from which the message was moved.
+     * @param toQueue the queue to which the message was moved.
      */
     void addJmsMessageMovedAudit(
             String messageId,

@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * This class represents the datamodel of the domibus backend transport layer.
- * <p/>
+ * <p>
  * In order to simplify the process of transforming data from/to the backend this
  * datamodel was introduced. A transformer for mapping this model into the complex
  * ebMS3 datamodel is already implemented.
@@ -43,7 +43,7 @@ public class Submission {
 
     /**
      * Getter for action
-     * <p/>
+     * <p>
      * "This element is a string identifying an operation or an activity within a Service. Its actual semantics is
      * beyond the scope of this specification. Action SHALL be unique within the Service in which it is defined.
      * The value of the Action element is specified by the designer of the service."
@@ -57,7 +57,7 @@ public class Submission {
 
     /**
      * Setter for action
-     * <p/>
+     * <p>
      * "This element is a string identifying an operation or an activity within a Service. Its actual semantics is
      * beyond the scope of this specification. Action SHALL be unique within the Service in which it is defined.
      * The value of the Action element is specified by the designer of the service."
@@ -74,7 +74,7 @@ public class Submission {
 
     /**
      * Getter for agreementref
-     * <p/>
+     * <p>
      * "AgreementRef is a string value that identifies the agreement that governs the exchange. The P-Mode
      * under which the MSH operates for this message should be aligned with this agreement.
      * The value of an AgreementRef element MUST be unique within a namespace mutually agreed by the two
@@ -91,7 +91,7 @@ public class Submission {
 
     /**
      * Setter for agreementref
-     * <p/>
+     * <p>
      * "AgreementRef is a string value that identifies the agreement that governs the exchange. The P-Mode
      * under which the MSH operates for this message should be aligned with this agreement.
      * The value of an AgreementRef element MUST be unique within a namespace mutually agreed by the two
@@ -108,7 +108,7 @@ public class Submission {
 
     /**
      * Getter for agreementRefType
-     * <p/>
+     * <p>
      * "This OPTIONAL attribute indicates how the parties sending and receiving the message will interpret the value of
      * the reference (e.g. the value could be "ebcppa2.1" for parties using a CPA-based agreement representation). There
      * is no restriction on the value of the type attribute; this choice is left to profiles of this specification. If
@@ -123,7 +123,7 @@ public class Submission {
 
     /**
      * Setter for agreementRefType
-     * <p/>
+     * <p>
      * "This OPTIONAL attribute indicates how the parties sending and receiving the message will interpret the value of
      * the reference (e.g. the value could be "ebcppa2.1" for parties using a CPA-based agreement representation). There
      * is no restriction on the value of the type attribute; this choice is left to profiles of this specification. If
@@ -138,7 +138,7 @@ public class Submission {
 
     /**
      * Getter for conversationId
-     * <p/>
+     * <p>
      * "The Party initiating a conversation determines the value of the ConversationId element that SHALL be
      * reflected in all messages pertaining to that conversation. The actual semantics of this value is beyond the
      * scope of this specification. Implementations SHOULD provide a facility for mapping between their
@@ -154,7 +154,7 @@ public class Submission {
     /**
      * Setter for conversationId
      * If not set a random value will be generated.
-     * <p/>
+     * <p>
      * "The Party initiating a conversation determines the value of the ConversationId element that SHALL be
      * reflected in all messages pertaining to that conversation. The actual semantics of this value is beyond the
      * scope of this specification. Implementations SHOULD provide a facility for mapping between their
@@ -169,7 +169,7 @@ public class Submission {
 
     /**
      * Getter for fromRole
-     * <p/>
+     * <p>
      * "The REQUIRED eb:Role element occurs once, and identifies the authorized role
      * (fromAuthorizedRole or toAuthorizedRole) of the Party sending (when present as a child of the From element) or
      * receiving (when present as a child of the To element) the message. The value of the Role element is a non- empty
@@ -185,7 +185,7 @@ public class Submission {
 
     /**
      * Setter for fromRole
-     * <p/>
+     * <p>
      * "The REQUIRED eb:Role element occurs once, and identifies the authorized role
      * (fromAuthorizedRole or toAuthorizedRole) of the Party sending (when present as a child of the From element) or
      * receiving (when present as a child of the To element) the message. The value of the Role element is a non- empty
@@ -204,7 +204,7 @@ public class Submission {
 
     /**
      * Getter for messageId
-     * <p/>
+     * <p>
      * "This REQUIRED element has a value representing – for each message - a globally unique identifier conforming to
      * MessageId [RFC2822]. Note: In the Message-Id and Content-Id MIME headers, values are always surrounded by angle
      * brackets. However references in mid: or cid: scheme URI's and the MessageId and RefToMessageId elements MUST NOT
@@ -220,7 +220,7 @@ public class Submission {
     /**
      * Setter for messageId
      * The prefix added to the messageId, in case of sending from domibus, is configurable
-     * <p/>
+     * <p>
      * "This REQUIRED element has a value representing – for each message - a globally unique identifier conforming to
      * MessageId [RFC2822]. Note: In the Message-Id and Content-Id MIME headers, values are always surrounded by angle
      * brackets. However references in mid: or cid: scheme URI's and the MessageId and RefToMessageId elements MUST NOT
@@ -235,7 +235,7 @@ public class Submission {
 
     /**
      * Getter for refToMessageId
-     * <p/>
+     * <p>
      * "This OPTIONAL element occurs at most once. When present, it MUST contain the MessageId value of an ebMS Message
      * to which this message relates, in a way that conforms to the MEP in use."
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
@@ -248,7 +248,7 @@ public class Submission {
 
     /**
      * Setter for refToMessageId
-     * <p/>
+     * <p>
      * "This OPTIONAL element occurs at most once. When present, it MUST contain the MessageId value of an ebMS Message
      * to which this message relates, in a way that conforms to the MEP in use."
      * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
@@ -261,7 +261,7 @@ public class Submission {
 
     /**
      * Getter for service
-     * <p/>
+     * <p>
      * "This element identifies the service that acts on the message. Its actual semantics is beyond the scope of
      * this specification. The designer of the service may be a standards organization, or an individual or
      * enterprise."
@@ -275,7 +275,7 @@ public class Submission {
 
     /**
      * Setter for service
-     * <p/>
+     * <p>
      * "This element identifies the service that acts on the message. Its actual semantics is beyond the scope of
      * this specification. The designer of the service may be a standards organization, or an individual or
      * enterprise."
@@ -292,7 +292,7 @@ public class Submission {
 
     /**
      * Getter for serviceType
-     * <p/>
+     * <p>
      * "The Service element MAY contain a single @type attribute, that indicates how the parties sending and
      * receiving the message will interpret the value of the element. There is no restriction on the value of the
      * type attribute. If the type attribute is not present, the content of the Service element MUST be a URI."
@@ -306,7 +306,7 @@ public class Submission {
 
     /**
      * Setter serviceType
-     * <p/>
+     * <p>
      * "The Service element MAY contain a single @type attribute, that indicates how the parties sending and
      * receiving the message will interpret the value of the element. There is no restriction on the value of the
      * type attribute. If the type attribute is not present, the content of the Service element MUST be a URI."
@@ -320,7 +320,7 @@ public class Submission {
 
     /**
      * Getter toRole
-     * <p/>
+     * <p>
      * "The REQUIRED eb:Role element occurs once, and identifies the authorized role
      * (fromAuthorizedRole or toAuthorizedRole) of the Party sending (when present as a child of the From element) or
      * receiving (when present as a child of the To element) the message. The value of the Role element is a non- empty
@@ -336,7 +336,7 @@ public class Submission {
 
     /**
      * Setter toRole
-     * <p/>
+     * <p>
      * "The REQUIRED eb:Role element occurs once, and identifies the authorized role
      * (fromAuthorizedRole or toAuthorizedRole) of the Party sending (when present as a child of the From element) or
      * receiving (when present as a child of the To element) the message. The value of the Role element is a non- empty
@@ -362,7 +362,7 @@ public class Submission {
 
     /**
      * This method adds one message property to the plugin. The optional type attribute is not set.
-     * <p/>
+     * <p>
      * "Its actual semantics is beyond the scope of this specification. The element is intended to be consumed outside
      * the ebMS-specified functions. It may contain some information that qualifies or abstracts message data, or that
      * allows for binding the message to some business process. A representation in the header of such properties allows
@@ -379,7 +379,7 @@ public class Submission {
 
     /**
      * This method adds one message property to the plugin.
-     * <p/>
+     * <p>
      * "Its actual semantics is beyond the scope of this specification. The element is intended to be consumed outside
      * the ebMS-specified functions. It may contain some information that qualifies or abstracts message data, or that
      * allows for binding the message to some business process. A representation in the header of such properties allows
@@ -401,7 +401,7 @@ public class Submission {
 
     /**
      * Getter for all message properties of this plugin.
-     * <p/>
+     * <p>
      * "Its actual semantics is beyond the scope of this specification. The element is intended to be consumed outside
      * the ebMS-specified functions. It may contain some information that qualifies or abstracts message data, or that
      * allows for binding the message to some business process. A representation in the header of such properties allows
@@ -455,7 +455,7 @@ public class Submission {
      * This method adds one payload to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Payload} elements.
      * In this case the parameter contentId, a {@link java.util.Set} of payload properties and the payload data itself were set.
      * By default a payload added with this method is considered to be NOT part of the soap body.
-     * <p/>
+     * <p>
      * Payload properties will be mapped into eb:PartProperties in ebMS described here:
      * "This element has zero or more eb:Property child elements. An eb:Property element is of xs:anySimpleType
      * (e.g. string, URI) and has a REQUIRED @name attribute, the value of which must be agreed between partners. Its
@@ -476,7 +476,7 @@ public class Submission {
     /**
      * This method adds one payload to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Payload} elements.
      * In this case it is possible to set all parameters available for a payload.
-     * <p/>
+     * <p>
      * <ol>
      * <li><b>contentId:</b> Will be mapped the href attribute of the eb:partInfo element in ebMS described here:
      * This OPTIONAL attribute has a value that is the [RFC2392] Content-ID URI of the payload object
@@ -519,7 +519,7 @@ public class Submission {
 
     /**
      * This method adds one originating party to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Party} elements.
-     * <p/>
+     * <p>
      * Paramters are:
      * <ol>
      * <li><b>partyId:</b> This is mapped into eb:From/eb:PartyId in ebMS described here:
@@ -544,7 +544,7 @@ public class Submission {
 
     /**
      * This method adds one destination party to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Party} elements.
-     * <p/>
+     * <p>
      * Paramters are:
      * <ol>
      * <li><b>partyId:</b> This is mapped into eb:To/eb:PartyId in ebMS described here:

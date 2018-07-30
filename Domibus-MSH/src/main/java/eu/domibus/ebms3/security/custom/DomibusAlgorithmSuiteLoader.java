@@ -26,7 +26,7 @@ import java.util.Map;
  * This class implements a custom {@link org.apache.cxf.ws.security.policy.custom.AlgorithmSuiteLoader} in order to enable the domibus gateway to support:
  * <ol>
  * <li>the gcm variant of the aes algorithm</li>
- * <li>a key transport algorithm wihtout SHA1 dependencies</li> *
+ * <li>a key transport algorithm without SHA1 dependencies</li>
  * </ol>
  * NOTE: GCM is supported by Apache CXF via {@link org.apache.cxf.ws.security.policy.custom.DefaultAlgorithmSuiteLoader} but at time of writing (15.10.2014)
  * the corresponding AlgorithmSuites do not support digest Algorithms other than SHA1.

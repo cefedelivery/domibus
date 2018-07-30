@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  * @author Arun Raj
  * @author Federico Martini
  * @since 3.3
- * <br/>
+ * <br>
  * This class validates the content of the UserMessage which represents the message's header.
  * These validations are based on the AS4 specifications and the gateway PMode configuration.
  *
@@ -54,31 +54,31 @@ public class BackendMessageValidator {
 
 
     /**
-     * Validations pertaining to the field - UserMessage/MessageInfo/MessageId<br/><br/>
-     * <b><u>As per ebms_core-3.0-spec-cs-02.pdf:</u></b><br/>
+     * Validations pertaining to the field - UserMessage/MessageInfo/MessageId<br><br>
+     * <b><u>As per ebms_core-3.0-spec-cs-02.pdf:</u></b><br>
      * &ldquo;b:Messaging/eb:UserMessage/eb:MessageInfo/eb:MessageId:
      * This REQUIRED element has a value representing – for each message - a globally unique identifier <b>conforming to MessageId [RFC2822].</b>
      * Note: In the Message-Id and Content-Id MIME headers, values are always surrounded by angle brackets. However references in mid: or cid: scheme URI's and
-     * the MessageId and RefToMessageId elements MUST NOT include these delimiters.&rdquo;<br/><br/>
+     * the MessageId and RefToMessageId elements MUST NOT include these delimiters.&rdquo;<br><br>
      * <p>
-     * <b><u>As per RFC2822 :</u></b><br/>
+     * <b><u>As per RFC2822 :</u></b><br>
      * &ldquo;2.1. General Description - At the most basic level, a message is a series of characters.  A message that is conformant with this standard is comprised of
-     * characters with values in the range 1 through 127 and interpreted as US-ASCII characters [ASCII].&rdquo;<br/><br/>
+     * characters with values in the range 1 through 127 and interpreted as US-ASCII characters [ASCII].&rdquo;<br><br>
      * <p>
      * &ldquo;3.6.4. Identification fields: The "Message-ID:" field provides a unique message identifier that refers to a particular version of a particular message.
      * The uniqueness of the message identifier is guaranteed by the host that generates it (see below).
      * This message identifier is <u>intended to be machine readable and not necessarily meaningful to humans.</u>
-     * A message identifier pertains to exactly one instantiation of a particular message; subsequent revisions to the message each receive new message identifiers.&rdquo;<br/><br/>
+     * A message identifier pertains to exactly one instantiation of a particular message; subsequent revisions to the message each receive new message identifiers.&rdquo;<br><br>
      * <p>
      * Though the above specifications state the message id can be any ASCII character, practically the message ids might need to be referenced by persons and documents.
-     * Hence all non printable characters (ASCII 0 to 31 and 127) should be avoided.<br/><br/>
+     * Hence all non printable characters (ASCII 0 to 31 and 127) should be avoided.<br><br>
      * <p>
      * RFC2822 also states the better algo for generating a unique id is - put a combination of the current absolute date and time along with
      * some other currently unique (perhaps sequential) identifier available on the system + &ldquo;@&rdquo; + domain name (or a domain literal IP address) of the host on which the
      * message identifier. As seen from acceptance and production setup, existing clients of Domibus sending message id is not following this format. Hence, although it is good, it is not enforced.
      * Only control character restriction is enforced.
      *
-     * @param messageId
+     * @param messageId the message id.
      * @throws EbMS3Exception
      */
     public void validateMessageId(final String messageId) throws EbMS3Exception {
@@ -108,7 +108,7 @@ public class BackendMessageValidator {
     /**
      * The field - UserMessage/MessageInfo/RefToMessageId is expected to satisfy all the validations of the - UserMessage/MessageInfo/MessageId field
      *
-     * @param refToMessageId
+     * @param refToMessageId the message id to be validated.
      * @throws EbMS3Exception
      */
     public void validateRefToMessageId(final String refToMessageId) throws EbMS3Exception {
@@ -136,8 +136,8 @@ public class BackendMessageValidator {
     /**
      * Verifies that the initiator and the responder parties are different.
      *
-     * @param from
-     * @param to
+     * @param from the initiator party.
+     * @param to the responder party.
      * @throws EbMS3Exception
      */
     public void validateParties(Party from, Party to) {
@@ -150,8 +150,8 @@ public class BackendMessageValidator {
     /**
      * Verifies that the message is being sent by the same party as the one configured for the sending access point
      *
-     * @param gatewayParty
-     * @param from
+     * @param gatewayParty the access point party.
+     * @param from the initiator party.
      * @throws EbMS3Exception
      */
     public void validateInitiatorParty(Party gatewayParty, Party from) throws EbMS3Exception {
@@ -167,8 +167,8 @@ public class BackendMessageValidator {
     /**
      * Verifies that the message is not for the current gateway.
      *
-     * @param gatewayParty
-     * @param to
+     * @param gatewayParty the access point party.
+     * @param to the responder party.
      * @throws EbMS3Exception
      */
     public void validateResponderParty(Party gatewayParty, Party to) {
@@ -180,8 +180,8 @@ public class BackendMessageValidator {
     /**
      * Verifies that the parties' roles are different
      *
-     * @param fromRole
-     * @param toRole
+     * @param fromRole the role of the initiator party.
+     * @param toRole the role of the responder party.
      * @throws EbMS3Exception
      */
     public void validatePartiesRoles(Role fromRole, Role toRole) throws EbMS3Exception {

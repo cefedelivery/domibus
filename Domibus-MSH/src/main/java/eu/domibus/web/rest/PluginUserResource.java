@@ -95,6 +95,10 @@ public class PluginUserResource {
 
     /**
      * This method returns a CSV file with the contents of Plugin User table
+     * @param authType the authentication type (BASIC or CERTIFICATE)
+     * @param authRole the authorization role
+     * @param originalUser the original user
+     * @param userName the user name
      *
      * @return CSV file with the contents of Plugin User table
      */

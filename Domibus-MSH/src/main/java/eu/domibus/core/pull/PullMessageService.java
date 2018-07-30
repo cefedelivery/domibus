@@ -26,8 +26,8 @@ public interface PullMessageService {
      * the message later will be extracted and saved in a different place where the message lock will be facilitated.
      *
      * @param partyIdExtractor interface allowing to retrieve the initiator information from different context.
-     * @param userMessage
-     * @param messageLog
+     * @param userMessage      the user message.
+     * @param messageLog       the message log.
      */
     void addPullMessageLock(PartyIdExtractor partyIdExtractor, UserMessage userMessage, MessageLog messageLog);
 
@@ -53,12 +53,13 @@ public interface PullMessageService {
                                        final ReliabilityChecker.CheckResult state);
 
     /**
-     * Manage the status of the pull message when the receipt arrives..
-     * @param reliabilityCheckSuccessful the state of the reality chek process.
-     * @param isOk
+     * Manage the status of the pull message when the receipt arrives.
+     * @param reliabilityCheckSuccessful the state of the reality check process.
+     * @param isOk                       the OK or WARNING state of the acknowledgement.
      * @param userMessageLog             the message log.
      * @param legConfiguration           contains the context of the configured message exchange.
-     * @param userMessage
+     * @param userMessage                not used.
+     * @return the PullRequestResult of the userMessageLog
      */
     PullRequestResult updatePullMessageAfterReceipt(
             ReliabilityChecker.CheckResult reliabilityCheckSuccessful,
@@ -68,8 +69,8 @@ public interface PullMessageService {
             UserMessage userMessage);
 
     /**
-     *Acquire a lock given a messageid.
-     * @param messageId
+     * Acquire a lock given a messageId.
+     * @param messageId the message id.
      * @return the lock entity.
      */
     MessagingLock getLock(String messageId);
@@ -83,7 +84,7 @@ public interface PullMessageService {
 
     /**
      * Delete a lock.
-     * @param messagingLock the enity to delete.
+     * @param messagingLock the entity to delete.
      */
     void delete(MessagingLock messagingLock);
 
@@ -101,7 +102,7 @@ public interface PullMessageService {
 
     /**
      * Handles the lock in regards of message receipt status.
-     * @param requestResult
+     * @param requestResult the pull request result.
      */
     void releaseLockAfterReceipt(PullRequestResult requestResult);
 }

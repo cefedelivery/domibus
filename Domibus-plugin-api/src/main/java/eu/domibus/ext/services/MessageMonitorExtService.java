@@ -9,9 +9,9 @@ import java.util.List;
 
 /**
  * This interface exposes all the available operations related to the Messages Monitor Service.
- * <p>
+ *
  * <p>The client can either call directly the REST service MessageMonitorResource or hook-up using this interface.
- * <p>
+ *
  * <p>Assuming that "failed message" means failed to be sent by the sender access point and getting the status set to SEND_FAILURE, the service gives the possibility to:
  * <ul>
  * <li>list all the failed messages</li>
@@ -21,9 +21,9 @@ import java.util.List;
  * <li>get the history of all delivery attempts</li>
  * <li>delete the message payload of a failed message</li>
  * </ul>
- * <p>
+ *
  * <p>Notice about Domibus notification mechanism: whenever a message fails to be sent several times, according to the configuration of the reception awareness/retry in the PMode,
- * it's status gets changed to SEND_FAILURE and Domibus notifies the plugin via the void messageSendFailed(String messageId) method from the eu.domibus.plugin.BackendConnector.<br/>
+ * it's status gets changed to SEND_FAILURE and Domibus notifies the plugin via the void messageSendFailed(String messageId) method from the eu.domibus.plugin.BackendConnector.<br>
  * In case of the <b>default-jms-plugin</b> the method <b>messageSendFailed</b> is implemented to send a JMS message containing the error details on the "domibus.backend.jms.errorNotifyProducer" queue.</p>
  * </p>
  *

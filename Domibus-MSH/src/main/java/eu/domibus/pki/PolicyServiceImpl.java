@@ -39,9 +39,9 @@ public class PolicyServiceImpl implements PolicyService {
     /**
      * To retrieve the domibus security policy xml from the specified location and create the Security Policy object.
      *
-     * @param location
-     * @return
-     * @throws ConfigurationException
+     * @param location the policy xml file location
+     * @return the security policy
+     * @throws ConfigurationException if the policy xml cannot be read or parsed from the file
      */
     @Override
     @Cacheable("policyCache")
@@ -59,7 +59,7 @@ public class PolicyServiceImpl implements PolicyService {
      * If null is provided, a no security policy is assumed.
      * A no security policy would be used to avoid certificate validation.
      *
-     * @param policy
+     * @param policy the security policy
      * @return boolean
      */
     @Override

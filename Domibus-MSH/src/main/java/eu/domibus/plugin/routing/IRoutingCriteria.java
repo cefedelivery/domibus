@@ -13,7 +13,8 @@ public interface IRoutingCriteria {
      * Returns if $UserMessage matches expression
      *
      * @param candidate user message to match
-     * @return result
+     * @param expression expression to match
+     * @return boolean result
      */
     public boolean matches(UserMessage candidate, String expression);
 

@@ -50,7 +50,7 @@ public class SignalMessageDao extends BasicDao<SignalMessage> {
     /**
      * Clear receipts of the Signal Message.
      *
-     * @param signalMessage
+     * @param signalMessage the signal message
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void clear(final SignalMessage signalMessage) {

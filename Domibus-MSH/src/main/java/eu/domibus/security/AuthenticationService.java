@@ -63,6 +63,7 @@ public class AuthenticationService {
 
     /**
      * Set the domain in the current security context
+     * @param domainCode the code of the new current domain
      */
     public void changeDomain(String domainCode) {
 

@@ -196,11 +196,11 @@ public class Messaging extends AbstractBaseEntity {
     /**
      * Gets a map that contains attributes that aren't bound to any typed
      * property on this class.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * the map is keyed by the name of the attribute and the value is the string
      * value of the attribute.
-     * <p/>
+     * <p>
      * the map returned by this method is live, and you can add new attribute by
      * updating the map directly. Because of this design, there's no setter.
      *
