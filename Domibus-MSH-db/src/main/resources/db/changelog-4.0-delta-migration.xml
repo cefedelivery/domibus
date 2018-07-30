@@ -22,12 +22,13 @@
             SET SQL_SAFE_UPDATES = 0;
             UPDATE TB_AUTHENTICATION_ENTRY SET PASSWD='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu' WHERE USERNAME='admin';
             UPDATE TB_AUTHENTICATION_ENTRY SET PASSWD='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu' WHERE USERNAME='user';
+            DELETE FROM TB_AUTHENTICATION_ENTRY WHERE USERNAME!='admin' AND USERNAME!='user';
             SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
         </sql>
         <sql dbms="oracle">
             UPDATE TB_AUTHENTICATION_ENTRY SET PASSWD='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu' WHERE USERNAME='admin';
             UPDATE TB_AUTHENTICATION_ENTRY SET PASSWD='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu' WHERE USERNAME='user';
+            DELETE FROM TB_AUTHENTICATION_ENTRY WHERE USERNAME!='admin' AND USERNAME!='user';
         </sql>
     </changeSet>
-
 </databaseChangeLog>
