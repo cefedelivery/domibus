@@ -90,12 +90,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
             entity.setNextAttempt(userMessageLog.getNextAttempt());
             entity.setFailed(userMessageLog.getFailed());
 
-            try {
-                uiMessageDao.update(entity);
-                uiMessageDao.flush();
-            } catch (StaleObjectStateException | OptimisticLockException e) {
-                LOG.debug("Optimistic lock detected for messageStatusChange on messageId={}", messageId);
-            }
+            updateAndFlush(messageId, entity, "messageStatusChange");
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
         }
@@ -112,12 +107,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (entity != null) {
             entity.setNotificationStatus(userMessageLog.getNotificationStatus());
 
-            try {
-                uiMessageDao.update(entity);
-                uiMessageDao.flush();
-            } catch (StaleObjectStateException | OptimisticLockException e) {
-                LOG.debug("Optimistic lock detected for messageNotificationStatusChange on messageId={}", messageId);
-            }
+            updateAndFlush(messageId, entity, "messageNotificationStatusChange");
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageNotificationStatusChange failed for messageId={}", messageId);
         }
@@ -126,6 +116,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                 userMessageLog.getNotificationStatus());
 
     }
+
+
 
     @Override
     public void messageChange(String messageId) {
@@ -136,7 +128,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (entity != null) {
             updateUIMessage(userMessageLog, entity);
 
-            uiMessageDao.update(entity);
+            updateAndFlush(messageId, entity, "messageChange");
         } else {
             UIReplicationDataServiceImpl.LOG.warn("messageChange failed for messageId={}", messageId);
         }
@@ -184,11 +176,28 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (uiMessageEntityList.size() > 0) {
             LOG.info("start to update TB_MESSAGE_UI");
             try {
-                uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> uiMessageDao.saveOrUpdate(uiMessageEntity));
+                uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> updateAndFlush(uiMessageEntity.getMessageId(),
+                        uiMessageEntity, "findAndSyncUiMessage"));
             } catch (OptimisticLockException e) {
                 LOG.warn("Optimistic lock exception detected");
             }
             LOG.info("finish to update TB_MESSAGE_UI");
+        }
+    }
+
+    /**
+     * Update (merge) a JPA entity and force the flush in order to catch right away the {@link OptimisticLockException}
+     *
+     * @param messageId
+     * @param entity
+     * @param operationName
+     */
+    private void updateAndFlush(String messageId, UIMessageEntity entity, String operationName) {
+        try {
+            uiMessageDao.update(entity);
+            uiMessageDao.flush();
+        } catch (StaleObjectStateException | OptimisticLockException e) {
+            LOG.debug("Optimistic lock detected for {} on messageId={}", operationName, messageId);
         }
     }
 
