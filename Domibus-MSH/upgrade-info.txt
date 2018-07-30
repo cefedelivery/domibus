@@ -64,8 +64,8 @@ Domibus 4.0 (from 3.3.4):
                                            </address-settings>
                                            .............................
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
-                   In case users were manually added to TB_AUTHENTICATION_ENTRY, migrate their password.
-                   Default users ('admin' and 'user') are migrated by the SQL migration scripts.
+                 TB_AUTHENTICATION_ENTRY table was restored to defaults, having two users 'admin' and 'user' with default password '123456' encrypted using the new algorithm.
+                 Other users should be added using the new functionality in the Domibus Admin Console.
                - Remove Description and Schema headers from PartInfo. The headers were deprecated in ebMS3.
                - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
                     <ehcache>
