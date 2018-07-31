@@ -120,8 +120,16 @@ public abstract class PModeProvider {
         return this.configurationRawDAO.getConfigurationRaw(id);
     }
 
-    public byte[] getCurrentPModeFile() {
-        return getRawConfigurationBytes(this.configurationRawDAO.getCurrentRawConfiguration());
+    public PModeArchiveInfo getCurrentPmode() {
+        final ConfigurationRaw currentRawConfiguration = this.configurationRawDAO.getCurrentRawConfiguration();
+        if (currentRawConfiguration != null) {
+            return new PModeArchiveInfo(
+                    currentRawConfiguration.getEntityId(),
+                    currentRawConfiguration.getConfigurationDate(),
+                    "",
+                    currentRawConfiguration.getDescription());
+        }
+        return null;
     }
 
     public void removePMode(int id) {
@@ -145,7 +153,7 @@ public abstract class PModeProvider {
         }
 
         //unmarshall the PMode taking into account the whitespaces
-        return  unmarshall(bytes, false);
+        return unmarshall(bytes, false);
 
     }
 

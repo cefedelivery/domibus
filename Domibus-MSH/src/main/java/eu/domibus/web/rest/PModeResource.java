@@ -77,22 +77,9 @@ public class PModeResource {
     }
 
     @GetMapping(path = "current", produces = "application/xml")
-    public ResponseEntity<? extends Resource> getCurrentPMode() {
-        final byte[] rawConfiguration = pModeProvider.getCurrentPModeFile();
-        ByteArrayResource resource = new ByteArrayResource(new byte[0]);
-        if (rawConfiguration != null) {
-            resource = new ByteArrayResource(rawConfiguration);
-        }
+    public PModeResponseRO getCurrentPMode() {
+        return domainConverter.convert(pModeProvider.getCurrentPmode(), PModeResponseRO.class);
 
-        HttpStatus status = HttpStatus.OK;
-        if (resource.getByteArray().length == 0) {
-            status = HttpStatus.NO_CONTENT;
-        }
-
-        return ResponseEntity.status(status)
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .header("content-disposition", "attachment; filename=Pmodes.xml")
-                .body(resource);
     }
 
     @RequestMapping(method = RequestMethod.POST)
