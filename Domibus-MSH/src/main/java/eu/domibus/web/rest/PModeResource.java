@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.CsvService;
@@ -76,9 +77,15 @@ public class PModeResource {
                 .body(resource);
     }
 
-    @GetMapping(path = "current", produces = "application/xml")
+    @GetMapping(path = "current")
     public PModeResponseRO getCurrentPMode() {
-        return domainConverter.convert(pModeProvider.getCurrentPmode(), PModeResponseRO.class);
+        final PModeArchiveInfo currentPmode = pModeProvider.getCurrentPmode();
+        if(currentPmode!=null) {
+            final PModeResponseRO convert = domainConverter.convert(currentPmode, PModeResponseRO.class);
+            convert.setCurrent(true);
+            return convert;
+        }
+        return null;
 
     }
 
