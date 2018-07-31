@@ -271,7 +271,7 @@
                         <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
-                                <id>build-wildfly</id>
+                                <id>build-wildfly12</id>
                                 <goals>
                                     <goal>configure</goal>
                                 </goals>
@@ -330,7 +330,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>make-assembly-wildfly</id>
+                                <id>make-assembly-wildfly12</id>
                                 <configuration>
                                     <descriptors>
                                         <descriptor>src/main/assembly/wildfly12/wildfly-configuration-only.xml</descriptor>
