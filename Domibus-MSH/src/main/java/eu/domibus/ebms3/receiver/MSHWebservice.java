@@ -19,7 +19,7 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullRequestResult;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
@@ -112,6 +112,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
     public SOAPMessage invoke(final SOAPMessage request) {
+
         SOAPMessage responseMessage = null;
         Messaging messaging;
         messaging = getMessage(request);
@@ -143,12 +144,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 LOG.info("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
-                LOG.info("Ping message " + userMessageHandlerContext.isPingMessage());
+                LOG.info("Ping message {}", userMessageHandlerContext.isTestMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {
                 try {
-                    if (!userMessageHandlerContext.isPingMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
+                    if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
                         backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                     }
                 } catch (Exception ex) {
@@ -165,7 +166,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
-    SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
+    protected SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
         ResponseHandler.CheckResult isOk = null;
@@ -218,7 +219,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return null;
     }
 
-    SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
+    protected SOAPMessage getSoapMessage(String messageId, LegConfiguration legConfiguration, UserMessage userMessage) throws EbMS3Exception {
         SOAPMessage soapMessage;
         if (pullReceiptMatcher.matchReliableReceipt(legConfiguration) && legConfiguration.getReliability().isNonRepudiation()) {
             RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
@@ -233,9 +234,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return soapMessage;
     }
 
-
-    @Transactional
-    SOAPMessage handlePullRequest(Messaging messaging) {
+    protected SOAPMessage handlePullRequest(Messaging messaging) {
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
         String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());

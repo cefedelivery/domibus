@@ -6,12 +6,8 @@ package eu.domibus.plugin.jms;
  */
 public class JMSMessageConstants {
 
-    private JMSMessageConstants() {
-        // empty constructor
-    }
-
+    public static final String JMS_PLUGIN_PROPERTY_PREFIX = "jmsplugin";
     public static final String MESSAGE_ID = "messageId";
-    public static final String P1_IN_BODY = "p1InBody";
     public static final String JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY = "messageType";
     public static final String MIME_TYPE = "MimeType";
     public static final String ACTION = "action";
@@ -41,11 +37,8 @@ public class JMSMessageConstants {
     public static final String ERROR_DETAIL = "errorDetail";
     public static final String PROPERTY_PREFIX = "property_";
     public static final String PROPERTY_TYPE_PREFIX = "propertyType_";
-    public static final String DESCRIPTION_LANGUAGE = "descriptionLanguage";
     private static final String PAYLOAD_NAME_PREFIX = "payload_";
     public static final String PAYLOAD_NAME_FORMAT = PAYLOAD_NAME_PREFIX + "{0}";
-    private static final String PAYLOAD_DESCRIPTION_SUFFIX = "_description";
-    public static final String PAYLOAD_DESCRIPTION_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_DESCRIPTION_SUFFIX;
     private static final String PAYLOAD_MIME_TYPE_SUFFIX = "_mimeType";
     public static final String PAYLOAD_MIME_TYPE_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_TYPE_SUFFIX;
     private static final String PAYLOAD_FILE_NAME_SUFFIX = "_fileName";
@@ -54,4 +47,7 @@ public class JMSMessageConstants {
     public static final String PAYLOAD_MIME_CONTENT_ID_FORMAT = PAYLOAD_NAME_FORMAT + PAYLOAD_MIME_CONTENT_ID_SUFFIX;
     public static final String PUT_ATTACHMENTS_IN_QUEUE = "putAttachmentInQueue";
     public static final String PAYLOAD_FILENAME = "FileName";
+
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password"; //NOSONAR
 }

@@ -1,22 +1,26 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
-import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.LOGIN_SUSPENSION_TIME;
 import static eu.domibus.common.services.impl.UserManagementServiceImpl.MAXIMUM_LOGIN_ATTEMPT;
@@ -33,27 +37,32 @@ public class UserManagementServiceImplTest {
     private UserDao userDao;
 
     @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
     private UserRoleDao userRoleDao;
 
     @Injectable
-    private BCryptPasswordEncoder bcryptEncoder;
+    private UserPersistenceService userPersistenceService;
 
     @Injectable
-    private DomainCoreConverter domainConverter;
+    private DomainContextProvider domainContextProvider;
 
     @Injectable
-    private Properties domibusProperties;
+    private UserConverter userConverter;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Injectable
+    private EventService eventService;
+
 
     @Tested
     private UserManagementServiceImpl userManagementService;
 
     @Test
     public void findUsers() throws Exception {
-        //TODO
-    }
-
-    @Test
-    public void saveUsers() throws Exception {
         //TODO
     }
 
@@ -79,6 +88,7 @@ public class UserManagementServiceImplTest {
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 0;
+
         }};
     }
 
@@ -90,10 +100,12 @@ public class UserManagementServiceImplTest {
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
-        userManagementService.handleWrongAuthentication("");
+        final String userName = "test";
+        userManagementService.handleWrongAuthentication(userName);
         new Verifications() {{
             userManagementService.applyAccountLockingPolicy(user);
             times = 1;
+            userManagementService.triggerEvent(userName,UserLoginErrorReason.BAD_CREDENTIALS);
         }};
     }
 
@@ -101,7 +113,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -122,7 +134,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyNotNumberProperty(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = "a";
             user.getAttemptCount();
@@ -143,7 +155,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusProperties.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -230,7 +242,7 @@ public class UserManagementServiceImplTest {
         final List<User> users = Lists.newArrayList(user);
 
         new Expectations() {{
-            domibusProperties.getProperty(LOGIN_SUSPENSION_TIME, "3600");
+            domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, "3600");
             times = 1;
             result = suspensionInterval;
             System.currentTimeMillis();
@@ -252,23 +264,6 @@ public class UserManagementServiceImplTest {
             assertEquals(0, modifiedUser.getAttemptCount(), 0d);
         }};
 
-    }
-
-    @Test
-    public void prepareUserForUpdate() {
-        final User userEntity = new User();
-        userEntity.setActive(false);
-        userEntity.setSuspensionDate(new Date());
-        userEntity.setAttemptCount(5);
-        eu.domibus.api.user.User user = new eu.domibus.api.user.User();
-        user.setActive(true);
-        new Expectations() {{
-            userDao.loadUserByUsername(anyString);
-            result = userEntity;
-        }};
-        User user1 = userManagementService.prepareUserForUpdate(user);
-        assertNull(user1.getSuspensionDate());
-        assertEquals(0, user1.getAttemptCount(), 0d);
     }
 
     @Test
@@ -302,6 +297,75 @@ public class UserManagementServiceImplTest {
         userManagementService.handleCorrectAuthentication(userName);
         new Verifications(){{
             userDao.update(withAny(new User()));times=0;
+        }};
+    }
+
+    @Test
+    public void triggerAlertBadCredential(){
+        final String userName="test";
+        new Expectations(){{
+           multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+           result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.BAD_CREDENTIALS);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), false);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertInactiveDisableEventOnEachLogin(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.INACTIVE);
+        new VerificationsInOrder(){{
+            eventService.enqueueAccountDisabledEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertSuspendedDisableEventOnEachLogin(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.SUSPENDED);
+        new VerificationsInOrder(){{
+            eventService.enqueueAccountDisabledEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertInactiveDisableEventOnlyAtTheMoment(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=false;
+            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.INACTIVE);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);times=1;
+        }};
+    }
+
+    @Test
+    public void triggerAlertSuspendedDisableEventOnlyAtTheMoment(){
+        final String userName="test";
+        new Expectations(){{
+            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result=false;
+            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            result=true;
+        }};
+        userManagementService.triggerEvent(userName,UserLoginErrorReason.SUSPENDED);
+        new VerificationsInOrder(){{
+            eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);times=1;
         }};
     }
 

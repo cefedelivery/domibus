@@ -1,8 +1,11 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.UserService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import mockit.Expectations;
@@ -12,9 +15,12 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tiago Miguel
@@ -27,10 +33,19 @@ public class UserResourceTest {
     UserResource userResource;
 
     @Injectable
-    UserService userService;
+    private UserService superUserManagementService;
+
+    @Injectable
+    private UserService userManagementService;
 
     @Injectable
     DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    private AuthUtils authUtils;
 
     private List<UserResponseRO> getUserResponseList() {
         final List<UserResponseRO> userResponseROList = new ArrayList<>();
@@ -58,7 +73,7 @@ public class UserResourceTest {
         final List<UserResponseRO> userResponseROList = getUserResponseList();
 
         new Expectations() {{
-            userService.findUsers();
+            userManagementService.findUsers();
             result = userList;
 
             domainConverter.convert(userList, UserResponseRO.class);
@@ -72,5 +87,31 @@ public class UserResourceTest {
         Assert.assertNotNull(userResponseROS);
         UserResponseRO userResponseRO = getUserResponseRO();
         Assert.assertEquals(userResponseRO, userResponseROS.get(0));
+    }
+
+    @Test
+    public void testGetCsv() throws EbMS3Exception {
+        // Given
+        List<UserResponseRO> usersResponseROList = new ArrayList<>();
+        UserResponseRO userResponseRO = new UserResponseRO("user1", "email@email.com", true);
+        List<String> roles = new ArrayList<>();
+        roles.add("ROLE_ADMIN");
+        userResponseRO.setAuthorities(roles);
+        usersResponseROList.add(userResponseRO);
+        new Expectations(userResource) {{
+           userResource.users();
+           result = usersResponseROList;
+           csvServiceImpl.exportToCSV(usersResponseROList);
+           result = "Username, Email, Active, Roles" + System.lineSeparator() +
+                   "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator();
+        }};
+
+        // When
+        final ResponseEntity<String> csv = userResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals("Username, Email, Active, Roles" + System.lineSeparator() +
+                "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator(), csv.getBody());
     }
 }

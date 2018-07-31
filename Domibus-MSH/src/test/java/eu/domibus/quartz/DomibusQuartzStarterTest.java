@@ -1,5 +1,7 @@
 package eu.domibus.quartz;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -36,20 +38,21 @@ public class DomibusQuartzStarterTest {
     private DomibusQuartzStarter domibusQuartzStarter;
 
     @Injectable
-    private Scheduler scheduler;
+    protected DomibusSchedulerFactory domibusSchedulerFactory;
+
+    @Injectable
+    protected DomainService domainService;
+
+    @Injectable
+    protected DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    protected Scheduler scheduler;
 
     @Before
     public void setUp() throws Exception {
         jobKeys.add(jobKey1);
-
-        //disable post-construct method
-        new MockUp<DomibusQuartzStarter>() {
-            @Mock
-            public void checkJobsAndStartScheduler() throws SchedulerException {
-                //do nothing
-            }
-        };
-    }
+}
 
     @Test
     public void checkSchedulerJobs_ValidConfig_NoJobDeleted(final @Mocked JobDetailImpl jobDetail) throws Exception {
@@ -74,7 +77,7 @@ public class DomibusQuartzStarterTest {
         }};
 
         //tested method
-        domibusQuartzStarter.checkSchedulerJobs();
+        domibusQuartzStarter.checkSchedulerJobs(scheduler);
 
         new FullVerifications() {{
         }};
@@ -103,7 +106,7 @@ public class DomibusQuartzStarterTest {
         }};
 
         //tested method
-        domibusQuartzStarter.checkSchedulerJobs();
+        domibusQuartzStarter.checkSchedulerJobs(scheduler);
 
         new FullVerifications() {{
             JobKey jobKeyActual;

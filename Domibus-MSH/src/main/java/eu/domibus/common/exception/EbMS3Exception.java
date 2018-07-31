@@ -4,7 +4,7 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.ebms3.common.model.Description;
 import eu.domibus.ebms3.common.model.Error;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.dom.DOMDocument;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,7 +54,7 @@ public class EbMS3Exception extends Exception {
      */
     //private final String description;
     public EbMS3Exception(final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
-        super(cause);
+        super(errorDetail, cause);
         this.ebMS3ErrorCode = ebMS3ErrorCode;
         this.errorDetail = errorDetail;
         this.refToMessageId = refToMessageId;

@@ -6,6 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeService;
 import eu.domibus.api.pmode.PModeServiceHelper;
 import eu.domibus.api.pmode.domain.LegConfiguration;
@@ -89,8 +90,12 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private MessageExchangeService messageExchangeService;
 
+    //TODO remove the ext converter and replace it with DomainCoreConverter
     @Autowired
     private DomainExtConverter domainExtConverter;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     @Autowired
     private PullMessageService pullMessageService;

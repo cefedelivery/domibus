@@ -1,11 +1,14 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.util.HttpUtil;
-import eu.domibus.wss4j.common.crypto.CryptoService;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -32,7 +35,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,17 +57,21 @@ public class DynamicDiscoveryServiceOASISTest {
     private static final String TEST_SERVICE_VALUE = "urn:epsosPatientService::List";
     private static final String TEST_SERVICE_TYPE = "ehealth-procid-qns";
     private static final String TEST_INVALID_SERVICE_VALUE = "invalidServiceValue";
+    private static final String DOMAIN = "default";
 
     private static final String ADDRESS = "http://localhost:9090/anonymous/msh";
 
     @Injectable
-    private Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    private CryptoService cryptoService;
+    private MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Injectable
-    private DomibusConfigurationService domibusConfigurationService;
+    protected DomainContextProvider domainProvider;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -73,7 +79,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationMock(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -82,7 +88,7 @@ public class DynamicDiscoveryServiceOASISTest {
 
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        EndpointInfo endpoint = dynamicDiscoveryServiceOASIS.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         assertNotNull(endpoint);
         assertEquals(ADDRESS, endpoint.getAddress());
 
@@ -94,10 +100,10 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test
     public void testLookupInformationRegexMatch(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*EHEALTH_SMP.*$";
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -106,7 +112,7 @@ public class DynamicDiscoveryServiceOASISTest {
 
         }};
 
-        EndpointInfo endpoint = dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        EndpointInfo endpoint = dynamicDiscoveryServiceOASIS.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
         assertNotNull(endpoint);
         assertEquals(ADDRESS, endpoint.getAddress());
 
@@ -118,7 +124,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -126,13 +132,13 @@ public class DynamicDiscoveryServiceOASISTest {
             result = sm;
         }};
 
-        dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        dynamicDiscoveryServiceOASIS.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
     }
 
     @Test
     public void testLookupInformationNotFoundMessage(final @Capturing DynamicDiscovery smpClient) throws Exception {
         new NonStrictExpectations() {{
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -141,7 +147,7 @@ public class DynamicDiscoveryServiceOASISTest {
         }};
         try {
 
-            dynamicDiscoveryServiceOASIS.lookupInformation(TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
+            dynamicDiscoveryServiceOASIS.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_INVALID_SERVICE_VALUE, TEST_SERVICE_TYPE);
         } catch (ConfigurationException cfe) {
             Assert.assertTrue(cfe.getMessage().contains("Could not fetch metadata for: urn:romania:ncpb"));
         }
@@ -171,16 +177,16 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusConfigurationService.useProxy();
             result = true;
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.0";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "1234";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
         }};
 
@@ -205,7 +211,6 @@ public class DynamicDiscoveryServiceOASISTest {
         //then
         Assert.assertNull(defaultProxy);
     }
-
     @Test
     public void testCreateDynamicDiscoveryClientWithProxy() throws Exception {
         // Given
@@ -214,22 +219,22 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusConfigurationService.useProxy();
             result = true;
 
-            domibusProperties.getProperty("domibus.proxy.http.host");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             result = "192.168.0.1";
 
-            domibusProperties.getProperty("domibus.proxy.http.port");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
             result = "8012";
 
-            domibusProperties.getProperty("domibus.proxy.user");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
             result = "proxyUser";
 
-            domibusProperties.getProperty("domibus.proxy.password");
+            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             result = "proxyPassword";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*$";
         }};
 
@@ -248,10 +253,10 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusConfigurationService.useProxy();
             result = false;
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
 
-            domibusProperties.getProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
+            domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*$";
         }};
 
@@ -281,14 +286,14 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusConfigurationService.useProxy();
             result = false;
 
-            domibusProperties.getProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
             KeyStore truststore;
             truststore = KeyStore.getInstance("JKS");
             truststore.load(getClass().getResourceAsStream("../ehealth_smp_acc_truststore.jks"), TEST_KEYSTORE_PASSWORD.toCharArray());
 
-            cryptoService.getTrustStore();
+            multiDomainCertificateProvider.getTrustStore(DomainService.DEFAULT_DOMAIN);
             result = truststore;
 
         }};
@@ -302,7 +307,7 @@ public class DynamicDiscoveryServiceOASISTest {
         //TEST Service
         //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0007:9340033829test2", "ehealth-actorid-qns", "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:www.cenbii.eu:transaction:biitrns014:ver2.0:extended:urn:www.peppol.eu:bis:peppol5a:ver2.0::2.1", "urn:www.cenbii.eu:profile:bii05:ver2.0", "cenbii-procid-ubl");
 
-        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("0088:270420181111", "iso6523-actorid-upis", "busdox-docid-qns::lululu", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
+        EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation(DOMAIN, "0088:270420181111", "iso6523-actorid-upis", "busdox-docid-qns::lululu", "urn:www.cenbii.eu:profile:bii04:ver1.0", "cenbii-procid-ubl");
 
         // Support Issue
         //EndpointInfo endpointInfo = dynamicDiscoveryServiceOASIS.lookupInformation("dynceftestparty13gw", "connectivity-partid-qns", "connectivity-docid-qns::doc_id1", "urn:www.cenbii.eu:profile:bii04:ver1.0", "connectivity-docid-qns");

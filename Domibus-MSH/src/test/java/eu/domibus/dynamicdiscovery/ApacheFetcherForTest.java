@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import no.difi.vefa.peppol.lookup.api.FetcherResponse;
 import no.difi.vefa.peppol.lookup.api.LookupException;
 import no.difi.vefa.peppol.lookup.fetcher.AbstractFetcher;
+import no.difi.vefa.peppol.mode.Mode;
 import org.apache.http.HttpHost;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
@@ -34,8 +35,7 @@ public class ApacheFetcherForTest extends AbstractFetcher {
     protected CredentialsProvider credentialsProvider;
 
     public ApacheFetcherForTest(HttpHost proxy, CredentialsProvider credentialsProvider) {
-        super();
-        int timeout = -1;
+        super(Mode.of(Mode.TEST));
         RequestConfig.Builder builder = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeout)
                 .setConnectTimeout(timeout)
@@ -48,11 +48,11 @@ public class ApacheFetcherForTest extends AbstractFetcher {
             this.credentialsProvider = credentialsProvider;
         }
 
-        this.requestConfig = builder.build();
+        requestConfig = builder.build();
     }
 
     @Override
-    public FetcherResponse fetch(URI uri) throws LookupException {
+    public FetcherResponse fetch(URI uri) throws LookupException, FileNotFoundException {
         try (CloseableHttpClient httpClient = createClient()) {
             HttpGet httpGet = new HttpGet(uri);
 
@@ -74,7 +74,7 @@ public class ApacheFetcherForTest extends AbstractFetcher {
             }
         } catch (SocketTimeoutException | SocketException | UnknownHostException e) {
             throw new LookupException(String.format("Unable to fetch '%s'", uri), e);
-        } catch (LookupException e) {
+        } catch (LookupException | FileNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new LookupException(e.getMessage(), e);

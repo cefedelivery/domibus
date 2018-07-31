@@ -1,6 +1,7 @@
 package eu.domibus.api.jms;
 
 import javax.jms.Queue;
+import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,16 @@ public interface JMSManager {
     List<JmsMessage> browseMessages(String source);
 
     /**
+     * Operation to browse a JMS source with restrictions given by the selector.
+     *
+     * @param source   queue or topic
+     * @param selector selector
+     * @return a list of JmsMessage
+     */
+    List<JmsMessage> browseMessages(String source, String selector);
+
+
+    /**
      * Operation to browse a JMS source with restrictions given by the parameters.
      *
      * @param source   queue or topic
@@ -53,7 +64,21 @@ public interface JMSManager {
 
     void sendMessageToQueue(JmsMessage message, String destination);
 
+    /**
+     * Send a basic pojo to a destination. it will be serialize to json and added to the queue.
+     * @param message the pojo to be serialized to json.
+     * @param destination the destination where the message should be send.
+     * @param selector a jms selector so that the message is retrieved by the correct jms listener.
+     */
+    void convertAndSendToQueue(Object message, Queue destination, String selector);
+
     void sendMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMapMessageToQueue(JmsMessage message, String destination);
+
+    void sendMapMessageToQueue(JmsMessage message, Queue destination);
+
+    void sendMessageToTopic(JmsMessage message, Topic destination);
 
     void deleteMessages(String source, String[] messageIds);
 

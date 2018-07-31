@@ -1,4 +1,4 @@
-<h1 id="jmsmonitoringheader_id">JMS Monitoring</h1>
+<page-header id="jmsmonitoringheader_id">JMS Monitoring</page-header>
 <div class="selectionCriteria">
   <md-card>
     <md-card-content>
@@ -7,11 +7,11 @@
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
                    id="jmsQueueSelector" style="width: 45%">
           <md-option *ngFor="let queue of queues" [value]="queue" style="width:95%">
-            {{queue.internal ? "[internal]" :""}} {{queue.name}} ({{queue.numberOfMessages}})
+            {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
-        <md2-datepicker id="jmsFromDatePicker"
-                        placeholder="From:"
+        <md2-datepicker id="jmsFromDatePicker" appClearInvalid
+                        placeholder="Received From:"
                         [(ngModel)]="request.fromDate"
                         name="receivedFrom"
                         [type]="'datetime'"
@@ -19,8 +19,8 @@
                         (change)='onTimestampFromChange($event)'
                         #timestampControl="ngModel">
         </md2-datepicker>
-        <md2-datepicker id="jmsToDatePicker"
-                        placeholder="To:"
+        <md2-datepicker id="jmsToDatePicker" appClearInvalid
+                        placeholder="Received Up To:"
                         [(ngModel)]="request.toDate"
                         name="receivedTo"
                         [min]="timestampToMinDate"
@@ -39,7 +39,7 @@
         </md-input-container>
 
         <div class="searchArea">
-          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()">
+          <button id="jmsSearchButton" md-raised-button color="primary" (click)="search()" [disabled]="!canSearch()">
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -52,13 +52,17 @@
 <div class="panel">
   <div class="group-filter-button">
     <span class="row-button">
-    <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
+      <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
                      (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
     </span>
     <span class="column-filter-button">
-    <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
+      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                        (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
+    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+            id="saveascsvbutton_id" md-tooltip="Export as CSV">
+      <img src="assets/images/exportCSV.svg" width="30" height="30">
+    </button>
   </div>
 
   <ngx-datatable
@@ -89,7 +93,8 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button id="jmsMoveButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="moveAction(row)" tooltip="Move">
+    <button id="jmsMoveButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="moveAction(row)"
+            tooltip="Move">
       <md-icon>move_to_inbox</md-icon>
     </button>
     <button id="jmsDeleteButtonRow{{row.$$index}}_id" md-icon-button color="primary" (click)="deleteAction(row)"

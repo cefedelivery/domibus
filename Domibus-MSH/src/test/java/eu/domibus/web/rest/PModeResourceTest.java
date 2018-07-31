@@ -1,10 +1,17 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.api.pmode.PModeArchiveInfo;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.services.AuditService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
+import eu.domibus.web.rest.ro.PModeResponseRO;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +23,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Tiago Miguel
@@ -25,41 +34,77 @@ import java.util.ArrayList;
 public class PModeResourceTest {
 
     @Tested
-    PModeResource pModeResource;
+    private PModeResource pModeResource;
 
     @Injectable
-    PModeProvider pModeProvider;
+    private PModeProvider pModeProvider;
+
+    @Injectable
+    private DomainCoreConverter domainConverter;
+
+    @Injectable
+    private CsvServiceImpl csvServiceImpl;
+
+    @Injectable
+    private AuditService auditService;
 
     @Test
     public void testDownloadPmodes() {
         // Given
         final byte[] byteA = new byte[]{1, 0, 1};
         new Expectations() {{
-            pModeProvider.getRawConfiguration();
+            pModeProvider.getPModeFile(0);
             result = byteA;
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmodes();
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.OK);
     }
 
     @Test
-    public void tesstDownloadPModesNoContent() {
+    public void testDownloadPModesNoContent() {
         // Given
         final byte[] byteA = new byte[]{};
         new Expectations() {{
-            pModeProvider.getRawConfiguration();
+            pModeProvider.getPModeFile(0);
             result = byteA;
         }};
 
         // When
-        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmodes();
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
 
         // Then
         validateResponseEntity(responseEntity, HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void testDownloadPModesAudit() {
+        // Given
+        final byte[] byteA =new byte[]{1, 0, 1};
+        new Expectations() {{
+            pModeProvider.getPModeFile(0);
+            result = byteA;
+        }};
+        ResponseEntity<? extends Resource> responseEntity = pModeResource.downloadPmode(0, true);
+        validateResponseEntity(responseEntity, HttpStatus.OK);
+
+        new Verifications() {{
+            // add audit must be called
+            auditService.addPModeDownloadedAudit("0"); times = 0;
+
+        }};
+
+        responseEntity = pModeResource.downloadPmode(0, false);
+        validateResponseEntity(responseEntity, HttpStatus.OK);
+
+        new Verifications() {{
+            // add audit must be called
+            auditService.addPModeDownloadedAudit("0"); times = 1;
+
+        }};
     }
 
     private void validateResponseEntity(ResponseEntity<? extends Resource> responseEntity, HttpStatus httpStatus) {
@@ -75,7 +120,7 @@ public class PModeResourceTest {
         MultipartFile file = new MockMultipartFile("filename", new byte[]{});
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -89,7 +134,7 @@ public class PModeResourceTest {
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -103,12 +148,12 @@ public class PModeResourceTest {
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new ArrayList<>().add("issue1");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
@@ -123,17 +168,17 @@ public class PModeResourceTest {
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new XmlProcessingException("UnitTest1");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest1\n",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n XmlProcessingException: UnitTest1\n",
                 stringResponseEntity.getBody());
     }
 
@@ -143,18 +188,209 @@ public class PModeResourceTest {
         MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
 
         new Expectations() {{
-            pModeProvider.updatePModes((byte[]) any);
+            pModeProvider.updatePModes((byte[]) any, anyString);
             result = new Exception("UnitTest2");
         }};
 
         // When
-        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file);
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
 
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n UnitTest2",
+        Assert.assertEquals("Failed to upload the PMode file due to: \n Exception: UnitTest2",
                 stringResponseEntity.getBody());
 
+    }
+
+    @Test
+    public void testDeletePmodesEmptyList() {
+        // Given
+        final ArrayList<String> emptyList = new ArrayList<>();
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.deletePmodes(emptyList);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Failed to delete PModes since the list of ids was empty.", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testDeletePmodesSuccess() {
+        // Given
+        List<String> stringList = new ArrayList<>();
+        stringList.add("1");
+        stringList.add("2");
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.deletePmodes(stringList);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("PModes were deleted\n", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testDeletePmodesException() {
+        // Given
+        final Exception exception = new Exception("Mocked exception");
+        List<String> stringList = new ArrayList<>();
+        stringList.add("1");
+
+        new Expectations(pModeResource) {{
+            pModeProvider.removePMode(anyInt);
+            result = exception;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.deletePmodes(stringList);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Impossible to delete PModes due to \nMocked exception", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeSuccess() {
+        // Given
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("PMode was successfully uploaded", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeException() throws XmlProcessingException {
+        // Given
+        final Exception exception = new Exception("Mocked exception");
+        new Expectations(pModeResource) {{
+            pModeProvider.updatePModes((byte[]) any, anyString);
+            result = exception;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Impossible to upload PModes due to \nMocked exception", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeNestedException() throws XmlProcessingException {
+        // Given
+        final Exception exception = new Exception(new Exception("Nested mocked exception"));
+
+        new Expectations(pModeResource) {{
+            pModeProvider.updatePModes((byte[]) any, anyString);
+            result = exception;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Impossible to upload PModes due to \njava.lang.Exception: Nested mocked exception", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPmodeIssues() throws XmlProcessingException {
+        // Given
+        List<String> issues = new ArrayList<>();
+        issues.add("issue1");
+        new Expectations(pModeResource) {{
+           pModeProvider.updatePModes((byte[]) any, anyString);
+           result = issues;
+        }};
+
+        // When
+        final ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmode(1);
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("PMode was successfully uploaded but some issues were detected: \nissue1", stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testPmodeList() {
+        // Given
+        final Date date = new Date();
+        final String username = "username";
+        final String description = "description";
+
+        PModeResponseRO pModeResponseRO = new PModeResponseRO();
+        pModeResponseRO.setId(1);
+        pModeResponseRO.setUsername(username);
+        pModeResponseRO.setDescription(description);
+        pModeResponseRO.setConfigurationDate(date);
+        pModeResponseRO.setCurrent(true);
+
+        ArrayList<PModeResponseRO> pModeResponseROArrayList = new ArrayList<>();
+        pModeResponseROArrayList.add(pModeResponseRO);
+
+        new Expectations(pModeResource) {{
+           domainConverter.convert((List<PModeArchiveInfo>)any, PModeResponseRO.class);
+           result = pModeResponseROArrayList;
+        }};
+
+        // When
+        final List<PModeResponseRO> pModeResponseROSGot = pModeResource.pmodeList();
+
+        // Then
+        Assert.assertEquals(1, pModeResponseROSGot.size());
+        Assert.assertEquals(1, pModeResponseRO.getId());
+        Assert.assertEquals(date, pModeResponseRO.getConfigurationDate());
+        Assert.assertEquals(username, pModeResponseRO.getUsername());
+        Assert.assertEquals(description, pModeResponseRO.getDescription());
+        Assert.assertTrue(pModeResponseRO.isCurrent());
+
+    }
+
+    @Test
+    public void testGetCsv() throws EbMS3Exception {
+        // Given
+        Date date = new Date();
+        List<PModeArchiveInfo> pModeArchiveInfoList = new ArrayList<>();
+        PModeArchiveInfo pModeArchiveInfo1 = new PModeArchiveInfo(1, date, "user1", "description1");
+        PModeArchiveInfo pModeArchiveInfo2 = new PModeArchiveInfo(2, date, "user2", "description2");
+        pModeArchiveInfoList.add(pModeArchiveInfo1);
+        pModeArchiveInfoList.add(pModeArchiveInfo2);
+
+        List<PModeResponseRO> pModeResponseROList = new ArrayList<>();
+        PModeResponseRO pModeResponseRO1 = new PModeResponseRO(1, date, "user1", "description1");
+        PModeResponseRO pModeResponseRO2 = new PModeResponseRO(2, date, "user2", "description2");
+        pModeResponseROList.add(pModeResponseRO1);
+        pModeResponseROList.add(pModeResponseRO2);
+        new Expectations() {{
+           pModeProvider.getRawConfigurationList();
+           result = pModeArchiveInfoList;
+           domainConverter.convert(pModeArchiveInfoList, PModeResponseRO.class);
+           result = pModeResponseROList;
+           csvServiceImpl.exportToCSV(pModeResponseROList);
+           result = "Configuration Date, Username, Description" + System.lineSeparator() +
+           date + ", user1, description1" + System.lineSeparator() +
+           date + ", user2, description2" + System.lineSeparator();
+        }};
+
+        // When
+        final ResponseEntity<String> csv = pModeResource.getCsv();
+
+        // Then
+        Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
+        Assert.assertEquals("Configuration Date, Username, Description" + System.lineSeparator() +
+                        date + ", user1, description1" + System.lineSeparator() +
+                        date + ", user2, description2" + System.lineSeparator(),
+                csv.getBody());
     }
 }

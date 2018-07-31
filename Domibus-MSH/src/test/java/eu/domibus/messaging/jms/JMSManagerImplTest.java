@@ -1,17 +1,22 @@
 package eu.domibus.messaging.jms;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.security.AuthUtils;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.jms.spi.InternalJmsMessage;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MessageConverter;
 
 import javax.jms.Queue;
 import java.util.*;
@@ -30,10 +35,28 @@ public class JMSManagerImplTest {
     InternalJMSManager internalJmsManager;
 
     @Injectable
+    DomainContextProvider domainContextProvider;
+
+    @Injectable
     JMSDestinationMapper jmsDestinationMapper;
 
     @Injectable
     JMSMessageMapper jmsMessageMapper;
+
+    @Injectable
+    AuditService auditService;
+
+    @Injectable
+    DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    AuthUtils authUtils;
+
+    @Injectable
+    private MessageConverter messageConverter;
+
+    @Injectable
+    private JmsTemplate jsonJmsTemplate;
 
     @Test
     public void testGetDestinations() throws Exception {
@@ -82,7 +105,7 @@ public class JMSManagerImplTest {
         final List<InternalJmsMessage> internalJmsMessage = new ArrayList<>();
 
         new Expectations() {{
-            internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, selector);
+            internalJmsManager.browseMessages(source, jmsType, fromDate, toDate, (String)any);
             result = internalJmsMessage;
         }};
 
@@ -150,6 +173,10 @@ public class JMSManagerImplTest {
 
         new Verifications() {{
             internalJmsManager.deleteMessages(source, messageIds);
+            auditService.addJmsMessageDeletedAudit("1", source);
+            times = 1;
+            auditService.addJmsMessageDeletedAudit("2", source);
+            times = 1;
         }};
     }
 
@@ -163,6 +190,76 @@ public class JMSManagerImplTest {
 
         new Verifications() {{
             internalJmsManager.moveMessages(source, destination, messageIds);
+            auditService.addJmsMessageMovedAudit("1", source, destination);
+            times = 1;
+            auditService.addJmsMessageMovedAudit("2", source, destination);
+            times = 1;
         }};
     }
+
+    @Test
+    public void testGetDomainSelector_MultiTenant_SuperAdmin() {
+
+        final String selector = "myselector";
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = true;
+
+        }};
+
+        Assert.assertEquals(selector, jmsManager.getDomainSelector(selector));
+
+        new FullVerifications(){{
+
+        }};
+    }
+
+    @Test
+    public void testGetDomainSelector_MultiTenant_Admin() {
+
+        final String selector = "myselector";
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainContextProvider.getCurrentDomain();
+            result = new Domain("taxud", "Taxud");
+
+        }};
+
+        Assert.assertEquals(selector + " AND DOMAIN ='taxud'", jmsManager.getDomainSelector(selector));
+
+        new FullVerifications(){{}};
+    }
+
+    @Test
+    public void testGetDomainSelector_MultiTenant_Admin_EmptySelector() {
+
+        final String selector = null;
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainContextProvider.getCurrentDomain();
+            result = new Domain("taxud1", "Taxud1");
+
+        }};
+
+        Assert.assertEquals("DOMAIN ='taxud1'", jmsManager.getDomainSelector(selector));
+
+        new FullVerifications(){{}};
+    }
+
 }

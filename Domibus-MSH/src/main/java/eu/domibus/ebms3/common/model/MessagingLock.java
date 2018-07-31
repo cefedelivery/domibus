@@ -29,16 +29,16 @@ import static eu.domibus.ebms3.common.model.MessageState.READY;
 })
 public class MessagingLock extends AbstractBaseEntity {
 
-    public final static String PULL="PULL";
+    public final static String PULL = "PULL";
 
     @Column(name = "MESSAGE_TYPE")
     @NotNull
-    private String messageType;
+    private String messageType; //NOSONAR
 
     @Column(name = "MESSAGE_RECEIVED")
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
-    private Date received;
+    private Date received; //NOSONAR
 
     @Column(name = "MESSAGE_STATE")
     @Enumerated(EnumType.STRING)
@@ -46,15 +46,15 @@ public class MessagingLock extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
     @NotNull
-    private String messageId;
+    private String messageId; //NOSONAR
 
     @Column(name = "INITIATOR")
     @NotNull
-    private String initiator;
+    private String initiator; //NOSONAR
 
     @Column(name = "MPC")
     @NotNull
-    private String mpc;
+    private String mpc; //NOSONAR
 
     @Column(name = "MESSAGE_STALED")
     @Temporal(TemporalType.TIMESTAMP)
@@ -70,28 +70,28 @@ public class MessagingLock extends AbstractBaseEntity {
     @Column(name = "SEND_ATTEMPTS_MAX")
     private int sendAttemptsMax;
 
-    public MessagingLock(
-            final String messageId,
-            final String initiator,
-            final String mpc,
-            final Date received,
-            final Date staled,
-            final Date nextAttempt,
-            final int sendAttempts,
-            final int sendAttemptsMax) {
+    public MessagingLock(             //NOSONAR
+                                      final String messageId,
+                                      final String initiator,
+                                      final String mpc,
+                                      final Date received,
+                                      final Date staled,
+                                      final Date nextAttempt,
+                                      final int sendAttempts,
+                                      final int sendAttemptsMax) {
         this.received = received;
-        this.staled=staled;
+        this.staled = staled;
         this.messageId = messageId;
-        this.initiator=initiator;
-        this.mpc=mpc;
-        this.messageType=PULL;
-        this.messageState=READY;
-        this.nextAttempt=nextAttempt;
-        this.sendAttempts=sendAttempts;
-        this.sendAttemptsMax=sendAttemptsMax;
+        this.initiator = initiator;
+        this.mpc = mpc;
+        this.messageType = PULL;
+        this.messageState = READY;
+        this.nextAttempt = nextAttempt;
+        this.sendAttempts = sendAttempts;
+        this.sendAttemptsMax = sendAttemptsMax;
     }
 
-    public MessagingLock() {
+    public MessagingLock() {//NOSONAR
     }
 
     public String getMessageType() {

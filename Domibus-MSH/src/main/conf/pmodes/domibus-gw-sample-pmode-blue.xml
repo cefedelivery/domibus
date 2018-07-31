@@ -21,15 +21,11 @@
 				<partyIdType name="partyTypeUrn" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
 			<party name="red_gw"
-				    endpoint="http://<red_hostname>:8080/domibus/services/msh"
-					allowChunking="false"
->
+				    endpoint="http://<red_hostname>:8080/domibus/services/msh">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
 			<party name="blue_gw" 
-					endpoint="http://<blue_hostname>:8080/domibus/services/msh"
-					allowChunking="false"
->
+					endpoint="http://<blue_hostname>:8080/domibus/services/msh">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
@@ -48,7 +44,7 @@
 					key="finalRecipient" 
 					datatype="string" 
 					required="true"/>
-			<propertySet name="ecodexPropertySet">
+			<propertySet name="eDeliveryPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
 			</propertySet>
@@ -62,46 +58,37 @@
 					cid="cid:attachment" 
 					required="false"
 					mimeType="application/octet-stream"/>
-			<payloadProfile name="MessageProfile" 
-					maxSize="40894464">
+			<payloadProfile name="MessageProfile" maxSize="40894464"> <!-- maxSize is currently ignored -->
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy"
-					policy="eDeliveryPolicy.xml"
+			<security name="eDeliveryAS4Policy"
+					policy="eDeliveryAS4Policy.xml"
 					signatureMethod="RSA_SHA256" />	
-			<security name="noSigNoEnc"
-					  policy="doNothingPolicy.xml"
-					  signatureMethod="RSA_SHA256"/>
-			<security name="eSensPolicy"
-					  policy="eSensPolicy.v2.0.xml"
-					  signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" 
 					errorAsResponse="true" 
-					businessErrorNotifyProducer="false"
-					businessErrorNotifyConsumer="false" 
-					deliveryFailureNotifyProducer="false"/>
+					businessErrorNotifyProducer="true"
+					businessErrorNotifyConsumer="true"
+					deliveryFailureNotifyProducer="true"/>
 		</errorHandlings>
 		<agreements>
-            <agreement name="agreement1" value="A1" type=""/>
-            <agreement name="agreement2" value="A2" type=""/>
-            <agreement name="agreement3" value="A3" type=""/>
+			<agreement name="agreement1" value="A1" type="T1"/>
 		</agreements>
 		<services>
 			<service name="testService1" value="bdx:noprocess" type="tc1"/>
+			<service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="TC1Leg1"/>
-			<action name="tc2Action" value="TC2Leg1"/>
+			<action name="testAction" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
 			<reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
-			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
 			<legConfiguration name="pushTestcase1tc1Action" 
@@ -109,26 +96,25 @@
 					action="tc1Action" 
 					defaultMpc="defaultMpc" 
 					reliability="AS4Reliability" 
-					security="eDeliveryPolicy"
+					security="eDeliveryAS4Policy"
 					receptionAwareness="receptionAwareness" 
-					propertySet="ecodexPropertySet"
+					propertySet="eDeliveryPropertySet"
 					payloadProfile="MessageProfile"
 					errorHandling="demoErrorHandling"
 					compressPayloads="true"/>
-			<legConfiguration name="pushTestcase1tc2Action"
-							  service="testService1"
-							  action="tc2Action"
+			<legConfiguration name="testServiceCase"
+							  service="testService"
+							  action="testAction"
 							  defaultMpc="defaultMpc"
 							  reliability="AS4Reliability"
-							  security="eSensPolicy"
+							  security="eDeliveryAS4Policy"
 							  receptionAwareness="receptionAwareness"
-							  propertySet="ecodexPropertySet"
+							  propertySet="eDeliveryPropertySet"
 							  payloadProfile="MessageProfile"
 							  errorHandling="demoErrorHandling"
 							  compressPayloads="true"/>
 		</legConfigurations>
 <process name="tc1Process"
-         agreement=""
          mep="oneway"
          binding="push"
          initiatorRole="defaultInitiatorRole"
@@ -143,7 +129,7 @@
 	</responderParties>
 	<legs>
 		<leg name="pushTestcase1tc1Action"/>
-		<leg name="pushTestcase1tc2Action"/>
+		<leg name="testServiceCase"/>
 	</legs>
 </process>
 	</businessProcesses>

@@ -1,6 +1,8 @@
 package eu.domibus.jms.wildfly;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -9,7 +11,7 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hornetq.api.jms.management.JMSQueueControl;
 import org.hornetq.api.jms.management.JMSServerControl;
 import org.hornetq.api.jms.management.TopicControl;
@@ -62,6 +64,12 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     @Autowired
     JMSSelectorUtil jmsSelectorUtil;
 
+    @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
 
@@ -74,7 +82,8 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 InternalJMSDestination internalJmsDestination = new InternalJMSDestination();
                 internalJmsDestination.setName(jmsQueueControl.getName());
                 internalJmsDestination.setType(InternalJMSDestination.QUEUE_TYPE);
-                internalJmsDestination.setNumberOfMessages(jmsQueueControl.getMessageCount());
+                /* in multi-tenancy mode we show the number of messages only to super admin */
+                internalJmsDestination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN : jmsQueueControl.getMessageCount());
                 internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
                 internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
                 internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
@@ -221,11 +230,6 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     }
 
     @Override
-    public List<InternalJmsMessage> browseMessages(String source) {
-        return browseMessages(source, null, null, null, null);
-    }
-
-    @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
@@ -270,12 +274,17 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 List<InternalJmsMessage> result = new ArrayList<>();
                 Enumeration enumeration = browser.getEnumeration();
                 while (enumeration.hasMoreElements()) {
-                    TextMessage textMessage = null;
+                    Object message = enumeration.nextElement();
                     try {
-                        textMessage = (TextMessage) enumeration.nextElement();
-                        result.add(convert(textMessage));
+                        if (message instanceof TextMessage) {
+                            TextMessage textMessage = (TextMessage) message;
+                            result.add(convert(textMessage));
+                        } else if (message instanceof MapMessage) {
+                            MapMessage mapMessage = (MapMessage) message;
+                            result.add(convert(mapMessage));
+                        }
                     } catch (Exception e) {
-                        LOG.error("Error converting message [" + textMessage + "]", e);
+                        LOG.error("Error converting message [" + message + "]", e);
                     }
 
                 }
@@ -296,43 +305,28 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
         while (propertyNames.hasMoreElements()) {
             String name = (String) propertyNames.nextElement();
             Object objectProperty = textMessage.getObjectProperty(name);
-//            if (objectProperty instanceof String) {
             properties.put(name, objectProperty);
-//            }
         }
         result.setProperties(properties);
         return result;
     }
 
-    protected List<InternalJmsMessage> convert(Map<String, Object>[] maps) {
-        if (maps == null) {
-            return null;
-        }
-        List<InternalJmsMessage> result = new ArrayList<>();
-        for (Map<String, Object> map : maps) {
-            result.add(convert(map));
-        }
-        return result;
-    }
-
-    protected InternalJmsMessage convert(Map<String, Object> map) {
+    protected InternalJmsMessage convert(MapMessage mapMessage) throws JMSException {
         InternalJmsMessage result = new InternalJmsMessage();
 
-        result.setType((String) map.get("JMSType"));
-        Long jmsTimestamp = (Long) map.get("JMSTimestamp");
+        result.setType(mapMessage.getJMSType());
+        mapMessage.getJMSTimestamp();
+        Long jmsTimestamp = mapMessage.getJMSTimestamp();
         if (jmsTimestamp != null) {
             result.setTimestamp(new Date(jmsTimestamp));
         }
-
-        result.setId((String) map.get("JMSMessageID"));
+        result.setId(mapMessage.getJMSMessageID());
 
         Map<String, Object> properties = new HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            Object propertyValue = entry.getValue();
-
-//            if (propertyValue instanceof String) {
-            properties.put(entry.getKey(), propertyValue);
-//            }
+        Enumeration<String> mapNames = mapMessage.getMapNames();
+        while (mapNames.hasMoreElements()) {
+            String mapKey = mapNames.nextElement();
+            properties.put(mapKey, mapMessage.getObject(mapKey));
         }
         result.setProperties(properties);
         return result;

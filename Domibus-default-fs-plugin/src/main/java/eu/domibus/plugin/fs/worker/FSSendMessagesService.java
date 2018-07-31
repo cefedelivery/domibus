@@ -1,17 +1,21 @@
 package eu.domibus.plugin.fs.worker;
 
+import eu.domibus.ext.services.AuthenticationExtService;
+import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.plugin.fs.*;
+import eu.domibus.plugin.fs.FSFileNameHelper;
+import eu.domibus.plugin.fs.FSFilesManager;
+import eu.domibus.plugin.fs.FSPluginProperties;
 import eu.domibus.plugin.fs.exception.FSSetUpException;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -23,6 +27,7 @@ public class FSSendMessagesService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(FSSendMessagesService.class);
     
     public static final String METADATA_FILE_NAME = "metadata.xml";
+    public static final String DEFAULT_DOMAIN = "default";
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
@@ -32,28 +37,60 @@ public class FSSendMessagesService {
     
     @Autowired
     private FSProcessFileService fsProcessFileService;
-    
+
+    @Autowired
+    private AuthenticationExtService authenticationExtService;
+
+    @Autowired
+    private DomibusConfigurationExtService domibusConfigurationExtService;
+
+    @Autowired
+    private FSMultiTenancyService fsMultiTenancyService;
+
     /**
      * Triggering the send messages means that the message files from the OUT directory
      * will be processed to be sent
      */
     public void sendMessages() {
         LOG.debug("Sending file system messages...");
-        
+
         sendMessages(null);
         
         for (String domain : fsPluginProperties.getDomains()) {
-            sendMessages(domain);
+            if (fsMultiTenancyService.verifyDomainExists(domain)) {
+                sendMessages(domain);
+            }
         }
     }
     
     private void sendMessages(String domain) {
         FileObject[] contentFiles = null;
+
+        if(domibusConfigurationExtService.isMultiTenantAware()) {
+            if(domain == null) {
+                domain = DEFAULT_DOMAIN;
+            }
+
+            String authenticationUser = fsPluginProperties.getAuthenticationUser(domain);
+            if(authenticationUser == null) {
+                LOG.error("Authentication User not defined for domain [{}]", domain);
+                return;
+            }
+
+            String authenticationPassword = fsPluginProperties.getAuthenticationPassword(domain);
+            if(authenticationPassword == null) {
+                LOG.error("Authentication Password not defined for domain [{}]", domain);
+                return;
+            }
+
+            authenticationExtService.basicAuthenticate(authenticationUser, authenticationPassword);
+        }
+
         try (FileObject rootDir = fsFilesManager.setUpFileSystem(domain);
                 FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER)) {
             
             contentFiles = fsFilesManager.findAllDescendantFiles(outgoingFolder);
-            LOG.debug(Arrays.toString(contentFiles));
+            LOG.debug("{}", contentFiles);
 
             List<FileObject> processableFiles = filterProcessableFiles(contentFiles);
             for (FileObject processableFile : processableFiles) {

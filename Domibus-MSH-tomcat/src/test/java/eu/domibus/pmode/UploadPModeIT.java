@@ -1,15 +1,15 @@
 package eu.domibus.pmode;
 
 import eu.domibus.AbstractIT;
+import eu.domibus.api.util.xml.UnmarshallerResult;
+import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,29 +39,19 @@ public class UploadPModeIT extends AbstractIT {
 
     private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
 
-    private static boolean initialized;
+
     @Autowired
     PModeResource adminGui;
 
     @Autowired
-    PModeProvider pModeProvider;
-
-    @Autowired
     ConfigurationDAO configurationDAO;
 
-    /*@Autowired
-    PModeProvider pModeDao;*/
     @Autowired()
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
 
-    @Before
-    public void before() {
-        if (!initialized) {
-            initialized = true;
-        }
-    }
-
+    @Autowired
+    XMLUtil xmlUtil;
 
     /**
      * Tests that the PMODE is correctly saved in the DB.
@@ -74,10 +64,7 @@ public class UploadPModeIT extends AbstractIT {
 
         try {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
-            //MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-blue_gw", pModeFile.getName(), "text/xml", IOUtils.toByteArray(fis));
-            //String response = adminGui.uploadFileHandler(pModeContent);
-            pModeProvider.updatePModes(IOUtils.toByteArray(is));
-            //Assert.assertEquals("You successfully uploaded the PMode file.", response);
+            pModeProvider.updatePModes(IOUtils.toByteArray(is), "description");
         } catch (IOException ioEx) {
             System.out.println("File reading error: " + ioEx.getMessage());
             throw ioEx;
@@ -99,7 +86,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
 
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
@@ -116,7 +103,7 @@ public class UploadPModeIT extends AbstractIT {
 
     /**
      * Tests that a subset of the PMODE file content (given a fixed pModeKey) is correctly stored in the DB.
-     *
+     * <p>
      * PMODE Key  = Initiator Party: Responder Party: Service name: Action name: Agreement: Test case name
      */
     @Test
@@ -202,8 +189,6 @@ public class UploadPModeIT extends AbstractIT {
             for (Mpc mpc : configuration.getMpcs()) {
                 Mpc savedMpc = savedMpcs.get(mpc.getName());
                 Assert.assertNotNull(savedMpc);
-                // Assert.assertEquals(mpc, savedMpc); This strangely seeems to work only with Strings!
-                //Assert.assertTrue(mpc.equals(savedMpc)); equals and hashcode are based on hibernate Ids !
                 Assert.assertEquals(mpc.getName(), savedMpc.getName());
                 Assert.assertEquals(mpc.getQualifiedName(), savedMpc.getQualifiedName());
                 Assert.assertEquals(mpc.getRetentionDownloaded(), savedMpc.getRetentionDownloaded());
@@ -230,11 +215,49 @@ public class UploadPModeIT extends AbstractIT {
             String pmodeName = "domibus-configuration-long-names.xml";
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
             MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", pmodeName, "text/xml", IOUtils.toByteArray(is));
-            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent);
+            ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
             Assert.assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;
         }
     }
+
+
+    public static final String SCHEMAS_DIR = "schemas/";
+    public static final String DOMIBUS_PMODE_XSD = "domibus-pmode.xsd";
+
+    /**
+     * Tests that a PMODE can be serialized/deserialized properly.
+     */
+    @Test
+    public void testVerifyPartyListUpdate() throws IOException, JAXBException {
+
+        try {
+            InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
+            byte[] bytes = IOUtils.toByteArray(is);
+
+            InputStream xsdStream = getClass().getClassLoader().getResourceAsStream(SCHEMAS_DIR + DOMIBUS_PMODE_XSD);
+            ByteArrayInputStream xmlStream = new ByteArrayInputStream(bytes);
+
+            UnmarshallerResult unmarshallerResult = xmlUtil.unmarshal(true, jaxbContext, xmlStream, xsdStream);
+            Configuration configuration = unmarshallerResult.getResult();
+
+            byte[] x2 = pModeProvider.serializePModeConfiguration(configuration);
+
+        } catch (IOException ioEx) {
+            System.out.println("Error: " + ioEx.getMessage());
+            throw ioEx;
+        } catch (JAXBException jEx) {
+            System.out.println("JAXB error: " + jEx.getMessage());
+            throw jEx;
+        } catch (XmlProcessingException e) {
+            System.out.println("XmlProcessingException: " + e.getMessage());
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.out.println(e.getClass() + " : " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
 }

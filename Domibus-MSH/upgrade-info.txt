@@ -1,3 +1,122 @@
+Domibus 4.0 (from 3.3.4):
+                - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
+                - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\conf" respectively into "\domibus\conf\domibus\plugins\lib"
+                - The Custom Plugins need to be updated:
+                     o remove the domibus-ext-services-api Maven dependency; the existing services from the domibus-ext-services-api have been moved into the plugin-api module under the same packages.
+                       The service classes from the domibus-ext-services-api module have been renamed in order not to be confused with the internal services.
+                       Example: AuthenticationService was renamed to AuthenticationExtService. The same pattern has been used for the other services.
+                     o replace the Maven dependency commons-lang with commons-lang3 like below:
+                           <dependency>
+                               <groupId>org.apache.commons</groupId>
+                               <artifactId>commons-lang3</artifactId>
+                               <scope>provided</scope>
+                           </dependency>
+
+                - [WebLogic only]
+                    Modify file "\conf\domibus\domibus.properties":
+                         o add the folloging property:
+                             domibus.jms.queue.alert=jms/domibus.internal.alert.queue
+                         o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3(+)-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
+                - [Tomcat only]
+                     Modify file "\conf\domibus\domibus.properties":
+                          o add the folloging property:
+                              domibus.jms.queue.alert=domibus.internal.alert.queue
+                          o in file "cef_edelivery_path\domibus\conf\domibus\insternal\activemq.xml":
+                              - in the destinations section add the following queue:
+                                         .............................
+                                         <destinations>
+                                             .............................
+                                              <queue id="alertMessageQueue"
+                                                                 physicalName="domibus.internal.alert.queue"/>
+                                             .............................
+                                         </destinations>
+                                         .............................
+                              -  in the redeliveryPolicyEntries section add the following redeliveryPolicy:
+                                             .............................
+                                             <redeliveryPolicyEntries>
+                                                 .............................
+                                                 <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
+                                                 .............................
+                                             </redeliveryPolicyEntries>
+                                             .............................
+                              -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the droponly parameter:
+                                        E.G:
+                                            - original:
+                                                <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
+                                            -new configuration:
+                                                <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue domibus.internal.alert.queue" reportInterval="10000"/>
+                 - [Wildfly only]
+                     Modify file "\conf\domibus\domibus.properties":
+                          o add the following property:
+                              domibus.jms.queue.alert=jms/domibus.internal.alert.queue
+                          o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
+                           - add the following queue in the destination section
+                                       .............................
+                                       <jms-destinations>
+                                           .............................
+                                            <jms-queue name="DomibusAlertMessageQueue">
+                                                <entry name="java:/jms/domibus.internal.alert.queue"/>
+                                                <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
+                                                <durable>true</durable>
+                                            </jms-queue>
+                                           .............................
+                                       </jms-destinations>
+                                       .............................
+                            -  in the address-settings section
+                                    o add the following address-setting configurations:
+                                           .............................
+                                           <address-settings>
+                                               .............................
+                                               <address-setting match="jms.queue.DomibusAlertMessageQueue">
+                                                  <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                                                  <max-delivery-attempts>1</max-delivery-attempts>
+                                               </address-setting>
+                                               .............................
+                                           </address-settings>
+                                           .............................
+               - Authentication uses BCryptPasswordEncoder, similar to the UI users.
+                 TB_AUTHENTICATION_ENTRY table was restored to defaults, having two users 'admin' and 'user' with default password '123456' encrypted using the new algorithm.
+                 Custom users should be recreated using the new functionality in the Domibus Admin Console.
+               - Remove Description and Schema headers from PartInfo. The headers were deprecated in ebMS3.
+               - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
+                    <ehcache>
+                    ........................
+                    <cache name="auditTarget"
+                               maxBytesLocalHeap="5m"
+                               timeToLiveSeconds="3600"
+                               overflowToDisk="false">
+                     </cache>
+                  ........................
+                  </ehcache>
+                - Modify file "\conf\domibus\domibus.properties":
+                    o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
+                    o update all the cron expressions from 0/60 * * * * ? to 0 0/1 * * * ?
+                    o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class and replace it by:
+                      - [WebLogic only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.WeblogicJtaPlatform
+                      - [Tomcat only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosJ2eePlatform
+                      - [Wildfly only]
+                            domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
+                    o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
+                        - [Mysql only]
+                             domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                    o add a new property "domibus.database.schema" for defining the database schema and modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties to re-use it
+                           Eg: #MySQL
+                               domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?pinGlobalTxToPhysicalConnection=true
+                               domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?useSSL=false
+                - Optional changes(only if Domibus is used in multi-tenancy mode):
+                    o create a new database schema using the DB script(mysql5innoDb-4.0-multi-tenancy.ddl for MySQL or oracle10g-4.0-multi-tenancy.ddl for Oracle)
+                    o add the new property "domibus.database.general.schema" in the Database section of "/conf/domibus/domibus.properties" file and configure it with the general schema created in the previous step
+                    o [Tomcat only]
+                        -  Modify the file "/conf/domibus/domibus.properties":
+                           o modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties and set the default general schema in the URL
+                             Eg: #MySQL
+                                 domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?pinGlobalTxToPhysicalConnection=true
+                                 domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
+                    Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
+                - Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
+                  Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
 Domibus 3.3.4 (from 3.3.3):
                  - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :

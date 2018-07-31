@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
@@ -10,8 +11,11 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.ebms3.common.model.Property;
+import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -19,7 +23,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.messaging.NotifyMessageCreator;
-import eu.domibus.plugin.BackendConnector;
 import eu.domibus.plugin.NotificationListener;
 import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.routing.BackendFilterEntity;
@@ -31,7 +34,7 @@ import eu.domibus.plugin.transformer.impl.SubmissionAS4Transformer;
 import eu.domibus.plugin.validation.SubmissionValidator;
 import eu.domibus.plugin.validation.SubmissionValidatorList;
 import eu.domibus.submission.SubmissionValidatorListProvider;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -43,7 +46,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.jms.Queue;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -71,7 +77,6 @@ public class BackendNotificationService {
     @Autowired
     protected SubmissionValidatorListProvider submissionValidatorListProvider;
 
-
     protected List<NotificationListener> notificationListenerServices;
 
     @Resource(name = "routingCriteriaFactories")
@@ -88,11 +93,20 @@ public class BackendNotificationService {
     private ApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private DomainCoreConverter coreConverter;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    UserMessageServiceHelper userMessageServiceHelper;
+
 
     //TODO move this into a dedicate provider(a different spring bean class)
     private Map<String, IRoutingCriteria> criteriaMap;
@@ -141,7 +155,7 @@ public class BackendNotificationService {
     protected void notifyOfIncoming(final BackendFilter matchingBackendFilter, final UserMessage userMessage, final NotificationType notificationType, Map<String, Object> properties) {
         if (matchingBackendFilter == null) {
             LOG.error("No backend responsible for message [" + userMessage.getMessageInfo().getMessageId() + "] found. Sending notification to [" + unknownReceiverQueue + "]");
-            String finalRecipient = getFinalRecipient(userMessage);
+            String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
             jmsManager.sendMessageToQueue(new NotifyMessageCreator(userMessage.getMessageInfo().getMessageId(), notificationType, properties).createMessage(), unknownReceiverQueue);
             return;
@@ -201,17 +215,6 @@ public class BackendNotificationService {
         return backendFilters;
     }
 
-    private String getFinalRecipient(UserMessage userMessage) {
-        String finalRecipient = null;
-        for (final Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
-                finalRecipient = p.getValue();
-                break;
-            }
-        }
-        return finalRecipient;
-    }
-
     protected void validateSubmission(UserMessage userMessage, String backendName, NotificationType notificationType) {
         if (NotificationType.MESSAGE_RECEIVED != notificationType) {
             LOG.debug("Validation is not configured to be done for notification of type [" + notificationType + "]");
@@ -244,7 +247,7 @@ public class BackendNotificationService {
         LOG.info("Notifying backend [{}] of message [{}] and notification type [{}]", backendName, userMessage.getMessageInfo().getMessageId(), notificationType);
 
         validateSubmission(userMessage, backendName, notificationType);
-        String finalRecipient = getFinalRecipient(userMessage);
+        String finalRecipient = userMessageServiceHelper.getFinalRecipient(userMessage);
         if (properties != null) {
             properties.put(MessageConstants.FINAL_RECIPIENT, finalRecipient);
         }
@@ -261,8 +264,10 @@ public class BackendNotificationService {
             LOG.warn("No notification listeners found for backend [" + backendName + "]");
             return;
         }
-        if(NotificationType.MESSAGE_STATUS_CHANGE == notificationType && BackendConnector.Mode.PULL == notificationListener.getMode()) {
-            LOG.debug("No plugin notification sent for message [{}]. Notification type [{}] suppressed for mode [{}]", messageId, NotificationType.MESSAGE_STATUS_CHANGE, BackendConnector.Mode.PULL);
+
+        LOG.info("Required notifications [{}]", notificationListener.getRequiredNotificationTypeList());
+        if (!notificationListener.getRequiredNotificationTypeList().contains(notificationType)) {
+            LOG.info("No plugin notification sent for message [{}]. Notification type [{}], mode [{}]", messageId, notificationType, notificationListener.getMode());
             return;
         }
 
@@ -294,6 +299,12 @@ public class BackendNotificationService {
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void notifyOfMessageStatusChange(MessageLog messageLog, MessageStatus newStatus, Timestamp changeTimestamp) {
+
+        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+        if (messagingConfiguration.shouldMonitorMessageStatus(newStatus)) {
+            eventService.enqueueMessageEvent(messageLog.getMessageId(), messageLog.getMessageStatus(), newStatus, messageLog.getMshRole());
+        }
+
         if (isPluginNotificationDisabled()) {
             return;
         }
@@ -306,7 +317,6 @@ public class BackendNotificationService {
             return;
         }
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_STATUS_CHANGED, messageLog.getMessageStatus(), newStatus);
-
         final Map<String, Object> messageProperties = getMessageProperties(messageLog, newStatus, changeTimestamp);
         notify(messageLog.getMessageId(), messageLog.getBackend(), NotificationType.MESSAGE_STATUS_CHANGE, messageProperties);
     }
@@ -335,7 +345,7 @@ public class BackendNotificationService {
     }
 
     protected boolean isPluginNotificationDisabled() {
-        String pluginNotificationEnabled = domibusProperties.getProperty("domibus.plugin.notification.active", "true");
+        String pluginNotificationEnabled = domibusPropertyProvider.getProperty("domibus.plugin.notification.active", "true");
         return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

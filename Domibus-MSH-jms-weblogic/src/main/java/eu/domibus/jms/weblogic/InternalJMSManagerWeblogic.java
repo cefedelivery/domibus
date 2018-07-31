@@ -1,6 +1,8 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -9,7 +11,7 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
@@ -67,6 +69,12 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Autowired
     JMSSelectorUtil jmsSelectorUtil;
 
+    @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
+
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
         return jmxTemplate.query(
@@ -110,7 +118,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
                         destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                         destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
+                        /* in multi-tenancy mode we show the number of messages only to super admin */
+                        destination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN :
+                                getMessagesTotalCount(mbsc, jmsDestination));
                         destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
                     }
                 }
@@ -165,7 +175,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         String configQueueJndiName = (String) mbsc.getAttribute(configQueue, "JNDIName");
                         destination.setProperty(PROPERTY_JNDI_NAME, configQueueJndiName);
                         destination.setInternal(jmsDestinationHelper.isInternal(configQueueJndiName));
-                        destination.setNumberOfMessages(getMessagesTotalCount(mbsc, jmsDestination));
+                        /* in multi-tenancy mode we show the number of messages only to super admin */
+                        destination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN :
+                                getMessagesTotalCount(mbsc, jmsDestination));
                         destinationsMap.put(destinationFQName, destination);
                     }
                 }
@@ -448,35 +460,6 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             }
         }
         throw new InternalJMSException("Could not find internal destination for [" + source + "]");
-    }
-
-    /**
-     * To be used to browse all the messages of a specific queue. It works also in a cluster.
-     *
-     * @param source
-     * @return
-     */
-    @Override
-    public List<InternalJmsMessage> browseMessages(String source) {
-        List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
-        final String sourceWithoutJMSModule = removeJmsModule(source);
-        List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
-        for (InternalJMSDestination destination : destinations) {
-            String destinationType = destination.getType();
-            if (QUEUE.equals(destinationType)) {
-                Map<String, Object> criteria = new HashMap<>();
-                String selector = jmsSelectorUtil.getSelector(criteria);
-                try {
-                    ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
-                    internalJmsMessages.addAll(getMessagesFromDestination(jmsDestination, selector));
-                } catch (Exception e) {
-                    throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
-                }
-            } else {
-                throw new InternalJMSException("Unrecognized destination type [" + destinationType + "]");
-            }
-        }
-        return internalJmsMessages;
     }
 
     /**

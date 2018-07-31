@@ -115,13 +115,6 @@ public class SubmissionAS4Transformer {
                 partProperties.getProperties().add(property);
             }
 
-            if(payload.getDescription() != null) {
-                final Description description = new Description();
-                description.setValue(payload.getDescription().getValue());
-                description.setLang(payload.getDescription().getLang().getLanguage());
-                partInfo.setDescription(description);
-            }
-
             partInfo.setPartProperties(partProperties);
             payloadInfo.getPartInfo().add(partInfo);
 
@@ -183,13 +176,9 @@ public class SubmissionAS4Transformer {
             }
         }
         if (partInfo.getFileName() != null) {
-            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), ""));
+            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), null));
         }
-        Submission.Description description = null;
-        if(partInfo.getDescription() != null){
-            description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), partInfo.getDescription().getValue());
-        }
-        result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), description, (partInfo.getSchema() != null ? partInfo.getSchema().getLocation() : null));
+        result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), null, null);
     }
 
     private String generateConversationId() {

@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-soapui-tests</artifactId>
     <packaging>jar</packaging>
@@ -19,6 +19,13 @@
         <soapui.root.folder>${project.basedir}/src/main/soapui</soapui.root.folder>
         <soapui.scripting.library>${soapui.root.folder}/scripting</soapui.scripting.library>
         <soapui.ext.libraries>${soapui.root.folder}/lib</soapui.ext.libraries>
+
+        <sonar.jacoco.reportPath>../target/jacoco-ut.exec</sonar.jacoco.reportPath>
+        <!-- jacoco agent remote addresses and ports -->
+        <sonar.jacoco.remotePort.blue>${jacocoRemotePortBlue}</sonar.jacoco.remotePort.blue>
+        <sonar.jacoco.remoteAddress.blue>${jacocoRemoteAddressBlue}</sonar.jacoco.remoteAddress.blue>
+        <sonar.jacoco.remotePort.red>${jacocoRemotePortRed}</sonar.jacoco.remotePort.red>
+        <sonar.jacoco.remoteAddress.red>${jacocoRemoteAddressRed}</sonar.jacoco.remoteAddress.red>
     </properties>
 
     <pluginRepositories>
@@ -28,82 +35,144 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.smartbear.soapui</groupId>
-                <artifactId>soapui-pro-maven-plugin</artifactId>
-                <version>5.1.2</version>
-                <executions>
-                    <execution>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
-                    <junitReport>true</junitReport>
-                    <printReport>true</printReport>
-                    <testSuite>WS-Auto for Bamboo</testSuite>
-                    <!--<testCase>Dom141-Pull-Submit Message-Basic Flow</testCase>-->
-                    <projectProperties>
-                        <value>${localUrl}</value>
-                        <value>${remoteUrl}</value>
-                        <value>${driverBlue}</value>
-                        <value>${driverRed}</value>
-                        <value>${jdbcUrlBlue}</value>
-                        <value>${jdbcUrlRed}</value>
-                        <value>${databaseBlue}</value>
-                        <value>${databaseRed}</value>
-                        <value>${blueDbUser}</value>
-                        <value>${blueDbPassword}</value>
-                        <value>${redDbUser}</value>
-                        <value>${redDbPassword}</value>
-                        <value>updateReport=false</value>
-                        <value>thirdGateway=false</value>
-                    </projectProperties>
-                    <soapuiProperties>
-                        <property>
-                            <name>soapui.logroot</name>
-                            <value>${project.build.directory}/soapui/logs/</value>
-                        </property>
-                        <property>
-                            <name>http.nonProxyHosts</name>
-                            <value>localhost|127.*|[::1]</value>
-                        </property>
-                        <property>
-                            <name>soapui.scripting.library</name>
-                            <value>${soapui.scripting.library}</value>
-                        </property>
-                        <property>
-                            <name>soapui.ext.libraries</name>
-                            <value>${soapui.ext.libraries}</value>
-                        </property>
-                    </soapuiProperties>
-                    <testFailIgnore>false</testFailIgnore>
-                    <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
-                </configuration>
+    <profiles>
+        <!-- defined as separate profile in order to be triggered on demand -->
+        <profile>
+        <id>soapui</id>
+            <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>com.smartbear.soapui</groupId>
+                    <artifactId>soapui-pro-maven-plugin</artifactId>
+                    <version>5.1.2</version>
+                    <executions>
+                        <execution>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <outputFolder>${project.build.directory}/surefire-reports</outputFolder>
+                        <junitReport>true</junitReport>
+                        <printReport>true</printReport>
+                        <testSuite>WS-Auto-for-Bamboo</testSuite>
+                        <projectFile>${soapui.root.folder}/AS4-domibus-WS-soapui-project.xml</projectFile>
+                        <projectProperties>
+                            <value>${localUrl}</value>
+                            <value>${remoteUrl}</value>
+                            <value>${driverBlue}</value>
+                            <value>${driverRed}</value>
+                            <value>${jdbcUrlBlue}</value>
+                            <value>${jdbcUrlRed}</value>
+                            <value>${databaseBlue}</value>
+                            <value>${databaseRed}</value>
+                            <value>${blueDbUser}</value>
+                            <value>${blueDbPassword}</value>
+                            <value>${redDbUser}</value>
+                            <value>${redDbPassword}</value>
+                            <value>updateReport=false</value>
+                            <value>thirdGateway=false</value>
+                            <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>
+                            <value>defaultPModesPath=${soapui.root.folder}/resources/PModesandKeystoresDefault</value>
+                            <value>specialPModesPath=${soapui.root.folder}/resources/PModesandKeystoresSpecialTests</value>
+                        </projectProperties>
+                        <soapuiProperties>
+                            <property>
+                                <name>soapui.logroot</name>
+                                <value>${project.build.directory}/soapui/logs/</value>
+                            </property>
+                            <property>
+                                <name>http.nonProxyHosts</name>
+                                <value>localhost|127.*|[::1]</value>
+                            </property>
+                            <property>
+                                <name>soapui.scripting.library</name>
+                                <value>${soapui.scripting.library}</value>
+                            </property>
+                            <property>
+                                <name>soapui.ext.libraries</name>
+                                <value>${soapui.ext.libraries}</value>
+                            </property>
+                        </soapuiProperties>
+                        <testFailIgnore>true</testFailIgnore>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>mysql</groupId>
+                            <artifactId>mysql-connector-java</artifactId>
+                            <version>${mysql.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.reflections</groupId>
+                            <artifactId>reflections</artifactId>
+                            <version>0.9.8</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+            </build>
+        </profile>
 
-                <dependencies>
-                    <dependency>
-                        <groupId>mysql</groupId>
-                        <artifactId>mysql-connector-java</artifactId>
-                        <version>${mysql.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.reflections</groupId>
-                        <artifactId>reflections</artifactId>
-                        <version>0.9.8</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-  
+        <profile>
+            <id>dump-coverage</id>
+            <!-- profile will run only if only '-DjacocoRemotePortBlue' property is specified in the run command line
+             otherwise said, if we don't want to have the call the dump foal we will NOT specify this property  -->
+            <activation>
+                <property>
+                    <name>jacocoRemotePortBlue</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- the magic starts here -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.maven.plugin.version}</version>
+
+                        <executions>
+                            <execution>
+                                <id>dump coverage from blue</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>dump</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                    <address>${sonar.jacoco.remoteAddress.blue}</address>
+                                    <port>${sonar.jacoco.remotePort.blue}</port>
+                                    <reset>false</reset>
+                                    <append>true</append>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>dump coverage from red</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>dump</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${sonar.jacoco.reportPath}</destFile>
+                                    <address>${sonar.jacoco.remoteAddress.red}</address>
+                                    <port>${sonar.jacoco.remotePort.red}</port>
+                                    <reset>false</reset>
+                                    <append>true</append>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+
+
+        </profile>
+    </profiles>
+
 </project>

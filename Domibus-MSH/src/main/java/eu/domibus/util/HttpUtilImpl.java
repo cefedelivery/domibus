@@ -1,10 +1,14 @@
 package eu.domibus.util;
 
-import eu.domibus.api.util.HttpUtil;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import org.apache.commons.io.IOUtils;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
+import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.util.HttpUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,12 +20,10 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Properties;
 
 /**
  * Created by Cosmin Baciu on 12-Jul-16.
@@ -32,8 +34,7 @@ public class HttpUtilImpl implements HttpUtil {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(HttpUtilImpl.class);
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     DomibusConfigurationService domibusConfigurationService;
@@ -41,10 +42,10 @@ public class HttpUtilImpl implements HttpUtil {
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
         if (domibusConfigurationService.useProxy()) {
-            String httpProxyHost = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            String httpProxyPort = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            String httpProxyUser = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            String httpProxyPassword = domibusProperties.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
+            String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
             LOG.info("Using proxy for downloading URL " + url);
             return downloadURLViaProxy(url, httpProxyHost, Integer.parseInt(httpProxyPort), httpProxyUser, httpProxyPassword);
         }

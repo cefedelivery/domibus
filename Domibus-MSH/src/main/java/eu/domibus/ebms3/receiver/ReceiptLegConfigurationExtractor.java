@@ -2,12 +2,11 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.acknowledge.MessageAcknowledgeException;
-import eu.domibus.api.message.acknowledge.MessageAcknowledgeService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.UserMessage;
 import org.apache.cxf.binding.soap.SoapMessage;

@@ -3,7 +3,7 @@ package eu.domibus.plugin;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.util.StringUtils;
 
 import javax.activation.DataHandler;
@@ -571,7 +571,7 @@ public class Submission {
         private final String partyId;
         private final String partyIdType;
 
-        Party(final String partyId, final String partyIdType) {
+        public Party(final String partyId, final String partyIdType) {
             if(!StringUtils.hasLength(partyId)) {
                 throw new IllegalArgumentException("partyId must not be empty");
             }
@@ -728,8 +728,16 @@ public class Submission {
             return value;
         }
 
+        public void setValue(String value) {
+            this.value = value;
+        }
+
         public String getType() {
             return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
     }
 

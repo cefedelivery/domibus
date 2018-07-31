@@ -1,32 +1,42 @@
 package eu.domibus.pki;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.model.certificate.CertificateStatus;
 import eu.domibus.common.model.certificate.CertificateType;
+import eu.domibus.core.alerts.model.service.ExpiredCertificateModuleConfiguration;
+import eu.domibus.core.alerts.model.service.ImminentExpirationCertificateModuleConfiguration;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.certificate.CertificateDao;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.wss4j.common.crypto.CryptoService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import javax.xml.bind.DatatypeConverter;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.*;
 
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
@@ -49,25 +59,29 @@ public class CertificateServiceImpl implements CertificateService {
     CRLService crlService;
 
     @Autowired
-    CryptoService cryptoService;
+    MultiDomainCryptoService multiDomainCertificateProvider;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    DomainContextProvider domainProvider;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private CertificateDao certificateDao;
 
-    @Cacheable(value = "certValidationByAlias", key = "#alias")
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private PModeProvider pModeProvider;
+
     @Override
     @Transactional(noRollbackFor = DomibusCertificateException.class)
-    public boolean isCertificateChainValid(String alias) throws DomibusCertificateException {
-        LOG.debug("Checking certificate validation for [" + alias + "]");
-        KeyStore trustStore = cryptoService.getTrustStore();
-        if (trustStore == null) {
-            throw new DomibusCertificateException("Error getting the truststore");
-        }
-
+    public boolean isCertificateChainValid(KeyStore trustStore, String alias) throws DomibusCertificateException {
         X509Certificate[] certificateChain = null;
         try {
             certificateChain = getCertificateChain(trustStore, alias);
@@ -103,7 +117,7 @@ public class CertificateServiceImpl implements CertificateService {
     public boolean isCertificateValid(X509Certificate cert) throws DomibusCertificateException {
         boolean isValid = checkValidity(cert);
         if (!isValid) {
-            LOG.warn("Certificate is not valid: " + cert);
+            LOG.warn("Certificate is not valid:[{}] ",cert);
             return false;
         }
         try {
@@ -125,37 +139,11 @@ public class CertificateServiceImpl implements CertificateService {
         return result;
     }
 
-    /**
-     * Verifies the existence and validity of a certificate.
-     *
-     * @param alias
-     * @return boolean
-     * @throws DomibusCertificateException
-     * @Author Federico Martini
-     * @Since 3.3
-     */
-    @Override
-    public boolean isCertificateValid(String alias) throws DomibusCertificateException {
-        LOG.debug("Verifying the certificate with alias [" + alias + "]");
-        try {
-            X509Certificate certificate = (X509Certificate) cryptoService.getCertificateFromKeystore(alias);
-            if (certificate == null) {
-                throw new DomibusCertificateException("Error: the certificate does not exist for alias[" + alias + "]");
-            }
-            if (!isCertificateValid(certificate)) {
-                throw new DomibusCertificateException("Error: the certificate is not valid anymore for alias [" + alias + "]");
-            }
-        } catch (KeyStoreException ksEx) {
-            throw new DomibusCertificateException("Error getting the certificate from keystore for alias [" + alias + "]", ksEx);
-        }
-        return true;
-    }
-
     @Override
     public String extractCommonName(final X509Certificate certificate) throws InvalidNameException {
 
         final String dn = certificate.getSubjectDN().getName();
-        LOG.debug("DN is: " + dn);
+        LOG.debug("DN is:[{}]",dn);
         final LdapName ln = new LdapName(dn);
         for (final Rdn rdn : ln.getRdns()) {
             if (StringUtils.equalsIgnoreCase(rdn.getType(), "CN")) {
@@ -186,7 +174,7 @@ public class CertificateServiceImpl implements CertificateService {
             return (X509Certificate) cert;
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
             LOG.error("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password);
-            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias + "pass " + password, e);
+            throw new DomibusCertificateException("Could not load certificate from file " + filePath + ", alias " + alias, e);
         }
     }
 
@@ -194,20 +182,14 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
-    public List<TrustStoreEntry> getTrustStoreEntries() {
+    public List<TrustStoreEntry> getTrustStoreEntries(final KeyStore trustStore) {
         try {
-            final KeyStore trustStore = cryptoService.getTrustStore();
             List<TrustStoreEntry> trustStoreEntries = new ArrayList<>();
             final Enumeration<String> aliases = trustStore.aliases();
             while (aliases.hasMoreElements()) {
                 final String alias = aliases.nextElement();
                 final X509Certificate certificate = (X509Certificate) trustStore.getCertificate(alias);
-                TrustStoreEntry trustStoreEntry = new TrustStoreEntry(
-                        alias,
-                        certificate.getSubjectDN().getName(),
-                        certificate.getIssuerDN().getName(),
-                        certificate.getNotBefore(),
-                        certificate.getNotAfter());
+                TrustStoreEntry trustStoreEntry = createTrustStoreEntry(alias, certificate);
                 trustStoreEntries.add(trustStoreEntry);
             }
             return trustStoreEntries;
@@ -221,16 +203,96 @@ public class CertificateServiceImpl implements CertificateService {
      * {@inheritDoc}
      */
     @Override
-    public void saveCertificateAndLogRevocation() {
-        saveCertificateData();
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveCertificateAndLogRevocation(final Domain currentDomain) {
+        final KeyStore trustStore = multiDomainCertificateProvider.getTrustStore(currentDomain);
+        final KeyStore keyStore = multiDomainCertificateProvider.getKeyStore(currentDomain);
+        saveCertificateData(trustStore, keyStore);
         logCertificateRevocationWarning();
     }
+
+    @Override
+    public void validateLoadOperation(ByteArrayInputStream newTrustStoreBytes, String password) {
+        try {
+            KeyStore tempTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            tempTrustStore.load(newTrustStoreBytes, password.toCharArray());
+            newTrustStoreBytes.reset();
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+            throw new DomibusCertificateException("Could not load key store", e);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendCertificateAlerts() {
+        sendCertificateImminentExpirationAlerts();
+        sendCertificateExpiredAlerts();
+    }
+
+    protected void sendCertificateImminentExpirationAlerts() {
+        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
+        final Boolean activeModule = imminentExpirationCertificateConfiguration.isActive();
+        LOG.debug("Certificate Imminent expiration alert module activated:[{}]", activeModule);
+        if (!activeModule) {
+            return;
+        }
+        final String accessPoint = getAccesPointName();
+        final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
+        final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
+
+        final Date offset = LocalDateTime.now().plusDays(imminentExpirationDelay).toDate();
+        final Date notificationDate = LocalDateTime.now().minusDays(imminentExpirationFrequency).toDate();
+
+        LOG.debug("Searching for certificate about to expire with notification date smaller then:[{}] and expiration date < current date + offset[{}]->[{}]", notificationDate, imminentExpirationDelay, offset);
+        certificateDao.findImminentExpirationToNotifyAsAlert(notificationDate, offset).forEach(certificate -> {
+            certificate.setAlertImminentNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+            certificateDao.saveOrUpdate(certificate);
+            final String alias = certificate.getAlias();
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueImminentCertificateExpirationEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+        });
+    }
+
+
+
+    protected void sendCertificateExpiredAlerts() {
+        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+        final boolean activeModule = expiredCertificateConfiguration.isActive();
+        LOG.debug("Certificate expired alert module activated:[{}]", activeModule);
+        if (!activeModule) {
+            return;
+        }
+        final String accessPoint = getAccesPointName();
+        final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
+        final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
+
+        Date endNotification = LocalDateTime.now().minusDays(revokedDuration).toDate();
+        Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
+
+        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
+        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
+            certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+            certificateDao.saveOrUpdate(certificate);
+            final String alias = certificate.getAlias();
+            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+        });
+    }
+
+    private String getAccesPointName() {
+        String partyName = null;
+        if (pModeProvider.isConfigurationLoaded()) {
+            partyName = pModeProvider.getGatewayParty().getName();
+        }
+        return partyName;
+    }
+
 
     /**
      * Create or update certificate in the db.
      */
-    protected void saveCertificateData() {
-        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates();
+    protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
+        List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
         for (eu.domibus.common.model.certificate.Certificate certificate : certificates) {
             certificateDao.saveOrUpdate(certificate);
         }
@@ -259,11 +321,9 @@ public class CertificateServiceImpl implements CertificateService {
      *
      * @return a list of certificate.
      */
-    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates() {
-        KeyStore trustStore = cryptoService.getTrustStore();
+    protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> allCertificates = new ArrayList<>();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(trustStore, CertificateType.PUBLIC));
-        KeyStore keyStore = cryptoService.getKeyStore();
         allCertificates.addAll(loadAndEnrichCertificateFromKeystore(keyStore, CertificateType.PRIVATE));
         return Collections.unmodifiableList(allCertificates);
     }
@@ -296,16 +356,17 @@ public class CertificateServiceImpl implements CertificateService {
      * @return the certificate status.
      */
     protected CertificateStatus getCertificateStatus(Date notAfter) {
-        int revocationOffsetInDays = Integer.valueOf(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
+        int revocationOffsetInDays = Integer.parseInt(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
         try {
-            revocationOffsetInDays = Integer.valueOf(domibusProperties.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
+            revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
         } catch (NumberFormatException n) {
+            LOG.trace("Property:[{}] is invalid, should be a number.",REVOCATION_TRIGGER_OFFSET_PROPERTY,n);
 
         }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
         LocalDateTime certificateEnd = LocalDateTime.fromDateFields(notAfter);
-        LOG.debug("Current date[{}], offset date[{}], certificate end date:[{}]",now,offsetDate,certificateEnd);
+        LOG.debug("Current date[{}], offset date[{}], certificate end date:[{}]", now, offsetDate, certificateEnd);
         if (now.isAfter(certificateEnd)) {
             return CertificateStatus.REVOKED;
         } else if (offsetDate.isAfter(certificateEnd)) {
@@ -333,4 +394,79 @@ public class CertificateServiceImpl implements CertificateService {
         return Collections.unmodifiableList(certificates);
     }
 
+
+    public X509Certificate loadCertificateFromString(String content) throws CertificateException {
+        CertificateFactory certFactory = null;
+        X509Certificate cert = null;
+        try {
+            certFactory = CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            LOG.warn("Error initializing certificate factory ", e);
+            throw new DomibusCertificateException("Could not initialize certificate factory", e);
+        }
+        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
+        try {
+            cert = (X509Certificate) certFactory.generateCertificate(in);
+        } catch (CertificateException e) {
+            LOG.warn("Error generating certificate ", e);
+            throw new DomibusCertificateException("Could not generate certificate", e);
+        }
+        return cert;
+    }
+
+    public TrustStoreEntry convertCertificateContent(String certificateContent) throws CertificateException {
+        X509Certificate cert = loadCertificateFromString(certificateContent);
+        return createTrustStoreEntry(cert);
+    }
+
+    public TrustStoreEntry getPartyCertificateFromTruststore(String partyName) throws KeyStoreException {
+        X509Certificate cert = multiDomainCertificateProvider.getCertificateFromTruststore(domainProvider.getCurrentDomain(), partyName);
+        LOG.debug("get certificate from truststore for [{}] = [{}] ", partyName, cert);
+        TrustStoreEntry res = createTrustStoreEntry(cert);
+        if (res != null)
+            res.setFingerprints(extractFingerprints(cert));
+        return res;
+    }
+
+    private TrustStoreEntry createTrustStoreEntry(X509Certificate certificate) {
+        return createTrustStoreEntry(null, certificate);
+    }
+
+    private TrustStoreEntry createTrustStoreEntry(String alias, X509Certificate certificate) {
+        if (certificate == null)
+            return null;
+        return new TrustStoreEntry(
+                alias,
+                certificate.getSubjectDN().getName(),
+                certificate.getIssuerDN().getName(),
+                certificate.getNotBefore(),
+                certificate.getNotAfter());
+    }
+
+    private String extractFingerprints(final X509Certificate certificate) {
+        if (certificate == null)
+            return null;
+
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            LOG.warn("Error initializing MessageDigest ", e);
+            throw new DomibusCertificateException("Could not initialize MessageDigest", e);
+        }
+        byte[] der = new byte[0];
+        try {
+            der = certificate.getEncoded();
+        } catch (CertificateEncodingException e) {
+            LOG.warn("Error encoding certificate ", e);
+            throw new DomibusCertificateException("Could not encode certificate", e);
+        }
+        md.update(der);
+        byte[] digest = md.digest();
+        String digestHex = DatatypeConverter.printHexBinary(digest);
+        return digestHex.toLowerCase();
+    }
+
 }
+
+

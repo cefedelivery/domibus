@@ -1,11 +1,20 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,17 +30,21 @@ import java.util.List;
 @RequestMapping(value = "/rest/messagefilters")
 public class MessageFilterResource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageFilterResource.class);
+
     @Autowired
     RoutingService routingService;
 
     @Autowired
     DomainCoreConverter coreConverter;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public MessageFilterResultRO getMessageFilter() {
+    @Autowired
+    private MessageFilterCsvServiceImpl messageFilterCsvServiceImpl;
+
+    protected Pair<List<MessageFilterRO>,Boolean> getBackendFiltersInformation() {
+        boolean areFiltersPersisted = true;
         List<BackendFilter> backendFilters = routingService.getBackendFiltersUncached();
         List<MessageFilterRO> messageFilterResultROS = coreConverter.convert(backendFilters, MessageFilterRO.class);
-        boolean areFiltersPersisted = true;
         for (MessageFilterRO messageFilter : messageFilterResultROS) {
             if(messageFilter.getEntityId() == 0) {
                 messageFilter.setPersisted(false);
@@ -40,10 +53,16 @@ public class MessageFilterResource {
                 messageFilter.setPersisted(true);
             }
         }
+        return new ImmutablePair<>(messageFilterResultROS,areFiltersPersisted);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public MessageFilterResultRO getMessageFilter() {
+        final Pair<List<MessageFilterRO>, Boolean> backendFiltersInformation = getBackendFiltersInformation();
 
         MessageFilterResultRO resultRO = new MessageFilterResultRO();
-        resultRO.setMessageFilterEntries(messageFilterResultROS);
-        resultRO.setAreFiltersPersisted(areFiltersPersisted);
+        resultRO.setMessageFilterEntries(backendFiltersInformation.getKey());
+        resultRO.setAreFiltersPersisted(backendFiltersInformation.getValue());
         return resultRO;
     }
 
@@ -51,5 +70,26 @@ public class MessageFilterResource {
     public void updateMessageFilters(@RequestBody List<MessageFilterRO> messageFilterROS) {
         List<BackendFilter> backendFilters = coreConverter.convert(messageFilterROS, BackendFilter.class);
         routingService.updateBackendFilters(backendFilters);
+    }
+
+    /**
+     * This method returns a CSV file with the contents of Message Filter table
+     *
+     * @return CSV file with the contents of Message Filter table
+     */
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv() {
+        String resultText;
+        try {
+            resultText = messageFilterCsvServiceImpl.exportToCSV(getBackendFiltersInformation().getKey());
+        } catch (CsvException e) {
+            LOGGER.error("Exception caught during export to CSV", e);
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + messageFilterCsvServiceImpl.getCsvFilename("messagefilter"))
+                .body(resultText);
     }
 }

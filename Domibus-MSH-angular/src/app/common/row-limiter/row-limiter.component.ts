@@ -6,7 +6,6 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
   styleUrls: ['./row-limiter.component.css']
 })
 export class RowLimiterComponent implements OnInit {
-
   @Input()
   pageSizes: Array<any>;
 
@@ -24,7 +23,6 @@ export class RowLimiterComponent implements OnInit {
 
   changePageSize(newPageLimit:number) {
     this.onPageSizeChanged.emit(newPageLimit);
-    console.log('New page limit:', newPageLimit);
   }
 
 }

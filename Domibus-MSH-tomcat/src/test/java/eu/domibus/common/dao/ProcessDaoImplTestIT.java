@@ -4,13 +4,13 @@ import eu.domibus.AbstractIT;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.plugin.BackendConnector;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -26,13 +26,13 @@ import static org.junit.Assert.assertNull;
  * @since 3.3
  * Testing class for ProcessDao
  */
-@ContextConfiguration("classpath:pmode-dao.xml")
 public class ProcessDaoImplTestIT extends AbstractIT{
+
     @Autowired
-    private PModeDao pModeDao;
+    private PModeProvider pmodeDao;
+
     @Autowired
     private ProcessDao processDao;
-
 
     @Test
     @Transactional
@@ -52,7 +52,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     @Rollback
     public void findPullByInitiator() throws Exception {
         loadBluePullPmodeFile();
-        Party party = pModeDao.getReceiverParty(":red_gw");
+        Party party = pmodeDao.getReceiverParty(":red_gw");
         List<Process> pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
         assertEquals(1, pullProcessesByInitiator.size());
 
@@ -64,7 +64,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
 
     private void loadBluePullPmodeFile() throws XmlProcessingException, IOException, URISyntaxException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-blue-pull.xml");
-        pModeDao.updatePModes(IOUtils.toByteArray(inputStream));
+        pmodeDao.updatePModes(IOUtils.toByteArray(inputStream), "description");
 
     }
 

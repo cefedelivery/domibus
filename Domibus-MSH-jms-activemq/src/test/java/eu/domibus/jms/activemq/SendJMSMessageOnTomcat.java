@@ -22,6 +22,9 @@ public class SendJMSMessageOnTomcat {
             MapMessage messageMap = session.createMapMessage();
 
             // Declare message as submit
+            messageMap.setStringProperty("username", "plugin_admin");
+            messageMap.setStringProperty("password", "123456");
+
             messageMap.setStringProperty("messageType", "submitMessage");
             messageMap.setStringProperty("messageId", UUID.randomUUID().toString());
             // Uncomment to test refToMessageId that is too long, i.e. > 255
@@ -59,12 +62,18 @@ public class SendJMSMessageOnTomcat {
             messageMap.setStringProperty("payload_1_description", "message");
             messageMap.setStringProperty("payload_1_mimeContentId", "cid:message");
             messageMap.setStringProperty("payload_1_mimeType", "text/xml");
-            //messageMap.setStringProperty("payload_1_fileName", "D:\\testJMS.txt");
+
             //messageMap.setStringProperty("p1InBody", "true"); // If true payload_1 will be sent in the body of the AS4 message. Only XML payloads may be sent in the AS4 message body. Optional
 
+            //send the payload in the JMS message as byte array
             String pay1 = "<test>test</test>";
             byte[] payload = pay1.getBytes();
             messageMap.setBytes("payload_1", payload);
+
+
+            //send the payload as a file system reference
+            //messageMap.setStringProperty("payload_1_fileName", "testJMS.txt");
+            //messageMap.setString("payload_1", "file:////C:/DEV/testJMS.txt");
 
             producer.send(messageMap);
 

@@ -58,7 +58,7 @@ public class CRLServiceImpl implements CRLService {
         }
 
         for (String crlDistributionPoint : crlDistributionPoints) {
-            if (crlUtil.isURLSupported(crlDistributionPoint)) {
+            if (CRLUrlType.isURLSupported(crlDistributionPoint)) {
                 result.add(crlDistributionPoint);
             } else {
                 LOG.debug("The protocol of the distribution endpoint is not supported: " + crlDistributionPoint);

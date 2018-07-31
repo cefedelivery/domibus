@@ -1,5 +1,8 @@
 package eu.domibus.web.rest.ro;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.Date;
 
 /**
@@ -13,6 +16,7 @@ public class TrustStoreRO {
     private String issuer;
     private Date validFrom;
     private Date validUntil;
+    private String fingerprints;
 
     public String getName() {
         return name;
@@ -52,5 +56,43 @@ public class TrustStoreRO {
 
     public void setValidUntil(Date validUntil) {
         this.validUntil = validUntil;
+    }
+
+    public String getFingerprints() {
+        return fingerprints;
+    }
+
+    public void setFingerprints(String fingerprints) {
+        this.fingerprints = fingerprints;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TrustStoreRO that = (TrustStoreRO) o;
+
+        return new EqualsBuilder()
+                .append(name, that.name)
+                .append(subject, that.subject)
+                .append(issuer, that.issuer)
+                .append(validFrom, that.validFrom)
+                .append(validUntil, that.validUntil)
+                .append(fingerprints, that.fingerprints)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(name)
+                .append(subject)
+                .append(issuer)
+                .append(validFrom)
+                .append(validUntil)
+                .append(fingerprints)
+                .toHashCode();
     }
 }

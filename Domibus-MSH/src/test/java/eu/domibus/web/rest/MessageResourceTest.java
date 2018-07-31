@@ -3,6 +3,7 @@ package eu.domibus.web.rest;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.services.AuditService;
 import eu.domibus.core.message.MessageConverterService;
 import eu.domibus.ebms3.common.model.*;
 import mockit.Expectations;
@@ -42,6 +43,9 @@ public class MessageResourceTest {
     @Injectable
     private UserMessageLogDao userMessageLogDao;
 
+    @Injectable
+    private AuditService auditService;
+
     private UserMessage createUserMessage() {
         UserMessage userMessage = new UserMessage();
         userMessage.setEntityId(1);
@@ -78,7 +82,6 @@ public class MessageResourceTest {
         Assert.assertEquals(2, responseEntity.getHeaders().size());
         Assert.assertEquals("application/octet-stream", responseEntity.getHeaders().get("Content-Type").get(0));
         Assert.assertEquals("attachment; filename=messageId.xml", responseEntity.getHeaders().get("content-disposition").get(0));
-        Assert.assertEquals("Byte array resource [resource loaded from byte array]", responseEntity.getBody().getDescription());
     }
 
     @Test
@@ -103,6 +106,5 @@ public class MessageResourceTest {
         Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         Assert.assertEquals("application/zip", responseEntity.getHeaders().get("Content-Type").get(0));
         Assert.assertEquals("attachment; filename=messageId.zip", responseEntity.getHeaders().get("content-disposition").get(0));
-        Assert.assertEquals("Byte array resource [resource loaded from byte array]", responseEntity.getBody().getDescription());
     }
 }

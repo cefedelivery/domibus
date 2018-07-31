@@ -23,6 +23,9 @@
     <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
     </bean>
+    <bean id="alertMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.alert.queue"/>
+    </bean>
     <bean id="notifyBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.queue"/>
     </bean>
@@ -39,24 +42,6 @@
     </bean>
     <bean id="domibusJDBC-nonXADataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jdbc/cipaeDeliveryNonXADs"/>
-    </bean>
-
-    <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
-        <constructor-arg name="props" ref="domibusProperties"/>
-        <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
-    </bean>
-    <bean id="entityManagerFactory" primary="true"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
-        <property name="persistenceUnitName" value="domibusJTA"/>
-        <property name="packagesToScan" value="#{'${domibus.entityManagerFactory.packagesToScan}'.split(',')}"/>
-        <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
-        <property name="jpaVendorAdapter">
-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                <property name="showSql" value="false"/>
-                <property name="generateDdl" value="false"/>
-            </bean>
-        </property>
-        <property name="jpaProperties" ref="jpaProperties"/>
     </bean>
 
     <bean id="internalDestinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
@@ -83,5 +68,15 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
+    </bean>
+    <bean id="alertJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="${domibus.alert.queue.concurrency}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+        <property name="destinationResolver" ref="internalDestinationResolver"/>
+        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
 </beans>

@@ -1,13 +1,9 @@
 package eu.domibus.common.model.logging;
 
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -15,6 +11,16 @@ import java.util.Properties;
  */
 @Service(value = "userMessageLogInfoFilter")
 public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
+
+    private static final String QUERY_BODY = " from UserMessageLog log, " +
+            "UserMessage message " +
+            "left join log.messageInfo info " +
+            "left join message.messageProperties.property propsFrom " +
+            "left join message.messageProperties.property propsTo " +
+            "left join message.partyInfo.from.partyId partyFrom " +
+            "left join message.partyInfo.to.partyId partyTo " +
+            "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
+            "and propsTo.name = 'finalRecipient'";
 
     public String filterUserMessageLogQuery(String column, boolean asc, Map<String, Object> filters) {
         String query = "select new eu.domibus.common.model.logging.MessageLogInfo(" +
@@ -35,7 +41,8 @@ public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
                 (isFourCornerModel() ? "propsTo.value," : "'',") +
                 "info.refToMessageId," +
                 "log.failed," +
-                "log.restored" +
+                "log.restored," +
+                "log.messageSubtype" +
                 ")" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();

@@ -1,7 +1,7 @@
 package eu.domibus.plugin.webService.impl;
 
-import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.services.AuthenticationService;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
+import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -9,11 +9,9 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Properties;
 
 @Component(value = "customAuthenticationInterceptor")
 public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
@@ -21,11 +19,7 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationInterceptor.class);
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
-
-    @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationExtService authenticationExtService;
 
     public CustomAuthenticationInterceptor() {
         super(Phase.PRE_PROTOCOL);
@@ -38,8 +32,8 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
         LOG.debug("Intercepted request for " + httpRequest.getPathInfo());
 
         try {
-            authenticationService.authenticate(httpRequest);
-        } catch (AuthenticationException e) {
+            authenticationExtService.authenticate(httpRequest);
+        } catch (AuthenticationExtException e) {
             throw new Fault(e);
         }
     }

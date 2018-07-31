@@ -1,6 +1,6 @@
 package eu.domibus.api.jms;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -13,15 +13,14 @@ import java.util.Map;
 public class JmsMessage {
 
     public static final String PROPERTY_ORIGINAL_QUEUE = "originalQueue";
-
+    // order of the fields is important for CSV generation
     protected String id;
     protected String type;
-    protected String content;
+    protected String jmsCorrelationId;
     protected Date timestamp;
-
-    protected Map<String, Object> properties = new HashMap<>();
-
+    protected String content;
     protected Map<String, Object> customProperties;
+    protected Map<String, Object> properties = new HashMap<>();
 
     public String getId() {
         return id;
@@ -63,6 +62,14 @@ public class JmsMessage {
         properties.put(name, value);
     }
 
+    public String getJmsCorrelationId() {
+        return jmsCorrelationId;
+    }
+
+    public void setJmsCorrelationId(String jmsCorrelationId) {
+        this.jmsCorrelationId = jmsCorrelationId;
+    }
+
     public Map<String, Object> getJMSProperties() {
         Map<String, Object> jmsProperties = new HashMap<>();
         for (String key : properties.keySet()) {
@@ -99,6 +106,10 @@ public class JmsMessage {
 
     public String getCustomStringProperty(String key) {
         return (String) getCustomProperties().get(key);
+    }
+
+    public void setCustomProperties(Map<String, Object> customProperties) {
+        this.customProperties = customProperties;
     }
 
     @Override

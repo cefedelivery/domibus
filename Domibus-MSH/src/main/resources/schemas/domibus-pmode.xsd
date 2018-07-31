@@ -108,6 +108,10 @@
                                         </xs:element>
                                     </xs:sequence>
                                 </xs:complexType>
+                                <xs:unique name="uniquePartyName">
+                                    <xs:selector xpath="party"/>
+                                    <xs:field xpath="@name"/>
+                                </xs:unique>
                             </xs:element>
                             <xs:element name="meps">
                                 <xs:complexType>

@@ -2,10 +2,10 @@ package eu.domibus.plugin.webService.impl;
 
 
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlTransient;
@@ -42,7 +42,6 @@ public class ExtendedPartInfo extends PartInfo {
 
     public ExtendedPartInfo(PartInfo partInfo) {
         this.setHref(partInfo.getHref());
-        this.setDescription(partInfo.getDescription());
         this.setPartProperties(partInfo.getPartProperties());
     }
 
@@ -102,7 +101,6 @@ public class ExtendedPartInfo extends PartInfo {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("Description", description);
         builder.append("HRef", href);
         builder.append("partProperties", partProperties.getProperty());
         builder.append("InBody", inBody);
@@ -121,7 +119,6 @@ public class ExtendedPartInfo extends PartInfo {
 
         return new EqualsBuilder()
                 .append(super.getHref(), that.getHref())
-                .append(super.getDescription(), that.getDescription())
                 .append(super.getPartProperties(), that.getPartProperties())
                 .isEquals();
     }
@@ -130,7 +127,6 @@ public class ExtendedPartInfo extends PartInfo {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(getHref())
-                .append(getDescription())
                 .append(getPartProperties())
                 .toHashCode();
     }

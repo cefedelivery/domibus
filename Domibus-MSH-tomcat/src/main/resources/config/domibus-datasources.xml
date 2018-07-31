@@ -1,5 +1,3 @@
-
-
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:amq="http://activemq.apache.org/schema/core"
        xmlns="http://www.springframework.org/schema/beans"
@@ -39,6 +37,8 @@
                physicalName="domibus.internal.dispatch.queue"/>
     <amq:queue id="pullMessageQueue"
                physicalName="domibus.internal.pull.queue"/>
+    <amq:queue id="alertMessageQueue"
+               physicalName="domibus.internal.alert.queue"/>
     <amq:queue id="notifyBackendQueue"
                physicalName="domibus.internal.notification.queue"/>
     <!-- I no backend with matching policy found notifcations are sent to this queue -->
@@ -47,58 +47,17 @@
     <amq:topic id="clusterCommandTopic"
                physicalName="domibus.internal.command"/>
 
-    <bean id="xaProperties" class="eu.domibus.spring.PrefixedProperties">
-        <constructor-arg name="props" ref="domibusProperties"/>
-        <constructor-arg name="prefix" value="domibus.datasource.xa.property."/>
-    </bean>
 
-    <bean id="domibusJDBC-XADataSource"
-          class="com.atomikos.jdbc.AtomikosDataSourceBean"
-          init-method="init" destroy-method="close">
-        <property name="uniqueResourceName">
-            <value>domibusJDBC-XA</value>
-        </property>
-        <property name="xaDataSourceClassName">
-            <value>${domibus.datasource.xa.xaDataSourceClassName}</value>
-        </property>
-        <property name="xaProperties" ref="xaProperties"/>
-        <property name="minPoolSize">
-            <value>${domibus.datasource.xa.minPoolSize}</value>
-        </property>
-        <property name="maxPoolSize">
-            <value>${domibus.datasource.xa.maxPoolSize}</value>
-        </property>
-        <property name="maxLifetime" value="${domibus.datasource.xa.maxLifetime}"/>
-    </bean>
     <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
-	   <property name="uniqueResourceName" value="domibusNonXADataSource"/>
-	   <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
-	   <property name="url" value="${domibus.datasource.url}"/>
-	   <property name="user" value="${domibus.datasource.user}"/>
-	   <property name="password" value="${domibus.datasource.password}"/>
-       <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
-       <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
-       <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
+        <property name="uniqueResourceName" value="domibusNonXADataSource"/>
+        <property name="driverClassName" value="${domibus.datasource.driverClassName}"/>
+        <property name="url" value="${domibus.datasource.url}"/>
+        <property name="user" value="${domibus.datasource.user}"/>
+        <property name="password" value="${domibus.datasource.password}"/>
+        <property name="minPoolSize" value="${domibus.datasource.minPoolSize}"/>
+        <property name="maxPoolSize" value=" ${domibus.datasource.maxPoolSize}"/>
+        <property name="maxLifetime" value="${domibus.datasource.maxLifetime}"/>
     </bean>
-
-     <bean id="jpaProperties" class="eu.domibus.spring.PrefixedProperties">
-        <constructor-arg name="props" ref="domibusProperties"/>
-        <constructor-arg name="prefix" value="domibus.entityManagerFactory.jpaProperty."/>
-    </bean>
-    <bean id="entityManagerFactory" primary="true"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="transactionManager">
-        <property name="persistenceUnitName" value="domibusJTA"/>
-        <property name="packagesToScan" value="#{'${domibus.entityManagerFactory.packagesToScan}'.split(',')}"/>
-        <property name="jtaDataSource" ref="domibusJDBC-XADataSource"/>
-        <property name="jpaVendorAdapter">
-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                <property name="showSql" value="false"/>
-                <property name="generateDdl" value="false"/>
-            </bean>
-        </property>
-        <property name="jpaProperties" ref="jpaProperties"/>
-    </bean>
-
 
     <bean id="internalJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
@@ -117,6 +76,16 @@
         <property name="concurrency" value="${domibus.pull.queue.concurency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
+    </bean>
+
+    <bean id="alertJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="${domibus.alert.queue.concurrency}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
 
 </beans>

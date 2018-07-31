@@ -1,21 +1,20 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This service class is responsible for the retention and clean up of Domibus messages, including signal messages.
@@ -33,13 +32,13 @@ public class MessageRetentionService {
     public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
     public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.max.delete";
     public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.max.delete";
+    public static final String DOMIBUS_ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
 
     @Autowired
     private CollectionUtil collectionUtil;
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -89,7 +88,7 @@ public class MessageRetentionService {
     protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
         LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
-        String fileLocation = domibusProperties.getProperty("domibus.attachment.storage.location");
+        String fileLocation = domibusPropertyProvider.getProperty(DOMIBUS_ATTACHMENT_STORAGE_LOCATION);
         // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
         if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
             List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
@@ -115,7 +114,7 @@ public class MessageRetentionService {
     }
 
     protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
-        final String propertyValueString = domibusProperties.getProperty(propertyName);
+        final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
         if (propertyValueString == null) {
             LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
             return defaultValue;

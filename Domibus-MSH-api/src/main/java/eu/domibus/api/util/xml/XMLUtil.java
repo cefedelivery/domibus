@@ -14,4 +14,7 @@ import java.io.InputStream;
 public interface XMLUtil {
 
     UnmarshallerResult unmarshal(boolean ignoreWhitespaces, JAXBContext jaxbContext, InputStream xmlStream, InputStream xsdStream) throws SAXException, JAXBException, ParserConfigurationException, XMLStreamException;
+
+    byte[] marshal(JAXBContext jaxbContext, Object input, InputStream xsdStream) throws SAXException, JAXBException, ParserConfigurationException, XMLStreamException;
+
 }

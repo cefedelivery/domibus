@@ -2,20 +2,17 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
-import eu.domibus.common.dao.*;
+import eu.domibus.common.dao.ErrorLogDao;
+import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.SignalMessageDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.logging.RawEnvelopeLog;
-import eu.domibus.common.model.logging.SignalMessageLogBuilder;
+import eu.domibus.core.message.SignalMessageLogDefaultService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.common.model.SignalMessage;
-import eu.domibus.util.SoapUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +20,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
 
 /**
  * @author Christian Koch, Stefan Mueller, Federico Martini
@@ -55,13 +46,13 @@ public class ResponseHandler {
     private SignalMessageDao signalMessageDao;
 
     @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Autowired
     private NonRepudiationService nonRepudiationService;
 
     @Autowired
     private MessagingDao messagingDao;
+
+    @Autowired
+    private SignalMessageLogDefaultService signalMessageLogDefaultService;
 
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
 
@@ -81,20 +72,19 @@ public class ResponseHandler {
         signalMessageDao.create(signalMessage);
         // Updating the reference to the signal message
         Messaging sentMessage = messagingDao.findMessageByMessageId(messaging.getSignalMessage().getMessageInfo().getRefToMessageId());
+        String userMessageService = null;
+        String userMessageAction = null;
         if (sentMessage != null) {
+            userMessageService = sentMessage.getUserMessage().getCollaborationInfo().getService().getValue();
+            userMessageAction = sentMessage.getUserMessage().getCollaborationInfo().getAction();
             sentMessage.setSignalMessage(signalMessage);
             messagingDao.update(sentMessage);
         }
         // Builds the signal message log
-        SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
-                .setMessageId(signalMessage.getMessageInfo().getMessageId())
-                .setMessageStatus(MessageStatus.RECEIVED)
-                .setMshRole(MSHRole.RECEIVING)
-                .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
-        // Saves an entry of the signal message log
-        signalMessageLogDao.create(smlBuilder.build());
+        signalMessageLogDefaultService.save(signalMessage.getMessageInfo().getMessageId(), userMessageService, userMessageAction);
+
         // Checks if the signal message is Ok
-        if (signalMessage.getError() == null || signalMessage.getError().size() == 0) {
+        if (signalMessage.getError() == null || signalMessage.getError().isEmpty()) {
             return CheckResult.OK;
         }
         return handleErrors(signalMessage);

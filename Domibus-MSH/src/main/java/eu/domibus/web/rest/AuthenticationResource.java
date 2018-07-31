@@ -1,9 +1,12 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.multitenancy.*;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
@@ -36,7 +39,16 @@ public class AuthenticationResource {
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 
     @Autowired
-    private AuthenticationService authenticationService;
+    protected AuthenticationService authenticationService;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected DomainCoreConverter domainCoreConverter;
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
@@ -44,14 +56,34 @@ public class AuthenticationResource {
         return new ErrorRO(ex.getMessage());
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({DomainException.class})
+    public ErrorRO handleDomainException(Exception ex) {
+        return new ErrorRO(ex.getMessage());
+    }
+
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)
     public UserRO authenticate(@RequestBody LoginRO loginRO, HttpServletResponse response) {
-        LOG.debug("Authenticating user [{}]", loginRO.getUsername());
-        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword());
-        if(principal.isDefaultPasswordUsed()){
-            LOG.warn(WarningUtil.warnOutput(principal.getUsername()+" is using default password."));
+
+        String domainCode = userDomainService.getDomainForUser(loginRO.getUsername());
+        LOG.debug("Determined domain [{}] for user [{}]", domainCode, loginRO.getUsername());
+
+        if (domainCode != null) {   //domain user
+            domainContextProvider.setCurrentDomain(domainCode);
+        } else {                    //ap user
+            domainContextProvider.clearCurrentDomain();
+            domainCode = userDomainService.getPreferredDomainForUser(loginRO.getUsername());
+            LOG.debug("Determined preferred domain [{}] for user [{}]", domainCode, loginRO.getUsername());
         }
+
+        LOG.debug("Authenticating user [{}]", loginRO.getUsername());
+        final UserDetail principal = authenticationService.authenticate(loginRO.getUsername(), loginRO.getPassword(), domainCode);
+        if (principal.isDefaultPasswordUsed()) {
+            LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
+        }
+
+        domainContextProvider.setCurrentDomain(domainCode);
 
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();
@@ -87,5 +119,26 @@ public class AuthenticationResource {
         return securityUser.getUsername();
     }
 
+    /**
+     * Retrieve the current domain of the current user (in multi-tenancy mode)
+     *
+     * @return the current domain
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.GET)
+    public DomainRO getCurrentDomain() {
+        LOG.debug("Getting current domain");
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
+        return domainCoreConverter.convert(domain, DomainRO.class);
+    }
+
+    /**
+     * Set the current domain of the current user (in multi-tenancy mode)
+     */
+    @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setCurrentDomain(@RequestBody String domainCode) {
+        LOG.debug("Setting current domain " + domainCode);
+        authenticationService.changeDomain(domainCode);
+    }
 
 }

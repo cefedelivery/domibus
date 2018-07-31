@@ -70,14 +70,11 @@
             </payloadProfile>
         </payloadProfiles>
         <securities>
-            <security name="eDeliveryPolicy"
-                      policy="eDeliveryPolicy.xml"
+            <security name="eDeliveryAS4Policy"
+                      policy="eDeliveryAS4Policy.xml"
                       signatureMethod="RSA_SHA256" />
             <security name="noSigNoEnc"
                       policy="doNothingPolicy.xml"
-                      signatureMethod="RSA_SHA256"/>
-            <security name="eSensPolicy"
-                      policy="eSensPolicy.v2.0.xml"
                       signatureMethod="RSA_SHA256"/>
         </securities>
         <errorHandlings>
@@ -112,7 +109,7 @@
                               action="tc1Action"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="eDeliveryPolicy"
+                              security="eDeliveryAS4Policy"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               payloadProfile="MessageProfile"
@@ -123,28 +120,18 @@
                               action="tc2Action"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="eSensPolicy"
+                              security="eDeliveryAS4Policy"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               payloadProfile="MessageProfile"
                               errorHandling="demoErrorHandling"
                               compressPayloads="true"/>
-            <legConfiguration name="pullLeg1"
-                              service="pullService"
-                              action="pullAction"
-                              defaultMpc="defaultMpc"
-                              reliability="noReliability"
-                              security="signOnly"
-                              receptionAwareness="receptionAwareness"
-                              propertySet="ecodexPropertySet"
-                              errorHandling="demoErrorHandling"
-                              compressPayloads="false"/>
             <legConfiguration name="pullLeg2"
                               service="pullService"
                               action="pullAction"
                               defaultMpc="defaultMpc"
                               reliability="noReliability"
-                              security="signAndEncrypt"
+                              security="eDeliveryAS4Policy"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"

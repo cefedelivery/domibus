@@ -8,6 +8,9 @@ import {MdDialog, MdDialogRef} from "@angular/material";
 import {TrustStoreUploadComponent} from "./truststore-upload/truststore-upload.component";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
+import {DownloadService} from "../download/download.service";
+import {AlertComponent} from "../alert/alert.component";
+import {AlertService} from "../alert/alert.service";
 
 @Component({
   selector: 'app-truststore',
@@ -29,7 +32,10 @@ export class TruststoreComponent implements OnInit {
 
   rows: Array<any> = [];
 
-  constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog) {
+  static readonly TRUSTSTORE_URL: string = "rest/truststore";
+  static readonly TRUSTSTORE_CSV_URL: string = TruststoreComponent.TRUSTSTORE_URL + "/csv";
+
+  constructor(private trustStoreService: TrustStoreService, public dialog: MdDialog, public alertService: AlertService) {
   }
 
   ngOnInit(): void {
@@ -65,6 +71,10 @@ export class TruststoreComponent implements OnInit {
       return ["Name", "Subject", "Issuer", "Valid from", "Valid until"].indexOf(col.name) != -1
     });
     this.getTrustStoreEntries();
+
+    if(this.trustStoreEntries.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error("Maximum number of rows reached for downloading CSV");
+    }
   }
 
   getTrustStoreEntries(): void {
@@ -101,5 +111,20 @@ export class TruststoreComponent implements OnInit {
     dialogRef.componentInstance.onTruststoreUploaded.subscribe(updated => {
         this.getTrustStoreEntries();
     });
+  }
+
+  /**
+   * Method that checks if CSV Button export can be enabled
+   * @returns {boolean} true, if button can be enabled; and false, otherwise
+   */
+  isSaveAsCSVButtonEnabled() : boolean {
+    return this.rows.length < AlertComponent.MAX_COUNT_CSV;
+  }
+
+  /**
+   * Saves the content of the datatable into a CSV file
+   */
+  saveAsCSV() {
+    DownloadService.downloadNative(TruststoreComponent.TRUSTSTORE_CSV_URL);
   }
 }

@@ -8,19 +8,13 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-default-ws-plugin</artifactId>
     <packaging>jar</packaging>
     <name>Domibus MSH Default WS Plugin</name>
 
     <dependencies>
-        <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ext-services-api</artifactId>
-            <version>${domibus-ext-services-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
@@ -48,8 +42,8 @@
             <artifactId>domibus-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -126,6 +120,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

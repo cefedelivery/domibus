@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
@@ -16,7 +17,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -24,7 +25,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.PolicyService;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,9 @@ public class MessageSender implements MessageListener {
 
     @Autowired
     UserMessageLogDao userMessageLogDao;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
 
     private void sendUserMessage(final String messageId) {
@@ -200,7 +204,7 @@ public class MessageSender implements MessageListener {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
@@ -208,6 +212,9 @@ public class MessageSender implements MessageListener {
         String messageId = null;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
+            LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
+            domainContextProvider.setCurrentDomain(domainCode);
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageId);
             delay = message.getLongProperty(MessageConstants.DELAY);
             if (delay > 0) {

@@ -2,9 +2,9 @@
 <db:configuration xmlns:db="http://domibus.eu/configuration" party="blue_gw">
 	<mpcs>
 		<mpc name="defaultMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="600"/>
-		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
-		<mpc name="brisMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
-		<mpc name="brisMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull2" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="2"/>
+		<mpc name="brisMpc" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMPC" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
+		<mpc name="brisMpcPull1" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull1" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
+		<mpc name="brisMpcPull2" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/brisMpcPull2" enabled="true" default="true" retention_downloaded="0" retention_undownloaded="4"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -51,7 +51,7 @@
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
@@ -78,9 +78,9 @@
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action" defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase50tc10Action" service="testService50" action="tc50Action" defaultMpc="brisMpcPull1" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase51tc11Action" service="testService51" action="tc51Action" defaultMpc="brisMpcPull2" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action" defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase50tc10Action" service="testService50" action="tc50Action" defaultMpc="brisMpcPull1" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase51tc11Action" service="testService51" action="tc51Action" defaultMpc="brisMpcPull2" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>

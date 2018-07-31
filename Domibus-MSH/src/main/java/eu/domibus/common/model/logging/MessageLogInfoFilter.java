@@ -33,6 +33,7 @@ public class MessageLogInfoFilter {
     private static final String MESSAGE_COLLABORATION_INFO_CONVERSATION_ID = "message.collaborationInfo.conversationId";
     private static final String LOG_FAILED = "log.failed";
     private static final String LOG_RESTORED = "log.restored";
+    private static final String LOG_MESSAGE_SUBTYPE = "log.messageSubtype";
 
     @Autowired
     @Qualifier("domibusProperties")
@@ -76,6 +77,8 @@ public class MessageLogInfoFilter {
                 return LOG_FAILED;
             case "restored":
                 return LOG_RESTORED;
+            case "messageSubtype":
+                return LOG_MESSAGE_SUBTYPE;
             default:
                 return "";
         }
@@ -116,6 +119,12 @@ public class MessageLogInfoFilter {
                         result.append(LOG_RECEIVED).append(" <= :").append(filter.getKey());
                     }
                 }
+            }
+        } else {
+            if(filter.getKey().equals("messageSubtype")) {
+                result.append(" and ");
+                String tableName = getHQLKey(filter.getKey());
+                result.append(tableName).append(" is null");
             }
         }
     }

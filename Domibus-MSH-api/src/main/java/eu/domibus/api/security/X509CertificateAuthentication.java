@@ -1,6 +1,6 @@
 package eu.domibus.api.security;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -21,6 +21,10 @@ public class X509CertificateAuthentication implements Authentication {
     public X509CertificateAuthentication(final X509Certificate[] certificates) {
         this.certificates = certificates;
         this.certificateId = calculateCertificateId(getCertificate(certificates));
+    }
+
+    public String getCertificateId() {
+        return certificateId;
     }
 
     public String getOriginalUser() {
@@ -70,7 +74,7 @@ public class X509CertificateAuthentication implements Authentication {
         return certificateId;
     }
 
-    private X509Certificate getCertificate(final X509Certificate[] requestCerts) {
+    protected X509Certificate getCertificate(final X509Certificate[] requestCerts) {
         if (requestCerts == null || requestCerts.length == 0) {
             // Empty array
             return null;
@@ -107,7 +111,7 @@ public class X509CertificateAuthentication implements Authentication {
         return nonIssuerCert;
     }
 
-    private String calculateCertificateId(final X509Certificate cert) {
+    protected String calculateCertificateId(final X509Certificate cert) {
         if(cert == null) {
             throw new IllegalArgumentException("Certificate is null");
         }

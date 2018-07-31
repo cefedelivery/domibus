@@ -51,11 +51,12 @@
         <class>eu.domibus.plugin.webService.entity.AuthenticationEntry</class>
 
         <properties>
-            <property name="hibernate.transaction.manager_lookup_class"
-                      value="com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup"/>
+
+            <property name="hibernate.transaction.jta.platform"
+                      value="com.atomikos.icatch.jta.hibernate4.AtomikosPlatform"/>
             <property name="hibernate.archive.autodetection" value="class"/>
             <property name="hibernate.ConnectionReleaseMode" value="after_statement"/>
-            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <!--<property name="hibernate.hbm2ddl.auto" value="create-drop"/>-->
             <!--<property name="hibernate.hbm2ddl.import_files" value="database/quartz.sql, database/sendMessageDataset.sql"/>-->
             <property name="hibernate.hbm2ddl.import_files" value="dataset/database/quartz.sql"/>
         </properties>

@@ -1,22 +1,22 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.util.WarningUtil;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.Properties;
+import java.util.List;
 
 /**
  * Created by idragusa on 4/14/16.
@@ -27,52 +27,65 @@ public class GatewayConfigurationValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(GatewayConfigurationValidator.class);
 
     private static final String BLUE_GW_ALIAS = "blue_gw";
-
-    @Resource(name = "trustStoreProperties")
-    private Properties trustStoreProperties;
+    private static final String DOMIBUS_PROPERTIES_SHA256 = "domibus.properties.sha256";
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
+    @Autowired
+    protected DomainService domainService;
+
+    @Autowired
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
     @PostConstruct
     public void validateConfiguration() {
         LOG.info("Checking gateway configuration ...");
-        validateCerts();
+        validateCertificates();
 
         try {
-            try (BufferedReader br = new BufferedReader((new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("domibus.properties.sha256"))));) {
+            final InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(DOMIBUS_PROPERTIES_SHA256);
+            if(resourceAsStream == null) {
+                WarningUtil.warnOutput("Could not verify the configuration file hash [" + DOMIBUS_PROPERTIES_SHA256 + "]");
+                return;
+            }
+            try (BufferedReader br = new BufferedReader((new InputStreamReader(resourceAsStream)))) {
                 validateFileHash("domibus.properties", br.readLine());
             }
         } catch (Exception e) {
-            LOG.warn("Could not verify the configuration files hash", e);
+            LOG.warn("Could not verify the configuration file hash", e);
         }
 
     }
 
-    private void validateCerts() {
-        final KeyStore ks;
+    protected void validateCertificates() {
+        final List<Domain> domains = domainService.getDomains();
+        for (Domain domain : domains) {
+            validateCerts(domain);
+        }
+
+    }
+
+    private void validateCerts(Domain domain) {
+        KeyStore trustStore = null;
         try {
-            ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        } catch (KeyStoreException e) {
-            LOG.warn("Failed to get keystore instance! " + e.getMessage());
+            trustStore = multiDomainCertificateProvider.getTrustStore(domain);
+        } catch (Exception e) {
+            LOG.warn("Failed to load certificates for domain [{}]! : [{}]", domain.getCode(), e.getMessage());
+            warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
+        }
+        if(trustStore == null) {
+            LOG.warn("Failed to load certificates for domain [{}]", domain.getCode());
             return;
         }
 
-        try (FileInputStream fileInputStream = new FileInputStream(trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.file"))) {
-            ks.load(fileInputStream, trustStoreProperties.getProperty("org.apache.ws.security.crypto.merlin.trustStore.password").toCharArray());
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-            LOG.warn("Failed to load certificates! " + e.getMessage());
-            warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
-        }
-
         try {
-            if (ks.containsAlias(BLUE_GW_ALIAS)) {
-                warnOutput("SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
+            if (trustStore.containsAlias(BLUE_GW_ALIAS)) {
+                warnOutput(domain,"SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
             }
-
         } catch (KeyStoreException e) {
             LOG.warn("Failed to load certificates! " + e.getMessage());
-            warnOutput("CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
+            warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
     }
 
@@ -93,6 +106,10 @@ public class GatewayConfigurationValidator {
 
     private void warnOutput(String message) {
         LOG.warn(WarningUtil.warnOutput(message));
+    }
+
+    private void warnOutput(Domain domain, String message) {
+        LOG.warn(WarningUtil.warnOutput("Domain [" + domain.getCode() + "]:" + message));
     }
 
 }

@@ -2,7 +2,6 @@ package eu.domibus.common.util;
 
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -28,9 +27,10 @@ public class DomibusPropertiesService {
 
     public void init() {
         try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream("domibus.properties");
+            InputStream is = getClass().getClassLoader().getResourceAsStream("config/application.properties");
             if (is == null) {
                 LOG.warn("The 'domibus.properties' has not been found!");
+                return;
             }
             domibusProps.load(is);
             LOG.info("=========================================================================================================");
@@ -63,5 +63,4 @@ public class DomibusPropertiesService {
         display.append("]");
         return display.toString();
     }
-
 }

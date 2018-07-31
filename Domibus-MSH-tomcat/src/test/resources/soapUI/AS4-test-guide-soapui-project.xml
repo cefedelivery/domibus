@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="AS4_test_guide" resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl"><con:part><con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
+<con:soapui-project id="1c29d1fb-f8ae-4ddb-ac43-1469a15001ec" activeEnvironment="Default" name="AS4_test_guide" resourceRoot="" soapui-version="5.2.1" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="9581111c-248c-4085-bf9f-dc452577042f" wsaVersion="NONE" name="BackendService_1_1SoapBinding" type="wsdl" bindingName="{http://org.ecodex.backend/1_1/}BackendService_1_1SoapBinding" soapVersion="1_2" anonymous="optional" definition="http://localhost:8080/domibus/services/backend?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8080/domibus/services/backend?wsdl"><con:part><con:url>http://localhost:8080/domibus/services/backend?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="BackendService_1_1" targetNamespace="http://org.ecodex.backend/1_1/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://org.ecodex.backend/1_1/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns2="http://schemas.xmlsoap.org/soap/http" xmlns:ns1="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
   <wsdl:types>
     <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:tns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
       <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -146,23 +146,6 @@
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="downloadMessageRequest">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="messageID" nillable="true" type="tns:max255-non-empty-string"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="downloadMessageResponse">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
-            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:PayloadType"/>
-            <xsd:any minOccurs="0"/>
-            <!--Introduced to support validation and MTOM/XOP-->
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
       <xsd:element name="retrieveMessageRequest">
         <xsd:complexType>
           <xsd:sequence>
@@ -175,8 +158,6 @@
           <xsd:sequence>
             <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
             <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" type="tns:LargePayloadType"/>
-            <xsd:any minOccurs="0"/>
-            <!--Introduced to support validation and MTOM/XOP-->
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
@@ -202,14 +183,6 @@
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="sendRequest">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadType"/>
-            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadType"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
       <xsd:element name="submitRequest">
         <xsd:complexType>
           <xsd:sequence>
@@ -219,21 +192,6 @@
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="submitResponse">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xsd:string"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="sendRequestURL">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element minOccurs="0" name="bodyload" type="tns:PayloadURLType"/>
-            <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:PayloadURLType"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="sendResponse">
         <xsd:complexType>
           <xsd:sequence>
             <xsd:element maxOccurs="unbounded" minOccurs="0" name="messageID" nillable="true" type="xsd:string"/>
@@ -274,6 +232,8 @@
       <xsd:simpleType name="messageStatus">
         <xsd:restriction base="xsd:string">
           <xsd:enumeration value="READY_TO_SEND"/>
+          <xsd:enumeration value="READY_TO_PULL"/>
+          <xsd:enumeration value="BEING_PULLED"/>
           <xsd:enumeration value="SEND_ENQUEUED"/>
           <xsd:enumeration value="SEND_IN_PROGRESS"/>
           <xsd:enumeration value="WAITING_FOR_RECEIPT"/>
@@ -361,7 +321,6 @@
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="getMessageStatusResponse" nillable="true" type="tns:messageStatus"/>
       <xsd:element name="getStatusResponse" nillable="true" type="tns:messageStatus"/>
       <xsd:element name="getErrorsRequest" nillable="true">
         <xsd:complexType>
@@ -530,93 +489,48 @@
       </xs:complexType>
     </xs:schema>
   </wsdl:types>
-  <wsdl:message name="downloadMessage">
-    <wsdl:part element="tns:downloadMessageRequest" name="downloadMessageRequest"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="DownloadMessageFault">
-    <wsdl:part element="tns:FaultDetail" name="DownloadMessageFault"></wsdl:part>
+  <wsdl:message name="getStatusResponse">
+    <wsdl:part element="tns:getStatusResponse" name="getStatusResponse"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="listPendingMessagesResponse">
     <wsdl:part element="tns:listPendingMessagesResponse" name="listPendingMessagesResponse"></wsdl:part>
   </wsdl:message>
-  <wsdl:message name="getStatusResponse">
-    <wsdl:part element="tns:getStatusResponse" name="getStatusResponse"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="getStatus">
-    <wsdl:part element="tns:statusRequest" name="statusRequest"></wsdl:part>
+  <wsdl:message name="getMessageErrorsResponse">
+    <wsdl:part element="tns:getMessageErrorsResponse" name="getMessageErrorsResponse"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="submitMessageResponse">
     <wsdl:part element="tns:submitResponse" name="submitResponse"></wsdl:part>
   </wsdl:message>
+  <wsdl:message name="RetrieveMessageFault">
+    <wsdl:part element="tns:FaultDetail" name="RetrieveMessageFault"></wsdl:part>
+  </wsdl:message>
   <wsdl:message name="getMessageErrors">
     <wsdl:part element="tns:getErrorsRequest" name="getErrorsRequest"></wsdl:part>
   </wsdl:message>
-  <wsdl:message name="getMessageStatusResponse">
-    <wsdl:part element="tns:getMessageStatusResponse" name="getMessageStatusResponse"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="downloadMessageResponse">
-    <wsdl:part element="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:part>
-    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
+  <wsdl:message name="getStatus">
+    <wsdl:part element="tns:statusRequest" name="statusRequest"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="listPendingMessages">
     <wsdl:part element="tns:listPendingMessagesRequest" name="listPendingMessagesRequest"></wsdl:part>
   </wsdl:message>
-  <wsdl:message name="retrieveMessage">
-    <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest"></wsdl:part>
+  <wsdl:message name="SubmitMessageFault">
+    <wsdl:part element="tns:FaultDetail" name="SubmitMessageFault"></wsdl:part>
   </wsdl:message>
-  <wsdl:message name="getMessageStatus">
-    <wsdl:part element="tns:getStatusRequest" name="getStatusRequest"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="sendMessageResponse">
-    <wsdl:part element="tns:sendResponse" name="sendResponse"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="retrieveMessageResponse">
-    <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:part>
-    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="sendMessage">
-    <wsdl:part element="tns:sendRequest" name="sendRequest"></wsdl:part>
-    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="SendMessageFault">
-    <wsdl:part element="tns:FaultDetail" name="SendMessageFault"></wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="getMessageErrorsResponse">
-    <wsdl:part element="tns:getMessageErrorsResponse" name="getMessageErrorsResponse"></wsdl:part>
+  <wsdl:message name="StatusFault">
+    <wsdl:part element="tns:FaultDetail" name="StatusFault"></wsdl:part>
   </wsdl:message>
   <wsdl:message name="submitMessage">
     <wsdl:part element="tns:submitRequest" name="submitRequest"></wsdl:part>
     <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
   </wsdl:message>
+  <wsdl:message name="retrieveMessage">
+    <wsdl:part element="tns:retrieveMessageRequest" name="retrieveMessageRequest"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="retrieveMessageResponse">
+    <wsdl:part element="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:part>
+    <wsdl:part element="ns1:Messaging" name="ebMSHeaderInfo"></wsdl:part>
+  </wsdl:message>
   <wsdl:portType name="BackendInterface">
-    <wsdl:operation name="sendMessage">
-      <wsdl:input message="tns:sendMessage" name="sendMessage"></wsdl:input>
-      <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse"></wsdl:output>
-      <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault"></wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="retrieveMessage" parameterOrder="retrieveMessageRequest retrieveMessageResponse ebMSHeaderInfo">
-      <wsdl:input message="tns:retrieveMessage" name="retrieveMessage"></wsdl:input>
-      <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:output>
-      <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault"></wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getMessageStatus">
-      <wsdl:input message="tns:getMessageStatus" name="getMessageStatus"></wsdl:input>
-      <wsdl:output message="tns:getMessageStatusResponse" name="getMessageStatusResponse"></wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="submitMessage">
-      <wsdl:input message="tns:submitMessage" name="submitMessage"></wsdl:input>
-      <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse"></wsdl:output>
-      <wsdl:fault message="tns:SendMessageFault" name="SendMessageFault"></wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="downloadMessage" parameterOrder="downloadMessageRequest downloadMessageResponse ebMSHeaderInfo">
-      <wsdl:input message="tns:downloadMessage" name="downloadMessage"></wsdl:input>
-      <wsdl:output message="tns:downloadMessageResponse" name="downloadMessageResponse"></wsdl:output>
-      <wsdl:fault message="tns:DownloadMessageFault" name="DownloadMessageFault"></wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getStatus">
-      <wsdl:input message="tns:getStatus" name="getStatus"></wsdl:input>
-      <wsdl:output message="tns:getStatusResponse" name="getStatusResponse"></wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="listPendingMessages">
       <wsdl:input message="tns:listPendingMessages" name="listPendingMessages"></wsdl:input>
       <wsdl:output message="tns:listPendingMessagesResponse" name="listPendingMessagesResponse"></wsdl:output>
@@ -625,76 +539,30 @@
       <wsdl:input message="tns:getMessageErrors" name="getMessageErrors"></wsdl:input>
       <wsdl:output message="tns:getMessageErrorsResponse" name="getMessageErrorsResponse"></wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="getStatus">
+      <wsdl:input message="tns:getStatus" name="getStatus"></wsdl:input>
+      <wsdl:output message="tns:getStatusResponse" name="getStatusResponse"></wsdl:output>
+      <wsdl:fault message="tns:StatusFault" name="StatusFault"></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="submitMessage">
+      <wsdl:input message="tns:submitMessage" name="submitMessage"></wsdl:input>
+      <wsdl:output message="tns:submitMessageResponse" name="submitMessageResponse"></wsdl:output>
+      <wsdl:fault message="tns:SubmitMessageFault" name="SubmitMessageFault"></wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="retrieveMessage" parameterOrder="retrieveMessageRequest retrieveMessageResponse ebMSHeaderInfo">
+      <wsdl:input message="tns:retrieveMessage" name="retrieveMessage"></wsdl:input>
+      <wsdl:output message="tns:retrieveMessageResponse" name="retrieveMessageResponse"></wsdl:output>
+      <wsdl:fault message="tns:RetrieveMessageFault" name="RetrieveMessageFault"></wsdl:fault>
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="BackendService_1_1SoapBinding" type="tns:BackendInterface">
     <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="sendMessage">
+    <wsdl:operation name="listPendingMessages">
       <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="sendMessage">
-        <soap12:header message="tns:sendMessage" part="ebMSHeaderInfo" use="literal"></soap12:header>
-        <soap12:body parts="sendRequest" use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="sendMessageResponse">
-        <soap12:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SendMessageFault">
-        <soap12:fault name="SendMessageFault" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="retrieveMessage">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="retrieveMessage">
+      <wsdl:input name="listPendingMessages">
         <soap12:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="retrieveMessageResponse">
-        <soap12:header message="tns:retrieveMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
-        <soap12:body parts="retrieveMessageResponse" use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="DownloadMessageFault">
-        <soap12:fault name="DownloadMessageFault" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getMessageStatus">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="getMessageStatus">
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getMessageStatusResponse">
-        <soap12:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="submitMessage">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="submitMessage">
-        <soap12:header message="tns:submitMessage" part="ebMSHeaderInfo" use="literal"></soap12:header>
-        <soap12:body parts="submitRequest" use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="submitMessageResponse">
-        <soap12:body use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="SendMessageFault">
-        <soap12:fault name="SendMessageFault" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="downloadMessage">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="downloadMessage">
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="downloadMessageResponse">
-        <soap12:header message="tns:downloadMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
-        <soap12:body parts="downloadMessageResponse" use="literal"/>
-      </wsdl:output>
-      <wsdl:fault name="DownloadMessageFault">
-        <soap12:fault name="DownloadMessageFault" use="literal"/>
-      </wsdl:fault>
-    </wsdl:operation>
-    <wsdl:operation name="getStatus">
-      <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="getStatus">
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="getStatusResponse">
+      <wsdl:output name="listPendingMessagesResponse">
         <soap12:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
@@ -707,14 +575,43 @@
         <soap12:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="listPendingMessages">
+    <wsdl:operation name="getStatus">
       <soap12:operation soapAction="" style="document"/>
-      <wsdl:input name="listPendingMessages">
+      <wsdl:input name="getStatus">
         <soap12:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="listPendingMessagesResponse">
+      <wsdl:output name="getStatusResponse">
         <soap12:body use="literal"/>
       </wsdl:output>
+      <wsdl:fault name="StatusFault">
+        <soap12:fault name="StatusFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="submitMessage">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="submitMessage">
+        <soap12:header message="tns:submitMessage" part="ebMSHeaderInfo" use="literal"></soap12:header>
+        <soap12:body parts="submitRequest" use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="submitMessageResponse">
+        <soap12:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="SubmitMessageFault">
+        <soap12:fault name="SubmitMessageFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="retrieveMessage">
+      <soap12:operation soapAction="" style="document"/>
+      <wsdl:input name="retrieveMessage">
+        <soap12:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="retrieveMessageResponse">
+        <soap12:header message="tns:retrieveMessageResponse" part="ebMSHeaderInfo" use="literal"></soap12:header>
+        <soap12:body parts="retrieveMessageResponse" use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="RetrieveMessageFault">
+        <soap12:fault name="RetrieveMessageFault" use="literal"/>
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="BackendService_1_1">
@@ -722,102 +619,19 @@
       <soap12:address location="http://localhost:8080/domibus/services/backend"/>
     </wsdl:port>
   </wsdl:service>
-</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="dc567009-e72d-4167-9ec7-fe2ac1738684" isOneWay="false" action="" name="downloadMessage" bindingOperationName="downloadMessage" type="Request-Response" outputName="downloadMessageResponse" inputName="downloadMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="f79dd490-a71e-4359-99f7-c6616b25435c" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
-   <soap:Header/>
-   <soap:Body>
-      <_1:downloadMessageRequest>
-         <messageID>?</messageID>
-      </_1:downloadMessageRequest>
-   </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/downloadMessage"/></con:call></con:operation><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="65a67b0b-cbe6-414b-8fa0-f0c64c3dd412" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint></con:endpoints><con:operation id="767cb481-8b7d-45ef-957f-e823696a27be" isOneWay="false" action="" name="getMessageErrors" bindingOperationName="getMessageErrors" type="Request-Response" outputName="getMessageErrorsResponse" inputName="getMessageErrors" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="65a67b0b-cbe6-414b-8fa0-f0c64c3dd412" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:getErrorsRequest>
          <messageID>?</messageID>
       </_1:getErrorsRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:call></con:operation><con:operation id="95ae55fb-b5a3-4575-94c9-44c3dedf1981" isOneWay="false" action="" name="getMessageStatus" bindingOperationName="getMessageStatus" type="Request-Response" outputName="getMessageStatusResponse" inputName="getMessageStatus" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd4d9cef-769e-424a-ba1b-22e2e982cb8b" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
-   <soap:Header/>
-   <soap:Body>
-      <_1:getStatusRequest>
-         <messageID>?</messageID>
-      </_1:getStatusRequest>
-   </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getStatus"/></con:call></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd300cdb-a4e4-45f0-826d-4423845d0442" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/getMessageErrors"/></con:call></con:operation><con:operation id="f3563058-db2b-4135-a5e0-ddcfb8386683" isOneWay="false" action="" name="listPendingMessages" bindingOperationName="listPendingMessages" type="Request-Response" outputName="listPendingMessagesResponse" inputName="listPendingMessages" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="dd300cdb-a4e4-45f0-826d-4423845d0442" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:listPendingMessagesRequest>?</_1:listPendingMessagesRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/listPendingMessages"/></con:call></con:operation><con:operation id="3fe9115c-da9f-495b-90c5-4efabf0c9fa2" isOneWay="false" action="" name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" outputName="sendMessageResponse" inputName="sendMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="33a213a1-8ed7-40b6-8e7b-55be4723092d" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/" xmlns:xm="http://www.w3.org/2005/05/xmlmime">
-   <soap:Header>
-      <ns:Messaging mustUnderstand="?">
-         <!--Optional:-->
-         <ns:UserMessage mpc="?">
-            <!--You may enter the following 5 items in any order-->
-            <!--Optional:-->
-            <ns:MessageInfo>
-               <!--You may enter the following 3 items in any order-->
-               <!--Optional:-->
-               <ns:Timestamp>?</ns:Timestamp>
-               <!--Optional:-->
-               <ns:MessageId>?</ns:MessageId>
-               <!--Optional:-->
-               <ns:RefToMessageId>?</ns:RefToMessageId>
-            </ns:MessageInfo>
-            <ns:PartyInfo>
-               <!--You may enter the following 2 items in any order-->
-               <ns:From>
-                  <!--You may enter the following 2 items in any order-->
-                  <ns:PartyId type="?">?</ns:PartyId>
-                  <ns:Role>?</ns:Role>
-               </ns:From>
-               <!--Optional:-->
-               <ns:To>
-                  <!--You may enter the following 2 items in any order-->
-                  <ns:PartyId type="?">?</ns:PartyId>
-                  <ns:Role>?</ns:Role>
-               </ns:To>
-            </ns:PartyInfo>
-            <ns:CollaborationInfo>
-               <!--You may enter the following 4 items in any order-->
-               <!--Optional:-->
-               <ns:AgreementRef type="?" pmode="?">?</ns:AgreementRef>
-               <ns:Service type="?">?</ns:Service>
-               <ns:Action>?</ns:Action>
-               <!--Optional:-->
-               <ns:ConversationId>?</ns:ConversationId>
-            </ns:CollaborationInfo>
-            <ns:MessageProperties>
-               <!--1 or more repetitions:-->
-               <ns:Property name="?" type="?">?</ns:Property>
-            </ns:MessageProperties>
-            <ns:PayloadInfo>
-               <!--1 or more repetitions:-->
-               <ns:PartInfo href="?">
-                  <!--You may enter the following 3 items in any order-->
-                  <!--Optional:-->
-                  <ns:Schema location="?" version="?" namespace="?"/>
-                  <!--Optional:-->
-                  <ns:Description xml:lang="?">?</ns:Description>
-                  <!--Optional:-->
-                  <ns:PartProperties>
-                     <!--1 or more repetitions:-->
-                     <ns:Property name="?" type="?">?</ns:Property>
-                  </ns:PartProperties>
-               </ns:PartInfo>
-            </ns:PayloadInfo>
-         </ns:UserMessage>
-      </ns:Messaging>
-   </soap:Header>
-   <soap:Body>
-      <_1:sendRequest>
-         <!--Optional:-->
-         <bodyload xm:contentType="application/?" payloadId="?">cid:920080530403</bodyload>
-         <!--Zero or more repetitions:-->
-         <payload xm:contentType="application/?" payloadId="?">cid:382424662608</payload>
-      </_1:sendRequest>
-   </soap:Body>
-</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/sendMessage"/></con:call></con:operation><con:operation id="f9f04f32-d5af-4626-9463-548abb965805" isOneWay="false" action="" name="retrieveMessage" bindingOperationName="retrieveMessage" type="Request-Response" outputName="retrieveMessageResponse" inputName="retrieveMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="16743867-c9ea-440b-871a-80219f76ccce" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
+</soap:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/listPendingMessages"/></con:call></con:operation><con:operation id="f9f04f32-d5af-4626-9463-548abb965805" isOneWay="false" action="" name="retrieveMessage" bindingOperationName="retrieveMessage" type="Request-Response" outputName="retrieveMessageResponse" inputName="retrieveMessage" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="16743867-c9ea-440b-871a-80219f76ccce" name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8080/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header/>
    <soap:Body>
       <_1:retrieveMessageRequest>
@@ -870,11 +684,6 @@
             <ns:PayloadInfo>
                <!--1 or more repetitions:-->
                <ns:PartInfo href="?">
-                  <!--You may enter the following 3 items in any order-->
-                  <!--Optional:-->
-                  <ns:Schema location="?" version="?" namespace="?"/>
-                  <!--Optional:-->
-                  <ns:Description xml:lang="?">?</ns:Description>
                   <!--Optional:-->
                   <ns:PartProperties>
                      <!--1 or more repetitions:-->
@@ -1012,7 +821,7 @@
          <con:properties>
             <con:property>
                <con:name>MessageID</con:name>
-               <con:value>b07cba77-931f-4166-88f5-789098feeb4e@domibus.eu</con:value>
+               <con:value>42085478-d735-4d20-aaba-1a671cf70eb4@domibus.eu</con:value>
             </con:property>
          </con:properties>
       </con:config>

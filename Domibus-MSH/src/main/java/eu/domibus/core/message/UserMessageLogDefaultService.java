@@ -7,6 +7,8 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.model.logging.UserMessageLogBuilder;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
+import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,11 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     @Autowired
     BackendNotificationService backendNotificationService;
 
-    @Override
-    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint) {
+    private UserMessageLog createUserMessageLog(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint) {
         // Builds the user message log
-        final MessageStatus status = MessageStatus.valueOf(messageStatus);
         UserMessageLogBuilder umlBuilder = UserMessageLogBuilder.create()
                 .setMessageId(messageId)
+                .setMessageStatus(MessageStatus.valueOf(messageStatus))
                 .setMshRole(MSHRole.valueOf(mshRole))
                 .setNotificationStatus(NotificationStatus.valueOf(notificationStatus))
                 .setMpc(mpc)
@@ -40,12 +41,38 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
                 .setBackendName(backendName)
                 .setEndpoint(endpoint);
 
-        final UserMessageLog userMessageLog = umlBuilder.build();
+        return umlBuilder.build();
+    }
+
+    @Override
+    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint) {
+        final MessageStatus status = MessageStatus.valueOf(messageStatus);
+        // Builds the user message log
+        final UserMessageLog userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
+
         //we set the status after we send the status change event; otherwise the old status and the new status would be the same
         userMessageLog.setMessageStatus(status);
         userMessageLogDao.create(userMessageLog);
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
+    }
 
+    @Override
+    public void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String service, String action) {
+        final MessageStatus status = MessageStatus.valueOf(messageStatus);
+        // Builds the user message log
+        final UserMessageLog userMessageLog = createUserMessageLog(messageId, messageStatus, notificationStatus, mshRole, maxAttempts, mpc, backendName, endpoint);
+        // Sets the subtype
+        MessageSubtype messageSubtype = null;
+        if (checkTestMessage(service, action)) {
+            messageSubtype = MessageSubtype.TEST;
+        }
+        userMessageLog.setMessageSubtype(messageSubtype);
+        if(!MessageSubtype.TEST.equals(messageSubtype)) {
+            backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
+        }
+        //we set the status after we send the status change event; otherwise the old status and the new status would be the same
+        userMessageLog.setMessageStatus(status);
+        userMessageLogDao.create(userMessageLog);
     }
 
     protected void updateMessageStatus(final String messageId, final MessageStatus newStatus) {
@@ -85,5 +112,16 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
     public void setMessageAsSendFailure(String messageId) {
         updateMessageStatus(messageId, MessageStatus.SEND_FAILURE);
     }
-    
+
+    /**
+     * Checks <code>service</code> and <code>action</code> to determine if it's a TEST message
+     * @param service Service
+     * @param action Action
+     * @return True, if it's a test message and false otherwise
+     */
+    protected Boolean checkTestMessage(final String service, final String action) {
+        return Ebms3Constants.TEST_SERVICE.equals(service)
+                && Ebms3Constants.TEST_ACTION.equals(action);
+
+    }
 }

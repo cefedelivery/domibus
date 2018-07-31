@@ -1,6 +1,9 @@
 package eu.domibus.common.model.security;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
@@ -21,31 +24,47 @@ import java.util.*;
 }
 )
 @NamedQueries({
-        @NamedQuery(name = "User.findAll", query = "FROM User"),
-        @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME"),
-        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true"),
-        @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
+        @NamedQuery(name = "User.findAll", query = "FROM User u where u.deleted=false"),
+        @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME and u.deleted=false"),
+        @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true and u.deleted=false"),
+        @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false")
 })
+
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("User")
 public class User extends AbstractBaseEntity{
+
     @NotNull
     @Column(name = "USER_NAME")
     private String userName;
+
     @Column(name = "USER_EMAIL")
     @Email
     private String email;
+
     @NotNull
     @Column(name = "USER_PASSWORD")
     private String password;
+
     @NotNull
     @Column(name = "USER_ENABLED")
     private Boolean active;
+
     @Column(name="OPTLOCK")
     public Integer version;
+
     @Column(name = "ATTEMPT_COUNT")
+    @NotAudited
     private Integer attemptCount = 0;
+
     @Column(name = "SUSPENSION_DATE")
     @Temporal(TemporalType.TIMESTAMP)
+    @NotAudited
     private Date suspensionDate;
+
+    @NotNull
+    @Column(name = "USER_DELETED")
+    private Boolean deleted = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -79,7 +98,6 @@ public class User extends AbstractBaseEntity{
         return active;
     }
 
-
     public Collection<UserRole> getRoles() {
         return Collections.unmodifiableSet(roles);
     }
@@ -92,9 +110,12 @@ public class User extends AbstractBaseEntity{
     public void clearRoles(){
         roles.clear();
     }
+
     public String getUserName() {
         return userName;
     }
+
+    public Boolean isDeleted() { return this.deleted; }
 
     public void setEmail(String email) {
         this.email = email;
@@ -104,9 +125,9 @@ public class User extends AbstractBaseEntity{
         this.password = password;
     }
 
-    public void setActive(Boolean enabled) {
-        this.active = enabled;
-    }
+    public void setActive(Boolean enabled) { this.active = enabled; }
+
+    public void setDeleted(Boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object o) {
@@ -144,4 +165,5 @@ public class User extends AbstractBaseEntity{
     public void setSuspensionDate(Date suspensionDate) {
         this.suspensionDate = suspensionDate;
     }
+
 }

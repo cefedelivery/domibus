@@ -8,19 +8,13 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
     <artifactId>domibus-default-fs-plugin</artifactId>
     <packaging>jar</packaging>
     <name>Domibus MSH Default FS Plugin</name>
 
     <dependencies>
-        <dependency>
-            <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ext-services-api</artifactId>
-            <version>${domibus-ext-services-api.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-plugin-api</artifactId>
@@ -34,7 +28,7 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <scope>provided</scope>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -130,7 +124,7 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.53</version>
+            <version>0.1.54</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
@@ -140,7 +134,7 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>1.16</version>
+            <version>1.18</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>

@@ -1,9 +1,10 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -16,7 +17,6 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -29,7 +29,7 @@ public class MessageRetentionServiceTest {
     private CollectionUtil collectionUtil;
 
     @Injectable
-    private Properties domibusProperties;
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private PModeProvider pModeProvider;
@@ -171,7 +171,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusProperties.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = null;
         }};
 
@@ -185,7 +185,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusProperties.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "a2";
         }};
 
@@ -199,7 +199,7 @@ public class MessageRetentionServiceTest {
         Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
-            domibusProperties.getProperty(propertyName);
+            domibusPropertyProvider.getDomainProperty(propertyName);
             result = "5";
         }};
 

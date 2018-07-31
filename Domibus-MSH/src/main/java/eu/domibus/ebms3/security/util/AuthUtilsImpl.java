@@ -1,10 +1,14 @@
 package eu.domibus.ebms3.security.util;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,10 +17,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Properties;
 
 @Component(value = "authUtils")
 public class AuthUtilsImpl implements AuthUtils {
@@ -25,8 +27,11 @@ public class AuthUtilsImpl implements AuthUtils {
 
     private static final String UNSECURE_LOGIN_ALLOWED = "domibus.auth.unsecureLoginAllowed";
 
-    @Resource(name = "domibusProperties")
-    private Properties domibusProperties;
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
 
     /**
      * Returns the original user passed via the security context OR
@@ -70,27 +75,40 @@ public class AuthUtilsImpl implements AuthUtils {
 
     @Override
     public boolean isUnsecureLoginAllowed() {
-        /* unsecured login allowed */
-        return "true".equals(domibusProperties.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
-    }
-
-    @Override
-    public boolean isUserAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
-            return true;
+        if(domibusConfigurationService.isMultiTenantAware()) {
+            LOG.debug("Unsecured login not allowed: Domibus is running in multi-tenancy mode");
+            return false;
         }
-        return false;
+        /* unsecured login allowed */
+        return "true".equals(domibusPropertyProvider.getProperty(UNSECURE_LOGIN_ALLOWED, "true"));
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public boolean isSuperAdmin() {
+        return checkAdminRights(AuthRole.ROLE_AP_ADMIN);
+    }
+
+    @Override
+    public boolean isAdmin() {
+        return checkAdminRights(AuthRole.ROLE_ADMIN);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_AP_ADMIN')")
     public void hasUserOrAdminRole() {
+        if(isAdmin() || isSuperAdmin()) {
+            return;
+        }
+        // USER_ROLE - verify the ORIGINAL_USER is configured
+        String originalUser = getOriginalUserFromSecurityContext();
+        if(StringUtils.isEmpty(originalUser)) {
+            throw new AuthenticationException("User " + getAuthenticatedUser() + " has USER_ROLE but is missing the ORIGINAL_USER in the db");
+        }
+        LOG.debug("Logged with USER_ROLE, ORIGINAL_USER is {}", originalUser );
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_AP_ADMIN')")
     public void hasAdminRole() {
     }
 
@@ -112,6 +130,15 @@ public class AuthUtilsImpl implements AuthUtils {
                         user,
                         password,
                         Collections.singleton(new SimpleGrantedAuthority(authRole.name()))));
+    }
+
+    protected boolean checkAdminRights(AuthRole authRole) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        if (authorities.contains(new SimpleGrantedAuthority(authRole.name()))) {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -12,7 +12,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.ebms3.common.dao.PModeProvider;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -230,7 +230,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 mpc,
                 messageLog.getReceived(),
                 staledDate,
-                messageLog.getNextAttempt(),
+                messageLog.getNextAttempt()==null?new Date():messageLog.getNextAttempt(),
                 messageLog.getSendAttempts(),
                 messageLog.getSendAttemptsMax());
     }
@@ -268,7 +268,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
-        if (userMessageLog.getReceived().compareTo(userMessageLog.getNextAttempt()) < 0) {
+        if (userMessageLog.getNextAttempt() !=null) {
             nextAttempt = userMessageLog.getNextAttempt();
         }
         userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));

@@ -1,7 +1,9 @@
 package eu.domibus.ebms3.sender;
 
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.quartz.DomibusQuartzJobBean;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullMessageStateService;
 import eu.domibus.logging.DomibusLogger;
@@ -10,7 +12,6 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  * Quartz based worker responsible for the periodical execution of {@link eu.domibus.ebms3.sender.MessageSender#sendUserMessage(String)}
@@ -20,12 +21,12 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  */
 
 @DisallowConcurrentExecution //Only one SenderWorker runs at any time
-public class SendRetryWorker extends QuartzJobBean {
+public class SendRetryWorker extends DomibusQuartzJobBean {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SendRetryWorker.class);
 
     @Autowired
-    private RetryService retryService;
+    protected RetryService retryService;
 
     @Autowired
     private PullMessageService pullMessageService;
@@ -34,13 +35,12 @@ public class SendRetryWorker extends QuartzJobBean {
     private PullMessageStateService pullMessageStateService;
 
     @Autowired
-    AuthUtils authUtils;
+    protected AuthUtils authUtils;
 
 
     @Override
-    protected void executeInternal(final JobExecutionContext context) throws JobExecutionException {
-
-        if (!authUtils.isUnsecureLoginAllowed()) {
+    protected void executeJob(final JobExecutionContext context, final Domain domain) throws JobExecutionException {
+        if(!authUtils.isUnsecureLoginAllowed()) {
             authUtils.setAuthenticationToSecurityContext("retry_user", "retry_password");
         }
 
@@ -69,6 +69,4 @@ public class SendRetryWorker extends QuartzJobBean {
 
 
     }
-
-
 }

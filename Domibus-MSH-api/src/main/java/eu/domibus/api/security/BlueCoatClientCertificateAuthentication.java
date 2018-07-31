@@ -1,7 +1,7 @@
 package eu.domibus.api.security;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -41,6 +41,10 @@ public class BlueCoatClientCertificateAuthentication implements Authentication {
     public BlueCoatClientCertificateAuthentication(final String certHeaderValue) {
         certificate = new CertificateDetails();
         this.certificateId = calculateCertificateId(certHeaderValue);
+    }
+
+    public String getCertificateId() {
+        return certificateId;
     }
 
     @Override

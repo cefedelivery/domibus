@@ -60,7 +60,7 @@ public class RoutingService {
     }
 
     @CacheEvict(value = "backendFilterCache", allEntries = true)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public void updateBackendFilters(final List<BackendFilter> filters) {
         List<BackendFilterEntity> backendFilterEntities = coreConverter.convert(filters, BackendFilterEntity.class);
         List<BackendFilterEntity> allBackendFilterEntities = backendFilterDao.findAll();

@@ -1,7 +1,19 @@
+
 package org.apache.cxf.jaxws.handler.soap;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.xml.soap.*;
+import javax.xml.ws.Binding;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import javax.xml.ws.soap.SOAPFaultException;
+
+import org.w3c.dom.Node;
+
 import org.apache.cxf.binding.soap.HeaderUtil;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
@@ -14,18 +26,9 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxws.handler.AbstractProtocolHandlerInterceptor;
 import org.apache.cxf.jaxws.handler.HandlerChainInvoker;
 import org.apache.cxf.phase.Phase;
-import org.w3c.dom.Node;
 
-import javax.xml.namespace.QName;
-import javax.xml.soap.*;
-import javax.xml.ws.Binding;
-import javax.xml.ws.handler.Handler;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.soap.SOAPFaultException;
-import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 
 
 /*[EDELIVERY-1117] This interceptor replaces the CXF interceptor SOAPHandlerFaultOutInterceptor.
@@ -34,11 +37,11 @@ import java.util.Set;
 * instead of "HandleFault" which is non standard in SOAP1_2 and raises an error.
 * According to the SOAP specification, Code element must have a value.
 *
+* Updated to the 3.2.1 version of CXF @since Domibus 4.0
 * */
 public class DomibusSOAPHandlerFaultOutInterceptor extends
         AbstractProtocolHandlerInterceptor<SoapMessage> implements
         SoapInterceptor {
-
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusSOAPHandlerFaultOutInterceptor.class);
 
     private static final SAAJOutInterceptor SAAJ_OUT = new SAAJOutInterceptor();
@@ -54,17 +57,15 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
         super(binding, Phase.PRE_PROTOCOL_FRONTEND);
     }
 
-    public Set<URI> getRoles() {
-        Set<URI> roles = new HashSet<URI>();
-        // TODO
-        return roles;
+    public Set getRoles() {
+        return new HashSet<>();
     }
 
-    public Set<QName> getUnderstoodHeaders() {
-        Set<QName> understood = new HashSet<QName>();
-        for (Handler<?> h : getBinding().getHandlerChain()) {
+    public Set getUnderstoodHeaders() {
+        Set understood = new HashSet<>();
+        for (Handler h : getBinding().getHandlerChain()) {
             if (h instanceof SOAPHandler) {
-                Set<QName> headers = CastUtils.cast(((SOAPHandler<?>) h).getHeaders());
+                Set headers = CastUtils.cast(((SOAPHandler) h).getHeaders());
                 if (headers != null) {
                     understood.addAll(headers);
                 }
@@ -74,7 +75,6 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
     }
 
     public void handleMessage(SoapMessage message) {
-
         if (binding.getHandlerChain().isEmpty()) {
             return;
         }
@@ -96,7 +96,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
     }
 
     private void checkUnderstoodHeaders(SoapMessage soapMessage) {
-        Set<QName> paramHeaders = HeaderUtil.getHeaderQNameInOperationParam(soapMessage);
+        Set paramHeaders = HeaderUtil.getHeaderQNameInOperationParam(soapMessage);
         if (soapMessage.getHeaders().isEmpty() && paramHeaders.isEmpty()) {
             //the TCK expects the getHeaders method to always be
             //called.   If there aren't any headers in the message,
@@ -130,7 +130,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
                 SOAPFault soapFault = body.addFault();
 
                 if (exception instanceof SOAPFaultException) {
-                    SOAPFaultException sf = (SOAPFaultException) exception;
+                    SOAPFaultException sf = (SOAPFaultException)exception;
                     soapFault.setFaultString(sf.getFault().getFaultString());
                     SAAJUtils.setFaultCode(soapFault, sf.getFault().getFaultCodeAsQName());
                     soapFault.setFaultActor(sf.getFault().getFaultActor());
@@ -141,7 +141,7 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
                         soapFault.addDetail().appendChild(nd);
                     }
                 } else if (exception instanceof Fault) {
-                    SoapFault sf = SoapFault.createFault((Fault) exception, message
+                    SoapFault sf = SoapFault.createFault((Fault)exception, message
                             .getVersion());
                     soapFault.setFaultString(sf.getReason());
                     SAAJUtils.setFaultCode(soapFault, sf.getFaultCode());
@@ -174,8 +174,4 @@ public class DomibusSOAPHandlerFaultOutInterceptor extends
         return new SOAPMessageContextImpl(message);
     }
 
-    public void handleFault(SoapMessage message) {
-    }
-
 }
-

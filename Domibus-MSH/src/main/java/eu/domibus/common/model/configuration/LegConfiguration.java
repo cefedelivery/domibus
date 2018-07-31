@@ -25,6 +25,8 @@ import java.util.Map;
                 query = "select p.legs from Process p where :SENDER_PARTY in (select party.name from p.initiatorParties party) and :RECEIVER_PARTY in (select party.name from p.responderParties party) and (p.agreement.name='agreementEmpty')"),
         @NamedQuery(name = "LegConfiguration.findForPMode",
                 query = "select l.name from LegConfiguration l where l.service.name=:SERVICE and l.action.name=:ACTION and l.name in :CANDIDATES"),
+        @NamedQuery(name = "LegConfiguration.findForTestService",
+                query = "select l from LegConfiguration l where l.service.value=:SERVICE and l.action.value=:ACTION"),
         @NamedQuery(name = "LegConfiguration.findByName",
                 query = "select l from LegConfiguration l where l.name=:NAME")})
 
@@ -115,9 +117,7 @@ public class LegConfiguration extends AbstractBaseEntity {
 
         final LegConfiguration that = (LegConfiguration) o;
 
-        if (!name.equals(that.name)) return false;
-
-        return true;
+        return name.equals(that.name);
     }
 
     @Override

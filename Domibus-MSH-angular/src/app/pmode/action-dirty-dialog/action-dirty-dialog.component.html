@@ -1,0 +1,40 @@
+<div style="width: 1100px;text-align: center">
+  <h1 md-dialog-title>
+    You have previously deleted entries from the Archive. {{data.actionTitle}}:
+  </h1>
+  <h2 md-dialog-title>
+    If you want to both keep your changes and {{data.actionName}} to the older version, click "Ok".<br>
+    If you want to abort the {{data.actionName}} to that older version but keep your changes, click "Cancel".<br>
+    If you want to give up your changes and only restore to the older version, click "{{data.actionName | capitalizeFirst}}".<br>
+  </h2>
+
+  <div class="divTable">
+    <div class="divTableBody">
+
+      <div class="divTableRow">
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('ok')" id="okbuttondialog_id">
+            <md-icon>check_circle</md-icon>
+            <span>OK</span>
+          </button>
+        </div>
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close('cancel')" id="cancelbuttondialog_id">
+            <md-icon>cancel</md-icon>
+            <span>Cancel</span>
+          </button>
+        </div>
+
+        <div class="divTableCell">
+          <button md-raised-button color="primary" (click)="dialogRef.close(this.data.actionName)" id="restorebuttondialog_id">
+            <md-icon>{{data.actionIconName}}</md-icon>
+            <span>{{data.actionName | capitalizeFirst}}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

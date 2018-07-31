@@ -84,14 +84,14 @@
             </payloadProfile>
         </payloadProfiles>
         <securities>
-            <security name="eDeliveryPolicy"
-                      policy="eDeliveryPolicy.xml"
+            <security name="eDeliveryAS4Policy"
+                      policy="eDeliveryAS4Policy.xml"
                       signatureMethod="RSA_SHA256"/>
             <security name="noSigNoEnc"
                       policy="doNothingPolicy.xml"
                       signatureMethod="RSA_SHA256"/>
-            <security name="eSensPolicy"
-                      policy="eSensPolicy.xml"
+            <security name="eDeliveryAS4Policy"
+                      policy="eDeliveryAS4Policy.xml"
                       signatureMethod="RSA_SHA256"/>
         </securities>
         <errorHandlings>
@@ -125,7 +125,7 @@
                               action="tc1Action"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="eDeliveryPolicy"
+                              security="eDeliveryAS4Policy"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               payloadProfile="MessageProfile"
@@ -136,7 +136,7 @@
                               action="tc2Action"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="eSensPolicy"
+                              security="eDeliveryAS4Policy"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               payloadProfile="MessageProfile"

@@ -4,11 +4,14 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <cargo-maven2-plugin.version>1.6.7</cargo-maven2-plugin.version>
+    </properties>
 
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
     <packaging>pom</packaging>
     <artifactId>domibus-distribution</artifactId>
@@ -73,7 +76,7 @@
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.12</version>
+                        <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-tomcat</id>
@@ -173,7 +176,7 @@
                     <plugin>
                         <groupId>org.codehaus.cargo</groupId>
                         <artifactId>cargo-maven2-plugin</artifactId>
-                        <version>1.4.15</version>
+                        <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>build-wildfly</id>
@@ -241,6 +244,98 @@
                                         <descriptor>src/main/assembly/wildfly/wildfly-configuration-only.xml</descriptor>
                                         <descriptor>src/main/assembly/wildfly/wildfly-war.xml</descriptor>
                                         <descriptor>src/main/assembly/wildfly/wildfly-full.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                                <!-- bound to verify because we need to execute cargo-package first
+                                    which is in pre-integration-test -->
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>wildfly12</id>
+            <properties>
+                <wildfly12.version>12.0.0.Final</wildfly12.version>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven2-plugin</artifactId>
+                        <version>${cargo-maven2-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>build-wildfly12</id>
+                                <goals>
+                                    <goal>configure</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <container>
+                                        <containerId>wildfly12x</containerId>
+                                        <zipUrlInstaller>
+                                            <url>
+                                                https://ec.europa.eu/cefdigital/artifact/content/repositories/public/org/wildfly/as/wildfly-as-dist/12.0.0.Final/wildfly-as-dist-12.0.0.Final.zip
+                                            </url>
+                                        </zipUrlInstaller>
+                                    </container>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>replacer</artifactId>
+                        <version>1.5.3</version>
+                        <executions>
+                            <execution>
+                                <id>domibus-conf-location12</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly12.version}/wildfly-${wildfly12.version}/bin/standalone.conf.bat
+                                        </include>
+                                        <include>
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly12.version}/wildfly-${wildfly12.version}/bin/standalone.conf
+                                        </include>
+                                    </includes>
+                                    <replacements>
+                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
+                                        <replacement>
+                                            <token>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"</token>
+                                            <value>"JAVA_OPTS=-Xms64M -Xmx512M -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Ddomibus.config.location=%JBOSS_HOME%/conf/domibus"</value>
+                                        </replacement>
+                                        <!-- Please keep the values from the "token" and the "value" fields on one line and do not include any whitespaces -->
+                                        <replacement>
+                                            <token>JAVA_OPTS="-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true"</token>
+                                            <value>JAVA_OPTS="-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Ddomibus.config.location=\$JBOSS_HOME/conf/domibus"</value>
+                                        </replacement>
+                                    </replacements>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-assembly-wildfly12</id>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/wildfly12/wildfly-configuration-only.xml</descriptor>
+                                        <descriptor>src/main/assembly/wildfly12/wildfly-war.xml</descriptor>
+                                        <descriptor>src/main/assembly/wildfly12/wildfly-full.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                                 <!-- bound to verify because we need to execute cargo-package first

@@ -1,6 +1,6 @@
 package eu.domibus.plugin.webService.impl;
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.plugin.Submission;
@@ -12,10 +12,11 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
-import static org.apache.commons.lang.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * Converter class for Submission <-> UserMessage objects.
@@ -26,6 +27,7 @@ import static org.apache.commons.lang.StringUtils.trim;
 public class StubDtoTransformer implements MessageSubmissionTransformer<Messaging>, MessageRetrievalTransformer<UserMessage> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(StubDtoTransformer.class);
+
 
     @Override
     public UserMessage transformFromSubmission(final Submission submission, final UserMessage target) {
@@ -82,8 +84,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
         final MessageInfo messageInfo = new MessageInfo();
         messageInfo.setMessageId(submission.getMessageId());
         LOG.debug("MESSAGE ID " + messageInfo.getMessageId());
-        GregorianCalendar gc = new GregorianCalendar();
-        messageInfo.setTimestamp(new XMLGregorianCalendarImpl(gc));
+        messageInfo.setTimestamp(LocalDateTime.now());
         LOG.debug("TIMESTAMP " + messageInfo.getTimestamp());
         messageInfo.setRefToMessageId(submission.getRefToMessageId());
         result.setMessageInfo(messageInfo);
@@ -124,9 +125,6 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
             partInfo.setInBody(payload.isInBody());
             partInfo.setPayloadDatahandler(payload.getPayloadDatahandler());
             partInfo.setHref(payload.getContentId());
-            final Schema schema = new Schema();
-            schema.setLocation(payload.getSchemaLocation());
-            partInfo.setSchema(schema);
             final PartProperties partProperties = new PartProperties();
             for (final Submission.TypedProperty entry : payload.getPayloadProperties()) {
                 final Property property = new Property();
@@ -135,18 +133,10 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                 property.setType(entry.getType());
                 partProperties.getProperty().add(property);
             }
-            if (payload.getDescription() != null) {
-                final Description description = new Description();
-                description.setValue(payload.getDescription().getValue());
-                description.setLang(payload.getDescription().getLang().getLanguage());
-                partInfo.setDescription(description);
-            }
             partInfo.setPartProperties(partProperties);
             payloadInfo.getPartInfo().add(partInfo);
             result.setPayloadInfo(payloadInfo);
         }
-
-
     }
 
 
@@ -191,11 +181,7 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
                         properties.add(new Submission.TypedProperty(trim(property.getName()), trim(property.getValue()), trim(property.getType())));
                     }
                 }
-                Submission.Description description = null;
-                if (partInfo.getDescription() != null) {
-                    description = new Submission.Description(new Locale(partInfo.getDescription().getLang()), trim(partInfo.getDescription().getValue()));
-                }
-                result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), description, /*(partInfo.getSchema() != null) ? partInfo.getSchema().getLocation() :*/ null);
+                result.addPayload(extPartInfo.getHref(), extPartInfo.getPayloadDatahandler(), properties, extPartInfo.isInBody(), null, null);
             }
         }
 
@@ -235,15 +221,16 @@ public class StubDtoTransformer implements MessageSubmissionTransformer<Messagin
             errorResultImpl.setErrorDetail(errorResult.getErrorDetail());
             errorResultImpl.setMshRole(MshRole.fromValue(errorResult.getMshRole().name()));
             errorResultImpl.setMessageInErrorId(errorResult.getMessageInErrorId());
-            GregorianCalendar gc = new GregorianCalendar();
+            LocalDateTime dateTime = LocalDateTime.now();
+
             if (errorResult.getNotified() != null) {
-                gc.setTime(errorResult.getNotified());
+                dateTime = errorResult.getNotified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             }
-            errorResultImpl.setNotified(new XMLGregorianCalendarImpl(gc));
+            errorResultImpl.setNotified(dateTime);
             if (errorResult.getTimestamp() != null) {
-                gc.setTime(errorResult.getTimestamp());
+                dateTime = errorResult.getTimestamp().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             }
-            errorResultImpl.setTimestamp(new XMLGregorianCalendarImpl(gc));
+            errorResultImpl.setTimestamp(dateTime);
             errorList.getItem().add(errorResultImpl);
         }
         return errorList;

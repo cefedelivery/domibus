@@ -1,6 +1,10 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
@@ -8,10 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -26,7 +29,11 @@ public class JmsResource {
     private static final String APPLICATION_JSON = "application/json";
 
     @Autowired
-    JMSManager jmsManager;
+    protected JMSManager jmsManager;
+
+    @Autowired
+    protected CsvServiceImpl csvServiceImpl;
+
 
     @RequestMapping(value = {"/destinations"}, method = GET)
     public ResponseEntity<DestinationsResponseRO> destinations() {
@@ -45,6 +52,7 @@ public class JmsResource {
                     .body(destinationsResponseRO);
         }
     }
+
 
     @RequestMapping(value = {"/messages"}, method = POST)
     public ResponseEntity<MessagesResponseRO> messages(@RequestBody MessagesRequestRO request) {
@@ -76,6 +84,7 @@ public class JmsResource {
 
             if (request.getAction() == MessagesActionRequestRO.Action.MOVE) {
                 jmsManager.moveMessages(request.getSource(), request.getDestination(), ids);
+
             } else if (request.getAction() == MessagesActionRequestRO.Action.REMOVE) {
                 jmsManager.deleteMessages(request.getSource(), ids);
             }
@@ -91,8 +100,57 @@ public class JmsResource {
                     .contentType(MediaType.parseMediaType(APPLICATION_JSON))
                     .body(response);
         }
+    }
 
+    /**
+     * This method returns a CSV file with the contents of JMS Messages table
+     *
+     * @return CSV file with the contents of JMS Messages table
+     */
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
+    public ResponseEntity<String> getCsv(
+            @RequestParam(value = "source") String source,
+            @RequestParam(value = "jmsType", required = false) String jmsType,
+            @RequestParam(value = "fromDate", required = false) Long fromDate,
+            @RequestParam(value = "toDate", required = false) Long toDate,
+            @RequestParam(value = "selector", required = false) String selector) {
+        String resultText;
 
+        // get list of messages
+        final List<JmsMessage> jmsMessageList = jmsManager.browseMessages(
+                source,
+                jmsType,
+                fromDate == null ? null : new Date(fromDate),
+                toDate == null ? null : new Date(toDate),
+                selector);
+        customizeJMSProperties(jmsMessageList);
+
+        // excluding unneeded columns
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
+
+        // needed for empty csv file purposes
+        csvServiceImpl.setClass(JmsMessage.class);
+
+        // column name customization
+        csvServiceImpl.customizeColumn(CsvCustomColumns.JMS_RESOURCE.getCustomColumns());
+
+        try {
+            resultText = csvServiceImpl.exportToCSV(jmsMessageList);
+        } catch (CsvException e) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jms"))
+                .body(resultText);
+    }
+
+    private void customizeJMSProperties(List<JmsMessage> jmsMessageList) {
+        for (JmsMessage message : jmsMessageList) {
+            message.setCustomProperties(message.getCustomProperties());
+            message.setProperties(message.getJMSProperties());
+        }
     }
 
 

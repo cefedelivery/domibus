@@ -6,7 +6,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>domibus-ext-services-delegate</artifactId>
@@ -26,17 +26,17 @@
         <!-- Domibus modules -->
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ext-services-api</artifactId>
-            <version>${domibus-ext-services-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.domibus</groupId>
             <artifactId>domibus-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.domibus</groupId>
+            <artifactId>domibus-plugin-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- End Domibus modules -->
 
@@ -150,6 +150,19 @@
             <artifactId>jmockit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <!-- End Test dependencies -->
 
         <!--Swagger-->

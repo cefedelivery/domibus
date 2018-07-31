@@ -1,6 +1,6 @@
 package eu.domibus.common.model.logging;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -12,6 +12,16 @@ import java.util.Map;
 @Service(value = "signalMessageLogInfoFilter")
 public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
 
+    private static final String QUERY_BODY = " from SignalMessageLog log, " +
+            "Messaging messaging inner join messaging.signalMessage signal " +
+            "inner join messaging.userMessage message " +
+            "left join message.messageInfo info " +
+            "left join message.messageProperties.property propsFrom " +
+            "left join message.messageProperties.property propsTo " +
+            "left join message.partyInfo.from.partyId partyFrom " +
+            "left join message.partyInfo.to.partyId partyTo " +
+            "where signal.messageInfo.messageId=log.messageId and signal.messageInfo.refToMessageId=message.messageInfo.messageId and propsFrom.name = 'originalSender'" +
+            "and propsTo.name = 'finalRecipient' ";
     private static final String CONVERSATION_ID = "conversationId";
 
     @Override
@@ -50,7 +60,8 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 (isFourCornerModel() ? " propsTo.value," : "'',") +
                 " info.refToMessageId," +
                 "log.failed," +
-                "log.restored" +
+                "log.restored," +
+                "log.messageSubtype" +
                 ")" + getQueryBody(filters);
         StringBuilder result = filterQuery(query, column, asc, filters);
         return result.toString();
