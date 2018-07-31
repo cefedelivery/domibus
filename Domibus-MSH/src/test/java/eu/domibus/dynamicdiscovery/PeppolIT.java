@@ -2,7 +2,6 @@ package eu.domibus.dynamicdiscovery;
 
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.util.EndpointInfo;
-import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
@@ -20,8 +19,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertNotNull;
 
