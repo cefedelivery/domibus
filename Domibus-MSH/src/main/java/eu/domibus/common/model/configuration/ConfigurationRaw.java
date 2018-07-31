@@ -14,6 +14,8 @@ import java.util.Date;
 @NamedQueries({
         @NamedQuery(name = "ConfigurationRaw.getById",
                 query = "select conf from ConfigurationRaw conf WHERE conf.entityId = :CONF_ID"),
+        @NamedQuery(name = "ConfigurationRaw.getCurrent",
+                query = "SELECT conf from ConfigurationRaw conf where conf.configurationDate=(select max(conf.configurationDate) from ConfigurationRaw conf)"),
         @NamedQuery(name = "ConfigurationRaw.getDetailedList",
         query = "select new eu.domibus.api.pmode.PModeArchiveInfo(c.entityId, c.configurationDate, r.userName, c.description) From ConfigurationRaw c, RevisionLog r join r.revisionTypes as ea where ea.entityId=c.entityId")
 }
