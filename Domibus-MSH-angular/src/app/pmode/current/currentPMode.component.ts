@@ -1,4 +1,4 @@
-﻿import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+﻿import {Component, OnInit} from '@angular/core';
 import {Http, Headers, Response} from '@angular/http';
 import {AlertService} from 'app/alert/alert.service';
 import {MdDialog} from '@angular/material';
@@ -50,7 +50,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    */
   ngOnInit () {
     //this.getAllPModeEntries();
-    this.getCurrentPMode();
+    this.getCurrentEntry();
+    this.getActivePMode();
   }
 
   /**
@@ -62,25 +63,19 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       .publishReplay(1).refCount();
   }
 
-  getCurrentPMode() {
+  getCurrentEntry() {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/current').subscribe(res => {
-        const HTTP_OK = 200;
-        if (res.status === HTTP_OK) {
-          this.pModeExists = true;
-          this.pModeContents = res.text();
-        }
-      }, err => {
-        this.pModeExists = false;
+          this.current = res;
       })
     }
   }
 
-  /*/!**
+  /***
    * Gets all the PModes Entries
-   *!/
-  getAllPModeEntries () {
+   **/
+  /*getAllPModeEntries () {
     this.current = null;
     this.pModeContents = null;
     this.pModeExists = false;
@@ -100,7 +95,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
   /**
    * Get Request for the Active PMode XML
    */
-  /*getActivePMode () {
+  getActivePMode () {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/' + this.current.id + '?noAudit=true ').subscribe(res => {
@@ -113,7 +108,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
         this.pModeExists = false;
       })
     }
-  }*/
+  }
 
   /**
    * Method called when Upload button is clicked
@@ -122,7 +117,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
     this.dialog.open(PmodeUploadComponent)
       .afterClosed().subscribe(result => {
       //this.getAllPModeEntries();
-      this.getCurrentPMode();
+      this.getCurrentEntry();
+      this.getActivePMode();
     });
   }
 
@@ -156,7 +152,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
     }).afterClosed().subscribe(result => {
       if (result && result.done) {
         //this.getAllPModeEntries();
-        this.getCurrentPMode();
+        this.getCurrentEntry();
+        this.getActivePMode();
       }
     });
   }
@@ -169,7 +166,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       .afterClosed().subscribe(response => {
       if (response) {
         //this.getActivePMode();
-        this.getCurrentPMode();
+        this.getCurrentEntry();
+        this.getActivePMode();
       }
     });
   }
