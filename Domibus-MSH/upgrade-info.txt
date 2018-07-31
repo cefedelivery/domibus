@@ -1,6 +1,17 @@
 Domibus 4.0 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\conf" respectively into "\domibus\conf\domibus\plugins\lib"
+                - The Custom Plugins need to be updated:
+                     o remove the domibus-ext-services-api Maven dependency; the existing services from the domibus-ext-services-api have been moved into the plugin-api module under the same packages.
+                       The service classes from the domibus-ext-services-api module have been renamed in order not to be confused with the internal services.
+                       Example: AuthenticationService was renamed to AuthenticationExtService. The same pattern has been used for the other services.
+                     o replace the Maven dependency commons-lang with commons-lang3 like below:
+                           <dependency>
+                               <groupId>org.apache.commons</groupId>
+                               <artifactId>commons-lang3</artifactId>
+                               <scope>provided</scope>
+                           </dependency>
+
                 - [WebLogic only]
                     Modify file "\conf\domibus\domibus.properties":
                          o add the folloging property:

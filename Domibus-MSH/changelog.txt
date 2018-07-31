@@ -2,6 +2,7 @@ Domibus 4.0
 - Support for email alert system
 - Support for multi-tenancy
 - Management of participants through the administration console
+- Removed the module domibus-ext-services-api and moved all services from domibus-ext-services-api to the plugin-api
 - Cleanup the distributed security policies
 - Each plugin can now specify its own list of notification types for which it expects notifications.
 - Upgraded the following libraries:hibernate, atomikos,spring,liquibase,junit
