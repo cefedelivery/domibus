@@ -106,6 +106,10 @@ public abstract class PModeProvider {
 
     public byte[] getPModeFile(int id) {
         final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
+        return getRawConfigurationBytes(rawConfiguration);
+    }
+
+    private byte[] getRawConfigurationBytes(ConfigurationRaw rawConfiguration) {
         if (rawConfiguration != null) {
             return rawConfiguration.getXml();
         }
@@ -114,6 +118,10 @@ public abstract class PModeProvider {
 
     public ConfigurationRaw getRawConfiguration(int id) {
         return this.configurationRawDAO.getConfigurationRaw(id);
+    }
+
+    public byte[] getCurrentPModeFile() {
+        return getRawConfigurationBytes(this.configurationRawDAO.getCurrentRawConfiguration());
     }
 
     public void removePMode(int id) {
