@@ -59,6 +59,9 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       .publishReplay(1).refCount();
   }
 
+  /**
+   * Gets the currect PMode entry
+   */
   getCurrentEntry() {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
       this.pModeContentsDirty = false;
@@ -73,7 +76,6 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * Get Request for the Active PMode XML
    */
   getActivePMode () {
-    debugger;
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL) && this.current!==undefined) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/' + this.current.id + '?noAudit=true ').subscribe(res => {
