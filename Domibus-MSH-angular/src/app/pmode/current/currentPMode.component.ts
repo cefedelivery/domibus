@@ -49,9 +49,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * NgOnInit method
    */
   ngOnInit () {
-    //this.getAllPModeEntries();
     this.getCurrentEntry();
-    this.getActivePMode();
   }
 
   /**
@@ -67,8 +65,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/current').subscribe(res => {
-         debugger;
           this.current = res.json();
+          this.getActivePMode();
       })
     }
   }
@@ -97,6 +95,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * Get Request for the Active PMode XML
    */
   getActivePMode () {
+    debugger;
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL) && this.current!==undefined) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/' + this.current.id + '?noAudit=true ').subscribe(res => {
