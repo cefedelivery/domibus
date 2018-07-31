@@ -12,6 +12,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="nperpion" id="EDELIVERY-3338">
+        <addColumn tableName="TB_USER">
+            <column name="USER_DELETED" type="BOOLEAN" defaultValueNumeric="0" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="TB_USER_AUD">
+            <column name="USER_DELETED" type="BOOLEAN"></column>
+        </addColumn>
+    </changeSet>
+
     <changeSet author="dussath" id="EDELIVERY-3053_1">
         <createTable tableName="TB_MESSAGING_LOCK">
             <column autoIncrement="true" name="ID_PK" type="INT">
