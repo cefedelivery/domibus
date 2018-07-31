@@ -99,9 +99,9 @@ Domibus 4.0 (from 3.3.4):
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosJ2eePlatform
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
-                    o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
-                        - [Mysql only]
-                             domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                    o [Mysql only]
+                       - add property :
+                            domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
                     o [Tomcat only]
                        - add a new property "domibus.database.schema" for defining the database schema and modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties to re-use it
                            Eg: #MySQL
