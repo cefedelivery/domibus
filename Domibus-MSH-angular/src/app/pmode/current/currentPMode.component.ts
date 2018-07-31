@@ -60,7 +60,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
   }
 
   /**
-   * Gets the currect PMode entry
+   * Gets the current PMode entry
    */
   getCurrentEntry() {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
