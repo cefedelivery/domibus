@@ -49,7 +49,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
    * NgOnInit method
    */
   ngOnInit () {
-    this.getAllPModeEntries();
+    //this.getAllPModeEntries();
+    this.getCurrentPMode();
   }
 
   /**
@@ -61,9 +62,24 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       .publishReplay(1).refCount();
   }
 
-  /**
+  getCurrentPMode() {
+    if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
+      this.pModeContentsDirty = false;
+      this.http.get(CurrentPModeComponent.PMODE_URL + '/current').subscribe(res => {
+        const HTTP_OK = 200;
+        if (res.status === HTTP_OK) {
+          this.pModeExists = true;
+          this.pModeContents = res.text();
+        }
+      }, err => {
+        this.pModeExists = false;
+      })
+    }
+  }
+
+  /*/!**
    * Gets all the PModes Entries
-   */
+   *!/
   getAllPModeEntries () {
     this.current = null;
     this.pModeContents = null;
@@ -78,13 +94,13 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       () => {
         this.alertService.error('\'Get all pmodes\' not completed successfully.');
       });
-  }
+  }*/
 
 
   /**
    * Get Request for the Active PMode XML
    */
-  getActivePMode () {
+  /*getActivePMode () {
     if (!isNullOrUndefined(CurrentPModeComponent.PMODE_URL)) {
       this.pModeContentsDirty = false;
       this.http.get(CurrentPModeComponent.PMODE_URL + '/' + this.current.id + '?noAudit=true ').subscribe(res => {
@@ -97,7 +113,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
         this.pModeExists = false;
       })
     }
-  }
+  }*/
 
   /**
    * Method called when Upload button is clicked
@@ -105,7 +121,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
   upload () {
     this.dialog.open(PmodeUploadComponent)
       .afterClosed().subscribe(result => {
-      this.getAllPModeEntries();
+      //this.getAllPModeEntries();
+      this.getCurrentPMode();
     });
   }
 
@@ -138,7 +155,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
       data: {pModeContents: this.pModeContents}
     }).afterClosed().subscribe(result => {
       if (result && result.done) {
-        this.getAllPModeEntries();
+        //this.getAllPModeEntries();
+        this.getCurrentPMode();
       }
     });
   }
