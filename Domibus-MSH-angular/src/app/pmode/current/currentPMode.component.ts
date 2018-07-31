@@ -168,7 +168,8 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
     this.dialog.open(CancelDialogComponent)
       .afterClosed().subscribe(response => {
       if (response) {
-        this.getActivePMode();
+        //this.getActivePMode();
+        this.getCurrentPMode();
       }
     });
   }
