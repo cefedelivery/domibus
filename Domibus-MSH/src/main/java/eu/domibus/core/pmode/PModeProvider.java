@@ -201,9 +201,9 @@ public abstract class PModeProvider {
         return resultMessage;
     }
 
-    private String validateDescriptionSize(String description) {
+    private String validateDescriptionSize(final String description) {
         if(StringUtils.isNotEmpty(description) && description.length()>255){
-            description=description.substring(0,254);
+            return description.substring(0,254);
         }
         return description;
     }
