@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>4.0-RC1</version>
+        <version>4.0-SNAPSHOT</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>domibus-db</artifactId>
@@ -59,7 +59,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-RC1-data.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -77,7 +77,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-multi-tenancy.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-RC1-multi-tenancy.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-multi-tenancy.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -95,7 +95,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-RC1.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -113,7 +113,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-RC1-data.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0-data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -131,7 +131,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-multi-tenancy.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-RC1-multi-tenancy.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0-multi-tenancy.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -149,7 +149,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-RC1.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -167,7 +167,7 @@
                                offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-delta.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.3.4-to-4.0-RC1-migration.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-3.3.4-to-4.0-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
@@ -185,7 +185,7 @@
                                offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-delta.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-3.3.4-to-4.0-RC1-migration.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-3.3.4-to-4.0-migration.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
