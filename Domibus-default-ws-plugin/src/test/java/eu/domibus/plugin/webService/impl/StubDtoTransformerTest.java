@@ -101,7 +101,7 @@ public class StubDtoTransformerTest {
 
         /*UserMessage.MessageInfo population start*/
         MessageInfo messageInfoObj = new MessageInfo();
-        messageInfoObj.setTimestamp(new XMLGregorianCalendarImpl(new GregorianCalendar()));
+        //messageInfoObj.setTimestamp(new XMLGregorianCalendarImpl(new GregorianCalendar()));
         userMessageObj.setMessageInfo(messageInfoObj);
     /*UserMessage.MessageInfo population end*/
 
@@ -214,7 +214,7 @@ public class StubDtoTransformerTest {
 
         /*UserMessage.MessageInfo population start*/
         MessageInfo messageInfoObj = new MessageInfo();
-        messageInfoObj.setTimestamp(new XMLGregorianCalendarImpl(new GregorianCalendar()));
+        //messageInfoObj.setTimestamp(new XMLGregorianCalendarImpl(new GregorianCalendar()));
         userMessageObj.setMessageInfo(messageInfoObj);
     /*UserMessage.MessageInfo population end*/
 

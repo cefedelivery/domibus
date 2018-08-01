@@ -1,7 +1,7 @@
 package eu.domibus.plugin.webService.impl;
 
-import eu.domibus.ext.exceptions.AuthenticationException;
-import eu.domibus.ext.services.AuthenticationService;
+import eu.domibus.ext.exceptions.AuthenticationExtException;
+import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -25,7 +25,7 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
     private Properties domibusProperties;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationExtService authenticationService;
 
     public CustomAuthenticationInterceptor() {
         super(Phase.PRE_PROTOCOL);
@@ -39,7 +39,7 @@ public class CustomAuthenticationInterceptor extends AbstractPhaseInterceptor<Me
 
         try {
             authenticationService.authenticate(httpRequest);
-        } catch (AuthenticationException e) {
+        } catch (AuthenticationExtException e) {
             throw new Fault(e);
         }
     }

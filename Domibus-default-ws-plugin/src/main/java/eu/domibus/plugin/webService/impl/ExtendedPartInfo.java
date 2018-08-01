@@ -42,7 +42,6 @@ public class ExtendedPartInfo extends PartInfo {
 
     public ExtendedPartInfo(PartInfo partInfo) {
         this.setHref(partInfo.getHref());
-        this.setDescription(partInfo.getDescription());
         this.setPartProperties(partInfo.getPartProperties());
     }
 
@@ -102,7 +101,6 @@ public class ExtendedPartInfo extends PartInfo {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("Description", description);
         builder.append("HRef", href);
         builder.append("partProperties", partProperties.getProperty());
         builder.append("InBody", inBody);
@@ -121,7 +119,6 @@ public class ExtendedPartInfo extends PartInfo {
 
         return new EqualsBuilder()
                 .append(super.getHref(), that.getHref())
-                .append(super.getDescription(), that.getDescription())
                 .append(super.getPartProperties(), that.getPartProperties())
                 .isEquals();
     }
@@ -130,7 +127,6 @@ public class ExtendedPartInfo extends PartInfo {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(getHref())
-                .append(getDescription())
                 .append(getPartProperties())
                 .toHashCode();
     }
