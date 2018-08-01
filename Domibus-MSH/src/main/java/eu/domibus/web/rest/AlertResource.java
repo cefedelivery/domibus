@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -120,7 +121,7 @@ public class AlertResource {
 
     @PutMapping
     public void processAlerts(@RequestBody List<AlertRo> alertRos) {
-        final List<Alert> alerts = alertRos.stream().map(alertRo -> {
+        final List<Alert> alerts = alertRos.stream().filter(Objects::nonNull).map(alertRo -> {
             final int entityId = alertRo.getEntityId();
             final boolean processed = alertRo.isProcessed();
             Alert alert = new Alert();
@@ -217,7 +218,7 @@ public class AlertResource {
                     range(0, parameters.length).
                     mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
                     filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
-                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue)); //NOSONAR
             alertCriteria.setParameters(parametersMap);
         }
         return alertCriteria;

@@ -67,7 +67,7 @@ public class GetStatusIT extends AbstractBackendWSIT {
         try {
             MessageStatus response = backendWebService.getStatus(messageStatusRequest);
         } catch (StatusFault statusFault) {
-            String message = "Message ID is empty";
+            String message = "Status request is not valid against the XSD";
             Assert.assertEquals(message, statusFault.getMessage());
             throw statusFault;
         }

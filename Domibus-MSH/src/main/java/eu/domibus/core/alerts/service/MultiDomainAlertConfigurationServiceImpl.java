@@ -258,7 +258,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             IntStream.
                     range(0, states.length).
                     mapToObj(i -> new AbstractMap.SimpleImmutableEntry<>(MessageStatus.valueOf(states[i]), AlertLevel.valueOf(levels[eachStatusHasALevel ? i : 0]))).
-                    forEach(entry -> messagingConfiguration.addStatusLevelAssociation(entry.getKey(), entry.getValue()));
+                    forEach(entry -> messagingConfiguration.addStatusLevelAssociation(entry.getKey(), entry.getValue())); //NOSONAR
             LOG.info("Alert message status change module activated for domain:[{}]", domain);
             return messagingConfiguration;
         } catch (Exception ex) {

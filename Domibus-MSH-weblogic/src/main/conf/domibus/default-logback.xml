@@ -12,7 +12,7 @@
             </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -36,7 +36,7 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/${domainName}-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -59,7 +59,7 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/${domainName}-business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>

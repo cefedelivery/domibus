@@ -261,7 +261,7 @@
         <profile>
             <id>wildfly12</id>
             <properties>
-                <wildfly.version>12.0.0.Final</wildfly.version>
+                <wildfly12.version>12.0.0.Final</wildfly12.version>
             </properties>
             <build>
                 <plugins>
@@ -271,7 +271,7 @@
                         <version>${cargo-maven2-plugin.version}</version>
                         <executions>
                             <execution>
-                                <id>build-wildfly</id>
+                                <id>build-wildfly12</id>
                                 <goals>
                                     <goal>configure</goal>
                                 </goals>
@@ -295,7 +295,7 @@
                         <version>1.5.3</version>
                         <executions>
                             <execution>
-                                <id>domibus-conf-location</id>
+                                <id>domibus-conf-location12</id>
                                 <phase>post-integration-test</phase>
                                 <goals>
                                     <goal>replace</goal>
@@ -303,10 +303,10 @@
                                 <configuration>
                                     <includes>
                                         <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf.bat
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly12.version}/wildfly-${wildfly12.version}/bin/standalone.conf.bat
                                         </include>
                                         <include>
-                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly.version}/wildfly-${wildfly.version}/bin/standalone.conf
+                                            ${project.build.directory}/cargo/installs/wildfly-as-dist-${wildfly12.version}/wildfly-${wildfly12.version}/bin/standalone.conf
                                         </include>
                                     </includes>
                                     <replacements>
@@ -330,7 +330,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>make-assembly-wildfly</id>
+                                <id>make-assembly-wildfly12</id>
                                 <configuration>
                                     <descriptors>
                                         <descriptor>src/main/assembly/wildfly12/wildfly-configuration-only.xml</descriptor>

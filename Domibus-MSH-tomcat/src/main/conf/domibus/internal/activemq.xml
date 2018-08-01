@@ -109,6 +109,7 @@
                     <authorizationMap>
                         <authorizationEntries>
                             <authorizationEntry queue="domibus.>" read="users" write="users" admin="admins" />
+                            <authorizationEntry queue="*.domibus.>" read="users" write="users" admin="admins" />
                             <authorizationEntry topic="domibus.>" read="users" write="users" admin="admins"/>
                             <authorizationEntry topic="ActiveMQ.Advisory.>" read="users" write="users" admin="users"/>
                         </authorizationEntries>
