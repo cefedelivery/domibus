@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -215,6 +216,7 @@ public class StubDtoTransformerTest {
         /*UserMessage.MessageInfo population start*/
         MessageInfo messageInfoObj = new MessageInfo();
         //messageInfoObj.setTimestamp(new XMLGregorianCalendarImpl(new GregorianCalendar()));
+        messageInfoObj.setTimestamp(LocalDateTime.now());
         userMessageObj.setMessageInfo(messageInfoObj);
     /*UserMessage.MessageInfo population end*/
 
