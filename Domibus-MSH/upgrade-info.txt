@@ -1,7 +1,7 @@
 Domibus 4.0 RC1 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\conf" respectively into "\domibus\conf\domibus\plugins\lib"
-                - The following changes have been implemented in the Default WS Plugin which is not backward compatible:
+                - The following changes have been implemented in the Default WS Plugin which is not backward compatible. The client of the Default WS Plugin need to take into account the following changes:
                      o replaced SendMessageFault with SubmitMessageFault
                      o replaced DownloadMessageFault with RetrieveMessageFault
                      o replaced PayloadType with LargePayloadType
@@ -9,7 +9,7 @@ Domibus 4.0 RC1 (from 3.3.4):
                      o removed deprecated methods sendMessage, downloadMessage, getMessageStatus
                      o MessageInfo->timestamp type was changed from Date to LocalDateTime
                      o Removed Description and Schema fields from PartInfo. These fields are no longer accepted by Domibus backend
-                - The Custom Plugins need to be updated:
+                - The backwards compatibility with the Custom Plugins is not maintain. In order to upgrade please follow the steps:
                      o remove the domibus-ext-services-api Maven dependency; the existing services from the domibus-ext-services-api have been moved into the plugin-api module under the same packages.
                        The service classes from the domibus-ext-services-api module have been renamed in order not to be confused with the internal services.
                        Example: AuthenticationService was renamed to AuthenticationExtService
