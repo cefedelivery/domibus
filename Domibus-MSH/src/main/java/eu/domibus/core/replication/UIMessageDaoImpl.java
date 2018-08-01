@@ -131,11 +131,11 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
             uiMessageEntity.setEntityId(uiMessageEntityFound.getEntityId());
             uiMessageEntity.setLastModified(uiMessageEntityFound.getLastModified());
             em.merge(uiMessageEntity);
-            LOG.info("uiMessageEntity having messageId={} have been updated", uiMessageEntity.getMessageId());
+            LOG.debug("uiMessageEntity having messageId={} have been updated", uiMessageEntity.getMessageId());
             return;
         }
         em.persist(uiMessageEntity);
-        LOG.info("uiMessageEntity having messageId={} have been inserted", uiMessageEntity.getMessageId());
+        LOG.debug("uiMessageEntity having messageId={} have been inserted", uiMessageEntity.getMessageId());
     }
 
     @Override

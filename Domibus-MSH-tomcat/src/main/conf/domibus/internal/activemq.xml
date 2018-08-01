@@ -50,7 +50,7 @@
 
 
             <queue id="domibusUIReplicationQueue"
-                   physicalName="domibus.UI.replication"/>
+                   physicalName="domibus.internal.ui.replication.queue"/>
 
             <!-- Backend plugin notification queues -->
             <queue id="webserviceBackendNotificationQueue"

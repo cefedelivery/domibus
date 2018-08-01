@@ -176,8 +176,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (uiMessageEntityList.size() > 0) {
             LOG.info("start to update TB_MESSAGE_UI");
             try {
-                uiMessageEntityList.parallelStream().forEach(uiMessageEntity -> updateAndFlush(uiMessageEntity.getMessageId(),
-                        uiMessageEntity, "findAndSyncUiMessage"));
+                uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
+                        uiMessageDao.saveOrUpdate(uiMessageEntity));
             } catch (OptimisticLockException e) {
                 LOG.warn("Optimistic lock exception detected");
             }
