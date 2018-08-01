@@ -77,7 +77,8 @@ Domibus 4.0 (from 3.3.4):
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
                  TB_AUTHENTICATION_ENTRY table was restored to defaults, having two users 'admin' and 'user' with default password '123456' encrypted using the new algorithm.
                  Custom users should be recreated using the new functionality in the Domibus Admin Console.
-               - Remove Description and Schema headers from PartInfo. The headers were deprecated in ebMS3.
+               - [WS-PLugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
+               - [JMS-PLugin] Description is no longer available as a property of a payload, remove it from the input message.
                - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
                     <ehcache>
                     ........................
@@ -98,10 +99,11 @@ Domibus 4.0 (from 3.3.4):
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=com.atomikos.icatch.jta.hibernate4.AtomikosJ2eePlatform
                       - [Wildfly only]
                             domibus.entityManagerFactory.jpaProperty.hibernate.transaction.jta.platform=org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform
-                    o add property domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings
-                        - [Mysql only]
-                             domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
-                    o add a new property "domibus.database.schema" for defining the database schema and modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties to re-use it
+                    o [Mysql only]
+                       - add property :
+                            domibus.entityManagerFactory.jpaProperty.hibernate.id.new_generator_mappings=false
+                    o [Tomcat only]
+                       - add a new property "domibus.database.schema" for defining the database schema and modify the "domibus.datasource.xa.property.url" and "domibus.datasource.url" properties to re-use it
                            Eg: #MySQL
                                domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?pinGlobalTxToPhysicalConnection=true
                                domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?useSSL=false
