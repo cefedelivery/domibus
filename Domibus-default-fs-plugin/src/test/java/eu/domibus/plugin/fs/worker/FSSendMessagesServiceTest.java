@@ -23,7 +23,9 @@ import javax.activation.DataSource;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author FERNANDES Henrique, GONCALVES Bruno
@@ -158,8 +160,12 @@ public class FSSendMessagesServiceTest {
             fsMultiTenancyService.verifyDomainExists("DOMAIN1");
             result = true;
 
+            List domains = new ArrayList<String>();
+            domains.add("default");
+            domains.add("DOMAIN1");
+
             fsPluginProperties.getDomains();
-            result = Collections.singletonList("DOMAIN1");
+            result = domains;
 
             fsFilesManager.setUpFileSystem("DOMAIN1");
             result = rootDir;
@@ -178,6 +184,12 @@ public class FSSendMessagesServiceTest {
 
             domibusConfigurationExtService.isMultiTenantAware();
             result = true;
+
+            fsPluginProperties.getAuthenticationUser(anyString);
+            result = "user1";
+
+            fsPluginProperties.getAuthenticationPassword(anyString);
+            result = "pass1";
 
             backendFSPlugin.submit(with(new Delegate<FSMessage>() {
                 void delegate(FSMessage message) throws IOException {
@@ -219,6 +231,12 @@ public class FSSendMessagesServiceTest {
 
             fsPluginProperties.getDomains();
             result = Collections.singletonList("DOMAIN1");
+
+            fsPluginProperties.getAuthenticationUser(anyString);
+            result = "user1";
+
+            fsPluginProperties.getAuthenticationPassword(anyString);
+            result = "pass1";
 
             fsFilesManager.setUpFileSystem("DOMAIN1");
             result = new FSSetUpException("Test-forced exception");
