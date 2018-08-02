@@ -39,6 +39,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationDataServiceImpl.class);
 
+    /** max no of records to be synchronized using cron job */
     private static final String MAX_ROWS_KEY = "domibus.ui.replication.sync.cron.max.rows";
 
     private int maxRowsToSync;
@@ -69,16 +70,31 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void messageReceived(String messageId) {
         saveUIMessageFromUserMessageLog(messageId);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void messageSubmitted(String messageId) {
         saveUIMessageFromUserMessageLog(messageId);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void messageStatusChange(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
@@ -99,6 +115,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                 userMessageLog.getMessageStatus());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void messageNotificationStatusChange(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
@@ -118,7 +139,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     }
 
 
-
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void messageChange(String messageId) {
 
@@ -136,6 +161,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param messageId
+     */
     @Override
     public void signalMessageSubmitted(final String messageId) {
         saveUIMessageFromSignalMessageLog(messageId);

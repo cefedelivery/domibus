@@ -126,6 +126,6 @@ SELECT
         AND property5_.NAME='originalSender' 
         AND property6_.NAME='finalRecipient' 
 	) result
-ORDER BY result.received ASC
+ORDER BY result.received ASC;
 
 COMMIT;

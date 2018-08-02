@@ -39,7 +39,7 @@
                physicalName="domibus.internal.pull.queue"/>
     <amq:queue id="alertMessageQueue"
                physicalName="domibus.internal.alert.queue"/>
-    <amq:queue id="domibusUIReplicationQueue"
+    <amq:queue id="uiReplicationQueue"
                physicalName="domibus.internal.ui.replication.queue"/>
     <amq:queue id="notifyBackendQueue"
                physicalName="domibus.internal.notification.queue"/>

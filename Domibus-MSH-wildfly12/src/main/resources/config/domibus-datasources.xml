@@ -21,6 +21,9 @@
     <bean id="alertMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.alert.queue"/>
     </bean>
+    <bean id="uiReplicationQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.ui.replication.queue"/>
+    </bean>
     <bean id="notifyBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.queue"/>
     </bean>

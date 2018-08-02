@@ -675,25 +675,25 @@
             AND property5_.NAME = 'originalSender'
             AND property6_.NAME = 'finalRecipient') result
             LEFT JOIN
-            tb_message_ui flat_table ON result.message_id = flat_table.message_id
-            AND result.message_Status = flat_table.message_status
-            AND result.NOTIFICATION_STATUS = flat_table.NOTIFICATION_STATUS
-            AND result.MSH_ROLE = flat_table.MSH_ROLE
-            AND result.MESSAGE_TYPE = flat_table.MESSAGE_TYPE
-            AND result.DELETED = flat_table.DELETED
-            AND result.RECEIVED = flat_table.RECEIVED
-            AND result.SEND_ATTEMPTS = flat_table.SEND_ATTEMPTS
-            AND result.SEND_ATTEMPTS_MAX = flat_table.SEND_ATTEMPTS_MAX
-            AND result.NEXT_ATTEMPT = flat_table.NEXT_ATTEMPT
-            AND result.conversation_id = flat_table.conversation_id
-            AND result.FROM_ID = flat_table.FROM_ID
-            AND result.TO_ID = flat_table.TO_ID
-            AND result.FROM_SCHEME = flat_table.FROM_SCHEME
-            AND result.TO_SCHEME = flat_table.TO_SCHEME
-            AND result.REF_TO_MESSAGE_ID = flat_table.REF_TO_MESSAGE_ID
-            AND result.FAILED = flat_table.FAILED
-            AND result.RESTORED = flat_table.RESTORED
-            AND result.MESSAGE_SUBTYPE = flat_table.MESSAGE_SUBTYPE
+            tb_message_ui flat_table ON result.message_id &lt;=&gt; flat_table.message_id
+            AND result.message_Status &lt;=&gt; flat_table.message_status
+            AND result.NOTIFICATION_STATUS &lt;=&gt; flat_table.NOTIFICATION_STATUS
+            AND result.MSH_ROLE &lt;=&gt; flat_table.MSH_ROLE
+            AND result.MESSAGE_TYPE &lt;=&gt; flat_table.MESSAGE_TYPE
+            AND result.DELETED &lt;=&gt; flat_table.DELETED
+            AND result.RECEIVED &lt;=&gt; flat_table.RECEIVED
+            AND result.SEND_ATTEMPTS &lt;=&gt; flat_table.SEND_ATTEMPTS
+            AND result.SEND_ATTEMPTS_MAX &lt;=&gt; flat_table.SEND_ATTEMPTS_MAX
+            AND result.NEXT_ATTEMPT &lt;=&gt; flat_table.NEXT_ATTEMPT
+            AND result.conversation_id &lt;=&gt; flat_table.conversation_id
+            AND result.FROM_ID &lt;=&gt; flat_table.FROM_ID
+            AND result.TO_ID &lt;=&gt; flat_table.TO_ID
+            AND result.FROM_SCHEME &lt;=&gt; flat_table.FROM_SCHEME
+            AND result.TO_SCHEME &lt;=&gt; flat_table.TO_SCHEME
+            AND result.REF_TO_MESSAGE_ID &lt;=&gt; flat_table.REF_TO_MESSAGE_ID
+            AND result.FAILED &lt;=&gt; flat_table.FAILED
+            AND result.RESTORED &lt;=&gt; flat_table.RESTORED
+            AND result.MESSAGE_SUBTYPE &lt;=&gt; flat_table.MESSAGE_SUBTYPE
             WHERE
             flat_table.message_id IS NULL
         </createView>

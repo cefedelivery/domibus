@@ -24,8 +24,8 @@ public class UIReplicationSignalService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
 
     @Autowired
-    @Qualifier("domibusUIReplicationQueue")
-    private Queue domibusUIReplicationQueue;
+    @Qualifier("uiReplicationQueue")
+    private Queue uiReplicationQueue;
 
     @Autowired
     protected JMSManager jmsManager;
@@ -35,7 +35,7 @@ public class UIReplicationSignalService {
                 .type(UIJMSType.USER_MESSAGE_RECEIVED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageStatusChange(String messageId, MessageStatus newStatus) {
@@ -44,7 +44,7 @@ public class UIReplicationSignalService {
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageChange(String messageId) {
@@ -53,7 +53,7 @@ public class UIReplicationSignalService {
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageNotificationStatusChange(String messageId, NotificationStatus newStatus) {
@@ -62,7 +62,7 @@ public class UIReplicationSignalService {
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void userMessageSubmitted(String messageId) {
@@ -70,7 +70,7 @@ public class UIReplicationSignalService {
                 .type(UIJMSType.USER_MESSAGE_SUBMITTED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void signalMessageSubmitted(String messageId) {
@@ -78,7 +78,7 @@ public class UIReplicationSignalService {
                 .type(UIJMSType.SIGNAL_MESSAGE_SUBMITTED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void signalMessageReceived(String messageId) {
@@ -86,7 +86,7 @@ public class UIReplicationSignalService {
                 .type(UIJMSType.SIGNAL_MESSAGE_RECEIVED.name())
                 .property(MessageConstants.MESSAGE_ID, messageId).build();
 
-        jmsManager.sendMapMessageToQueue(message, domibusUIReplicationQueue);
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
 }
