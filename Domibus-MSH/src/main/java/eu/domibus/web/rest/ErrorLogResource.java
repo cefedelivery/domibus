@@ -59,7 +59,7 @@ public class ErrorLogResource {
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
-            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,

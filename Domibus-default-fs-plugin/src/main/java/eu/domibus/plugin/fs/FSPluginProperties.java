@@ -4,7 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * File System Plugin Properties
@@ -211,7 +214,7 @@ public class FSPluginProperties {
      * @return the user used to authenticate
      */
     public String getAuthenticationUser(String domain) {
-        return getDomainProperty(domain, AUTHENTICATION_USER, null);
+        return getDomainPropertyNoDefault(domain, AUTHENTICATION_USER, null);
     }
 
     /**
@@ -219,7 +222,7 @@ public class FSPluginProperties {
      * @return the password used to authenticate
      */
     public String getAuthenticationPassword(String domain) {
-        return getDomainProperty(domain, AUTHENTICATION_PASSWORD, null);
+        return getDomainPropertyNoDefault(domain, AUTHENTICATION_PASSWORD, null);
     }
 
     /**
@@ -285,6 +288,14 @@ public class FSPluginProperties {
             return properties.getProperty(domainFullPropertyName, defaultValue);
         }
         return properties.getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
+    }
+
+    private String getDomainPropertyNoDefault(String domain, String propertyName, String defaultValue) {
+        String domainFullPropertyName = DOMAIN_PREFIX + domain + DOT + propertyName;
+        if (properties.containsKey(domainFullPropertyName)) {
+            return properties.getProperty(domainFullPropertyName, defaultValue);
+        }
+        return null;
     }
 
     private Integer getInteger(String value, Integer defaultValue) {
