@@ -166,13 +166,14 @@ public abstract class PModeProvider {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
-
+        description = validateDescriptionSize(description);
         List<String> resultMessage = new ArrayList<>();
         final UnmarshallerResult unmarshalledConfiguration = parsePMode(bytes);
         if (!unmarshalledConfiguration.isValid()) {
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
-            LOG.warn(StringUtils.join(resultMessage, " "));
+            final String message = StringUtils.join(resultMessage, " ");
+            LOG.warn(message);
         }
 
         Configuration configuration = unmarshalledConfiguration.getResult();
@@ -198,6 +199,13 @@ public abstract class PModeProvider {
                 .build(), clusterCommandTopic);
 
         return resultMessage;
+    }
+
+    private String validateDescriptionSize(final String description) {
+        if(StringUtils.isNotEmpty(description) && description.length()>255){
+            return description.substring(0,254);
+        }
+        return description;
     }
 
 
