@@ -79,7 +79,7 @@ public class BackendMessageValidator {
      * Only control character restriction is enforced.
      *
      * @param messageId the message id.
-     * @throws EbMS3Exception
+     * @throws EbMS3Exception if the message id value is invalid
      */
     public void validateMessageId(final String messageId) throws EbMS3Exception {
 
@@ -109,7 +109,7 @@ public class BackendMessageValidator {
      * The field - UserMessage/MessageInfo/RefToMessageId is expected to satisfy all the validations of the - UserMessage/MessageInfo/MessageId field
      *
      * @param refToMessageId the message id to be validated.
-     * @throws EbMS3Exception
+     * @throws EbMS3Exception if the RefToMessageId value is invalid
      */
     public void validateRefToMessageId(final String refToMessageId) throws EbMS3Exception {
 
@@ -138,7 +138,7 @@ public class BackendMessageValidator {
      *
      * @param from the initiator party.
      * @param to the responder party.
-     * @throws EbMS3Exception
+     * @throws NullPointerException if either initiator party or responder party is null
      */
     public void validateParties(Party from, Party to) {
 
@@ -152,7 +152,8 @@ public class BackendMessageValidator {
      *
      * @param gatewayParty the access point party.
      * @param from the initiator party.
-     * @throws EbMS3Exception
+     * @throws NullPointerException if either gatewayParty or initiator party is null
+     * @throws EbMS3Exception if the initiator party name does not correspond to the access point's name
      */
     public void validateInitiatorParty(Party gatewayParty, Party from) throws EbMS3Exception {
 
@@ -169,7 +170,7 @@ public class BackendMessageValidator {
      *
      * @param gatewayParty the access point party.
      * @param to the responder party.
-     * @throws EbMS3Exception
+     * @throws NullPointerException if either access point party or responder party is null
      */
     public void validateResponderParty(Party gatewayParty, Party to) {
 
@@ -182,7 +183,8 @@ public class BackendMessageValidator {
      *
      * @param fromRole the role of the initiator party.
      * @param toRole the role of the responder party.
-     * @throws EbMS3Exception
+     * @throws NullPointerException if either initiator party's role or responder party's role is null
+     * @throws EbMS3Exception if the initiator party's role is the same as the responder party's role
      */
     public void validatePartiesRoles(Role fromRole, Role toRole) throws EbMS3Exception {
 
@@ -198,7 +200,6 @@ public class BackendMessageValidator {
         if(payloadInfo == null || CollectionUtils.isEmpty(payloadInfo.getPartInfo())) {
             return;
         }
-
 
         for(PartInfo partInfo : payloadInfo.getPartInfo()) {
             validateCompressionProperty(partInfo.getPartProperties());
