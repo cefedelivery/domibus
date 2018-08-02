@@ -22,6 +22,7 @@ public interface MessageRetriever {
      *
      * @param messageId the messageId of the message to retrieve
      * @return the message object with the given messageId
+     * @throws MessageNotFoundException if the message could not be found
      */
     Submission downloadMessage(String messageId) throws MessageNotFoundException;
 
@@ -37,7 +38,7 @@ public interface MessageRetriever {
      * Returns List {@link java.util.List} of error logs {@link ErrorResult} for message with messageid
      *
      * @param messageId id of the message the errors are requested for
-     * @return the list of error log entries {@link java.util.List< ErrorResult >}
+     * @return the list of error log entries {@link java.util.List<ErrorResult>}
      */
     List<? extends ErrorResult> getErrorsForMessage(String messageId);
 }
