@@ -85,7 +85,7 @@ public class MessageLogResource {
 
     @RequestMapping(method = RequestMethod.GET)
     public MessageLogResultRO getMessageLog(
-            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "orderBy", required = false) String column,
