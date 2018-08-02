@@ -7,6 +7,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.Query;
@@ -39,12 +40,13 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     }
 
     /**
-     * find {@link UIMessageEntity} by messageId
+     * Find {@link UIMessageEntity} by messageId
      *
      * @param messageId
      * @return an instance of {@link UIMessageEntity}
      */
     @Override
+    @Transactional(readOnly=true, isolation=Isolation.READ_UNCOMMITTED)
     public UIMessageEntity findUIMessageByMessageId(final String messageId) {
 
         final TypedQuery<UIMessageEntity> query = this.em.createNamedQuery("UIMessageEntity.findUIMessageByMessageId", UIMessageEntity.class);

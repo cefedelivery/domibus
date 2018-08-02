@@ -21,7 +21,7 @@ import java.util.Date;
 @Table(name = "V_MESSAGE_UI_DIFF")
 @NamedQueries({
         @NamedQuery(name = "UIMessageDiffEntity.findDiffMessages", query = "select e from UIMessageDiffEntity e"),
-        @NamedQuery(name = "UIMessageDiffEntity.countDiffMessages", query = "select count(e.messageId)  from UIMessageDiffEntity e")
+        @NamedQuery(name = "UIMessageDiffEntity.countDiffMessages", query = "select count(e.messageId) from UIMessageDiffEntity e")
 })
 public class UIMessageDiffEntity {
 
