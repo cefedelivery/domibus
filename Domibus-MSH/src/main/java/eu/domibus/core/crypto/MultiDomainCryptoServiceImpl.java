@@ -49,17 +49,16 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
 
     protected DomainCryptoService getDomainCertificateProvider(Domain domain)  {
         LOG.debug("Get domain CertificateProvider for domain [{}]", domain);
-        DomainCryptoService domainCertificateProvider = domainCertificateProviderMap.get(domain);
-        if (domainCertificateProvider == null) {
+        if (domainCertificateProviderMap.get(domain) == null) {
             synchronized (domainCertificateProviderMap) {
                 if (domainCertificateProviderMap.get(domain) == null) { //NOSONAR: double-check locking
                     LOG.debug("Creating domain CertificateProvider for domain [{}]", domain);
-                    domainCertificateProvider = domainCertificateProviderFactory.createDomainCryptoService(domain);
+                    DomainCryptoService domainCertificateProvider = domainCertificateProviderFactory.createDomainCryptoService(domain);
                     domainCertificateProviderMap.put(domain, domainCertificateProvider);
                 }
             }
         }
-        return domainCertificateProvider;
+        return domainCertificateProviderMap.get(domain);
     }
 
     @Override
