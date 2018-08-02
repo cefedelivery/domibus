@@ -476,7 +476,7 @@ public class Submission {
     /**
      * This method adds one payload to the {@link java.util.Set} of {@link eu.domibus.plugin.Submission.Payload} elements.
      * In this case it is possible to set all parameters available for a payload.
-     * <p>
+     *
      * <ol>
      * <li><b>contentId:</b> Will be mapped the href attribute of the eb:partInfo element in ebMS described here:
      * This OPTIONAL attribute has a value that is the [RFC2392] Content-ID URI of the payload object

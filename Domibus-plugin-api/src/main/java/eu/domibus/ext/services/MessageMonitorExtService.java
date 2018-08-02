@@ -25,7 +25,6 @@ import java.util.List;
  * <p>Notice about Domibus notification mechanism: whenever a message fails to be sent several times, according to the configuration of the reception awareness/retry in the PMode,
  * it's status gets changed to SEND_FAILURE and Domibus notifies the plugin via the void messageSendFailed(String messageId) method from the eu.domibus.plugin.BackendConnector.<br>
  * In case of the <b>default-jms-plugin</b> the method <b>messageSendFailed</b> is implemented to send a JMS message containing the error details on the "domibus.backend.jms.errorNotifyProducer" queue.</p>
- * </p>
  *
  * @author Cosmin Baciu
  * @since 4.0
@@ -55,6 +54,7 @@ public interface MessageMonitorExtService {
      * <li>It filter the messages based on the finalRecipient value in case the user has ROLE_USER</li>
      * </ul>
      *
+     * @param finalRecipient
      * @return List - a list of unique message ids.
      * @throws MessageMonitorExtException Raised in case an exception occurs while trying to get the failed messages list
      * @throws AuthenticationExtException Raised in case the security is enabled and the user is not authenticated or the user does not have the permission to access messages having the provided finalRecipient

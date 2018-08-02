@@ -4,7 +4,7 @@ package eu.domibus.plugin.transformer;
 import eu.domibus.plugin.Submission;
 
 /**
- * Implementations of this interface transsform a message of type
+ * Implementations of this interface transform a message of type
  * {@link eu.domibus.plugin.Submission} to an object of type {@literal <T>}
  *
  * @param <U> Data transfer object
@@ -19,6 +19,7 @@ public interface MessageRetrievalTransformer<U> {
      * transforms the Messaging to the typed object
      *
      * @param submission the {@link eu.domibus.plugin.Submission} to be transformed
+     * @param target
      * @return the transformed message
      */
     U transformFromSubmission(Submission submission, U target);
