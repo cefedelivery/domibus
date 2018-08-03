@@ -57,4 +57,16 @@ public interface UIReplicationDataService {
      */
     void findAndSyncUIMessages();
 
+    /**
+     * run the diff query against {@code V_MESSAGE_UI} view and sync the data
+     */
+    int findAndSyncUIMessages(int limit);
+
+    /**
+     * count no of records from  {@code V_MESSAGE_UI}
+     *
+     * @return
+     */
+    int countSyncUIMessages();
+
 }

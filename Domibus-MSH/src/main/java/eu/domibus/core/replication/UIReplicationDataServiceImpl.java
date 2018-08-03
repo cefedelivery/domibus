@@ -216,6 +216,63 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int findAndSyncUIMessages(int limit) {
+        LOG.debug("find and sync first {} UIMessages", limit);
+        long startTime = System.currentTimeMillis();
+
+
+        int recordsToSync = uiMessageDiffDao.countAll();
+
+        LOG.debug("{} milliseconds to count the records", System.currentTimeMillis() - startTime);
+        startTime = System.currentTimeMillis();
+
+        if (recordsToSync == 0) {
+            LOG.info("no records to sync");
+            return 0;
+        }
+
+        List<UIMessageEntity> uiMessageEntityList =
+                uiMessageDiffDao.findAll(limit).
+                        stream().
+                        map(objects -> convertToUIMessageEntity(objects)).
+                        collect(Collectors.toList());
+
+        LOG.debug("{} milliseconds to fetch the records", System.currentTimeMillis() - startTime);
+        startTime = System.currentTimeMillis();
+
+        if (uiMessageEntityList.size() > 0) {
+            LOG.debug("start to update TB_MESSAGE_UI");
+            try {
+                uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
+                        uiMessageDao.saveOrUpdate(uiMessageEntity));
+            } catch (OptimisticLockException e) {
+                LOG.warn("Optimistic lock exception detected");
+            }
+            LOG.debug("finish to update TB_MESSAGE_UI after {} milliseconds", System.currentTimeMillis() - startTime);
+        }
+        return uiMessageEntityList.size();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     */
+    @Override
+    public int countSyncUIMessages() {
+        LOG.debug("start to count UIMessages to be synced");
+        long startTime = System.currentTimeMillis();
+
+        int recordsToSync = uiMessageDiffDao.countAll();
+
+        LOG.debug("{} milliseconds to count the records", System.currentTimeMillis() - startTime);
+
+        return recordsToSync;
+    }
+
+    /**
      * Update (merge) a JPA entity and force the flush in order to catch right away the {@link OptimisticLockException}
      *
      * @param messageId
