@@ -116,6 +116,11 @@ public class AuditResource {
 
     /**
      * This method returns a CSV file with the contents of Audit table
+     * @param auditTargetName the type of audit.
+     * @param user the user that performed the audited action.
+     * @param action the type of action linked with audit.
+     * @param from the date from which we want to retrieve audit logs.
+     * @param to the date to which we want to retrieve audit logs.
      *
      * @return CSV file with the contents of Audit table
      */

@@ -130,6 +130,7 @@ public class Mpc extends AbstractBaseEntity {
 
     /**
      * Gets the value of the default property.
+     * @return the value of the default property.
      */
     public boolean isDefault() {
         return this.defaultMpc;
@@ -137,6 +138,7 @@ public class Mpc extends AbstractBaseEntity {
 
     /**
      * Sets the value of the default property.
+     * @param value the new value of the default property.
      */
     public void setDefault(final boolean value) {
         this.defaultMpc = value;
@@ -144,6 +146,7 @@ public class Mpc extends AbstractBaseEntity {
 
     /**
      * Gets the value of the enabled property.
+     * @return the value of the enabled property.
      */
     public boolean isEnabled() {
         return this.enabled;
@@ -151,6 +154,7 @@ public class Mpc extends AbstractBaseEntity {
 
     /**
      * Sets the value of the enabled property.
+     * @param value the new value of the enabled property.
      */
     public void setEnabled(final boolean value) {
         this.enabled = value;

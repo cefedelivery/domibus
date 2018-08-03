@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * <p/>
+ * <p>
  * This element occurs zero or more times. The PartInfo element is used to reference a MIME
  * attachment, an XML element within the SOAP Body, or another resource which may be obtained
  * by resolving a URL, according to the value of the href attribute property.

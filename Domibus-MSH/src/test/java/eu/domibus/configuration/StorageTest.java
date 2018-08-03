@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @Author Flavio Santos
+ * @author Flavio Santos
  */
 @RunWith(JMockit.class)
 public class StorageTest {

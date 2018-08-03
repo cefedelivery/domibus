@@ -43,8 +43,8 @@ import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_REVOKED;
 import static eu.domibus.logging.DomibusMessageCode.SEC_CERTIFICATE_SOON_REVOKED;
 
 /**
- * @Author Cosmin Baciu
- * @Since 3.2
+ * @author Cosmin Baciu
+ * @since 3.2
  */
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -157,10 +157,10 @@ public class CertificateServiceImpl implements CertificateService {
     /**
      * Load certificate with alias from JKS file and return as {@code X509Certificate}.
      *
-     * @param filePath
-     * @param alias
-     * @param password
-     * @return
+     * @param filePath the path to the JKS file
+     * @param alias the certificate alias
+     * @param password the key store certificate
+     * @return a X509 certificate
      */
     @Override
     public X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
@@ -236,7 +236,7 @@ public class CertificateServiceImpl implements CertificateService {
         if (!activeModule) {
             return;
         }
-        final String accessPoint = getAccesPointName();
+        final String accessPoint = getAccessPointName();
         final Integer imminentExpirationDelay = imminentExpirationCertificateConfiguration.getImminentExpirationDelay();
         final Integer imminentExpirationFrequency = imminentExpirationCertificateConfiguration.getImminentExpirationFrequency();
 
@@ -262,7 +262,7 @@ public class CertificateServiceImpl implements CertificateService {
         if (!activeModule) {
             return;
         }
-        final String accessPoint = getAccesPointName();
+        final String accessPoint = getAccessPointName();
         final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
         final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
 
@@ -279,7 +279,7 @@ public class CertificateServiceImpl implements CertificateService {
         });
     }
 
-    private String getAccesPointName() {
+    private String getAccessPointName() {
         String partyName = null;
         if (pModeProvider.isConfigurationLoaded()) {
             partyName = pModeProvider.getGatewayParty().getName();
@@ -290,6 +290,8 @@ public class CertificateServiceImpl implements CertificateService {
 
     /**
      * Create or update certificate in the db.
+     * @param trustStore the trust store
+     * @param keyStore the key store
      */
     protected void saveCertificateData(KeyStore trustStore, KeyStore keyStore) {
         List<eu.domibus.common.model.certificate.Certificate> certificates = groupAllKeystoreCertificates(trustStore, keyStore);
@@ -319,6 +321,8 @@ public class CertificateServiceImpl implements CertificateService {
     /**
      * Group keystore and trustStore certificates in a list.
      *
+     * @param trustStore the trust store
+     * @param keyStore the key store
      * @return a list of certificate.
      */
     protected List<eu.domibus.common.model.certificate.Certificate> groupAllKeystoreCertificates(KeyStore trustStore, KeyStore keyStore) {

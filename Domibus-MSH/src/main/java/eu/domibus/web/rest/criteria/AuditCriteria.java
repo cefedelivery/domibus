@@ -22,7 +22,7 @@ public class AuditCriteria {
     private Set<String> action;
 
     /**
-     * the user that perfomed the audited action.
+     * the user that performed the audited action.
      */
     private Set<String> user;
 
@@ -32,7 +32,7 @@ public class AuditCriteria {
     private Date from;
 
     /**
-     * Date from which we want to retrieve audit logs.
+     * Date to which we want to retrieve audit logs.
      */
     private Date to;
 
