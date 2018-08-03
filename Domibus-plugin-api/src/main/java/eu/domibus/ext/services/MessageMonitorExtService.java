@@ -54,7 +54,7 @@ public interface MessageMonitorExtService {
      * <li>It filter the messages based on the finalRecipient value in case the user has ROLE_USER</li>
      * </ul>
      *
-     * @param finalRecipient
+     * @param finalRecipient represents the destination
      * @return List - a list of unique message ids.
      * @throws MessageMonitorExtException Raised in case an exception occurs while trying to get the failed messages list
      * @throws AuthenticationExtException Raised in case the security is enabled and the user is not authenticated or the user does not have the permission to access messages having the provided finalRecipient

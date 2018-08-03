@@ -74,7 +74,7 @@ public interface BackendConnector<U, T> {
      * Returns List {@link java.util.List} of error logs {@link ErrorResult} for message with messageid
      *
      * @param messageId id of the message the errors are requested for
-     * @return the list of error log entries {@link java.util.List<ErrorResult>}
+     * @return the list of error log entries {@link java.util.List} of {@link ErrorResult}
      */
     List<ErrorResult> getErrorsForMessage(final String messageId);
 

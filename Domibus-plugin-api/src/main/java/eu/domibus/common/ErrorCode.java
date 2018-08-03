@@ -128,6 +128,8 @@ public enum ErrorCode {
         /**
          * "This REQUIRED attribute is a unique identifier for the type of error."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing a unique identifier for the type of error
          */
         public String getOrigin() {
             return this.origin;

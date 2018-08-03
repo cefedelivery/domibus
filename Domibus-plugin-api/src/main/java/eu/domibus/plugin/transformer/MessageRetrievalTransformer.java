@@ -19,7 +19,7 @@ public interface MessageRetrievalTransformer<U> {
      * transforms the Messaging to the typed object
      *
      * @param submission the {@link eu.domibus.plugin.Submission} to be transformed
-     * @param target
+     * @param target the output target
      * @return the transformed message
      */
     U transformFromSubmission(Submission submission, U target);
