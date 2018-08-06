@@ -8,9 +8,10 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 /**
+ * {@inheritDoc}
+ *
  * @author Catalin Enache
  * @since 4.0
- * {@inheritDoc}
  */
 @Repository
 public class UIMessageDiffDaoImpl implements UIMessageDiffDao {

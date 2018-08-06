@@ -36,6 +36,12 @@ public interface UIReplicationDataService {
      */
     void messageNotificationStatusChange(final String messageId);
 
+    /**
+     * updates/sync data on receiver/sender side when a change in message change appears
+     *
+     *  @param messageId
+     *
+     */
     void messageChange(final String messageId);
 
     /**
@@ -65,7 +71,7 @@ public interface UIReplicationDataService {
     /**
      * count no of records from  {@code V_MESSAGE_UI}
      *
-     * @return
+     * @return no of records
      */
     int countSyncUIMessages();
 

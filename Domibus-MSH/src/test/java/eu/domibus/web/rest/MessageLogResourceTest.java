@@ -17,9 +17,10 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.CsvService;
+import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageDao;
-import eu.domibus.core.replication.UIMessageDaoImpl;
+import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.SignalMessage;
@@ -27,10 +28,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
+import mockit.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,7 +77,13 @@ public class MessageLogResourceTest {
     DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
+    private UIMessageService uiMessageService;
+
+    @Injectable
     private UIMessageDao uiMessageDao;
+
+    @Injectable
+    private MessagesLogService messagesLogService;
 
     @Parameterized.Parameter(0)
     public MessageType messageType;
@@ -90,57 +94,34 @@ public class MessageLogResourceTest {
     @Parameterized.Parameter(2)
     public MessageSubtype messageSubtype;
 
+    @Parameterized.Parameter(3)
+    public boolean useFlatTable;
+
     @Mocked
     SignalMessage signalMessage;
 
     @Parameterized.Parameters(name = "{index}: messageType=\"{0}\" messageSubtype=\"{2}\"")
     public static Collection<Object[]> values() {
         return Arrays.asList(new Object[][]{
-                {MessageType.USER_MESSAGE, new UserMessageLog(), null},
-                {MessageType.USER_MESSAGE, new UserMessageLog(), MessageSubtype.TEST},
-                {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), null},
-                {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), MessageSubtype.TEST},
+                {MessageType.USER_MESSAGE, new UserMessageLog(), null, false},
+                {MessageType.USER_MESSAGE, new UserMessageLog(), MessageSubtype.TEST, false},
+                {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), null, false},
+                {MessageType.SIGNAL_MESSAGE, new SignalMessageLog(), MessageSubtype.TEST, false},
         });
     }
 
     @Test
     public void testMessageLog() {
         // Given
-        MessageLog createdMessageLog = createMessageLog(messageType, messageLog, messageSubtype);
-        final MessageLogInfo messageLogInfo = new MessageLogInfo(
-                createdMessageLog.getMessageId(),
-                createdMessageLog.getMessageStatus(),
-                createdMessageLog.getNotificationStatus(),
-                createdMessageLog.getMshRole(),
-                createdMessageLog.getMessageType(),
-                createdMessageLog.getDeleted(),
-                createdMessageLog.getReceived(),
-                createdMessageLog.getSendAttempts(),
-                createdMessageLog.getSendAttemptsMax(),
-                createdMessageLog.getNextAttempt(),
-                "conversationId",
-                "fromPartyId",
-                "toPartyId",
-                "originalSender",
-                "finalRecipient",
-                "refToMessageId",
-                createdMessageLog.getFailed(),
-                createdMessageLog.getRestored(),
-                createdMessageLog.getMessageSubtype());
-        final List<MessageLogInfo> resultList = new ArrayList<>();
-        resultList.add(messageLogInfo);
-        // Expectations doesn't allow if's inside
-        if(messageType.equals(MessageType.USER_MESSAGE)) {
-            new Expectations() {{
-                userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
-                result = resultList;
-            }};
-        } else if (messageType.equals(MessageType.SIGNAL_MESSAGE)) {
-            new Expectations() {{
-                signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
-                result = resultList;
-            }};
-        }
+        final MessageLogRO  messageLogRO = createMessageLog(messageType, messageSubtype);
+        final List<MessageLogRO> resultList = Collections.singletonList(messageLogRO);
+        MessageLogResultRO expectedMessageLogResult = new MessageLogResultRO();
+        expectedMessageLogResult.setMessageLogEntries(resultList);
+
+        new Expectations() {{
+            messagesLogService.countAndFindPaged(messageType, anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
+            result = expectedMessageLogResult;
+        }};
 
         // When
         final MessageLogResultRO messageLogResultRO = getMessageLog(messageType, messageSubtype);
@@ -149,17 +130,17 @@ public class MessageLogResourceTest {
         Assert.assertNotNull(messageLogResultRO);
         Assert.assertEquals(1, messageLogResultRO.getMessageLogEntries().size());
 
-        MessageLogRO messageLogRO = messageLogResultRO.getMessageLogEntries().get(0);
-        Assert.assertEquals(createdMessageLog.getMessageId(), messageLogRO.getMessageId());
-        Assert.assertEquals(createdMessageLog.getMessageStatus(), messageLogRO.getMessageStatus());
-        Assert.assertEquals(createdMessageLog.getMessageType(), messageLogRO.getMessageType());
-        Assert.assertEquals(createdMessageLog.getDeleted(), messageLogRO.getDeleted());
-        Assert.assertEquals(createdMessageLog.getMshRole(), messageLogRO.getMshRole());
-        Assert.assertEquals(createdMessageLog.getNextAttempt(), messageLogRO.getNextAttempt());
-        Assert.assertEquals(createdMessageLog.getNotificationStatus(), messageLogRO.getNotificationStatus());
-        Assert.assertEquals(createdMessageLog.getReceived(), messageLogRO.getReceived());
-        Assert.assertEquals(createdMessageLog.getSendAttempts(), messageLogRO.getSendAttempts());
-        Assert.assertEquals(createdMessageLog.getMessageSubtype(), messageLogRO.getMessageSubtype());
+        MessageLogRO actualMessageLogRO = messageLogResultRO.getMessageLogEntries().get(0);
+        Assert.assertEquals(messageLogRO.getMessageId(), actualMessageLogRO.getMessageId());
+        Assert.assertEquals(messageLogRO.getMessageStatus(), actualMessageLogRO.getMessageStatus());
+        Assert.assertEquals(messageLogRO.getMessageType(), actualMessageLogRO.getMessageType());
+        Assert.assertEquals(messageLogRO.getDeleted(), actualMessageLogRO.getDeleted());
+        Assert.assertEquals(messageLogRO.getMshRole(), actualMessageLogRO.getMshRole());
+        Assert.assertEquals(messageLogRO.getNextAttempt(), actualMessageLogRO.getNextAttempt());
+        Assert.assertEquals(messageLogRO.getNotificationStatus(), actualMessageLogRO.getNotificationStatus());
+        Assert.assertEquals(messageLogRO.getReceived(), actualMessageLogRO.getReceived());
+        Assert.assertEquals(messageLogRO.getSendAttempts(), actualMessageLogRO.getSendAttempts());
+        Assert.assertEquals(messageLogRO.getMessageSubtype(), actualMessageLogRO.getMessageSubtype());
     }
 
     @Test
@@ -168,37 +149,30 @@ public class MessageLogResourceTest {
         Date date = new Date();
         List<MessageLogInfo> messageList = getMessageList(messageType, date, messageSubtype);
 
-        // Expectations doesn't allow if's inside
-        if(messageType.equals(MessageType.USER_MESSAGE)) {
-            new Expectations() {{
-                domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
-                result = CsvService.MAX_NUMBER_OF_ENTRIES;
-                userMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
-                result = messageList;
-                csvServiceImpl.exportToCSV(messageList);
-                result = CSV_TITLE +
-                        "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
-                        NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," +
-                        date + "," + date + "," + messageSubtype + System.lineSeparator();
-            }};
-        } else if(messageType.equals(MessageType.SIGNAL_MESSAGE)) {
-            new Expectations() {{
-                domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
-                result = CsvService.MAX_NUMBER_OF_ENTRIES;
-                signalMessageLogDao.findAllInfoPaged(anyInt, anyInt, anyString, anyBoolean, (HashMap<String, Object>) any);
-                result = messageList;
-                csvServiceImpl.exportToCSV(messageList);
-                result = CSV_TITLE +
-                        "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
-                        NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," +
-                        date + "," + date + "," + messageSubtype + System.lineSeparator();
-            }};
-        }
+        new Expectations() {{
+            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
+            result = CsvService.MAX_NUMBER_OF_ENTRIES;
+
+            messagesLogService.findAllInfoCSV(messageType, anyInt, (HashMap<String, Object>) any);
+            result = messageList;
+
+            csvServiceImpl.exportToCSV(messageList);
+            result = CSV_TITLE +
+                    "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
+                    NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," +
+                    date + "," + date + "," + messageSubtype + System.lineSeparator();
+        }};
 
         // When
         final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, messageType, null,
                 null, null, null, null, null,
                 null, null, null, messageSubtype);
+
+        new Verifications() {{
+            Map<String, String> mapActualValues;
+            csvServiceImpl.customizeColumn(mapActualValues = withCapture());
+            Assert.assertEquals("", CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), mapActualValues);
+        }};
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
@@ -307,29 +281,31 @@ public class MessageLogResourceTest {
     }
 
     /**
-     * Creates a <code>messageLog</code> based on <code>messageType</code> and <code>messageSubtype</code>
+     * Creates a {@link MessageLogRO} based on <code>messageType</code> and <code>messageSubtype</code>
      * @param messageType Message Type
-     * @param messageLog Message Log
      * @param messageSubtype Message Subtype
      * @return <code>MessageLog</code>
      */
-    private static MessageLog createMessageLog(MessageType messageType, MessageLog messageLog, MessageSubtype messageSubtype) {
-        messageLog.setEntityId(1);
-        messageLog.setBackend("backend");
-        messageLog.setDeleted(new Date());
-        messageLog.setDownloaded(new Date());
-        messageLog.setEndpoint("endpoint");
-        messageLog.setFailed(new Date());
-        messageLog.setMessageId("messageId");
-        messageLog.setMessageStatus(MessageStatus.ACKNOWLEDGED);
-        messageLog.setMessageType(messageType);
-        messageLog.setMessageSubtype(messageSubtype);
-        messageLog.setMpc("mpc");
-        messageLog.setMshRole(MSHRole.RECEIVING);
-        messageLog.setNextAttempt(new Date());
-        messageLog.setReceived(new Date());
-        messageLog.setSendAttemptsMax(4);
-        return messageLog;
+    private static MessageLogRO createMessageLog(MessageType messageType, MessageSubtype messageSubtype) {
+
+        MessageLogRO messageLogRO = new MessageLogRO();
+        messageLogRO.setMessageId("messageId");
+        messageLogRO.setMessageStatus( MessageStatus.ACKNOWLEDGED);
+        messageLogRO.setNotificationStatus( NotificationStatus.REQUIRED);
+        messageLogRO.setMshRole(MSHRole.RECEIVING);
+        messageLogRO.setMessageType(messageType);
+        messageLogRO.setDeleted(new Date());
+        messageLogRO.setReceived(new Date());
+        messageLogRO.setFromPartyId("fromPartyId");
+        messageLogRO.setToPartyId("toPartyId");
+        messageLogRO.setConversationId("conversationId");
+        messageLogRO.setOriginalSender("originalSender");
+        messageLogRO.setFinalRecipient("finalRecipient");
+        messageLogRO.setRefToMessageId("refToMessageId");
+        messageLogRO.setMessageSubtype(messageSubtype);
+
+
+        return messageLogRO;
     }
 
     /**
