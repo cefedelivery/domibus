@@ -217,6 +217,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.count++;
 
     this.newParties.push(newParty);
+    this.edit(newParty);
   }
 
   remove () {
