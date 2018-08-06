@@ -1,6 +1,7 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class UIMessageServiceImpl implements UIMessageService {
 
     @Autowired
     private UIMessageDao uiMessageDao;
+
+    @Autowired
+    private DomainCoreConverter domainConverter;
 
     @Override
     public List<MessageLogInfo> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
@@ -57,35 +61,15 @@ public class UIMessageServiceImpl implements UIMessageService {
      * @return an {@link MessageLogRO} object
      */
     private MessageLogRO convertUIMessageEntity(UIMessageEntity uiMessageEntity) {
-        if(uiMessageEntity == null) {
+        if (uiMessageEntity == null) {
             return null;
         }
 
-        MessageLogRO result = new MessageLogRO();
-        result.setConversationId(uiMessageEntity.getConversationId());
-        result.setFromPartyId(uiMessageEntity.getFromId());
-        result.setToPartyId(uiMessageEntity.getToId());
-        result.setOriginalSender(uiMessageEntity.getFromScheme());
-        result.setFinalRecipient(uiMessageEntity.getToScheme());
-        result.setRefToMessageId(uiMessageEntity.getRefToMessageId());
-        result.setMessageId(uiMessageEntity.getMessageId());
-        result.setMessageStatus(uiMessageEntity.getMessageStatus());
-        result.setNotificationStatus(uiMessageEntity.getNotificationStatus());
-        result.setMshRole(uiMessageEntity.getMshRole());
-        result.setMessageType(uiMessageEntity.getMessageType());
-        result.setDeleted(uiMessageEntity.getDeleted());
-        result.setReceived(uiMessageEntity.getReceived());
-        result.setSendAttempts(uiMessageEntity.getSendAttempts());
-        result.setSendAttemptsMax(uiMessageEntity.getSendAttemptsMax());
-        result.setNextAttempt(uiMessageEntity.getNextAttempt());
-        result.setFailed(uiMessageEntity.getFailed());
-        result.setRestored(uiMessageEntity.getRestored());
-        result.setMessageSubtype(uiMessageEntity.getMessageSubtype());
-        return result;
+        return domainConverter.convert(uiMessageEntity, MessageLogRO.class);
     }
 
-
     /**
+     * Converts {@link UIMessageEntity} object to {@link MessageLogInfo}
      *
      * @param uiMessageEntity
      * @return
@@ -95,26 +79,6 @@ public class UIMessageServiceImpl implements UIMessageService {
             return null;
         }
 
-        return new MessageLogInfo(
-                uiMessageEntity.getMessageId(),
-                uiMessageEntity.getMessageStatus(),
-                uiMessageEntity.getNotificationStatus(),
-                uiMessageEntity.getMshRole(),
-                uiMessageEntity.getMessageType(),
-                uiMessageEntity.getDeleted(),
-                uiMessageEntity.getReceived(),
-                uiMessageEntity.getSendAttempts(),
-                uiMessageEntity.getSendAttemptsMax(),
-                uiMessageEntity.getNextAttempt(),
-                uiMessageEntity.getConversationId(),
-                uiMessageEntity.getFromId(),
-                uiMessageEntity.getToId(),
-                uiMessageEntity.getFromScheme(),
-                uiMessageEntity.getToScheme(),
-                uiMessageEntity.getRefToMessageId(),
-                uiMessageEntity.getFailed(),
-                uiMessageEntity.getRestored(),
-                uiMessageEntity.getMessageSubtype()
-        );
+        return domainConverter.convert(uiMessageEntity, MessageLogInfo.class);
     }
 }
