@@ -146,8 +146,10 @@ export class PartyDetailsComponent implements OnInit {
   }
 
   addIdentifier () {
-    const identifierRow = {entityId: 0, partyId: 'new', partyIdType: {name: '', value: ''}};
+    const identifierRow = {entityId: 0, partyId: '', partyIdType: {name: '', value: ''}};
     this.party.identifiers.push(identifierRow);
+    this.selectedIdentifiers.push(identifierRow);
+    this.editIdentifier();
   }
 
   ok () {
