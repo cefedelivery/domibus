@@ -121,8 +121,10 @@ export class PartyDetailsComponent implements OnInit {
     });
   }
 
-  editIdentifier () {
+  async editIdentifier (): Promise<boolean> {
     const identifierRow = this.selectedIdentifiers[0];
+    if (!identifierRow) return;
+
     const rowClone = Object.assign({}, identifierRow);
 
     const dialogRef: MdDialogRef<PartyIdentifierDetailsComponent> = this.dialog.open(PartyIdentifierDetailsComponent, {
@@ -130,26 +132,34 @@ export class PartyDetailsComponent implements OnInit {
         edit: rowClone
       }
     });
-    dialogRef.afterClosed().subscribe(ok => {
-      const editForm = dialogRef.componentInstance;
-      if (ok) {
-        const test = rowClone;
-        Object.assign(identifierRow, editForm.data.edit);
-      }
-    });
+
+    const ok = await dialogRef.afterClosed().toPromise();
+    if (ok) {
+      Object.assign(identifierRow, rowClone);
+    }
+
+    return ok;
   }
 
   removeIdentifier () {
     const identifierRow = this.selectedIdentifiers[0];
+    if (!identifierRow) return;
+
     this.party.identifiers.splice(this.party.identifiers.indexOf(identifierRow), 1);
     this.selectedIdentifiers.length = 0;
   }
 
-  addIdentifier () {
+  async addIdentifier () {
     const identifierRow = {entityId: 0, partyId: '', partyIdType: {name: '', value: ''}};
+
     this.party.identifiers.push(identifierRow);
+    this.selectedIdentifiers.length = 0;
     this.selectedIdentifiers.push(identifierRow);
-    this.editIdentifier();
+
+    const ok = await this.editIdentifier();
+    if (!ok) {
+      this.removeIdentifier();
+    }
   }
 
   ok () {
