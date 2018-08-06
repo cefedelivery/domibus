@@ -1,7 +1,5 @@
 package eu.domibus.core.replication;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -16,8 +14,6 @@ import java.util.List;
  */
 @Repository
 public class UIMessageDiffDaoImpl implements UIMessageDiffDao {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIMessageDiffDaoImpl.class);
 
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager em;

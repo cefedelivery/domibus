@@ -19,8 +19,4 @@ public interface UIMessageDao {
 
     void saveOrUpdate(UIMessageEntity uiMessageEntity);
 
-    List<UIMessageDiffEntity> findUIMessagesNotSynced();
-
-    int countUIMessageDiffRows();
-
 }

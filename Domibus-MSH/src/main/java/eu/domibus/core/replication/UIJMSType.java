@@ -1,7 +1,7 @@
 package eu.domibus.core.replication;
 
 /**
- * It mpas different types of notification for replicating the data into {@code TB_MESSAGE_UI} table
+ * It maps different types of notification for replicating the data into {@code TB_MESSAGE_UI} table
  *
  * @author Catalin Enache
  * @since 4.0

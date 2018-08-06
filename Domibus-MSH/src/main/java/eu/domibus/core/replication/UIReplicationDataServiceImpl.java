@@ -7,6 +7,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.util.WarningUtil;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.common.model.Messaging;
@@ -64,6 +65,9 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    private DomainCoreConverter domainConverter;
 
     @PostConstruct
     public void init() {
@@ -203,7 +207,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                         map(objects -> convertToUIMessageEntity(objects)).
                         collect(Collectors.toList());
 
-        if (uiMessageEntityList.size() > 0) {
+        if (!uiMessageEntityList.isEmpty()) {
             LOG.info("start to update TB_MESSAGE_UI");
             try {
                 uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
@@ -243,7 +247,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         LOG.debug("{} milliseconds to fetch the records", System.currentTimeMillis() - startTime);
         startTime = System.currentTimeMillis();
 
-        if (uiMessageEntityList.size() > 0) {
+        if (!uiMessageEntityList.isEmpty()) {
             LOG.debug("start to update TB_MESSAGE_UI");
             try {
                 uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
@@ -388,28 +392,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
             return null;
         }
 
-        UIMessageEntity entity = new UIMessageEntity();
-        entity.setMessageId(diffEntity.getMessageId());
-        entity.setMessageStatus(diffEntity.getMessageStatus());
-        entity.setNotificationStatus(diffEntity.getNotificationStatus());
-        entity.setMshRole(diffEntity.getMshRole());
-        entity.setMessageType(diffEntity.getMessageType());
-        entity.setDeleted(diffEntity.getDeleted());
-        entity.setReceived(diffEntity.getReceived());
-        entity.setSendAttempts(diffEntity.getSendAttempts());
-        entity.setSendAttemptsMax(diffEntity.getSendAttemptsMax());
-        entity.setNextAttempt(diffEntity.getNextAttempt());
-        entity.setConversationId(diffEntity.getConversationId());
-        entity.setFromId(diffEntity.getFromId());
-        entity.setToId(diffEntity.getToId());
-        entity.setFromScheme(diffEntity.getFromScheme());
-        entity.setToScheme(diffEntity.getToScheme());
-        entity.setRefToMessageId(diffEntity.getRefToMessageId());
-        entity.setFailed(diffEntity.getFailed());
-        entity.setRestored(diffEntity.getRestored());
-        entity.setMessageSubtype(diffEntity.getMessageSubtype());
-
-        return entity;
+        return domainConverter.convert(diffEntity, UIMessageEntity.class);
     }
 
 

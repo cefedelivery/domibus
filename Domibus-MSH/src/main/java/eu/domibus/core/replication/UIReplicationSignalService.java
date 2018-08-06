@@ -4,8 +4,6 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.common.MessageStatus;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -16,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.jms.Queue;
 
 /**
+ * Signals creation or update of a User or Signal message
+ *
  * @author Cosmin Baciu
  * @since 4.0
  */
@@ -44,7 +44,7 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
-    public void messageStatusChange(String messageId, MessageStatus newStatus) {
+    public void messageStatusChange(String messageId) {
         final JmsMessage message = JMSMessageBuilder.create()
                 .type(UIJMSType.MESSAGE_STATUS_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
@@ -64,7 +64,7 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
-    public void messageNotificationStatusChange(String messageId, NotificationStatus newStatus) {
+    public void messageNotificationStatusChange(String messageId) {
         final JmsMessage message = JMSMessageBuilder.create()
                 .type(UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)

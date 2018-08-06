@@ -15,7 +15,6 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageDao;
-import eu.domibus.core.replication.UIMessageDaoImpl;
 import eu.domibus.core.replication.UIMessageEntity;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;

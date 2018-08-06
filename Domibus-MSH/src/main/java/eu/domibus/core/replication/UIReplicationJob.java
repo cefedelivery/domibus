@@ -8,11 +8,6 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-
-import java.util.List;
 
 /**
  * @author Catalin Enache
@@ -31,6 +26,7 @@ public class UIReplicationJob extends DomibusQuartzJobBean {
 
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
+        LOG.debug("UIReplicationJob start");
         uiReplicationDataService.findAndSyncUIMessages();
     }
 }

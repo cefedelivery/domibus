@@ -6,6 +6,8 @@ import eu.domibus.common.NotificationStatus;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -255,5 +257,65 @@ public class UIMessageEntity extends AbstractBaseEntity {
 
     public void setLastModified(Date version) {
         this.lastModified = version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof UIMessageEntity)) return false;
+
+        UIMessageEntity that = (UIMessageEntity) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(sendAttempts, that.sendAttempts)
+                .append(sendAttemptsMax, that.sendAttemptsMax)
+                .append(messageId, that.messageId)
+                .append(messageStatus, that.messageStatus)
+                .append(notificationStatus, that.notificationStatus)
+                .append(messageType, that.messageType)
+                .append(messageSubtype, that.messageSubtype)
+                .append(mshRole, that.mshRole)
+                .append(conversationId, that.conversationId)
+                .append(deleted, that.deleted)
+                .append(received, that.received)
+                .append(restored, that.restored)
+                .append(failed, that.failed)
+                .append(nextAttempt, that.nextAttempt)
+                .append(fromId, that.fromId)
+                .append(fromScheme, that.fromScheme)
+                .append(toId, that.toId)
+                .append(toScheme, that.toScheme)
+                .append(refToMessageId, that.refToMessageId)
+                .append(lastModified, that.lastModified)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(messageId)
+                .append(messageStatus)
+                .append(notificationStatus)
+                .append(messageType)
+                .append(messageSubtype)
+                .append(mshRole)
+                .append(conversationId)
+                .append(deleted)
+                .append(received)
+                .append(restored)
+                .append(failed)
+                .append(sendAttempts)
+                .append(sendAttemptsMax)
+                .append(nextAttempt)
+                .append(fromId)
+                .append(fromScheme)
+                .append(toId)
+                .append(toScheme)
+                .append(refToMessageId)
+                .append(lastModified)
+                .toHashCode();
     }
 }

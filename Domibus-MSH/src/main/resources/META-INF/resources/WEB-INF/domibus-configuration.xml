@@ -2,12 +2,9 @@
 
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/util
-    http://www.springframework.org/schema/util/spring-util.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -82,20 +79,6 @@
         <property name="jobDetail" ref="uiReplicationJob"/>
         <property name="cronExpression" value="${domibus.ui.replication.sync.cron}"/>
         <property name="startDelay" value="30000"/>
-    </bean>
-
-    <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list>
-                <ref bean="retryWorkerTrigger"/>
-                <ref bean="pullRequestTrigger"/>
-                <ref bean="activateSuspendedUserTrigger"/>
-                <ref bean="saveCertificateAndLogRevocationTrigger"/>
-                <ref bean="uiReplicationTrigger"/>
-            </list>
-        </property>
     </bean>
 
 </beans>

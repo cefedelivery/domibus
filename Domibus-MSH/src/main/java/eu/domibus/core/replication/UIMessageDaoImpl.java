@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * DAO implementation
  * @author Catalin Enache
  * @since 4.0
  */
@@ -138,27 +138,6 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         }
         em.persist(uiMessageEntity);
         LOG.debug("uiMessageEntity having messageId={} have been inserted", uiMessageEntity.getMessageId());
-    }
-
-    @Override
-    @Transactional(readOnly = true, timeout = 300)
-    public List<UIMessageDiffEntity> findUIMessagesNotSynced() {
-        long startTime = System.currentTimeMillis();
-
-        Query q = em.createQuery("Select * from U", UIMessageDiffEntity.class);
-        List<UIMessageDiffEntity> result = q.getResultList();
-
-        LOG.debug("[{}] milliseconds to findUIMessagesNotSynced", System.currentTimeMillis() - startTime);
-
-        return result;
-    }
-
-    @Override
-    @Transactional(readOnly = true, timeout = 300)
-    public int countUIMessageDiffRows() {
-        final Query nativeQuery = em.createNativeQuery("SELECT count(mud.MESSAGE_ID) FROM  V_MESSAGE_UI_DIFF mud");
-        final Number singleResult = (Number) nativeQuery.getSingleResult();
-        return singleResult.intValue();
     }
 
     /**
