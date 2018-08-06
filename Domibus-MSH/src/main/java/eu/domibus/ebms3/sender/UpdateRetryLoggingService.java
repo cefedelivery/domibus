@@ -118,6 +118,9 @@ public class UpdateRetryLoggingService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
+     * @param userMessageLog the message to check
+     * @param legConfiguration processing information for the message
+     * @return true if the message can be sent again
      */
     public boolean hasAttemptsLeft(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
@@ -128,8 +131,8 @@ public class UpdateRetryLoggingService {
     /**
      * Gets the scheduled start date of the message: if the message has been restored is returns the restored date otherwise it returns the received date
      *
-     * @param userMessageLog
-     * @return
+     * @param userMessageLog the message
+     * @return the scheduled start date in milliseconds elapsed since the UNIX epoch
      */
     public Long getScheduledStartTime(final MessageLog userMessageLog) {
         Date result = userMessageLog.getRestored();

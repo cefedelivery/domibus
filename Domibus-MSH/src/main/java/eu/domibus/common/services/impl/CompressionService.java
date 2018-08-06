@@ -98,6 +98,7 @@ public class CompressionService {
      * This method handles decompression of payloads for messages in case of {@link eu.domibus.common.MSHRole#RECEIVING}
      *
      * @param ebmsMessage the receving {@link UserMessage} with all payloads
+     * @param legConfigForMessage processing information for the message
      * @return {@code true} if everything was decompressed without problems, {@code false} in case of disabled compression via pmode
      * @throws EbMS3Exception if an problem occurs during the de compression or the mimetype of a compressed payload was missing
      */

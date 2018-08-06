@@ -139,6 +139,20 @@ public class MessageLogResource {
 
     /**
      * This method returns a CSV file with the contents of Messages table
+     * @param messageId the message id
+     * @param conversationId the conversation id
+     * @param mshRole the MSH role
+     * @param messageType the message type (SIGNAL_MESSAGE or USER_MESSAGE)
+     * @param messageStatus the message status
+     * @param notificationStatus the notification status
+     * @param fromPartyId the sender party id
+     * @param toPartyId the recipient party id
+     * @param refToMessageId the related message id
+     * @param originalSender the original sender
+     * @param finalRecipient the final recipient
+     * @param receivedFrom received after this date
+     * @param receivedTo received before this date
+     * @param messageSubtype the message subtype
      *
      * @return CSV file with the contents of Messages table
      */

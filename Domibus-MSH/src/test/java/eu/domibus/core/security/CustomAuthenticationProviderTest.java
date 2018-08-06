@@ -1,11 +1,9 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
-import eu.domibus.api.util.HashUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.util.HashUtilImpl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -40,10 +38,6 @@ public class CustomAuthenticationProviderTest {
     private static final String TEST_KEYSTORE = "testkeystore.jks";
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
-
-
-    @Injectable
-    private HashUtil hashUtil = new HashUtilImpl();
 
     @Injectable
     private AuthenticationDAO securityAuthenticationDAO;

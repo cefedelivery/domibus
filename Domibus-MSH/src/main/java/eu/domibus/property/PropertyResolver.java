@@ -29,8 +29,8 @@ public class PropertyResolver {
      * Resolves a value against the system properties
      *
      * See {@link PropertyResolver#getResolvedValue(String, Properties, boolean)}
-     * @param value
-     * @return
+     * @param value The value to be resolved
+     * @return The resolved value, including system properties
      */
     public String getResolvedValue(String value) {
         return getResolvedValue(value, new Properties(), true);

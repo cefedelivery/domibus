@@ -206,7 +206,7 @@ public class UserMessageHandlerService {
      * Required for AS4_TA_12
      *
      * @param messaging the UserMessage received
-     * @throws EbMS3Exception
+     * @throws EbMS3Exception if an attachment with an invalid charset is received
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");

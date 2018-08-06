@@ -133,6 +133,8 @@ public class AuthenticationResource {
 
     /**
      * Set the current domain of the current user (in multi-tenancy mode)
+     *
+     * @param domainCode the code of the new current domain
      */
     @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)

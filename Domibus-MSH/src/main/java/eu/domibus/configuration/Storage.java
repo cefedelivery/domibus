@@ -16,8 +16,8 @@ import java.nio.file.Paths;
 
 /**
  * @version 2.0
- * @Author Ioana Dragusanu
- * @Author Martini Federico
+ * @author Ioana Dragusanu
+ * @author Martini Federico
  */
 @Component
 public class Storage {

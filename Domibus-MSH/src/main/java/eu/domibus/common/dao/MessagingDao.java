@@ -71,7 +71,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     /**
      * Clears the payloads data for the message with the given messageId.
      *
-     * @param messageId
+     * @param messageId the message id.
      */
     @Transactional(propagation = Propagation.MANDATORY)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
@@ -112,7 +112,7 @@ public class MessagingDao extends BasicDao<Messaging> {
      * Retrieves messages based STATUS and TO fields. The return is ordered by received date.
      * @param partyIdentifier the party to which this message should be delivered.
      * @param messageStatus the status of the message.
-     * @param mpc
+     * @param mpc the message partition channel of the message.
      * @return a list of class containing the date and the messageId.
      */
     public List<MessagePullDto> findMessagingOnStatusReceiverAndMpc(final String partyIdentifier, final MessageStatus messageStatus, final String mpc){

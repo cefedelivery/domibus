@@ -52,7 +52,7 @@ import java.util.Map;
  * During download, it manages the user authentication and the AS4 message's reading, data clearing and status update.
  *
  * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
- * @Since 3.0
+ * @since 3.0
  */
 @Service
 public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever {

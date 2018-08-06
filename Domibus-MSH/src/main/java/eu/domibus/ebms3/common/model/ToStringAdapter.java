@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  *
- * This adapter takes a List<String> containing a single element and maps it to the single String Node and vice versa.
+ * This adapter takes a {@literal List<String>} containing a single element and maps it to the single String Node and vice versa.
  *
  * @author Christian Koch, Stefan Mueller
  */
