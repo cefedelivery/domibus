@@ -98,6 +98,10 @@ public class PartyResource {
 
     /**
      * This method returns a CSV file with the contents of Party table
+     * @param name the party name
+     * @param endPoint the party endpoint
+     * @param partyId the party id
+     * @param process a process associated with the party
      *
      * @return CSV file with the contents of Party table
      */

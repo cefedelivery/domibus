@@ -276,8 +276,8 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
-     *  @param legConfiguration
-     * @param userMessageLog
+     * @param legConfiguration processing information for the message
+     * @param userMessageLog the user message
      */
     protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
@@ -316,6 +316,9 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
+     * @param userMessageLog the message
+     * @param legConfiguration processing information for the message
+     * @return true if the message can be sent again
      */
     protected boolean attemptNumberLeftIsLowerOrEqualThenMaxAttempts(final MessageLog userMessageLog,
                                                                      final LegConfiguration legConfiguration) {

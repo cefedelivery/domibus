@@ -39,22 +39,24 @@ public class MessageProperties {
      * data, or that allows for binding the message to some business process. A representation in the header of
      * such properties allows for more efficient monitoring, correlating, dispatching and validating functions (even
      * if these are out of scope of ebMS specification) that do not require payload access.
-     * <p/>
+     * <p>
      * This accessor method returns a reference to the live list, not a
      * snapshot. Therefore any modification you make to the returned list will
      * be present inside the JAXB object. This is why there is not a
      * <CODE>set</CODE> method for the property property.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getProperty().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
+     *
+     * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Property }
+     *
+     * @return a reference to the live list of properties
      */
     public Set<Property> getProperty() {
         if (this.property == null) {

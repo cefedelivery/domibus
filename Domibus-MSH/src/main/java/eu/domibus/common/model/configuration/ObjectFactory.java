@@ -31,6 +31,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Configuration }
+     * @return a new instance of {@link Configuration }
      */
     public Configuration createConfiguration() {
         return new Configuration();
@@ -38,6 +39,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Mpcs }
+     * @return a new instance of {@link Mpcs }
      */
     public Mpcs createMpcs() {
         return new Mpcs();
@@ -45,6 +47,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BusinessProcesses }
+     * @return a new instance of {@link BusinessProcesses }
      */
     public BusinessProcesses createBusinessProcesses() {
         return new BusinessProcesses();
@@ -52,6 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Roles }
+     * @return a new instance of {@link Roles }
      */
     public Roles createRoles() {
         return new Roles();
@@ -59,6 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Parties }
+     * @return a new instance of {@link Parties }
      */
     public Parties createParties() {
         return new Parties();
@@ -66,6 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Meps }
+     * @return a new instance of {@link Meps }
      */
     public Meps createMeps() {
         return new Meps();
@@ -73,6 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Properties }
+     * @return a new instance of {@link Properties }
      */
     public Properties createProperties() {
         return new Properties();
@@ -80,6 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PayloadProfiles }
+     * @return a new instance of {@link PayloadProfiles }
      */
     public PayloadProfiles createPayloadProfiles() {
         return new PayloadProfiles();
@@ -87,6 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ErrorHandlings }
+     * @return a new instance of {@link ErrorHandlings }
      */
     public ErrorHandlings createErrorHandlings() {
         return new ErrorHandlings();
@@ -94,6 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Agreements }
+     * @return a new instance of {@link Agreements }
      */
     public Agreements createAgreements() {
         return new Agreements();
@@ -101,6 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Services }
+     * @return a new instance of {@link Services }
      */
     public Services createServices() {
         return new Services();
@@ -108,6 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Actions }
+     * @return a new instance of {@link Actions }
      */
     public Actions createActions() {
         return new Actions();
@@ -115,6 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link As4 }
+     * @return a new instance of {@link As4 }
      */
     public As4 createAs4() {
         return new As4();
@@ -122,6 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link LegConfigurations }
+     * @return a new instance of {@link LegConfigurations }
      */
     public LegConfigurations createLegConfigurations() {
         return new LegConfigurations();
@@ -129,6 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Process }
+     * @return a new instance of {@link Process }
      */
     public Process createProcess() {
         return new Process();
@@ -136,6 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Participants }
+     * @return a new instance of {@link Participants }
      */
     public Participants createParticipants() {
         return new Participants();
@@ -143,6 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Legs }
+     * @return a new instance of {@link Legs }
      */
     public Legs createLegs() {
         return new Legs();
@@ -150,6 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Leg }
+     * @return a new instance of {@link Leg }
      */
     public Leg createLeg() {
         return new Leg();
@@ -157,6 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Participant }
+     * @return a new instance of {@link Participant }
      */
     public Participant createParticipant() {
         return new Participant();
@@ -164,6 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link LegConfiguration }
+     * @return a new instance of {@link LegConfiguration }
      */
     public LegConfiguration createLegConfiguration() {
         return new LegConfiguration();
@@ -171,6 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ReceptionAwareness }
+     * @return a new instance of {@link ReceptionAwareness }
      */
     public ReceptionAwareness createReceptionAwareness() {
         return new ReceptionAwareness();
@@ -178,6 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Reliability }
+     * @return a new instance of {@link Reliability }
      */
     public Reliability createReliability() {
         return new Reliability();
@@ -185,6 +207,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Action }
+     * @return a new instance of {@link Action }
      */
     public Action createAction() {
         return new Action();
@@ -192,6 +215,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Service }
+     * @return a new instance of {@link Service }
      */
     public Service createService() {
         return new Service();
@@ -199,6 +223,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Agreement }
+     * @return a new instance of {@link Agreement }
      */
     public Agreement createAgreement() {
         return new Agreement();
@@ -206,6 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ErrorHandling }
+     * @return a new instance of {@link ErrorHandling }
      */
     public ErrorHandling createErrorHandling() {
         return new ErrorHandling();
@@ -213,6 +239,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Payload }
+     * @return a new instance of {@link Payload }
      */
     public Payload createPayload() {
         return new Payload();
@@ -220,6 +247,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PayloadProfile }
+     * @return a new instance of {@link PayloadProfile }
      */
     public PayloadProfile createPayloadProfile() {
         return new PayloadProfile();
@@ -227,6 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Attachment }
+     * @return a new instance of {@link Attachment }
      */
     public Attachment createAttachment() {
         return new Attachment();
@@ -234,6 +263,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Property }
+     * @return a new instance of {@link Property }
      */
     public Property createProperty() {
         return new Property();
@@ -241,6 +271,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PropertySet }
+     * @return a new instance of {@link PropertySet }
      */
     public PropertySet createPropertySet() {
         return new PropertySet();
@@ -248,6 +279,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PropertyRef }
+     * @return a new instance of {@link PropertyRef }
      */
     public PropertyRef createPropertyRef() {
         return new PropertyRef();
@@ -255,6 +287,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Mep }
+     * @return a new instance of {@link Mep }
      */
     public Mep createMep() {
         return new Mep();
@@ -262,6 +295,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Binding }
+     * @return a new instance of {@link Binding }
      */
     public Binding createBinding() {
         return new Binding();
@@ -269,6 +303,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartyIdTypes }
+     * @return a new instance of {@link PartyIdTypes }
      */
     public PartyIdTypes createPartyIdTypes() {
         return new PartyIdTypes();
@@ -276,6 +311,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Party }
+     * @return a new instance of {@link Party }
      */
     public Party createParty() {
         return new Party();
@@ -283,6 +319,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Identifier }
+     * @return a new instance of {@link Identifier }
      */
     public Identifier createIdentifier() {
         return new Identifier();
@@ -290,6 +327,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PartyIdType }
+     * @return a new instance of {@link PartyIdType }
      */
     public PartyIdType createPartyIdType() {
         return new PartyIdType();
@@ -297,6 +335,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Role }
+     * @return a new instance of {@link Role }
      */
     public Role createRole() {
         return new Role();
@@ -304,6 +343,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Mpc }
+     * @return a new instance of {@link Mpc }
      */
     public Mpc createMpc() {
         return new Mpc();
@@ -311,6 +351,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Securities }
+     * @return a new instance of {@link Securities }
      */
     public Securities createSecurities() {
         return new Securities();
@@ -318,6 +359,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Security }
+     * @return a new instance of {@link Security }
      */
     public Security createSecurity() {
         return new Security();

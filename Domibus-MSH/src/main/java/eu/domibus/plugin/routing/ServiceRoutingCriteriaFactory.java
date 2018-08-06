@@ -5,7 +5,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
 
 /**
  * Service criteria for user messages
- * <p/>
+ * <p>
  *
  * @author Christian Walczac
  */

@@ -50,6 +50,7 @@ public interface BackendConnector<U, T> {
      * @param messageId the messageId of the message to retrieve
      * @param target    the target object to be filled.
      * @return the message object with the given messageId
+     * @throws MessageNotFoundException if the message was not found
      */
     T downloadMessage(final String messageId, final T target) throws MessageNotFoundException;
 
@@ -73,7 +74,7 @@ public interface BackendConnector<U, T> {
      * Returns List {@link java.util.List} of error logs {@link ErrorResult} for message with messageid
      *
      * @param messageId id of the message the errors are requested for
-     * @return the list of error log entries {@link java.util.List< ErrorResult >}
+     * @return the list of error log entries {@link java.util.List} of {@link ErrorResult}
      */
     List<ErrorResult> getErrorsForMessage(final String messageId);
 
@@ -82,7 +83,7 @@ public interface BackendConnector<U, T> {
      * MUST OVERRIDE this method. For plugins working in Mode.PULL this method never gets called. The message can be
      * retrieved by a subclass by calling super.downloadMessage(messageId, target)
      *
-     * @param messageId
+     * @param messageId the id of the message to deliver
      */
     void deliverMessage(final String messageId);
 

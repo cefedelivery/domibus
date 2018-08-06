@@ -13,7 +13,7 @@ import java.util.Iterator;
 
 /**
  * Created by idragusa on 5/26/16.
- * <p/>
+ * <p>
  * [EDELIVERY-1117]
  * The scope of this interceptor is to replace the existing CXF SOAPHandlerFaultOutInterceptor with our
  * own DomibusSOAPHandlerFaultOutInterceptor that sets the code value to Receiver instead of HandleFault
