@@ -106,9 +106,7 @@ public class MessageLogResource {
 
         LOGGER.debug("Getting message log");
 
-        MessageLogResultRO result = new MessageLogResultRO();
-
-        //TODO why are those filters send back to the GUI??
+        //creating the filters
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus,
                 fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
 
@@ -116,10 +114,9 @@ public class MessageLogResource {
         filters.put(RECEIVED_TO_STR, dateUtil.fromString(receivedTo));
         filters.put("messageType", messageType);
 
-        result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
 
-
+        MessageLogResultRO result;
         if (useFlatTable) {
             result = uiMessageService.countAndFindPaged(pageSize * page, pageSize, column, asc, filters);
         } else {
@@ -127,6 +124,7 @@ public class MessageLogResource {
             result = messagesLogService.countAndFindPaged(messageType, pageSize * page, pageSize, column, asc, filters);
         }
 
+        result.setFilter(filters);
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
         result.setMsgStatus(MessageStatus.values());
