@@ -1,8 +1,11 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.DomainRO;
@@ -45,8 +48,15 @@ public class ApplicationResource {
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected AuthUtils authUtils;
+
     /**
      * Rest method for the Domibus Info (Version, Build Time, ...)
+     *
      * @return Domibus Info
      */
     @RequestMapping(value = "info", method = RequestMethod.GET)
@@ -59,16 +69,23 @@ public class ApplicationResource {
 
     /**
      * Rest get method for the Domibus Customized Name
-     * @return Domibus Customized Name (
+     *
+     * @return Domibus Customized Name
      */
     @RequestMapping(value = "name", method = RequestMethod.GET)
     public String getDomibusName() {
         LOG.debug("Getting application name");
-        return domibusPropertyProvider.getDomainProperty(DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
+        Domain domain = null;
+        if (authUtils.getAuthenticatedUser() != null)
+            domain = domainContextProvider.getCurrentDomainSafely();
+        if (domain == null)
+            domain = DomainService.DEFAULT_DOMAIN;
+        return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
     }
 
     /**
      * Rest get method for multi-tenancy status
+     *
      * @return true if multi-tenancy is enabled
      */
     @RequestMapping(value = "multitenancy", method = RequestMethod.GET)
@@ -79,6 +96,7 @@ public class ApplicationResource {
 
     /**
      * Retrieve all configured domains in multi-tenancy mode
+     *
      * @return a list of domains
      */
     @RequestMapping(value = "domains", method = RequestMethod.GET)
