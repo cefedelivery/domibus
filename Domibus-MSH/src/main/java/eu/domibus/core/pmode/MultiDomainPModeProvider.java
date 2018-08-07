@@ -2,6 +2,7 @@ package eu.domibus.core.pmode;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
@@ -9,6 +10,7 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.AgreementRef;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.Service;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +100,12 @@ public class MultiDomainPModeProvider extends PModeProvider {
     @Override
     protected String findPartyName(Collection<PartyId> partyId) throws EbMS3Exception {
         return getCurrentPModeProvider().findPartyName(partyId);
+    }
+
+
+    @Override
+    public MessageExchangeConfiguration findUserMessageExchangeContext(final UserMessage userMessage, final MSHRole mshRole) throws EbMS3Exception {
+        return getCurrentPModeProvider().findUserMessageExchangeContext(userMessage, mshRole);
     }
 
     @Override

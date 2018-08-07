@@ -1,4 +1,5 @@
 Domibus 4.0
+- Removed unused classes:Validator<T>,NullValidator,ValidationException
 - Support for email alert system
 - Support for multi-tenancy
 - Management of participants through the administration console

@@ -22,12 +22,13 @@ public interface UserService{
 //    List<eu.domibus.api.user.User> findAllUsers();
 
     /**
-     * get all user roles
+     * Get all user roles
+     * @return all user roles
      */
     List<eu.domibus.api.user.UserRole> findUserRoles();
 
     /**
-     * create or update users of the system (edited in the user management gui console).
+     * Create or update users of the system (edited in the user management gui console).
      * @param users to create of update.
      */
     void updateUsers(List<User> users);

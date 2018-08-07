@@ -36,22 +36,24 @@ public class PayloadInfo {
      * This element occurs zero or more times. The PartInfo element is used to reference a MIME
      * attachment, an XML element within the SOAP Body, or another resource which may be obtained
      * by resolving a URL, according to the value of the href attribute
-     * <p/>
+     * <p>
      * This accessor method returns a reference to the live list, not a
      * snapshot. Therefore any modification you make to the returned list will
      * be present inside the JAXB object. This is why there is not a
      * <CODE>set</CODE> method for the partInfo property.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPartInfo().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
+     *
+     * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link PartInfo }
+     *
+     * @return a reference to the live list of part info
      */
 
     //TODO: support payloadreference?

@@ -101,6 +101,7 @@ public class DomibusQuartzStarter {
     /**
      * entry point method (post-construct)
      *
+     * @param domain the domain
      * @throws SchedulerException Quartz scheduler exception
      */
     public void checkJobsAndStartScheduler(Domain domain) throws SchedulerException {
@@ -137,6 +138,7 @@ public class DomibusQuartzStarter {
      * Checks for all the jobs related with trigger group {@code triggerGroup}
      * @param scheduler Scheduler
      * @param triggerGroup Trigger Group name
+     * @throws SchedulerException Quartz scheduler exception
      */
     protected void checkSchedulerJobsByTriggerGroup(Scheduler scheduler, String triggerGroup) throws SchedulerException {
         LOG.info("Start Quartz jobs with trigger group [{}]...", triggerGroup);
@@ -162,7 +164,7 @@ public class DomibusQuartzStarter {
 
     /**
      * goes through scheduler jobs and check for {@code ClassNotFoundException}
-     *
+     * @param scheduler the scheduler
      * @throws SchedulerException Quartz scheduler exception
      */
     protected void checkSchedulerJobs(Scheduler scheduler) throws SchedulerException {

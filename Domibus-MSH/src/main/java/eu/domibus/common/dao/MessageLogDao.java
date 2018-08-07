@@ -18,7 +18,7 @@ import java.util.*;
 
 
 /**
- * @param <F>
+ * @param <F> MessageLog type: either UserMessageLog or SignalMessageLog
  * @author Federico Martini
  * @since 3.2
  */

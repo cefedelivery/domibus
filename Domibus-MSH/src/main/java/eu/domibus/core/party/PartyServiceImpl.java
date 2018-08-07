@@ -107,7 +107,7 @@ public class PartyServiceImpl implements PartyService {
 
     /**
      * In the actual configuration the link between parties and processes exists from process to party.
-     * We need to reverse this association, we want to have a relation party -> process I am involved in as a responder
+     * We need to reverse this association, we want to have a relation party -&gt; process I am involved in as a responder
      * or initiator.
      *
      * @return a list of party linked with their processes.

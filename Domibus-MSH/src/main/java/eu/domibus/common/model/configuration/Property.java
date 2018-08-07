@@ -61,7 +61,7 @@ public class Property extends AbstractBaseEntity {
      * Gets the value of the name property.
      *
      * @return possible object is
-     * <p/>
+     * <p>
      * {@link String }
      */
     public String getName() {
@@ -120,6 +120,7 @@ public class Property extends AbstractBaseEntity {
 
     /**
      * Gets the value of the required property.
+     * @return the value of the required property.
      */
     public boolean isRequired() {
         return this.required;
@@ -127,6 +128,7 @@ public class Property extends AbstractBaseEntity {
 
     /**
      * Sets the value of the required property.
+     * @param value the new value of the required property.
      */
     public void setRequired(final boolean value) {
         this.required = value;
