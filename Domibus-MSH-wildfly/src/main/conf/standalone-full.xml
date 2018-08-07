@@ -408,6 +408,11 @@
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                         <max-delivery-attempts>1</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusUIReplicationQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>1000</redelivery-delay>
+                        <max-delivery-attempts>1</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -559,6 +564,11 @@
                     <jms-queue name="DomibusAlertMessageQueue">
                         <entry name="java:/jms/domibus.internal.alert.queue"/>
                         <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusUIReplicationQueue">
+                        <entry name="java:/jms/domibus.internal.ui.replication.queue"/>
+                        <entry name="java:/jms/queue/DomibusUIReplicationQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">

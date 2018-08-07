@@ -462,7 +462,7 @@
                 <address-setting name="jms.queue.DomibusSendMessageQueue" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
                 <address-setting name="jms.queue.DomibusPullMessageQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="1000" max-delivery-attempts="0"/>
                 <address-setting name="jms.queue.DomibusAlertMessageQueue" expiry-address="jms.queue.ExpiryQueue" max-delivery-attempts="1"/>
-                <address-setting name="jms.queue.DomibusUIReplicationQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="10000" max-delivery-attempts="10"/>
+                <address-setting name="jms.queue.DomibusUIReplicationQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="10000" max-delivery-attempts="1"/>
                 <address-setting name="jms.queue.DomibusBusinessMessageOutQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
                 <address-setting name="jms.queue.DomibusNotifyBackendJmsQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
                 <address-setting name="jms.queue.DomibusErrorNotifyConsumerQueue" dead-letter-address="jms.queue.DomibusDLQ" expiry-address="jms.queue.ExpiryQueue" redelivery-delay="300000" max-delivery-attempts="10"/>
