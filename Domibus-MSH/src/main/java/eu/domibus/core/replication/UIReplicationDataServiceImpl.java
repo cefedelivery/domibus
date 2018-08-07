@@ -112,7 +112,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
             updateAndFlush(messageId, entity, "messageStatusChange");
         } else {
-            UIReplicationDataServiceImpl.LOG.warn("messageStatusChange failed for messageId={}", messageId);
+            LOG.warn("messageStatusChange failed for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced, status={}",
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId,
