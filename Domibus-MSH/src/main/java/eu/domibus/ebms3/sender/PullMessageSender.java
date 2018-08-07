@@ -129,7 +129,7 @@ public class PullMessageSender {
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
             messaging = MessageUtil.getMessage(response, jaxbContext);
             if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
-                LOG.trace("No message for sent pull request with mpc:[{}]",mpc);
+                LOG.trace("No message for sent pull request with mpc:[{}]", mpc);
                 logError(signalMessage);
                 return;
             }
@@ -170,16 +170,13 @@ public class PullMessageSender {
     }
 
     private Policy getPolicy(LegConfiguration legConfiguration) throws EbMS3Exception {
-        Policy policy;
         try {
-            policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+            return policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
         } catch (final ConfigurationException e) {
-
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }
-        return policy;
     }
 
 
