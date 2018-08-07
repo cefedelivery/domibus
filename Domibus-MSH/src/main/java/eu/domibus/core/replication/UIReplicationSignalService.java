@@ -31,73 +31,53 @@ public class UIReplicationSignalService {
     private DomainContextProvider domainContextProvider;
 
     public void userMessageReceived(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.USER_MESSAGE_RECEIVED.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_RECEIVED);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageStatusChange(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.MESSAGE_STATUS_CHANGE.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageChange(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.MESSAGE_CHANGE.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_CHANGE);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void messageNotificationStatusChange(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void userMessageSubmitted(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.USER_MESSAGE_SUBMITTED.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                        .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_SUBMITTED);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void signalMessageSubmitted(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.SIGNAL_MESSAGE_SUBMITTED.name())
-                .property(MessageConstants.MESSAGE_ID, messageId)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build();
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.SIGNAL_MESSAGE_SUBMITTED);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
     public void signalMessageReceived(String messageId) {
-        final JmsMessage message = JMSMessageBuilder.create()
-                .type(UIJMSType.SIGNAL_MESSAGE_RECEIVED.name())
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.SIGNAL_MESSAGE_RECEIVED);
+
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
+    }
+
+    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType) {
+        return JMSMessageBuilder.create()
+                .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
                 .build();
-
-        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
 }

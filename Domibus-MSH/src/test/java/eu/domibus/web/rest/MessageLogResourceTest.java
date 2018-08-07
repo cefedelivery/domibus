@@ -9,7 +9,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.PartyDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLog;
@@ -53,9 +52,6 @@ public class MessageLogResourceTest {
 
     @Injectable
     UserMessageLogDao userMessageLogDao;
-
-    @Injectable
-    SignalMessageLogDao signalMessageLogDao;
 
     // needed Injectable
     @Injectable
