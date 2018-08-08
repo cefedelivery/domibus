@@ -21,7 +21,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.persistence.OptimisticLockException;
 import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
@@ -232,7 +231,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void test_MessageChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
+    public void testMessageChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
         final UserMessageLog userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
@@ -257,7 +256,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void messageChange_EntityNotFound_Warn() {
+    public void testMessageChange_EntityNotFound_Warn() {
         final UserMessageLog userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
@@ -300,7 +299,7 @@ public class UIReplicationDataServiceImplTest {
         }};
 
         //tested
-        uiReplicationDataService.signalMessageSubmitted(messageId);
+        uiReplicationDataService.signalMessageReceived(messageId);
 
         new FullVerifications(uiReplicationDataService) {{
             String messageIdActual;
@@ -311,7 +310,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void test_FindAndSyncUIMessages(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
+    public void testFindAndSyncUIMessages(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
         final int countAllRows = 10;
         final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
         Deencapsulation.setField(uiReplicationDataService, "maxRowsToSync", 10000);
@@ -335,7 +334,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void test_FindAndSyncUIMessagesWithLimit(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
+    public void testFindAndSyncUIMessagesWithLimit(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
         final int countAllRows = 10;
         final int limit = 20;
         final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
@@ -365,7 +364,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void test_CountSyncUIMessages() {
+    public void testCountSyncUIMessages() {
 
         final int records = 214;
         new Expectations() {{
@@ -395,27 +394,6 @@ public class UIReplicationDataServiceImplTest {
         new FullVerifications() {{
             uiMessageDao.update(uiMessageEntity);
             uiMessageDao.flush();
-        }};
-    }
-
-    //@Test
-    public void testUpdateAndFlush_ExceptionThrown_Optimistic(final @Mocked UIMessageEntity uiMessageEntity) {
-
-        new Expectations(uiReplicationDataService) {{
-            uiMessageDao.flush();
-            result = new OptimisticLockException("Exception raised");
-        }};
-
-        try {
-            //tested method
-            uiReplicationDataService.updateAndFlush(messageId, uiMessageEntity, "messageStatusChange");
-            Assert.fail("exception expected");
-        } catch (OptimisticLockException e) {
-
-        }
-
-        new Verifications() {{
-            uiMessageDao.update(uiMessageEntity);
         }};
     }
 
