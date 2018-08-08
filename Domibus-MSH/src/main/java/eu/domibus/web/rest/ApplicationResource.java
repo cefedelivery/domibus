@@ -76,10 +76,12 @@ public class ApplicationResource {
     public String getDomibusName() {
         LOG.debug("Getting application name");
         Domain domain = null;
-        if (authUtils.getAuthenticatedUser() != null)
+        if (authUtils.getAuthenticatedUser() != null) {
             domain = domainContextProvider.getCurrentDomainSafely();
-        if (domain == null)
+        }
+        if (domain == null) {
             domain = DomainService.DEFAULT_DOMAIN;
+        }
         return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
     }
 
