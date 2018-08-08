@@ -119,6 +119,7 @@ public class PartyServiceImpl implements PartyService {
         try {
             allParties = pModeProvider.findAllParties();
         } catch(IllegalStateException e) {
+            LOG.trace("findAllParties thrown: ", e);
             return new ArrayList<>();
         }
 
