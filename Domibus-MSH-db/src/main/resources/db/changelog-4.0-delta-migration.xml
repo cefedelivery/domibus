@@ -157,7 +157,7 @@
             ORDER BY result.received ASC;
         </sql>
         <sql dbms="oracle">
-            INSERT INTO tb_message_ui (
+            INSERT /*+ append*/ INTO tb_message_ui (
             id_pk,
             message_id,
             message_status,
@@ -280,5 +280,40 @@
             result.received ASC
             );
         </sql>
+    </changeSet>
+    <changeSet id="EDELIVERY-3361_1" author="CatalinEnache">
+        <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_TYPE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_SUBTYPE" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_SUBTYPE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_MSG_ID" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_RECEIVED" tableName="TB_MESSAGE_UI">
+            <column name="RECEIVED"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_MSH_ROLE" tableName="TB_MESSAGE_UI">
+            <column name="MSH_ROLE"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_FROM_SCHEME" tableName="TB_MESSAGE_UI">
+            <column name="FROM_SCHEME"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TO_SCHEME" tableName="TB_MESSAGE_UI">
+            <column name="TO_SCHEME"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_FROM_ID" tableName="TB_MESSAGE_UI">
+            <column name="FROM_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TO_ID" tableName="TB_MESSAGE_UI">
+            <column name="TO_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_REF_MSG_ID" tableName="TB_MESSAGE_UI">
+            <column name="REF_TO_MESSAGE_ID"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_CONV_ID" tableName="TB_MESSAGE_UI">
+            <column name="CONVERSATION_ID"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
