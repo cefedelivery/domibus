@@ -76,6 +76,7 @@ public class ApplicationResource {
     public String getDomibusName() {
         LOG.debug("Getting application name");
         Domain domain = null;
+        // We check this because, for non-authenticated users, the domain would sometimes be recycled from some other thread from the pool and it would have a random domain.
         if (authUtils.getAuthenticatedUser() != null) {
             domain = domainContextProvider.getCurrentDomainSafely();
         }
