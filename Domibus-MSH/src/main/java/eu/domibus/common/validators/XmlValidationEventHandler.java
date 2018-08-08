@@ -15,7 +15,7 @@ import java.util.List;
 /**
  @author Federico Martini
  @since 3.1
- <br/> Class to handle and customize the validation events triggered during XML parsing.
+ <br> Class to handle and customize the validation events triggered during XML parsing.
  */
 public class XmlValidationEventHandler implements ValidationEventHandler {
 

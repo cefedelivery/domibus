@@ -118,6 +118,8 @@ public enum ErrorCode {
          * corresponding @origin values, may be specified elsewhere, such as in a
          * forthcoming Part 2 of this specification."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing code of the error
          */
         public ErrorCode getErrorCode() {
             return this.errorCode;
@@ -126,6 +128,8 @@ public enum ErrorCode {
         /**
          * "This REQUIRED attribute is a unique identifier for the type of error."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing a unique identifier for the type of error
          */
         public String getOrigin() {
             return this.origin;
@@ -215,6 +219,8 @@ public enum ErrorCode {
          * "This OPTIONAL attribute provides a short description of the error
          * that can be reported in a log, in order to facilitate readability."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing a short description of the error
          */
         public String getShortDescription() {
             return this.shortDescription;
@@ -237,6 +243,8 @@ public enum ErrorCode {
          * MSH to process other messages, although the conversation or the MEP instance
          * this message was involved in is at risk of being invalid."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing the severity of the error
          */
         public String getSeverity() {
             return this.severity;
@@ -246,6 +254,8 @@ public enum ErrorCode {
          * "This OPTIONAL attribute identifies the type of error related to a particular
          * origin. For example: Content, Packaging, UnPackaging, Communication, InternalProcess."
          * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
+         *
+         * @return a String representing the type of the error
          */
         public Categories getCategory() {
             return this.category;

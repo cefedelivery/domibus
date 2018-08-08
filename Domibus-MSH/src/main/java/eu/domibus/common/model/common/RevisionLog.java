@@ -109,11 +109,11 @@ public class RevisionLog {
      * Hibernate is going to send notifications to this revision class each time an update occurs on an entity or its sub-hierarchy,
      * but in the audit system we only want to keep track of the changes at a highber level. If wee need more info it is possible to go into envers audit tables.
      *
-     * @param entityId
-     * @param entityName
-     * @param groupName
-     * @param modificationType
-     * @param auditOrder
+     * @param entityId the entity id
+     * @param entityName the entity name
+     * @param groupName the group name
+     * @param modificationType the modification type
+     * @param auditOrder the audit order
      */
     public void addEntityAudit(final String entityId, final String entityName, final String groupName, final ModificationType modificationType, final int auditOrder) {
         if (LOG.isDebugEnabled()) {

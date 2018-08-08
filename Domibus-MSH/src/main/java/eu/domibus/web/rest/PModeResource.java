@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.common.services.CsvService;
@@ -54,8 +55,8 @@ public class PModeResource {
     @Autowired
     private AuditService auditService;
 
-    @GetMapping(path = "{id}", produces = "application/xml")
-    public ResponseEntity<Resource> downloadPmode(@PathVariable(value="id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
+    @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
+    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value = "id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
 
         final byte[] rawConfiguration = pModeProvider.getPModeFile(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -64,10 +65,10 @@ public class PModeResource {
         }
 
         HttpStatus status = HttpStatus.OK;
-        if(resource.getByteArray().length == 0) {
+        if (resource.getByteArray().length == 0) {
             status = HttpStatus.NO_CONTENT;
         } else if (!noAudit) {
-            auditService.addPModeDownloadedAudit( Integer.toString(id));
+            auditService.addPModeDownloadedAudit(Integer.toString(id));
         }
 
         return ResponseEntity.status(status)
@@ -76,7 +77,19 @@ public class PModeResource {
                 .body(resource);
     }
 
-    @PostMapping
+    @GetMapping(path = "current")
+    public PModeResponseRO getCurrentPMode() {
+        final PModeArchiveInfo currentPmode = pModeProvider.getCurrentPmode();
+        if(currentPmode!=null) {
+            final PModeResponseRO convert = domainConverter.convert(currentPmode, PModeResponseRO.class);
+            convert.setCurrent(true);
+            return convert;
+        }
+        return null;
+
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> uploadPmodes(@RequestPart("file") MultipartFile pmode, @RequestParam("description") String pModeDescription) {
         if (pmode.isEmpty()) {
             return ResponseEntity.badRequest().body("Failed to upload the PMode file since it was empty.");
@@ -99,7 +112,7 @@ public class PModeResource {
         }
     }
 
-    @DeleteMapping
+    @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<String> deletePmodes(@RequestParam("ids") List<String> pmodesString) {
         if (pmodesString.isEmpty()) {
             LOG.error("Failed to delete PModes since the list of ids was empty.");
@@ -118,12 +131,12 @@ public class PModeResource {
         return ResponseEntity.ok("PModes were deleted\n");
     }
 
-    @PutMapping(value = {"/restore/{id}"})
-    public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
+    @RequestMapping(value = {"/restore/{id}"}, method = RequestMethod.PUT)
+    public ResponseEntity<String> uploadPmode(@PathVariable(value = "id") Integer id) {
         ConfigurationRaw existingRawConfiguration = pModeProvider.getRawConfiguration(id);
         ConfigurationRaw newRawConfiguration = new ConfigurationRaw();
         newRawConfiguration.setEntityId(0);
-        
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
         ZonedDateTime confDate = ZonedDateTime.ofInstant(existingRawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
         newRawConfiguration.setDescription("Restored version of " + confDate.format(formatter));
@@ -144,7 +157,7 @@ public class PModeResource {
         return ResponseEntity.ok(message);
     }
 
-    @GetMapping(value = {"/list"})
+    @RequestMapping(value = {"/list"}, method = RequestMethod.GET)
     public List<PModeResponseRO> pmodeList() {
         return domainConverter.convert(pModeProvider.getRawConfigurationList(), PModeResponseRO.class);
     }
@@ -154,7 +167,7 @@ public class PModeResource {
      *
      * @return CSV file with the contents of PMode Archive table
      */
-    @GetMapping(path = "/csv")
+    @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv() {
         String resultText;
 
@@ -163,7 +176,7 @@ public class PModeResource {
         pModeResponseROList.addAll(pmodeList());
 
         // set first PMode as current
-        if(!pModeResponseROList.isEmpty()) {
+        if (!pModeResponseROList.isEmpty()) {
             pModeResponseROList.get(0).setCurrent(true);
         }
 
@@ -181,7 +194,7 @@ public class PModeResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode-archive"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
                 .body(resultText);
     }
 

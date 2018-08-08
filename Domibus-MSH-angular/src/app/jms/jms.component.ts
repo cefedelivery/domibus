@@ -53,6 +53,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   get selectedSource (): any {
     return this._selectedSource;
   }
+
   set selectedSource (value: any) {
     this._selectedSource = value;
     this.request.source = value.name;
@@ -444,6 +445,10 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   saveAsCSV () {
+    if (!this.request.source) {
+      this.alertService.error('Source should be set');
+      return;
+    }
     DownloadService.downloadNative('rest/jms/csv' + this.getFilterPath());
   }
 

@@ -22,23 +22,23 @@ import java.util.Map;
  * </ul>
  * <p>There are two ways of performing message acknowledgments between C3 and the backend:</p>
  * <ul>
- * <li>synchronous</li>
+ * <li>synchronous
  * <p>C3(via the plugin) notifies the backend synchronously and the backend process the messages also synchronously. In this case there is no need for the backend to send a separate message acknowledgement so
  * the plugin at the C3 side registers the processing of the message by the backend.</p>
- * <p>Eg: <br/>
- * BackendResponse backendResponse = plugin.callBackendWS(message) <br/>
- * messageAcknowledgeService.acknowledgeMessageDelivered(message.getId(), new Timestamp(System.currentTimeMillis())) <br/>
- * messageAcknowledgeService.acknowledgeMessageProcessed(message.getId(), new Timestamp(System.currentTimeMillis())) <br/>
+ * <p>Eg: <br>
+ * BackendResponse backendResponse = plugin.callBackendWS(message) <br>
+ * messageAcknowledgeService.acknowledgeMessageDelivered(message.getId(), new Timestamp(System.currentTimeMillis())) <br>
+ * messageAcknowledgeService.acknowledgeMessageProcessed(message.getId(), new Timestamp(System.currentTimeMillis())) <br>
  * </p>
- * <li>asynchronous</li>
+ * <li>asynchronous
  * <p>C3 notifies the backend synchronously and the backend process the messages asynchronously. In this case the backend will send a separate message acknowledgement when
  * it manages to process the message successfully.</p>
- * <p>Eg: <br/>
- * plugin.sendMessageToTheBackend(message) <br/>
- * messageAcknowledgeService.acknowledgeMessageDelivered(message.getId(), new Timestamp(System.currentTimeMillis())) <br/><br/>
+ * <p>Eg: <br>
+ * plugin.sendMessageToTheBackend(message) <br>
+ * messageAcknowledgeService.acknowledgeMessageDelivered(message.getId(), new Timestamp(System.currentTimeMillis())) <br><br>
  * <p>
  * //the plugin receives a JMS message from the backend after the backend processed the message successfully
- * messageAcknowledgeService.acknowledgeMessageProcessed(message.getId(), new Timestamp(System.currentTimeMillis())) <br/>
+ * messageAcknowledgeService.acknowledgeMessageProcessed(message.getId(), new Timestamp(System.currentTimeMillis())) <br>
  * </p>
  * </ul>
  *

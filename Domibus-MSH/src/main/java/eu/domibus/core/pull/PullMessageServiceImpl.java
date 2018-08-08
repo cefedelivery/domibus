@@ -230,7 +230,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 mpc,
                 messageLog.getReceived(),
                 staledDate,
-                messageLog.getNextAttempt(),
+                messageLog.getNextAttempt()==null?new Date():messageLog.getNextAttempt(),
                 messageLog.getSendAttempts(),
                 messageLog.getSendAttemptsMax());
     }
@@ -268,7 +268,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
-        if (userMessageLog.getReceived().compareTo(userMessageLog.getNextAttempt()) < 0) {
+        if (userMessageLog.getNextAttempt() !=null) {
             nextAttempt = userMessageLog.getNextAttempt();
         }
         userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
@@ -276,8 +276,8 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
-     *  @param legConfiguration
-     * @param userMessageLog
+     * @param legConfiguration processing information for the message
+     * @param userMessageLog the user message
      */
     protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
@@ -316,6 +316,9 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
+     * @param userMessageLog the message
+     * @param legConfiguration processing information for the message
+     * @return true if the message can be sent again
      */
     protected boolean attemptNumberLeftIsLowerOrEqualThenMaxAttempts(final MessageLog userMessageLog,
                                                                      final LegConfiguration legConfiguration) {

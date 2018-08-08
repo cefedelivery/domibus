@@ -62,13 +62,13 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
     @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
     public void testMessageIdEmpty() throws RetrieveMessageFault {
-        retrieveMessageFail("", "MessageId is empty");
+        retrieveMessageFail("", "retrieveMessageRequest is not valid against the XSD");
     }
 
     @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
     public void testMessageNotFound() throws RetrieveMessageFault {
-        retrieveMessageFail("notFound", "Message with id [notFound] was not found");
+        retrieveMessageFail("notFound", "Message not found, id [notFound]");
     }
 
     @DirtiesContext
@@ -104,7 +104,7 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
         try {
             backendWebService.retrieveMessage(retrieveMessageRequest, retrieveMessageResponse, ebMSHeaderInfo);
         } catch (RetrieveMessageFault re) {
-            Assert.assertEquals(errorMessage, re.getFaultInfo().getMessage());
+            Assert.assertEquals(errorMessage, re.getMessage());
             throw re;
         }
         Assert.fail("DownloadMessageFault was expected but was not raised");

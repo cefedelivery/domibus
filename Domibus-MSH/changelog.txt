@@ -1,17 +1,44 @@
 Domibus 4.0
+- Removed unused classes:Validator<T>,NullValidator,ValidationException
+- Support for email alert system
 - Support for multi-tenancy
+- Management of participants through the administration console
+- Removed the module domibus-ext-services-api and moved all services from domibus-ext-services-api to the plugin-api
+- Security policies were updated and renamed. Sample pModes were updated to use the new policies.
+  New policies are:
+      eDeliveryAS4Policy.xml - Reference to a Subject Key Identifier
+      eDeliveryAS4Policy_BST.xml - Reference to a Binary Security Token
+      eDeliveryAS4Policy_IS.xml - Reference to an Issuer and Serial Number
+  Message exchange using old and new policies is not possible in all combinations.
+  Therefore, custom pModes should also be updated to the new policies. Replace eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml with the new eDeliveryAS4Policy.xml.
+  Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml with the new eDeliveryAS4Policy_BST.xml
 - Each plugin can now specify its own list of notification types for which it expects notifications.
-- Upgrade the following libraries:hibernate, atomikos,spring,liquibase,junit
-- Upgrade the java version
+- Upgraded the following libraries:hibernate, atomikos,spring,liquibase,junit
+- Upgraded to Java 8
+- Domibus support for Wildfly 12
 - Add an audit and versioning system
 - Possibility to have information of all PMode changes' history
 - Possibility to export the contents of a datatable to CSV
 - Removed deprecated methods from ws-plugin: sendMessage, downloadMessage, getMessageStatus
 - Internalize EhCache configuration and give possibility to override it
 - Added OWASP Dependency Check Maven Plugin to identify vulnerable dependencies
-- Possibility to Test the connections for other Access Points
+- Possibility to Test the connections with other Access Points
 - Possibility to reactivate suspended super users
-- Removed ebMS3 deprecated headers Description and Schema from PartInfo. If received on the MSH, these headers are ignored.
+- The password for plugin users migrated to BCryptPasswordEncoder
+- Configurable Domibus Admin Console title
+- Fixed an issue when receiver is not authorized to get the status of his destined message when security is enabled
+- Support ofr LDAP CRLs
+- Handled the not existing folder issue for domibus.attachment.storage.location
+- Fixed an issue when eb3:MessageProperties section is missing from the User Message
+- Fixed an issue when PartProperties section defined in PartInfo missing from the User Message
+- Editable text area for Pmode
+- With secure login enabled, Sender is not authorized to get the status of his message
+- With secure login enabled - can't retrieve message if not authorized user tried to retrieve it earlier
+- Implement the Plugin Users page
+- Fix the Unique Particle Attribution violations in the Default WS Plugin
+- The ebMS3 headers Description and Schema from PartInfo are deprecated. These headers were removed from the WS-plugin XSD and the JMS-plugin message properties.
+  When received on the MSH, these headers are ignored.
+- The notifications events sent to the plugins should be configurable
 Domibus 3.3.4
 - Performance improvement in the Messages page
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.

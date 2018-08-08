@@ -20,7 +20,7 @@ import javax.xml.ws.WebServiceException;
  * Interceptor to save the raw xml in case of a pull message.
  * The non repudiation mechanism needs the raw message at the end of the interceptor queue, as it needs the security interceptors added
  * informations in order to do his job.
- * It is only saving userMessage found in the ServerOutInterceptor=> PullMessage.
+ * It is only saving userMessage found in the ServerOutInterceptor=&gt; PullMessage.
  */
 //@thom test this class
 public class SaveRawPulledMessageInterceptor extends AbstractSoapInterceptor {

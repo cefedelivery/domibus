@@ -69,7 +69,7 @@
         </payloadProfiles>
         <securities>
             <security name="eSens"
-                      policy="eSensPolicy.v2.0.xml"
+                      policy="eDeliveryAS4Policy.xml"
                       signatureMethod="RSA_SHA256"/>
         </securities>
         <errorHandlings>

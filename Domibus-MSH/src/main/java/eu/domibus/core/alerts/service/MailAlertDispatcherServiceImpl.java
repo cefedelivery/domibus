@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MailAlertDispatcherServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MailAlertDispatcherServiceImpl.class);
 
     @Autowired
     private AlertService alertService;
@@ -34,10 +34,11 @@ public class MailAlertDispatcherServiceImpl implements AlertDispatcherService {
         final MailModel mailModelForAlert = alertService.getMailModelForAlert(alert);
         try {
             alert.setAlertStatus(AlertStatus.FAILED);
+            LOG.debug("Alert:[{}] sending by email...",alert.getEntityId());
             mailSender.sendMail(
                     mailModelForAlert,
                     multiDomainAlertConfigurationService.getCommonConfiguration().getSendFrom(),
-                    multiDomainAlertConfigurationService.getCommonConfiguration().getSendFrom());
+                    multiDomainAlertConfigurationService.getCommonConfiguration().getSendTo());
             alert.setAlertStatus(AlertStatus.SUCCESS);
         } finally {
             alertService.handleAlertStatus(alert);

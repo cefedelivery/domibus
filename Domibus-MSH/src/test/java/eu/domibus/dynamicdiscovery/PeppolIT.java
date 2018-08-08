@@ -2,7 +2,6 @@ package eu.domibus.dynamicdiscovery;
 
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.util.EndpointInfo;
-import mockit.integration.junit4.JMockit;
 import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
 import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
@@ -19,8 +18,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Ignore;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -29,7 +27,7 @@ import static org.junit.Assert.assertNotNull;
  * @since 6/13/18.
  */
 
-@RunWith(JMockit.class)
+//@RunWith(JMockit.class)
 public class PeppolIT {
 
     //The (sub)domain of the SML, e.g. acc.edelivery.tech.ec.europa.eu
@@ -37,7 +35,8 @@ public class PeppolIT {
     private static final String TEST_SML_ZONE = "acc.edelivery.tech.ec.europa.eu";
 
     /* This is not a unit tests but a useful test for a real SMP entry. */
-    @Test
+//    @Test
+    @Ignore
     public void testLookupInformation() throws Exception {
         EndpointInfo endpoint = testLookupInformation("0088:112233", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");
         //EndpointInfo endpoint = testLookupInformation("0088:260420181111", "iso6523-actorid-upis", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0", "cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0", "");

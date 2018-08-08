@@ -58,7 +58,7 @@ Securities{
 		SignatureMethod : RSA_SHA256
 	}
 	Security eSensDefault {
-		Policy : "encryptAll.xml"
+		Policy : "eDeliveryAS4Policy.xml"
 		SignatureMethod : RSA_SHA256
 	}
 	Security signOnly {

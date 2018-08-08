@@ -55,8 +55,8 @@
 		<payloadProfiles>
 		</payloadProfiles>
 		<securities>
-			<security name="eSensPolicy.v2.0"
-					policy="eSensPolicy.v2.0.xml"
+			<security name="eDeliveryAS4Policy"
+					policy="eDeliveryAS4Policy.xml"
 					signatureMethod="RSA_SHA256" />	
 			<security name="noSigNoEnc"
 					policy="doNothingPolicy.xml"
@@ -89,7 +89,7 @@
 					action="submitMessage" 
 					defaultMpc="defaultMpc" 
 					reliability="AS4Reliability" 
-					security="eSensPolicy.v2.0"
+					security="eDeliveryAS4Policy"
 					receptionAwareness="receptionAwareness" 
 					propertySet="edeliveryPropertySet"
 					payloadProfile="MessageProfile"

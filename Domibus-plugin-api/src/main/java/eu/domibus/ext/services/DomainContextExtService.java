@@ -13,7 +13,7 @@ public interface DomainContextExtService {
     /**
      * Get the current domain. Does not throw exceptions in the attempt to get the domain.
      *
-     * @return
+     * @return the current domain or null if there is no current domain set
      */
     DomainDTO getCurrentDomainSafely();
 

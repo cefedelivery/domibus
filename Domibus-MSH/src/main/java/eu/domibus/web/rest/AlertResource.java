@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,7 +42,7 @@ public class AlertResource {
 
 
     @GetMapping
-    public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "1") int page,
+    public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "0") int page,
                                   @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                   @RequestParam(value = "asc", defaultValue = "true") Boolean ask,
                                   @RequestParam(value = "orderBy", required = false) String column,
@@ -120,7 +121,7 @@ public class AlertResource {
 
     @PutMapping
     public void processAlerts(@RequestBody List<AlertRo> alertRos) {
-        final List<Alert> alerts = alertRos.stream().map(alertRo -> {
+        final List<Alert> alerts = alertRos.stream().filter(Objects::nonNull).map(alertRo -> {
             final int entityId = alertRo.getEntityId();
             final boolean processed = alertRo.isProcessed();
             Alert alert = new Alert();
@@ -132,7 +133,7 @@ public class AlertResource {
     }
 
     @GetMapping(path = "/csv")
-    public ResponseEntity<String> getCsv(@RequestParam(value = "page", defaultValue = "1") int page,
+    public ResponseEntity<String> getCsv(@RequestParam(value = "page", defaultValue = "0") int page,
                                          @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                          @RequestParam(value = "asc", defaultValue = "true") Boolean ask,
                                          @RequestParam(value = "orderBy", required = false) String column,
@@ -183,7 +184,7 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "1") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
+    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);
@@ -217,7 +218,7 @@ public class AlertResource {
                     range(0, parameters.length).
                     mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
                     filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
-                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+                    collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue)); //NOSONAR
             alertCriteria.setParameters(parametersMap);
         }
         return alertCriteria;

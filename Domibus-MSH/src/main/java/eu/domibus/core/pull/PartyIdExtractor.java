@@ -17,7 +17,7 @@ public interface PartyIdExtractor {
 
     /**
      * Return the identifier of the party.
-     * @return
+     * @return the identifier of the party
      */
     String getPartyId();
 

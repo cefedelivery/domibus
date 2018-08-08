@@ -104,6 +104,11 @@ public class JmsResource {
 
     /**
      * This method returns a CSV file with the contents of JMS Messages table
+     * @param source queue or topic
+     * @param jmsType type of the JMS message
+     * @param fromDate starting date
+     * @param toDate ending date
+     * @param selector jms selector (additional search criteria)
      *
      * @return CSV file with the contents of JMS Messages table
      */

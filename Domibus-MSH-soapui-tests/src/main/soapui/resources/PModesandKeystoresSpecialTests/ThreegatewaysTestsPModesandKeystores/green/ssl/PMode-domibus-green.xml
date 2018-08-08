@@ -49,7 +49,7 @@
 			</payloadProfile>
 		</payloadProfiles>
 		<securities>
-			<security name="eDeliveryPolicy" policy="eDeliveryPolicy.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
@@ -78,8 +78,8 @@
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action" defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
-			<legConfiguration name="pushTestcase6tc1Action" service="testService6" action="tc6Action" defaultMpc="insolvencyMpc" reliability="AS4Reliability" security="eDeliveryPolicy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase5tc1Action" service="testService5" action="tc5Action" defaultMpc="brisMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase6tc1Action" service="testService6" action="tc6Action" defaultMpc="insolvencyMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc5Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>

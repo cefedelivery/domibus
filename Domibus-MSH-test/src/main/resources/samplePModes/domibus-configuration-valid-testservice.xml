@@ -112,9 +112,6 @@
             <security name="noSigNoEnc"
                       policy="doNothingPolicy.xml"
                       signatureMethod="RSA_SHA256"/>
-            <security name="signAndEncrypt"
-                      policy="signEncrypt.xml"
-                      signatureMethod="RSA_SHA256"/>
         </securities>
         <errorHandlings>
             <errorHandling name="demoErrorHandling"
@@ -165,7 +162,7 @@
                               action="tc2Action"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="signAndEncrypt"
+                              security="signOnly"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
@@ -176,7 +173,7 @@
                               action="tc3ActionLeg1"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="signAndEncrypt"
+                              security="signOnly"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
@@ -187,7 +184,7 @@
                               action="tc3ActionLeg2"
                               defaultMpc="defaultMpc"
                               reliability="AS4Reliability"
-                              security="signAndEncrypt"
+                              security="signOnly"
                               receptionAwareness="receptionAwareness"
                               propertySet="ecodexPropertySet"
                               errorHandling="demoErrorHandling"
@@ -206,7 +203,7 @@
             <legConfiguration name="legTestService"
                               service="testService"
                               action="testActionTest"
-                              security="signAndEncrypt"
+                              security="signOnly"
                               defaultMpc="defaultMpc"
                               receptionAwareness="receptionAwareness"
                               reliability="AS4Reliability"

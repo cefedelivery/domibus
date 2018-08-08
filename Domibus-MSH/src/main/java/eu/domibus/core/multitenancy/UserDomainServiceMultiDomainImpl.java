@@ -2,7 +2,6 @@ package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
@@ -15,17 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Cosmin Baciu
+ * @author Ion Perpegel(nperpion)
  * @since 4.0
  */
 @Service
-public class UserDomainServiceImpl implements UserDomainService {
+public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceMultiDomainImpl.class);
 
     @Autowired
     protected DomainTaskExecutor domainTaskExecutor;
@@ -38,7 +36,7 @@ public class UserDomainServiceImpl implements UserDomainService {
 
     @Autowired
     protected UserDao userDao;
- 
+
     @Autowired
     protected UserConverter userConverter;
 
@@ -46,17 +44,13 @@ public class UserDomainServiceImpl implements UserDomainService {
     protected DomainContextProvider domainContextProvider;
 
     /**
-     * Get the domain associated to the provided user from the general schema. <br/>
+     * Get the domain associated to the provided user from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the domain code of the user
      */
     @Override
     public String getDomainForUser(String user) {
-        if (!domibusConfigurationService.isMultiTenantAware()) {
-            LOG.debug("Using default domain for user [{}]", user);
-            return DomainService.DEFAULT_DOMAIN.getCode();
-        }
         LOG.debug("Searching domain for user [{}]", user);
         String domain = domainTaskExecutor.submit(() -> userDomainDao.findDomainByUser(user));
         LOG.debug("Found domain [{}] for user [{}]", domain, user);
@@ -64,39 +58,31 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
 
     /**
-     * Get the preferred domain associated to the super user from the general schema. <br/>
+     * Get the preferred domain associated to the super user from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the code of the preferred domain of a super user
      */
     @Override
     public String getPreferredDomainForUser(String user) {
-        if (!domibusConfigurationService.isMultiTenantAware()) {
-            LOG.debug("Using default domain for user [{}]", user);
-            return DomainService.DEFAULT_DOMAIN.getCode();
-        }
         LOG.debug("Searching preferred domain for user [{}]", user);
         String domain = domainTaskExecutor.submit(() -> userDomainDao.findPreferredDomainByUser(user));
         LOG.debug("Found preferred domain [{}] for user [{}]", domain, user);
         return domain;
-
     }
 
     /**
-     * Get all super users from the general schema. <br/>
+     * Get all super users from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
-     * @return
+     * @return the list of users from the general schema
      */
     @Override
     public List<User> getSuperUsers() {
-        if (!domibusConfigurationService.isMultiTenantAware()) {
-            return new ArrayList<>();
-        }
         LOG.debug("Searching for super users");
         return domainTaskExecutor.submit(() -> {
             List<eu.domibus.common.model.security.User> userEntities = userDao.listUsers();
-            List<eu.domibus.api.user.User> users = userConverter.convert(userEntities);
+            List<User> users = userConverter.convert(userEntities);
 
             // fill in preferred domain
             List<UserDomainEntity> domains = userDomainDao.listPreferredDomains();
@@ -140,12 +126,13 @@ public class UserDomainServiceImpl implements UserDomainService {
         });
     }
 
+    /**
+     * Retrieves all users from general schema
+     */
     @Override
     public List<String> getAllUserNames() {
-        LOG.debug("Setting preferred domain [{}] for user [{}]");
+        LOG.debug("Get all users from general schema");
 
-        return domainTaskExecutor.submit(() -> {
-            return userDomainDao.listAllUserNames();
-        });
+        return domainTaskExecutor.submit(() -> userDomainDao.listAllUserNames());
     }
 }

@@ -154,6 +154,9 @@
                 <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
                     <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <!--Connector/J 8.0.x
+                    <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+                    -->
                     <driver>com.mysql</driver>
                     <security>
                         <user-name>edelivery</user-name>
@@ -190,6 +193,10 @@
                     <driver name="com.mysql" module="com.mysql">
                         <driver-class>com.mysql.jdbc.Driver</driver-class>
                         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+                        <!--Connector/J 8.0.x
+                        <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+                        <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
+                        -->
                     </driver>
                 </drivers>
             </datasources>
