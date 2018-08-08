@@ -1,4 +1,5 @@
 Domibus 4.0
+- Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException
 - Support for email alert system
 - Support for multi-tenancy
