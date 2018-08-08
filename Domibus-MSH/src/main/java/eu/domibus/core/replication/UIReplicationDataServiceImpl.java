@@ -81,6 +81,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void messageReceived(String messageId) {
+        LOG.debug("UserMessage={} received", messageId);
         saveUIMessageFromUserMessageLog(messageId);
     }
 
@@ -91,6 +92,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void messageSubmitted(String messageId) {
+        LOG.debug("UserMessage={} submitted", messageId);
         saveUIMessageFromUserMessageLog(messageId);
     }
 
@@ -172,6 +174,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      */
     @Override
     public void signalMessageSubmitted(final String messageId) {
+        LOG.debug("SignalMessage={} submitted", messageId);
         saveUIMessageFromSignalMessageLog(messageId);
     }
 
@@ -181,7 +184,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * @param messageId
      */
     @Override
-    public void signalMessageReceived(String messageId) {
+    public void signalMessageReceived(final String messageId) {
+        LOG.debug("SignalMessage={} received", messageId);
         saveUIMessageFromSignalMessageLog(messageId);
     }
 

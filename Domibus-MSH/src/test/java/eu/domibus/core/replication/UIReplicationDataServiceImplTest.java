@@ -21,7 +21,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.persistence.OptimisticLockException;
 import java.sql.Date;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -84,7 +87,6 @@ public class UIReplicationDataServiceImplTest {
     private final String toPartyIdType = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
     private final String fromPartyId = "domibus-blue";
     private final String fromPartyIdType = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
-
     private final String originalSender = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1";
     private final String finalRecipient = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 
@@ -230,7 +232,7 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void messageChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
+    public void test_MessageChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
         final UserMessageLog userMessageLog = createUserMessageLog();
 
         new Expectations(uiReplicationDataService) {{
@@ -274,23 +276,147 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void signalMessageSubmitted() {
+    public void testSignalMessageSubmitted() {
+
+        new Expectations(uiReplicationDataService) {{
+            uiReplicationDataService.saveUIMessageFromSignalMessageLog(anyString);
+        }};
+
+        //tested
+        uiReplicationDataService.signalMessageSubmitted(messageId);
+
+        new FullVerifications(uiReplicationDataService) {{
+            String messageIdActual;
+            uiReplicationDataService.saveUIMessageFromSignalMessageLog(messageIdActual = withCapture());
+            times = 1;
+            Assert.assertEquals(messageId, messageIdActual);
+        }};
     }
 
     @Test
-    public void signalMessageReceived() {
+    public void testSignalMessageReceived() {
+        new Expectations(uiReplicationDataService) {{
+            uiReplicationDataService.saveUIMessageFromSignalMessageLog(anyString);
+        }};
+
+        //tested
+        uiReplicationDataService.signalMessageSubmitted(messageId);
+
+        new FullVerifications(uiReplicationDataService) {{
+            String messageIdActual;
+            uiReplicationDataService.saveUIMessageFromSignalMessageLog(messageIdActual = withCapture());
+            times = 1;
+            Assert.assertEquals(messageId, messageIdActual);
+        }};
     }
 
     @Test
-    public void findAndSyncUIMessages() {
+    public void test_FindAndSyncUIMessages(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
+        final int countAllRows = 10;
+        final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
+        Deencapsulation.setField(uiReplicationDataService, "maxRowsToSync", 10000);
+
+        new Expectations() {{
+            uiMessageDiffDao.countAll();
+            result = countAllRows;
+
+            uiMessageDiffDao.findAll();
+            result = uiMessageDiffEntityList;
+        }};
+
+        //tested method
+        uiReplicationDataService.findAndSyncUIMessages();
+
+        new FullVerifications(){{
+            uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
+
+            uiMessageDao.saveOrUpdate(withAny(new UIMessageEntity()));
+        }};
     }
 
     @Test
-    public void countSyncUIMessages() {
+    public void test_FindAndSyncUIMessagesWithLimit(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
+        final int countAllRows = 10;
+        final int limit = 20;
+        final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
+        Deencapsulation.setField(uiReplicationDataService, "maxRowsToSync", 10000);
+
+        new Expectations() {{
+            uiMessageDiffDao.countAll();
+            result = countAllRows;
+
+            uiMessageDiffDao.findAll(anyInt);
+            result = uiMessageDiffEntityList;
+        }};
+
+        //tested method
+        final int syncedRows = uiReplicationDataService.findAndSyncUIMessages(limit);
+        Assert.assertEquals(1, syncedRows);
+
+        new FullVerifications(){{
+            int actualValue;
+            uiMessageDiffDao.findAll(actualValue = withCapture());
+            Assert.assertEquals(limit, actualValue);
+
+            uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
+
+            uiMessageDao.saveOrUpdate(withAny(new UIMessageEntity()));
+        }};
     }
 
     @Test
-    public void updateAndFlush() {
+    public void test_CountSyncUIMessages() {
+
+        final int records = 214;
+        new Expectations() {{
+            uiMessageDiffDao.countAll();
+            result = records;
+
+        }};
+
+        //tested method
+        final int recordsToSync = uiReplicationDataService.countSyncUIMessages();
+        Assert.assertEquals(records, recordsToSync);
+
+        new FullVerifications() {{
+            uiMessageDiffDao.countAll();
+        }};
+    }
+
+    @Test
+    public void testUpdateAndFlush_NoExceptionThrown_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
+
+        new Expectations() {{
+        }};
+
+        //tested method
+        uiReplicationDataService.updateAndFlush(messageId, uiMessageEntity, "messageStatusChange");
+
+        new FullVerifications() {{
+            uiMessageDao.update(uiMessageEntity);
+            uiMessageDao.flush();
+        }};
+    }
+
+    //@Test
+    public void testUpdateAndFlush_ExceptionThrown_Optimistic(final @Mocked UIMessageEntity uiMessageEntity) {
+
+        new Expectations(uiReplicationDataService) {{
+            uiMessageDao.flush();
+            result = new OptimisticLockException("Exception raised");
+        }};
+
+        try {
+            //tested method
+            uiReplicationDataService.updateAndFlush(messageId, uiMessageEntity, "messageStatusChange");
+            Assert.fail("exception expected");
+        } catch (OptimisticLockException e) {
+
+        }
+
+        new Verifications() {{
+            uiMessageDao.update(uiMessageEntity);
+        }};
     }
 
     @Test
