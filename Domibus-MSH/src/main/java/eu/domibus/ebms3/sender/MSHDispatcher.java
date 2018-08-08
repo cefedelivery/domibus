@@ -23,7 +23,7 @@ import java.net.ConnectException;
 
 /**
  * @author Christian Koch, Stefan Mueller
- * @Since 3.0
+ * @since 3.0
  */
 @Service
 public class MSHDispatcher {

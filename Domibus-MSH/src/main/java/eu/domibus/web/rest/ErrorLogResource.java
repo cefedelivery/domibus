@@ -59,7 +59,7 @@ public class ErrorLogResource {
 
     @RequestMapping(method = RequestMethod.GET)
     public ErrorLogResultRO getErrorLog(
-            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
@@ -96,6 +96,15 @@ public class ErrorLogResource {
 
     /**
      * This method returns a CSV file with the contents of Error Log table
+     * @param errorSignalMessageId the signal message id of the message that caused the error
+     * @param mshRole whether the error occured while SENDING or while RECEIVING messages
+     * @param messageInErrorId the id of the message that caused the error
+     * @param errorCode error code
+     * @param errorDetail error detail
+     * @param timestampFrom error timestamp after this date
+     * @param timestampTo error timestamp before this date
+     * @param notifiedFrom error notified after this date
+     * @param notifiedTo error notified before this date
      *
      * @return CSV file with the contents of Error Log table
      */

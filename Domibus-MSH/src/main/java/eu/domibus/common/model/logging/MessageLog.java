@@ -51,13 +51,13 @@ public abstract class MessageLog extends AbstractBaseAuditEntity {
     private String endpoint;
     /**
      * The Date when this message was deleted, A message shall be deleted when one of the following conditions apply:
-     * <p/>
+     * <p>
      * - An outgoing message has been sent without error eb:Error/@severity failure failure, and an AS4 receipt has been
      * received
      * - An outgoing message has been sent without error eb:Error/@severity failure, and AS4 is disabled
      * - An outgoing message could not be sent and the final AS4 retry has passed
      * - An outgoing message could not be sent and AS4 is disabled (eb:Error/@severity failure, [CORE 6.2.5])
-     * <p/>
+     * <p>
      * - A received message
      */
     @Column(name = "DELETED")

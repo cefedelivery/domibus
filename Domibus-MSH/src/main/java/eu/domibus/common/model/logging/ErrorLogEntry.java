@@ -72,7 +72,7 @@ public class ErrorLogEntry extends AbstractBaseEntity implements ErrorResult {
      *
      * @param messaging Signal message containing the error
      * @param role      Role of the MSH
-     * @return
+     * @return the new error log entry
      */
     public static ErrorLogEntry parse(final Messaging messaging, final MSHRole role) {
         final Error error = messaging.getSignalMessage().getError().iterator().next();

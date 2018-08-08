@@ -3,7 +3,6 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.api.util.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,9 +24,6 @@ import java.util.List;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
-
-    @Autowired
-    private HashUtil hashUtil;
 
     @Autowired
     @Qualifier("securityAuthenticationDAO")

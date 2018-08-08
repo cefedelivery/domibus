@@ -10,7 +10,7 @@ import java.util.TimeZone;
 
 /**
  * @author Federico Martini
- *         <p/>
+ *         <p>
  *         This class is designed to retrieve the main Domibus properties defined in a file and valued using Maven resource filtering.
  *         Spring will take care of the creation of this Singleton object at startup.
  */
