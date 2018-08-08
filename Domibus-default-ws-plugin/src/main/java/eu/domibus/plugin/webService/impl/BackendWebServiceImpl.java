@@ -14,21 +14,16 @@ import eu.domibus.plugin.AbstractBackendConnector;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import eu.domibus.plugin.webService.generated.*;
-import eu.domibus.plugin.webService.impl.validation.WSPluginSchemaValidation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -45,7 +40,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public static final String MESSAGE_SUBMISSION_FAILED = "Message submission failed";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendWebServiceImpl.class);
 
-    public static final eu.domibus.plugin.webService.generated.ObjectFactory WEBSERVICE_OF = new eu.domibus.plugin.webService.generated.ObjectFactory();
+    private static final eu.domibus.plugin.webService.generated.ObjectFactory WEBSERVICE_OF = new eu.domibus.plugin.webService.generated.ObjectFactory();
 
     private static final ObjectFactory EBMS_OBJECT_FACTORY = new ObjectFactory();
 
@@ -59,18 +54,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
 
+    private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
+
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
 
     @Autowired
     private MessageAcknowledgeExtService messageAcknowledgeExtService;
-
-    @Autowired
-    protected WSPluginSchemaValidation wsPluginSchemaValidation;
-
-    @Autowired
-    protected BackendWebServiceFaultFactory backendWebServiceFaultFactory;
 
     public BackendWebServiceImpl(final String name) {
         super(name);
@@ -90,11 +81,10 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.info("Received message");
 
-        wsPluginSchemaValidation.validateSubmitMessage(submitRequest, ebMSHeaderInfo);
-
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
         List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
+
         for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
 
             ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
@@ -116,7 +106,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 }
             }
             if (!foundPayload) {
-                throw new SubmitMessageFault("No Payload found for PartInfo with href: " + extendedPartInfo.getHref(), backendWebServiceFaultFactory.generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                throw new SubmitMessageFault("No Payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
             }
         }
         partInfoList.addAll(partInfosToAdd);
@@ -130,7 +120,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             messageId = this.submit(ebMSHeaderInfo);
         } catch (final MessagingProcessingException mpEx) {
             LOG.error(MESSAGE_SUBMISSION_FAILED, mpEx);
-            throw new SubmitMessageFault(MESSAGE_SUBMISSION_FAILED, backendWebServiceFaultFactory.generateFaultDetail(mpEx));
+            throw new SubmitMessageFault(MESSAGE_SUBMISSION_FAILED, generateFaultDetail(mpEx));
         }
         LOG.info("Received message from backend to send, assigning messageID [{}]", messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
@@ -138,7 +128,19 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         return response;
     }
 
+    private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
+        FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
+        fd.setCode(mpEx.getEbms3ErrorCode().getErrorCodeName());
+        fd.setMessage(mpEx.getMessage());
+        return fd;
+    }
 
+    private FaultDetail generateDefaultFaultDetail(String message) {
+        FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
+        fd.setCode(ErrorCode.EBMS_0004.name());
+        fd.setMessage(message);
+        return fd;
+    }
 
     private void copyPartProperties(final String payloadContentType, final ExtendedPartInfo partInfo) {
         final PartProperties partProperties = new PartProperties();
@@ -191,17 +193,16 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300, rollbackFor = RetrieveMessageFault.class)
     public void retrieveMessage(RetrieveMessageRequest retrieveMessageRequest, Holder<RetrieveMessageResponse> retrieveMessageResponse, Holder<Messaging> ebMSHeaderInfo) throws RetrieveMessageFault {
-        wsPluginSchemaValidation.validateRetrieveMessage(retrieveMessageRequest);
 
         UserMessage userMessage;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
 
-        if (!isMessageIdNotEmpty) {
+        if(!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t", "");
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t","");
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);
@@ -241,7 +242,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
-            if (extPartInfo.getPayloadDatahandler() != null) {
+            if(extPartInfo.getPayloadDatahandler() != null) {
                 LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(extPartInfo.getPayloadDatahandler());
             }
@@ -278,11 +279,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     public MessageStatus getStatus(final StatusRequest statusRequest) throws StatusFault {
-        wsPluginSchemaValidation.validateGetStatus(statusRequest);
-
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(statusRequest.getMessageID());
 
-        if (!isMessageIdNotEmpty) {
+        if(!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
@@ -291,8 +290,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     @Override
     public ErrorResultImplArray getMessageErrors(final GetErrorsRequest messageErrorsRequest) {
-        wsPluginSchemaValidation.validateGetMessageErrorsRequest(messageErrorsRequest);
-
         return defaultTransformer.transformFromErrorResults(messageRetriever.getErrorsForMessage(messageErrorsRequest.getMessageID()));
     }
 
