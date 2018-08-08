@@ -22,17 +22,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * DAO implementation
+ * DAO implementation for {@link UIMessageEntity}
+ *
  * @author Catalin Enache
  * @since 4.0
  */
 @Repository
 public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMessageDao {
 
-    /**
-     * logger
-     */
+    /** logger */
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIMessageDaoImpl.class);
+
+    /** message id */
+    String MESSAGE_ID = "MESSAGE_ID";
 
 
     public UIMessageDaoImpl() {
@@ -155,38 +157,9 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
             Object filterValue = filter.getValue();
             if (filterValue != null) {
                 if (filterValue instanceof String) {
-                    if (StringUtils.isNotBlank(filterKey) && !filter.getValue().toString().isEmpty()) {
-                        switch (filterKey) {
-                            case "fromPartyId":
-                                predicates.add(cb.equal(ume.get("fromId"), filterValue));
-                                break;
-                            case "toPartyId":
-                                predicates.add(cb.equal(ume.get("toId"), filterValue));
-                                break;
-                            case "originalSender":
-                                predicates.add(cb.equal(ume.get("fromScheme"), filterValue));
-                                break;
-                            case "finalRecipient":
-                                predicates.add(cb.equal(ume.get("toScheme"), filterValue));
-                                break;
-                            default:
-                                predicates.add(cb.equal(ume.get(filterKey), filterValue));
-                                break;
-                        }
-                    }
+                    addStringPredicates(cb, ume, predicates, filter, filterKey, filterValue);
                 } else if (filterValue instanceof Date) {
-                    if (!filterValue.toString().isEmpty()) {
-                        switch (filterKey) {
-                            case "receivedFrom":
-                                predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
-                                break;
-                            case "receivedTo":
-                                predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                    addDatePredicates(cb, ume, predicates, filterKey, filterValue);
                 } else {
                     predicates.add(cb.equal(ume.<String>get(filterKey), filterValue));
                 }
@@ -197,6 +170,43 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
             }
         }
         return predicates;
+    }
+
+    private void addStringPredicates(CriteriaBuilder cb, Root<? extends UIMessageEntity> ume, List<Predicate> predicates, Map.Entry<String, Object> filter, String filterKey, Object filterValue) {
+        if (StringUtils.isNotBlank(filterKey) && !filter.getValue().toString().isEmpty()) {
+            switch (filterKey) {
+                case "fromPartyId":
+                    predicates.add(cb.equal(ume.get("fromId"), filterValue));
+                    break;
+                case "toPartyId":
+                    predicates.add(cb.equal(ume.get("toId"), filterValue));
+                    break;
+                case "originalSender":
+                    predicates.add(cb.equal(ume.get("fromScheme"), filterValue));
+                    break;
+                case "finalRecipient":
+                    predicates.add(cb.equal(ume.get("toScheme"), filterValue));
+                    break;
+                default:
+                    predicates.add(cb.equal(ume.get(filterKey), filterValue));
+                    break;
+            }
+        }
+    }
+
+    private void addDatePredicates(CriteriaBuilder cb, Root<? extends UIMessageEntity> ume, List<Predicate> predicates, String filterKey, Object filterValue) {
+        if (!filterValue.toString().isEmpty()) {
+            switch (filterKey) {
+                case "receivedFrom":
+                    predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
+                    break;
+                case "receivedTo":
+                    predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 

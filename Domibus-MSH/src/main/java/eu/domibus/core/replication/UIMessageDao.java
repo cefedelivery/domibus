@@ -8,8 +8,6 @@ import java.util.Map;
  * @since 4.0
  */
 public interface UIMessageDao {
-    /** message id */
-    String MESSAGE_ID = "MESSAGE_ID";
 
     UIMessageEntity findUIMessageByMessageId(String messageId);
 

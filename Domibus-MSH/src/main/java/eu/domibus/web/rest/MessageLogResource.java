@@ -75,7 +75,7 @@ public class MessageLogResource {
 
     @PostConstruct
     public void init() {
-        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.UI.flat.table.enabled", "false"));
+        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "false"));
     }
 
     @RequestMapping(method = RequestMethod.GET)
