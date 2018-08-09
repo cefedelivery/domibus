@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +115,14 @@ public class PartyServiceImpl implements PartyService {
     protected List<Party> linkPartyAndProcesses() {
 
         //Retrieve all party entities.
-        List<eu.domibus.common.model.configuration.Party> allParties = pModeProvider.findAllParties();
+        List<eu.domibus.common.model.configuration.Party> allParties;
+        try {
+            allParties = pModeProvider.findAllParties();
+        } catch(IllegalStateException e) {
+            LOG.trace("findAllParties thrown: ", e);
+            return new ArrayList<>();
+        }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("linkPartyAndProcesses for party entities");
             allParties.forEach(party -> LOG.debug("     [{}]", party));
@@ -281,7 +289,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setInitiatorPartiesXml(new InitiatorParties());
             List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
             ip.removeIf(x -> !iParties.contains(x.getName()));
-            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name.equals(x.getName())))
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equals(x.getName())))
                     .map(name -> {
                         InitiatorParty y = new InitiatorParty();
                         y.setName(name);
@@ -362,7 +370,12 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public List<eu.domibus.api.process.Process> getAllProcesses() {
         //Retrieve all processes, needed in UI console to be able to check
-        List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
+        List<eu.domibus.common.model.configuration.Process> allProcesses;
+        try {
+           allProcesses = pModeProvider.findAllProcesses();
+        } catch(IllegalStateException e) {
+            return new ArrayList<>();
+        }
         List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
         return processes;
     }
