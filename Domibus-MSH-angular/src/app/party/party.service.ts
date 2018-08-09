@@ -94,6 +94,6 @@ export class PartyService {
   }
 
   updateParties (partyList: PartyResponseRo[]) {
-    return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
+    return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise();
   }
 }
