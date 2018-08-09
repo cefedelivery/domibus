@@ -86,7 +86,6 @@ export class PartyService {
 
   initParty () {
     const newParty = new PartyResponseRo();
-    newParty.name = 'new';
     newParty.processesWithPartyAsInitiator = [];
     newParty.processesWithPartyAsResponder = [];
     newParty.identifiers = [];

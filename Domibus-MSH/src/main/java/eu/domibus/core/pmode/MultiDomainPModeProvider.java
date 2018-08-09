@@ -55,6 +55,8 @@ public class MultiDomainPModeProvider extends PModeProvider {
         PModeProvider pModeProvider = providerMap.get(currentDomain);
         if (pModeProvider == null) {
             synchronized (providerMap) {
+                // retrieve again from map, otherwise it is null even for the second thread(because the variable has method scope)
+                pModeProvider = providerMap.get(currentDomain);
                 if (pModeProvider == null) { //NOSONAR: double-check locking
                     LOG.debug("Creating domain PMode provider  for domain [{}]", currentDomain);
                     pModeProvider = pModeProviderFactory.createDomainPModeProvider(currentDomain);

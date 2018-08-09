@@ -77,7 +77,7 @@
         <md-icon>save</md-icon>
         <span>Save</span>
       </button>
-      <button md-raised-button (click)="add()" color="primary">
+      <button md-raised-button (click)="add()" color="primary" [disabled]="!canAdd()">
         <md-icon>add</md-icon>
         <span>New</span>
       </button>

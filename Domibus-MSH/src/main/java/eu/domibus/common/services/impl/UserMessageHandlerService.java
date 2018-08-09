@@ -11,6 +11,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.ErrorHandling;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
@@ -277,10 +278,13 @@ public class UserMessageHandlerService {
         Party to = pModeProvider.getReceiverParty(pmodeKey);
         Validate.notNull(to, "Responder party was not found");
 
+        NotificationStatus notificationStatus = (legConfiguration.getErrorHandling() != null &&legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
+        LOG.debug("NotificationStatus [{}]", notificationStatus);
+
         userMessageLogService.save(
                 userMessage.getMessageInfo().getMessageId(),
                 MessageStatus.RECEIVED.toString(),
-                (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED).toString(),
+                notificationStatus.toString(),
                 MSHRole.RECEIVING.toString(),
                 0,
                 StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc(),
