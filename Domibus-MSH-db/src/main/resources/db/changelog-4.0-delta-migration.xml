@@ -155,6 +155,8 @@
             AND property6_.NAME='finalRecipient'
             ) result
             ORDER BY result.received ASC;
+
+            COMMIT;
         </sql>
         <sql dbms="oracle">
             INSERT /*+ append*/ INTO tb_message_ui (
@@ -279,17 +281,21 @@
             ORDER BY
             result.received ASC
             );
+
+            COMMIT;
         </sql>
     </changeSet>
     <changeSet id="EDELIVERY-3361_1" author="CatalinEnache">
+        <addUniqueConstraint
+                columnNames="MESSAGE_ID"
+                constraintName="UNI_MSG_UI_MSG_ID"
+                tableName="TB_MESSAGE_UI"
+        />
         <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_TYPE"/>
         </createIndex>
         <createIndex indexName="IDX_MSG_UI_SUBTYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_SUBTYPE"/>
-        </createIndex>
-        <createIndex indexName="IDX_MSG_UI_MSG_ID" tableName="TB_MESSAGE_UI">
-            <column name="MESSAGE_ID"/>
         </createIndex>
         <createIndex indexName="IDX_MSG_UI_RECEIVED" tableName="TB_MESSAGE_UI">
             <column name="RECEIVED"/>

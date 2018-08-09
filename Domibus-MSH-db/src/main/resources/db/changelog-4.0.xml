@@ -1993,9 +1993,7 @@
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="MESSAGE_ID" type="VARCHAR(255)">
-                <constraints nullable="false" unique="true"/>
-            </column>
+            <column name="MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="MESSAGE_STATUS" type="VARCHAR(255)"/>
             <column name="NOTIFICATION_STATUS" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -2026,14 +2024,16 @@
             <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
             <column name="LAST_MODIFIED" type="TIMESTAMP" defaultValueComputed="${now}"/>
         </createTable>
+        <addUniqueConstraint
+                columnNames="MESSAGE_ID"
+                constraintName="UNI_MSG_UI_MSG_ID"
+                tableName="TB_MESSAGE_UI"
+        />
         <createIndex indexName="IDX_MSG_UI_TYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_TYPE"/>
         </createIndex>
         <createIndex indexName="IDX_MSG_UI_SUBTYPE" tableName="TB_MESSAGE_UI">
             <column name="MESSAGE_SUBTYPE"/>
-        </createIndex>
-        <createIndex indexName="IDX_MSG_UI_MSG_ID" tableName="TB_MESSAGE_UI">
-            <column name="MESSAGE_ID"/>
         </createIndex>
         <createIndex indexName="IDX_MSG_UI_RECEIVED" tableName="TB_MESSAGE_UI">
             <column name="RECEIVED"/>
