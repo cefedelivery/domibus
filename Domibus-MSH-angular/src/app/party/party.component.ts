@@ -10,6 +10,8 @@ import {AlertComponent} from '../alert/alert.component';
 import {PartyDetailsComponent} from './party-details/party-details.component';
 import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
+import {CurrentPModeComponent} from '../pmode/current/currentPMode.component';
+import {Http} from '@angular/http';
 
 /**
  * @author Thomas Dussart
@@ -48,13 +50,15 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   allProcesses: string[];
 
+  pModeExists: boolean;
+
   constructor (public dialog: MdDialog,
                public partyService: PartyService,
-               public alertService: AlertService) {
+               public alertService: AlertService,
+               private http: Http) {
   }
 
-  ngOnInit () {
-
+  async ngOnInit () {
     this.rows = [];
     this.allRows = [];
     this.selected = [];
@@ -69,7 +73,14 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
     this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
-    this.listPartiesAndProcesses();
+
+    const res = await this.http.get(CurrentPModeComponent.PMODE_URL + '/current').toPromise();
+    if (res && res.text()) {
+      this.pModeExists = true;
+      this.listPartiesAndProcesses();
+    } else {
+      this.pModeExists = false;
+    }
   }
 
   isDirty (): boolean {
@@ -178,12 +189,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
     }
   }
 
+  canAdd () {
+    return !!this.pModeExists;
+  }
+
   canSave () {
     return this.isDirty();
   }
 
   canEdit () {
-    return this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1;
   }
 
   canCancel () {
@@ -191,7 +206,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canDelete () {
-    return this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1;
   }
 
   cancel () {
@@ -207,7 +222,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
       .catch(err => this.alertService.exception('Party update error', err, false));
   }
 
-  add () {
+  async add () {
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
     this.allRows.push(newParty);
@@ -217,10 +232,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.count++;
 
     this.newParties.push(newParty);
+    const ok = await this.edit(newParty);
+    if (!ok) {
+      this.remove();
+    }
   }
 
   remove () {
     const deletedParty = this.selected[0];
+    if(!deletedParty) return;
+
     this.rows.splice(this.rows.indexOf(deletedParty), 1);
     this.allRows.splice(this.rows.indexOf(deletedParty), 1);
 
@@ -233,31 +254,32 @@ export class PartyComponent implements OnInit, DirtyOperations {
       this.newParties.splice(this.newParties.indexOf(deletedParty), 1);
   }
 
-  edit (row) {
+  async edit (row): Promise<boolean> {
     row = row || this.selected[0];
-    this.manageCertificate(row)
-      .then(() => {
-        const rowCopy = JSON.parse(JSON.stringify(row));
-        const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-        const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
-          data: {
-            edit: rowCopy,
-            allProcesses: allProcessesCopy
-          }
-        });
+    await this.manageCertificate(row);
 
-        dialogRef.afterClosed().subscribe(ok => {
-          if (ok) {
-            if (JSON.stringify(row) === JSON.stringify(rowCopy))
-              return; // nothing changed
+    const rowCopy = JSON.parse(JSON.stringify(row));
+    const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-            Object.assign(row, rowCopy);
-            if (this.updatedParties.indexOf(row) < 0)
-              this.updatedParties.push(row);
-          }
-        });
-      });
+    const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+      data: {
+        edit: rowCopy,
+        allProcesses: allProcessesCopy
+      }
+    });
+
+    const ok = await dialogRef.afterClosed().toPromise();
+    if (ok) {
+      if (JSON.stringify(row) === JSON.stringify(rowCopy))
+        return; // nothing changed
+
+      Object.assign(row, rowCopy);
+      if (this.updatedParties.indexOf(row) < 0)
+        this.updatedParties.push(row);
+    }
+
+    return ok;
   }
 
   manageCertificate (party: PartyResponseRo): Promise<CertificateRo> {

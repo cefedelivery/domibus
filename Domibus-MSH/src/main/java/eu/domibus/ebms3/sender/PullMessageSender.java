@@ -2,6 +2,7 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.DomibusInitializationHelper;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -22,6 +23,7 @@ import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.PolicyService;
 import eu.domibus.util.MessageUtil;
 import org.apache.neethi.Policy;
@@ -84,14 +86,25 @@ public class PullMessageSender {
     private PullReceiptSender pullReceiptSender;
 
     @Autowired
+    private DomainContextProvider domainContextProvider;
+
+    @Autowired
     @Qualifier("taskExecutor")
     private Executor executor;
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
     @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
+    //@TODO unit test this method.
     public void processPullRequest(final MapMessage map) {
         if (domibusInitializationHelper.isNotReady()) {
+            return;
+        }
+        try {
+            final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
+            domainContextProvider.setCurrentDomain(domainCode);
+        } catch (JMSException e) {
+            LOG.error("Could not get domain from pull request jms message:", e);
             return;
         }
         LOG.debug("Initiate pull request");
@@ -106,25 +119,17 @@ public class PullMessageSender {
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
-            LOG.debug("Sending pull request with mpc " + mpc);
+            LOG.debug("Sending pull request with mpc:[{}]", mpc);
             final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
             final Party receiverParty = pModeProvider.getReceiverParty(pMode);
-            final Policy policy;
-            try {
-                policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-            } catch (final ConfigurationException e) {
-
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
-                ex.setMshRole(MSHRole.SENDING);
-                throw ex;
-            }
+            final Policy policy = getPolicy(legConfiguration);
             LOG.trace("Build soap message");
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
             LOG.trace("Send soap message");
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
             messaging = MessageUtil.getMessage(response, jaxbContext);
             if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
-                LOG.trace("No message for sent pull request with mpc " + mpc);
+                LOG.trace("No message for sent pull request with mpc:[{}]", mpc);
                 logError(signalMessage);
                 return;
             }
@@ -145,12 +150,7 @@ public class PullMessageSender {
              * Ideally the message id should be commited to a queue and the sending of the receipt executed in another proces.
              */
             try {
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId);
-                    }
-                });
+                executor.execute(() -> pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }
@@ -166,6 +166,16 @@ public class PullMessageSender {
                 LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messageId);
             }
             checkConnectionProblem(e);
+        }
+    }
+
+    private Policy getPolicy(LegConfiguration legConfiguration) throws EbMS3Exception {
+        try {
+            return policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
+        } catch (final ConfigurationException e) {
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
         }
     }
 

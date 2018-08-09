@@ -25,6 +25,7 @@ public class DomainDaoImpl implements DomainDao {
 
     private static final String[] DOMAIN_FILE_EXTENSION = {"properties"};
     private static final String DOMAIN_FILE_SUFFIX = "-domibus";
+    private static final String DOMAIN_TITLE = "domain.title";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -53,7 +54,8 @@ public class DomainDaoImpl implements DomainDao {
             if (StringUtils.containsIgnoreCase(fileName, DOMAIN_FILE_SUFFIX)) {
                 String domainCode = StringUtils.substringBefore(fileName, DOMAIN_FILE_SUFFIX);
 
-                Domain domain = new Domain(domainCode, getDomainTitle(domainCode));
+                Domain domain = new Domain(domainCode, null);
+                domain.setName(getDomainTitle(domain));
                 result.add(domain);
             }
 
@@ -61,8 +63,8 @@ public class DomainDaoImpl implements DomainDao {
         return result;
     }
 
-    protected String getDomainTitle(String domainCode) {
-        return domibusPropertyProvider.getProperty(domainCode + ".domain.title", domainCode);
+    protected String getDomainTitle(Domain domain) {
+        return domibusPropertyProvider.getProperty(domain, DOMAIN_TITLE, domain.getCode());
     }
 }
 
