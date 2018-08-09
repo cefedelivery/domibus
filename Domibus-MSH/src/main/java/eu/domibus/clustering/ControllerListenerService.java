@@ -1,6 +1,7 @@
 package eu.domibus.clustering;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -39,6 +40,9 @@ public class ControllerListenerService implements MessageListener {
     @Autowired
     protected DomainService domainService;
 
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
+
     @Override
     @Transactional
     public void onMessage(Message message) {
@@ -58,6 +62,7 @@ public class ControllerListenerService implements MessageListener {
         try {
             String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
             domain = domainService.getDomain(domainCode);
+            domainContextProvider.setCurrentDomain(domainCode);
         } catch (JMSException e) {
             LOG.error("Could not get the domain", e);
             return;
@@ -65,7 +70,6 @@ public class ControllerListenerService implements MessageListener {
 
         switch (command) {
             case Command.RELOAD_PMODE:
-                //TODO refresh the PMode associated to the domain
                 pModeProvider.refresh();
                 multiDomainCryptoService.refreshTrustStore(domain);
                 break;
