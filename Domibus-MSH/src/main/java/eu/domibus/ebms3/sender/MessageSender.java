@@ -101,6 +101,13 @@ public class MessageSender implements MessageListener {
 
     private void sendUserMessage(final String messageId) {
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
+
+        if(messageStatus == MessageStatus.NOT_FOUND) {
+            userMessageService.scheduleSending(messageId);
+            LOG.info("MessageStatus NOT_FOUND -> reschedule sending");
+            return;
+        }
+
         if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
             LOG.warn("Message [{}] has a status [{}] which is not allowed for sending. Only the statuses [{}] are allowed", messageId, messageStatus, ALLOWED_STATUSES_FOR_SENDING);
             return;
