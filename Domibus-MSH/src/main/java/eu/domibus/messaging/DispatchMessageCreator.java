@@ -23,4 +23,14 @@ public class DispatchMessageCreator {
                 .property(MessageConstants.MESSAGE_ID, messageId)
                 .build();
     }
+
+    public JmsMessage createMessage(final int retryCount) {
+
+        return JMSMessageBuilder
+                .create()
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(MessageConstants.RETRY_COUNT, retryCount)
+                .build();
+    }
+
 }

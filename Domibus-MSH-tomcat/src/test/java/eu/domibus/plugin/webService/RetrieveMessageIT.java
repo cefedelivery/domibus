@@ -62,7 +62,7 @@ public class RetrieveMessageIT extends AbstractBackendWSIT {
     @DirtiesContext
     @Test(expected = RetrieveMessageFault.class)
     public void testMessageIdEmpty() throws RetrieveMessageFault {
-        retrieveMessageFail("", "retrieveMessageRequest is not valid against the XSD");
+        retrieveMessageFail("", "Message ID is empty");
     }
 
     @DirtiesContext

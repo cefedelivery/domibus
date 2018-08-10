@@ -61,7 +61,7 @@ export class AlertService {
     if (!errMsg) {
       try {
         if (error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8') {
-          errMsg = (error.json ? error.json().message : error);
+          errMsg = (error.json ? error.json().message || error.json() || error : error);
         } else {
           errMsg = error;
           errMsg = error._body ? error._body.match(/<h1>(.+)<\/h1>/)[1] : error;
