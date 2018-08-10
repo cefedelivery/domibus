@@ -1,24 +1,17 @@
 package eu.domibus.core.pull;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static eu.domibus.core.pull.PullMessageState.EXPIRED;
 import static eu.domibus.core.pull.PullMessageState.RETRY;
@@ -42,30 +35,17 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     protected static final String MESSAGE_STATE = "MESSAGE_STATE";
 
-    private static final String LOCK_BY_ID_QUERY = "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE";
+    protected static final String LOCK_BY_ID_QUERY = "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE='READY' and ml.ID_PK=?1 FOR UPDATE";
 
-    private static final String LOCK_BY_MESSAGE_ID_QUERY = "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE";
+    protected static final String LOCK_BY_MESSAGE_ID_QUERY = "SELECT ID_PK,MESSAGE_TYPE,MESSAGE_RECEIVED,MESSAGE_STATE,MESSAGE_ID,INITIATOR,MPC,SEND_ATTEMPTS,SEND_ATTEMPTS_MAX,NEXT_ATTEMPT,MESSAGE_STALED FROM TB_MESSAGING_LOCK ml where ml.MESSAGE_ID=?1 FOR UPDATE";
 
     @PersistenceContext(unitName = "domibusJTA")
     private EntityManager entityManager;
 
-    private NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private DomibusConfigurationService domibusConfigurationService;
-
-    @Autowired
-    @Qualifier("domibusJDBC-XADataSource")
-    public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PullMessageId getNextPullMessageToProcess(final Integer idPk) {
-        Map<String, Object> params = new HashMap<>();
         try {
-            params.put(IDPK, idPk);
             Query q = entityManager.createNativeQuery(LOCK_BY_ID_QUERY, MessagingLock.class);
             q.setParameter(1, idPk);
             final MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
@@ -75,22 +55,18 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             final int sendAttemptsMax = messagingLock.getSendAttemptsMax();
             final Date messageStaled = messagingLock.getStaled();
 
-            final String updateSql = "UPDATE TB_MESSAGING_LOCK ml SET ml.MESSAGE_STATE=:MESSAGE_STATE WHERE ml.ID_PK=:idpk";
             final Timestamp currentDate = new Timestamp(System.currentTimeMillis());
             LOG.debug("expiration date[{}], current date[{}] ", messageStaled, currentDate);
             if (messageStaled.compareTo(currentDate) < 0) {
-                params.put(MESSAGE_STATE, MessageState.DEL.name());
-                jdbcTemplate.update(updateSql, params);
+                messagingLock.setMessageState(MessageState.DEL);
                 return new PullMessageId(messageId, EXPIRED, String.format("Maximum time to send the message has been reached:[%tc]", messageStaled));
             }
             LOG.debug("sendattempts[{}], sendattemptsmax[{}]", sendAttempts, sendAttemptsMax);
             if (sendAttempts >= sendAttemptsMax) {
-                params.put(MESSAGE_STATE, MessageState.DEL.name());
-                jdbcTemplate.update(updateSql, params);
+                messagingLock.setMessageState(MessageState.DEL);
                 return new PullMessageId(messageId, EXPIRED, String.format("Maximum number of attempts to send the message has been reached:[%d]", sendAttempts));
             }
             if (sendAttempts >= 0) {
-                params.put(MESSAGE_STATE, MessageState.PROCESS.name());
                 messagingLock.setMessageState(MessageState.PROCESS);
             }
             if (sendAttempts > 0) {
