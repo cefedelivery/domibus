@@ -1,5 +1,6 @@
 package eu.domibus.common.services.impl;
 
+import com.google.gson.Gson;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.util.DomibusStringUtil;
@@ -11,7 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -38,7 +43,7 @@ public class CsvServiceImpl<T> implements CsvService {
     public String exportToCSV(List<?> list) {
         StringBuilder result = new StringBuilder();
         Field[] fields;
-        if(CollectionUtils.isNotEmpty(list)) {
+        if (CollectionUtils.isNotEmpty(list)) {
             final Class<?> aClass = list.get(0).getClass();
             fields = aClass.getDeclaredFields();
             createCSVColumnHeader(result, fields);
@@ -55,9 +60,9 @@ public class CsvServiceImpl<T> implements CsvService {
 
     @Override
     public void createCSVColumnHeader(StringBuilder result, Field[] fields) {
-        for(Field field : fields) {
+        for (Field field : fields) {
             String varName = field.getName();
-            if(customNames.get(varName.toUpperCase()) != null) {
+            if (customNames.get(varName.toUpperCase()) != null) {
                 varName = customNames.get(varName.toUpperCase());
             }
             if (excluded.contains(varName)) {
@@ -72,7 +77,7 @@ public class CsvServiceImpl<T> implements CsvService {
 
     @Override
     public void createCSVContents(List<?> list, StringBuilder result, Field[] fields) {
-        for(Object elem : list) {
+        for (Object elem : list) {
             // for each field of the class
             for (Field field : fields) {
                 // if it's not on the list of the excluded ones
@@ -83,9 +88,9 @@ public class CsvServiceImpl<T> implements CsvService {
                 field.setAccessible(true);
                 try {
                     // get the field value
-                    String fieldValue = Objects.toString(field.get(elem), StringUtils.EMPTY);
+                    String fieldValue = serializeFieldValue(field, elem);
                     // if field contains ,(comma) we should include ""
-                    if(fieldValue.contains(COMMA)) {
+                    if (fieldValue.contains(COMMA)) {
                         fieldValue = DOUBLE_QUOTES + fieldValue + DOUBLE_QUOTES;
                     }
                     result.append(fieldValue);
@@ -101,13 +106,33 @@ public class CsvServiceImpl<T> implements CsvService {
         }
     }
 
+    private String serializeFieldValue(Field field, Object elem) throws IllegalAccessException {
+        Object fieldValue = field.get(elem);
+        if (fieldValue == null) {
+            return StringUtils.EMPTY;
+        }
+        if (fieldValue instanceof Map) {
+            return new Gson().toJson(fieldValue);
+        }
+        if (fieldValue instanceof Date) {
+            DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'GMT' Z");
+            ZonedDateTime d = ZonedDateTime.ofInstant(((Date)fieldValue).toInstant(), ZoneId.systemDefault());
+            return d.format(f);
+
+//            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ", Locale.getDefault());
+//            return df.format(fieldValue);
+        }
+        String str = Objects.toString(fieldValue, StringUtils.EMPTY);
+        return str;
+    }
+
     public void customizeColumn(Map<String, String> customized) {
         customNames.putAll(customized);
     }
 
     public String getCsvFilename(String module) {
-        Date date = new Date() ;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         return module + "_datatable_" + dateFormat.format(date) + ".csv";
     }
 

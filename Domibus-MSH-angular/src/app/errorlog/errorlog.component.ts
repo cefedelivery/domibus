@@ -52,7 +52,7 @@ export class ErrorLogComponent implements AfterViewInit {
   advancedSearch: boolean;
 
   static readonly ERROR_LOG_URL: string = 'rest/errorlogs';
-  static readonly ERROR_LOG_CSV_URL: string = ErrorLogComponent.ERROR_LOG_URL + '/csv';
+  static readonly ERROR_LOG_CSV_URL: string = ErrorLogComponent.ERROR_LOG_URL + '/csv?';
 
   constructor (private elementRef: ElementRef, private http: Http, private alertService: AlertService, public dialog: MdDialog, private renderer: Renderer2) {
   }
@@ -100,13 +100,16 @@ export class ErrorLogComponent implements AfterViewInit {
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
-  getErrorLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
-    let searchParams: URLSearchParams = new URLSearchParams();
-    searchParams.set('page', offset.toString());
-    searchParams.set('pageSize', pageSize.toString());
-    searchParams.set('orderBy', orderBy);
+  createSearchParams (): URLSearchParams {
+    const searchParams = new URLSearchParams();
 
-    //filter
+    if (this.orderBy) {
+      searchParams.set('orderBy', this.orderBy);
+    }
+    if (this.asc != null) {
+      searchParams.set('asc', this.asc.toString());
+    }
+
     if (this.filter.errorSignalMessageId) {
       searchParams.set('errorSignalMessageId', this.filter.errorSignalMessageId);
     }
@@ -135,9 +138,14 @@ export class ErrorLogComponent implements AfterViewInit {
       searchParams.set('notifiedTo', this.filter.notifiedTo.getTime());
     }
 
-    if (asc != null) {
-      searchParams.set('asc', asc.toString());
-    }
+    return searchParams;
+  }
+
+  getErrorLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
+    const searchParams = this.createSearchParams();
+
+    searchParams.set('page', offset.toString());
+    searchParams.set('pageSize', pageSize.toString());
 
     return this.http.get(ErrorLogComponent.ERROR_LOG_URL, {
       search: searchParams
@@ -264,47 +272,12 @@ export class ErrorLogComponent implements AfterViewInit {
     });
   }
 
-  private getFilterPath () {
-    let result = '?';
-
-    //filter
-    if (this.filter.errorSignalMessageId) {
-      result += 'errorSignalMessageId=' + this.filter.errorSignalMessageId + '&';
-    }
-    if (this.filter.mshRole) {
-      result += 'mshRole=' + this.filter.mshRole + '&';
-    }
-    if (this.filter.messageInErrorId) {
-      result += 'messageInErrorId=' + this.filter.messageInErrorId + '&';
-    }
-    if (this.filter.errorCode) {
-      result += 'errorCode=' + this.filter.errorCode + '&';
-    }
-    if (this.filter.errorDetail) {
-      result += 'errorDetail=' + this.filter.errorDetail + '&';
-    }
-    if (this.filter.timestampFrom != null) {
-      result += 'timestampFrom=' + this.filter.timestampFrom.getTime() + '&';
-    }
-    if (this.filter.timestampTo != null) {
-      result += 'timestampTo=' + this.filter.timestampTo.getTime() + '&';
-    }
-    if (this.filter.notifiedFrom != null) {
-      result += 'notifiedFrom=' + this.filter.notifiedFrom.getTime() + '&';
-    }
-    if (this.filter.notifiedTo != null) {
-      result += 'notifiedTo=' + this.filter.notifiedTo.getTime() + '&';
-    }
-
-    return result;
-  }
-
   isSaveAsCSVButtonEnabled () {
     return (this.count < AlertComponent.MAX_COUNT_CSV);
   }
 
   saveAsCSV () {
-    DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.getFilterPath());
+    DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.createSearchParams().toString());
   }
 
   ngAfterViewInit () {

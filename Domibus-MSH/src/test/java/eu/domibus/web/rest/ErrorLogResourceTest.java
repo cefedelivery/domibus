@@ -139,7 +139,7 @@ public class ErrorLogResourceTest {
         }};
 
         // When
-        final ResponseEntity<String> csv = errorLogResource.getCsv(null, null, null, null, null,
+        final ResponseEntity<String> csv = errorLogResource.getCsv("timestamp", false,null, null, null, null, null,
                 null, null, null, null);
 
         // Then

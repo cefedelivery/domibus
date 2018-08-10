@@ -50,6 +50,7 @@ public enum CsvCustomColumns {
     private static final Map<String, String> partyMap;
     static {
         partyMap = new HashMap<>();
+        partyMap.put("Name".toUpperCase(), "Party name");
         partyMap.put("EndPoint".toUpperCase(), "End point");
         partyMap.put("JoinedIdentifiers".toUpperCase(), "Party id");
         partyMap.put("JoinedProcesses".toUpperCase(), "Process");
