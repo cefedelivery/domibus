@@ -2,6 +2,8 @@ package eu.domibus.core.pmode;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.pmode.PModeArchiveInfo;
+import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
@@ -13,6 +15,7 @@ import eu.domibus.ebms3.common.model.Service;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.XmlProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 
@@ -170,61 +173,141 @@ public class MultiDomainPModeProvider extends PModeProvider {
 
     @Override
     public int getRetentionUndownloadedByMpcURI(String mpcURI) {
-        return  getCurrentPModeProvider().getRetentionUndownloadedByMpcURI(mpcURI);
+        return getCurrentPModeProvider().getRetentionUndownloadedByMpcURI(mpcURI);
     }
 
     @Override
     public Role getBusinessProcessRole(String roleValue) {
-        return  getCurrentPModeProvider().getBusinessProcessRole(roleValue);
+        return getCurrentPModeProvider().getBusinessProcessRole(roleValue);
     }
 
     @Override
     public List<Process> findPullProcessesByMessageContext(MessageExchangeConfiguration messageExchangeConfiguration) {
-        return  getCurrentPModeProvider().findPullProcessesByMessageContext(messageExchangeConfiguration);
+        return getCurrentPModeProvider().findPullProcessesByMessageContext(messageExchangeConfiguration);
     }
 
     @Override
     public List<Process> findPullProcessesByInitiator(Party party) {
-        return  getCurrentPModeProvider().findPullProcessesByInitiator(party);
+        return getCurrentPModeProvider().findPullProcessesByInitiator(party);
     }
 
     @Override
     public List<Process> findPullProcessByMpc(String mpc) {
-        return  getCurrentPModeProvider().findPullProcessByMpc(mpc);
+        return getCurrentPModeProvider().findPullProcessByMpc(mpc);
     }
 
     @Override
     public List<Process> findAllProcesses() {
-        return  getCurrentPModeProvider().findAllProcesses();
+        return getCurrentPModeProvider().findAllProcesses();
     }
 
     @Override
     public List<Party> findAllParties() {
-        return  getCurrentPModeProvider().findAllParties();
+        return getCurrentPModeProvider().findAllParties();
     }
 
     @Override
     public List<String> findPartyIdByServiceAndAction(String service, String action) {
-        return  getCurrentPModeProvider().findPartyIdByServiceAndAction(service, action);
+        return getCurrentPModeProvider().findPartyIdByServiceAndAction(service, action);
     }
 
     @Override
     public String getPartyIdType(String partyIdentifier) {
-        return  getCurrentPModeProvider().getPartyIdType(partyIdentifier);
+        return getCurrentPModeProvider().getPartyIdType(partyIdentifier);
     }
 
     @Override
     public String getServiceType(String serviceValue) {
-        return  getCurrentPModeProvider().getServiceType(serviceValue);
+        return getCurrentPModeProvider().getServiceType(serviceValue);
     }
 
     @Override
     public String getRole(String roleType, String serviceValue) {
-        return  getCurrentPModeProvider().getRole(roleType, serviceValue);
+        return getCurrentPModeProvider().getRole(roleType, serviceValue);
     }
 
     @Override
     public String getAgreementRef(String serviceValue) {
-        return  getCurrentPModeProvider().getAgreementRef(serviceValue);
+        return getCurrentPModeProvider().getAgreementRef(serviceValue);
+    }
+
+    @Override
+    public byte[] getPModeFile(int id) {
+        return getCurrentPModeProvider().getPModeFile(id);
+    }
+
+    @Override
+    public ConfigurationRaw getRawConfiguration(int id) {
+        return getCurrentPModeProvider().getRawConfiguration(id);
+    }
+
+    @Override
+    public PModeArchiveInfo getCurrentPmode() {
+        return getCurrentPModeProvider().getCurrentPmode();
+    }
+
+    @Override
+    public void removePMode(int id) {
+        getCurrentPModeProvider().removePMode(id);
+    }
+
+    @Override
+    public List<PModeArchiveInfo> getRawConfigurationList() {
+        return getCurrentPModeProvider().getRawConfigurationList();
+    }
+
+    @Override
+    protected UnmarshallerResult parsePMode(byte[] bytes) throws XmlProcessingException {
+        return getCurrentPModeProvider().parsePMode(bytes);
+    }
+
+    @Override
+    public Configuration getPModeConfiguration(byte[] bytes) throws XmlProcessingException {
+        return getCurrentPModeProvider().getPModeConfiguration(bytes);
+    }
+
+    @Override
+    public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
+        return getCurrentPModeProvider().updatePModes(bytes, description);
+    }
+
+    @Override
+    protected UnmarshallerResult unmarshall(byte[] bytes, boolean ignoreWhitespaces) throws XmlProcessingException {
+        return getCurrentPModeProvider().unmarshall(bytes, ignoreWhitespaces);
+    }
+
+    @Override
+    public byte[] serializePModeConfiguration(Configuration configuration) throws XmlProcessingException {
+        return getCurrentPModeProvider().serializePModeConfiguration(configuration);
+    }
+
+    @Override
+    protected String getSenderPartyNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getSenderPartyNameFromPModeKey(pModeKey);
+    }
+
+    @Override
+    protected String getReceiverPartyNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getReceiverPartyNameFromPModeKey(pModeKey);
+    }
+
+    @Override
+    protected String getServiceNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getServiceNameFromPModeKey(pModeKey);
+    }
+
+    @Override
+    protected String getActionNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getActionNameFromPModeKey(pModeKey);
+    }
+
+    @Override
+    protected String getAgreementRefNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getAgreementRefNameFromPModeKey(pModeKey);
+    }
+
+    @Override
+    protected String getLegConfigurationNameFromPModeKey(String pModeKey) {
+        return getCurrentPModeProvider().getLegConfigurationNameFromPModeKey(pModeKey);
     }
 }

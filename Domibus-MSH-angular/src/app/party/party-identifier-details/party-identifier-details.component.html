@@ -7,20 +7,28 @@
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party ID" name="partyId" [(ngModel)]="partyIdentifier.partyId">
+              <input mdInput placeholder="Party ID" name="partyId" [(ngModel)]="partyIdentifier.partyId" #partyId="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party Id Type" name="partyIdType_name" [(ngModel)]="partyIdentifier.partyIdType.name">
+              <input mdInput placeholder="Party Id Type" name="partyIdType_name" [(ngModel)]="partyIdentifier.partyIdType.name" #partyIdType_name="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Party Id value" name="partyIdType_value" [(ngModel)]="partyIdentifier.partyIdType.value">
+              <input mdInput placeholder="Party Id value" name="partyIdType_value" [(ngModel)]="partyIdentifier.partyIdType.value" #partyIdType_value="ngModel"
+                     required [maxlength]="255" [pattern]="partyIdTypePattern">
+              <div *ngIf="partyIdType_value.invalid && (partyIdType_value.dirty || partyIdType_value.touched)" style="color:red;font-size:70%">
+                <div *ngIf="partyIdType_value.errors.pattern">
+                  {{partyIdTypeMessage}}
+                </div>
+              </div>
             </md-input-container>
           </div>
         </md-card-content>
       </md-card>
     </div>
 
-    <button md-raised-button (click)="ok()" color="primary">
+    <button md-raised-button (click)="ok()" color="primary" [disabled]="partyId.invalid || partyIdType_name.invalid || partyIdType_value.invalid">
       <span>OK</span>
     </button>
     <button md-raised-button (click)="cancel()" color="primary">

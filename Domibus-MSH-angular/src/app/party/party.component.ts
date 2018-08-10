@@ -223,7 +223,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
       .catch(err => this.alertService.exception('Party update error', err, false));
   }
 
-  add () {
+  async add () {
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
     this.allRows.push(newParty);
@@ -233,10 +233,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.count++;
 
     this.newParties.push(newParty);
+    const ok = await this.edit(newParty);
+    if (!ok) {
+      this.remove();
+    }
   }
 
   remove () {
     const deletedParty = this.selected[0];
+    if(!deletedParty) return;
+
     this.rows.splice(this.rows.indexOf(deletedParty), 1);
     this.allRows.splice(this.rows.indexOf(deletedParty), 1);
 
@@ -249,31 +255,32 @@ export class PartyComponent implements OnInit, DirtyOperations {
       this.newParties.splice(this.newParties.indexOf(deletedParty), 1);
   }
 
-  edit (row) {
+  async edit (row): Promise<boolean> {
     row = row || this.selected[0];
-    this.manageCertificate(row)
-      .then(() => {
-        const rowCopy = JSON.parse(JSON.stringify(row));
-        const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-        const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
-          data: {
-            edit: rowCopy,
-            allProcesses: allProcessesCopy
-          }
-        });
+    await this.manageCertificate(row);
 
-        dialogRef.afterClosed().subscribe(ok => {
-          if (ok) {
-            if (JSON.stringify(row) === JSON.stringify(rowCopy))
-              return; // nothing changed
+    const rowCopy = JSON.parse(JSON.stringify(row));
+    const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-            Object.assign(row, rowCopy);
-            if (this.updatedParties.indexOf(row) < 0)
-              this.updatedParties.push(row);
-          }
-        });
-      });
+    const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+      data: {
+        edit: rowCopy,
+        allProcesses: allProcessesCopy
+      }
+    });
+
+    const ok = await dialogRef.afterClosed().toPromise();
+    if (ok) {
+      if (JSON.stringify(row) === JSON.stringify(rowCopy))
+        return; // nothing changed
+
+      Object.assign(row, rowCopy);
+      if (this.updatedParties.indexOf(row) < 0)
+        this.updatedParties.push(row);
+    }
+
+    return ok;
   }
 
   manageCertificate (party: PartyResponseRo): Promise<CertificateRo> {

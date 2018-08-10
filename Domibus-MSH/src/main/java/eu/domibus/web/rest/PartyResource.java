@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.util.*;
@@ -134,7 +135,7 @@ public class PartyResource {
     }
 
     @RequestMapping(value = {"/update"}, method = RequestMethod.PUT)
-    public void updateParties(@RequestBody List<PartyResponseRo> partiesRo) {
+    public ResponseEntity updateParties( @RequestBody List<PartyResponseRo> partiesRo) {
         LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
 
         List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
@@ -144,7 +145,16 @@ public class PartyResource {
                 .filter(party -> party.getCertificateContent() != null)
                 .collect(Collectors.toMap(party -> party.getName(), party -> party.getCertificateContent()));
 
-        partyService.updateParties(partyList, certificates);
+        try {
+            partyService.updateParties(partyList, certificates);
+            return ResponseEntity.noContent().build();
+        } catch(IllegalStateException e) {
+            StringBuilder errorMessageB = new StringBuilder();
+            for(Throwable err = e; err != null; err = err.getCause()) {
+                errorMessageB.append("\n").append(err.getMessage());
+            }
+            return ResponseEntity.badRequest().body(errorMessageB.toString());
+        }
     }
 
     /**
