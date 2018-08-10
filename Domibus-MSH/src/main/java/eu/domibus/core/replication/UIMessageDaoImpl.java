@@ -67,6 +67,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     @Override
     public int countMessages(Map<String, Object> filters) {
         long startTime = System.currentTimeMillis();
+
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
         Root<UIMessageEntity> uiMessageEntity = cq.from(UIMessageEntity.class);
@@ -96,18 +97,20 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     @Override
     public List<UIMessageEntity> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters) {
         long startTime = System.currentTimeMillis();
+
         List<UIMessageEntity> result;
         CriteriaBuilder cb = this.em.getCriteriaBuilder();
         CriteriaQuery<UIMessageEntity> cq = cb.createQuery(UIMessageEntity.class);
-        Root<UIMessageEntity> ume = cq.from(UIMessageEntity.class);
-        cq.select(ume);
-        List<Predicate> predicates = getPredicates(filters, cb, ume);
+
+        Root<UIMessageEntity> root = cq.from(UIMessageEntity.class);
+        cq.select(root);
+        List<Predicate> predicates = getPredicates(filters, cb, root);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
         if (column != null) {
             if (asc) {
-                cq.orderBy(cb.asc(ume.get(column)));
+                cq.orderBy(cb.asc(root.get(column)));
             } else {
-                cq.orderBy(cb.desc(ume.get(column)));
+                cq.orderBy(cb.desc(root.get(column)));
             }
 
         }
@@ -116,10 +119,9 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         query.setMaxResults(max);
 
         result = query.getResultList();
-        if (LOG.isDebugEnabled()) {
-            final long endTime = System.currentTimeMillis();
-            LOG.debug("[{}] milliseconds to findPaged [{}] messages", endTime - startTime, max);
-        }
+
+        final long endTime = System.currentTimeMillis();
+        LOG.debug("[{}] milliseconds to findPaged [{}] messages", endTime - startTime, max);
         return result;
     }
 
