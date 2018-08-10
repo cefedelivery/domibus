@@ -54,6 +54,7 @@ public class MessageSender implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageSender.class);
 
     private static final Set<MessageStatus> ALLOWED_STATUSES_FOR_SENDING = EnumSet.of(MessageStatus.SEND_ENQUEUED, MessageStatus.WAITING_FOR_RETRY);
+    private static final int MAX_RETRY_COUNT = 3;
 
     @Autowired
     private UserMessageService userMessageService;
@@ -99,12 +100,16 @@ public class MessageSender implements MessageListener {
     protected DomainContextProvider domainContextProvider;
 
 
-    private void sendUserMessage(final String messageId) {
+    private void sendUserMessage(final String messageId, int retryCount) {
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
 
         if(messageStatus == MessageStatus.NOT_FOUND) {
-            userMessageService.scheduleSending(messageId);
-            LOG.info("MessageStatus NOT_FOUND -> reschedule sending");
+            if(retryCount >= MAX_RETRY_COUNT) {
+                LOG.warn("Message [{}] has a status [{}] for [{}] times and will not be sent", messageId, MessageStatus.NOT_FOUND, retryCount);
+                return;
+            }
+            userMessageService.scheduleSending(messageId, retryCount++);
+            LOG.warn("MessageStatus NOT_FOUND -> reschedule sending");
             return;
         }
 
@@ -217,8 +222,12 @@ public class MessageSender implements MessageListener {
         LOG.debug("Processing message [{}]", message);
         Long delay;
         String messageId = null;
+        int retryCount = 0;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
+            if(message.propertyExists(MessageConstants.RETRY_COUNT)) {
+                retryCount = message.getIntProperty(MessageConstants.RETRY_COUNT);
+            }
             final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
             LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
             domainContextProvider.setCurrentDomain(domainCode);
@@ -233,7 +242,7 @@ public class MessageSender implements MessageListener {
         } catch (final JMSException e) {
             LOG.error("Error processing message", e);
         }
-        sendUserMessage(messageId);
+        sendUserMessage(messageId, retryCount);
     }
 
 }

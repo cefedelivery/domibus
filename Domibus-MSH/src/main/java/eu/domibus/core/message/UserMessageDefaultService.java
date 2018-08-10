@@ -176,6 +176,11 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    public void scheduleSending(String messageId, int retryCount) {
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(retryCount), sendMessageQueue);
+    }
+
+    @Override
     public void scheduleSending(String messageId) {
         jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
     }
