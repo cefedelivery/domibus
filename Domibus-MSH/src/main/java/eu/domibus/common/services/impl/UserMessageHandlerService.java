@@ -464,7 +464,7 @@ public class UserMessageHandlerService {
             // Builds the signal message log
             SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
                     .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.SEND_IN_PROGRESS)
+                    .setMessageStatus(MessageStatus.ACKNOWLEDGED)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log
