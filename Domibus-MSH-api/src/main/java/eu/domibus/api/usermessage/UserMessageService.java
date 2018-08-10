@@ -31,6 +31,8 @@ public interface UserMessageService {
 
     void scheduleSending(String messageId, Long delay);
 
+    void scheduleSending(String messageId, int retryCount);
+
     /**
      * Gets a User Message based on the {@code messageId}
      * @param messageId User Message Identifier
