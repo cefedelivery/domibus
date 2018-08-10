@@ -111,7 +111,6 @@ public class MessageSender implements MessageListener {
             }
             LOG.warn("Message [{}] has a status [{}] for [{}] times and will not be sent", messageId, MessageStatus.NOT_FOUND, retryCount);
             return;
-
         }
 
         if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
