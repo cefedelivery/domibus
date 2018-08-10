@@ -103,14 +103,15 @@ public class MessageSender implements MessageListener {
     private void sendUserMessage(final String messageId, int retryCount) {
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
 
-        if(messageStatus == MessageStatus.NOT_FOUND) {
-            if(retryCount >= MAX_RETRY_COUNT) {
-                LOG.warn("Message [{}] has a status [{}] for [{}] times and will not be sent", messageId, MessageStatus.NOT_FOUND, retryCount);
+        if(MessageStatus.NOT_FOUND == messageStatus) {
+            if(retryCount < MAX_RETRY_COUNT) {
+                userMessageService.scheduleSending(messageId, retryCount+1);
+                LOG.warn("MessageStatus NOT_FOUND, retry count is [{}] -> reschedule sending", retryCount);
                 return;
             }
-            userMessageService.scheduleSending(messageId, retryCount++);
-            LOG.warn("MessageStatus NOT_FOUND -> reschedule sending");
+            LOG.warn("Message [{}] has a status [{}] for [{}] times and will not be sent", messageId, MessageStatus.NOT_FOUND, retryCount);
             return;
+
         }
 
         if (!ALLOWED_STATUSES_FOR_SENDING.contains(messageStatus)) {
