@@ -16,6 +16,12 @@
           <md-input-container>
             <input mdInput placeholder="Process" [(ngModel)]="process" name="process" id="process_id">
           </md-input-container>
+          <md-select placeholder="Process Role" [(ngModel)]="process_role" name="process_role" id="process_role_id" style="width:120px;">
+            <md-option [value]="''"></md-option>
+            <md-option [value]="'(I)'">I</md-option>
+            <md-option [value]="'(R)'">R</md-option>
+            <md-option [value]="'(IR)'">IR</md-option>
+          </md-select>
           <div class="searchArea">
             <button md-raised-button color="primary" id="searchbutton_id">
               <md-icon>search</md-icon>

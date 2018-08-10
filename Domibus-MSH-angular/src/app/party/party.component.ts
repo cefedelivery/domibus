@@ -31,6 +31,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   endPoint: string;
   partyID: string;
   process: string;
+  process_role: string;
 
   rows: PartyResponseRo[];
   allRows: PartyResponseRo[];
@@ -100,7 +101,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   listPartiesAndProcesses () {
     this.offset = 0;
     return Observable.forkJoin([
-      this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process),
+      this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process, this.process_role),
       this.partyService.listProcesses()
     ])
       .subscribe((data: any[]) => {
@@ -143,28 +144,28 @@ export class PartyComponent implements OnInit, DirtyOperations {
   initColumns () {
     this.columnPicker.allColumns = [
       {
-        name: 'Name',
+        name: 'Party Name',
         prop: 'name',
         width: 10
       },
       {
         name: 'End point',
         prop: 'endpoint',
-        width: 200
+        width: 150
       },
       {
         name: 'Party id',
         prop: 'joinedIdentifiers',
-        width: 20
+        width: 10
       },
       {
-        name: 'Process',
+        name: 'Process (I=Initiator, R=Responder, IR=Both)',
         prop: 'joinedProcesses',
-        width: 150
+        width: 200
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Name', 'End point', 'Party id', 'Process'].indexOf(col.name) != -1
+      return ['name', 'endpoint', 'joinedIdentifiers', 'joinedProcesses'].indexOf(col.prop) !== -1
     })
   }
 
@@ -180,7 +181,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   saveAsCSV () {
-    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
+    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process, this.process_role);
   }
 
   onActivate (event) {
