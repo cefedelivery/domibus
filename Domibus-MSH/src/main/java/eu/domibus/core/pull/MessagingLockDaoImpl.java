@@ -68,7 +68,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
             params.put(IDPK, idPk);
             Query q = entityManager.createNativeQuery(LOCK_BY_ID_QUERY, MessagingLock.class);
             q.setParameter(1, idPk);
-            final MessagingLock messagingLock messagingLock = (MessagingLock) q.getSingleResult();
+            final MessagingLock messagingLock = (MessagingLock) q.getSingleResult();
             LOG.debug("[getNextPullMessageToProcess]:id[{}] locked", idPk);
             final String messageId = messagingLock.getMessageId();
             final int sendAttempts = messagingLock.getSendAttempts();
