@@ -8,6 +8,8 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
+import eu.domibus.ebms3.common.model.Ebms3Constants;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -62,6 +64,11 @@ public class ReliabilityServiceImpl implements ReliabilityService {
 
 
     private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+
+        if(isTestMessage(legConfiguration)) {
+            return;
+        }
+
         switch (reliabilityCheckSuccessful) {
             case OK:
                 switch (isOk) {
@@ -87,6 +94,20 @@ public class ReliabilityServiceImpl implements ReliabilityService {
 
         }
     }
+
+    /**
+     * Check if this message is a test message
+     *
+     * @param legConfiguration the legConfiguration that matched the message
+     * @return result of test service and action handle
+     */
+    protected Boolean isTestMessage(final LegConfiguration legConfiguration) {
+        LOG.debug("Checking if it is a test message");
+        return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction());
+
+    }
+
 
 
 }
