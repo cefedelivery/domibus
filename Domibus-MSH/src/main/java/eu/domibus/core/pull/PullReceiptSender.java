@@ -1,5 +1,6 @@
 package eu.domibus.core.pull;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -24,7 +25,7 @@ import java.util.Set;
 @Component
 public class PullReceiptSender {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PullReceiptSender.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PullReceiptSender.class);
 
     @Autowired
     private MSHDispatcher mshDispatcher;
@@ -33,8 +34,12 @@ public class PullReceiptSender {
     @Autowired
     private JAXBContext jaxbContext;
 
+    @Autowired
+    private DomainContextProvider domainContextProvider;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendReicept(final SOAPMessage soapMessage, final String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey, final String messsageId) {
+    public void sendReicept(final SOAPMessage soapMessage, final String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey, final String messsageId, String domainCode) {
+        domainContextProvider.setCurrentDomain(domainCode);
         LOG.trace("[sendReicept]Message:[{}]dispatch receipt", messsageId);
         final SOAPMessage acknowledgementResult;
         try {
