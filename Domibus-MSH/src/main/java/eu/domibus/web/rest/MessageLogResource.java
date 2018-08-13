@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -73,9 +76,20 @@ public class MessageLogResource {
     /** use TB_MESSAGE_UI table instead of joins, defaults to false */
     boolean useFlatTable;
 
+    Date defaultFrom;
+
+    Date defaultTo;
+
     @PostConstruct
     public void init() {
         useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "true"));
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        try {
+            defaultFrom = ft.parse("1970-01-01 23:59:00");
+            defaultTo = ft.parse("2977-10-25 23:59:00");
+        } catch (ParseException e) {
+            LOGGER.error("Impossible to initiate default dates");
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -106,8 +120,18 @@ public class MessageLogResource {
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus,
                 fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
 
-        filters.put(RECEIVED_FROM_STR, dateUtil.fromString(receivedFrom));
-        filters.put(RECEIVED_TO_STR, dateUtil.fromString(receivedTo));
+        //we just set default values for received column
+        // in order to improve pagination on large amount of data
+        Date from = dateUtil.fromString(receivedFrom);
+        if (from == null) {
+            from = defaultFrom;
+        }
+        Date to = dateUtil.fromString(receivedTo);
+        if (to == null) {
+            to = defaultTo;
+        }
+        filters.put(RECEIVED_FROM_STR, from);
+        filters.put(RECEIVED_TO_STR, to);
         filters.put("messageType", messageType);
 
         LOGGER.debug("using filters [{}]", filters);
@@ -120,6 +144,12 @@ public class MessageLogResource {
             result = messagesLogService.countAndFindPaged(messageType, pageSize * page, pageSize, column, asc, filters);
         }
 
+        if (defaultFrom.equals(from)) {
+            filters.remove(RECEIVED_FROM_STR);
+        }
+        if (defaultTo.equals(to)) {
+            filters.remove(RECEIVED_TO_STR);
+        }
         result.setFilter(filters);
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());

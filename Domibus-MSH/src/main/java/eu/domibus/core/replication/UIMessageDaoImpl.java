@@ -15,7 +15,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -200,10 +199,10 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         if (!filterValue.toString().isEmpty()) {
             switch (filterKey) {
                 case "receivedFrom":
-                    predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
+                    predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), (Date)filterValue));
                     break;
                 case "receivedTo":
-                    predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), Timestamp.valueOf(filterValue.toString())));
+                           predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), (Date)filterValue));
                     break;
                 default:
                     break;

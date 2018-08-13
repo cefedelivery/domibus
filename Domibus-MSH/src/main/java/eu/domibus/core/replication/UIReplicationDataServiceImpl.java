@@ -327,7 +327,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      *
      * @param messageId
      */
-    void saveUIMessageFromUserMessageLog(String messageId) {
+    protected void saveUIMessageFromUserMessageLog(String messageId) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
 
@@ -369,7 +369,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * @param diffEntity
      * @return
      */
-    UIMessageEntity convertToUIMessageEntity(UIMessageDiffEntity diffEntity) {
+    protected UIMessageEntity convertToUIMessageEntity(UIMessageDiffEntity diffEntity) {
         if (null == diffEntity) {
             return null;
         }
