@@ -4,6 +4,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.core.pull.PullRetryWorker;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -118,6 +119,7 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
+
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean retryWorkerTrigger() {
@@ -127,6 +129,27 @@ public class DomainSchedulerFactoryConfiguration {
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(retryWorkerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.retry.cron"));
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
+    @Bean
+    public JobDetailFactoryBean pullRetryWorkerJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(PullRetryWorker.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean pullRetryWorkerTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null)
+            return null;
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(pullRetryWorkerJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.pull.retry.cron"));
         obj.setStartDelay(20000);
         return obj;
     }

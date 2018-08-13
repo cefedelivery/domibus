@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 public class PartyResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PartyResource.class);
+    private static final String DELIMITER = ", ";
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -80,13 +81,11 @@ public class PartyResource {
         flattenProcesses(partyResponseRos);
 
         partyResponseRos.forEach(partyResponseRo -> {
-            final List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo
-                    .getProcessesWithPartyAsInitiator();
+            final List<ProcessRo> processesWithPartyAsInitiator = partyResponseRo.getProcessesWithPartyAsInitiator();
             final List<ProcessRo> processesWithPartyAsResponder = partyResponseRo.getProcessesWithPartyAsResponder();
 
             final Set<ProcessRo> processRos = new HashSet<>(processesWithPartyAsInitiator);
-            processRos
-                    .addAll(processesWithPartyAsResponder);
+            processRos.addAll(processesWithPartyAsResponder);
 
             processRos
                     .stream()
@@ -171,7 +170,7 @@ public class PartyResource {
                             stream().
                             map(IdentifierRo::getPartyId).
                             sorted().
-                            collect(Collectors.joining(", "));
+                            collect(Collectors.joining(DELIMITER));
                     partyResponseRo.setJoinedIdentifiers(joinedIdentifiers);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Flatten identifiers for [{}]=[{}]", partyResponseRo.getName(), partyResponseRo.getJoinedIdentifiers());
@@ -212,19 +211,19 @@ public class PartyResource {
                             stream().
                             map(ProcessRo::getName).
                             map(name -> name.concat("(I)")).
-                            collect(Collectors.joining(", "));
+                            collect(Collectors.joining(DELIMITER));
 
                     String joinedProcessesWithMeAsResponderOnly = processWithPartyAsResponderOnly.
                             stream().
                             map(ProcessRo::getName).
                             map(name -> name.concat("(R)")).
-                            collect(Collectors.joining(","));
+                            collect(Collectors.joining(DELIMITER));
 
                     String joinedProcessesWithMeAsInitiatorAndResponder = processesWithPartyAsInitiatorAndResponder.
                             stream().
                             map(ProcessRo::getName).
                             map(name -> name.concat("(IR)")).
-                            collect(Collectors.joining(","));
+                            collect(Collectors.joining(DELIMITER));
 
                     List<String> joinedProcess = Lists.newArrayList();
 
@@ -241,7 +240,7 @@ public class PartyResource {
                     }
 
                     partyResponseRo.setJoinedProcesses(
-                            StringUtils.join(joinedProcess, ", "));
+                            StringUtils.join(joinedProcess, DELIMITER));
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Flatten processes for [{}]=[{}]", partyResponseRo.getName(), partyResponseRo.getJoinedProcesses());
                     }

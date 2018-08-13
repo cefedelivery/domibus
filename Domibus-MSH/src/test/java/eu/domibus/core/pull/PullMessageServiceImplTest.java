@@ -14,6 +14,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageState;
 import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -70,6 +71,9 @@ public class PullMessageServiceImplTest {
 
     @Tested
     private PullMessageServiceImpl pullMessageService;
+
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
 
     @Test

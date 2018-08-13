@@ -7,10 +7,12 @@
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Name" name="name" id="name_id" [(ngModel)]="party.name">
+              <input mdInput placeholder="Name" name="name" id="name_id" [(ngModel)]="party.name" #party_name="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id" [(ngModel)]="party.endpoint">
+              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id" [(ngModel)]="party.endpoint" #party_endPoint="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
           </div>
         </md-card-content>
@@ -140,7 +142,7 @@
     </div>
 
 
-    <button md-raised-button (click)="ok()" color="primary">
+    <button md-raised-button (click)="ok()" color="primary" [disabled]="party_name.invalid || party_endPoint.invalid">
       <span>OK</span>
     </button>
     <button md-raised-button (click)="cancel()" color="primary">

@@ -9,6 +9,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.core.message.SignalMessageLogDefaultService;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.ObjectFactory;
@@ -54,6 +55,9 @@ public class ResponseHandler {
     @Autowired
     private SignalMessageLogDefaultService signalMessageLogDefaultService;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
     public CheckResult handle(final SOAPMessage response) throws EbMS3Exception {
 
         final Messaging messaging;
@@ -82,6 +86,9 @@ public class ResponseHandler {
         }
         // Builds the signal message log
         signalMessageLogDefaultService.save(signalMessage.getMessageInfo().getMessageId(), userMessageService, userMessageAction);
+
+        //UI replication
+        uiReplicationSignalService.signalMessageReceived(signalMessage.getMessageInfo().getMessageId());
 
         // Checks if the signal message is Ok
         if (signalMessage.getError() == null || signalMessage.getError().isEmpty()) {

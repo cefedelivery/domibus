@@ -100,8 +100,9 @@ public class PullMessageSender {
         if (domibusInitializationHelper.isNotReady()) {
             return;
         }
+        String domainCode;
         try {
-            final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
+            domainCode = map.getStringProperty(MessageConstants.DOMAIN);
             domainContextProvider.setCurrentDomain(domainCode);
         } catch (JMSException e) {
             LOG.error("Could not get domain from pull request jms message:", e);
@@ -150,7 +151,7 @@ public class PullMessageSender {
              * Ideally the message id should be commited to a queue and the sending of the receipt executed in another proces.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId));
+                executor.execute(() -> pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

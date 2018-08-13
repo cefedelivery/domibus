@@ -18,6 +18,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.jms.Queue;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,7 +76,6 @@ public class UserMessageDefaultServiceTest {
     @Injectable
     private BackendNotificationService backendNotificationService;
 
-
     @Injectable
     private JMSManager jmsManager;
 
@@ -95,6 +96,9 @@ public class UserMessageDefaultServiceTest {
 
     @Injectable
     private PullMessageService pullMessageService;
+
+    @Injectable
+    protected UIReplicationSignalService uiReplicationSignalService;
 
 
     @Test
@@ -205,11 +209,16 @@ public class UserMessageDefaultServiceTest {
             userMessageDefaultService.computeNewMaxAttempts(userMessageLog, messageId);
             result = newMaxAttempts;
 
+            userMessageLog.getMessageStatus();
+            result = MessageStatus.SEND_ENQUEUED;
+
         }};
 
         userMessageDefaultService.restoreFailedMessage(messageId);
 
-        new Verifications() {{
+        new FullVerifications(userMessageDefaultService) {{
+            backendNotificationService.notifyOfMessageStatusChange(withAny(new UserMessageLog()), MessageStatus.SEND_ENQUEUED, withAny(new Timestamp(System.currentTimeMillis())));
+
             userMessageLog.setMessageStatus(MessageStatus.SEND_ENQUEUED);
             userMessageLog.setRestored(withAny(new Date()));
             userMessageLog.setFailed(null);
@@ -217,7 +226,9 @@ public class UserMessageDefaultServiceTest {
             userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
             userMessageLogDao.update(userMessageLog);
+            uiReplicationSignalService.messageChange(anyString);
             userMessageDefaultService.scheduleSending(messageId);
+
         }};
     }
 

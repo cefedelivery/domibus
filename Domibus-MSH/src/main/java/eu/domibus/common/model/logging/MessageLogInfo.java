@@ -55,7 +55,6 @@ public class MessageLogInfo {
 
     private final Date restored;
 
-
     public MessageLogInfo(final String messageId,
                           final MessageStatus messageStatus,
                           final NotificationStatus notificationStatus,
