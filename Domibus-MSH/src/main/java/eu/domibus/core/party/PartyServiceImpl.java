@@ -289,7 +289,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setInitiatorPartiesXml(new InitiatorParties());
             List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
             ip.removeIf(x -> !iParties.contains(x.getName()));
-            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name.equals(x.getName())))
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equals(x.getName())))
                     .map(name -> {
                         InitiatorParty y = new InitiatorParty();
                         y.setName(name);

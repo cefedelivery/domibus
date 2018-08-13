@@ -34,10 +34,10 @@ export class PartyService {
 
   listProcesses (): Observable<ProcessRo> {
     return this.http.get(PartyService.LIST_PROCESSES)
-      .map(res => res.json()).catch(() => Observable.throw("No processes found"));
+      .map(res => res.json()).catch(() => Observable.throw('No processes found'));
   }
 
-  listParties (name: string, endPoint: string, partyId: string, process: string)
+  listParties (name: string, endPoint: string, partyId: string, process: string, process_role: string)
     : Observable<PartyFilteredResult> {
 
     return this.http.get(PartyService.LIST_PARTIES).map(res => {
@@ -54,11 +54,11 @@ export class PartyService {
         records = records.filter(party => party.identifiers.filter(x => x.partyId === partyId).length > 0);
       }
       if (process) {
-        records = records.filter(party => party.joinedProcesses.lastIndexOf(process) >= 0);
+        records = records.filter(party => party.joinedProcesses.lastIndexOf(process + process_role) >= 0);
       }
 
       return {data: records, allData: allRecords};
-    }).catch(() => Observable.throw("No parties found"));
+    }).catch(() => Observable.throw('No parties found'));
 
   }
 
@@ -80,7 +80,7 @@ export class PartyService {
     return result;
   }
 
-  saveAsCsv (name: string, endPoint: string, partyId: string, process: string) {
+  saveAsCsv (name: string, endPoint: string, partyId: string, process: string, process_role: string) {
     DownloadService.downloadNative(PartyService.CSV_PARTIES + this.getFilterPath(name, endPoint, partyId, process));
   }
 
@@ -93,6 +93,6 @@ export class PartyService {
   }
 
   updateParties (partyList: PartyResponseRo[]) {
-    return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise().catch(err => console.log(err));
+    return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise();
   }
 }
