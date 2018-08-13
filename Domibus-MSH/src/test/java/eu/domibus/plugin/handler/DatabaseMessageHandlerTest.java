@@ -73,6 +73,17 @@ public class DatabaseMessageHandlerTest {
     private static final String GREEN = "green_gw";
     private static final String RED = "red_gw";
     private static final String BLUE = "blue_gw";
+    private static final String AGREEMENT = "";
+    private static final String SERVICE = "testService1";
+    private static final String ACTION = "TC2Leg1";
+    private static final String LEG = "pushTestcase1tc2Action";
+
+    private String pModeKey = GREEN+ MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            RED + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            SERVICE + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            ACTION + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            AGREEMENT + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            LEG;
 
     @Tested
     private DatabaseMessageHandler dmh;
@@ -216,8 +227,6 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
-
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
             result = messageExchangeConfiguration;
@@ -290,8 +299,6 @@ public class DatabaseMessageHandlerTest {
 
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
-
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
@@ -370,8 +377,6 @@ public class DatabaseMessageHandlerTest {
 
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
-
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
@@ -618,8 +623,6 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
-
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
@@ -722,7 +725,6 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");
             result = messageExchangeConfiguration;
@@ -832,7 +834,6 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             result = new MessageExchangeConfiguration("","green_gw","red_gw","testService1","TC2Leg1","pushTestcase1tc2Action");;
 
@@ -900,7 +901,6 @@ public class DatabaseMessageHandlerTest {
             userMessageLogDao.getMessageStatus(MESS_ID);
             result = MessageStatus.NOT_FOUND;
 
-            String pModeKey = "green_gw:red_gw:testService1:TC2Leg1::pushTestcase1tc2Action";
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration("", "green_gw", "red_gw", "testService1", "TC2Leg1", "pushTestcase1tc2Action");

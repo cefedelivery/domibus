@@ -260,27 +260,27 @@ public abstract class PModeProvider {
     public abstract Role getBusinessProcessRole(String roleValue);
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[0];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[0];
     }
 
     protected String getReceiverPartyNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[1];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[1];
     }
 
     protected String getServiceNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[2];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[2];
     }
 
     protected String getActionNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[3];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[3];
     }
 
     protected String getAgreementRefNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[4];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[4];
     }
 
     protected String getLegConfigurationNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[5];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[5];
     }
 
     public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);
