@@ -3,6 +3,7 @@ package eu.domibus.pmode;
 import eu.domibus.AbstractIT;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
+import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
@@ -35,7 +36,11 @@ import java.util.*;
 @Transactional
 public class UploadPModeIT extends AbstractIT {
 
-    private static final String BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY = "blue_gw:red_gw:testService1:tc1Action:agreement1110:pushTestcase1tc1Action";
+    private static final String BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY = "blue_gw" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            "red_gw" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            "testService1" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            "tc1Action" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+            "agreement1110" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR + "pushTestcase1tc1Action";
 
     private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
 
