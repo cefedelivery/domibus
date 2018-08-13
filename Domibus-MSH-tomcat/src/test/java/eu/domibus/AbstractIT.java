@@ -247,7 +247,13 @@ public abstract class AbstractIT {
         attachment.setContentId("cid:message");
         message.addAttachmentPart(attachment);
 
-        message.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        String pModeKey = "blue_gw" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "red_gw" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "testService1" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "tc1Action" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +  "pushTestcase1tc1Action";
+
+        message.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
         return message;
     }
 
