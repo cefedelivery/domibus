@@ -75,9 +75,10 @@ public class MessageLogResource {
     public MessageLogResultRO getMessageLog(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -138,6 +139,9 @@ public class MessageLogResource {
 
     /**
      * This method returns a CSV file with the contents of Messages table
+     *
+     * @param orderByColumn the column to sort rows by
+     * @param asc true if the sort direction is ascending
      * @param messageId the message id
      * @param conversationId the conversation id
      * @param mshRole the MSH role
@@ -157,6 +161,9 @@ public class MessageLogResource {
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
+            @RequestParam(value = "orderBy", required = false) String orderByColumn,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -182,9 +189,9 @@ public class MessageLogResource {
 
         List<MessageLogInfo> resultList = new ArrayList<>();
         if (messageType == MessageType.SIGNAL_MESSAGE) {
-            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
+            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, orderByColumn, asc, filters);
         } else if (messageType == MessageType.USER_MESSAGE) {
-            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
+            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, orderByColumn, asc, filters);
         }
 
         // needed for empty csv file purposes
