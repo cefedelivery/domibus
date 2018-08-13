@@ -191,7 +191,7 @@ public class MessageLogResourceTest {
         }
 
         // When
-        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, messageType, null,
+        final ResponseEntity<String> csv = messageLogResource.getCsv("received", true,null, null, null, messageType, null,
                 null, null, null, null, null,
                 null, null, null, messageSubtype);
 
@@ -214,7 +214,7 @@ public class MessageLogResourceTest {
         }};
 
         // When
-        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, messageType, null,
+        final ResponseEntity<String> csv = messageLogResource.getCsv("received", true,null, null, null, messageType, null,
                 null, null, null, null, null,
                 null, null, null, messageSubtype);
 
@@ -334,7 +334,7 @@ public class MessageLogResourceTest {
      * @return <code>MessageLogResultRO</code> object
      */
     private MessageLogResultRO getMessageLog(MessageType messageType, MessageSubtype messageSubtype) {
-        return messageLogResource.getMessageLog(1, 10, 10, "MessageId", true,
+        return messageLogResource.getMessageLog(1, 10, "MessageId", true,
                 null, null, null, messageType, null,
                 null, null, null, null, null, null,
                 null, null, messageSubtype);

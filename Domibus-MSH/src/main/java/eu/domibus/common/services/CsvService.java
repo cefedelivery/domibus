@@ -13,14 +13,12 @@ public interface CsvService {
 
     int MAX_NUMBER_OF_ENTRIES = 10000;
 
-    String COMMA = ",";
-    String DOUBLE_QUOTES = "\"";
+    void setClass(Class<?> tClass);
+
+    void setExcludedItems(List<String> excludedItems);
 
     String exportToCSV(List<?> list);
 
-    void createCSVColumnHeader(StringBuilder result, Field[] fields);
+    String getCsvFilename(String module);
 
-    void createCSVContents(List<?> list, StringBuilder result, Field[] fields);
-
-    void setExcludedItems(List<String> excludedItems);
 }

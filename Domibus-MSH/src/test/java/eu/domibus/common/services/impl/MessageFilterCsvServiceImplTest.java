@@ -20,7 +20,7 @@ import java.util.List;
 @RunWith(JMockit.class)
 public class MessageFilterCsvServiceImplTest {
 
-    private static final String MESSAGE_FILTER_HEADER = "Plugin, From, To, Action, Service, Persisted";
+    private static final String MESSAGE_FILTER_HEADER = "Plugin,From,To,Action,Service,Persisted";
     @Tested
     MessageFilterCsvServiceImpl messageFilterCsvService;
 
@@ -67,6 +67,6 @@ public class MessageFilterCsvServiceImplTest {
 
         // Then
         Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator() +
-                "backendName,from:from, , , ,true" + System.lineSeparator(), exportToCSV);
+                "backendName,from:from,,,,true" + System.lineSeparator(), exportToCSV);
     }
 }

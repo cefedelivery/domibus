@@ -13,6 +13,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +38,7 @@ public class CsvServiceImplTest {
         final String exportToCSV = csvServiceImpl.exportToCSV(new ArrayList<>());
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
@@ -45,7 +48,7 @@ public class CsvServiceImplTest {
         final String exportToCSV = csvServiceImpl.exportToCSV(null);
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
@@ -63,12 +66,16 @@ public class CsvServiceImplTest {
         Date date = new Date();
         List<MessageLogInfo> messageLogInfoList = getMessageList(MessageType.USER_MESSAGE, date, messageSubtype);
 
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'GMT'Z");
+        ZonedDateTime d = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        String csvDate = d.format(f);
+
         // When
         final String exportToCSV = csvServiceImpl.exportToCSV(messageLogInfoList);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Message Id,From Party Id,To Party Id,Message Status,Notification Status,Received,Msh Role,Send Attempts,Send Attempts Max,Next Attempt,Conversation Id,Message Type,Message Subtype,Deleted,Original Sender,Final Recipient,Ref To Message Id,Failed,Restored"));
-        Assert.assertTrue(exportToCSV.contains("messageId,fromPartyId,toPartyId,ACKNOWLEDGED,NOTIFIED,"+date+",RECEIVING,1,5,"+date+",conversationId,USER_MESSAGE,"+(messageSubtype!=null?messageSubtype.name():"")+","+date+",originalSender,finalRecipient,refToMessageId,"+date+","+date));
+        Assert.assertTrue(exportToCSV.contains("messageId,fromPartyId,toPartyId,ACKNOWLEDGED,NOTIFIED,"+csvDate+",RECEIVING,1,5,"+csvDate+",conversationId,USER_MESSAGE,"+(messageSubtype!=null?messageSubtype.name():"")+","+csvDate+",originalSender,finalRecipient,refToMessageId,"+csvDate+","+csvDate));
     }
 
     private List<MessageLogInfo> getMessageList(MessageType messageType, Date date, MessageSubtype messageSubtype) {

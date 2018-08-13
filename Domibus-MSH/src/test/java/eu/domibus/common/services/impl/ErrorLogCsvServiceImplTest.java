@@ -10,6 +10,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +35,7 @@ public class ErrorLogCsvServiceImplTest {
         final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>());
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
@@ -42,7 +45,7 @@ public class ErrorLogCsvServiceImplTest {
         final String exportToCSV = errorLogCsvService.exportToCSV(null);
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
@@ -51,12 +54,16 @@ public class ErrorLogCsvServiceImplTest {
         Date date = new Date();
         List<ErrorLogRO> errorLogROList = getErrorLogList(date);
 
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'GMT'Z");
+        ZonedDateTime d = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        String csvDate = d.format(f);
+
         // When
         final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"));
-        Assert.assertTrue(exportToCSV.contains("signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+date+","+date));
+        Assert.assertTrue(exportToCSV.contains("signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+csvDate+","+csvDate));
     }
 
     private List<ErrorLogRO> getErrorLogList(Date date) {
