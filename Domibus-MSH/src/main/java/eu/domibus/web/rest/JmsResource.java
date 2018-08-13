@@ -14,8 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -104,12 +106,12 @@ public class JmsResource {
 
     /**
      * This method returns a CSV file with the contents of JMS Messages table
-     * @param source queue or topic
-     * @param jmsType type of the JMS message
-     * @param fromDate starting date
-     * @param toDate ending date
-     * @param selector jms selector (additional search criteria)
      *
+     * @param source   queue or topic
+     * @param jmsType  type of the JMS message
+     * @param fromDate starting date
+     * @param toDate   ending date
+     * @param selector jms selector (additional search criteria)
      * @return CSV file with the contents of JMS Messages table
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
@@ -127,7 +129,10 @@ public class JmsResource {
                 jmsType,
                 fromDate == null ? null : new Date(fromDate),
                 toDate == null ? null : new Date(toDate),
-                selector);
+                selector)
+                .stream().sorted(Comparator.comparing(JmsMessage::getTimestamp).reversed())
+                .collect(Collectors.toList());
+
         customizeJMSProperties(jmsMessageList);
 
         // excluding unneeded columns

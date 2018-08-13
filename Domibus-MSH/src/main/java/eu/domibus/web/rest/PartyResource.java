@@ -131,7 +131,7 @@ public class PartyResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("parties"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmodeparties"))
                 .body(resultText);
     }
 

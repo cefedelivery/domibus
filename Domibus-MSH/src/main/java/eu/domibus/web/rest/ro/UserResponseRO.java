@@ -32,7 +32,7 @@ public class UserResponseRO {
         this.userName = userName;
         this.email = email;
         this.active = actif;
-        this.authorities=new ArrayList<>();
+        this.authorities = new ArrayList<>();
     }
 
     public String getUserName() {
@@ -47,15 +47,15 @@ public class UserResponseRO {
         return active;
     }
 
-    public void updateRolesField(){
-        int count=0;
+    public void updateRolesField() {
+        int count = 0;
         String separator = StringUtils.EMPTY;
         for (String authority : authorities) {
-            if(count>0){
-               separator= CsvService.COMMA;
+            if (count > 0) {
+                separator = ",";
             }
             count++;
-            roles+=separator+authority;
+            roles += separator + authority;
         }
     }
 

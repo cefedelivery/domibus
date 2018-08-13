@@ -96,6 +96,8 @@ public class ErrorLogResource {
 
     /**
      * This method returns a CSV file with the contents of Error Log table
+     * @param orderByColumn the column to sort rows by
+     * @param asc true if the sort direction is ascending
      * @param errorSignalMessageId the signal message id of the message that caused the error
      * @param mshRole whether the error occured while SENDING or while RECEIVING messages
      * @param messageInErrorId the id of the message that caused the error
@@ -110,7 +112,7 @@ public class ErrorLogResource {
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
-            @RequestParam(value = "orderBy", required = false) String column,
+            @RequestParam(value = "orderBy", required = false) String orderByColumn,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
 
             @RequestParam(value = "errorSignalMessageId", required = false) String errorSignalMessageId,
@@ -129,7 +131,7 @@ public class ErrorLogResource {
 
         int maxCSVrows = NumberUtils.toInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
-        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, column, asc, filters);
+        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
 
         // needed for empty csv file purposes
