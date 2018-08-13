@@ -10,6 +10,22 @@
         <date-format>MM/dd/yyyy HH:mm</date-format>
         <wildcard>true</wildcard>
     </configuration>
+    <mapping>
+        <class-a>eu.domibus.core.alerts.model.service.StringPropertyValue</class-a>
+        <class-b>eu.domibus.core.alerts.model.persist.StringEventProperty</class-b>
+        <field>
+            <a>value</a>
+            <b>stringValue</b>
+        </field>
+    </mapping>
+    <mapping>
+        <class-a>eu.domibus.core.alerts.model.service.DatePropertyValue</class-a>
+        <class-b>eu.domibus.core.alerts.model.persist.DateEventProperty</class-b>
+        <field>
+            <a>value</a>
+            <b>dateValue</b>
+        </field>
+    </mapping>
     <mapping wildcard="false">
         <class-a>eu.domibus.core.alerts.model.service.Event</class-a>
         <class-b>eu.domibus.core.alerts.model.persist.Event</class-b>
@@ -28,8 +44,8 @@
         <field>
             <a>properties</a>
             <b>properties</b>
-            <a-hint>eu.domibus.core.alerts.model.service.EventPropertyValue</a-hint>
-            <b-hint>eu.domibus.core.alerts.model.persist.EventProperty</b-hint>
+            <a-hint>eu.domibus.core.alerts.model.service.StringPropertyValue, eu.domibus.core.alerts.model.service.DatePropertyValue</a-hint>
+            <b-hint>eu.domibus.core.alerts.model.persist.StringEventProperty, eu.domibus.core.alerts.model.persist.DateEventProperty</b-hint>
         </field>
     </mapping>
 </mappings>

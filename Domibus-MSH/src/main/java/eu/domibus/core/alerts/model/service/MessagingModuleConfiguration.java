@@ -71,8 +71,8 @@ public class MessagingModuleConfiguration implements AlertModuleConfiguration {
             LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_COMMUNICATION_FAILURE);
             throw new IllegalArgumentException("Invalid alert type of the strategy.");
         }
-        final EventPropertyValue eventPropertyValue = alert.getEvents().iterator().next().getProperties().get(MessageEvent.NEW_STATUS.name());
-        final MessageStatus newStatus = MessageStatus.valueOf(eventPropertyValue.getValue());
+        final StringPropertyValue stringPropertyValue = (StringPropertyValue) alert.getEvents().iterator().next().getProperties().get(MessageEvent.NEW_STATUS.name());
+        final MessageStatus newStatus = MessageStatus.valueOf(stringPropertyValue.getValue());
         final AlertLevel alertLevel = getAlertLevel(newStatus);
         LOG.debug("Alert level for message change to status[{}] is [{}]", newStatus, alertLevel);
         return alertLevel;

@@ -25,7 +25,7 @@ public class Event {
 
     private EventType type;
 
-    private Map<String, EventPropertyValue> properties = new HashMap<>();
+    private Map<String, AbstractPropertyValue> properties = new HashMap<>();
 
     public Event(final EventType type) {
         this.reportingTime = new Date();
@@ -59,37 +59,42 @@ public class Event {
         this.type = type;
     }
 
-    public Map<String, EventPropertyValue> getProperties() {
+    public Map<String, AbstractPropertyValue> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, EventPropertyValue> properties) {
+    public void setProperties(Map<String, AbstractPropertyValue> properties) {
         this.properties = properties;
     }
 
-    public Optional<String> findProperty(final String key) {
-        final EventPropertyValue eventPropertyValue = properties.get(key);
-        if(eventPropertyValue==null){
+    public Optional<String> findStringProperty(final String key) {
+        final StringPropertyValue stringPropertyValue = (StringPropertyValue) properties.get(key);
+        if(stringPropertyValue ==null){
             LOG.error("No event property with such key as key[{}]",key);
             throw new IllegalArgumentException("Invalid property key");
         }
-        if(eventPropertyValue.getValue()==null){
+        if(stringPropertyValue.getValue()==null){
             return Optional.empty();
         }
-        return Optional.of(eventPropertyValue.getValue());
+        return Optional.of(stringPropertyValue.getValue());
     }
 
     public Optional<String> findOptionalProperty(final String key) {
-        final EventPropertyValue eventPropertyValue = properties.get(key);
-        if(eventPropertyValue==null || eventPropertyValue.getValue()==null){
+        final AbstractPropertyValue stringPropertyValue = properties.get(key);
+        if(stringPropertyValue ==null || stringPropertyValue.getValue()==null){
             return Optional.empty();
         }
-        return Optional.of(eventPropertyValue.getValue());
+        return Optional.of(stringPropertyValue.getValue().toString());
     }
 
-    public void addKeyValue(final String key, final String value) {
-        properties.put(key, new EventPropertyValue(value));
+    public void addStringKeyValue(final String key, final String value) {
+        properties.put(key, new StringPropertyValue(key,value));
     }
+
+    public void addDateKeyValue(final String key, final Date value) {
+        properties.put(key, new DatePropertyValue(key,value));
+    }
+
 
     @Override
     public String toString() {

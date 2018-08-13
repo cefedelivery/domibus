@@ -333,12 +333,12 @@
             <column name="PROPERTY_TYPE" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="PROPERTY_VALUE" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
             <column name="FK_EVENT" type="INT">
                 <constraints nullable="false"/>
             </column>
+            <column name="DTYPE" type="VARCHAR(31)"/>
+            <column name="STRING_VALUE" type="VARCHAR(255)"/>
+            <column name="DATE_VALUE" type="TIMESTAMP"/>
         </createTable>
 
         <createIndex indexName="IDX_FK_EVENT_PROPERTY" tableName="TB_EVENT_PROPERTY">

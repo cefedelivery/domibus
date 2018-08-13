@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -43,20 +44,20 @@ public class AlertDao extends BasicDao<Alert> {
         root.fetch(Alert_.events).fetch(Event_.properties);
 
         final Subquery<Integer> subQuery = criteria.subquery(Integer.class);
-        Root<Alert> subRoot=subQuery.from(Alert.class);
+        Root<Alert> subRoot = subQuery.from(Alert.class);
 
         //Do first a subQuery to retrieve the filtered alerts id based on criteria.
-        subQuery.select( subRoot.get( Alert_.entityId) );
+        subQuery.select(subRoot.get(Alert_.entityId));
 
         List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, subRoot));
         final SetJoin<Alert, Event> eventJoin = subRoot.join(Alert_.events);
         final Map<String, String> parameters = alertCriteria.getParameters();
         parameters.forEach((key, value) -> {
             //because event properties are key value, we need to create a join on each parameters.
-            final MapJoin<Event, String, EventProperty> join = eventJoin.join(Event_.properties);
+            final MapJoin<Event, String, AbstractEventProperty> join = eventJoin.join(Event_.properties);
             final Predicate parameterPredicate = builder.and(
-                    builder.equal(join.get(EventProperty_.key), key),
-                    builder.equal(join.get(EventProperty_.value), value));
+                    builder.equal(join.get(AbstractEventProperty_.key), key),
+                    builder.equal(builder.treat(join, StringEventProperty.class).get(StringEventProperty_.stringValue), value));
             predicates.add(parameterPredicate);
 
         });
@@ -67,36 +68,36 @@ public class AlertDao extends BasicDao<Alert> {
         criteria.where(root.get(Alert_.entityId).in(subQuery)).distinct(true);
         final Boolean ask = alertCriteria.getAsk();
         final String column = alertCriteria.getColumn();
-        if(column !=null && ask !=null){
-            if(ask){
+        if (column != null && ask != null) {
+            if (ask) {
                 criteria.orderBy(builder.asc(root.get(column)));
-            }else{
+            } else {
                 criteria.orderBy(builder.desc(root.get(column)));
             }
         }
         final TypedQuery<Alert> query = em.createQuery(criteria);
-        query.setFirstResult(alertCriteria.getPage()*alertCriteria.getPageSize());
+        query.setFirstResult(alertCriteria.getPage() * alertCriteria.getPageSize());
         query.setMaxResults(alertCriteria.getPageSize());
         return query.getResultList();
     }
 
-    public Long countAlerts(AlertCriteria alertCriteria){
+    public Long countAlerts(AlertCriteria alertCriteria) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-        Root<Alert> root=criteria.from(Alert.class);
+        Root<Alert> root = criteria.from(Alert.class);
 
         //Do first a subQuery to retrieve the filtered alerts id based on criteria.
-        criteria.select( builder.count(root.get( Alert_.entityId)) );
+        criteria.select(builder.count(root.get(Alert_.entityId)));
 
         List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, root));
         final SetJoin<Alert, Event> eventJoin = root.join(Alert_.events);
         final Map<String, String> parameters = alertCriteria.getParameters();
         parameters.forEach((key, value) -> {
             //because event properties are key value, we need to create a join on each parameters.
-            final MapJoin<Event, String, EventProperty> join = eventJoin.join(Event_.properties);
+            final MapJoin<Event, String, AbstractEventProperty> join = eventJoin.join(Event_.properties);
             final Predicate parameterPredicate = builder.and(
-                    builder.equal(join.get(EventProperty_.key), key),
-                    builder.equal(join.get(EventProperty_.value), value));
+                    builder.equal(join.get(AbstractEventProperty_.key), key),
+                    builder.equal(builder.treat(join, StringEventProperty.class).get(StringEventProperty_.stringValue), value));
             predicates.add(parameterPredicate);
 
         });
@@ -107,20 +108,20 @@ public class AlertDao extends BasicDao<Alert> {
     }
 
     private List<Predicate> getAlertPredicates(AlertCriteria alertCriteria, CriteriaBuilder cb, Root<Alert> alertRoot) {
-        List<Predicate> predicates= Lists.newArrayList();
+        List<Predicate> predicates = Lists.newArrayList();
         if (alertCriteria.isProcessed() != null) {
             predicates.add(cb.equal(alertRoot.get(Alert_.processed), alertCriteria.isProcessed()));
         }
 
-        if(alertCriteria.getAlertType()!=null){
+        if (alertCriteria.getAlertType() != null) {
             predicates.add(cb.equal(alertRoot.get(Alert_.alertType), alertCriteria.getAlertType()));
         }
 
-        if(alertCriteria.getAlertLevel()!=null){
+        if (alertCriteria.getAlertLevel() != null) {
             predicates.add(cb.equal(alertRoot.get(Alert_.alertLevel), alertCriteria.getAlertLevel()));
         }
 
-        if(alertCriteria.getAlertID()!=null){
+        if (alertCriteria.getAlertID() != null) {
             predicates.add(cb.equal(alertRoot.get(Alert_.entityId), alertCriteria.getAlertID()));
         }
 
@@ -141,16 +142,16 @@ public class AlertDao extends BasicDao<Alert> {
 
     }
 
-    public List<Alert> retrieveAlertsWithCreationDateSmallerThen(final Date alertLimitDate){
+    public List<Alert> retrieveAlertsWithCreationDateSmallerThen(final Date alertLimitDate) {
         final TypedQuery<Alert> namedQuery = em.createNamedQuery("Alert.findAlertToClean", Alert.class);
-        namedQuery.setParameter("ALERT_LIMIT_DATE",alertLimitDate);
+        namedQuery.setParameter("ALERT_LIMIT_DATE", alertLimitDate);
         return namedQuery.getResultList();
     }
 
-    public void updateAlertProcessed(final Integer id,Boolean processed){
+    public void updateAlertProcessed(final Integer id, Boolean processed) {
         final Query namedQuery = em.createNamedQuery("Alert.updateProcess");
-        namedQuery.setParameter("ALERT_ID",id);
-        namedQuery.setParameter("PROCESSED",processed);
+        namedQuery.setParameter("ALERT_ID", id);
+        namedQuery.setParameter("PROCESSED", processed);
         namedQuery.executeUpdate();
     }
 

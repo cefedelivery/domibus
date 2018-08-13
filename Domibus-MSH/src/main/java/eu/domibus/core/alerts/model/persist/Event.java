@@ -31,7 +31,7 @@ public class Event extends AbstractBaseEntity {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "key")
     @MapKeyEnumerated
-    private Map<String, EventProperty> properties = new HashMap<>();
+    private Map<String, AbstractEventProperty> properties = new HashMap<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -45,13 +45,13 @@ public class Event extends AbstractBaseEntity {
         alerts.add(alert);
     }
 
-    public void addProperty(final String key, final EventProperty eventProperty) {
-        eventProperty.setKey(key);
-        properties.put(key, eventProperty);
-        eventProperty.setEvent(this);
+    public void addProperty(final String key, final AbstractEventProperty abstractProperty) {
+        abstractProperty.setKey(key);
+        properties.put(key, abstractProperty);
+        abstractProperty.setEvent(this);
     }
 
-    public Map<String, EventProperty> getProperties() {
+    public Map<String, AbstractEventProperty> getProperties() {
         return properties;
     }
 
@@ -79,7 +79,7 @@ public class Event extends AbstractBaseEntity {
         this.alerts = alerts;
     }
 
-    public void setProperties(Map<String, EventProperty> properties) {
+    public void setProperties(Map<String, AbstractEventProperty> properties) {
         this.properties = properties;
     }
 
@@ -96,9 +96,8 @@ public class Event extends AbstractBaseEntity {
 
     public void enrichProperties() {
         getProperties().forEach((key, eventProperty) -> {
-            eventProperty.setKey(key);
             eventProperty.setEvent(this);
-            LOG.debug("Transferring key[{}] value[{}] from jms event to persistent event", key,eventProperty.getValue());
+            LOG.debug("Transferring property with key[{}] value[{}] from jms event to persistent event", key,eventProperty.getValue());
         });
     }
 }

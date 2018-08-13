@@ -110,7 +110,7 @@ public class AlertServiceImpl implements AlertService {
         read.setReportingTime(new Date());
         Map<String, String> mailModel = new HashMap<>();
         final Event next = read.getEvents().iterator().next();
-        next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue()));
+        next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue().toString()));
         mailModel.put(ALERT_LEVEL, read.getAlertLevel().name());
         mailModel.put(REPORTING_TIME, read.getReportingTime().toString());
         if (LOG.isDebugEnabled()) {
