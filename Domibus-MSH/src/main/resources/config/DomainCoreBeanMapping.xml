@@ -32,4 +32,44 @@
             <b-hint>eu.domibus.core.alerts.model.persist.EventProperty</b-hint>
         </field>
     </mapping>
+    <mapping>
+        <class-a>eu.domibus.core.replication.UIMessageEntity</class-a>
+        <class-b>eu.domibus.web.rest.ro.MessageLogRO</class-b>
+        <field>
+            <a>fromId</a>
+            <b>fromPartyId</b>
+        </field>
+        <field>
+            <a>toId</a>
+            <b>toPartyId</b>
+        </field>
+        <field>
+            <a>fromScheme</a>
+            <b>originalSender</b>
+        </field>
+        <field>
+            <a>toScheme</a>
+            <b>finalRecipient</b>
+        </field>
+    </mapping>
+    <mapping>
+        <class-a>eu.domibus.core.replication.UIMessageEntity</class-a>
+        <class-b>eu.domibus.common.model.logging.MessageLogInfo</class-b>
+        <field>
+            <a>fromId</a>
+            <b>fromPartyId</b>
+        </field>
+        <field>
+            <a>toId</a>
+            <b>toPartyId</b>
+        </field>
+        <field>
+            <a>fromScheme</a>
+            <b>originalSender</b>
+        </field>
+        <field>
+            <a>toScheme</a>
+            <b>finalRecipient</b>
+        </field>
+    </mapping>
 </mappings>

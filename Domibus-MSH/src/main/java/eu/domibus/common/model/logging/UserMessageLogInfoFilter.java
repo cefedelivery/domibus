@@ -12,16 +12,6 @@ import java.util.Map;
 @Service(value = "userMessageLogInfoFilter")
 public class UserMessageLogInfoFilter extends MessageLogInfoFilter {
 
-    private static final String QUERY_BODY = " from UserMessageLog log, " +
-            "UserMessage message " +
-            "left join log.messageInfo info " +
-            "left join message.messageProperties.property propsFrom " +
-            "left join message.messageProperties.property propsTo " +
-            "left join message.partyInfo.from.partyId partyFrom " +
-            "left join message.partyInfo.to.partyId partyTo " +
-            "where message.messageInfo = info and propsFrom.name = 'originalSender'" +
-            "and propsTo.name = 'finalRecipient'";
-
     public String filterUserMessageLogQuery(String column, boolean asc, Map<String, Object> filters) {
         String query = "select new eu.domibus.common.model.logging.MessageLogInfo(" +
                 "log.messageId," +

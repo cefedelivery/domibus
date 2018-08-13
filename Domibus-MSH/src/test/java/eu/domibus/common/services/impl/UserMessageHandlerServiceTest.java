@@ -19,20 +19,19 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -61,6 +60,10 @@ import java.util.List;
  */
 @RunWith(JMockit.class)
 public class UserMessageHandlerServiceTest {
+
+    @Tested
+    UserMessageHandlerService userMessageHandlerService;
+
     @Injectable
     BackendNotificationService backendNotificationService;
 
@@ -124,9 +127,9 @@ public class UserMessageHandlerServiceTest {
     @Injectable
     RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Injectable
+    protected UIReplicationSignalService uiReplicationSignalService;
 
-    @Tested
-    UserMessageHandlerService userMessageHandlerService;
 
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
@@ -415,6 +418,7 @@ public class UserMessageHandlerServiceTest {
                                                      @Injectable final UserMessageLog userMessageLog)
             throws EbMS3Exception, TransformerException, SOAPException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
+        final String messageId = "TestMessageId123";
 
         new Expectations(userMessageHandlerService) {{
             messaging.getUserMessage();
@@ -427,7 +431,7 @@ public class UserMessageHandlerServiceTest {
             result = receiverParty;
 
             userMessage.getMessageInfo().getMessageId();
-            result = "TestMessageId123";
+            result = messageId;
 
         }};
         userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
@@ -437,6 +441,7 @@ public class UserMessageHandlerServiceTest {
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
             messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            uiReplicationSignalService.userMessageReceived(messageId);
         }};
     }
 

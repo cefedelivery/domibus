@@ -20,6 +20,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -100,6 +101,9 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private PullMessageService pullMessageService;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
     @Override
     public String getFinalRecipient(String messageId) {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -149,6 +153,7 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
         userMessageLogDao.update(userMessageLog);
+        uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
 
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);

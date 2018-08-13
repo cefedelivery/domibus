@@ -39,6 +39,8 @@
                physicalName="domibus.internal.pull.queue"/>
     <amq:queue id="alertMessageQueue"
                physicalName="domibus.internal.alert.queue"/>
+    <amq:queue id="uiReplicationQueue"
+               physicalName="domibus.internal.ui.replication.queue"/>
     <amq:queue id="notifyBackendQueue"
                physicalName="domibus.internal.notification.queue"/>
     <!-- I no backend with matching policy found notifcations are sent to this queue -->
@@ -46,7 +48,6 @@
                physicalName="domibus.internal.notification.unknown"/>
     <amq:topic id="clusterCommandTopic"
                physicalName="domibus.internal.command"/>
-
 
     <bean id="domibusJDBC-nonXADataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
         <property name="uniqueResourceName" value="domibusNonXADataSource"/>
@@ -68,7 +69,6 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
-
     <bean id="pullJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
@@ -77,7 +77,6 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
     </bean>
-
     <bean id="alertJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
@@ -87,6 +86,5 @@
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
-
 </beans>
 

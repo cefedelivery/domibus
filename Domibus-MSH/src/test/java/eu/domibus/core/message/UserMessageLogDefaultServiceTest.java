@@ -5,12 +5,10 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.Verifications;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,14 +23,17 @@ import java.sql.Timestamp;
 @RunWith(JMockit.class)
 public class UserMessageLogDefaultServiceTest {
 
+    @Tested
+    UserMessageLogDefaultService userMessageLogDefaultService;
+
     @Injectable
     UserMessageLogDao userMessageLogDao;
 
     @Injectable
     BackendNotificationService backendNotificationService;
 
-    @Tested
-    UserMessageLogDefaultService userMessageLogDefaultService;
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Test
     public void testSave() throws Exception {
@@ -78,18 +79,20 @@ public class UserMessageLogDefaultServiceTest {
 
         userMessageLogDefaultService.updateMessageStatus(messageId, messageStatus);
 
-        new Verifications() {{
+        new FullVerifications() {{
             backendNotificationService.notifyOfMessageStatusChange(messageLog, messageStatus, withAny(new Timestamp(System.currentTimeMillis())));
             userMessageLogDao.setMessageStatus(messageLog, messageStatus);
+            uiReplicationSignalService.messageStatusChange(messageId);
         }};
     }
 
     @Test
-    public void testSetMessageAsDeleted() throws Exception {
+    public void testSetMessageAsDeleted(@Injectable final UserMessageLog messageLog) throws Exception {
         final String messageId = "1";
+
         userMessageLogDefaultService.setMessageAsDeleted(messageId);
 
-        new Verifications() {{
+        new FullVerifications() {{
             userMessageLogDefaultService.updateMessageStatus(messageId, MessageStatus.DELETED);
         }};
     }
@@ -99,7 +102,7 @@ public class UserMessageLogDefaultServiceTest {
         final String messageId = "1";
         userMessageLogDefaultService.setMessageAsDownloaded(messageId);
 
-        new Verifications() {{
+        new FullVerifications() {{
             userMessageLogDefaultService.updateMessageStatus(messageId, MessageStatus.DOWNLOADED);
         }};
     }

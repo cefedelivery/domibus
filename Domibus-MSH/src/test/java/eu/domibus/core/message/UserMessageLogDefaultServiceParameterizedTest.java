@@ -5,6 +5,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -27,14 +28,17 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class UserMessageLogDefaultServiceParameterizedTest {
 
-    @Injectable
-    UserMessageLogDao userMessageLogDao;
-
-    @Injectable
-    BackendNotificationService backendNotificationService;
-
     @Tested
-    UserMessageLogDefaultService userMessageLogDefaultService;
+    private UserMessageLogDefaultService userMessageLogDefaultService;
+
+    @Injectable
+    private UserMessageLogDao userMessageLogDao;
+
+    @Injectable
+    private BackendNotificationService backendNotificationService;
+
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Parameterized.Parameter(0)
     public String service;

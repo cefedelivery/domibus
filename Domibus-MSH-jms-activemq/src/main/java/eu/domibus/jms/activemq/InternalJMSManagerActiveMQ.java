@@ -77,7 +77,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
             for (ObjectName name : getQueueMap().values()) {
                 QueueViewMBean queueMbean = getQueueViewMBean(name);
                 InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
-                destinationMap.put(queueMbean.getName(), internalJmsDestination);
+                if (StringUtils.indexOfAny(internalJmsDestination.getName(), SKIP_QUEUE_NAMES) == -1) {
+                    destinationMap.put(queueMbean.getName(), internalJmsDestination);
+                }
             }
             return destinationMap;
         } catch (Exception e) {
