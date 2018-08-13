@@ -1,15 +1,12 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
-import eu.domibus.ebms3.common.model.Ebms3Constants;
-import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -53,6 +50,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Autowired
+    private UserMessageHandlerService userMessageHandlerService;
+
     /**
      * {@inheritDoc}
      */
@@ -62,10 +62,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-
     private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
 
-        if(isTestMessage(legConfiguration)) {
+        if(userMessageHandlerService.checkTestMessage(legConfiguration)) {
             return;
         }
 
@@ -91,23 +90,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
-
         }
     }
-
-    /**
-     * Check if this message is a test message
-     *
-     * @param legConfiguration the legConfiguration that matched the message
-     * @return result of test service and action handle
-     */
-    protected Boolean isTestMessage(final LegConfiguration legConfiguration) {
-        LOG.debug("Checking if it is a test message");
-        return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
-                && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction());
-
-    }
-
-
-
 }
