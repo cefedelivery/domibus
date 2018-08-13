@@ -7,7 +7,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>3.3.4-SNAPSHOT</version>
+        <version>3.3.4-FIX-GRP</version>
     </parent>
 
     <artifactId>domibus-ws-stubs</artifactId>
