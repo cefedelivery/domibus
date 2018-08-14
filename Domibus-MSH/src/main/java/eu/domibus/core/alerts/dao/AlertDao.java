@@ -23,7 +23,7 @@ import java.util.Map;
 @Repository
 public class AlertDao extends BasicDao<Alert> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertDao.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(AlertDao.class);
 
     public AlertDao() {
         super(Alert.class);
@@ -50,17 +50,8 @@ public class AlertDao extends BasicDao<Alert> {
         subQuery.select(subRoot.get(Alert_.entityId));
 
         List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, subRoot));
-        final SetJoin<Alert, Event> eventJoin = subRoot.join(Alert_.events);
-        final Map<String, String> parameters = alertCriteria.getParameters();
-        parameters.forEach((key, value) -> {
-            //because event properties are key value, we need to create a join on each parameters.
-            final MapJoin<Event, String, AbstractEventProperty> join = eventJoin.join(Event_.properties);
-            final Predicate parameterPredicate = builder.and(
-                    builder.equal(join.get(AbstractEventProperty_.key), key),
-                    builder.equal(builder.treat(join, StringEventProperty.class).get(StringEventProperty_.stringValue), value));
-            predicates.add(parameterPredicate);
+        addDynamicPredicates(alertCriteria, builder, subRoot, predicates);
 
-        });
         //add predicates to the sub query.
         subQuery.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
 
@@ -81,29 +72,86 @@ public class AlertDao extends BasicDao<Alert> {
         return query.getResultList();
     }
 
+    private void addDynamicPredicates(
+            AlertCriteria alertCriteria,
+            CriteriaBuilder builder,
+            Root<Alert> subRoot,
+            List<Predicate> predicates) {
+        final SetJoin<Alert, Event> eventJoin = subRoot.join(Alert_.events);
+        final Map<String, String> parameters = alertCriteria.getParameters();
+
+        parameters.forEach((key, value) -> {
+            final MapJoin<Event, String, StringEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), StringEventProperty.class);
+            //because event properties are key value, we need to create a join on each parameters.
+            final Predicate parameterPredicate = builder.and(
+                    builder.equal(treat.get(StringEventProperty_.key), key),
+                    builder.equal(treat.get(StringEventProperty_.stringValue), value));
+            LOG.debug("Add dynamic non date criteria key:[{}] equals:[{}] for alert type:[{}]",key,value,alertCriteria.getAlertType().name());
+            predicates.add(parameterPredicate);
+        });
+        final Date dynamicaPropertyFrom = alertCriteria.getDynamicaPropertyFrom();
+        final Date dynamicaPropertyTo = alertCriteria.getDynamicaPropertyTo();
+        final String uniqueDynamicDateParameter = alertCriteria.getUniqueDynamicDateParameter();
+        if (uniqueDynamicDateParameter == null) {
+            return;
+        }
+        if(dynamicaPropertyFrom!=null && dynamicaPropertyTo!=null){
+            final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
+            final Predicate dynamicDateBetween = builder.and(
+                    builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
+                    builder.between(treat.get(DateEventProperty_.dateValue), dynamicaPropertyFrom,dynamicaPropertyTo));
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Add between date criteria key:[{}] between:[{}] and:[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, dynamicaPropertyTo, alertCriteria.getAlertType().name());
+            }
+            predicates.add(dynamicDateBetween);
+        }
+
+        else if (dynamicaPropertyFrom != null) {
+            final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
+            final Predicate dynamicDateBetween = builder.and(
+                    builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
+                    builder.greaterThanOrEqualTo(treat.get(DateEventProperty_.dateValue), dynamicaPropertyFrom));
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Add greater then date criteria key:[{}]>[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, alertCriteria.getAlertType().name());
+            }
+            predicates.add(dynamicDateBetween);
+        }
+        else if (dynamicaPropertyTo != null) {
+            final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
+            final Predicate dynamicDateBetween = builder.and(
+                    builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
+                    builder.lessThanOrEqualTo(treat.get(DateEventProperty_.dateValue), dynamicaPropertyTo));
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Add lesser then date criteria key:[{}]<[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, alertCriteria.getAlertType().name());
+            }
+            predicates.add(dynamicDateBetween);
+        }
+    }
+
     public Long countAlerts(AlertCriteria alertCriteria) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-        Root<Alert> root = criteria.from(Alert.class);
+
+        //create root entity specifying that we want to eager fetch. (Avoid the N+1 hibernate problem)
+        final Root<Alert> root = criteria.from(Alert.class);
+
+        final Subquery<Integer> subQuery = criteria.subquery(Integer.class);
+        Root<Alert> subRoot = subQuery.from(Alert.class);
 
         //Do first a subQuery to retrieve the filtered alerts id based on criteria.
-        criteria.select(builder.count(root.get(Alert_.entityId)));
+        subQuery.select(subRoot.get(Alert_.entityId));
 
-        List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, root));
-        final SetJoin<Alert, Event> eventJoin = root.join(Alert_.events);
-        final Map<String, String> parameters = alertCriteria.getParameters();
-        parameters.forEach((key, value) -> {
-            //because event properties are key value, we need to create a join on each parameters.
-            final MapJoin<Event, String, AbstractEventProperty> join = eventJoin.join(Event_.properties);
-            final Predicate parameterPredicate = builder.and(
-                    builder.equal(join.get(AbstractEventProperty_.key), key),
-                    builder.equal(builder.treat(join, StringEventProperty.class).get(StringEventProperty_.stringValue), value));
-            predicates.add(parameterPredicate);
-
-        });
+        List<Predicate> predicates = new ArrayList<>(getAlertPredicates(alertCriteria, builder, subRoot));
+        addDynamicPredicates(alertCriteria, builder, subRoot, predicates);
         //add predicates to the sub query.
-        criteria.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
-        return em.createQuery(criteria).getSingleResult();
+        subQuery.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
+
+        //create main query by retrieving alerts where ids are in the sub query selection.
+        criteria.select(builder.count(root.get(Alert_.entityId))).distinct(true);
+        criteria.where(root.get(Alert_.entityId).in(subQuery)).distinct(true);
+        final TypedQuery<Long> query = em.createQuery(criteria);
+
+        return query.getSingleResult();
 
     }
 

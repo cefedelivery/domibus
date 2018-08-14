@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
 @RequestMapping(value = "/rest/alerts")
 public class AlertResource {
 
-    private static final   Logger LOG = LoggerFactory.getLogger(AlertResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlertResource.class);
 
     @Autowired
     private AlertService alertService;
@@ -54,7 +54,9 @@ public class AlertResource {
                                   @RequestParam(value = "creationTo", required = false) String creationTo,
                                   @RequestParam(value = "reportingFrom", required = false) String reportingFrom,
                                   @RequestParam(value = "reportingTo", required = false) String reportingTo,
-                                  @RequestParam(value = "parameters", required = false) String[] parameters
+                                  @RequestParam(value = "parameters", required = false) String[] parameters,
+                                  @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
+                                  @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
     ) {
         AlertCriteria alertCriteria = getAlertCriteria(
                 page,
@@ -69,7 +71,9 @@ public class AlertResource {
                 creationTo,
                 reportingFrom,
                 reportingTo,
-                parameters);
+                parameters,
+                dynamicaPropertyFrom,
+                dynamicaPropertyTo);
 
         final Long aLong = alertService.countAlerts(alertCriteria);
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
@@ -80,7 +84,7 @@ public class AlertResource {
         return alertResult;
     }
 
-    @GetMapping( path = "/types")
+    @GetMapping(path = "/types")
     public List<String> getAlertTypes() {
         final List<AlertType> alertTypes = Lists.newArrayList(AlertType.values());
         return alertTypes.stream().map(Enum::name).collect(Collectors.toList());
@@ -145,7 +149,9 @@ public class AlertResource {
                                          @RequestParam(value = "creationTo", required = false) String creationTo,
                                          @RequestParam(value = "reportingFrom", required = false) String reportingFrom,
                                          @RequestParam(value = "reportingTo", required = false) String reportingTo,
-                                         @RequestParam(value = "parameters", required = false) String[] parameters
+                                         @RequestParam(value = "parameters", required = false) String[] nonDateDynamicParameters,
+                                         @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
+                                         @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
     ) {
         AlertCriteria alertCriteria = getAlertCriteria(
                 page,
@@ -160,7 +166,9 @@ public class AlertResource {
                 creationTo,
                 reportingFrom,
                 reportingTo,
-                parameters);
+                nonDateDynamicParameters,
+                dynamicaPropertyFrom,
+                dynamicaPropertyTo);
 
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
@@ -184,7 +192,7 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
+    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);
@@ -213,15 +221,41 @@ public class AlertResource {
             alertType = AlertType.MSG_COMMUNICATION_FAILURE.name();
         }
         if (parameters != null) {
-            final List<String> alertParameters = getAlertParameters(alertType);
+            final List<String> nonDateParameters = getNonDateParameters(alertType);
             final Map<String, String> parametersMap = IntStream.
                     range(0, parameters.length).
-                    mapToObj(i -> new SimpleImmutableEntry<>(alertParameters.get(i), parameters[i])).
+                    mapToObj(i -> new SimpleImmutableEntry<>(nonDateParameters.get(i), parameters[i])).
                     filter(keyValuePair -> !keyValuePair.getValue().isEmpty()).
                     collect(Collectors.toMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue)); //NOSONAR
             alertCriteria.setParameters(parametersMap);
         }
+        final String uniqueDynamicDateParameter = getUniqueDynamicDateParameter(alertType);
+        alertCriteria.setUniqueDynamicDateParameter(uniqueDynamicDateParameter);
+        if (StringUtils.isNotEmpty(dynamicaPropertyFrom)) {
+            alertCriteria.setDynamicaPropertyFrom(dateUtil.fromString(dynamicaPropertyFrom));
+        }
+
+        if (StringUtils.isNotEmpty(dynamicaPropertyTo)) {
+            alertCriteria.setDynamicaPropertyTo(dateUtil.fromString(dynamicaPropertyTo));
+        }
+
         return alertCriteria;
+    }
+
+    private List<String> getNonDateParameters(String alertType) {
+        return getAlertParameters(alertType).stream().filter(s -> !(s.endsWith("_TIME") || s.endsWith("_DATE"))).collect(Collectors.toList());
+    }
+
+    private String getUniqueDynamicDateParameter(String alertType) {
+        final List<String> collect = getAlertParameters(alertType).stream().filter(s -> (s.endsWith("_TIME") || s.endsWith("_DATE"))).collect(Collectors.toList());
+        if (collect.size() > 1) {
+            throw new IllegalStateException("Only one dynamic date per alert type is supported right now.");
+        }
+        if (collect.isEmpty()) {
+            return null;
+        }
+        return collect.get(0);
+
     }
 
     private AlertRo transform(Alert alert) {

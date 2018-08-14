@@ -13,23 +13,23 @@ import java.util.Date;
 public class DatePropertyValue extends AbstractPropertyValue<Date> {
 
 
-    private Date date;
+    private Date value;
 
     public DatePropertyValue() {
     }
 
     public DatePropertyValue(final String key,final Date date) {
         this.key=key;
-        this.date = date;
+        this.value = date;
     }
 
     @Override
     public Date getValue() {
-        return date;
+        return value;
     }
 
     @Override
-    public void setValue(Date date) {
-        this.date=date;
+    public void setValue(Date value) {
+        this.value=value;
     }
 }

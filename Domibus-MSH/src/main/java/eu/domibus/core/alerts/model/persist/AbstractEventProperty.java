@@ -16,11 +16,10 @@ import javax.validation.constraints.NotNull;
 @Entity
 public abstract class AbstractEventProperty<T> extends AbstractBaseEntity {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractEventProperty.class);
 
     @NotNull
     @Column(name = "PROPERTY_TYPE")
-    private String key; //NOSONAR
+    protected String key; //NOSONAR
 
     @NotNull
     @ManyToOne

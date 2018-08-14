@@ -55,7 +55,11 @@ export class AlertsComponent {
 
   dynamicFilters = [];
 
-  items = [];
+  dynamicDatesFilter:any = {};
+
+  nonDateParameters = [];
+  dateParameters = [];
+  alertTypeWithDate:boolean=false;
 
   timestampCreationFromMaxDate: Date = new Date();
   timestampCreationToMinDate: Date = null;
@@ -63,6 +67,9 @@ export class AlertsComponent {
   timestampReportingFromMaxDate: Date = new Date();
   timestampReportingToMinDate: Date = null;
   timestampReportingToMaxDate: Date = new Date();
+
+  dateFromName:string="";
+  dateToName:string="";
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     this.getAlertTypes();
@@ -159,15 +166,28 @@ export class AlertsComponent {
       searchParams.set('reportingTo', this.filter.reportingTo.getTime());
     }
 
-    if (this.dynamicFilters.length > 0) {
-      let d: string[] = [];
-      for (let i = 0; i < this.dynamicFilters.length; i++) {
+    if(this.dynamicFilters.length > 0) {
+      let d : string[] = [];
+      for(let i = 0; i < this.dynamicFilters.length; i++) {
         d[i] = '';
       }
-      for (let filter in this.dynamicFilters) {
+      for(let filter in this.dynamicFilters) {
         d[filter] = this.dynamicFilters[filter];
       }
       searchParams.set('parameters', d.toString());
+      //debugger;
+    }
+
+    if(this.alertTypeWithDate){
+      const from = this.dynamicDatesFilter.from;
+      if (from) {
+        searchParams.set('dynamicFrom', from.getTime());
+      }
+
+      const to = this.dynamicDatesFilter.to;
+      if (to) {
+        searchParams.set('dynamicTo', to.getTime());
+      }
     }
 
     if (asc != null) {
@@ -225,20 +245,31 @@ export class AlertsComponent {
     return false;//to prevent default navigation
   }
 
-  getAlertParameters(alertType: string): void {
+  getAlertParameters(alertType: string): Observable<Array<string>> {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('alertType', alertType);
-    let observable = this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams}).map(this.extractData);
-    let responseConnectableObservable = observable.publish();
-    responseConnectableObservable.flatMap(value => value).map(value => JSON.parse(value)).filter(value => {value.search('_TIME')===-1 || value.search('_DATE')===-1});
-    responseConnectableObservable.flatMap(value => value).filter(value => {value.search('_TIME')>0 || value.search('_DATE')>01});
-
-
+    return this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams}).map(this.extractData);
 
   }
 
   onAlertTypeChanged(alertType: string) {
-    this.getAlertParameters(alertType);
+    this.nonDateParameters = [];
+    this.dateParameters = [];
+    this.alertTypeWithDate=false;
+    this.dynamicFilters=[];
+    this.dynamicDatesFilter=[];
+    let alertParametersObservable = this.getAlertParameters(alertType).flatMap(value => value);
+    let nonDateParamerters = alertParametersObservable.filter(value => {
+      console.log("Value:"+value);
+      return (value.search('_TIME')===-1 && value.search('_DATE')===-1)
+    });
+    nonDateParamerters.subscribe(item=>this.nonDateParameters.push(item));
+    let dateParameters = alertParametersObservable.filter(value => {return value.search('_TIME')>0 || value.search('_DATE')>1});
+    dateParameters.subscribe(item=>{
+      this.dateParameters.push(item);
+      this.dateFromName=item+" FROM";
+      this.dateToName=item+" TO";
+      this.alertTypeWithDate=true;});
   }
 
   onTimestampCreationFromChange(event) {

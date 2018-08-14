@@ -15,8 +15,6 @@ import java.util.Date;
 @DiscriminatorValue("DATE")
 public class DateEventProperty extends AbstractEventProperty<Date>{
 
-    private static final Logger LOG = LoggerFactory.getLogger(DateEventProperty.class);
-
     @NotNull
     @Column(name = "DATE_VALUE")
     @Temporal(TemporalType.TIMESTAMP)
@@ -40,6 +38,6 @@ public class DateEventProperty extends AbstractEventProperty<Date>{
 
     @Override
     public Date getValue() {
-        return dateValue;
+        return getDateValue();
     }
 }
