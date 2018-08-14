@@ -58,7 +58,6 @@ export class AlertsComponent {
   dynamicDatesFilter:any = {};
 
   nonDateParameters = [];
-  dateParameters = [];
   alertTypeWithDate:boolean=false;
 
   timestampCreationFromMaxDate: Date = new Date();
@@ -175,7 +174,6 @@ export class AlertsComponent {
         d[filter] = this.dynamicFilters[filter];
       }
       searchParams.set('parameters', d.toString());
-      //debugger;
     }
 
     if(this.alertTypeWithDate){
@@ -254,22 +252,23 @@ export class AlertsComponent {
 
   onAlertTypeChanged(alertType: string) {
     this.nonDateParameters = [];
-    this.dateParameters = [];
     this.alertTypeWithDate=false;
     this.dynamicFilters=[];
     this.dynamicDatesFilter=[];
     let alertParametersObservable = this.getAlertParameters(alertType).flatMap(value => value);
+    const TIME_SUFFIX = '_TIME';
+    const DATE_SUFFIX = '_DATE';
     let nonDateParamerters = alertParametersObservable.filter(value => {
       console.log("Value:"+value);
-      return (value.search('_TIME')===-1 && value.search('_DATE')===-1)
+      return (value.search(TIME_SUFFIX)===-1 && value.search(DATE_SUFFIX)===-1)
     });
     nonDateParamerters.subscribe(item=>this.nonDateParameters.push(item));
-    let dateParameters = alertParametersObservable.filter(value => {return value.search('_TIME')>0 || value.search('_DATE')>1});
+    let dateParameters = alertParametersObservable.filter(value => {return value.search(TIME_SUFFIX)>0 || value.search(DATE_SUFFIX)>1});
     dateParameters.subscribe(item=>{
-      this.dateParameters.push(item);
       this.dateFromName=item+" FROM";
       this.dateToName=item+" TO";
-      this.alertTypeWithDate=true;});
+      this.alertTypeWithDate=true;
+    });
   }
 
   onTimestampCreationFromChange(event) {

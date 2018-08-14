@@ -80,11 +80,11 @@ public class Event {
     }
 
     public Optional<String> findOptionalProperty(final String key) {
-        final AbstractPropertyValue stringPropertyValue = properties.get(key);
-        if(stringPropertyValue ==null || stringPropertyValue.getValue()==null){
+        final AbstractPropertyValue property = properties.get(key);
+        if(property ==null || property.getValue()==null){
             return Optional.empty();
         }
-        return Optional.of(stringPropertyValue.getValue().toString());
+        return Optional.of(property.getValue().toString());
     }
 
     public void addStringKeyValue(final String key, final String value) {

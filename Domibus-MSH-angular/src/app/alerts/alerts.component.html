@@ -86,22 +86,20 @@
                   <input mdInput placeholder={{item}} name={{item}} [(ngModel)]="dynamicFilters[i]"
                          #{{item}}="ngModel" id={{item}}_id>
                 </md-input-container>
-                <!--let fieldFromName=item+' From:';let fieldFromId=item+'_FromId';let fieldToName=item+' To:';let fieldToId=item+'_ToId'-->
-                <!--<md-input-container *ngFor="let item of dateParameters">-->
                 <span *ngIf="alertTypeWithDate">
                   <md2-datepicker mdInput
                                   placeholder={{dateFromName}}
                                   [(ngModel)]="dynamicDatesFilter.from"
                                   name="from"
                                   [type]="'datetime'"
-                                  #timestampControl="ngModel" id="From id">
+                                  #timestampControl="ngModel" id={{dateFromName}}_id>
                   </md2-datepicker>
                   <md2-datepicker mdInput
                                   placeholder={{dateToName}}
                                   [(ngModel)]="dynamicDatesFilter.to"
                                   name="To"
                                   [type]="'datetime'"
-                                  #timestampControl="ngModel" id="To id">
+                                  #timestampControl="ngModel" id={{dateToName}}_id>
                   </md2-datepicker>
                 </span>
               </md-card-content>

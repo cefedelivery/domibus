@@ -23,7 +23,7 @@ import java.util.Map;
 @Repository
 public class AlertDao extends BasicDao<Alert> {
 
-    private static final  Logger LOG = LoggerFactory.getLogger(AlertDao.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlertDao.class);
 
     public AlertDao() {
         super(Alert.class);
@@ -86,7 +86,9 @@ public class AlertDao extends BasicDao<Alert> {
             final Predicate parameterPredicate = builder.and(
                     builder.equal(treat.get(StringEventProperty_.key), key),
                     builder.equal(treat.get(StringEventProperty_.stringValue), value));
-            LOG.debug("Add dynamic non date criteria key:[{}] equals:[{}] for alert type:[{}]",key,value,alertCriteria.getAlertType().name());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Add dynamic non date criteria key:[{}] equals:[{}] for alert type:[{}]", key, value, alertCriteria.getAlertType().name());
+            }
             predicates.add(parameterPredicate);
         });
         final Date dynamicaPropertyFrom = alertCriteria.getDynamicaPropertyFrom();
@@ -95,33 +97,30 @@ public class AlertDao extends BasicDao<Alert> {
         if (uniqueDynamicDateParameter == null) {
             return;
         }
-        if(dynamicaPropertyFrom!=null && dynamicaPropertyTo!=null){
+        if (dynamicaPropertyFrom != null && dynamicaPropertyTo != null) {
             final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
             final Predicate dynamicDateBetween = builder.and(
                     builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
-                    builder.between(treat.get(DateEventProperty_.dateValue), dynamicaPropertyFrom,dynamicaPropertyTo));
-            if(LOG.isDebugEnabled()) {
+                    builder.between(treat.get(DateEventProperty_.dateValue), dynamicaPropertyFrom, dynamicaPropertyTo));
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Add between date criteria key:[{}] between:[{}] and:[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, dynamicaPropertyTo, alertCriteria.getAlertType().name());
             }
             predicates.add(dynamicDateBetween);
-        }
-
-        else if (dynamicaPropertyFrom != null) {
+        } else if (dynamicaPropertyFrom != null) {
             final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
             final Predicate dynamicDateBetween = builder.and(
                     builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
                     builder.greaterThanOrEqualTo(treat.get(DateEventProperty_.dateValue), dynamicaPropertyFrom));
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Add greater then date criteria key:[{}]>[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, alertCriteria.getAlertType().name());
             }
             predicates.add(dynamicDateBetween);
-        }
-        else if (dynamicaPropertyTo != null) {
+        } else if (dynamicaPropertyTo != null) {
             final MapJoin<Event, String, DateEventProperty> treat = builder.treat(eventJoin.join(Event_.properties), DateEventProperty.class);
             final Predicate dynamicDateBetween = builder.and(
                     builder.equal(treat.get(DateEventProperty_.key), uniqueDynamicDateParameter),
                     builder.lessThanOrEqualTo(treat.get(DateEventProperty_.dateValue), dynamicaPropertyTo));
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Add lesser then date criteria key:[{}]<[{}] for alert type:[{}]", uniqueDynamicDateParameter, dynamicaPropertyFrom, alertCriteria.getAlertType().name());
             }
             predicates.add(dynamicDateBetween);
