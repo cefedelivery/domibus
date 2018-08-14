@@ -240,6 +240,19 @@ public class UserMessageHandlerService {
     }
 
     /**
+     * Check if this message is a test message
+     *
+     * @param legConfiguration the legConfiguration that matched the message
+     * @return result of test service and action handle
+     */
+    protected Boolean checkTestMessage(final LegConfiguration legConfiguration) {
+        LOG.debug("Checking if it is a test message");
+        return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction());
+
+    }
+
+    /**
      * This method persists incoming messages into the database (and handles decompression before)
      *
      * @param request          the message to persist
