@@ -7,7 +7,7 @@ import eu.domibus.core.alerts.model.common.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,13 +17,13 @@ import java.util.Optional;
  */
 public class MessagingModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MessagingModuleConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessagingModuleConfiguration.class);
 
     private final boolean messageCommunicationActive;
 
     private String mailSubject;
 
-    private Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
+    private Map<MessageStatus, AlertLevel> messageStatusLevels = new EnumMap<>(MessageStatus.class);
 
     public MessagingModuleConfiguration(final String mailSubject) {
         this.messageCommunicationActive = true;
