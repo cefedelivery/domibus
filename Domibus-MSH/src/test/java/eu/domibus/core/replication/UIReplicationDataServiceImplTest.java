@@ -313,9 +313,11 @@ public class UIReplicationDataServiceImplTest {
     public void testFindAndSyncUIMessages(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
         final int countAllRows = 10;
         final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
-        Deencapsulation.setField(uiReplicationDataService, "maxRowsToSync", 10000);
 
         new Expectations() {{
+            domibusPropertyProvider.getDomainProperty(UIReplicationDataServiceImpl.MAX_ROWS_KEY, "1000");
+            result = 10000;
+
             uiMessageDiffDao.countAll();
             result = countAllRows;
 
@@ -338,9 +340,9 @@ public class UIReplicationDataServiceImplTest {
         final int countAllRows = 10;
         final int limit = 20;
         final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
-        Deencapsulation.setField(uiReplicationDataService, "maxRowsToSync", 10000);
 
         new Expectations() {{
+
             uiMessageDiffDao.countAll();
             result = countAllRows;
 

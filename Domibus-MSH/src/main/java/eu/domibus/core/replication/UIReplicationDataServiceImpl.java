@@ -21,7 +21,6 @@ import org.hibernate.StaleObjectStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.OptimisticLockException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,9 +40,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationDataServiceImpl.class);
 
     /** max no of records to be synchronized using cron job */
-    private static final String MAX_ROWS_KEY = "domibus.ui.replication.sync.cron.max.rows";
-
-    private int maxRowsToSync;
+    static final String MAX_ROWS_KEY = "domibus.ui.replication.sync.cron.max.rows";
 
     @Autowired
     private UIMessageDaoImpl uiMessageDao;
@@ -68,11 +65,6 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     @Autowired
     private DomainCoreConverter domainConverter;
-
-    @PostConstruct
-    public void init() {
-        maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
-    }
 
     /**
      * {@inheritDoc}
@@ -199,6 +191,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         int rowsToSyncCount = uiMessageDiffDao.countAll();
         LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
 
+        int maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
         if (rowsToSyncCount > maxRowsToSync) {
             LOG.warn(WarningUtil.warnOutput("There are more than {} rows to sync into TB_MESSAGE_UI table " +
                     "please use the REST resource instead."), maxRowsToSync);
@@ -376,6 +369,5 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
         return domainConverter.convert(diffEntity, UIMessageEntity.class);
     }
-
 
 }
