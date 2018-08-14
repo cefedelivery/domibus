@@ -13,6 +13,7 @@ public enum CsvCustomColumns {
     PARTY_RESOURCE,
     TRUSTSTORE_RESOURCE,
     USER_RESOURCE,
+    PLUGIN_USER_RESOURCE,
     ALERT_RESOURCE;
 
     private Map<String, String> customFields;
@@ -63,6 +64,13 @@ public enum CsvCustomColumns {
         userMap.put("Roles".toUpperCase(), "Role");
     }
 
+    private static final Map<String, String> pluginuserMap;
+    static {
+        pluginuserMap = new HashMap<>();
+        pluginuserMap.put("UserName".toUpperCase(), "Username");
+        pluginuserMap.put("authRoles".toUpperCase(), "Role");
+    }
+
     private static final Map<String, String> truststoreMap;
     static {
         truststoreMap = new HashMap<>();
@@ -85,6 +93,7 @@ public enum CsvCustomColumns {
         PARTY_RESOURCE.customFields = partyMap;
         TRUSTSTORE_RESOURCE.customFields = truststoreMap;
         USER_RESOURCE.customFields = userMap;
+        PLUGIN_USER_RESOURCE.customFields = pluginuserMap;
         ALERT_RESOURCE.customFields=alertMap;
     }
 

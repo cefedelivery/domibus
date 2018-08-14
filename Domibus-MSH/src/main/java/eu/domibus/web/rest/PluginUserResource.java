@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
  * @since 4.0
  */
 @RestController
@@ -114,13 +114,13 @@ public class PluginUserResource {
         final PluginUserResultRO pluginUserROList = findUsers(authType, authRole, originalUser, userName, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
         // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.USER_RESOURCE.getExcludedItems());
+        csvServiceImpl.setExcludedItems(CsvExcludedItems.PLUGIN_USER_RESOURCE.getExcludedItems());
 
         // needed for empty csv file purposes
         csvServiceImpl.setClass(PluginUserRO.class);
 
         // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.USER_RESOURCE.getCustomColumns());
+        csvServiceImpl.customizeColumn(CsvCustomColumns.PLUGIN_USER_RESOURCE.getCustomColumns());
 
         try {
             resultText = csvServiceImpl.exportToCSV(pluginUserROList.getEntries());
@@ -130,7 +130,7 @@ public class PluginUserResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("plugin-users"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pluginusers"))
                 .body(resultText);
     }
 
