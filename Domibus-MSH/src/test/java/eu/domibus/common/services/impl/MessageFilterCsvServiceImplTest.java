@@ -2,6 +2,7 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.routing.RoutingCriteria;
+import eu.domibus.core.csv.MessageFilterCsvServiceImpl;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -28,7 +29,7 @@ public class MessageFilterCsvServiceImplTest {
     public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>());
+        final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>(), null, null, null);
 
         // Then
         Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
@@ -38,7 +39,7 @@ public class MessageFilterCsvServiceImplTest {
     public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = messageFilterCsvService.exportToCSV(null);
+        final String exportToCSV = messageFilterCsvService.exportToCSV(null, null, null, null);
 
         // Then
         Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
@@ -63,7 +64,7 @@ public class MessageFilterCsvServiceImplTest {
         messageFilterROList.add(messageFilterRO);
 
         // When
-        final String exportToCSV = messageFilterCsvService.exportToCSV(messageFilterROList);
+        final String exportToCSV = messageFilterCsvService.exportToCSV(messageFilterROList, MessageFilterRO.class, null, null);
 
         // Then
         Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator() +

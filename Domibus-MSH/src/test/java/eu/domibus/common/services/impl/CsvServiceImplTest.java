@@ -5,6 +5,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
 import mockit.Tested;
@@ -35,7 +36,7 @@ public class CsvServiceImplTest {
     public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = csvServiceImpl.exportToCSV(new ArrayList<>());
+        final String exportToCSV = csvServiceImpl.exportToCSV(new ArrayList<>(), null, null, null);
 
         // Then
         Assert.assertTrue(exportToCSV.trim().isEmpty());
@@ -45,7 +46,7 @@ public class CsvServiceImplTest {
     public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = csvServiceImpl.exportToCSV(null);
+        final String exportToCSV = csvServiceImpl.exportToCSV(null,null,null,null);
 
         // Then
         Assert.assertTrue(exportToCSV.trim().isEmpty());
@@ -71,7 +72,7 @@ public class CsvServiceImplTest {
         String csvDate = d.format(f);
 
         // When
-        final String exportToCSV = csvServiceImpl.exportToCSV(messageLogInfoList);
+        final String exportToCSV = csvServiceImpl.exportToCSV(messageLogInfoList, MessageLogInfo.class,null,null);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Message Id,From Party Id,To Party Id,Message Status,Notification Status,Received,Msh Role,Send Attempts,Send Attempts Max,Next Attempt,Conversation Id,Message Type,Message Subtype,Deleted,Original Sender,Final Recipient,Ref To Message Id,Failed,Restored"));

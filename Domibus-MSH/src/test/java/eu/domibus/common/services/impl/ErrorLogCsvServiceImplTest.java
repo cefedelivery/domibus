@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -32,7 +33,7 @@ public class ErrorLogCsvServiceImplTest {
     public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>());
+        final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>(), null, null, null);
 
         // Then
         Assert.assertTrue(exportToCSV.trim().isEmpty());
@@ -42,7 +43,7 @@ public class ErrorLogCsvServiceImplTest {
     public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(null);
+        final String exportToCSV = errorLogCsvService.exportToCSV(null,null,null,null);
 
         // Then
         Assert.assertTrue(exportToCSV.trim().isEmpty());
@@ -59,7 +60,7 @@ public class ErrorLogCsvServiceImplTest {
         String csvDate = d.format(f);
 
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList);
+        final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList, ErrorLogRO.class, null, null);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"));

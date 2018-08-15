@@ -5,8 +5,8 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.TrustStoreEntry;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.DomibusCacheService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.web.rest.ro.TrustStoreRO;
 import eu.domibus.api.multitenancy.DomainContextProvider;
@@ -32,6 +32,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tiago Miguel
@@ -163,7 +164,7 @@ public class TruststoreResourceTest {
         new Expectations(truststoreResource) {{
             truststoreResource.trustStoreEntries();
             result = trustStoreROList;
-            csvServiceImpl.exportToCSV(trustStoreROList);
+            csvServiceImpl.exportToCSV(trustStoreROList,null,(Map<String, String>)any, (List<String>)any);
             result = "Name, Subject, Issuer, Valid From, Valid Until" + System.lineSeparator() +
                     "Name, Subject, Issuer, " + date + ", " + date + System.lineSeparator();
         }};

@@ -5,8 +5,8 @@ import eu.domibus.api.user.User;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.UserService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -101,7 +101,7 @@ public class UserResourceTest {
         new Expectations(userResource) {{
            userResource.users();
            result = usersResponseROList;
-           csvServiceImpl.exportToCSV(usersResponseROList);
+           csvServiceImpl.exportToCSV(usersResponseROList, UserResponseRO.class, (Map<String, String>)any, (List<String>)any);
            result = "Username, Email, Active, Roles" + System.lineSeparator() +
                    "user1, email@email.com, true, ROLE_ADMIN" + System.lineSeparator();
         }};
