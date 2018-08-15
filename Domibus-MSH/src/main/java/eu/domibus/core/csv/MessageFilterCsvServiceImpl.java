@@ -1,4 +1,4 @@
-package eu.domibus.common.services.impl;
+package eu.domibus.core.csv;
 
 import com.opencsv.CSVWriter;
 import eu.domibus.api.routing.RoutingCriteria;
@@ -6,10 +6,7 @@ import eu.domibus.web.rest.ro.MessageFilterRO;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,22 +17,14 @@ import java.util.stream.Collectors;
 @Service
 public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
 
-    private List<String> csvHeader = new ArrayList<>();
-
-    private String[] routingCriteriaArray = {"From", "To", "Action", "Service"};
-
-    public MessageFilterCsvServiceImpl() {
-        csvHeader.add("Plugin");
-        csvHeader.addAll(Arrays.asList(routingCriteriaArray));
-        csvHeader.add("Persisted");
-    }
-
     @Override
-    public String exportToCSV(List<?> list) {
+    public String exportToCSV(List<?> list, Class theClass,
+                              final Map<String, String> customColumnNames, final List<String> excludedColumns) {
         StringWriter result = new StringWriter();
         CSVWriter csvBuilder = new CSVWriter(result);
 
-        writeCSVRow(csvBuilder, csvHeader);
+        List<String> columnNames = Arrays.asList("Plugin", "From", "To", "Action", "Service", "Persisted");
+        writeCSVRow(csvBuilder, columnNames);
 
         if (list != null && !list.isEmpty()) {
             for (Object messageFilterRO : list) {
@@ -54,6 +43,8 @@ public class MessageFilterCsvServiceImpl extends CsvServiceImpl {
     }
 
     private List<String> routingCriteriaToCsvString(List<RoutingCriteria> routingCriteria) {
+        final String[] routingCriteriaArray = {"From", "To", "Action", "Service"};
+
         return Arrays.stream(routingCriteriaArray).map(name -> {
             RoutingCriteria rc = routingCriteria.stream()
                     .filter(x -> x.getName().equalsIgnoreCase(name))

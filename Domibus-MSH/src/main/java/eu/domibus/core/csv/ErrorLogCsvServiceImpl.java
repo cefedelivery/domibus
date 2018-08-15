@@ -1,4 +1,4 @@
-package eu.domibus.common.services.impl;
+package eu.domibus.core.csv;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.web.rest.ro.ErrorLogRO;
