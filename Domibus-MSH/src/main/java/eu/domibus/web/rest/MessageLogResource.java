@@ -11,9 +11,10 @@ import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.MessagesLogService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -221,15 +223,10 @@ public class MessageLogResource {
             resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, orderByColumn, asc, filters);
         }
 
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(MessageLogInfo.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns());
-
         String resultText;
         try {
-            resultText = csvServiceImpl.exportToCSV(resultList);
+            resultText = csvServiceImpl.exportToCSV(resultList, MessageLogInfo.class,
+                    CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), new ArrayList<>());
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();

@@ -1,6 +1,5 @@
 package eu.domibus.web.rest.ro;
 
-import eu.domibus.common.services.CsvService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

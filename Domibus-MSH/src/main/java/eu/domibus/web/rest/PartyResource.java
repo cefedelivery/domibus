@@ -5,9 +5,11 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.api.security.TrustStoreEntry;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.party.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -98,11 +100,11 @@ public class PartyResource {
 
     /**
      * This method returns a CSV file with the contents of Party table
-     * @param name the party name
-     * @param endPoint the party endpoint
-     * @param partyId the party id
-     * @param process a process associated with the party
      *
+     * @param name     the party name
+     * @param endPoint the party endpoint
+     * @param partyId  the party id
+     * @param process  a process associated with the party
      * @return CSV file with the contents of Party table
      */
     @GetMapping(path = "/csv")
@@ -113,17 +115,9 @@ public class PartyResource {
         String resultText;
         final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.PARTY_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(PartyResponseRo.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.PARTY_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(partyResponseRoList);
+            resultText = csvServiceImpl.exportToCSV(partyResponseRoList, PartyResponseRo.class,
+                    CsvCustomColumns.PARTY_RESOURCE.getCustomColumns(), CsvExcludedItems.PARTY_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
@@ -135,7 +129,7 @@ public class PartyResource {
     }
 
     @RequestMapping(value = {"/update"}, method = RequestMethod.PUT)
-    public ResponseEntity updateParties( @RequestBody List<PartyResponseRo> partiesRo) {
+    public ResponseEntity updateParties(@RequestBody List<PartyResponseRo> partiesRo) {
         LOG.debug("Updating parties [{}]", Arrays.toString(partiesRo.toArray()));
 
         List<Party> partyList = domainConverter.convert(partiesRo, Party.class);
@@ -148,9 +142,9 @@ public class PartyResource {
         try {
             partyService.updateParties(partyList, certificates);
             return ResponseEntity.noContent().build();
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             StringBuilder errorMessageB = new StringBuilder();
-            for(Throwable err = e; err != null; err = err.getCause()) {
+            for (Throwable err = e; err != null; err = err.getCause()) {
                 errorMessageB.append("\n").append(err.getMessage());
             }
             return ResponseEntity.badRequest().body(errorMessageB.toString());

@@ -3,8 +3,10 @@ package eu.domibus.web.rest;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
@@ -135,17 +137,9 @@ public class JmsResource {
 
         customizeJMSProperties(jmsMessageList);
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(JmsMessage.class);
-
-        // column name customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.JMS_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(jmsMessageList);
+            resultText = csvServiceImpl.exportToCSV(jmsMessageList, JmsMessage.class,
+                    CsvCustomColumns.JMS_RESOURCE.getCustomColumns(), CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

@@ -3,12 +3,13 @@ package eu.domibus.web.rest;
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -166,12 +164,10 @@ public class AlertResource {
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
         String resultText;
         try {
-            // needed for empty csv file purposes
-            csvServiceImpl.setClass(AlertRo.class);
 
-            // column customization
-            csvServiceImpl.customizeColumn(CsvCustomColumns.ALERT_RESOURCE.getCustomColumns());
-            resultText = csvServiceImpl.exportToCSV(alertRoList);
+            resultText = csvServiceImpl.exportToCSV(alertRoList, AlertRo.class,
+                    CsvCustomColumns.ALERT_RESOURCE.getCustomColumns(), new ArrayList<>());
+
         } catch (CsvException e) {
             LOG.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();

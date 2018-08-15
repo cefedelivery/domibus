@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.core.csv;
 
 import java.util.HashMap;
 import java.util.Map;

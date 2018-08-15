@@ -8,9 +8,10 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.ErrorLogCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -134,15 +135,10 @@ public class ErrorLogResource {
         final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
 
-        // needed for empty csv file purposes
-        errorLogCsvServiceImpl.setClass(ErrorLogRO.class);
-
-        // column customization
-        errorLogCsvServiceImpl.customizeColumn(CsvCustomColumns.ERRORLOG_RESOURCE.getCustomColumns());
-
         String resultText;
         try {
-            resultText = errorLogCsvServiceImpl.exportToCSV(errorLogROList);
+            resultText = errorLogCsvServiceImpl.exportToCSV(errorLogROList, ErrorLogRO.class,
+                    CsvCustomColumns.ERRORLOG_RESOURCE.getCustomColumns(), new ArrayList<>());
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();

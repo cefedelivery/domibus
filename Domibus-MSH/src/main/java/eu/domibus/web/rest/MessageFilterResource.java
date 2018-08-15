@@ -2,9 +2,9 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.routing.BackendFilter;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.MessageFilterCsvServiceImpl;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
@@ -17,6 +17,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -78,7 +81,8 @@ public class MessageFilterResource {
     public ResponseEntity<String> getCsv() {
         String resultText;
         try {
-            resultText = messageFilterCsvServiceImpl.exportToCSV(getBackendFiltersInformation().getKey());
+            resultText = messageFilterCsvServiceImpl.exportToCSV(getBackendFiltersInformation().getKey(),
+                    MessageFilterRO.class, null, null);
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
