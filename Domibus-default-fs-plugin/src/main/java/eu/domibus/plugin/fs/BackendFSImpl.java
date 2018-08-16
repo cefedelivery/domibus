@@ -2,7 +2,6 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
 import eu.domibus.ext.services.DomainContextExtService;
-import eu.domibus.ext.services.DomainExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -45,7 +44,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
     private static final String LS = System.lineSeparator();
-//    private static final String ERROR_EXTENSION = ".error";
 
     private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
     private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
