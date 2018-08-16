@@ -22,7 +22,9 @@ Domibus 4.0 RC1 (from 3.3.4):
                                <artifactId>commons-lang3</artifactId>
                                <scope>provided</scope>
                            </dependency>
-
+                - PEPPOL dynamic discovery was updated to the PEPPOL profile requirements.
+                  The value of eb:UserMessage/eb:CollaborationInfo/eb:Service matches now the entire Scheme::ProcessIdentifier construction while
+                  the Service@type is not taken into consideration and therefore can take any needed value.
                 - [WebLogic only]
                     Modify file "\conf\domibus\domibus.properties":
                          o add the folloging property:

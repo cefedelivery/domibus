@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<db:configuration xmlns:db="http://domibus.eu/configuration" party="receiver">
+<db:configuration xmlns:db="http://domibus.eu/configuration" party="blue_gw">
 	<mpcs>
 		<mpc name="defaultMpc"
 			 qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC" enabled="true" default="true"
@@ -14,8 +14,8 @@
 			<partyIdTypes>
 				<partyIdType name="peppolPartyType" value="urn:fdc:peppol.eu:2017:identifiers:ap"/>
 			</partyIdTypes>
-			<party name="receiver" endpoint="http://localhost:8180/domibus/services/msh">
-				<identifier partyId="receiver" partyIdType="peppolPartyType"/>
+			<party name="blue_gw" endpoint="http://localhost:8080/domibus/services/msh">
+				<identifier partyId="domibus-blue" partyIdType="peppolPartyType"/>
 			</party>
 		</parties>
 		<meps>
@@ -50,7 +50,7 @@
 			<agreement name="agreement1" value="A1" type="T1"/>
 		</agreements>
 		<services>
-			<service name="testService1" value="cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii05:ver2.0" type="peppolServiceType"/>
+			<service name="testService1" value="cenbii-procid-ubl::urn:www.cenbii.eu:profile:bii04:ver1.0" type="peppolServiceType"/>
 		</services>
 		<actions>
 			<action name="tc1Action" value="urn:oasis:names:specification:ubl:schema:xsd:Invoice-12::Invoice##urn:www.cenbii.eu:transaction:biicoretrdm010:ver1.0:#urn:www.peppol.eu:bis:peppol4a:ver1.0::2.0"/>
@@ -63,9 +63,9 @@
 			<legConfiguration name="pushTestcase1tc1Action" service="testService1" action="tc1Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_BST" receptionAwareness="receptionAwareness" propertySet="eDeliveryPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 		</legConfigurations>
 		<process name="tc1Process" mep="oneway" binding="push" initiatorRole="peppolRole" responderRole="peppolRole">
-			<responderParties>
-				<responderParty name="receiver"/>
-			</responderParties>
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+			</initiatorParties>
 			<legs>
 				<leg name="pushTestcase1tc1Action"/>
 			</legs>
