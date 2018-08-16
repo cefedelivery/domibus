@@ -126,7 +126,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void deleteUsers(Collection<User> usersEntitiesToDelete) {
-        userDao.deleteAll(usersEntitiesToDelete);
+        userDao.delete(usersEntitiesToDelete);
         for (User user : usersEntitiesToDelete) {
             userDomainService.deleteDomainForUser(user.getUserName());
         }

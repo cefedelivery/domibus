@@ -1,5 +1,6 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.user.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 
@@ -9,17 +10,12 @@ import java.util.List;
  * @author Thomas Dussart
  * @since 3.3
  */
-public interface UserService{
+public interface UserService {
 
     /**
      * @return the list of system users.
      */
     List<eu.domibus.api.user.User> findUsers();
-
-//    /**
-//     * @return the list of users, including super users.
-//     */
-//    List<eu.domibus.api.user.User> findAllUsers();
 
     /**
      * Get all user roles
@@ -32,7 +28,7 @@ public interface UserService{
      * @param users to create of update.
      */
     void updateUsers(List<User> users);
-     
+
     /**
      * Handle the account lockout policy.
      * Will log login attempt to the security log and inactivate user after certain amount of login attempt.
@@ -47,7 +43,7 @@ public interface UserService{
      * and verify if the suspension date is smaller then current time - interval period defined in property file.
      * If some user are found they will be reactivated.
      */
-    void findAndReactivateSuspendedUsers();
+    void reactivateSuspendedUsers();
 
 
     /**
