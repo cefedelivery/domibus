@@ -43,7 +43,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
-    private static final String LS = System.lineSeparator();
 
     private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
     private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
@@ -290,18 +289,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         return content;
     }
 
+
     private StringBuilder getErrorFileContent(ErrorResult errorResult) {
-        StringBuilder sb = new StringBuilder();
-        ErrorCode errorCode = errorResult.getErrorCode();
-        if (errorCode != null) {
-            sb.append("errorCode: ").append(errorCode.getErrorCodeName()).append(LS);
-        }
-        sb.append("errorDetail: ").append(errorResult.getErrorDetail()).append(LS);
-        sb.append("messageInErrorId: ").append(errorResult.getMessageInErrorId()).append(LS);
-        sb.append("mshRole: ").append(errorResult.getMshRole()).append(LS);
-        sb.append("notified: ").append(errorResult.getNotified()).append(LS);
-        sb.append("timestamp: ").append(errorResult.getTimestamp()).append(LS);
-        return sb;
+
+        return fsSendMessagesService.buildErrorMessage(errorResult.getErrorCode().getErrorCodeName(),
+                                                        errorResult.getErrorDetail(),
+                                                        errorResult.getMessageInErrorId(),
+                                                        errorResult.getMshRole().toString(),
+                                                        errorResult.getNotified().toString(),
+                                                        errorResult.getTimestamp().toString());
     }
 
     private void handleSentMessage(String domain, String messageId) {

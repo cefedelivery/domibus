@@ -2,6 +2,7 @@ package eu.domibus.plugin.fs.worker;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.ErrorResult;
+import eu.domibus.common.MSHRole;
 import eu.domibus.ext.services.AuthenticationExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class FSSendMessagesService {
     public static final String METADATA_FILE_NAME = "metadata.xml";
     public static final String DEFAULT_DOMAIN = "default";
     public static final String ERROR_EXTENSION = ".error";
+    private static final String LS = System.lineSeparator();
 
     @Autowired
     private FSPluginProperties fsPluginProperties;
@@ -121,17 +124,16 @@ public class FSSendMessagesService {
         try {
             fsProcessFileService.processFile(processableFile);
         } catch (JAXBException ex) {
-            errorMessage = "Invalid metadata file: " + ex.toString();
+            errorMessage = buildErrorMessage("Invalid metadata file: " + ex.toString()).toString();
             LOG.error(errorMessage, ex);
         } catch (MessagingProcessingException ex) {
-            errorMessage = "Error occurred submitting message to Domibus: " + ex.getMessage();
+            errorMessage = buildErrorMessage("Error occurred submitting message to Domibus: " + ex.getMessage()).toString();
             LOG.error(errorMessage, ex);
         } catch (RuntimeException | FileSystemException ex) {
-            errorMessage = "Error processing file. Skipped it. Error message is: " + ex.getMessage();
+            errorMessage = buildErrorMessage("Error processing file. Skipped it. Error message is: " + ex.getMessage()).toString();
             LOG.error(errorMessage, ex);
         } finally {
             if(errorMessage != null) {
-                errorMessage = "[" + processableFile.getPublicURIString() + "]" + errorMessage;
                 handleSendFailedMessage(processableFile, domain, errorMessage);
             }
         }
@@ -170,6 +172,37 @@ public class FSSendMessagesService {
             throw new FSPluginException("Error handling the send failed message file " + processableFile, e);
         }
     }
+
+    public StringBuilder buildErrorMessage(String errorDetail) {
+        return buildErrorMessage(null, errorDetail, null, null, null, null);
+    }
+
+    public StringBuilder buildErrorMessage(String errorCode, String errorDetail, String messageId, String mshRole, String notified, String timestamp) {
+        StringBuilder sb = new StringBuilder();
+        if (errorCode != null) {
+            sb.append("errorCode: ").append(errorCode).append(LS);
+        }
+        sb.append("errorDetail: ").append(errorDetail).append(LS);
+        if(messageId != null) {
+            sb.append("messageInErrorId: ").append(messageId).append(LS);
+        }
+        if(mshRole != null) {
+            sb.append("mshRole: ").append(mshRole).append(LS);
+        } else {
+            sb.append("mshRole: ").append(MSHRole.SENDING).append(LS);
+        }
+        if(notified != null) {
+            sb.append("notified: ").append(notified).append(LS);
+        }
+        if(timestamp != null) {
+            sb.append("timestamp: ").append(timestamp).append(LS);
+        } else {
+            sb.append("timestamp: ").append(LocalDateTime.now()).append(LS);
+        }
+
+        return sb;
+    }
+
 
     private List<FileObject> filterProcessableFiles(FileObject[] files) {
         List<FileObject> filteredFiles = new LinkedList<>();

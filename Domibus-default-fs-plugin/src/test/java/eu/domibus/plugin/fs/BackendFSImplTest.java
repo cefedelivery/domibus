@@ -68,7 +68,7 @@ public class BackendFSImplTest {
     private DomainContextExtService domainContextExtService;
 
     @Injectable
-    private FSSendMessagesService fsSendMessagesService = new FSSendMessagesService();
+    private FSSendMessagesService fsSendMessagesService;
 
     @Injectable
     String name = "fsplugin";
