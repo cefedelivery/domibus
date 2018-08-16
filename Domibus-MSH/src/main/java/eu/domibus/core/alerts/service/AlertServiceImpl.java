@@ -133,6 +133,7 @@ public class AlertServiceImpl implements AlertService {
         alertEntity.setNextAttempt(null);
         if (SUCCESS == alertEntity.getAlertStatus()) {
             alertEntity.setReportingTime(new Date());
+            alertEntity.setAttempts(alertEntity.getAttempts()+1);
             LOG.debug("Alert[{}]: send successfully",alert.getEntityId());
             return;
         }
@@ -147,8 +148,12 @@ public class AlertServiceImpl implements AlertService {
             alertEntity.setAttempts(attempts);
             alertEntity.setAlertStatus(RETRY);
         }
+
+        if (FAILED == alertEntity.getAlertStatus()) {
+            alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
+            alertEntity.setAttempts(alertEntity.getMaxAttempts());
+        }
         LOG.debug("Alert[{}]: change status to:[{}]",alert.getEntityId(),alertEntity.getAlertStatus());
-        alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
     }
 
     /**

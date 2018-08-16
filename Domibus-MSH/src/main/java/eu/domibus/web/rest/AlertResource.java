@@ -48,6 +48,7 @@ public class AlertResource {
                                   @RequestParam(value = "orderBy", required = false) String column,
                                   @RequestParam(value = "processed", required = false) String processed,
                                   @RequestParam(value = "alertType", required = false) String alertType,
+                                  @RequestParam(value = "alertStatus", required = false) String alertStatus,
                                   @RequestParam(value = "alertId", required = false) Integer alertId,
                                   @RequestParam(value = "alertLevel", required = false) String alertLevel,
                                   @RequestParam(value = "creationFrom", required = false) String creationFrom,
@@ -63,6 +64,7 @@ public class AlertResource {
                 column,
                 processed,
                 alertType,
+                alertStatus,
                 alertId,
                 alertLevel,
                 creationFrom,
@@ -90,6 +92,12 @@ public class AlertResource {
     public List<String> getAlertLevels() {
         final List<AlertLevel> alertLevels = Lists.newArrayList(AlertLevel.values());
         return alertLevels.stream().map(Enum::name).collect(Collectors.toList());
+    }
+
+    @GetMapping(path = "/status")
+    public List<String> getAlertStatus() {
+        final List<AlertStatus> alertLevels = Lists.newArrayList(AlertStatus.values());
+        return alertLevels.stream().filter(alertStatus -> AlertStatus.SEND_ENQUEUED!=alertStatus).map(Enum::name).collect(Collectors.toList());
     }
 
     @GetMapping(path = "/params")
@@ -139,6 +147,7 @@ public class AlertResource {
                                          @RequestParam(value = "orderBy", required = false) String column,
                                          @RequestParam(value = "processed", required = false) String processed,
                                          @RequestParam(value = "alertType", required = false) String alertType,
+                                         @RequestParam(value = "alertStatus", required = false) String alertStatus,
                                          @RequestParam(value = "alertId", required = false) Integer alertId,
                                          @RequestParam(value = "alertLevel", required = false) String alertLevel,
                                          @RequestParam(value = "creationFrom", required = false) String creationFrom,
@@ -154,6 +163,7 @@ public class AlertResource {
                 column,
                 processed,
                 alertType,
+                alertStatus,
                 alertId,
                 alertLevel,
                 creationFrom,
@@ -184,7 +194,7 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
+    private AlertCriteria getAlertCriteria(@RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, @RequestParam(value = "asc", defaultValue = "true") Boolean ask, @RequestParam(value = "orderBy", required = false) String column, @RequestParam(value = "processed", required = false) String processed, @RequestParam(value = "alertType", required = false) String alertType, String alertStatus, @RequestParam(value = "alertId", required = false) Integer alertId, @RequestParam(value = "alertLevel", required = false) String alertLevel, @RequestParam(value = "creationFrom", required = false) String creationFrom, @RequestParam(value = "creationTo", required = false) String creationTo, @RequestParam(value = "reportingFrom", required = false) String reportingFrom, @RequestParam(value = "reportingTo", required = false) String reportingTo, @RequestParam(value = "parameters", required = false) String[] parameters) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);
@@ -194,6 +204,7 @@ public class AlertResource {
         alertCriteria.setAlertType(alertType);
         alertCriteria.setAlertID(alertId);
         alertCriteria.setAlertLevel(alertLevel);
+        alertCriteria.setAlertStatus(alertStatus);
 
         if (StringUtils.isNotEmpty(creationFrom)) {
             alertCriteria.setCreationFrom(dateUtil.fromString(creationFrom));
@@ -232,6 +243,11 @@ public class AlertResource {
         alertRo.setAlertLevel(alert.getAlertLevel().name());
         alertRo.setCreationTime(alert.getCreationTime());
         alertRo.setReportingTime(alert.getReportingTime());
+        alertRo.setAlertStatus(alert.getAlertStatus().name());
+        alertRo.setAttempts(alert.getAttempts());
+        alertRo.setMaxAttempts(alert.getMaxAttempts());
+        alertRo.setReportingTimeFailure(alert.getReportingTimeFailure());
+        alertRo.setNextAttempt(alert.getNextAttempt());
 
         final List<String> alertParameterNames = getAlertParameters(alert.getAlertType().name());
         final List<String> alertParameterValues = alertParameterNames.

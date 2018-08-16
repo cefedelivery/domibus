@@ -26,6 +26,7 @@ export class AlertsComponent {
   static readonly ALERTS_URL: string = 'rest/alerts';
   static readonly ALERTS_CSV_URL: string = AlertsComponent.ALERTS_URL + "/csv";
   static readonly ALERTS_TYPES_URL: string = AlertsComponent.ALERTS_URL + "/types";
+  static readonly ALERTS_STATUS_URL: string = AlertsComponent.ALERTS_URL + "/status";
   static readonly ALERTS_LEVELS_URL: string = AlertsComponent.ALERTS_URL + "/levels";
   static readonly ALERTS_PARAMS_URL: string = AlertsComponent.ALERTS_URL + "/params";
 
@@ -47,6 +48,7 @@ export class AlertsComponent {
   buttonsDisabled: boolean = true;
 
   aTypes = [];
+  aStatuses = [];
   aLevels = [];
 
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
@@ -67,6 +69,7 @@ export class AlertsComponent {
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     this.getAlertTypes();
     this.getAlertLevels();
+    this.getAlertStatuses();
   }
 
   getAlertTypes() : void {
@@ -74,6 +77,13 @@ export class AlertsComponent {
       .map(this.extractData)
       .catch(this.handleError)
       .subscribe(aTypes => this.aTypes = aTypes);
+  }
+
+  getAlertStatuses() : void {
+    this.http.get(AlertsComponent.ALERTS_STATUS_URL)
+      .map(this.extractData)
+      .catch(this.handleError)
+      .subscribe(aStatuses => this.aStatuses = aStatuses);
   }
 
   getAlertLevels() : void {
@@ -108,13 +118,18 @@ export class AlertsComponent {
       { name: 'Processed', cellTemplate: this.rowProcessed, width: 20 },
       { name: 'Alert Type' },
       { name: 'Alert Level', width: 50 },
+      { name: 'Alert Status', width: 50 },
       { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
       { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
-      { name: 'Parameters', sortable: false }
+      { name: 'Parameters', sortable: false },
+      { name: 'Sent Attempts', width: 50,  prop: 'attempts', },
+      { name: 'Max Attempts', width: 50 },
+      { name: 'Next Attempt', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
+      { name: 'Reporting Time Failure', cellTemplate: this.rowWithDateFormatTpl, width: 155 }
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Processed", "Alert Type", "Alert Level", "Creation Time", "Reporting Time", "Parameters"].indexOf(col.name) != -1
+      return ["Processed", "Alert Type", "Alert Level", "Alert Status","Creation Time", "Reporting Time", "Parameters"].indexOf(col.name) != -1
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
@@ -133,6 +148,10 @@ export class AlertsComponent {
 
     if(this.filter.alertType) {
       searchParams.set('alertType', this.filter.alertType);
+    }
+
+    if(this.filter.alertStatus){
+      searchParams.set('alertStatus', this.filter.alertStatus);
     }
 
     if(this.filter.alertId) {
@@ -191,7 +210,7 @@ export class AlertsComponent {
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
-
+      debugger;
       const start = offset * pageSize;
       const end = start + pageSize;
       const newRows = [...result.alertsEntries];
@@ -310,6 +329,10 @@ export class AlertsComponent {
 
     if(this.filter.alertType) {
       result += 'alertType=' + this.filter.alertType + '&';
+    }
+
+    if(this.filter.alertStatus) {
+      result += 'alertStatus=' + this.filter.alertStatus + '&';
     }
 
     if(this.filter.alertId) {

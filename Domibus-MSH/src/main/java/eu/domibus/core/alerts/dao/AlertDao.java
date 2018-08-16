@@ -116,6 +116,10 @@ public class AlertDao extends BasicDao<Alert> {
             predicates.add(cb.equal(alertRoot.get(Alert_.alertType), alertCriteria.getAlertType()));
         }
 
+        if(alertCriteria.getAlertStatus()!=null){
+            predicates.add(cb.equal(alertRoot.get(Alert_.alertStatus), alertCriteria.getAlertStatus()));
+        }
+
         if(alertCriteria.getAlertLevel()!=null){
             predicates.add(cb.equal(alertRoot.get(Alert_.alertLevel), alertCriteria.getAlertLevel()));
         }

@@ -33,18 +33,6 @@
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="alertRetryJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.core.alerts.job.AlertRetryJob"/>
-        <property name="durability" value="true"/>
-    </bean>
-
-    <bean id="alertCleanerJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.core.alerts.job.AlertCleanerJob"/>
-        <property name="durability" value="true"/>
-    </bean>
-
     <bean id="pullRequestTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="pullRequestJob"/>
