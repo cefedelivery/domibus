@@ -258,7 +258,11 @@ public class DomainSchedulerFactoryConfiguration {
      * @return Domain' schema prefix
      */
     protected String getTablePrefix(Domain domain) {
-        return getSchemaPrefix(domainService.getDatabaseSchema(domain));
+        final String databaseSchema = domainService.getDatabaseSchema(domain);
+        if(StringUtils.isEmpty(databaseSchema)) {
+            throw new IllegalArgumentException("Could not get the database schema for domain [" + domain + "]");
+        }
+        return getSchemaPrefix(databaseSchema);
     }
 
     /**
