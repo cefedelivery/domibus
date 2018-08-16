@@ -59,15 +59,15 @@
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
     </bean>
-    <bean id="pullJmsListenerContainerFactory"
-          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
-        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
-        <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="${domibus.pull.queue.concurency}"/>
-        <property name="sessionTransacted" value="true"/>
-        <property name="sessionAcknowledgeMode" value="0"/>
-        <property name="destinationResolver" ref="internalDestinationResolver"/>
-    </bean>
+    <!--<bean id="pullJmsListenerContainerFactory"-->
+          <!--class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">-->
+        <!--<property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>-->
+        <!--<property name="transactionManager" ref="transactionManager"/>-->
+        <!--<property name="concurrency" value="${domibus.pull.queue.concurency}"/>-->
+        <!--<property name="sessionTransacted" value="true"/>-->
+        <!--<property name="sessionAcknowledgeMode" value="0"/>-->
+        <!--<property name="destinationResolver" ref="internalDestinationResolver"/>-->
+    <!--</bean>-->
     <bean id="alertJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>

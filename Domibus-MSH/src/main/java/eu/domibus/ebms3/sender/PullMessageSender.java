@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import javax.jms.Message;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
@@ -93,10 +94,10 @@ public class PullMessageSender {
     private Executor executor;
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
-    @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
+   // @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     //@TODO unit test this method.
-    public void processPullRequest(final MapMessage map) {
+    public void processPullRequest(final Message map) {
         if (domibusInitializationHelper.isNotReady()) {
             return;
         }
