@@ -29,25 +29,6 @@ import java.util.stream.Collectors;
 public class CsvServiceImpl implements CsvService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CsvServiceImpl.class);
 
-//    private Class theClass = null;
-//
-//    private final Map<String, String> customNames = new HashMap<>();
-//
-//    private List<String> excluded = new ArrayList<>();
-
-//    public void setClass(Class tClass) {
-//        theClass = tClass;
-//    }
-//
-//        public void customizeColumn(Map<String, String> customized) {
-//        customNames.putAll(customized);
-//    }
-//
-//        public void setExcludedItems(List<String> excludedItems) {
-//        excluded = excludedItems;
-//    }
-
-
     @Override
     public String exportToCSV(List<?> list, Class theClass,
                               Map<String, String> customColumnNames, List<String> excludedColumns) {

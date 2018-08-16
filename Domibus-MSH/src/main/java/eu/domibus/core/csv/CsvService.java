@@ -17,8 +17,4 @@ public interface CsvService {
     String exportToCSV(List<?> list, Class tClass,
                        final Map<String, String> customColumnNames, List<String> excludedColumns);
 
-//    String getCsvFilename(String module);
-//    void setClass(Class<?> tClass);
-//    void setExcludedItems(List<String> excludedItems);
-
 }
