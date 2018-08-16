@@ -198,7 +198,7 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
+    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, String alertStatus,Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);

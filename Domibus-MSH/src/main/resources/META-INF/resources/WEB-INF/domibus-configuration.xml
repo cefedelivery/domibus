@@ -30,6 +30,12 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="uiReplicationJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.core.replication.UIReplicationJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
     <bean id="pullRequestTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="pullRequestJob"/>
