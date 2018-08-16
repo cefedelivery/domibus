@@ -1,5 +1,6 @@
 package eu.domibus.quartz;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
@@ -75,6 +76,9 @@ public class DomainSchedulerFactoryConfiguration {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    @Autowired
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
@@ -259,7 +263,7 @@ public class DomainSchedulerFactoryConfiguration {
      */
     protected String getTablePrefix(Domain domain) {
         final String databaseSchema = domainService.getDatabaseSchema(domain);
-        if(StringUtils.isEmpty(databaseSchema)) {
+        if(domibusConfigurationService.isMultiTenantAware() && StringUtils.isEmpty(databaseSchema)) {
             throw new IllegalArgumentException("Could not get the database schema for domain [" + domain + "]");
         }
         return getSchemaPrefix(databaseSchema);
