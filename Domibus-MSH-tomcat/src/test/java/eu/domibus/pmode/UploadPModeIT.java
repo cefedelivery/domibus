@@ -6,7 +6,6 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.ebms3.common.dao.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
