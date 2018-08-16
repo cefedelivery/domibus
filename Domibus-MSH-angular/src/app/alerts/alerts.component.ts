@@ -210,7 +210,6 @@ export class AlertsComponent {
       this.orderBy = orderBy;
       this.asc = asc;
       this.count = result.count;
-      debugger;
       const start = offset * pageSize;
       const end = start + pageSize;
       const newRows = [...result.alertsEntries];
