@@ -16,8 +16,8 @@ import java.util.List;
  * @author musatmi
  * @since 3.3
  */
-//@Component
-//@Order(1)
+@Component
+@Order(1)
 public class RolesValidator implements ConfigurationValidator {
 
     @Override
