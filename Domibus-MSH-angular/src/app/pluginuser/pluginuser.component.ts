@@ -37,7 +37,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
   columnPicker: ColumnPickerBase;
 
-  userRoles: Array<String> ;
+  userRoles: Array<String>;
 
   constructor (private alertService: AlertService,
                private pluginUserService: PluginUserService,
@@ -267,8 +267,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
    */
   async saveAsCSV () {
     const ok = await this.checkIsDirty();
-    if (ok)
-      DownloadService.downloadNative(PluginUserService.CSV_URL);
+    if (ok) {
+      DownloadService.downloadNative(PluginUserService.CSV_URL + '?'
+        + this.pluginUserService.createFilterParams(this.filter).toString());
+    }
   }
 
 }

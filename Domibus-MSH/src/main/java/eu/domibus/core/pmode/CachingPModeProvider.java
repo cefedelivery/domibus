@@ -146,6 +146,10 @@ public class CachingPModeProvider extends PModeProvider {
 
     @Override
     protected String findServiceName(final eu.domibus.ebms3.common.model.Service service) throws EbMS3Exception {
+        if(service == null) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Service is not found in the message", null, null);
+        }
+
         for (final Service service1 : this.getConfiguration().getBusinessProcesses().getServices()) {
             if ((StringUtils.equalsIgnoreCase(service1.getServiceType(), service.getType()) || (!StringUtils.isNotEmpty(service1.getServiceType()) && !StringUtils.isNotEmpty(service.getType()))))
                 if (StringUtils.equalsIgnoreCase(service1.getValue(), service.getValue())) {

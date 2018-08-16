@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExpiredCertificateModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ExpiredCertificateModuleConfiguration.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(ExpiredCertificateModuleConfiguration.class);
 
     private final Boolean expiredActive;
 

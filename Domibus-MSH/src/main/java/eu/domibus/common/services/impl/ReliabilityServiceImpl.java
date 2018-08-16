@@ -1,7 +1,6 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
-import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -51,6 +50,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Autowired
+    private UserMessageHandlerService userMessageHandlerService;
+
     /**
      * {@inheritDoc}
      */
@@ -60,8 +62,12 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-
     private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+
+        if(userMessageHandlerService.checkTestMessage(legConfiguration)) {
+            return;
+        }
+
         switch (reliabilityCheckSuccessful) {
             case OK:
                 switch (isOk) {
@@ -84,9 +90,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
-
         }
     }
-
-
 }

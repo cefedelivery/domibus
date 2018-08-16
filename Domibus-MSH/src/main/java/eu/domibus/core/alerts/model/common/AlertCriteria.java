@@ -38,6 +38,12 @@ public class AlertCriteria {
 
     private Date reportingTo;
 
+    private Date dynamicaPropertyFrom;
+
+    private Date dynamicaPropertyTo;
+
+    private String uniqueDynamicDateParameter;
+
     private Map<String, String> parameters = new HashMap<>();
 
     public int getPage() {
@@ -170,5 +176,29 @@ public class AlertCriteria {
 
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
+    }
+
+    public Date getDynamicaPropertyFrom() {
+        return dynamicaPropertyFrom;
+    }
+
+    public void setDynamicaPropertyFrom(Date dynamicaPropertyFrom) {
+        this.dynamicaPropertyFrom = dynamicaPropertyFrom;
+    }
+
+    public Date getDynamicaPropertyTo() {
+        return dynamicaPropertyTo;
+    }
+
+    public void setDynamicaPropertyTo(Date dynamicaPropertyTo) {
+        this.dynamicaPropertyTo = dynamicaPropertyTo;
+    }
+
+    public String getUniqueDynamicDateParameter() {
+        return uniqueDynamicDateParameter;
+    }
+
+    public void setUniqueDynamicDateParameter(String uniqueDynamicDateParameter) {
+        this.uniqueDynamicDateParameter = uniqueDynamicDateParameter;
     }
 }

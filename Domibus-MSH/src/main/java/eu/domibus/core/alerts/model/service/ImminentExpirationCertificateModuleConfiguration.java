@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ImminentExpirationCertificateModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ImminentExpirationCertificateModuleConfiguration.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(ImminentExpirationCertificateModuleConfiguration.class);
 
     private final Boolean imminentExpirationActive;
 

@@ -15,6 +15,7 @@ import eu.domibus.core.alerts.model.service.MessagingModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
@@ -106,6 +107,9 @@ public class BackendNotificationService {
 
     @Autowired
     UserMessageServiceHelper userMessageServiceHelper;
+
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
 
     //TODO move this into a dedicate provider(a different spring bean class)
@@ -286,6 +290,8 @@ public class BackendNotificationService {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
         userMessageLogDao.setAsNotified(messageId);
+
+        uiReplicationSignalService.messageNotificationStatusChange(messageId);
     }
 
     public void notifyOfSendSuccess(final String messageId) {
@@ -295,6 +301,8 @@ public class BackendNotificationService {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
         userMessageLogDao.setAsNotified(messageId);
+
+        uiReplicationSignalService.messageNotificationStatusChange(messageId);
     }
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)

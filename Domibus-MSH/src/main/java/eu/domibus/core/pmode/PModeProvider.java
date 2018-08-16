@@ -282,7 +282,12 @@ public abstract class PModeProvider {
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
             LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
             return messageExchangeConfiguration;
+        } catch (EbMS3Exception e) {
+            if(userMessage != null && userMessage.getMessageInfo() != null) {
+                e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
+            }
 
+            throw e;
         } catch (IllegalStateException ise) {
             // It can happen if DB is clean and no pmodes are configured yet!
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", messageId, ise);

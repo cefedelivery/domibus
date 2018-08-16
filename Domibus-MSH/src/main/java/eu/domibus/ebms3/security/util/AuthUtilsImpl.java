@@ -53,7 +53,8 @@ public class AuthUtilsImpl implements AuthUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String originalUser = null;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
+        if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))
+                && !authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name()))) {
             originalUser = (String) authentication.getPrincipal();
             LOG.debug("User [{}] has user role and finalRecipient [{}]", getAuthenticatedUser(), originalUser);
         } else {

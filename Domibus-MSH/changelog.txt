@@ -40,6 +40,8 @@ Domibus 4.0
 - The ebMS3 headers Description and Schema from PartInfo are deprecated. These headers were removed from the WS-plugin XSD and the JMS-plugin message properties.
   When received on the MSH, these headers are ignored.
 - The notifications events sent to the plugins should be configurable
+- Support for the new PEPPOL PKI. Maintain backwards compatibility with the old PEPPOL PKI. Tested in multi-tenancy mode, one domain
+  uses old PKI while other domain uses the new PKI.
 Domibus 3.3.4
 - Performance improvement in the Messages page
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.

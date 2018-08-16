@@ -3,8 +3,8 @@ package eu.domibus.web.rest;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.AuditService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tiago Miguel
@@ -377,7 +378,7 @@ public class PModeResourceTest {
            result = pModeArchiveInfoList;
            domainConverter.convert(pModeArchiveInfoList, PModeResponseRO.class);
            result = pModeResponseROList;
-           csvServiceImpl.exportToCSV(pModeResponseROList);
+           csvServiceImpl.exportToCSV(pModeResponseROList, PModeResponseRO.class, (Map<String, String>)any, (List<String>)any);
            result = "Configuration Date, Username, Description" + System.lineSeparator() +
            date + ", user1, description1" + System.lineSeparator() +
            date + ", user2, description2" + System.lineSeparator();

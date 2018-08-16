@@ -7,8 +7,8 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.services.impl.ErrorLogCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
 import mockit.Expectations;
@@ -21,10 +21,7 @@ import org.junit.runner.RunWith;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Tiago Miguel
@@ -132,14 +129,14 @@ public class ErrorLogResourceTest {
             result = errorLogEntries;
             domainConverter.convert(errorLogEntries, ErrorLogRO.class);
             result = errorLogROEntries;
-            errorLogCsvServiceImpl.exportToCSV(errorLogROEntries);
+            errorLogCsvServiceImpl.exportToCSV(errorLogROEntries, ErrorLogRO.class, (Map<String, String>)any, (List<String>)any);
             result = CSV_TITLE +
                     signalMessageIdStr + "," + MSHRole.RECEIVING + "," + refToMessageIdStr + "," + ErrorCode.EBMS_0001.getErrorCodeName() + "," +
                     errorDetailStr + "," + date + "," + date+System.lineSeparator();
         }};
 
         // When
-        final ResponseEntity<String> csv = errorLogResource.getCsv(null, null, null, null, null,
+        final ResponseEntity<String> csv = errorLogResource.getCsv("timestamp", false,null, null, null, null, null,
                 null, null, null, null);
 
         // Then

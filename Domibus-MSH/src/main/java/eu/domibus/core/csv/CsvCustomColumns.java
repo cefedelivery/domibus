@@ -1,4 +1,4 @@
-package eu.domibus.web.rest;
+package eu.domibus.core.csv;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ public enum CsvCustomColumns {
     PARTY_RESOURCE,
     TRUSTSTORE_RESOURCE,
     USER_RESOURCE,
+    PLUGIN_USER_RESOURCE,
     ALERT_RESOURCE;
 
     private Map<String, String> customFields;
@@ -34,6 +35,7 @@ public enum CsvCustomColumns {
     private static final Map<String, String> jmsMap;
     static {
         jmsMap = new HashMap<>();
+        jmsMap.put("id".toUpperCase(), "ID");
         jmsMap.put("type".toUpperCase(), "JMS Type");
         jmsMap.put("Timestamp".toUpperCase(), "Time");
         jmsMap.put("CustomProperties".toUpperCase(), "Custom prop");
@@ -49,6 +51,7 @@ public enum CsvCustomColumns {
     private static final Map<String, String> partyMap;
     static {
         partyMap = new HashMap<>();
+        partyMap.put("Name".toUpperCase(), "Party name");
         partyMap.put("EndPoint".toUpperCase(), "End point");
         partyMap.put("JoinedIdentifiers".toUpperCase(), "Party id");
         partyMap.put("JoinedProcesses".toUpperCase(), "Process");
@@ -59,6 +62,13 @@ public enum CsvCustomColumns {
         userMap = new HashMap<>();
         userMap.put("UserName".toUpperCase(), "Username");
         userMap.put("Roles".toUpperCase(), "Role");
+    }
+
+    private static final Map<String, String> pluginuserMap;
+    static {
+        pluginuserMap = new HashMap<>();
+        pluginuserMap.put("UserName".toUpperCase(), "Username");
+        pluginuserMap.put("authRoles".toUpperCase(), "Role");
     }
 
     private static final Map<String, String> truststoreMap;
@@ -83,6 +93,7 @@ public enum CsvCustomColumns {
         PARTY_RESOURCE.customFields = partyMap;
         TRUSTSTORE_RESOURCE.customFields = truststoreMap;
         USER_RESOURCE.customFields = userMap;
+        PLUGIN_USER_RESOURCE.customFields = pluginuserMap;
         ALERT_RESOURCE.customFields=alertMap;
     }
 

@@ -178,13 +178,16 @@ export class MessageLogComponent implements OnInit {
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
-  getMessageLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
-    let searchParams: URLSearchParams = new URLSearchParams();
-    searchParams.set('page', offset.toString());
-    searchParams.set('pageSize', pageSize.toString());
-    searchParams.set('orderBy', orderBy);
+  createSearchParams (): URLSearchParams {
+    const searchParams = new URLSearchParams();
 
-    //filters
+    if (this.orderBy) {
+      searchParams.set('orderBy', this.orderBy);
+    }
+    if (this.asc != null) {
+      searchParams.set('asc', this.asc.toString());
+    }
+
     if (this.filter.messageId) {
       searchParams.set('messageId', this.filter.messageId);
     }
@@ -241,15 +244,19 @@ export class MessageLogComponent implements OnInit {
       searchParams.set('messageSubtype', this.filter.isTestMessage ? 'TEST' : null)
     }
 
-    if (asc != null) {
-      searchParams.set('asc', asc.toString());
-    }
+    return searchParams;
+  }
 
-    return this.http.get(MessageLogComponent.MESSAGE_LOG_URL, {
-      search: searchParams
-    }).map((response: Response) =>
-      response.json()
-    );
+  getMessageLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
+    const searchParams = this.createSearchParams();
+
+    searchParams.set('page', offset.toString());
+    searchParams.set('pageSize', pageSize.toString());
+
+    return this.http.get(MessageLogComponent.MESSAGE_LOG_URL, {search: searchParams})
+      .map((response: Response) =>
+        response.json()
+      );
   }
 
   page (offset, pageSize, orderBy, asc) {
@@ -410,74 +417,12 @@ export class MessageLogComponent implements OnInit {
     return (this.count <= AlertComponent.MAX_COUNT_CSV);
   }
 
-  private getFilterPath () {
-    let result = '?';
-    //filters
-    if (this.filter.messageId) {
-      result += 'messageId=' + this.filter.messageId + '&';
-    }
-
-    if (this.filter.mshRole) {
-      result += 'mshRole=' + this.filter.mshRole + '&';
-    }
-
-    if (this.filter.conversationId) {
-      result += 'conversationId=' + this.filter.conversationId + '&';
-    }
-
-    if (this.filter.messageType) {
-      result += 'messageType=' + this.filter.messageType + '&';
-    }
-
-    if (this.filter.messageSubtype) {
-      result += 'messageSubtype=' + this.filter.messageSubtype + '&';
-    }
-
-    if (this.filter.messageStatus) {
-      result += 'messageStatus=' + this.filter.messageStatus + '&';
-    }
-
-    if (this.filter.notificationStatus) {
-      result += 'notificationStatus=' + this.filter.notificationStatus + '&';
-    }
-
-    if (this.filter.fromPartyId) {
-      result += 'fromPartyId=' + this.filter.fromPartyId + '&';
-    }
-
-    if (this.filter.toPartyId) {
-      result += 'toPartyId=' + this.filter.toPartyId + '&';
-    }
-
-    if (this.filter.originalSender) {
-      result += 'originalSender=' + this.filter.originalSender + '&';
-    }
-
-    if (this.filter.finalRecipient) {
-      result += 'finalRecipient=' + this.filter.finalRecipient + '&';
-    }
-
-    if (this.filter.refToMessageId) {
-      result += 'refToMessageId=' + this.filter.refToMessageId + '&';
-    }
-
-    if (this.filter.receivedFrom) {
-      result += 'receivedFrom=' + this.filter.receivedFrom.getTime() + '&';
-    }
-
-    if (this.filter.receivedTo) {
-      result += 'receivedTo=' + this.filter.receivedTo.getTime() + '&';
-    }
-
-    return result;
-  }
-
   saveAsCSV () {
-    DownloadService.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + '/csv' + this.getFilterPath());
+    DownloadService.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + '/csv?' + this.createSearchParams().toString());
   }
 
   details (selectedRow: any) {
-    let dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
+    const dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
     dialogRef.componentInstance.message = selectedRow;
     dialogRef.componentInstance.fourCornerEnabled = this.app.fourCornerEnabled;
     // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;

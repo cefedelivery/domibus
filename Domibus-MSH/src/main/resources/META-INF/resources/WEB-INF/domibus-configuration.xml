@@ -2,12 +2,9 @@
 
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/util
-    http://www.springframework.org/schema/util/spring-util.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -57,6 +54,13 @@
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="saveCertificateAndLogRevocationJob"/>
         <property name="cronExpression" value="${domibus.certificate.check.cron}"/>
+    </bean>
+
+    <bean id="uiReplicationTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="uiReplicationJob"/>
+        <property name="cronExpression" value="${domibus.ui.replication.sync.cron}"/>
+        <property name="startDelay" value="30000"/>
     </bean>
 
 </beans>

@@ -7,8 +7,9 @@ import eu.domibus.core.alerts.model.common.MessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Thomas Dussart
@@ -16,13 +17,13 @@ import java.util.Map;
  */
 public class MessagingModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MessagingModuleConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessagingModuleConfiguration.class);
 
     private final boolean messageCommunicationActive;
 
     private String mailSubject;
 
-    private Map<MessageStatus, AlertLevel> messageStatusLevels = new HashMap<>();
+    private Map<MessageStatus, AlertLevel> messageStatusLevels = new EnumMap<>(MessageStatus.class);
 
     public MessagingModuleConfiguration(final String mailSubject) {
         this.messageCommunicationActive = true;
@@ -71,8 +72,10 @@ public class MessagingModuleConfiguration implements AlertModuleConfiguration {
             LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_COMMUNICATION_FAILURE);
             throw new IllegalArgumentException("Invalid alert type of the strategy.");
         }
-        final EventPropertyValue eventPropertyValue = alert.getEvents().iterator().next().getProperties().get(MessageEvent.NEW_STATUS.name());
-        final MessageStatus newStatus = MessageStatus.valueOf(eventPropertyValue.getValue());
+        final Event event = alert.getEvents().iterator().next();
+        final Optional<String> stringPropertyValue = event.findStringProperty(MessageEvent.NEW_STATUS.name());
+        final MessageStatus newStatus = MessageStatus.valueOf(stringPropertyValue.
+                orElseThrow(() -> new IllegalArgumentException("New status property should always be present")));
         final AlertLevel alertLevel = getAlertLevel(newStatus);
         LOG.debug("Alert level for message change to status[{}] is [{}]", newStatus, alertLevel);
         return alertLevel;

@@ -7,18 +7,15 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.*;
-import eu.domibus.core.alerts.model.persist.EventProperty;
+import eu.domibus.core.alerts.model.persist.StringEventProperty;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.converter.DomainCoreConverter;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.joda.time.LocalDateTime;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.jms.Queue;
 
@@ -130,12 +127,12 @@ public class AlertServiceImplTest {
         final eu.domibus.core.alerts.model.persist.Event event = new eu.domibus.core.alerts.model.persist.Event();
         persistedAlert.addEvent(event);
 
-        final EventProperty messageIdProperty = new EventProperty();
-        messageIdProperty.setValue(messageId);
+        final StringEventProperty messageIdProperty = new StringEventProperty();
+        messageIdProperty.setStringValue(messageId);
         event.addProperty(MESSAGE_ID.name(), messageIdProperty);
 
-        final EventProperty oldStatusProperty = new EventProperty();
-        oldStatusProperty.setValue(MessageStatus.SEND_ENQUEUED.name());
+        final StringEventProperty oldStatusProperty = new StringEventProperty();
+        oldStatusProperty.setStringValue(MessageStatus.SEND_ENQUEUED.name());
         event.addProperty(OLD_STATUS.name(), oldStatusProperty);
         new Expectations() {{
             alertDao.read(entityId);

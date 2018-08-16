@@ -12,16 +12,6 @@ import java.util.Map;
 @Service(value = "signalMessageLogInfoFilter")
 public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
 
-    private static final String QUERY_BODY = " from SignalMessageLog log, " +
-            "Messaging messaging inner join messaging.signalMessage signal " +
-            "inner join messaging.userMessage message " +
-            "left join message.messageInfo info " +
-            "left join message.messageProperties.property propsFrom " +
-            "left join message.messageProperties.property propsTo " +
-            "left join message.partyInfo.from.partyId partyFrom " +
-            "left join message.partyInfo.to.partyId partyTo " +
-            "where signal.messageInfo.messageId=log.messageId and signal.messageInfo.refToMessageId=message.messageInfo.messageId and propsFrom.name = 'originalSender'" +
-            "and propsTo.name = 'finalRecipient' ";
     private static final String CONVERSATION_ID = "conversationId";
 
     @Override
@@ -78,7 +68,7 @@ public class SignalMessageLogInfoFilter extends MessageLogInfoFilter {
                 " from SignalMessageLog log, " +
                         "Messaging messaging inner join messaging.signalMessage signal " +
                         "inner join messaging.userMessage message " +
-                        "left join message.messageInfo info " +
+                        "left join signal.messageInfo info " +
                         (isFourCornerModel() ? "left join message.messageProperties.property propsFrom " +
                          "left join message.messageProperties.property propsTo " : StringUtils.EMPTY) +
                         "left join message.partyInfo.from.partyId partyFrom " +

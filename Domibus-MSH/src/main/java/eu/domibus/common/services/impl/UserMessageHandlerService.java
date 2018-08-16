@@ -22,6 +22,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
@@ -124,6 +125,9 @@ public class UserMessageHandlerService {
 
     @Autowired
     protected NonRepudiationService nonRepudiationService;
+
+    @Autowired
+    protected UIReplicationSignalService uiReplicationSignalService;
 
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
@@ -236,6 +240,19 @@ public class UserMessageHandlerService {
     }
 
     /**
+     * Check if this message is a test message
+     *
+     * @param legConfiguration the legConfiguration that matched the message
+     * @return result of test service and action handle
+     */
+    protected Boolean checkTestMessage(final LegConfiguration legConfiguration) {
+        LOG.debug("Checking if it is a test message");
+        return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction());
+
+    }
+
+    /**
      * This method persists incoming messages into the database (and handles decompression before)
      *
      * @param request          the message to persist
@@ -288,6 +305,8 @@ public class UserMessageHandlerService {
                 to.getEndpoint(),
                 userMessage.getCollaborationInfo().getService().getValue(),
                 userMessage.getCollaborationInfo().getAction());
+
+        uiReplicationSignalService.userMessageReceived(userMessage.getMessageInfo().getMessageId());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
@@ -471,6 +490,8 @@ public class UserMessageHandlerService {
             SignalMessageLog signalMessageLog = smlBuilder.build();
             signalMessageLog.setMessageSubtype(messageSubtype);
             signalMessageLogDao.create(signalMessageLog);
+
+            uiReplicationSignalService.signalMessageSubmitted(signalMessageLog.getMessageId());
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }

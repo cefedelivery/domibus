@@ -10,6 +10,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -43,6 +44,9 @@ public class UpdateRetryLoggingService {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
 
     /**
      * This method is responsible for the handling of retries for a given sent message.
@@ -70,6 +74,7 @@ public class UpdateRetryLoggingService {
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             messageFailed(userMessageLog);
         }
+        uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
     }
 
     public void messageFailed(MessageLog userMessageLog) {
@@ -104,6 +109,7 @@ public class UpdateRetryLoggingService {
         userMessageLog.setMessageStatus(messageStatus);
         LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
         userMessageLogDao.update(userMessageLog);
+
     }
 
     public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {

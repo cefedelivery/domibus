@@ -85,10 +85,10 @@ public class EventServiceImpl implements EventService {
             final MessageStatus newStatus,
             final MSHRole role) {
         Event event = new Event(EventType.MSG_COMMUNICATION_FAILURE);
-        event.addKeyValue(OLD_STATUS.name(), oldStatus.name());
-        event.addKeyValue(NEW_STATUS.name(), newStatus.name());
-        event.addKeyValue(MESSAGE_ID.name(), messageId);
-        event.addKeyValue(ROLE.name(), role.name());
+        event.addStringKeyValue(OLD_STATUS.name(), oldStatus.name());
+        event.addStringKeyValue(NEW_STATUS.name(), newStatus.name());
+        event.addStringKeyValue(MESSAGE_ID.name(), messageId);
+        event.addStringKeyValue(ROLE.name(), role.name());
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, MESSAGE_EVENT_SELECTOR);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
@@ -101,7 +101,7 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date loginTime,
             final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, loginTime.toString(), Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
+        Event event = prepareAuthenticatorEvent(userName, loginTime, Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
@@ -114,7 +114,7 @@ public class EventServiceImpl implements EventService {
             final String userName,
             final Date accountDisabledTime,
             final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime.toString(), Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
+        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime, Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
@@ -158,8 +158,8 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public void enrichMessageEvent(final Event event) {
-        final Optional<String> messageIdProperty = event.findProperty(MESSAGE_ID.name());
-        final Optional<String> roleProperty = event.findProperty(ROLE.name());
+        final Optional<String> messageIdProperty = event.findStringProperty(MESSAGE_ID.name());
+        final Optional<String> roleProperty = event.findStringProperty(ROLE.name());
         if (!messageIdProperty.isPresent() || !roleProperty.isPresent()) {
             LOG.error("Message id and role are mandatory for message event[{}].", event);
             throw new IllegalStateException("Message id and role are mandatory for message event.");
@@ -172,15 +172,15 @@ public class EventServiceImpl implements EventService {
             userMessageExchangeContext = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.valueOf(role));
             final Party senderParty = pModeProvider.getSenderParty(userMessageExchangeContext.getPmodeKey());
             final Party receiverParty = pModeProvider.getReceiverParty(userMessageExchangeContext.getPmodeKey());
-            event.addKeyValue(FROM_PARTY.name(), senderParty.getName());
-            event.addKeyValue(TO_PARTY.name(), receiverParty.getName());
+            event.addStringKeyValue(FROM_PARTY.name(), senderParty.getName());
+            event.addStringKeyValue(TO_PARTY.name(), receiverParty.getName());
             StringBuilder errors = new StringBuilder();
             errorLogDao.
                     getErrorsForMessage(messageId).
                     stream().
                     map(ErrorLogEntry::getErrorDetail).forEach(errors::append);
             if (!errors.toString().isEmpty()) {
-                event.addKeyValue(DESCRIPTION.name(), errors.toString());
+                event.addStringKeyValue(DESCRIPTION.name(), errors.toString());
             }
         } catch (EbMS3Exception e) {
             LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
@@ -190,21 +190,21 @@ public class EventServiceImpl implements EventService {
 
     private Event prepareCertificateEvent(String accessPoint, String alias, Date expirationDate, EventType eventType) {
         Event event = new Event(eventType);
-        event.addKeyValue(CertificateEvent.ACCESS_POINT.name(), accessPoint);
-        event.addKeyValue(CertificateEvent.ALIAS.name(), alias);
-        event.addKeyValue(CertificateEvent.EXPIRATION_DATE.name(), expirationDate.toString());
+        event.addStringKeyValue(CertificateEvent.ACCESS_POINT.name(), accessPoint);
+        event.addStringKeyValue(CertificateEvent.ALIAS.name(), alias);
+        event.addDateKeyValue(CertificateEvent.EXPIRATION_DATE.name(), expirationDate);
         return event;
     }
 
     private Event prepareAuthenticatorEvent(
             final String userName,
-            final String loginTime,
+            final Date loginTime,
             final String accountDisabled,
             final EventType eventType) {
         Event event = new Event(eventType);
-        event.addKeyValue(USER.name(), userName);
-        event.addKeyValue(LOGIN_TIME.name(), loginTime);
-        event.addKeyValue(AuthenticationEvent.ACCOUNT_DISABLED.name(), accountDisabled);
+        event.addStringKeyValue(USER.name(), userName);
+        event.addDateKeyValue(LOGIN_TIME.name(), loginTime);
+        event.addStringKeyValue(AuthenticationEvent.ACCOUNT_DISABLED.name(), accountDisabled);
         return event;
     }
 }
