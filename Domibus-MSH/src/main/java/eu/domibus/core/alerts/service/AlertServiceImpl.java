@@ -110,7 +110,7 @@ public class AlertServiceImpl implements AlertService {
         read.setReportingTime(new Date());
         Map<String, String> mailModel = new HashMap<>();
         final Event next = read.getEvents().iterator().next();
-        next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue()));
+        next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue().toString()));
         mailModel.put(ALERT_LEVEL, read.getAlertLevel().name());
         mailModel.put(REPORTING_TIME, read.getReportingTime().toString());
         if (LOG.isDebugEnabled()) {
@@ -165,6 +165,7 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         if(LOG.isDebugEnabled()){
@@ -186,6 +187,7 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public Long countAlerts(AlertCriteria alertCriteria) {
         return alertDao.countAlerts(alertCriteria);
     }
