@@ -2176,7 +2176,7 @@
             restored,
             message_subtype
             FROM
-            tb_message_ui
+            TB_MESSAGE_UI
         </createView>
     </changeSet>
     <changeSet id="EDELIVERY-3361-2" author="CatalinEnache" dbms="mysql">
@@ -2273,7 +2273,7 @@
         AND property5_.NAME = 'originalSender'
         AND property6_.NAME = 'finalRecipient') result
         LEFT JOIN
-        tb_message_ui flat_table ON result.message_id &lt;=&gt; flat_table.message_id
+        TB_MESSAGE_UI flat_table ON result.message_id &lt;=&gt; flat_table.message_id
         AND result.message_Status &lt;=&gt; flat_table.message_status
         AND result.NOTIFICATION_STATUS &lt;=&gt; flat_table.NOTIFICATION_STATUS
         AND result.MSH_ROLE &lt;=&gt; flat_table.MSH_ROLE
