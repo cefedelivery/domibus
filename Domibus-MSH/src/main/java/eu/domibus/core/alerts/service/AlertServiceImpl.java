@@ -165,6 +165,7 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
         if(LOG.isDebugEnabled()){
@@ -186,6 +187,7 @@ public class AlertServiceImpl implements AlertService {
      * {@inheritDoc}
      */
     @Override
+    @Transactional
     public Long countAlerts(AlertCriteria alertCriteria) {
         return alertDao.countAlerts(alertCriteria);
     }

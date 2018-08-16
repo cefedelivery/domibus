@@ -41,7 +41,6 @@ public class AlertDao extends BasicDao<Alert> {
 
         //create root entity specifying that we want to eager fetch. (Avoid the N+1 hibernate problem)
         final Root<Alert> root = criteria.from(Alert.class);
-        root.fetch(Alert_.events).fetch(Event_.properties);
 
         final Subquery<Integer> subQuery = criteria.subquery(Integer.class);
         Root<Alert> subRoot = subQuery.from(Alert.class);

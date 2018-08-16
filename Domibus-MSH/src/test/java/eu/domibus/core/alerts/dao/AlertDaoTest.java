@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -77,6 +78,7 @@ public class AlertDaoTest {
         alertDao.create(alert);
     }
     @Test
+    @Transactional
     public void findRetryAlertsOnParty() {
 
         final AlertCriteria alertCriteria = new AlertCriteria();
@@ -92,6 +94,7 @@ public class AlertDaoTest {
     }
 
     @Test
+    @Transactional
     public void findRetryAlertsOnPartyButProcessed() {
         createAlert("black_gw","red_gw",true,null);
         final AlertCriteria alertCriteria = new AlertCriteria();

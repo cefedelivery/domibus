@@ -93,7 +93,7 @@ public class EventServiceImplTest {
             jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, eventService.LOGIN_FAILURE);
             times = 1;
             Assert.assertEquals(userName, event.getProperties().get(USER.name()).getValue());
-            Assert.assertEquals(loginTime.toString(), event.getProperties().get(LOGIN_TIME.name()).getValue());
+            Assert.assertEquals(loginTime, event.getProperties().get(LOGIN_TIME.name()).getValue());
             Assert.assertEquals("false", event.getProperties().get(ACCOUNT_DISABLED.name()).getValue());
         }};
 
@@ -111,7 +111,7 @@ public class EventServiceImplTest {
             jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, eventService.ACCOUNT_DISABLED);
             times = 1;
             Assert.assertEquals(userName, event.getProperties().get(USER.name()).getValue());
-            Assert.assertEquals(loginTime.toString(), event.getProperties().get(LOGIN_TIME.name()).getValue());
+            Assert.assertEquals(loginTime, event.getProperties().get(LOGIN_TIME.name()).getValue());
             Assert.assertEquals("false", event.getProperties().get(ACCOUNT_DISABLED.name()).getValue());
         }};
     }
@@ -129,7 +129,7 @@ public class EventServiceImplTest {
             times = 1;
             Assert.assertEquals(accessPoint, event.getProperties().get(ACCESS_POINT.name()).getValue());
             Assert.assertEquals(alias, event.getProperties().get(ALIAS.name()).getValue());
-            Assert.assertEquals(expirationDate.toString(), event.getProperties().get(EXPIRATION_DATE.name()).getValue());
+            Assert.assertEquals(expirationDate, event.getProperties().get(EXPIRATION_DATE.name()).getValue());
         }};
     }
 
@@ -146,7 +146,7 @@ public class EventServiceImplTest {
             times = 1;
             Assert.assertEquals(accessPoint, event.getProperties().get(ACCESS_POINT.name()).getValue());
             Assert.assertEquals(alias, event.getProperties().get(ALIAS.name()).getValue());
-            Assert.assertEquals(expirationDate.toString(), event.getProperties().get(EXPIRATION_DATE.name()).getValue());
+            Assert.assertEquals(expirationDate, event.getProperties().get(EXPIRATION_DATE.name()).getValue());
         }};
     }
 
@@ -156,9 +156,10 @@ public class EventServiceImplTest {
 
         eu.domibus.core.alerts.model.persist.Event persistedEvent = new eu.domibus.core.alerts.model.persist.Event();
         persistedEvent.setEntityId(1);
+        final String key = "key";
         final StringEventProperty stringEventProperty = new StringEventProperty();
         stringEventProperty.setStringValue("value");
-        final String key = "key";
+        stringEventProperty.setKey(key);
         persistedEvent.getProperties().put(key, stringEventProperty);
 
         new Expectations() {{
