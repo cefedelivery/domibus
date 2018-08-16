@@ -22,8 +22,10 @@ import org.apache.commons.vfs2.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
+import javax.inject.Inject;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -64,6 +66,9 @@ public class BackendFSImplTest {
 
     @Injectable
     private DomainContextExtService domainContextExtService;
+
+    @Injectable
+    private FSSendMessagesService fsSendMessagesService = new FSSendMessagesService();
 
     @Injectable
     String name = "fsplugin";
@@ -550,11 +555,6 @@ public class BackendFSImplTest {
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
 
-            fsPluginProperties.isFailedActionDelete(null);
-            result = true;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
-            result = failedFolder;
         }};
 
         backendFS.messageStatusChanged(event);
@@ -562,7 +562,7 @@ public class BackendFSImplTest {
         contentFile.close();
 
         new VerificationsInOrder(1) {{
-            fsFilesManager.deleteFile(contentFile);
+            fsSendMessagesService.handleSendFailedMessage(contentFile, anyString, anyString);
         }};
     }
 
@@ -586,14 +586,6 @@ public class BackendFSImplTest {
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
 
-            fsPluginProperties.isFailedActionDelete(null);
-            result = false;
-
-            fsPluginProperties.isFailedActionArchive(null);
-            result = true;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
-            result = failedFolder;
         }};
 
         backendFS.messageStatusChanged(event);
@@ -601,12 +593,7 @@ public class BackendFSImplTest {
         contentFile.close();
 
         new VerificationsInOrder(1) {{
-            fsFilesManager.moveFile(contentFile, with(new Delegate<FileObject>() {
-                void delegate(FileObject file) throws IOException {
-                    Assert.assertNotNull(file);
-                    Assert.assertEquals( location + "/FAILED/content_" + messageId + ".xml", file.getName().getURI());
-                }
-            }));
+            fsSendMessagesService.handleSendFailedMessage(contentFile, anyString, anyString);
         }};
     }
 
@@ -635,12 +622,6 @@ public class BackendFSImplTest {
             fsFilesManager.findAllDescendantFiles(outgoingFolder);
             result = new FileObject[] { contentFile };
 
-            fsPluginProperties.isFailedActionDelete(null);
-            result = true;
-
-            fsFilesManager.getEnsureChildFolder(rootDir, "/BackendFSImplTest/FAILED/");
-            result = failedFolder;
-
             backendFS.getErrorsForMessage(messageId);
             result = errorList;
         }};
@@ -650,7 +631,7 @@ public class BackendFSImplTest {
         contentFile.close();
 
         new VerificationsInOrder(1) {{
-            fsFilesManager.deleteFile(contentFile);
+            fsSendMessagesService.handleSendFailedMessage(contentFile, anyString, anyString);
         }};
     }
 
