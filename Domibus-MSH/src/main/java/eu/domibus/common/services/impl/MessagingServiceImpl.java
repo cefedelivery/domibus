@@ -1,10 +1,16 @@
 package eu.domibus.common.services.impl;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.configuration.Storage;
+import eu.domibus.configuration.storage.Storage;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -31,8 +37,13 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     MessagingDao messagingDao;
 
+    private Storage storage;
+
     @Autowired
-    Storage storage;
+    StorageProvider storageProvider;
+
+    @Autowired
+    private DomainContextProvider domainContextProvider;
 
     public void setStorage(Storage storage) {
         this.storage = storage;
@@ -65,13 +76,19 @@ public class MessagingServiceImpl implements MessagingService {
         InputStream is = partInfo.getPayloadDatahandler().getInputStream();
         final boolean compressed = isCompressed(partInfo);
 
-        if (storage.getStorageDirectory() == null || storage.getStorageDirectory().getName() == null) {
+        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        Storage currentStorage = this.storage == null ? storageProvider.forDomain(currentDomain) : this.storage;
+        LOG.info("Retrieved Storage ben for domain [{}]", currentDomain);
+        if(currentStorage == null)
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Storage for domain" + currentDomain + " is null");
+
+        if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             byte[] binaryData = getBinaryData(is, compressed);
             partInfo.setBinaryData(binaryData);
             partInfo.setLength(binaryData.length);
             partInfo.setFileName(null);
         } else {
-            final File attachmentStore = new File(storage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
+            final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
             partInfo.setFileName(attachmentStore.getAbsolutePath());
             final long fileLength = saveFileToDisk(attachmentStore, is, compressed);
             partInfo.setLength(fileLength);
@@ -84,20 +101,20 @@ public class MessagingServiceImpl implements MessagingService {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SENDING_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
         }
 
-        if(compressed) {
+        if (compressed) {
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION, partInfo.getHref());
         }
     }
 
-    protected byte[] getBinaryData(InputStream is, boolean isCompressed) throws IOException{
-        byte[] binaryData  = IOUtils.toByteArray(is);
+    protected byte[] getBinaryData(InputStream is, boolean isCompressed) throws IOException {
+        byte[] binaryData = IOUtils.toByteArray(is);
         if (isCompressed) {
             binaryData = compress(binaryData);
         }
         return binaryData;
     }
 
-    protected long saveFileToDisk(File file, InputStream is, boolean isCompressed) throws IOException{
+    protected long saveFileToDisk(File file, InputStream is, boolean isCompressed) throws IOException {
         OutputStream fileOutputStream = new FileOutputStream(file);
         if (isCompressed) {
             fileOutputStream = new GZIPOutputStream(fileOutputStream);
@@ -109,7 +126,7 @@ public class MessagingServiceImpl implements MessagingService {
         return total;
     }
 
-    protected byte[] compress(byte[] binaryData) throws IOException{
+    protected byte[] compress(byte[] binaryData) throws IOException {
         final byte[] buffer = new byte[1024];
         InputStream sourceStream = new ByteArrayInputStream(binaryData);
         ByteArrayOutputStream compressedContent = new ByteArrayOutputStream();
@@ -126,7 +143,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     protected boolean isCompressed(PartInfo partInfo) {
-        if(partInfo.getPartProperties() != null) {
+        if (partInfo.getPartProperties() != null) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
                 if (property.getName().equals(CompressionService.COMPRESSION_PROPERTY_KEY) && property.getValue().equals(CompressionService.COMPRESSION_PROPERTY_VALUE)) {
                     return true;
