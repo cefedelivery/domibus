@@ -1,6 +1,5 @@
 package eu.domibus.common.services.impl;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
@@ -80,7 +79,7 @@ public class MessagingServiceImpl implements MessagingService {
         Storage currentStorage = this.storage == null ? storageProvider.forDomain(currentDomain) : this.storage;
         LOG.info("Retrieved Storage ben for domain [{}]", currentDomain);
         if(currentStorage == null)
-            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Storage for domain" + currentDomain + " is null");
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
 
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             byte[] binaryData = getBinaryData(is, compressed);

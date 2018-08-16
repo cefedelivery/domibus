@@ -26,7 +26,8 @@ import java.util.Date;
 @Service
 public class UpdateRetryLoggingService {
 
-    private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
+    public static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
+    public static final String DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT = "false";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UpdateRetryLoggingService.class);
 
     @Autowired
@@ -86,7 +87,7 @@ public class UpdateRetryLoggingService {
         }
         userMessageLogService.setMessageAsSendFailure(messageId);
 
-            if ("true".equals(domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+            if ("true".equals(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
                 messagingDao.clearPayloadData(messageId);
             }
         }

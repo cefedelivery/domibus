@@ -161,7 +161,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(pullProcesses.isEmpty()){
             LOG.trace("No pull process configured !");
         }
-        final Integer numberOfPullRequestPerMpc = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1"));
+        String numberOfPullRequestPerMpcProp = domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1");
+        LOG.info("DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE property read for domain[{}]", domainProvider.getCurrentDomain());
+
+        final Integer numberOfPullRequestPerMpc = Integer.valueOf(numberOfPullRequestPerMpcProp);
         if (!domibusConfigurationService.isMultiTenantAware() && pause(pullProcesses, numberOfPullRequestPerMpc)) {
             return;
         }
