@@ -292,12 +292,12 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private StringBuilder getErrorFileContent(ErrorResult errorResult) {
 
-        return fsSendMessagesService.buildErrorMessage(errorResult.getErrorCode().getErrorCodeName(),
+        return fsSendMessagesService.buildErrorMessage(errorResult.getErrorCode() == null ? null : errorResult.getErrorCode().getErrorCodeName(),
                                                         errorResult.getErrorDetail(),
                                                         errorResult.getMessageInErrorId(),
-                                                        errorResult.getMshRole().toString(),
-                                                        errorResult.getNotified().toString(),
-                                                        errorResult.getTimestamp().toString());
+                                                        errorResult.getMshRole() == null ? null : errorResult.getMshRole().toString(),
+                                                        errorResult.getNotified() == null ? null : errorResult.getNotified().toString(),
+                                                        errorResult.getTimestamp() == null ? null : errorResult.getTimestamp().toString());
     }
 
     private void handleSentMessage(String domain, String messageId) {
