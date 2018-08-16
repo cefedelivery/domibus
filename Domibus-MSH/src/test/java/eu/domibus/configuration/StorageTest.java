@@ -1,6 +1,7 @@
 package eu.domibus.configuration;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.configuration.storage.Storage;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;

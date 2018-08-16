@@ -6,7 +6,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
-import eu.domibus.configuration.Storage;
+import eu.domibus.configuration.storage.Storage;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
