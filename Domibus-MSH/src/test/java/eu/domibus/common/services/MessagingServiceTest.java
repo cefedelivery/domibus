@@ -1,5 +1,6 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
@@ -7,6 +8,7 @@ import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
@@ -53,6 +55,12 @@ public class MessagingServiceTest {
 
     @Injectable
     Storage storage;
+
+    @Injectable
+    StorageProvider storageProvider;
+
+    @Injectable
+    private DomainContextProvider domainContextProvider;
 
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {

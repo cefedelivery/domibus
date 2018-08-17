@@ -96,7 +96,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -142,7 +142,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -223,7 +223,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -267,7 +267,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);

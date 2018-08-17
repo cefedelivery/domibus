@@ -1,7 +1,10 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
@@ -57,6 +60,11 @@ public class UserManagementServiceImplTest {
     @Injectable
     private EventService eventService;
 
+    @Injectable
+    protected UserDomainService userDomainService;
+
+    @Injectable
+    protected DomainService domainService;
 
     @Tested
     private UserManagementServiceImpl userManagementService;
@@ -113,7 +121,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain)any, MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -134,7 +142,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyNotNumberProperty(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain)any, MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = "a";
             user.getAttemptCount();
@@ -155,7 +163,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain)any, MAXIMUM_LOGIN_ATTEMPT, "5");
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -242,17 +250,17 @@ public class UserManagementServiceImplTest {
         final List<User> users = Lists.newArrayList(user);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, "3600");
+            domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, "3600");
             times = 1;
             result = suspensionInterval;
             System.currentTimeMillis();
             result = currentTime;
-            userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
+            userDao.getSuspendedUsers(currentTimeMinusSuspensionInterval);
             times = 1;
             result = users;
         }};
 
-        userManagementService.findAndReactivateSuspendedUsers();
+        userManagementService.reactivateSuspendedUsers();
 
         new Verifications() {{
             List<User> users;

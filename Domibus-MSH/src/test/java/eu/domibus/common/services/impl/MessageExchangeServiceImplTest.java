@@ -6,6 +6,8 @@ import com.google.common.collect.Sets;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
@@ -78,6 +80,9 @@ public class MessageExchangeServiceImplTest {
 
     @Mock
     private DomibusConfigurationService domibusConfigurationService;
+
+    @Mock
+    private DomainContextProvider domainProvider;
 
     @Spy
     private ProcessValidator processValidator;
@@ -152,6 +157,7 @@ public class MessageExchangeServiceImplTest {
     @Test
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
+        when(domainProvider.getCurrentDomain()).thenReturn(new Domain("default", "Default"));
         when(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1")).thenReturn("10");
         when(domibusConfigurationService.isMultiTenantAware()).thenReturn(false);
 
