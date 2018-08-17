@@ -34,6 +34,14 @@ public interface DomibusPropertyProvider {
     String getDomainProperty(String propertyName, String defaultValue);
 
     String getDomainProperty(Domain domain, String propertyName);
+    /**
+     * Look for a property in the current domain. If the property is not found, it will search for the property in
+     * the following locations and in the respective order:
+     * in conf/domibus.properties, classpath://domibus.properties, classpath://domibus-default.properties
+     * @param propertyName the property name.
+     * @return the value for that property.
+     */
+    String getDomainOrDefaultProperty(String propertyName);
 
     String getDomainProperty(Domain domain, String propertyName, String defaultValue);
 

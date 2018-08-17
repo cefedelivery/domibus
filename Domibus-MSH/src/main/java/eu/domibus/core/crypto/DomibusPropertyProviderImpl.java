@@ -110,6 +110,16 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     @Override
+    public String getDomainOrDefaultProperty(String propertyName) {
+        final Domain currentDomain = domainContextProvider.getCurrentDomain();
+        String propertyValue = getProperty(currentDomain, propertyName);
+        if (StringUtils.isEmpty(propertyValue) && !DomainService.DEFAULT_DOMAIN.equals(currentDomain)) {
+            propertyValue = getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
+        }
+        return propertyValue;
+    }
+
+    @Override
     public String getDomainProperty(Domain domain, String propertyName, String defaultValue) {
         String propertyValue = getDomainProperty(domain, propertyName);
         if (StringUtils.isEmpty(propertyValue)) {
