@@ -168,6 +168,23 @@
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
                 </datasource>
+                <!-- Oracle
+                <datasource jta="true" jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryOracleNonXADS" enabled="true" use-ccm="true">
+                    <connection-url>jdbc:oracle:thin:@localhost:1521[:SID|/Service]</connection-url>
+                    <driver-class>oracle.jdbc.OracleDriver</driver-class>
+                    <driver>com.oracle</driver>
+                    <security>
+                        <user-name>edelivery_username</user-name>
+                        <password>edelivery_password</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
+                        <background-validation>true</background-validation>
+                        <stale-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker"/>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
+                    </validation>
+                </datasource>
+                -->
                 <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryMysqlXADS" enabled="true" use-ccm="true">
                     <xa-datasource-property name="ServerName">
                         localhost
@@ -186,6 +203,23 @@
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
                 </xa-datasource>
+                <!-- Oracle
+                <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryOracleXADS" enabled="true" use-ccm="true">
+                    <xa-datasource-property name="URL">
+                        jdbc:oracle:thin:@localhost:1521[:SID|/Service]
+                    </xa-datasource-property>
+                    <xa-datasource-class>oracle.jdbc.xa.client.OracleXADataSource</xa-datasource-class>
+                    <driver>com.oracle</driver>
+                    <security>
+                        <user-name>edelivery_user</user-name>
+                        <password>edelivery_password</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
+                    </validation>
+                </xa-datasource>
+                -->
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
@@ -198,6 +232,11 @@
                         <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
                         -->
                     </driver>
+                    <!--Oracle
+                    <driver name="com.oracle" module="com.oracle">
+                        <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+                    </driver>
+                    -->
                 </drivers>
             </datasources>
         </subsystem>
