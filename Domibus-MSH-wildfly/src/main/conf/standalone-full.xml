@@ -150,12 +150,17 @@
                     </security>
                 </datasource>
                 <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
+                    <connection-url>jdbc:mysql://localhost:3306/domibus?autoReconnect=true&amp;useSSL=false</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <!--Connector/J 8.0.x
                         <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
                     -->
                     <driver>com.mysql</driver>
+                    <pool>
+                        <min-pool-size>20</min-pool-size>
+                        <initial-pool-size>5</initial-pool-size>
+                        <max-pool-size>100</max-pool-size>
+                    </pool>
                     <security>
                         <user-name>edelivery</user-name>
                         <password>edelivery</password>
@@ -171,9 +176,14 @@
                         localhost
                     </xa-datasource-property>
                     <xa-datasource-property name="DatabaseName">
-                        domibus
+                        domibus?autoReconnect=true&amp;useSSL=false
                     </xa-datasource-property>
                     <driver>com.mysql</driver>
+                    <xa-pool>
+                        <min-pool-size>20</min-pool-size>
+                        <initial-pool-size>5</initial-pool-size>
+                        <max-pool-size>100</max-pool-size>
+                    </xa-pool>
                     <security>
                         <user-name>edelivery</user-name>
                         <password>edelivery</password>
@@ -212,10 +222,10 @@
                     <managed-thread-factory name="default" jndi-name="java:jboss/ee/concurrency/factory/default" context-service="default"/>
                 </managed-thread-factories>
                 <managed-executor-services>
-                    <managed-executor-service name="default" jndi-name="java:jboss/ee/concurrency/executor/default" context-service="default" hung-task-threshold="60000" core-threads="5" max-threads="25" keepalive-time="5000"/>
+                    <managed-executor-service name="default" jndi-name="java:jboss/ee/concurrency/executor/default" context-service="default" hung-task-threshold="60000" core-threads="50" max-threads="200" keepalive-time="5000"/>
                 </managed-executor-services>
                 <managed-executor-services>
-                    <managed-executor-service name="domibusExecutorService" jndi-name="java:jboss/ee/concurrency/executor/DomibusExecutorService" context-service="default" hung-task-threshold="60000" core-threads="5" max-threads="25" keepalive-time="5000"/>
+                    <managed-executor-service name="domibusExecutorService" jndi-name="java:jboss/ee/concurrency/executor/DomibusExecutorService" context-service="default" hung-task-threshold="60000" core-threads="50" max-threads="200" keepalive-time="5000"/>
                 </managed-executor-services>
                 <managed-executor-services>
                     <managed-executor-service name="quartzExecutorService" jndi-name="java:jboss/ee/concurrency/executor/QuartzExecutorService" context-service="default" hung-task-threshold="0" long-running-tasks="true"  core-threads="5" max-threads="25" keepalive-time="5000"/>
@@ -692,7 +702,7 @@
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
+            <any-address/>
         </interface>
         <!-- TODO - only show this if the jacorb subsystem is added  -->
         <interface name="unsecure">
