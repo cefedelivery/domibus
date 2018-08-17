@@ -25,6 +25,14 @@
 
     <files>
         <file>
+            <source>
+                ${project.basedir}/../Domibus-MSH/src/main/conf/domibus/domain_name-domibus.properties
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>domain_name-domibus.properties</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/internal/ehcache.xml</source>
             <outputDirectory>internal</outputDirectory>
             <filtered>false</filtered>
