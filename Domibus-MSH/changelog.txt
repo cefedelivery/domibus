@@ -29,7 +29,7 @@ Domibus 4.0
 - The password for plugin users migrated to BCryptPasswordEncoder
 - Configurable Domibus Admin Console title
 - Fixed an issue when receiver is not authorized to get the status of his destined message when security is enabled
-- Support ofr LDAP CRLs
+- Support for LDAP CRLs
 - Handled the not existing folder issue for domibus.attachment.storage.location
 - Fixed an issue when eb3:MessageProperties section is missing from the User Message
 - Fixed an issue when PartProperties section defined in PartInfo missing from the User Message
@@ -43,6 +43,7 @@ Domibus 4.0
 - The notifications events sent to the plugins should be configurable
 - Support for the new PEPPOL PKI. Maintain backwards compatibility with the old PEPPOL PKI. Tested in multi-tenancy mode, one domain
   uses old PKI while other domain uses the new PKI.
+- Added a new feature when the GUI loads Messages page from a single table, speed up the search for large DB volumes
 Domibus 3.3.4
 - Performance improvement in the Messages page
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.
