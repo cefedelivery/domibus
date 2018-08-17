@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultMailModel<T> implements MailModel<T> {
 
-    private final static Logger LOG = DomibusLoggerFactory.getLogger(DefaultMailModel.class);
-
     private final T model;
 
     private final String templatePath;

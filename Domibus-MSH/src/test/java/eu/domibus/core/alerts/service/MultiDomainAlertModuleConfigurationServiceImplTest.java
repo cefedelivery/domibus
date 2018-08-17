@@ -11,6 +11,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static eu.domibus.core.alerts.MailSender.DOMIBUS_ALERT_MAIL_SENDING_ACTIVE;
 import static eu.domibus.core.alerts.service.MultiDomainAlertConfigurationServiceImpl.*;
 import static org.junit.Assert.*;
 
@@ -198,6 +199,8 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             result = sender;
             domibusPropertyProvider.getProperty(domain,DOMIBUS_ALERT_RECEIVER_EMAIL);
             result=receiver;
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE, "false");
+            result=true;
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME, "20");
             result="20";
         }};
