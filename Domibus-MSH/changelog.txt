@@ -3,6 +3,7 @@ Domibus 4.0
 - Removed unused classes:Validator<T>,NullValidator,ValidationException
 - Support for email alert system
 - Support for multi-tenancy
+- Sample domain configuration file domain_name-domibus.properties included in the distribution.
 - Management of participants through the administration console
 - Removed the module domibus-ext-services-api and moved all services from domibus-ext-services-api to the plugin-api
 - Security policies were updated and renamed. Sample pModes were updated to use the new policies.
