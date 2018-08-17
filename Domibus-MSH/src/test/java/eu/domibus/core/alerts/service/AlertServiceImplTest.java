@@ -224,6 +224,12 @@ public class AlertServiceImplTest {
             alertDao.read(entityId);times=1;
             result = persistedAlert;
 
+            persistedAlert.getAttempts();
+            result=1;
+
+            persistedAlert.getMaxAttempts();
+            result=2;
+
             persistedAlert.getAlertStatus();
             result=AlertStatus.FAILED;
 
@@ -235,8 +241,8 @@ public class AlertServiceImplTest {
             persistedAlert.setAlertStatus(AlertStatus.FAILED);times=1;
             persistedAlert.setNextAttempt(null);
 
-            persistedAlert.setAttempts(withAny(0));times=0;
             persistedAlert.setReportingTimeFailure(failureTime);times=1;
+            persistedAlert.setAttempts(2);times=1;
         }};
     }
 

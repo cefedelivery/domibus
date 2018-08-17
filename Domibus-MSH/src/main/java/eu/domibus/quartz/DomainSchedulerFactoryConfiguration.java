@@ -5,6 +5,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.core.alerts.job.AlertCleanerJob;
+import eu.domibus.core.alerts.job.AlertRetryJob;
 import eu.domibus.core.pull.PullRetryWorker;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.logging.DomibusLogger;
@@ -154,6 +156,46 @@ public class DomainSchedulerFactoryConfiguration {
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(pullRetryWorkerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.pull.retry.cron"));
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
+    @Bean
+    public JobDetailFactoryBean alertRetryJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(AlertRetryJob.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean alertRetryWorkerTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null)
+            return null;
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(alertRetryJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.alert.retry.cron"));
+        obj.setStartDelay(20000);
+        return obj;
+    }
+
+    @Bean
+    public JobDetailFactoryBean alertCleanerJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(AlertCleanerJob.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean alertCleanerTrigger() {
+        if (domainContextProvider.getCurrentDomainSafely() == null)
+            return null;
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(alertCleanerJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.alert.cleaner.cron"));
         obj.setStartDelay(20000);
         return obj;
     }

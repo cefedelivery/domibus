@@ -20,6 +20,14 @@
               {{atype}}
             </md-option>
           </md-select>
+
+          <md-select placeholder="Alert Status" [(ngModel)]="filter.alertStatus" name="alertStatus"
+                     id="alertstatus_id">
+            <md-option [value]="''"></md-option>
+            <md-option *ngFor="let aStatus of aStatuses" [value]="aStatus">
+              {{aStatus}}
+            </md-option>
+          </md-select>
           <!-- Alert Id (Advanced) -->
           <md-input-container *ngIf="advancedSearch">
             <input mdInput placeholder="Alert Id" name="alertId" [(ngModel)]="filter.alertId"
