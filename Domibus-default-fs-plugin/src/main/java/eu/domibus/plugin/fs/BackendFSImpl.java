@@ -2,7 +2,6 @@ package eu.domibus.plugin.fs;
 
 import eu.domibus.common.*;
 import eu.domibus.ext.services.DomainContextExtService;
-import eu.domibus.ext.services.DomainExtService;
 import eu.domibus.ext.services.DomibusConfigurationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -44,8 +43,6 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(BackendFSImpl.class);
 
-    private static final String LS = System.lineSeparator();
-    private static final String ERROR_EXTENSION = ".error";
 
     private static final String FILENAME_SANITIZE_REGEX = "[^\\w.-]";
     private  static final String FILENAME_SANITIZE_REPLACEMENT = "_";
@@ -81,6 +78,9 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
 
     @Autowired
     private DomainContextExtService domainContextExtService;
+
+    @Autowired
+    private FSSendMessagesService fsSendMessagesService;
 
     private final Map<String, Pattern> domainPatternCache = new HashMap<>();
 
@@ -267,39 +267,15 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
              FileObject outgoingFolder = fsFilesManager.getEnsureChildFolder(rootDir, FSFilesManager.OUTGOING_FOLDER);
              FileObject targetFileMessage = findMessageFile(outgoingFolder, messageId)) {
 
-            if (targetFileMessage != null) {
-                String baseName = targetFileMessage.getName().getBaseName();
-                String errorFileName = FSFileNameHelper.stripStatusSuffix(baseName) + ERROR_EXTENSION;
+            fsSendMessagesService.handleSendFailedMessage(targetFileMessage, domain, getErrorMessage(messageId));
 
-                String targetFileMessageURI = targetFileMessage.getParent().getName().getPath();
-                String failedDirectoryLocation = FSFileNameHelper.deriveFailedDirectoryLocation(targetFileMessageURI);
-                FileObject failedDirectory = fsFilesManager.getEnsureChildFolder(rootDir, failedDirectoryLocation);
-
-                try {
-                    if (fsPluginProperties.isFailedActionDelete(domain)) {
-                        // Delete
-                        fsFilesManager.deleteFile(targetFileMessage);
-                        LOG.debug("Send failed message file [{}] was deleted", messageId);
-                    } else if (fsPluginProperties.isFailedActionArchive(domain)) {
-                        // Archive
-                        String archivedFileName = FSFileNameHelper.stripStatusSuffix(baseName);
-                        FileObject archivedFile = failedDirectory.resolveFile(archivedFileName);
-                        fsFilesManager.moveFile(targetFileMessage, archivedFile);
-                        LOG.debug("Send failed message file [{}] was archived into [{}]", messageId, archivedFile.getName().getURI());
-                    }
-                } finally {
-                    // Create error file
-                    createErrorFile(messageId, errorFileName, failedDirectory);
-                }
-            } else {
-                LOG.error("The send failed message file [{}] was not found in domain [{}]", messageId, domain);
-            }
         } catch (IOException e){
             throw new FSPluginException("Error handling the send failed message file " + messageId, e);
         }
     }
 
-    private void createErrorFile(String messageId, String errorFileName, FileObject failedDirectory) throws IOException {
+
+    private String getErrorMessage(String messageId) throws IOException {
         List<ErrorResult> errors = super.getErrorsForMessage(messageId);
         String content;
         if (!errors.isEmpty()) {
@@ -308,23 +284,20 @@ public class BackendFSImpl extends AbstractBackendConnector<FSMessage, FSMessage
         } else {
             // This might occur when the destination host is unreachable
             content = "Error detail information is not available";
-            LOG.error("{} for [{}]", content, errorFileName);
+            LOG.error("[{}] for [{}]", content, messageId);
         }
-        fsFilesManager.createFile(failedDirectory, errorFileName, content);
+        return content;
     }
 
+
     private StringBuilder getErrorFileContent(ErrorResult errorResult) {
-        StringBuilder sb = new StringBuilder();
-        ErrorCode errorCode = errorResult.getErrorCode();
-        if (errorCode != null) {
-            sb.append("errorCode: ").append(errorCode.getErrorCodeName()).append(LS);
-        }
-        sb.append("errorDetail: ").append(errorResult.getErrorDetail()).append(LS);
-        sb.append("messageInErrorId: ").append(errorResult.getMessageInErrorId()).append(LS);
-        sb.append("mshRole: ").append(errorResult.getMshRole()).append(LS);
-        sb.append("notified: ").append(errorResult.getNotified()).append(LS);
-        sb.append("timestamp: ").append(errorResult.getTimestamp()).append(LS);
-        return sb;
+
+        return fsSendMessagesService.buildErrorMessage(errorResult.getErrorCode() == null ? null : errorResult.getErrorCode().getErrorCodeName(),
+                                                        errorResult.getErrorDetail(),
+                                                        errorResult.getMessageInErrorId(),
+                                                        errorResult.getMshRole() == null ? null : errorResult.getMshRole().toString(),
+                                                        errorResult.getNotified() == null ? null : errorResult.getNotified().toString(),
+                                                        errorResult.getTimestamp() == null ? null : errorResult.getTimestamp().toString());
     }
 
     private void handleSentMessage(String domain, String messageId) {

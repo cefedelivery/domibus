@@ -159,8 +159,20 @@ public class MessageExchangeServiceImplTest {
         messageExchangeService.initiatePullRequest();
         verify(pModeProvider, times(1)).getGatewayParty();
         verify(jmsManager, times(20)).sendMapMessageToQueue(mapArgumentCaptor.capture(), any(Queue.class));
-        TestResult testResult = new TestResult("qn1", "party1:responder:service1:Mock:Mock:leg1", "false");
-        testResult.chain(new TestResult("qn2", "party1:responder:service2:Mock:Mock:leg2", "false"));
+        String pModeKeyResult = "party1" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "responder" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "service1" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "Mock" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "Mock" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR + "leg1";
+
+        TestResult testResult = new TestResult("qn1", pModeKeyResult, "false");
+        pModeKeyResult = "party1" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "responder" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "service2" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "Mock" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR +
+                "Mock" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR + "leg2";
+
+        testResult.chain(new TestResult("qn2", pModeKeyResult, "false"));
         final List<JmsMessage> allValues = mapArgumentCaptor.getAllValues();
         for (JmsMessage allValue : allValues) {
             assertTrue(testResult.testSucced(allValue.getProperties()));

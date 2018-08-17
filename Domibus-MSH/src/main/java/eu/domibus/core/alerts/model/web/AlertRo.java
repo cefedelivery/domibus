@@ -16,11 +16,21 @@ public class AlertRo {
 
     private String alertLevel;
 
+    private String alertStatus;
+
     private String alertDescription;
 
     private Date creationTime;
 
     private Date reportingTime;
+
+    private Integer attempts;
+
+    private Integer maxAttempts;
+
+    private Date nextAttempt;
+
+    private Date reportingTimeFailure;
 
     private List<String> parameters;
 
@@ -88,4 +98,43 @@ public class AlertRo {
         this.parameters = parameters;
     }
 
+    public String getAlertStatus() {
+        return alertStatus;
+    }
+
+    public void setAlertStatus(String alertStatus) {
+        this.alertStatus = alertStatus;
+    }
+
+    public Integer getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(Integer attempts) {
+        this.attempts = attempts;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    public Date getReportingTimeFailure() {
+        return reportingTimeFailure;
+    }
+
+    public void setReportingTimeFailure(Date reportingTimeFailure) {
+        this.reportingTimeFailure = reportingTimeFailure;
+    }
+
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public void setNextAttempt(Date nextAttempt) {
+        this.nextAttempt = nextAttempt;
+    }
 }

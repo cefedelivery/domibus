@@ -15,7 +15,7 @@ public class MessageExchangeConfiguration {
     private final String leg;
     private final String pmodeKey;
     private final String reversePmodeKey;
-    final static String SEPARATOR=":";
+    public final static String PMODEKEY_SEPARATOR="_pMK_SEP_";
 
     public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
         this.agreementName = agreementName;
@@ -24,8 +24,8 @@ public class MessageExchangeConfiguration {
         this.service = service;
         this.action = action;
         this.leg = leg;
-        this.pmodeKey=senderParty + SEPARATOR + receiverParty + SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
-        this.reversePmodeKey=receiverParty+ SEPARATOR + senderParty+ SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
+        this.pmodeKey=senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
+        this.reversePmodeKey=receiverParty+ PMODEKEY_SEPARATOR + senderParty+ PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
     }
 
     public String getAgreementName() {

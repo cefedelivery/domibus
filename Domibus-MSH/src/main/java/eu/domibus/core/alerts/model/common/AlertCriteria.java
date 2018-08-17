@@ -24,6 +24,8 @@ public class AlertCriteria {
 
     private AlertType alertType;
 
+    private AlertStatus alertStatus;
+
     private AlertLevel alertLevel;
 
     private Integer alertID;
@@ -101,6 +103,16 @@ public class AlertCriteria {
     public void setAlertType(String alertType) {
         if (StringUtils.isNotEmpty(alertType)) {
             this.alertType = AlertType.valueOf(alertType);
+        }
+    }
+
+    public AlertStatus getAlertStatus() {
+        return alertStatus;
+    }
+
+    public void setAlertStatus(final String alertStatus) {
+        if (StringUtils.isNotEmpty(alertStatus)) {
+            this.alertStatus = AlertStatus.valueOf(alertStatus);
         }
     }
 
