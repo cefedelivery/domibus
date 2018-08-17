@@ -247,6 +247,11 @@ public class UserMessageHandlerService {
      */
     protected Boolean checkTestMessage(final LegConfiguration legConfiguration) {
         LOG.debug("Checking if it is a test message");
+
+        if(legConfiguration == null) {
+            return false;
+        }
+
         return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
                 && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction().getValue());
 
