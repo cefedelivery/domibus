@@ -15,9 +15,9 @@ import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.MessagesLogService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageDao;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.MessageSubtype;
@@ -109,7 +109,7 @@ public class MessageLogResourceTest {
     @Test
     public void testMessageLog() {
         // Given
-        final MessageLogRO  messageLogRO = createMessageLog(messageType, messageSubtype);
+        final MessageLogRO messageLogRO = createMessageLog(messageType, messageSubtype);
         final List<MessageLogRO> resultList = Collections.singletonList(messageLogRO);
         MessageLogResultRO expectedMessageLogResult = new MessageLogResultRO();
         expectedMessageLogResult.setMessageLogEntries(resultList);
@@ -149,10 +149,10 @@ public class MessageLogResourceTest {
             domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
             result = CsvService.MAX_NUMBER_OF_ENTRIES;
 
-            messagesLogService.findAllInfoCSV(messageType, anyInt, (HashMap<String, Object>) any);
+            messagesLogService.findAllInfoCSV(messageType, anyInt, "received", true, (HashMap<String, Object>) any);
             result = messageList;
 
-            csvServiceImpl.exportToCSV(messageList);
+            csvServiceImpl.exportToCSV(messageList, null, (Map<String, String>)any, (List<String>)any);
             result = CSV_TITLE +
                     "conversationId,fromPartyId,toPartyId,originalSender,finalRecipient,refToMessageId,messageId," + MessageStatus.ACKNOWLEDGED + "," +
                     NotificationStatus.NOTIFIED + "," + MSHRole.RECEIVING + "," + messageType + "," + date + "," + date + ",1,5," + date + "," +
@@ -160,15 +160,9 @@ public class MessageLogResourceTest {
         }};
 
         // When
-        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, messageType, null,
+        final ResponseEntity<String> csv = messageLogResource.getCsv("received", true, null, null, null, messageType, null,
                 null, null, null, null, null,
                 null, null, null, messageSubtype);
-
-        new Verifications() {{
-            Map<String, String> mapActualValues;
-            csvServiceImpl.customizeColumn(mapActualValues = withCapture());
-            Assert.assertEquals("", CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), mapActualValues);
-        }};
 
         // Then
         Assert.assertEquals(HttpStatus.OK, csv.getStatusCode());
@@ -184,12 +178,12 @@ public class MessageLogResourceTest {
         new Expectations() {{
             domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
             result = CsvService.MAX_NUMBER_OF_ENTRIES;
-            csvServiceImpl.exportToCSV((List<?>) any);
+            csvServiceImpl.exportToCSV((List<?>) any, null, null, null);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};
 
         // When
-        final ResponseEntity<String> csv = messageLogResource.getCsv(null, null, null, messageType, null,
+        final ResponseEntity<String> csv = messageLogResource.getCsv("received", true, null, null, null, messageType, null,
                 null, null, null, null, null,
                 null, null, null, messageSubtype);
 
@@ -205,9 +199,9 @@ public class MessageLogResourceTest {
         UserMessage userMessage = new UserMessage();
         new Expectations() {{
             userMessageLogDao.findLastUserTestMessageId(partyId);
-            result=userMessageId;
+            result = userMessageId;
             messagingDao.findUserMessageByMessageId(userMessageId);
-            result=userMessage;
+            result = userMessage;
         }};
 
         // When
@@ -278,7 +272,8 @@ public class MessageLogResourceTest {
 
     /**
      * Creates a {@link MessageLogRO} based on <code>messageType</code> and <code>messageSubtype</code>
-     * @param messageType Message Type
+     *
+     * @param messageType    Message Type
      * @param messageSubtype Message Subtype
      * @return <code>MessageLog</code>
      */
@@ -286,8 +281,8 @@ public class MessageLogResourceTest {
 
         MessageLogRO messageLogRO = new MessageLogRO();
         messageLogRO.setMessageId("messageId");
-        messageLogRO.setMessageStatus( MessageStatus.ACKNOWLEDGED);
-        messageLogRO.setNotificationStatus( NotificationStatus.REQUIRED);
+        messageLogRO.setMessageStatus(MessageStatus.ACKNOWLEDGED);
+        messageLogRO.setNotificationStatus(NotificationStatus.REQUIRED);
         messageLogRO.setMshRole(MSHRole.RECEIVING);
         messageLogRO.setMessageType(messageType);
         messageLogRO.setDeleted(new Date());
@@ -306,12 +301,13 @@ public class MessageLogResourceTest {
 
     /**
      * Gets a MessageLog based on <code>messageType</code> and <code>messageSubtype</code>
-     * @param messageType Message Type
+     *
+     * @param messageType    Message Type
      * @param messageSubtype Message Subtype
      * @return <code>MessageLogResultRO</code> object
      */
     private MessageLogResultRO getMessageLog(MessageType messageType, MessageSubtype messageSubtype) {
-        return messageLogResource.getMessageLog(1, 10, 10, "MessageId", true,
+        return messageLogResource.getMessageLog(1, 10, "MessageId", true,
                 null, null, null, messageType, null,
                 null, null, null, null, null, null,
                 null, null, messageSubtype);
@@ -319,8 +315,9 @@ public class MessageLogResourceTest {
 
     /**
      * Get a MessageLogInfo List based on <code>messageInfo</code>, <code>date</code> and <code>messageSubtype</code>
-     * @param messageType Message Type
-     * @param date Date
+     *
+     * @param messageType    Message Type
+     * @param date           Date
      * @param messageSubtype Message Subtype
      * @return <code>List</code> of <code>MessageLogInfo</code> objects
      */

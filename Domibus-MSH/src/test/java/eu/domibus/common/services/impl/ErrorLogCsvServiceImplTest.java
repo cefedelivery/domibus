@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -10,6 +11,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,20 +33,20 @@ public class ErrorLogCsvServiceImplTest {
     public void testExportToCsv_EmptyList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>());
+        final String exportToCSV = errorLogCsvService.exportToCSV(new ArrayList<>(), null, null, null);
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
     public void testExportToCsv_NullList() throws CsvException {
         // Given
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(null);
+        final String exportToCSV = errorLogCsvService.exportToCSV(null,null,null,null);
 
         // Then
-        Assert.assertTrue(exportToCSV.isEmpty());
+        Assert.assertTrue(exportToCSV.trim().isEmpty());
     }
 
     @Test
@@ -51,12 +55,16 @@ public class ErrorLogCsvServiceImplTest {
         Date date = new Date();
         List<ErrorLogRO> errorLogROList = getErrorLogList(date);
 
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss'GMT'Z");
+        ZonedDateTime d = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        String csvDate = d.format(f);
+
         // When
-        final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList);
+        final String exportToCSV = errorLogCsvService.exportToCSV(errorLogROList, ErrorLogRO.class, null, null);
 
         // Then
         Assert.assertTrue(exportToCSV.contains("Error Signal Message Id,Msh Role,Message In Error Id,Error Code,Error Detail,Timestamp,Notified"));
-        Assert.assertTrue(exportToCSV.contains("signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+date+","+date));
+        Assert.assertTrue(exportToCSV.contains("signalMessageId,RECEIVING,messageInErrorId,EBMS:0001,errorDetail,"+csvDate+","+csvDate));
     }
 
     private List<ErrorLogRO> getErrorLogList(Date date) {

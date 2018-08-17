@@ -1,24 +1,25 @@
 package eu.domibus.core.alerts.model.persist;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
-@Entity
 @Table(name = "TB_EVENT_PROPERTY")
-public class EventProperty extends AbstractBaseEntity {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Entity
+public abstract class AbstractEventProperty<T> extends AbstractBaseEntity {
+
 
     @NotNull
     @Column(name = "PROPERTY_TYPE")
-    private String key; //NOSONAR
-
-    @NotNull
-    @Column(name = "PROPERTY_VALUE")
-    private String value; //NOSONAR
+    protected String key; //NOSONAR
 
     @NotNull
     @ManyToOne
@@ -33,14 +34,6 @@ public class EventProperty extends AbstractBaseEntity {
         this.key = key;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
     public Event getEvent() {
         return event;
     }
@@ -49,11 +42,6 @@ public class EventProperty extends AbstractBaseEntity {
         this.event = event;
     }
 
-    @Override
-    public String toString() {
-        return "EventProperty{" +
-                "key='" + key + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
+    public abstract T getValue();
+
 }

@@ -1,10 +1,12 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.DomibusCacheService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -84,14 +86,9 @@ public class TruststoreResource {
         String resultText;
         final List<TrustStoreRO> trustStoreROS = trustStoreEntries();
 
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(TrustStoreRO.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.TRUSTSTORE_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(trustStoreROS);
+            resultText = csvServiceImpl.exportToCSV(trustStoreROS, TrustStoreRO.class,
+                    CsvCustomColumns.TRUSTSTORE_RESOURCE.getCustomColumns(), CsvExcludedItems.TRUSTSTORE_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

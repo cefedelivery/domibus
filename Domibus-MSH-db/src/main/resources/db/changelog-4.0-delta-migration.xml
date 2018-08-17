@@ -159,7 +159,7 @@
             COMMIT;
         </sql>
         <sql dbms="oracle">
-            INSERT /*+ append*/ INTO tb_message_ui (
+            INSERT /*+ append*/ INTO TB_MESSAGE_UI (
             id_pk,
             message_id,
             message_status,

@@ -3,8 +3,10 @@ package eu.domibus.web.rest;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.*;
@@ -14,8 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -104,12 +108,12 @@ public class JmsResource {
 
     /**
      * This method returns a CSV file with the contents of JMS Messages table
-     * @param source queue or topic
-     * @param jmsType type of the JMS message
-     * @param fromDate starting date
-     * @param toDate ending date
-     * @param selector jms selector (additional search criteria)
      *
+     * @param source   queue or topic
+     * @param jmsType  type of the JMS message
+     * @param fromDate starting date
+     * @param toDate   ending date
+     * @param selector jms selector (additional search criteria)
      * @return CSV file with the contents of JMS Messages table
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
@@ -127,27 +131,22 @@ public class JmsResource {
                 jmsType,
                 fromDate == null ? null : new Date(fromDate),
                 toDate == null ? null : new Date(toDate),
-                selector);
+                selector)
+                .stream().sorted(Comparator.comparing(JmsMessage::getTimestamp).reversed())
+                .collect(Collectors.toList());
+
         customizeJMSProperties(jmsMessageList);
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(JmsMessage.class);
-
-        // column name customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.JMS_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(jmsMessageList);
+            resultText = csvServiceImpl.exportToCSV(jmsMessageList, JmsMessage.class,
+                    CsvCustomColumns.JMS_RESOURCE.getCustomColumns(), CsvExcludedItems.JMS_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jms"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("jmsmonitoring"))
                 .body(resultText);
     }
 

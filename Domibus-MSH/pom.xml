@@ -324,6 +324,13 @@
             <version>${mail.version}</version>
         </dependency>
 
+        <!-- opencsv -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.2</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>

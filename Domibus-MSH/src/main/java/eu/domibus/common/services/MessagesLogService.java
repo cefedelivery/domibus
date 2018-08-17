@@ -19,8 +19,8 @@ public interface MessagesLogService {
 
     Long countMessages(int size, HashMap<String, Object> filters);
 
-    MessageLogResultRO countAndFindPaged(MessageType messageType, int from, int max, String column, boolean asc, Map<String, Object> filters);
+    MessageLogResultRO countAndFindPaged(MessageType messageType, int from, int max, String orderByColumn, boolean asc, Map<String, Object> filters);
 
-    List<MessageLogInfo> findAllInfoCSV(MessageType messageType, int max,  Map<String, Object> filters);
+    List<MessageLogInfo> findAllInfoCSV(MessageType messageType, int max, String orderByColumn, boolean asc, Map<String, Object> filters);
 
 }

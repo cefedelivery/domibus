@@ -4,9 +4,10 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.common.services.AuditService;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -28,9 +29,7 @@ import javax.ws.rs.QueryParam;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Mircea Musat
@@ -180,21 +179,16 @@ public class PModeResource {
             pModeResponseROList.get(0).setCurrent(true);
         }
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(PModeResponseRO.class);
-
         try {
-            resultText = csvServiceImpl.exportToCSV(pModeResponseROList);
+            resultText = csvServiceImpl.exportToCSV(pModeResponseROList, PModeResponseRO.class,
+                    new HashMap<String, String>(), CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmodearchive"))
                 .body(resultText);
     }
 

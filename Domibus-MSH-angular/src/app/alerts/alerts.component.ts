@@ -55,7 +55,10 @@ export class AlertsComponent {
 
   dynamicFilters = [];
 
-  items=[];
+  dynamicDatesFilter:any = {};
+
+  nonDateParameters = [];
+  alertTypeWithDate:boolean=false;
 
   timestampCreationFromMaxDate: Date = new Date();
   timestampCreationToMinDate: Date = null;
@@ -64,31 +67,34 @@ export class AlertsComponent {
   timestampReportingToMinDate: Date = null;
   timestampReportingToMaxDate: Date = new Date();
 
+  dateFromName:string="";
+  dateToName:string="";
+
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     this.getAlertTypes();
     this.getAlertLevels();
   }
 
-  getAlertTypes() : void {
+  getAlertTypes(): void {
     this.http.get(AlertsComponent.ALERTS_TYPES_URL)
       .map(this.extractData)
       .catch(this.handleError)
       .subscribe(aTypes => this.aTypes = aTypes);
   }
 
-  getAlertLevels() : void {
+  getAlertLevels(): void {
     this.http.get(AlertsComponent.ALERTS_LEVELS_URL)
       .map(this.extractData)
       .catch(this.handleError)
       .subscribe(aLevels => this.aLevels = aLevels);
   }
 
-  private extractData (res: Response) {
+  private extractData(res: Response) {
     let body = res.json();
     return body || {};
   }
 
-  private handleError (error: Response | any) {
+  private handleError(error: Response | any) {
     this.alertService.error(error, false);
     let errMsg: string;
     if (error instanceof Response) {
@@ -104,13 +110,13 @@ export class AlertsComponent {
 
   ngOnInit() {
     this.columnPicker.allColumns = [
-      { name: 'Alert Id', width: 20, prop: "entityId" },
-      { name: 'Processed', cellTemplate: this.rowProcessed, width: 20 },
-      { name: 'Alert Type' },
-      { name: 'Alert Level', width: 50 },
-      { name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
-      { name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155 },
-      { name: 'Parameters', sortable: false }
+      {name: 'Alert Id', width: 20, prop: "entityId"},
+      {name: 'Processed', cellTemplate: this.rowProcessed, width: 20},
+      {name: 'Alert Type'},
+      {name: 'Alert Level', width: 50},
+      {name: 'Creation Time', cellTemplate: this.rowWithDateFormatTpl, width: 155},
+      {name: 'Reporting Time', cellTemplate: this.rowWithDateFormatTpl, width: 155},
+      {name: 'Parameters', sortable: false}
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
@@ -127,35 +133,35 @@ export class AlertsComponent {
     searchParams.set('orderBy', orderBy);
 
     // filters
-    if(this.filter.processed) {
-      searchParams.set('processed', this.filter.processed==='PROCESSED'?'true':'false');
+    if (this.filter.processed) {
+      searchParams.set('processed', this.filter.processed === 'PROCESSED' ? 'true' : 'false');
     }
 
-    if(this.filter.alertType) {
+    if (this.filter.alertType) {
       searchParams.set('alertType', this.filter.alertType);
     }
 
-    if(this.filter.alertId) {
+    if (this.filter.alertId) {
       searchParams.set('alertId', this.filter.alertId);
     }
 
-    if(this.filter.alertLevel) {
+    if (this.filter.alertLevel) {
       searchParams.set('alertLevel', this.filter.alertLevel);
     }
 
-    if(this.filter.creationFrom) {
+    if (this.filter.creationFrom) {
       searchParams.set('creationFrom', this.filter.creationFrom.getTime());
     }
 
-    if(this.filter.creationTo) {
+    if (this.filter.creationTo) {
       searchParams.set('creationTo', this.filter.creationTo.getTime());
     }
 
-    if(this.filter.reportingFrom) {
+    if (this.filter.reportingFrom) {
       searchParams.set('reportingFrom', this.filter.reportingFrom.getTime());
     }
 
-    if(this.filter.reportingTo) {
+    if (this.filter.reportingTo) {
       searchParams.set('reportingTo', this.filter.reportingTo.getTime());
     }
 
@@ -168,6 +174,18 @@ export class AlertsComponent {
         d[filter] = this.dynamicFilters[filter];
       }
       searchParams.set('parameters', d.toString());
+    }
+
+    if(this.alertTypeWithDate){
+      const from = this.dynamicDatesFilter.from;
+      if (from) {
+        searchParams.set('dynamicFrom', from.getTime());
+      }
+
+      const to = this.dynamicDatesFilter.to;
+      if (to) {
+        searchParams.set('dynamicTo', to.getTime());
+      }
     }
 
     if (asc != null) {
@@ -184,7 +202,7 @@ export class AlertsComponent {
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
 
-    this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe( (result: AlertsResult) => {
+    this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe((result: AlertsResult) => {
       console.log("alerts response: " + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
@@ -197,7 +215,7 @@ export class AlertsComponent {
       const newRows = [...result.alertsEntries];
 
       let index = 0;
-      for(let i = start; i <end; i++) {
+      for (let i = start; i < end; i++) {
         newRows[i] = result.alertsEntries[index++];
       }
 
@@ -205,7 +223,7 @@ export class AlertsComponent {
 
       this.loading = false;
 
-      if(this.count > AlertComponent.MAX_COUNT_CSV) {
+      if (this.count > AlertComponent.MAX_COUNT_CSV) {
         this.alertService.error("Maximum number of rows reached for downloading CSV");
       }
     }, (error: any) => {
@@ -225,16 +243,32 @@ export class AlertsComponent {
     return false;//to prevent default navigation
   }
 
-  getAlertParameters(alertType: string) : void {
+  getAlertParameters(alertType: string): Observable<Array<string>> {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('alertType', alertType);
-    this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams})
-      .map(this.extractData)
-      .subscribe( items => this.items = items);
+    return this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams}).map(this.extractData);
+
   }
 
   onAlertTypeChanged(alertType: string) {
-    this.getAlertParameters(alertType);
+    this.nonDateParameters = [];
+    this.alertTypeWithDate=false;
+    this.dynamicFilters=[];
+    this.dynamicDatesFilter=[];
+    let alertParametersObservable = this.getAlertParameters(alertType).flatMap(value => value);
+    const TIME_SUFFIX = '_TIME';
+    const DATE_SUFFIX = '_DATE';
+    let nonDateParamerters = alertParametersObservable.filter(value => {
+      console.log("Value:"+value);
+      return (value.search(TIME_SUFFIX)===-1 && value.search(DATE_SUFFIX)===-1)
+    });
+    nonDateParamerters.subscribe(item=>this.nonDateParameters.push(item));
+    let dateParameters = alertParametersObservable.filter(value => {return value.search(TIME_SUFFIX)>0 || value.search(DATE_SUFFIX)>1});
+    dateParameters.subscribe(item=>{
+      this.dateFromName=item+" FROM";
+      this.dateToName=item+" TO";
+      this.alertTypeWithDate=true;
+    });
   }
 
   onTimestampCreationFromChange(event) {
@@ -289,12 +323,12 @@ export class AlertsComponent {
    * Method that checks if CSV Button export can be enabled
    * @returns {boolean} true, if button can be enabled; and false, otherwise
    */
-  isSaveAsCSVButtonEnabled() : boolean {
+  isSaveAsCSVButtonEnabled(): boolean {
     return this.rows.length < AlertComponent.MAX_COUNT_CSV;
   }
 
   saveAsCSV() {
-    if(!this.buttonsDisabled) {
+    if (!this.buttonsDisabled) {
       this.save(true);
     } else {
       DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + this.getFilterPath());
@@ -304,35 +338,35 @@ export class AlertsComponent {
   private getFilterPath() {
     let result = '?';
     //filters
-    if(this.filter.processed != null) {
-      result += 'processed=' + (this.filter.processed==='PROCESSED') + '&';
+    if (this.filter.processed != null) {
+      result += 'processed=' + (this.filter.processed === 'PROCESSED') + '&';
     }
 
-    if(this.filter.alertType) {
+    if (this.filter.alertType) {
       result += 'alertType=' + this.filter.alertType + '&';
     }
 
-    if(this.filter.alertId) {
+    if (this.filter.alertId) {
       result += 'alertId=' + this.filter.alertId + '&';
     }
 
-    if(this.filter.alertLevel) {
+    if (this.filter.alertLevel) {
       result += 'alertLevel=' + this.filter.alertLevel + '&';
     }
 
-    if(this.filter.creationFrom) {
+    if (this.filter.creationFrom) {
       result += 'creationFrom=' + this.filter.creationFrom.getTime() + '&';
     }
 
-    if(this.filter.creationTo) {
+    if (this.filter.creationTo) {
       result += 'creationTo=' + this.filter.creationTo.getTime() + '&';
     }
 
-    if(this.filter.reportingFrom) {
+    if (this.filter.reportingFrom) {
       result += 'reportingFrom=' + this.filter.reportingFrom.getTime() + '&';
     }
 
-    if(this.filter.reportingTo) {
+    if (this.filter.reportingTo) {
       result += 'reportingTo=' + this.filter.reportingTo.getTime() + '&';
     }
 
@@ -362,7 +396,7 @@ export class AlertsComponent {
         this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(() => {
           this.alertService.success("The operation 'update alerts' completed successfully.", false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
-          if(withDownloadCSV) {
+          if (withDownloadCSV) {
             DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL);
           }
         }, err => {
@@ -370,7 +404,7 @@ export class AlertsComponent {
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
         });
       } else {
-        if(withDownloadCSV) {
+        if (withDownloadCSV) {
           DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL);
         }
       }

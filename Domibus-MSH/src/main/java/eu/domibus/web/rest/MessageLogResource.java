@@ -11,9 +11,10 @@ import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.MessagesLogService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +75,9 @@ public class MessageLogResource {
     @Autowired
     private MessagesLogService messagesLogService;
 
-    /** use TB_MESSAGE_UI table instead of joins, defaults to false */
+    /**
+     * use TB_MESSAGE_UI table instead of joins, defaults to false
+     */
     boolean useFlatTable;
 
     Date defaultFrom;
@@ -96,9 +100,10 @@ public class MessageLogResource {
     public MessageLogResultRO getMessageLog(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -163,25 +168,30 @@ public class MessageLogResource {
 
     /**
      * This method returns a CSV file with the contents of Messages table
-     * @param messageId the message id
-     * @param conversationId the conversation id
-     * @param mshRole the MSH role
-     * @param messageType the message type (SIGNAL_MESSAGE or USER_MESSAGE)
-     * @param messageStatus the message status
-     * @param notificationStatus the notification status
-     * @param fromPartyId the sender party id
-     * @param toPartyId the recipient party id
-     * @param refToMessageId the related message id
-     * @param originalSender the original sender
-     * @param finalRecipient the final recipient
-     * @param receivedFrom received after this date
-     * @param receivedTo received before this date
-     * @param messageSubtype the message subtype
      *
+     * @param orderByColumn      the column to sort rows by
+     * @param asc                true if the sort direction is ascending
+     * @param messageId          the message id
+     * @param conversationId     the conversation id
+     * @param mshRole            the MSH role
+     * @param messageType        the message type (SIGNAL_MESSAGE or USER_MESSAGE)
+     * @param messageStatus      the message status
+     * @param notificationStatus the notification status
+     * @param fromPartyId        the sender party id
+     * @param toPartyId          the recipient party id
+     * @param refToMessageId     the related message id
+     * @param originalSender     the original sender
+     * @param finalRecipient     the final recipient
+     * @param receivedFrom       received after this date
+     * @param receivedTo         received before this date
+     * @param messageSubtype     the message subtype
      * @return CSV file with the contents of Messages table
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
+            @RequestParam(value = "orderBy", required = false) String orderByColumn,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -208,21 +218,15 @@ public class MessageLogResource {
 
         List<MessageLogInfo> resultList;
         if (useFlatTable) {
-            resultList = uiMessageService.findPaged(0, maxCSVrows, null, true, filters);
+            resultList = uiMessageService.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
         } else {
-            resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, filters);
-
+            resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, orderByColumn, asc, filters);
         }
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(MessageLogInfo.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns());
 
         String resultText;
         try {
-            resultText = csvServiceImpl.exportToCSV(resultList);
+            resultText = csvServiceImpl.exportToCSV(resultList, MessageLogInfo.class,
+                    CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), new ArrayList<>());
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
@@ -260,7 +264,7 @@ public class MessageLogResource {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
         SignalMessage signalMessage = messaging.getSignalMessage();
-        if(signalMessage != null) {
+        if (signalMessage != null) {
             String signalMessageId = signalMessage.getMessageInfo().getMessageId();
             SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
 
@@ -279,7 +283,7 @@ public class MessageLogResource {
         return ResponseEntity.notFound().build();
     }
 
-    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype")MessageSubtype messageSubtype) {
+    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype") MessageSubtype messageSubtype) {
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);

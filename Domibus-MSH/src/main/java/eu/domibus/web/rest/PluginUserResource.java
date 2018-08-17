@@ -5,19 +5,23 @@ import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
-import eu.domibus.common.services.CsvService;
 import eu.domibus.common.services.PluginUserService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.PluginUserRO;
 import eu.domibus.web.rest.ro.PluginUserResultRO;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +36,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
  * @since 4.0
  */
 @RestController
@@ -95,11 +99,11 @@ public class PluginUserResource {
 
     /**
      * This method returns a CSV file with the contents of Plugin User table
-     * @param authType the authentication type (BASIC or CERTIFICATE)
-     * @param authRole the authorization role
-     * @param originalUser the original user
-     * @param userName the user name
      *
+     * @param authType     the authentication type (BASIC or CERTIFICATE)
+     * @param authRole     the authorization role
+     * @param originalUser the original user
+     * @param userName     the user name
      * @return CSV file with the contents of Plugin User table
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
@@ -113,30 +117,22 @@ public class PluginUserResource {
         // get list of users
         final PluginUserResultRO pluginUserROList = findUsers(authType, authRole, originalUser, userName, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.USER_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(PluginUserRO.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.USER_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(pluginUserROList.getEntries());
+            resultText = csvServiceImpl.exportToCSV(pluginUserROList.getEntries(), PluginUserRO.class,
+                    CsvCustomColumns.PLUGIN_USER_RESOURCE.getCustomColumns(), CsvExcludedItems.PLUGIN_USER_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("plugin-users"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pluginusers"))
                 .body(resultText);
     }
 
     /**
      * convert plugin users to PluginUserROs.
-     * 
+     *
      * @return a list of PluginUserROs and the pagination info
      */
     private PluginUserResultRO prepareResponse(List<AuthenticationEntity> users, Long count, int pageStart, int pageSize) {

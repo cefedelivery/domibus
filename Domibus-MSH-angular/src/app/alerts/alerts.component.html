@@ -77,15 +77,31 @@
           <div class="panel" *ngIf="isAlertTypeDefined()">
             <md-card>
               <div>
-              <md-card-title>
-                {{filter.alertType}}
-              </md-card-title>
+                <md-card-title>
+                  {{filter.alertType}}
+                </md-card-title>
               </div>
               <md-card-content>
-                <md-input-container *ngFor="let item of items; let i = index">
+                <md-input-container *ngFor="let item of nonDateParameters; let i = index">
                   <input mdInput placeholder={{item}} name={{item}} [(ngModel)]="dynamicFilters[i]"
-                     #{{item}}="ngModel" id={{item}}_id>
+                         #{{item}}="ngModel" id={{item}}_id>
                 </md-input-container>
+                <span *ngIf="alertTypeWithDate">
+                  <md2-datepicker mdInput
+                                  placeholder={{dateFromName}}
+                                  [(ngModel)]="dynamicDatesFilter.from"
+                                  name="from"
+                                  [type]="'datetime'"
+                                  #timestampControl="ngModel" id={{dateFromName}}_id>
+                  </md2-datepicker>
+                  <md2-datepicker mdInput
+                                  placeholder={{dateToName}}
+                                  [(ngModel)]="dynamicDatesFilter.to"
+                                  name="To"
+                                  [type]="'datetime'"
+                                  #timestampControl="ngModel" id={{dateToName}}_id>
+                  </md2-datepicker>
+                </span>
               </md-card-content>
             </md-card>
           </div>
@@ -105,7 +121,8 @@
   </md-card>
 
   <ng-template #rowProcessed let-row="row" let-value="value" ngx-datatable-cell-template>
-    <input autofocus type="checkbox" [checked]="value" id="processed{{row.$$index}}_id" (click)="setProcessedValue(row)"/>
+    <input autofocus type="checkbox" [checked]="value" id="processed{{row.$$index}}_id"
+           (click)="setProcessedValue(row)"/>
   </ng-template>
 
 </div>
@@ -126,7 +143,7 @@
     </button>
   </div>
 
-<!-- Data Table -->
+  <!-- Data Table -->
   <ngx-datatable
     id="alertsTable"
     class="material striped"

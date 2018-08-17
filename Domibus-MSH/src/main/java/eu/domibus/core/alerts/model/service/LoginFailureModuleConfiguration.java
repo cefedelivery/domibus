@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoginFailureModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(LoginFailureModuleConfiguration.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(LoginFailureModuleConfiguration.class);
 
     private final Boolean loginFailureActive;
 

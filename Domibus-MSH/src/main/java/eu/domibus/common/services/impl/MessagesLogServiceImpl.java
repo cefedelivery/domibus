@@ -112,11 +112,11 @@ public class MessagesLogServiceImpl implements MessagesLogService {
     }
 
     @Override
-    public List<MessageLogInfo> findAllInfoCSV(MessageType messageType, int max, Map<String, Object> filters) {
+    public List<MessageLogInfo> findAllInfoCSV(MessageType messageType, int max, String orderByColumn, boolean asc, Map<String, Object> filters) {
 
         return (messageType == MessageType.SIGNAL_MESSAGE ?
-                signalMessageLogDao.findAllInfoPaged(0, max, null, true, filters) :
-                userMessageLogDao.findAllInfoPaged(0, max, null, true, filters));
+                signalMessageLogDao.findAllInfoPaged(0, max, orderByColumn, asc, filters) :
+                userMessageLogDao.findAllInfoPaged(0, max, orderByColumn, asc, filters));
     }
 
 

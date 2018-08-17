@@ -1,11 +1,11 @@
 package eu.domibus.core.alerts.dao;
 
+import eu.domibus.core.alerts.model.persist.StringEventProperty;
 import eu.domibus.dao.InMemoryDataBaseConfig;
 import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
-import eu.domibus.core.alerts.model.persist.EventProperty;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -47,14 +48,14 @@ public class AlertDaoTest {
 
     public void createAlert(String fromParty,String toParty,boolean processed,Date reportingTime){
         Event event=new Event();
-        final EventProperty blue_gw = new EventProperty();
-        blue_gw.setValue(fromParty);
+        final StringEventProperty blue_gw = new StringEventProperty();
+        blue_gw.setStringValue(fromParty);
 
-        final EventProperty red_gw = new EventProperty();
-        red_gw.setValue(toParty);
+        final StringEventProperty red_gw = new StringEventProperty();
+        red_gw.setStringValue(toParty);
 
-        final EventProperty role = new EventProperty();
-        role.setValue("SENDER");
+        final StringEventProperty role = new StringEventProperty();
+        role.setStringValue("SENDER");
 
         event.addProperty("FROM_PARTY", blue_gw);
         event.addProperty("TO_PARTY", red_gw);
@@ -77,6 +78,7 @@ public class AlertDaoTest {
         alertDao.create(alert);
     }
     @Test
+    @Transactional
     public void findRetryAlertsOnParty() {
 
         final AlertCriteria alertCriteria = new AlertCriteria();
@@ -92,6 +94,7 @@ public class AlertDaoTest {
     }
 
     @Test
+    @Transactional
     public void findRetryAlertsOnPartyButProcessed() {
         createAlert("black_gw","red_gw",true,null);
         final AlertCriteria alertCriteria = new AlertCriteria();

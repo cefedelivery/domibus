@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AccountDisabledModuleConfiguration implements AlertModuleConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AccountDisabledModuleConfiguration.class);
+    private static final  Logger LOG = LoggerFactory.getLogger(AccountDisabledModuleConfiguration.class);
 
     private final Boolean accountDisabledActive;
 
