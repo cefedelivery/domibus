@@ -29,11 +29,6 @@ public interface DomibusPropertyProvider {
     falling back to the property from the DEFAULT domain if not found.
      */
 
-    String getDomainProperty(String propertyName);
-
-    String getDomainProperty(String propertyName, String defaultValue);
-
-    String getDomainProperty(Domain domain, String propertyName);
     /**
      * Look for a property in the current domain. If the property is not found, it will search for the property in
      * the following locations and in the respective order:
@@ -41,7 +36,11 @@ public interface DomibusPropertyProvider {
      * @param propertyName the property name.
      * @return the value for that property.
      */
-    String getDomainOrDefaultProperty(String propertyName);
+    String getDomainProperty(String propertyName);
+
+    String getDomainProperty(String propertyName, String defaultValue);
+
+    String getDomainProperty(Domain domain, String propertyName);
 
     String getDomainProperty(Domain domain, String propertyName, String defaultValue);
 

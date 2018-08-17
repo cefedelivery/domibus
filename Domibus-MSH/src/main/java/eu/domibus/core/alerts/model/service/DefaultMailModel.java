@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.model.service;
 
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -8,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultMailModel<T> implements MailModel<T> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(DefaultMailModel.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(DefaultMailModel.class);
 
     private final T model;
 

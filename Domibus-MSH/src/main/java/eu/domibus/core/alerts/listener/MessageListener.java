@@ -5,6 +5,7 @@ import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageListener {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MessageListener.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(MessageListener.class);
 
     @Autowired
     private EventService eventService;

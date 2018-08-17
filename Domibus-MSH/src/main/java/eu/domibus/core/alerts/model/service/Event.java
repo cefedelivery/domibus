@@ -3,6 +3,7 @@ package eu.domibus.core.alerts.model.service;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = Event.class)
 public class Event {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Event.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(Event.class);
 
     private int entityId;
 

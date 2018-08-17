@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class DefaultMessageConverter implements MessageConverter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultMessageConverter.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(DefaultMessageConverter.class);
 
     @Override
     public String getMessage(Marker marker, MessageCode messageCode, Object... args) {

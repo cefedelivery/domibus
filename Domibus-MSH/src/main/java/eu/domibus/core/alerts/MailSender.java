@@ -4,11 +4,11 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
+import eu.domibus.logging.DomibusLoggerFactory;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -29,7 +29,7 @@ import java.util.Set;
 @Component
 public class MailSender {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MailSender.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(MailSender.class);
 
     static final String DOMIBUS_ALERT_SENDER_SMTP_URL = "domibus.alert.sender.smtp.url";
 
@@ -37,11 +37,13 @@ public class MailSender {
 
     static final String DOMIBUS_ALERT_SENDER_SMTP_USER = "domibus.alert.sender.smtp.user";
 
-    static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
+    public static final String DOMIBUS_ALERT_SENDER_SMTP_PASSWORD = "domibus.alert.sender.smtp.password";
 
     static final String DOMIBUS_ALERT_MAIL = "domibus.alert.mail";
 
     private static final String MAIL = ".mail";
+
+    public static final String DOMIBUS_ALERT_MAIL_SENDING_ACTIVE = "domibus.alert.mail.sending.active";
 
     @Autowired
     private Configuration freemarkerConfig;
@@ -63,7 +65,8 @@ public class MailSender {
     protected void initMailSender() {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
-        if (alertModuleEnabled) {
+        final boolean mailActive=Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE));
+        if (alertModuleEnabled && mailActive) {
             //static properties.
             final String url = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);
             final Integer port = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PORT));

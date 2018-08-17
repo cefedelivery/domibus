@@ -6,6 +6,7 @@ import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 @ActiveProfiles("IN_MEMORY_DATABASE")
 public class AlertDaoTest {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertDaoTest.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertDaoTest.class);
 
     @Autowired
     private AlertDao alertDao;

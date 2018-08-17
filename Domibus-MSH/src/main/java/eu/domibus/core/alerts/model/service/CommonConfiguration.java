@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.model.service;
 
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CommonConfiguration {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CommonConfiguration.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(CommonConfiguration.class);
 
 
     private final Integer alertLifeTimeInDays;
@@ -22,6 +23,10 @@ public class CommonConfiguration {
         this.alertLifeTimeInDays = alertLifeTimeInDays;
         this.sendFrom = sendFrom;
         this.sendTo = sendTo;
+    }
+
+    public CommonConfiguration(final Integer alertLifeTimeInDays) {
+        this(alertLifeTimeInDays,"","");
     }
 
 
