@@ -69,6 +69,9 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
         if (res && res.text()) {
           this.current = res.json();
           this.getActivePMode();
+        } else {
+          this.current = null;
+          this.pModeExists = false;
         }
       })
     }
