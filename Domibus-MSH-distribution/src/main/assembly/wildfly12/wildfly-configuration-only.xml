@@ -25,9 +25,7 @@
 
     <files>
         <file>
-            <source>
-                ${project.basedir}/../Domibus-MSH/src/main/conf/domibus/domain_name-domibus.properties
-            </source>
+            <source>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/domain_name-domibus.properties</source>
             <outputDirectory>/</outputDirectory>
             <destName>domain_name-domibus.properties</destName>
             <filtered>false</filtered>
