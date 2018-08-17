@@ -36,6 +36,8 @@ public class Alert {
 
     private Integer maxAttempts;
 
+    private Date nextAttempt;
+
     private Date reportingTimeFailure;
 
     private AlertStatus alertStatus;
@@ -138,6 +140,14 @@ public class Alert {
 
     public void setAlertLevel(AlertLevel alertLevel) {
         this.alertLevel = alertLevel;
+    }
+
+    public Date getNextAttempt() {
+        return nextAttempt;
+    }
+
+    public void setNextAttempt(Date nextAttempt) {
+        this.nextAttempt = nextAttempt;
     }
 
     @Override

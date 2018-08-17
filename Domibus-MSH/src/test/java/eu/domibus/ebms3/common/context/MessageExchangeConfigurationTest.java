@@ -2,7 +2,7 @@ package eu.domibus.ebms3.common.context;
 
 import org.junit.Test;
 
-import static eu.domibus.ebms3.common.context.MessageExchangeConfiguration.SEPARATOR;
+import static eu.domibus.ebms3.common.context.MessageExchangeConfiguration.PMODEKEY_SEPARATOR;
 import static org.junit.Assert.assertEquals;
 /**
  * @author Thomas Dussart
@@ -28,7 +28,7 @@ public class MessageExchangeConfigurationTest {
         assertEquals(service, messageExchangeConfiguration.getService());
         assertEquals(action, messageExchangeConfiguration.getAction());
         assertEquals(leg, messageExchangeConfiguration.getLeg());
-        assertEquals(senderParty+SEPARATOR+receiverParty+SEPARATOR+service+SEPARATOR+action+SEPARATOR+agreementName+SEPARATOR+leg, messageExchangeConfiguration.getPmodeKey());
+        assertEquals(senderParty+PMODEKEY_SEPARATOR+receiverParty+PMODEKEY_SEPARATOR+service+PMODEKEY_SEPARATOR+action+PMODEKEY_SEPARATOR+agreementName+PMODEKEY_SEPARATOR+leg, messageExchangeConfiguration.getPmodeKey());
     }
 
 }
