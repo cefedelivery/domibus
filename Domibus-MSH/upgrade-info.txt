@@ -27,32 +27,37 @@ Domibus 4.0 RC1 (from 3.3.4):
                   the Service@type is not taken into consideration and therefore can take any needed value.
                 - [WebLogic only]
                     Modify file "\conf\domibus\domibus.properties":
-                         o add the folloging property:
+                         o add the following properties:
                              domibus.jms.queue.alert=jms/domibus.internal.alert.queue
-                         o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3(+)-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
+                             domibus.jms.queue.ui.replication=jms/domibus.internal.ui.replication.queue
+                         o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3.4-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
                 - [Tomcat only]
                      Modify file "\conf\domibus\domibus.properties":
-                          o add the folloging property:
+                          o add the following properties:
                               domibus.jms.queue.alert=domibus.internal.alert.queue
+                              domibus.jms.queue.ui.replication=domibus.internal.ui.replication.queue
                           o in file "cef_edelivery_path\domibus\conf\domibus\insternal\activemq.xml":
-                              - in the destinations section add the following queue:
+                              - in the destinations section add the following queuea:
                                          .............................
                                          <destinations>
                                              .............................
                                               <queue id="alertMessageQueue"
                                                                  physicalName="domibus.internal.alert.queue"/>
+                                              <queue id="uiReplicationQueue"
+                                                                 physicalName="domibus.internal.ui.replication.queue"/>
                                              .............................
                                          </destinations>
                                          .............................
-                              -  in the redeliveryPolicyEntries section add the following redeliveryPolicy:
+                              -  in the redeliveryPolicyEntries section add the following entries:
                                              .............................
                                              <redeliveryPolicyEntries>
                                                  .............................
                                                  <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
+                                                 <redeliveryPolicy queue="domibus.internal.ui.replication.queue" maximumRedeliveries="1" redeliveryDelay="10000"/>
                                                  .............................
                                              </redeliveryPolicyEntries>
                                              .............................
-                              -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the droponly parameter:
+                              -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the dropOnly parameter:
                                         E.G:
                                             - original:
                                                 <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
@@ -62,14 +67,20 @@ Domibus 4.0 RC1 (from 3.3.4):
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following property:
                               domibus.jms.queue.alert=jms/domibus.internal.alert.queue
+                              domibus.jms.queue.ui.replication=jms/domibus.internal.ui.replication.queue
                           o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
-                           - add the following queue in the destination section
+                           - add the following queues in the destination section
                                        .............................
                                        <jms-destinations>
                                            .............................
                                             <jms-queue name="DomibusAlertMessageQueue">
                                                 <entry name="java:/jms/domibus.internal.alert.queue"/>
                                                 <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
+                                                <durable>true</durable>
+                                            </jms-queue>
+                                            <jms-queue name="DomibusUIReplicationQueue">
+                                                <entry name="java:/jms/domibus.internal.ui.replication.queue"/>
+                                                <entry name="java:/jms/queue/DomibusUIReplicationQueue"/>
                                                 <durable>true</durable>
                                             </jms-queue>
                                            .............................
@@ -84,6 +95,11 @@ Domibus 4.0 RC1 (from 3.3.4):
                                                   <expiry-address>jms.queue.ExpiryQueue</expiry-address>
                                                   <max-delivery-attempts>1</max-delivery-attempts>
                                                </address-setting>
+                                               <address-setting match="jms.queue.DomibusUIReplicationQueue">
+                                                   <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                                                    <redelivery-delay>1000</redelivery-delay>
+                                                    <max-delivery-attempts>1</max-delivery-attempts>
+                                                 </address-setting>
                                                .............................
                                            </address-settings>
                                            .............................
