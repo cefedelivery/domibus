@@ -1,7 +1,11 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
@@ -70,6 +74,11 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected DomainService domainService;
 
     /**
      * {@inheritDoc}
@@ -142,7 +151,7 @@ public class UserManagementServiceImpl implements UserService {
                 final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
                 if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
                     eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
-                }else if(loginFailureConfiguration.isActive()){
+                } else if (loginFailureConfiguration.isActive()) {
                     eventService.enqueueLoginFailureEvent(userName, new Date(), true);
                 }
                 break;
@@ -171,7 +180,10 @@ public class UserManagementServiceImpl implements UserService {
     protected void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount;
         try {
-            maxAttemptAmount = Integer.valueOf(domibusPropertyProvider.getProperty(MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT));
+            final Domain domain = getCurrentOrDefaultdDomainForUser(user);
+
+            String maxAttemptAmountPropVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT);
+            maxAttemptAmount = Integer.valueOf(maxAttemptAmountPropVal);
         } catch (NumberFormatException n) {
             maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
         }
@@ -192,15 +204,33 @@ public class UserManagementServiceImpl implements UserService {
         userDao.update(user);
     }
 
+    Domain getCurrentOrDefaultdDomainForUser(User user) {
+        String domainCode;
+        boolean isSuperAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals(AuthRole.ROLE_AP_ADMIN.name()));
+        if (isSuperAdmin) {
+            domainCode = domainService.DEFAULT_DOMAIN.getCode();
+        } else {
+            domainCode = userDomainService.getDomainForUser(user.getUserName());
+        }
+        return domainService.getDomain(domainCode);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     @Transactional
-    public void findAndReactivateSuspendedUsers() {
+    public void reactivateSuspendedUsers() {
         int suspensionInterval;
+
+        String suspensionIntervalPropValue;
+        if(domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
+            suspensionIntervalPropValue = domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
+        } else { //for normal users the domain is set as current Domain
+            suspensionIntervalPropValue = domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
+        }
         try {
-            suspensionInterval = Integer.valueOf(domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME));
+            suspensionInterval = Integer.valueOf(suspensionIntervalPropValue);
         } catch (NumberFormatException n) {
             suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
         }
@@ -210,11 +240,11 @@ public class UserManagementServiceImpl implements UserService {
         }
 
         Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
-        List<User> users = userDao.getSuspendedUser(currentTimeMinusSuspensionInterval);
+
+        List<User> users = userDao.getSuspendedUsers(currentTimeMinusSuspensionInterval);
         for (User user : users) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Suspended user [{}] is going to be reactivated.", user.getUserName());
-            }
+            LOG.debug("Suspended user [{}] is going to be reactivated.", user.getUserName());
+
             user.setSuspensionDate(null);
             user.setAttemptCount(0);
             user.setActive(true);
