@@ -1,9 +1,9 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {PartyService} from './party.service';
-import {PartyResponseRo, ProcessRo, ProcessInfoRo, PartyFilteredResult, CertificateRo} from './party';
+import {CertificateRo, PartyFilteredResult, PartyResponseRo, ProcessRo} from './party';
 import {Observable} from 'rxjs/Observable';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
@@ -149,12 +149,12 @@ export class PartyComponent implements OnInit, DirtyOperations {
         width: 10
       },
       {
-        name: 'End point',
+        name: 'End Point',
         prop: 'endpoint',
         width: 150
       },
       {
-        name: 'Party id',
+        name: 'Party Id',
         prop: 'joinedIdentifiers',
         width: 10
       },
