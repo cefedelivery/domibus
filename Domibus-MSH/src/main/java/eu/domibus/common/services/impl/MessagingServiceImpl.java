@@ -36,17 +36,11 @@ public class MessagingServiceImpl implements MessagingService {
     @Autowired
     MessagingDao messagingDao;
 
-    private Storage storage;
-
     @Autowired
     StorageProvider storageProvider;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
-
-    public void setStorage(Storage storage) {
-        this.storage = storage;
-    }
 
     @Override
     public void storeMessage(Messaging messaging, MSHRole mshRole) throws CompressionException {
@@ -76,7 +70,7 @@ public class MessagingServiceImpl implements MessagingService {
         final boolean compressed = isCompressed(partInfo);
 
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        Storage currentStorage = this.storage == null ? storageProvider.forDomain(currentDomain) : this.storage;
+        Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.info("Retrieved Storage ben for domain [{}]", currentDomain);
         if(currentStorage == null)
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
