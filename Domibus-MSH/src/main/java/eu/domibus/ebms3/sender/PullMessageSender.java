@@ -94,7 +94,6 @@ public class PullMessageSender {
     private Executor executor;
 
     @SuppressWarnings("squid:S2583") //TODO: SONAR version updated!
-   // @JmsListener(destination = "${domibus.jms.queue.pull}", containerFactory = "pullJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     //@TODO unit test this method.
     public void processPullRequest(final Message map) {
@@ -110,13 +109,13 @@ public class PullMessageSender {
             return;
         }
         LOG.debug("Initiate pull request");
-        boolean notifiyBusinessOnError = false;
+        boolean notifyBusinessOnError = false;
         Messaging messaging = null;
         String messageId = null;
         try {
             final String mpc = map.getStringProperty(PullContext.MPC);
             final String pMode = map.getStringProperty(PullContext.PMODE_KEY);
-            notifiyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
+            notifyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
             SignalMessage signalMessage = new SignalMessage();
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
@@ -161,7 +160,7 @@ public class PullMessageSender {
             throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Error handling new UserMessage", e);
         } catch (final EbMS3Exception e) {
             try {
-                if (notifiyBusinessOnError && messaging != null) {
+                if (notifyBusinessOnError && messaging != null) {
                     backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                 }
             } catch (Exception ex) {

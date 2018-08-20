@@ -142,7 +142,7 @@ public class ErrorHandling extends AbstractBaseEntity {
         this.businessErrorNotifyConsumer = value;
     }
 
-    /**Agreements
+    /**
      * Gets the value of the deliveryFailureNotifyProducer property.
      * @return the value of the deliveryFailureNotifyProducer property.
      */

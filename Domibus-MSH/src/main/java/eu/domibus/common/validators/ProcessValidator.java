@@ -32,19 +32,19 @@ public class ProcessValidator {
 
     /**
      * In the case of pull process some restrictions are applied to the configuration.
-     * This method validate that the configuration is in synch with the restrictions.
+     * This method validate that the configuration is in sync with the restrictions.
      *
      * @param pullProcesses the list of potential pull processes.
-     * @throws PModeException in case of process missconfiguration
+     * @throws PModeException in case of process misconfiguration
      */
 
     @Transactional(propagation = Propagation.SUPPORTS, noRollbackFor = PModeException.class)
     public void validatePullProcess(List<Process> pullProcesses) {
         Set<PullProcessStatus> pullProcessStatuses = verifyPullProcessStatus(pullProcesses);
         if (!uniqueCorrectlyConfiguredPullProcess(pullProcessStatuses)) {
-            LOG.warn("There is a missconfiguration with pull processes:");
+            LOG.warn("There is a misconfiguration with pull processes:");
             for (Process process : pullProcesses) {
-                LOG.warn("Procces name:" + process.getName());
+                LOG.warn("Process name:" + process.getName());
             }
             throw new PModeException(DomibusCoreErrorCode.DOM_003, createWarningMessage(pullProcessStatuses));
         }

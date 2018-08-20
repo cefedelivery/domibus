@@ -38,6 +38,9 @@ public class PullJmsListenerConfigurer implements JmsListenerConfigurer {
     @Autowired
     protected PullJmsListenerContainerFactoryFactory pullJmsListenerContainerFactoryFactory;
 
+    @Autowired
+    PullMessageSender pullMessageSender;
+
     protected Map<Domain, SimpleJmsListenerEndpoint> instances = new HashMap<>();
 
     @Override
@@ -57,7 +60,7 @@ public class PullJmsListenerConfigurer implements JmsListenerConfigurer {
         endpoint.setId("pullMessageSender_" + domain.getCode());
         endpoint.setDestination(domibusPropertyProvider.getProperty("domibus.jms.queue.pull"));
 
-        endpoint.setMessageListener(new PullMessageSender()::processPullRequest);
+        endpoint.setMessageListener(pullMessageSender::processPullRequest);
 
         DefaultJmsListenerContainerFactory fact = pullJmsListenerContainerFactoryFactory.create(domain);
 

@@ -48,7 +48,7 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
 
-    private static final String DEFAULT_LOGING_ATTEMPT = "5";
+    private static final String DEFAULT_LOGIN_ATTEMPT = "5";
 
     @Autowired
     protected UserDao userDao;
@@ -180,12 +180,12 @@ public class UserManagementServiceImpl implements UserService {
     protected void applyAccountLockingPolicy(User user) {
         int maxAttemptAmount;
         try {
-            final Domain domain = getCurrentOrDefaultdDomainForUser(user);
+            final Domain domain = getCurrentOrDefaultDomainForUser(user);
 
-            String maxAttemptAmountPropVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGING_ATTEMPT);
+            String maxAttemptAmountPropVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGIN_ATTEMPT);
             maxAttemptAmount = Integer.valueOf(maxAttemptAmountPropVal);
         } catch (NumberFormatException n) {
-            maxAttemptAmount = Integer.valueOf(DEFAULT_LOGING_ATTEMPT);
+            maxAttemptAmount = Integer.valueOf(DEFAULT_LOGIN_ATTEMPT);
         }
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
@@ -204,7 +204,7 @@ public class UserManagementServiceImpl implements UserService {
         userDao.update(user);
     }
 
-    Domain getCurrentOrDefaultdDomainForUser(User user) {
+    private Domain getCurrentOrDefaultDomainForUser(User user) {
         String domainCode;
         boolean isSuperAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals(AuthRole.ROLE_AP_ADMIN.name()));
         if (isSuperAdmin) {
