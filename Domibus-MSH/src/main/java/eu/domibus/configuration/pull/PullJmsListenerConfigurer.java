@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-@DependsOn("springContextProvider")
 @EnableJms
 public class PullJmsListenerConfigurer implements JmsListenerConfigurer {
 

@@ -25,7 +25,6 @@ import java.util.Map;
  * @since 4.0
  */
 @Configuration
-@DependsOn("springContextProvider")
 public class MessageListenerContainerConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageListenerContainerConfiguration.class);

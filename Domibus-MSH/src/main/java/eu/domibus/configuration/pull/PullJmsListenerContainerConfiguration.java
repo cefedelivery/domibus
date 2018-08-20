@@ -23,7 +23,6 @@ import java.util.Optional;
  * @since 4.0
  */
 @Configuration
-@DependsOn("springContextProvider")
 public class PullJmsListenerContainerConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullJmsListenerContainerConfiguration.class);
