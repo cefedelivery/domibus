@@ -85,8 +85,8 @@ public class PartyId extends AbstractBaseEntity implements Comparable<PartyId> {
 
         final PartyId partyId = (PartyId) o;
 
-        if (this.type != null ? !this.type.equals(partyId.type) : partyId.type != null) return false;
-        return this.value.equals(partyId.value);
+        if (this.type != null ? !this.type.equalsIgnoreCase(partyId.type) : partyId.type != null) return false;
+        return this.value.equalsIgnoreCase(partyId.value);
 
     }
 

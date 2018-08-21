@@ -62,7 +62,7 @@ public class PullContext {
             Collection<LegConfiguration> filter = Collections2.filter(process.getLegs(), new Predicate<LegConfiguration>() {
                 @Override
                 public boolean apply(LegConfiguration legConfiguration) {
-                    return mpcQualifiedName.equals(legConfiguration.getDefaultMpc().getQualifiedName());
+                    return mpcQualifiedName.equalsIgnoreCase(legConfiguration.getDefaultMpc().getQualifiedName());
                 }
             });
             return filter.iterator().next();

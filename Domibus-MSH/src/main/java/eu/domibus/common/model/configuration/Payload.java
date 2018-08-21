@@ -188,7 +188,7 @@ public class Payload extends AbstractBaseEntity {
 
         final Payload payload = (Payload) o;
 
-        if (!name.equals(payload.name)) return false;
+        if (!name.equalsIgnoreCase(payload.name)) return false;
 
         return true;
     }

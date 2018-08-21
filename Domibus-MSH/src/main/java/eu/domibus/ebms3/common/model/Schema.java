@@ -95,9 +95,9 @@ public class Schema {
 
         final Schema schema = (Schema) o;
 
-        if (location != null ? !location.equals(schema.location) : schema.location != null) return false;
-        if (namespace != null ? !namespace.equals(schema.namespace) : schema.namespace != null) return false;
-        if (version != null ? !version.equals(schema.version) : schema.version != null) return false;
+        if (location != null ? !location.equalsIgnoreCase(schema.location) : schema.location != null) return false;
+        if (namespace != null ? !namespace.equalsIgnoreCase(schema.namespace) : schema.namespace != null) return false;
+        if (version != null ? !version.equalsIgnoreCase(schema.version) : schema.version != null) return false;
 
         return true;
     }

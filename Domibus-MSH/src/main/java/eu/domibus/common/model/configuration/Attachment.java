@@ -38,7 +38,7 @@ public class Attachment {
 
         final Attachment that = (Attachment) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

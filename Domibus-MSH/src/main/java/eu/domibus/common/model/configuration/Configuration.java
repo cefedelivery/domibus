@@ -55,7 +55,7 @@ public class Configuration extends AbstractBaseEntity {
 
     private void initParty() {
         for (final Party party1 : this.businessProcesses.getParties()) {
-            if (party1.getName().equals(this.partyXml)) {
+            if (party1.getName().equalsIgnoreCase(this.partyXml)) {
                 this.party = party1;
                 break;
             }

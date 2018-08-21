@@ -90,8 +90,8 @@ public class Service {
 
         final Service service = (Service) o;
 
-        if (this.type != null ? !this.type.equals(service.type) : service.type != null) return false;
-        return this.value.equals(service.value);
+        if (this.type != null ? !this.type.equalsIgnoreCase(service.type) : service.type != null) return false;
+        return this.value.equalsIgnoreCase(service.value);
 
     }
 
