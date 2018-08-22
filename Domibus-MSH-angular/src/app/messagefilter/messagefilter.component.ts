@@ -318,10 +318,6 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
   }
 
-  isSaveAsCSVButtonEnabled (): boolean {
-    return (this.rows.length < 10000);
-  }
-
   saveAsCSV () {
     if (this.isDirty()) {
       this.saveDialog(true);

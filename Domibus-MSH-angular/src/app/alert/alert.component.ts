@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AlertService} from './alert.service';
 
 @Component({
@@ -8,8 +8,8 @@ import {AlertService} from './alert.service';
   styleUrls: ['./alert.component.css']
 })
 
-export class AlertComponent {
-  public static readonly MAX_COUNT_CSV: number = 5;
+export class AlertComponent implements OnInit {
+  public static readonly MAX_COUNT_CSV: number = 10000;
   public static readonly CSV_ERROR_MESSAGE = 'Maximum number of rows reached for downloading CSV';
 
   message: any;
