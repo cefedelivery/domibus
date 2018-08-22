@@ -142,10 +142,6 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     this.getUserRoles();
 
-    if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
-      this.alertService.error('Maximum number of rows reached for downloading CSV');
-    }
-
     this.dirty = false;
     this.areRowsDeleted = false;
   }
@@ -248,7 +244,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
-    if(editForm.userForm.dirty) {
+    if (editForm.userForm.dirty) {
       if (UserState[UserState.PERSISTED] === user.status) {
         user.status = UserState[UserState.UPDATED]
       }
@@ -341,15 +337,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-
-  /**
-   * Method that checks if CSV Button export can be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  isSaveAsCSVButtonEnabled (): boolean {
-    return this.users.length < AlertComponent.MAX_COUNT_CSV;
-  }
-
   /**
    * Saves the content of the datatable into a CSV file
    */
@@ -357,6 +344,11 @@ export class UserComponent implements OnInit, DirtyOperations {
     if (this.isDirty()) {
       this.save(true);
     } else {
+      if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+        return;
+      }
+
       DownloadService.downloadNative(UserComponent.USER_CSV_URL);
     }
   }

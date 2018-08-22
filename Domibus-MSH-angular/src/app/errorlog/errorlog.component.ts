@@ -194,10 +194,6 @@ export class ErrorLogComponent implements AfterViewInit {
       this.errorCodes = result.errorCodes;
 
       this.loading = false;
-
-      if (this.count > AlertComponent.MAX_COUNT_CSV) {
-        this.alertService.error('Maximum number of rows reached for downloading CSV');
-      }
     }, (error: any) => {
       console.log('error getting the error log:' + error);
       this.loading = false;
@@ -272,11 +268,12 @@ export class ErrorLogComponent implements AfterViewInit {
     });
   }
 
-  isSaveAsCSVButtonEnabled () {
-    return (this.count < AlertComponent.MAX_COUNT_CSV);
-  }
-
   saveAsCSV () {
+    if (this.count > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.createSearchParams().toString());
   }
 
