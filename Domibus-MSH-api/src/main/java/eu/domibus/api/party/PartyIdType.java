@@ -9,8 +9,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 
 public class PartyIdType {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PartyIdType.class);
-
     protected String name;
 
     protected String value;

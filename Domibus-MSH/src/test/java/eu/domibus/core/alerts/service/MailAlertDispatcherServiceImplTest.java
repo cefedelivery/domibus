@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.service;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.MailSender;
 import eu.domibus.core.alerts.model.common.AlertStatus;
 import eu.domibus.core.alerts.model.service.Alert;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.AddressException;
 
+import static eu.domibus.core.alerts.MailSender.DOMIBUS_ALERT_MAIL_SENDING_ACTIVE;
 import static org.junit.Assert.*;
 
 /**
@@ -33,6 +35,9 @@ public class MailAlertDispatcherServiceImplTest {
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
+
     @Test
     public void dispatch(@Mocked final Alert alert,@Mocked final MailModel mailModelForAlert) {
         final String from = "sender.test@test.test";
@@ -44,6 +49,8 @@ public class MailAlertDispatcherServiceImplTest {
             result = from;
             multiDomainAlertConfigurationService.getCommonConfiguration().getSendTo();
             result = to;
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE);
+            result=true;
         }};
         mailAlertDispatcherService.dispatch(alert);
         new VerificationsInOrder(){{
@@ -67,6 +74,8 @@ public class MailAlertDispatcherServiceImplTest {
             result = from;
             multiDomainAlertConfigurationService.getCommonConfiguration().getSendTo();
             result = to;
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE);
+            result=true;
             mailSender.sendMail(
                     mailModelForAlert,
                     from,

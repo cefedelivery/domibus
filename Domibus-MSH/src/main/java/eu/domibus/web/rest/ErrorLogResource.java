@@ -12,6 +12,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -39,7 +40,7 @@ import java.util.Properties;
 @RequestMapping(value = "/rest/errorlogs")
 public class ErrorLogResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ErrorLogResource.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(ErrorLogResource.class);
 
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
 

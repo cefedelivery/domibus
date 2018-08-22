@@ -2,6 +2,7 @@ package eu.domibus.core.pull;
 
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ebms3.common.model.To;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.Set;
  */
 public class ToExtractor implements PartyIdExtractor {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ToExtractor.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(ToExtractor.class);
 
     private To to;
 

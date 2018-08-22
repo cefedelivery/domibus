@@ -17,6 +17,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventServiceImpl.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(EventServiceImpl.class);
 
     static final String MESSAGE_EVENT_SELECTOR = "message";
 

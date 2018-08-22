@@ -10,6 +10,7 @@ import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
@@ -57,7 +58,7 @@ public class AuthenticationResourceTest {
 
 
     @Test
-    public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil, @Mocked final LoggerFactory loggerFactory) throws Exception {
+    public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil) throws Exception {
         User user = new User("user", "user");
         LoginRO loginRO = new LoginRO();
         loginRO.setUsername("user");
@@ -75,8 +76,6 @@ public class AuthenticationResourceTest {
             String message;
             WarningUtil.warnOutput(message = withCapture());
             assertEquals("user is using default password.", message);
-            LOG.warn(withAny(""));
-            times = 1;
         }};
     }
 

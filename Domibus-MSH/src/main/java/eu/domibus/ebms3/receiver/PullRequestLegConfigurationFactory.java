@@ -3,6 +3,7 @@ package eu.domibus.ebms3.receiver;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PullRequest;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.headers.Header;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Qualifier("pullRequestLegConfigurationFactory")
 public class PullRequestLegConfigurationFactory extends AbstractMessageLegConfigurationFactory {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PullRequestLegConfigurationFactory.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(PullRequestLegConfigurationFactory.class);
 
     @Override
     protected LegConfigurationExtractor getConfiguration(SoapMessage soapMessage, Messaging messaging) {

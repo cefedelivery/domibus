@@ -10,6 +10,7 @@ import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import java.util.stream.IntStream;
 @RequestMapping(value = "/rest/alerts")
 public class AlertResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlertResource.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertResource.class);
 
     @Autowired
     private AlertService alertService;

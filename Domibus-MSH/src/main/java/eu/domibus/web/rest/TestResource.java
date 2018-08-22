@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = "/rest/test")
 public class TestResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestResource.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(TestResource.class);
 
     @RequestMapping(value = "testPost", method = RequestMethod.POST)
     public UserRO testPost(@RequestBody LoginRO loginRO, HttpServletRequest request) {
