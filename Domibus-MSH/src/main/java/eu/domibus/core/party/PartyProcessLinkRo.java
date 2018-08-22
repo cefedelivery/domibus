@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PartyProcessLinkRo {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PartyProcessLinkRo.class);
-
     private int entity_id;
 
     private String processName;

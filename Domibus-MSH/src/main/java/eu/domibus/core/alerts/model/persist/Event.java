@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.model.persist;
 
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.*;
 @Table(name = "TB_EVENT")
 public class Event extends AbstractBaseEntity {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Event.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(Event.class);
 
     @Column(name = "EVENT_TYPE")
     @Enumerated(EnumType.STRING)

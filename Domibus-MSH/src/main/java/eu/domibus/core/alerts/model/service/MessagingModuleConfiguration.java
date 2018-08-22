@@ -4,6 +4,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.MessageEvent;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
  */
 public class MessagingModuleConfiguration implements AlertModuleConfiguration {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MessagingModuleConfiguration.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(MessagingModuleConfiguration.class);
 
     private final boolean messageCommunicationActive;
 

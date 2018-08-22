@@ -2,6 +2,7 @@ package eu.domibus.core.pull;
 
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.Set;
  */
 public class PartyExtractor implements PartyIdExtractor {
 
-    private final static Logger LOG = LoggerFactory.getLogger(PartyExtractor.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(PartyExtractor.class);
 
     private final Party party;
 

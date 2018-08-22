@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.persist.*;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ import java.util.Map;
 @Repository
 public class AlertDao extends BasicDao<Alert> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlertDao.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertDao.class);
 
     public AlertDao() {
         super(Alert.class);

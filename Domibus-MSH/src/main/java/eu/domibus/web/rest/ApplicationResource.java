@@ -8,6 +8,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import org.slf4j.Logger;
@@ -29,8 +30,10 @@ import java.util.List;
 @RequestMapping(value = "/rest/application")
 public class ApplicationResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApplicationResource.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(ApplicationResource.class);
+
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
+
     protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
     @Autowired

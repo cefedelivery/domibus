@@ -8,6 +8,7 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.sender.MSHDispatcher;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.util.MessageUtil;
 import org.apache.neethi.Policy;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ import java.util.Set;
 @Component
 public class PullReceiptSender {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PullReceiptSender.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(PullReceiptSender.class);
 
     @Autowired
     private MSHDispatcher mshDispatcher;

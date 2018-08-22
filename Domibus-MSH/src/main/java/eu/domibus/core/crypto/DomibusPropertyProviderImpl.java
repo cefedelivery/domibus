@@ -84,6 +84,9 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
 
+    /**
+     *{@inheritDoc}
+     */
     @Override
     public String getDomainProperty(String propertyName) {
         final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();

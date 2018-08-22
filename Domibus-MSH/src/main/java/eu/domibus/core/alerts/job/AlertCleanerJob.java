@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.job;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.core.alerts.service.AlertService;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.quartz.DomibusQuartzJobBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @DisallowConcurrentExecution
 public class AlertCleanerJob extends DomibusQuartzJobBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AlertCleanerJob.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertCleanerJob.class);
 
     @Autowired
     private AlertService alertService;

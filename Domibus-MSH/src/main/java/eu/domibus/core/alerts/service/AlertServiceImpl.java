@@ -12,6 +12,7 @@ import eu.domibus.core.alerts.model.persist.Event;
 import eu.domibus.core.alerts.model.service.DefaultMailModel;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ import static eu.domibus.core.alerts.model.common.AlertStatus.*;
 @Service
 public class AlertServiceImpl implements AlertService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlertServiceImpl.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertServiceImpl.class);
 
     static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
 
@@ -80,7 +81,7 @@ public class AlertServiceImpl implements AlertService {
         alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
         alert.setAttempts(0);
-        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
+        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
         alert.setAlertStatus(SEND_ENQUEUED);
         alert.setCreationTime(new Date());
 
@@ -142,7 +143,7 @@ public class AlertServiceImpl implements AlertService {
         LOG.debug("Alert[{}]: send unsuccessfully",alert.getEntityId());
         if (attempts < maxAttempts) {
             LOG.debug("Alert[{}]: send attempts[{}], max attempts[{}]",alert.getEntityId(),attempts,maxAttempts);
-            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getProperty(DOMIBUS_ALERT_RETRY_TIME));
+            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_TIME));
             final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
             alertEntity.setAttempts(attempts);
