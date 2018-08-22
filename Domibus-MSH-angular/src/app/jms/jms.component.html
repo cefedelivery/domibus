@@ -5,8 +5,8 @@
       <div class="panel">
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
-                   id="jmsQueueSelector" style="width: 45%">
-          <md-option *ngFor="let queue of queues" [value]="queue" style="width:95%">
+                   id="jmsQueueSelector" style="width:40%;">
+          <md-option *ngFor="let queue of queues" [value]="queue" class="queue-combo-item">
             {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
@@ -59,7 +59,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                        (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()"
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>

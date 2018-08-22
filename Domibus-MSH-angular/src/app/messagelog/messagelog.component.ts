@@ -263,7 +263,7 @@ export class MessageLogComponent implements OnInit {
     this.loading = true;
 
     this.getMessageLogEntries(offset, pageSize, orderBy, asc).subscribe((result: MessageLogResult) => {
-      console.log('messageLog response:' + result);
+      // console.log('messageLog response:' + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
       this.orderBy = orderBy;
@@ -297,10 +297,6 @@ export class MessageLogComponent implements OnInit {
       this.msgStatus = result.msgStatus;
       this.notifStatus = result.notifStatus;
       this.loading = false;
-
-      if (this.count > AlertComponent.MAX_COUNT_CSV) {
-        this.alertService.error('Maximum number of rows reached for downloading CSV');
-      }
     }, (error: any) => {
       console.log('error getting the message log:' + error);
       this.loading = false;
@@ -413,11 +409,12 @@ export class MessageLogComponent implements OnInit {
     this.downloadMessage(this.selected[0].messageId);
   }
 
-  isSaveAsCSVButtonEnabled (): boolean {
-    return (this.count <= AlertComponent.MAX_COUNT_CSV);
-  }
-
   saveAsCSV () {
+    if (this.count > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     DownloadService.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + '/csv?' + this.createSearchParams().toString());
   }
 

@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.model.service;
 
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ImminentExpirationCertificateModuleConfiguration implements AlertModuleConfiguration {
 
-    private static final  Logger LOG = LoggerFactory.getLogger(ImminentExpirationCertificateModuleConfiguration.class);
+    private static final  Logger LOG = DomibusLoggerFactory.getLogger(ImminentExpirationCertificateModuleConfiguration.class);
 
     private final Boolean imminentExpirationActive;
 

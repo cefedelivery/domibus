@@ -3,10 +3,8 @@ package eu.domibus.core.alerts.model.service;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.AlertStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.domibus.core.alerts.model.common.AlertType;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -17,8 +15,6 @@ import java.util.Set;
  */
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = Alert.class)
 public class Alert {
-
-    private final static Logger LOG = LoggerFactory.getLogger(Alert.class);
 
     private int entityId;
 

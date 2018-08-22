@@ -9,6 +9,7 @@ import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.core.multitenancy.dao.UserDomainEntity;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.List;
 @Service
 public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceMultiDomainImpl.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(UserDomainServiceMultiDomainImpl.class);
 
     @Autowired
     protected DomainTaskExecutor domainTaskExecutor;

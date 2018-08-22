@@ -17,6 +17,7 @@ import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/messagelog")
 public class MessageLogResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(MessageLogResource.class);
 
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
     private static final String RECEIVED_FROM_STR = "receivedFrom";

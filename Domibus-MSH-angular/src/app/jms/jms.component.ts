@@ -229,11 +229,6 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.loading = false;
 
         this.updateSelectedQueueInfo();
-
-        if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
-          this.alertService.error('Maximum number of rows reached for downloading CSV');
-        }
-
       },
       error => {
         this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
@@ -420,10 +415,6 @@ export class JmsComponent implements OnInit, DirtyOperations {
     )
   }
 
-  isSaveAsCSVButtonEnabled () {
-    return (this.rows.length < AlertComponent.MAX_COUNT_CSV);
-  }
-
   getFilterPath () {
     let result = '?';
     if (!isNullOrUndefined(this.request.source)) {
@@ -449,12 +440,16 @@ export class JmsComponent implements OnInit, DirtyOperations {
       this.alertService.error('Source should be set');
       return;
     }
+    if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     DownloadService.downloadNative('rest/jms/csv' + this.getFilterPath());
   }
 
   isDirty (): boolean {
     return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
-
 
 }

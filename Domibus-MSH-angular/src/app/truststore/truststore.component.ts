@@ -33,7 +33,6 @@ export class TruststoreComponent implements OnInit {
   loading: boolean;
 
   rows: Array<any> = [];
-
   offset: number;
 
   constructor (private trustStoreService: TrustStoreService, public dialog: MdDialog, public alertService: AlertService) {
@@ -79,10 +78,6 @@ export class TruststoreComponent implements OnInit {
     this.offset = 0;
 
     this.getTrustStoreEntries();
-
-    if (this.trustStoreEntries.length > AlertComponent.MAX_COUNT_CSV) {
-      this.alertService.error('Maximum number of rows reached for downloading CSV');
-    }
   }
 
   getTrustStoreEntries (): void {
@@ -126,19 +121,15 @@ export class TruststoreComponent implements OnInit {
   }
 
   /**
-   * Method that checks if CSV Button export can be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  isSaveAsCSVButtonEnabled (): boolean {
-    return this.rows.length < AlertComponent.MAX_COUNT_CSV;
-  }
-
-  /**
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV () {
+    if (this.trustStoreEntries.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     DownloadService.downloadNative(TruststoreComponent.TRUSTSTORE_CSV_URL);
   }
-
 
 }

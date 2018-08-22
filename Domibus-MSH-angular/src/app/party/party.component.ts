@@ -176,11 +176,12 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.refresh();
   }
 
-  isSaveAsCSVButtonEnabled () {
-    return (this.count < AlertComponent.MAX_COUNT_CSV);
-  }
-
   saveAsCSV () {
+    if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process, this.process_role);
   }
 
@@ -241,7 +242,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   remove () {
     const deletedParty = this.selected[0];
-    if(!deletedParty) return;
+    if (!deletedParty) return;
 
     this.rows.splice(this.rows.indexOf(deletedParty), 1);
     this.allRows.splice(this.rows.indexOf(deletedParty), 1);

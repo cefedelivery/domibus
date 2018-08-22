@@ -4,6 +4,7 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.io.IOException;
  */
 public class SetDomainFilter extends GenericFilterBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SetDomainFilter.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(SetDomainFilter.class);
 
     @Autowired
     protected DomainContextProvider domainContextProvider;

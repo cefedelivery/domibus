@@ -5,6 +5,7 @@ import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.MessageFilterCsvServiceImpl;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
@@ -30,7 +31,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/messagefilters")
 public class MessageFilterResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageFilterResource.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(MessageFilterResource.class);
 
     @Autowired
     RoutingService routingService;
