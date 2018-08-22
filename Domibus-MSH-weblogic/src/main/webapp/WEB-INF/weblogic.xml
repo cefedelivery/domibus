@@ -6,6 +6,7 @@
     <context-root>/domibus-weblogic</context-root>
     <container-descriptor>
         <prefer-application-packages>
+            <package-name>com.google.*</package-name>
             <package-name>org.codehaus.stax2.*</package-name>
             <package-name>org.bouncycastle.*</package-name>
             <package-name>org.apache.wss4j.*</package-name>
