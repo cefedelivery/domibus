@@ -29,6 +29,14 @@ public interface DomibusPropertyProvider {
     falling back to the property from the DEFAULT domain if not found.
      */
 
+    /**
+     * Look for a property in the active domain configuration file.. If the property is not found, it will search for the property in
+     * the following locations and in the respective order:
+     * conf/domibus.properties, classpath://domibus.properties, classpath://domibus-default.properties
+     *
+     * @param propertyName the property name.
+     * @return the value for that property.
+     */
     String getDomainProperty(String propertyName);
 
     String getDomainProperty(String propertyName, String defaultValue);

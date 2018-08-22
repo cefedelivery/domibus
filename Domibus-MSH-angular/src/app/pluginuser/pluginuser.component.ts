@@ -138,10 +138,6 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.userRoles = result;
   }
 
-  canSaveAsCSV (): boolean {
-    return !this.loading && this.users.length > 0 && this.users.length < AlertComponent.MAX_COUNT_CSV;
-  }
-
   onActivate (event) {
     if ('dblclick' === event.type) {
       this.edit(event.row);
@@ -268,6 +264,11 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async saveAsCSV () {
     const ok = await this.checkIsDirty();
     if (ok) {
+      if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+        return;
+      }
+
       DownloadService.downloadNative(PluginUserService.CSV_URL + '?'
         + this.pluginUserService.createFilterParams(this.filter).toString());
     }

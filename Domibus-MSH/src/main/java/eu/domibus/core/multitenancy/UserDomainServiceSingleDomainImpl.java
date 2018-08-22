@@ -3,6 +3,7 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.List;
 @Service
 public class UserDomainServiceSingleDomainImpl implements UserDomainService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserDomainServiceSingleDomainImpl.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(UserDomainServiceSingleDomainImpl.class);
 
     /**
      * Get the domain associated to the provided user. <br>

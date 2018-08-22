@@ -4,7 +4,7 @@
     <md-card>
       <md-card-content>
         <form name="messageFilterForm" #messageFilterForm="ngForm">
-          <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+          <button md-icon-button color="primary" (click)="saveAsCSV()"
                   id="saveascsvbutton_id" md-tooltip="Export as CSV">
             <img src="assets/images/exportCSV.svg" width="30" height="30">
           </button>

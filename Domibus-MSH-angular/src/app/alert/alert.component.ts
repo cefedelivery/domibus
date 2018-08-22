@@ -1,5 +1,5 @@
-import {Component} from "@angular/core";
-import {AlertService} from "./alert.service";
+import {Component, OnInit} from '@angular/core';
+import {AlertService} from './alert.service';
 
 @Component({
   moduleId: module.id,
@@ -8,18 +8,22 @@ import {AlertService} from "./alert.service";
   styleUrls: ['./alert.component.css']
 })
 
-export class AlertComponent {
+export class AlertComponent implements OnInit {
+  public static readonly MAX_COUNT_CSV: number = 10000;
+  public static readonly CSV_ERROR_MESSAGE = 'Maximum number of rows reached for downloading CSV';
+
   message: any;
 
-  public static readonly MAX_COUNT_CSV: number = 10000;
-
-  constructor(private alertService: AlertService) { }
-
-  ngOnInit() {
-    this.alertService.getMessage().subscribe(message => { this.message = message; });
+  constructor (private alertService: AlertService) {
   }
 
-  clearAlert():void {
+  ngOnInit () {
+    this.alertService.getMessage().subscribe(message => {
+      this.message = message;
+    });
+  }
+
+  clearAlert (): void {
     this.alertService.clearAlert();
   }
 }

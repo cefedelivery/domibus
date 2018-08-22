@@ -1,5 +1,6 @@
 package eu.domibus.web.matcher;
 
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
@@ -13,7 +14,7 @@ import java.util.HashSet;
 
 public class URLCsrfMatcher implements RequestMatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(URLCsrfMatcher.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(URLCsrfMatcher.class);
 
     protected String ignoreUrl;
 

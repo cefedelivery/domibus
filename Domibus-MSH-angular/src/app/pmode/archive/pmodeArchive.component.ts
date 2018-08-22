@@ -18,8 +18,8 @@ import {AlertComponent} from 'app/alert/alert.component';
 import {RestoreDialogComponent} from '../restore-dialog/restore-dialog.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';
 import {CurrentPModeComponent} from '../current/currentPMode.component';
-import {DomainService} from "../../security/domain.service";
-import {Domain} from "../../security/domain";
+import {DomainService} from '../../security/domain.service';
+import {Domain} from '../../security/domain';
 
 @Component({
   moduleId: module.id,
@@ -171,9 +171,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         this.actualId = this.allPModes[0].id;
         this.actualRow = 0;
         this.count = response.json().length;
-        if (this.count > AlertComponent.MAX_COUNT_CSV) {
-          this.alertService.error('Maximum number of rows reached for downloading CSV');
-        }
+
       },
       () => {
       },
@@ -449,20 +447,17 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   }
 
   /**
-   * Method that checks if CSV Button export can be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  isSaveAsCSVButtonEnabled (): boolean {
-    return this.allPModes.length < AlertComponent.MAX_COUNT_CSV;
-  }
-
-  /**
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV () {
     if (this.isDirty()) {
       this.saveButton(true);
     } else {
+      if (this.count > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+        return;
+      }
+
       DownloadService.downloadNative(PModeArchiveComponent.PMODE_CSV_URL);
     }
   }
