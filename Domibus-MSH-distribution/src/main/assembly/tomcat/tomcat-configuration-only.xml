@@ -36,6 +36,14 @@
             <filtered>false</filtered>
         </file>
         <file>
+            <source>
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/default-logback.xml
+            </source>
+            <outputDirectory>/</outputDirectory>
+            <destName>default-logback.xml</destName>
+            <filtered>false</filtered>
+        </file>
+        <file>
             <source>${project.basedir}/../Domibus-MSH/src/main/conf/domibus/policies/eDeliveryAS4Policy.xml</source>
             <outputDirectory>policies</outputDirectory>
             <filtered>false</filtered>
