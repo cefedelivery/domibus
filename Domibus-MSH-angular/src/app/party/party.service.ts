@@ -92,6 +92,14 @@ export class PartyService {
     return newParty;
   }
 
+  validateParties (partyList: PartyResponseRo[]) {
+    const partiesWithoutIdentifiers = partyList.filter(party => party.identifiers == null || party.identifiers.length === 0);
+    if (partiesWithoutIdentifiers.length > 0) {
+      const names = partiesWithoutIdentifiers.map(party => party.name).join(',');
+      throw new Error('The following parties do not have any identifiers set:' + names);
+    }
+  }
+
   updateParties (partyList: PartyResponseRo[]) {
     return this.http.put(PartyService.UPDATE_PARTIES, partyList).toPromise();
   }

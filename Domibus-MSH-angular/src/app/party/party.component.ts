@@ -216,12 +216,19 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   save () {
+    try {
+      this.partyService.validateParties(this.rows)
+    } catch (err) {
+      this.alertService.exception('Party validation error:', err, false);
+      return;
+    }
+
     this.partyService.updateParties(this.rows)
       .then(() => {
         this.resetDirty();
         this.alertService.success('Parties saved successfully.', false);
       })
-      .catch(err => this.alertService.exception('Party update error', err, false));
+      .catch(err => this.alertService.exception('Party update error:', err, false));
   }
 
   async add () {
