@@ -48,13 +48,26 @@ export class DomainSelectorComponent implements OnInit {
       const canChange = await canChangeDomain;
       if (!canChange) throw false;
 
+      if (this.currentComponent.beforeDomainChange) {
+        try {
+          this.currentComponent.beforeDomainChange();
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
       const domain = this.domains.find(d => d.code == this.domainCode);
       await this.domainService.setCurrentDomain(domain);
 
       this.domainService.setAppTitle();
 
-      if (this.currentComponent.ngOnInit)
-        this.currentComponent.ngOnInit();
+      if (this.currentComponent.ngOnInit) {
+        try {
+          this.currentComponent.ngOnInit();
+        } catch (e) {
+          console.log(e);
+        }
+      }
 
     } catch (ex) { // domain not changed -> reset the combo value
       this.domainCode = this.currentDomainCode;
