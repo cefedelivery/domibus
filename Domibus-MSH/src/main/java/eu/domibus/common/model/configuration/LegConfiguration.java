@@ -117,7 +117,7 @@ public class LegConfiguration extends AbstractBaseEntity {
 
         final LegConfiguration that = (LegConfiguration) o;
 
-        return name.equals(that.name);
+        return name.equalsIgnoreCase(that.name);
     }
 
     @Override
@@ -209,58 +209,58 @@ public class LegConfiguration extends AbstractBaseEntity {
 
     public void init(final Configuration configuration) {
         for (final Reliability rel : configuration.getBusinessProcesses().getAs4Reliability()) {
-            if (rel.getName().equals(this.reliabilityXml)) {
+            if (rel.getName().equalsIgnoreCase(this.reliabilityXml)) {
                 this.reliability = rel;
                 break;
             }
         }
         for (final ReceptionAwareness ra : configuration.getBusinessProcesses().getAs4ConfigReceptionAwareness()) {
-            if (ra.getName().equals(this.receptionAwarenessXml)) {
+            if (ra.getName().equalsIgnoreCase(this.receptionAwarenessXml)) {
                 this.receptionAwareness = ra;
                 break;
             }
         }
 
         for (final Service ser : configuration.getBusinessProcesses().getServices()) {
-            if (ser.getName().equals(this.serviceXml)) {
+            if (ser.getName().equalsIgnoreCase(this.serviceXml)) {
                 this.service = ser;
                 break;
             }
         }
 
         for (final Security sec : configuration.getBusinessProcesses().getSecurities()) {
-            if (sec.getName().equals(this.securityXml)) {
+            if (sec.getName().equalsIgnoreCase(this.securityXml)) {
                 this.security = sec;
                 break;
             }
         }
 
         for (final Action a : configuration.getBusinessProcesses().getActions()) {
-            if (a.getName().equals(this.actionXml)) {
+            if (a.getName().equalsIgnoreCase(this.actionXml)) {
                 this.action = a;
                 break;
             }
         }
         for (final Mpc m : configuration.getMpcs()) {
-            if (m.getName().equals(this.mpcXml)) {
+            if (m.getName().equalsIgnoreCase(this.mpcXml)) {
                 this.defaultMpc = m;
                 break;
             }
         }
         for (final PropertySet ps : configuration.getBusinessProcesses().getPropertySets()) {
-            if (ps.getName().equals(this.propertySetXml)) {
+            if (ps.getName().equalsIgnoreCase(this.propertySetXml)) {
                 this.propertySet = ps;
                 break;
             }
         }
         for (final PayloadProfile pp : configuration.getBusinessProcesses().getPayloadProfiles()) {
-            if (pp.getName().equals(this.payloadProfileXml)) {
+            if (pp.getName().equalsIgnoreCase(this.payloadProfileXml)) {
                 this.payloadProfile = pp;
                 break;
             }
         }
         for (final ErrorHandling eh : configuration.getBusinessProcesses().getErrorHandlings()) {
-            if (eh.getName().equals(this.errorHandlingXml)) {
+            if (eh.getName().equalsIgnoreCase(this.errorHandlingXml)) {
                 this.errorHandling = eh;
                 break;
             }
@@ -269,14 +269,14 @@ public class LegConfiguration extends AbstractBaseEntity {
             Party key = null;
             Mpc value = null;
             for (final Mpc m : configuration.getMpcs()) {
-                if (m.getName().equals(pmpc.getMpc())) {
+                if (m.getName().equalsIgnoreCase(pmpc.getMpc())) {
                     value = m;
                     break;
                 }
 
             }
             for (final Party p : configuration.getBusinessProcesses().getParties()) {
-                if (p.getName().equals(pmpc.getParty())) {
+                if (p.getName().equalsIgnoreCase(pmpc.getParty())) {
                     key = p;
                     break;
                 }

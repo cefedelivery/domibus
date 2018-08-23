@@ -212,7 +212,7 @@ public class BackendMessageValidator {
         }
 
         for(Property property : properties.getProperties()) {
-            if(CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName())) {
+            if(CompressionService.COMPRESSION_PROPERTY_KEY.equalsIgnoreCase(property.getName())) {
                 throw new SubmissionValidationException("The occurrence of the property " + CompressionService.COMPRESSION_PROPERTY_KEY + " and its value are fully controlled by the AS4 compression feature");
             }
         }

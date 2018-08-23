@@ -64,7 +64,7 @@ public class CompressionService {
 
             String mimeType = null;
             for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.MIME_TYPE.equals(property.getName())) {
+                if (Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
                     mimeType = property.getValue();
                     break;
                 }
@@ -120,10 +120,10 @@ public class CompressionService {
 
             if(partInfo.getPartProperties() != null) {
                 for (final Property property : partInfo.getPartProperties().getProperties()) {
-                    if (Property.MIME_TYPE.equals(property.getName())) {
+                    if (Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
                         mimeType = property.getValue();
                     }
-                    if (CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName()) && CompressionService.COMPRESSION_PROPERTY_VALUE.equals(property.getValue())) {
+                    if (CompressionService.COMPRESSION_PROPERTY_KEY.equalsIgnoreCase(property.getName()) && CompressionService.COMPRESSION_PROPERTY_VALUE.equalsIgnoreCase(property.getValue())) {
                         payloadCompressed = true;
                     }
                 }

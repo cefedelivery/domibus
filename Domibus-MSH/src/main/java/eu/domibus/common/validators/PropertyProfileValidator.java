@@ -71,7 +71,7 @@ public class PropertyProfileValidator {
         for (final eu.domibus.ebms3.common.model.Property property : messageProperties.getProperty()) {
             Property profiled = null;
             for (final Property profiledProperty : modifiablePropertyList) {
-                if (profiledProperty.getKey().equals(property.getName())) {
+                if (profiledProperty.getKey().equalsIgnoreCase(property.getName())) {
                     profiled = profiledProperty;
                     break;
                 }

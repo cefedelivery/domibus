@@ -134,7 +134,7 @@ public class PModeDao extends PModeProvider {
         LOG.debug("Finding leg name using agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]",
                 agreementName, senderParty, receiverParty, service, action);
         String namedQuery;
-        if (agreementName.equals(OPTIONAL_AND_EMPTY)) {
+        if (agreementName.equalsIgnoreCase(OPTIONAL_AND_EMPTY)) {
             namedQuery = "LegConfiguration.findForPartiesAndAgreementsOAE";
         } else {
             namedQuery = "LegConfiguration.findForPartiesAndAgreements";
@@ -142,7 +142,7 @@ public class PModeDao extends PModeProvider {
         LOG.debug("Using named query [{}]", namedQuery);
 
         Query candidatesQuery = this.entityManager.createNamedQuery(namedQuery);
-        if (!agreementName.equals(OPTIONAL_AND_EMPTY)) {
+        if (!agreementName.equalsIgnoreCase(OPTIONAL_AND_EMPTY)) {
             LOG.debug("Setting agreement [{}]", OPTIONAL_AND_EMPTY);
             candidatesQuery.setParameter("AGREEMENT", agreementName);
         }

@@ -53,9 +53,9 @@ public class Agreement extends AbstractBaseEntity {
 
         final Agreement agreement = (Agreement) o;
 
-        if (!name.equals(agreement.name)) return false;
-        if (type != null ? !type.equals(agreement.type) : agreement.type != null) return false;
-        if (!value.equals(agreement.value)) return false;
+        if (!name.equalsIgnoreCase(agreement.name)) return false;
+        if (type != null ? !type.equalsIgnoreCase(agreement.type) : agreement.type != null) return false;
+        if (!value.equalsIgnoreCase(agreement.value)) return false;
 
         return true;
     }

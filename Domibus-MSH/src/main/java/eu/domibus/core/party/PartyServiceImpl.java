@@ -281,7 +281,7 @@ public class PartyServiceImpl implements PartyService {
             // sync <initiatorParties> and <responderParties>
             Set<String> iParties = partyList.stream()
                     .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
-                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
                     .map(p -> p.getName())
                     .collect(Collectors.toSet());
 
@@ -289,7 +289,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setInitiatorPartiesXml(new InitiatorParties());
             List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
             ip.removeIf(x -> !iParties.contains(x.getName()));
-            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equals(x.getName())))
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equalsIgnoreCase(x.getName())))
                     .map(name -> {
                         InitiatorParty y = new InitiatorParty();
                         y.setName(name);
@@ -301,7 +301,7 @@ public class PartyServiceImpl implements PartyService {
 
             Set<String> rParties = partyList.stream()
                     .filter(p -> p.getProcessesWithPartyAsResponder().stream()
-                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
                     .map(p -> p.getName())
                     .collect(Collectors.toSet());
 
@@ -309,7 +309,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setResponderPartiesXml(new ResponderParties());
             List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
             rp.removeIf(x -> !rParties.contains(x.getName()));
-            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equals(x.getName())))
+            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equalsIgnoreCase(x.getName())))
                     .map(name -> {
                         ResponderParty y = new ResponderParty();
                         y.setName(name);

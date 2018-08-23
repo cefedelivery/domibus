@@ -98,7 +98,7 @@ public class Mep extends AbstractBaseEntity {
 
         final Mep mep = (Mep) o;
 
-        if (!name.equals(mep.name)) return false;
+        if (!name.equalsIgnoreCase(mep.name)) return false;
 
         return true;
     }

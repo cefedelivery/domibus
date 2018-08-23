@@ -117,7 +117,7 @@ public class Security extends AbstractBaseEntity {
 
         final Security security = (Security) o;
 
-        if (!name.equals(security.name)) return false;
+        if (!name.equalsIgnoreCase(security.name)) return false;
 
         return true;
     }

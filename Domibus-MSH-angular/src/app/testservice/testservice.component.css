@@ -1,0 +1,3 @@
+.panel md-input-container, .panel md-select, .panel md2-datepicker, .panel md2-select {
+  width: 100% !important;
+}
