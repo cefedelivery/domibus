@@ -137,7 +137,8 @@ public class PullMessageSender {
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             LOG.trace("handle message");
-            final SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId(), messaging.getUserMessage().getPartyInfo().getTo().getFirstPartyId());
             final String sendMessageId = messageId;
             //TODO this will be changed in 4.1
             /**
@@ -151,7 +152,7 @@ public class PullMessageSender {
              * Ideally the message id should be commited to a queue and the sending of the receipt executed in another proces.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
+                executor.execute(() -> pullReceiptSender.sendReicept(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

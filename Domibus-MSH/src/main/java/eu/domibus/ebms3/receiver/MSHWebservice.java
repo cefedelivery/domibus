@@ -76,9 +76,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private PModeProvider pModeProvider;
 
     @Autowired
-    private MessageIdGenerator messageIdGenerator;
-
-    @Autowired
     private MessageExchangeService messageExchangeService;
 
     @Autowired
@@ -143,7 +140,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             try {
                 LOG.info("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, userMessageHandlerContext.getMessageId());
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId(), messaging.getUserMessage().getPartyInfo().getTo().getFirstPartyId());
                 LOG.info("Ping message {}", userMessageHandlerContext.isTestMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
