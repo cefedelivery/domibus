@@ -150,8 +150,8 @@ public class UserMessageHandlerService {
             //check if the message is sent to the same Domibus instance
             final boolean selfSendingFlag = checkSelfSending(pmodeKey);
             if (selfSendingFlag) {
-                /* we add a defined suffix in order to assure DB integrity - messageId unicity
-                basically we are generating another messageId for Signal Message on receievr side
+                /* we add a defined suffix in order to assure DB integrity - messageId uniqueness
+                basically we are generating another messageId for Signal Message on receiver side
                 */
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
@@ -180,10 +180,11 @@ public class UserMessageHandlerService {
                     }
                 }
             }
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
             return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
         }
     }
+
+
 
     /**
      * It will check if the messages are sent to the same Domibus instance
