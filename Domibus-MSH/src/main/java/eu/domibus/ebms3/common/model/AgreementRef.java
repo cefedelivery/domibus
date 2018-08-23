@@ -111,9 +111,9 @@ public class AgreementRef {
 
         final AgreementRef that = (AgreementRef) o;
 
-        if (this.pmode != null ? !this.pmode.equals(that.pmode) : that.pmode != null) return false;
-        if (this.type != null ? !this.type.equals(that.type) : that.type != null) return false;
-        return !(this.value != null ? !this.value.equals(that.value) : that.value != null);
+        if (this.pmode != null ? !this.pmode.equalsIgnoreCase(that.pmode) : that.pmode != null) return false;
+        if (this.type != null ? !this.type.equalsIgnoreCase(that.type) : that.type != null) return false;
+        return !(this.value != null ? !this.value.equalsIgnoreCase(that.value) : that.value != null);
 
     }
 

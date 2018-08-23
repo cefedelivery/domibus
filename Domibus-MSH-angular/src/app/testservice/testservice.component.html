@@ -49,22 +49,22 @@
       <div class="panel">
         <div>
           <md-input-container>
-            <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" [(ngModel)]="messageInfoSent.toPartyId" disabled>
+            <input mdInput placeholder="To Party Id" name="toPartyId" id="toPartyId_id" [(ngModel)]="messageInfoSent.toPartyId" readonly>
+          </md-input-container>
+        </div>
+        <!--<div>-->
+          <md-input-container>
+            <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" [(ngModel)]="messageInfoSent.finalRecipient" readonly>
+          </md-input-container>
+        <!--</div>-->
+        <div>
+          <md-input-container>
+            <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" [(ngModel)]="messageInfoSent.receivedTo" readonly>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="To Access Point" name="toAccessPoint" id="toAccessPoint_id" [(ngModel)]="messageInfoSent.finalRecipient" disabled>
-          </md-input-container>
-        </div>
-        <div>
-          <md-input-container>
-            <input mdInput placeholder="Time Sent" name="timeSent" id="timeSent_id" [(ngModel)]="messageInfoSent.receivedTo" disabled>
-          </md-input-container>
-        </div>
-        <div>
-          <md-input-container>
-            <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" [(ngModel)]="messageInfoSent.messageId" disabled>
+            <input mdInput placeholder="Message Id" name="toMessageId" id="toMessageId_id" [(ngModel)]="messageInfoSent.messageId" readonly>
           </md-input-container>
         </div>
       </div>
@@ -78,22 +78,22 @@
       <div class="panel">
         <div>
           <md-input-container>
-            <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" [(ngModel)]="messageInfoReceived.fromPartyId" disabled>
+            <input mdInput placeholder="From Party Id" name="fromPartyId" id="fromPartyId_id" [(ngModel)]="messageInfoReceived.fromPartyId" readonly>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" [(ngModel)]="messageInfoReceived.originalSender" disabled>
+            <input mdInput placeholder="From Access Point" name="fromAccessPoint" id="fromAccessPoint_id" [(ngModel)]="messageInfoReceived.originalSender" readonly>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" [(ngModel)]="messageInfoReceived.receivedFrom" disabled>
+            <input mdInput placeholder="Time Received" name="timeReceived" id="timeReceived_id" [(ngModel)]="messageInfoReceived.receivedFrom" readonly>
           </md-input-container>
         </div>
         <div>
           <md-input-container>
-            <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" [(ngModel)]="messageInfoReceived.messageId" disabled>
+            <input mdInput placeholder="Message Id" name="fromMessageId" id="fromMessageId_id" [(ngModel)]="messageInfoReceived.messageId" readonly>
           </md-input-container>
         </div>
       </div>

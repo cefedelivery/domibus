@@ -19,6 +19,8 @@ import {AlertService} from '../alert/alert.service';
   providers: [TrustStoreService]
 })
 export class TruststoreComponent implements OnInit {
+  static readonly TRUSTSTORE_URL: string = 'rest/truststore';
+  static readonly TRUSTSTORE_CSV_URL: string = TruststoreComponent.TRUSTSTORE_URL + '/csv';
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
@@ -26,14 +28,12 @@ export class TruststoreComponent implements OnInit {
 
   @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
 
-  trustStoreEntries: Array<TrustStoreEntry> = [];
-  selectedMessages: Array<any> = [];
-  loading: boolean = false;
+  trustStoreEntries: Array<TrustStoreEntry>;
+  selectedMessages: Array<any>;
+  loading: boolean;
 
   rows: Array<any> = [];
-
-  static readonly TRUSTSTORE_URL: string = 'rest/truststore';
-  static readonly TRUSTSTORE_CSV_URL: string = TruststoreComponent.TRUSTSTORE_URL + '/csv';
+  offset: number;
 
   constructor (private trustStoreService: TrustStoreService, public dialog: MdDialog, public alertService: AlertService) {
   }
@@ -68,33 +68,44 @@ export class TruststoreComponent implements OnInit {
     ];
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Name', 'Subject', 'Issuer', 'Valid from', 'Valid until'].indexOf(col.name) != -1
+      return ['Name', 'Subject', 'Issuer', 'Valid from', 'Valid until'].indexOf(col.name) !== -1
     });
+
+    this.trustStoreEntries = [];
+    this.selectedMessages = [];
+    this.rows = [];
+
+    this.offset = 0;
+
     this.getTrustStoreEntries();
   }
 
   getTrustStoreEntries (): void {
-    this.trustStoreService.getEntries().subscribe(trustStoreEntries => this.trustStoreEntries = trustStoreEntries);
+    this.trustStoreService.getEntries().subscribe(trustStoreEntries => {
+      this.trustStoreEntries = trustStoreEntries;
+      this.offset = 0;
+    });
   }
 
   onSelect ({selected}) {
-    console.log('Select Event');
     this.selectedMessages.splice(0, this.selectedMessages.length);
     this.selectedMessages.push(...selected);
   }
 
   onActivate (event) {
-    console.log('Activate Event', event);
     if ('dblclick' === event.type) {
       this.details(event.row);
     }
   }
 
   details (selectedRow: any) {
-    let dialogRef: MdDialogRef<TruststoreDialogComponent> = this.dialog.open(TruststoreDialogComponent, {data: {trustStoreEntry: selectedRow}});
-    dialogRef.afterClosed().subscribe(result => {
-
+    this.dialog.open(TruststoreDialogComponent, {data: {trustStoreEntry: selectedRow}})
+      .afterClosed().subscribe(result => {
     });
+  }
+
+  onChangePage (event: any): void {
+    this.offset = event.offset;
   }
 
   changePageSize (newPageSize: number) {
@@ -103,10 +114,10 @@ export class TruststoreComponent implements OnInit {
   }
 
   openEditTrustStore () {
-    let dialogRef: MdDialogRef<TrustStoreUploadComponent> = this.dialog.open(TrustStoreUploadComponent);
-    dialogRef.componentInstance.onTruststoreUploaded.subscribe(updated => {
-      this.getTrustStoreEntries();
-    });
+    this.dialog.open(TrustStoreUploadComponent).componentInstance.onTruststoreUploaded
+      .subscribe(updated => {
+        this.getTrustStoreEntries();
+      });
   }
 
   /**
@@ -120,4 +131,5 @@ export class TruststoreComponent implements OnInit {
 
     DownloadService.downloadNative(TruststoreComponent.TRUSTSTORE_CSV_URL);
   }
+
 }

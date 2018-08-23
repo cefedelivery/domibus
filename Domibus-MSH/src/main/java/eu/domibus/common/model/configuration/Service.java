@@ -106,7 +106,7 @@ public class Service extends AbstractBaseEntity {
 
         final Service service = (Service) o;
 
-        if (!name.equals(service.name)) return false;
+        if (!name.equalsIgnoreCase(service.name)) return false;
 
         return true;
     }

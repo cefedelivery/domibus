@@ -128,6 +128,29 @@
         } ]
       }
     },
+    "/ext/monitoring/messages/enqueued/{messageId}/send" : {
+      "put" : {
+        "tags" : [ "monitoring" ],
+        "summary" : "Send enqueued message",
+        "description" : "Send a message which has a SEND_ENQUEUED status",
+        "operationId" : "sendEnqueuedMessage",
+        "parameters" : [ {
+          "name" : "messageId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string",
+          "pattern" : ".+"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
     "/ext/monitoring/messages/failed" : {
       "get" : {
         "tags" : [ "monitoring" ],

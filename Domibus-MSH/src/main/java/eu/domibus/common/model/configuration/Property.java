@@ -41,9 +41,9 @@ public class Property extends AbstractBaseEntity {
         final Property property = (Property) o;
 
         if (this.required != property.required) return false;
-        if (!this.name.equals(property.name)) return false;
-        if (!this.key.equals(property.key)) return false;
-        return !(this.datatype != null ? !this.datatype.equals(property.datatype) : property.datatype != null);
+        if (!this.name.equalsIgnoreCase(property.name)) return false;
+        if (!this.key.equalsIgnoreCase(property.key)) return false;
+        return !(this.datatype != null ? !this.datatype.equalsIgnoreCase(property.datatype) : property.datatype != null);
 
     }
 

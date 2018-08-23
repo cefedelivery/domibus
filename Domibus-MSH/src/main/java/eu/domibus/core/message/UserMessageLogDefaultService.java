@@ -126,8 +126,8 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
      * @return True, if it's a test message and false otherwise
      */
     protected Boolean checkTestMessage(final String service, final String action) {
-        return Ebms3Constants.TEST_SERVICE.equals(service)
-                && Ebms3Constants.TEST_ACTION.equals(action);
+        return Ebms3Constants.TEST_SERVICE.equalsIgnoreCase(service)
+                && Ebms3Constants.TEST_ACTION.equalsIgnoreCase(action);
 
     }
 }
