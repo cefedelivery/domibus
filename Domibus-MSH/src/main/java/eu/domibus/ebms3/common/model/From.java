@@ -90,7 +90,7 @@ public class From {
         final From from = (From) o;
 
         if (!this.partyId.equals(from.getPartyId())) return false;
-        return !(this.role != null ? !this.role.equals(from.role) : from.role != null);
+        return !(this.role != null ? !this.role.equalsIgnoreCase(from.role) : from.role != null);
 
     }
 

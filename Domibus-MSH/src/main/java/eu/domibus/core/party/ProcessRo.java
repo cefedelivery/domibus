@@ -34,7 +34,7 @@ public class ProcessRo {
         ProcessRo processRo = (ProcessRo) o;
 
         if (entityId != processRo.entityId) return false;
-        return name != null ? name.equals(processRo.name) : processRo.name == null;
+        return name != null ? name.equalsIgnoreCase(processRo.name) : processRo.name == null;
     }
 
     @Override

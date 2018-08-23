@@ -178,7 +178,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             boolean found = false;
             for(String recipient : recipients) {
                 String originalUser = getOriginalUser(userMessage, recipient);
-                if (originalUser != null && originalUser.equals(authOriginalUser)) {
+                if (originalUser != null && originalUser.equalsIgnoreCase(authOriginalUser)) {
                     found = true;
                     break;
                 }
@@ -195,7 +195,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             LOG.debug("OriginalUser is [{}]", authOriginalUser);
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, recipient);
-            if (originalUser != null && !originalUser.equals(authOriginalUser)) {
+            if (originalUser != null && !originalUser.equalsIgnoreCase(authOriginalUser)) {
                 LOG.debug("User [{}] is trying to submit/access a message having as final recipient: [{}]", authOriginalUser, originalUser);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
@@ -208,7 +208,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         }
         String originalUser = null;
         for (Property property : userMessage.getMessageProperties().getProperty()) {
-            if (property.getName() != null && property.getName().equals(type)) {
+            if (property.getName() != null && property.getName().equalsIgnoreCase(type)) {
                 originalUser = property.getValue();
                 break;
             }

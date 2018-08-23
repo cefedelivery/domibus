@@ -438,7 +438,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     private List<String> handleLegConfiguration(LegConfiguration legConfiguration, Process process, String service, String action) {
         List result = new ArrayList<String>();
-        if (legConfiguration.getService().getValue().equals(service) && legConfiguration.getAction().getValue().equals(action)) {
+        if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), service) && StringUtils.equalsIgnoreCase(legConfiguration.getAction().getValue(), action)) {
             handleProcessParties(process, result);
         }
         return result;
@@ -465,7 +465,7 @@ public class CachingPModeProvider extends PModeProvider {
 
     private String getPartyIdTypeHandleParty(Party party, String partyIdentifier) {
         for (Identifier identifier : party.getIdentifiers()) {
-            if (identifier.getPartyId().equals(partyIdentifier)) {
+            if (StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
                 return identifier.getPartyIdType().getValue();
             }
         }
@@ -475,7 +475,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Override
     public String getServiceType(String serviceValue) {
         for (Service service : getConfiguration().getBusinessProcesses().getServices()) {
-            if (service.getValue().equals(serviceValue)) {
+            if (StringUtils.equalsIgnoreCase(service.getValue(), serviceValue)) {
                 return service.getServiceType();
             }
         }
@@ -486,7 +486,7 @@ public class CachingPModeProvider extends PModeProvider {
         List<Process> result = new ArrayList<>();
         for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
             for (LegConfiguration legConfiguration : process.getLegs()) {
-                if (legConfiguration.getService().getValue().equals(serviceValue)) {
+                if (StringUtils.equalsIgnoreCase(legConfiguration.getService().getValue(), serviceValue)) {
                     result.add(process);
                 }
             }
@@ -508,7 +508,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Nullable
     private String getRoleHandleProcess(Process found, String roleType) {
         for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
-            if (process.getName().equals(found.getName())) {
+            if (StringUtils.equalsIgnoreCase(process.getName(), found.getName())) {
                 if (roleType.equalsIgnoreCase("initiator")) {
                     return process.getInitiatorRole().getValue();
                 }
@@ -534,7 +534,7 @@ public class CachingPModeProvider extends PModeProvider {
     @Nullable
     private String getAgreementRefHandleProcess(Process found) {
         for (Process process : getConfiguration().getBusinessProcesses().getProcesses()) {
-            if (process.getName().equals(found.getName())) {
+            if (StringUtils.equalsIgnoreCase(process.getName(), found.getName())) {
                 Agreement agreement = process.getAgreement();
                 if (agreement != null) {
                     return agreement.getValue();

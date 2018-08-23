@@ -55,7 +55,7 @@ public class Reliability extends AbstractBaseEntity {
 
         final Reliability that = (Reliability) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

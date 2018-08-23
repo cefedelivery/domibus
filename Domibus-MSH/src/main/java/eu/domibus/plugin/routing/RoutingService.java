@@ -44,7 +44,7 @@ public class RoutingService {
 
         for (BackendFilterEntity filter : filters) {
             for (final NotificationListener backend : backendsTemp) {
-                if (filter.getBackendName().equals(backend.getBackendName())) {
+                if (filter.getBackendName().equalsIgnoreCase(backend.getBackendName())) {
                     backendsTemp.remove(backend);
                     break;
                 }

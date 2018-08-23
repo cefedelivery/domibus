@@ -49,8 +49,8 @@ public class Binding extends AbstractBaseEntity {
 
         final Binding binding = (Binding) o;
 
-        if (name != null ? !name.equals(binding.name) : binding.name != null) return false;
-        if (value != null ? !value.equals(binding.value) : binding.value != null) return false;
+        if (name != null ? !name.equalsIgnoreCase(binding.name) : binding.name != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(binding.value) : binding.value != null) return false;
 
         return true;
     }

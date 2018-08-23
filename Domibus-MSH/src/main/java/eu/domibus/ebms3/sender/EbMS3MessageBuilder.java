@@ -131,7 +131,7 @@ public class EbMS3MessageBuilder {
 
         if(partInfo.getPartProperties() != null) {
             for (final Property prop : partInfo.getPartProperties().getProperties()) {
-                if (Property.MIME_TYPE.equals(prop.getName())) {
+                if (Property.MIME_TYPE.equalsIgnoreCase(prop.getName())) {
                     mimeType = prop.getValue();
                 }
             }
