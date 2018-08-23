@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Http, URLSearchParams, Response} from '@angular/http';
 import {MessageLogResult} from './messagelogresult';
 import {Observable} from 'rxjs';
@@ -12,6 +12,7 @@ import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {isNullOrUndefined} from 'util';
 import {AppComponent} from '../app.component';
+import {DatatableComponent} from '@swimlane/ngx-datatable';
 
 @Component({
   moduleId: module.id,
@@ -30,6 +31,7 @@ export class MessageLogComponent implements OnInit {
   @ViewChild('nextAttemptInfoTpl') public nextAttemptInfoTpl: TemplateRef<any>;
   @ViewChild('nextAttemptInfoWithDateFormatTpl') public nextAttemptInfoWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
+  @ViewChild('list') list: DatatableComponent;
 
   columnPicker: ColumnPickerBase;
   rowLimiter: RowLimiterBase;
@@ -57,7 +59,8 @@ export class MessageLogComponent implements OnInit {
 
   messageResent: EventEmitter<boolean>;
 
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent) {
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent,
+               private elementRef: ElementRef) {
   }
 
   ngOnInit () {
@@ -176,6 +179,12 @@ export class MessageLogComponent implements OnInit {
     });
 
     this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+  }
+
+  public beforeDomainChange () {
+    if (this.list.isHorScroll) {
+      this.scrollLeft();
+    }
   }
 
   createSearchParams (): URLSearchParams {
@@ -444,5 +453,11 @@ export class MessageLogComponent implements OnInit {
     if (row && (row.messageType === 'SIGNAL_MESSAGE' || row.mshRole === 'RECEIVING'))
       return false;
     return true;
+  }
+
+  public scrollLeft () {
+    const dataTableBodyDom = this.elementRef.nativeElement.querySelector('.datatable-body');
+
+    dataTableBodyDom.scrollLeft = 0;
   }
 }

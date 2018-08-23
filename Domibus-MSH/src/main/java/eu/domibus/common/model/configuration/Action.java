@@ -49,8 +49,8 @@ public class Action extends AbstractBaseEntity {
 
         final Action action = (Action) o;
 
-        if (!name.equals(action.name)) return false;
-        if (!value.equals(action.value)) return false;
+        if (!name.equalsIgnoreCase(action.name)) return false;
+        if (!value.equalsIgnoreCase(action.value)) return false;
 
         return true;
     }

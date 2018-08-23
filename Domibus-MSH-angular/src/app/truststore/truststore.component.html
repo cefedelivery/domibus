@@ -32,6 +32,8 @@
         [selectionType]="'multi'"
         [selected]="selectedMessages"
         [limit]="rowLimiter.pageSize"
+        [offset]="offset"
+        (page)="onChangePage($event)"
         [sorts]="[{prop: 'alias', dir: 'desc'}]"
         (activate)="onActivate($event)"
         (select)="onSelect($event)">

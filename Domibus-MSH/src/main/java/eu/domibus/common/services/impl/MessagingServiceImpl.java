@@ -138,7 +138,7 @@ public class MessagingServiceImpl implements MessagingService {
     protected boolean isCompressed(PartInfo partInfo) {
         if (partInfo.getPartProperties() != null) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (property.getName().equals(CompressionService.COMPRESSION_PROPERTY_KEY) && property.getValue().equals(CompressionService.COMPRESSION_PROPERTY_VALUE)) {
+                if (property.getName().equalsIgnoreCase(CompressionService.COMPRESSION_PROPERTY_KEY) && property.getValue().equalsIgnoreCase(CompressionService.COMPRESSION_PROPERTY_VALUE)) {
                     return true;
                 }
             }

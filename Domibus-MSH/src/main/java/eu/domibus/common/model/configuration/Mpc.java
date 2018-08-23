@@ -56,7 +56,7 @@ public class Mpc extends AbstractBaseEntity {
 
         final Mpc mpc = (Mpc) o;
 
-        if (!name.equals(mpc.name)) return false;
+        if (!name.equalsIgnoreCase(mpc.name)) return false;
 
         return true;
     }

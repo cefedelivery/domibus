@@ -69,7 +69,7 @@ public interface MessageMonitorExtService {
      * @throws MessageMonitorExtException Raised in case an exception occurs while trying to get the failed message period
      * @throws AuthenticationExtException Raised in case the security is enabled and the user is not authenticated or the user does not have the permission to access the message
      */
-    public Long getFailedMessageInterval(String messageId) throws AuthenticationExtException, MessageMonitorExtException;
+    Long getFailedMessageInterval(String messageId) throws AuthenticationExtException, MessageMonitorExtException;
 
     /**
      * Operation to unblock and retry to send a message which has a SEND_FAILURE status in the access point.
@@ -81,6 +81,16 @@ public interface MessageMonitorExtService {
      * @throws AuthenticationExtException Raised in case the security is enabled and the user is not authenticated or the user does not have the permission to access the message
      */
     void restoreFailedMessage(String messageId) throws AuthenticationExtException, MessageMonitorExtException;
+
+    /**
+     * Operation to send a message which has a SEND_ENQUEUED status in the access point.
+     *
+     *
+     * @param messageId Unique id of the message
+     * @throws MessageMonitorExtException Raised in case an exception occurs while trying to send the message
+     * @throws AuthenticationExtException Raised in case the security is enabled and the user is not authenticated or the user does not have the permission to access the message
+     */
+    void sendEnqueuedMessage(String messageId) throws AuthenticationExtException, MessageMonitorExtException;
 
     /**
      * Operation to unblock and retry to send all messages which had the SEND_FAILURE status

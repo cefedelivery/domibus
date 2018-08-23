@@ -72,7 +72,7 @@ public class ProcessValidator {
         if (binding != null) {
             String name = binding.getName();
             if (name != null) {
-                if (BackendConnector.Mep.ONE_WAY.getFileMapping().equals(name)) {
+                if (BackendConnector.Mep.ONE_WAY.getFileMapping().equalsIgnoreCase(name)) {
                     status = ONE_MATCHING_PROCESS;
                 }
             }

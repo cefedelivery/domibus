@@ -240,7 +240,7 @@ public class BackendNotificationService {
 
     protected NotificationListener getNotificationListener(String backendName) {
         for (final NotificationListener notificationListenerService : notificationListenerServices) {
-            if (notificationListenerService.getBackendName().equals(backendName)) {
+            if (notificationListenerService.getBackendName().equalsIgnoreCase(backendName)) {
                 return notificationListenerService;
             }
         }
