@@ -23,6 +23,7 @@ public class UserResponseRO {
     private String status;
     private boolean suspended;
     private String domain;
+    private boolean deleted;
 
     public UserResponseRO() {
     }
@@ -113,6 +114,14 @@ public class UserResponseRO {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
