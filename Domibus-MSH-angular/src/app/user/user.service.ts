@@ -19,9 +19,10 @@ export class UserService {
     });
   }
 
-  getUsers (): Observable<UserResponseRO[]> {
+  getUsers (filter: UserSearchCriteria): Observable<UserResponseRO[]> {
     return this.http.get('rest/user/users')
       .map(this.extractData)
+      .filter(this.filterData(filter))
       .catch(this.handleError);
   }
 
@@ -68,6 +69,18 @@ export class UserService {
   private extractData (res: Response) {
     const result = res.json() || {};
     return result;
+  }
+
+  private filterData (filter: UserSearchCriteria) {
+    return function (users) {
+      let results = users.slice();
+      if (filter.deleted != null) {
+        results = users.filter(el => el.deleted === filter.deleted)
+      }
+      users.length = 0;
+      users.push(...results);
+      return users;
+    }
   }
 
   private handleError (error: Response | any) {

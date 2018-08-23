@@ -73,6 +73,9 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
+    this.filter = new UserSearchCriteria();
+    this.deletedStatuses = [null, true, false];
+
     this.columnPicker = new ColumnPickerBase();
     this.rowLimiter = new RowLimiterBase();
 
@@ -157,13 +160,10 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     this.dirty = false;
     this.areRowsDeleted = false;
-
-    this.filter = new UserSearchCriteria();
-    this.deletedStatuses = [null, true, false];
   }
 
   getUsers (): void {
-    this.userService.getUsers().subscribe(users => this.users = users);
+    this.userService.getUsers(this.filter).subscribe(results => this.users = results);
     this.dirty = false;
     this.areRowsDeleted = false;
   }

@@ -69,7 +69,7 @@
 
   <ng-template #editableTpl let-value="value" let-row="row" ngx-datatable-cell-template>
           <span (dblclick)="buttonEdit()"
-                class="clickAble"
+                class="clickAble" [class.user-deleted]="row.deleted"
                 style="word-wrap: break-word">
             {{value}}
           </span>

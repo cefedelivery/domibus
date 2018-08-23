@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Ion Perpegel
@@ -100,11 +101,20 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
-        //get all users from general schema
+        // validate user not already in general schema
+        //get all users from user-domains table in general schema
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (eu.domibus.api.user.User user : newUsers) {
             if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
                 throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists.");
+        }
+
+        // validate user not already in general schema
+        //get users from current domain
+        Stream<String> domainUsers = userDao.listUsers().stream().map(el -> el.getUserName());
+        for (eu.domibus.api.user.User user : newUsers) {
+            if (domainUsers.anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
+                throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists in current domain.");
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
