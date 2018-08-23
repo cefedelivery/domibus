@@ -3,17 +3,16 @@ import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
-import {PluginUserService, PluginUserSearchCriteria} from './pluginuser.service';
+import {PluginUserSearchCriteria, PluginUserService} from './pluginuser.service';
 import {PluginUserRO} from './pluginuser';
 import {DirtyOperations} from 'app/common/dirty-operations';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {EditbasicpluginuserFormComponent} from './editpluginuser-form/editbasicpluginuser-form.component';
 import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/editcertificatepluginuser-form.component';
 import {UserService} from '../user/user.service';
 import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {DownloadService} from '../download/download.service';
-import {UserComponent} from '../user/user.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
@@ -203,7 +202,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       await this.pluginUserService.saveUsers(this.users);
       this.search();
     } catch (err) {
-      this.alertService.error(err);
+      this.alertService.exception('Error when saving plugin users ', err, false);
     }
   }
 
