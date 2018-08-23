@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {UserResponseRO, UserState} from './user';
-import {UserService} from './user.service';
+import {UserSearchCriteria, UserService} from './user.service';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from 'app/user/uservalidator.service';
 import {AlertService} from '../alert/alert.service';
@@ -17,6 +17,7 @@ import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {DomainService} from '../security/domain.service';
 import {Domain} from '../security/domain';
+import {PluginUserSearchCriteria} from '../pluginuser/pluginuser.service';
 
 @Component({
   moduleId: module.id,
@@ -34,6 +35,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
   @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
+  @ViewChild('deletedTpl') deletedTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
@@ -57,6 +59,9 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   dirty: boolean;
   areRowsDeleted: boolean;
+
+  filter: UserSearchCriteria;
+  deletedStatuses: any[];
 
   constructor (private http: Http,
                private userService: UserService,
@@ -105,12 +110,20 @@ export class UserComponent implements OnInit, DirtyOperations {
         name: 'Password',
         prop: 'password',
         canAutoResize: true,
-        sortable: false
+        sortable: false,
+        width: 25
       },
       {
         cellTemplate: this.checkBoxTpl,
         name: 'Active',
-        canAutoResize: true
+        canAutoResize: true,
+        width: 25
+      },
+      {
+        cellTemplate: this.deletedTpl,
+        name: 'Deleted',
+        canAutoResize: true,
+        width: 25
       },
       {
         cellTemplate: this.rowActions,
@@ -135,7 +148,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Username', 'Role', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
+      return ['Username', 'Role', 'Domain', 'Active', 'Deleted', 'Actions'].indexOf(col.name) !== -1
     });
 
     this.getUsers();
@@ -144,6 +157,9 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     this.dirty = false;
     this.areRowsDeleted = false;
+
+    this.filter = new UserSearchCriteria();
+    this.deletedStatuses = [null, true, false];
   }
 
   getUsers (): void {
@@ -188,7 +204,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true, UserState[UserState.NEW], [], false);
+    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
+      UserState[UserState.NEW], [], false, false);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;

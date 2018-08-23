@@ -1,4 +1,38 @@
 <page-header id="usersheader_id">Users</page-header>
+
+<div *ngIf="false" class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+
+        <md-select placeholder="User role" [(ngModel)]="filter.authRole" id="role_id">
+          <md-option *ngFor="let t of userRoles" [value]="t">
+            {{t}}
+          </md-option>
+        </md-select>
+
+        <md-select placeholder="User deleted" [(ngModel)]="filter.deleted" id="deleted_id">
+          <md-option *ngFor="let t of deletedStatuses" [value]="t">
+            {{t}}
+          </md-option>
+        </md-select>
+
+        <md-input-container>
+          <input mdInput placeholder="Username" [(ngModel)]="filter.userName" id="username_id">
+        </md-input-container>
+
+        <div class="searchArea">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="getUsers()">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+        </div>
+
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+
 <div class="panel">
 
   <div class="group-filter-button">
@@ -53,6 +87,10 @@
     <ng-container *ngIf="row['suspended']">
       <span>(Suspended)</span>
     </ng-container>
+  </ng-template>
+
+  <ng-template #deletedTpl let-row="row" ngx-datatable-cell-template>
+    <input type="checkbox" [checked]="row['deleted']" disabled>
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>

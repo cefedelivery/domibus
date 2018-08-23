@@ -66,7 +66,8 @@ export class UserService {
   }
 
   private extractData (res: Response) {
-    return res.json() || {};
+    const result = res.json() || {};
+    return result;
   }
 
   private handleError (error: Response | any) {
@@ -83,4 +84,10 @@ export class UserService {
     return Promise.reject(errMsg);
   }
 
+}
+
+export class UserSearchCriteria {
+  authRole: string;
+  userName: string;
+  deleted: boolean;
 }
