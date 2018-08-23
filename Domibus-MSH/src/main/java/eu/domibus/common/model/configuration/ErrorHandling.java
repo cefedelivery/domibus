@@ -62,7 +62,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
         final ErrorHandling that = (ErrorHandling) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

@@ -98,7 +98,7 @@ public class To {
         final To to = (To) o;
 
         if (!this.partyId.equals(to.partyId)) return false;
-        return !(this.role != null ? !this.role.equals(to.role) : to.role != null);
+        return !(this.role != null ? !this.role.equalsIgnoreCase(to.role) : to.role != null);
 
     }
 

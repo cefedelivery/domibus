@@ -71,7 +71,7 @@ public class PropertySet extends AbstractBaseEntity {
 
         final PropertySet that = (PropertySet) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

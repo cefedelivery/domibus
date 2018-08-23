@@ -81,14 +81,14 @@ public class MessageExchangeConfiguration {
 
         MessageExchangeConfiguration that = (MessageExchangeConfiguration) o;
 
-        if (agreementName != null ? !agreementName.equals(that.agreementName) : that.agreementName != null)
+        if (agreementName != null ? !agreementName.equalsIgnoreCase(that.agreementName) : that.agreementName != null)
             return false;
-        if (!senderParty.equals(that.senderParty)) return false;
-        if (!receiverParty.equals(that.receiverParty)) return false;
-        if (!service.equals(that.service)) return false;
-        if (!action.equals(that.action)) return false;
-        if (!leg.equals(that.leg)) return false;
-        return pmodeKey.equals(that.pmodeKey);
+        if (!senderParty.equalsIgnoreCase(that.senderParty)) return false;
+        if (!receiverParty.equalsIgnoreCase(that.receiverParty)) return false;
+        if (!service.equalsIgnoreCase(that.service)) return false;
+        if (!action.equalsIgnoreCase(that.action)) return false;
+        if (!leg.equalsIgnoreCase(that.leg)) return false;
+        return pmodeKey.equalsIgnoreCase(that.pmodeKey);
     }
 
     @Override

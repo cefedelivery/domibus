@@ -93,7 +93,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
-        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
+        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
             dynamicDiscoveryService = dynamicDiscoveryServicePEPPOL;
         } else { // OASIS client is used by default
             dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;
@@ -422,7 +422,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
 
         for (final eu.domibus.ebms3.common.model.Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+            if (p.getName() != null && StringUtils.equalsIgnoreCase(p.getName(), MessageConstants.FINAL_RECIPIENT)) {
                 return p;
             }
             LOG.debug("Property: " + p.getName());
