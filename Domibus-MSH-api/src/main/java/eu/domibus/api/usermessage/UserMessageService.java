@@ -19,6 +19,8 @@ public interface UserMessageService {
 
     void restoreFailedMessage(String messageId);
 
+    void sendEnqueuedMessage(String messageId);
+
     List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end, String finalRecipient);
 
     void deleteFailedMessage(String messageId);
