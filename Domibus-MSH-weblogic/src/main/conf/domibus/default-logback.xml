@@ -75,7 +75,7 @@
         <appender-ref ref="${domainName}-business-file"/>
     </logger>
 
-    <root level="INFO" additivity="false">
+    <root level="WARN" additivity="false">
         <appender-ref ref="${domainName}-file"/>
     </root>
 
