@@ -16,9 +16,11 @@ import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * @author Ion Perpegel
@@ -74,10 +77,14 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
 
         // deletion
-        List<User> usersEntities = domainConverter.convert(users, User.class);
-        List<User> allUsersEntities = userDao.listUsers();
-        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-        deleteUsers(usersEntitiesToDelete);
+        List<eu.domibus.api.user.User> deletedUsers = filterDeletedUsers(users);
+        LOG.debug("Users to delete:" + deletedUsers.size());
+        deleteUsers(deletedUsers);
+
+//        List<User> usersEntities = domainConverter.convert(users, User.class);
+//        List<User> allUsersEntities = userDao.listUsers();
+//        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
+//        deleteUsers(usersEntitiesToDelete);
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -95,12 +102,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
         }
-    }
-
-    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
-        List<User> result = new ArrayList<>(masterData);
-        result.removeAll(newData);
-        return result;
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
@@ -125,12 +126,22 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
-        userDao.delete(usersEntitiesToDelete);
-        for (User user : usersEntitiesToDelete) {
+    private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
+//        List<User> users = domainConverter.convert(usersToDelete, User.class);
+        List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
+                .collect(Collectors.toList());
+        userDao.delete(users);
+        for (User user : users) {
             userDomainService.deleteDomainForUser(user.getUserName());
         }
     }
+
+//    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
+//        userDao.delete(usersEntitiesToDelete);
+//        for (User user : usersEntitiesToDelete) {
+//            userDomainService.deleteDomainForUser(user.getUserName());
+//        }
+//    }
 
     private void addRoleToUser(List<String> authorities, User userEntity) {
         for (String authority : authorities) {
@@ -144,13 +155,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         if (!userEntity.getActive() && user.isActive()) {
             userEntity.setSuspensionDate(null);
             userEntity.setAttemptCount(0);
-
         }
-        if(!user.isActive() && userEntity.getActive()){
-            LOG.debug("User:[{}] has been disabled by administrator",user.getUserName());
+        if (!user.isActive() && userEntity.getActive()) {
+            LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
             final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
-                LOG.debug("Sending account disabled event for user:[{}]",user.getUserName());
+                LOG.debug("Sending account disabled event for user:[{}]", user.getUserName());
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
             }
         }
@@ -171,4 +181,15 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithPasswordChange(List<eu.domibus.api.user.User> users) {
         return Collections2.filter(users, user -> UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty());
     }
+
+    private List<eu.domibus.api.user.User> filterDeletedUsers(List<eu.domibus.api.user.User> users) {
+        return Collections2.filter(users, user -> UserState.REMOVED.name().equals(user.getStatus()))
+                .stream().collect(Collectors.toList());
+    }
+
+//    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
+//        List<User> result = new ArrayList<>(masterData);
+//        result.removeAll(newData);
+//        return result;
+//    }
 }

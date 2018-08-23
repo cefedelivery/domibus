@@ -285,7 +285,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.deleteUsers([row]);
   }
 
-  private deleteUsers (users: any[]) {
+  private deleteUsers (users: UserResponseRO[]) {
     if (this.isLoggedInUserSelected(users)) {
       this.alertService.error('You cannot delete the logged in user: ' + this.securityService.getCurrentUser().username);
       return;
@@ -294,10 +294,19 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
     this.enableEdit = false;
 
-    // we need to use the old for loop approach to don't mess with the entries on the top before
-    for (let i = users.length - 1; i >= 0; i--) {
-      this.users.splice(users[i].$$index, 1);
+    for (const itemToDelete of  users) {
+      if (itemToDelete.status === UserState[UserState.NEW]) {
+        this.users.splice(this.users.indexOf(itemToDelete), 1);
+      } else {
+        itemToDelete.status = UserState[UserState.REMOVED];
+        itemToDelete.deleted = true;
+      }
     }
+
+    // we need to use the old for loop approach to don't mess with the entries on the top before
+    // for (let i = users.length - 1; i >= 0; i--) {
+    //   this.users.splice(users[i].$$index, 1);
+    // }
 
     this.selected = [];
     this.areRowsDeleted = true;
