@@ -190,8 +190,8 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    this.enableDelete = selected.length > 0;
-    this.enableEdit = selected.length == 1;
+    this.enableDelete = selected.length > 0 && !selected.every(el => el.deleted);
+    this.enableEdit = selected.length == 1 && !selected[0].deleted;
   }
 
   private isLoggedInUserSelected (selected): boolean {
@@ -233,6 +233,10 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEdit () {
+    if (this.rowNumber >= 0 && this.users[this.rowNumber] && this.users[this.rowNumber].deleted) {
+      this.alertService.error('You cannot edit a deleted user.', false, 3000);
+      return;
+    }
     this.buttonEditAction(this.rowNumber);
   }
 
@@ -303,11 +307,6 @@ export class UserComponent implements OnInit, DirtyOperations {
       }
     }
 
-    // we need to use the old for loop approach to don't mess with the entries on the top before
-    // for (let i = users.length - 1; i >= 0; i--) {
-    //   this.users.splice(users[i].$$index, 1);
-    // }
-
     this.selected = [];
     this.areRowsDeleted = true;
     this.setIsDirty();
@@ -336,11 +335,11 @@ export class UserComponent implements OnInit, DirtyOperations {
       const isValid = this.userValidatorService.validateUsers(this.users);
       if (!isValid) return;
 
-      const headers = new Headers({'Content-Type': 'application/json'});
       this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
         if (result) {
           this.disableSelectionAndButtons();
-          this.http.put(UserComponent.USER_USERS_URL, JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+          const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
+          this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
             this.getUsers();
             this.getUserRoles();
             this.alertService.success('The operation \'update users\' completed successfully.', false);

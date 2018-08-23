@@ -80,11 +80,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         List<eu.domibus.api.user.User> deletedUsers = filterDeletedUsers(users);
         LOG.debug("Users to delete:" + deletedUsers.size());
         deleteUsers(deletedUsers);
-
-//        List<User> usersEntities = domainConverter.convert(users, User.class);
-//        List<User> allUsersEntities = userDao.listUsers();
-//        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-//        deleteUsers(usersEntitiesToDelete);
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -127,7 +122,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
-//        List<User> users = domainConverter.convert(usersToDelete, User.class);
         List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
                 .collect(Collectors.toList());
         userDao.delete(users);
@@ -135,13 +129,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             userDomainService.deleteDomainForUser(user.getUserName());
         }
     }
-
-//    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
-//        userDao.delete(usersEntitiesToDelete);
-//        for (User user : usersEntitiesToDelete) {
-//            userDomainService.deleteDomainForUser(user.getUserName());
-//        }
-//    }
 
     private void addRoleToUser(List<String> authorities, User userEntity) {
         for (String authority : authorities) {
@@ -187,9 +174,4 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
                 .stream().collect(Collectors.toList());
     }
 
-//    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
-//        List<User> result = new ArrayList<>(masterData);
-//        result.removeAll(newData);
-//        return result;
-//    }
 }
