@@ -146,9 +146,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return this.http.get('rest/jms/destinations')
       .map(response => response.json().jmsDestinations)
       .catch((error: Response) => {
-      this.alertService.error('Could not load queues: ' + error);
-      return Promise.reject(error);
-    });
+        this.alertService.error('Could not load queues: ' + error);
+        return Promise.reject(error);
+      });
   }
 
   private loadDestinations (): Observable<Response> {
@@ -166,16 +166,19 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return result;
   }
 
-  private refreshDestinations () {
-    this.getDestinations().subscribe(
+  private refreshDestinations (): Observable<Response>  {
+    const result = this.getDestinations();
+    result.subscribe(
       (destinations) => {
         for (const key in destinations) {
-          this.queues[key].lenght = 0;
-          this.queues[key].push(destinations[key]);
+          const queue = this.queues.find(el => el.name === key);
+          if (queue) {
+            Object.assign(queue, destinations[key]);
+          }
         }
-        this.queuesInfoGot.emit();
       }
     );
+    return result;
   }
 
   private setDefaultQueue (queueName: string) {
@@ -392,7 +395,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.alertService.success('The operation \'move messages\' completed successfully.');
 
         //refresh destinations
-        this.loadDestinations().subscribe((response: Response) => {
+        this.refreshDestinations().subscribe((response: Response) => {
           this.setDefaultQueue(this.currentSearchSelectedSource.name);
         });
 
@@ -417,7 +420,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     }, {headers: this.headers}).subscribe(
       () => {
         this.alertService.success('The operation \'updates on message(s)\' completed successfully.');
-        this.loadDestinations();
+        this.refreshDestinations();
         this.markedForDeletionMessages = [];
       },
       error => {
