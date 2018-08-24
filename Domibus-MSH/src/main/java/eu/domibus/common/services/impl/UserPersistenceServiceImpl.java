@@ -16,20 +16,16 @@ import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Ion Perpegel
@@ -105,8 +101,14 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         //get all users from user-domains table in general schema
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (eu.domibus.api.user.User user : newUsers) {
-            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
-                throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists.");
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName()))) {
+                String errorMessage = "Cannot add user " + user.getUserName() + " because this name already exists in the "
+                        + user.getDomain() + " domain.";
+                if (user.isDeleted()) {
+                    errorMessage += "(it is deleted)";
+                }
+                throw new UserManagementException(errorMessage);
+            }
         }
 
         for (eu.domibus.api.user.User user : newUsers) {

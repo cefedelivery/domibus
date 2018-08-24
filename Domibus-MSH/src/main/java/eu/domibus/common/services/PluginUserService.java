@@ -3,6 +3,7 @@ package eu.domibus.common.services;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
 import eu.domibus.core.security.AuthenticationEntity;
+
 import java.util.List;
 
 /**
@@ -49,5 +50,5 @@ public interface PluginUserService {
      * @param updatedUsers Existing users to update
      * @param removedUsers Existing users to delete
      */
-    public void updateUsers(List<AuthenticationEntity> addedUsers, List<AuthenticationEntity> updatedUsers, List<AuthenticationEntity> removedUsers);
+    void updateUsers(List<AuthenticationEntity> addedUsers, List<AuthenticationEntity> updatedUsers, List<AuthenticationEntity> removedUsers);
 }

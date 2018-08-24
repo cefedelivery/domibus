@@ -64,7 +64,9 @@
     [selected]="selected"
     [limit]="rowLimiter.pageSize"
     [selectionType]="'multi'"
-    (select)='onSelect($event)'>
+    (select)='onSelect($event)'
+    [offset]="offset"
+    (page)="onChangePage($event)">
   </ngx-datatable>
 
   <ng-template #editableTpl let-value="value" let-row="row" ngx-datatable-cell-template>

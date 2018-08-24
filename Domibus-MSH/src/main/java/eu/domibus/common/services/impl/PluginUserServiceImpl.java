@@ -10,17 +10,18 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.PluginUserService;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * @author Pion
+ * @author Pion, Catalin Enache
  * @since 4.0
  */
 @Service
@@ -29,12 +30,16 @@ public class PluginUserServiceImpl implements PluginUserService {
     @Autowired
     @Qualifier("securityAuthenticationDAO")
     private AuthenticationDAO securityAuthenticationDAO;
+
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
+
     @Autowired
     private UserRoleDao userRoleDao;
+
     @Autowired
     private UserDomainService userDomainService;
+
     @Autowired
     private DomainContextProvider domainProvider;
 
@@ -56,9 +61,24 @@ public class PluginUserServiceImpl implements PluginUserService {
 
         final Domain currentDomain = domainProvider.getCurrentDomain();
 
+        checkUsers(addedUsers);
+
         addedUsers.forEach(u -> insertNewUser(u, currentDomain));
         updatedUsers.forEach(u -> updateUser(u));
         removedUsers.forEach(u -> deleteUser(u));
+    }
+
+    /**
+     * get all users from general schema and validate new users against existing names
+     *
+     * @param addedUsers
+     */
+    private void checkUsers(List<AuthenticationEntity> addedUsers) {
+        List<String> allUserNames = userDomainService.getAllUserNames();
+        for (AuthenticationEntity user : addedUsers) {
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUsername())))
+                throw new UserManagementException("Cannot add user " + user.getUsername() + " because this name already exists.");
+        }
     }
 
     private Map<String, Object> createFilterMap(

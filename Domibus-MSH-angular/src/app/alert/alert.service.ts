@@ -1,5 +1,5 @@
 ﻿import {Injectable} from '@angular/core';
-import {Router, NavigationStart, NavigationEnd} from '@angular/router';
+import {NavigationEnd, NavigationStart, Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {Subject} from 'rxjs/Subject';
 
@@ -66,7 +66,6 @@ export class AlertService {
         if (error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8') {
           errMsg = (error.json ? error.json().message || error.json() || error : error);
         } else {
-          errMsg = error;
           errMsg = error._body ? error._body.match(/<h1>(.+)<\/h1>/)[1] : error;
         }
       } catch (e) {
