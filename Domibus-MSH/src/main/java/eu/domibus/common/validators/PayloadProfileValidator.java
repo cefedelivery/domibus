@@ -65,13 +65,13 @@ public class PayloadProfileValidator {
         boolean compress = false;
         String mimeType = null;
         for(Property property : partInfo.getPartProperties().getProperties()) {
-            if(CompressionService.COMPRESSION_PROPERTY_KEY.equals(property.getName())) {
-                if(!CompressionService.COMPRESSION_PROPERTY_VALUE.equals(property.getValue())) {
+            if(CompressionService.COMPRESSION_PROPERTY_KEY.equalsIgnoreCase(property.getName())) {
+                if(!CompressionService.COMPRESSION_PROPERTY_VALUE.equalsIgnoreCase(property.getValue())) {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0052, CompressionService.COMPRESSION_PROPERTY_VALUE + " is the only accepted value for CompressionType. Got " + property.getValue(), null, null);
                 }
                 compress = true;
             }
-            if(Property.MIME_TYPE.equals(property.getName())) {
+            if(Property.MIME_TYPE.equalsIgnoreCase(property.getName())) {
                 mimeType = property.getValue();
             }
         }
@@ -114,7 +114,7 @@ public class PayloadProfileValidator {
             if(partInfo.getPartProperties() != null) {
                 final Collection<Property> partProperties = partInfo.getPartProperties().getProperties();
                 for (final Property partProperty : partProperties) {
-                    if (Property.MIME_TYPE.equals(partProperty.getName())) {
+                    if (Property.MIME_TYPE.equalsIgnoreCase(partProperty.getName())) {
                         mime = partProperty.getValue();
                         break;
                     }

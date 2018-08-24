@@ -88,7 +88,7 @@ public class Identifier extends AbstractBaseEntity {
 
     public void init(final Configuration configuration) {
         for (final PartyIdType idType : configuration.getBusinessProcesses().getPartyIdTypes()) {
-            if (idType.getName().equals(this.partyIdTypeXml)) {
+            if (idType.getName().equalsIgnoreCase(this.partyIdTypeXml)) {
                 this.partyIdType = idType;
                 break;
             }

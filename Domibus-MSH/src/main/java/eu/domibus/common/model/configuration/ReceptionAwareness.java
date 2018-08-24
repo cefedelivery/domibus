@@ -128,7 +128,7 @@ public class ReceptionAwareness extends AbstractBaseEntity {
 
         final ReceptionAwareness that = (ReceptionAwareness) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

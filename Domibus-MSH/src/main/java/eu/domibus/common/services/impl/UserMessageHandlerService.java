@@ -216,7 +216,7 @@ public class UserMessageHandlerService {
                 continue;
             }
             for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
+                if (Property.CHARSET.equalsIgnoreCase(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
@@ -234,8 +234,8 @@ public class UserMessageHandlerService {
      */
     public Boolean checkTestMessage(final UserMessage message) {
         LOG.debug("Checking if it is a test message");
-        return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
-                && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
+        return Ebms3Constants.TEST_SERVICE.equalsIgnoreCase(message.getCollaborationInfo().getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equalsIgnoreCase(message.getCollaborationInfo().getAction());
 
     }
 
@@ -252,8 +252,8 @@ public class UserMessageHandlerService {
             return false;
         }
 
-        return Ebms3Constants.TEST_SERVICE.equals(legConfiguration.getService().getValue())
-                && Ebms3Constants.TEST_ACTION.equals(legConfiguration.getAction().getValue());
+        return Ebms3Constants.TEST_SERVICE.equalsIgnoreCase(legConfiguration.getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equalsIgnoreCase(legConfiguration.getAction().getValue());
 
     }
 
@@ -381,7 +381,7 @@ public class UserMessageHandlerService {
 
     String getFinalRecipientName(UserMessage userMessage) {
         for (Property property : userMessage.getMessageProperties().getProperty()) {
-            if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+            if (property.getName() != null && property.getName().equalsIgnoreCase(MessageConstants.FINAL_RECIPIENT)) {
                 return property.getValue();
             }
         }

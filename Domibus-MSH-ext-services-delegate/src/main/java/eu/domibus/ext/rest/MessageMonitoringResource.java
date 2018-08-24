@@ -58,6 +58,13 @@ public class MessageMonitoringResource {
         messageMonitorExtService.restoreFailedMessage(messageId);
     }
 
+    @ApiOperation(value = "Send enqueued message",  notes = "Send a message which has a SEND_ENQUEUED status",
+            authorizations = @Authorization(value = "basicAuth"), tags = "monitoring")
+    @RequestMapping(path = "/enqueued/{messageId:.+}/send", method = RequestMethod.PUT)
+    public void sendEnqueuedMessage(@PathVariable(value = "messageId") String messageId) throws MessageMonitorExtException {
+        messageMonitorExtService.sendEnqueuedMessage(messageId);
+    }
+
     @ApiOperation(value = "Resend all messages with SEND_FAILURE status within a certain time interval", notes = "Resend all messages with SEND_FAILURE status within a certain time interval",
             authorizations = @Authorization(value = "basicAuth"), tags = "monitoring")
     @RequestMapping(path = "/failed/restore", method = RequestMethod.POST)
