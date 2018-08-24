@@ -22,6 +22,8 @@ import java.util.List;
 public class MessageFilterCsvServiceImplTest {
 
     private static final String MESSAGE_FILTER_HEADER = "Plugin,From,To,Action,Service,Persisted";
+
+    private static final String LINE_SEPARATOR = "\n";
     @Tested
     MessageFilterCsvServiceImpl messageFilterCsvService;
 
@@ -32,7 +34,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(new ArrayList<>(), null, null, null);
 
         // Then
-        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + LINE_SEPARATOR, exportToCSV);
     }
 
     @Test
@@ -42,7 +44,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(null, null, null, null);
 
         // Then
-        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator(), exportToCSV);
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + LINE_SEPARATOR, exportToCSV);
     }
 
     @Test
@@ -67,7 +69,7 @@ public class MessageFilterCsvServiceImplTest {
         final String exportToCSV = messageFilterCsvService.exportToCSV(messageFilterROList, MessageFilterRO.class, null, null);
 
         // Then
-        Assert.assertEquals(MESSAGE_FILTER_HEADER + System.lineSeparator() +
-                "backendName,from:from,,,,true" + System.lineSeparator(), exportToCSV);
+        Assert.assertEquals(MESSAGE_FILTER_HEADER + LINE_SEPARATOR +
+                "backendName,from:from,,,,true" + LINE_SEPARATOR, exportToCSV);
     }
 }
