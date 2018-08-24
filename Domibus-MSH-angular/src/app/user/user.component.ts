@@ -17,7 +17,6 @@ import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {DomainService} from '../security/domain.service';
 import {Domain} from '../security/domain';
-import {PluginUserSearchCriteria} from '../pluginuser/pluginuser.service';
 
 @Component({
   moduleId: module.id,
