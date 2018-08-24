@@ -62,6 +62,7 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   filter: UserSearchCriteria;
   deletedStatuses: any[];
+  offset:number;
 
   constructor (private http: Http,
                private userService: UserService,
@@ -73,6 +74,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
+    this.offset = 0;
     this.filter = new UserSearchCriteria();
     this.deletedStatuses = [null, true, false];
 
@@ -387,4 +389,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.getUsers();
   }
 
+  onChangePage (event: any): void {
+    this.offset = event.offset;
+  }
 }
