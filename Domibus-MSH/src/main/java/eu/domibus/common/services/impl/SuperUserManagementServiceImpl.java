@@ -3,8 +3,12 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthRole;
+import eu.domibus.api.user.UserManagementException;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
  */
 @Service("superUserManagementService")
 public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SuperUserManagementServiceImpl.class);
 
     @Autowired
     protected UserDomainService userDomainService;
@@ -49,12 +55,30 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
         List<eu.domibus.api.user.User> superUsers = users.stream()
                 .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
                 .collect(Collectors.toList());
-        domainTaskExecutor.submit(() -> {
-            // this block needs to called inside a transaction; 
-            // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
-            super.updateUsers(superUsers);
-            return null;
-        });
+
+        try {
+            domainTaskExecutor.submit(() -> {
+                // this block needs to called inside a transaction;
+                // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
+                super.updateUsers(superUsers);
+                return null;
+            });
+        } catch (eu.domibus.api.multitenancy.DomainException ex) {
+            LOG.info("DomainException ex ", ex);
+            if (ex.getCause() instanceof UserManagementException) {
+
+                LOG.info("getCause() instanceof UserManagementException ", ex.getCause());
+                throw (UserManagementException) ex.getCause();
+            } else {
+
+                LOG.info("getCause() ", ex.getCause());
+                throw ex;
+            }
+        } catch(Exception ex) {
+            LOG.info("EXCEPTION ex ", ex);
+            throw ex;
+        }
+
     }
 
 }

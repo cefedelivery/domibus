@@ -5,6 +5,7 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
+import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.PluginUserService;
 import eu.domibus.core.security.AuthenticationDAO;
