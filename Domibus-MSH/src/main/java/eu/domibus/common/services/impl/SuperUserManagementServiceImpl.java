@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 
@@ -64,21 +65,12 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
                 return null;
             });
         } catch (eu.domibus.api.multitenancy.DomainException ex) {
-            LOG.info("DomainException ex ", ex);
-            if (ex.getCause() instanceof UserManagementException) {
-
-                LOG.info("getCause() instanceof UserManagementException ", ex.getCause());
-                throw (UserManagementException) ex.getCause();
+            if (ex.getCause().getCause() instanceof UserManagementException) {
+                throw (UserManagementException) ex.getCause().getCause();
             } else {
-
-                LOG.info("getCause() ", ex.getCause());
                 throw ex;
             }
-        } catch(Exception ex) {
-            LOG.info("EXCEPTION ex ", ex);
-            throw ex;
         }
-
     }
 
 }
