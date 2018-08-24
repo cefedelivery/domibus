@@ -101,8 +101,14 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         //get all users from user-domains table in general schema
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (eu.domibus.api.user.User user : newUsers) {
-            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
-                throw new UserManagementException("Cannot add user " + user.getUserName() + " because this name already exists.");
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName()))) {
+                String errorMessage = "Cannot add user " + user.getUserName() + " because this name already exists in the "
+                        + user.getDomain() + " domain.";
+                if (user.isDeleted()) {
+                    errorMessage += "(it is deleted)";
+                }
+                throw new UserManagementException(errorMessage);
+            }
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
