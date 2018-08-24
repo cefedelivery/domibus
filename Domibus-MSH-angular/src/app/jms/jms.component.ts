@@ -143,13 +143,12 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   private getDestinations (): Observable<Response> {
-    const results = this.http.get('rest/jms/destinations');
-    results.map(response => response.json().jmsDestinations);
-    results.catch((error: Response) => {
+    return this.http.get('rest/jms/destinations')
+      .map(response => response.json().jmsDestinations)
+      .catch((error: Response) => {
       this.alertService.error('Could not load queues: ' + error);
       return Promise.reject(error);
     });
-    return results;
   }
 
   private loadDestinations (): Observable<Response> {
