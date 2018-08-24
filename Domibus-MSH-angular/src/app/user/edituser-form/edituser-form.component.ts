@@ -5,6 +5,7 @@ import {UserValidatorService} from '../uservalidator.service';
 import {SecurityService} from '../../security/security.service';
 import {UserService} from '../user.service';
 import {Domain} from '../../security/domain';
+import {DomainService} from '../../security/domain.service';
 
 const ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 const NEW_MODE = 'New User';
@@ -26,7 +27,7 @@ export class EditUserComponent {
   userName = '';
   email = '';
   active = true;
-  roles: string[] = [];
+  role: string;
   domain: string;
 
   public emailPattern = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}';
@@ -47,7 +48,8 @@ export class EditUserComponent {
                userValidatorService: UserValidatorService,
                private userService: UserService,
                private securityService: SecurityService,
-               private cdr: ChangeDetectorRef) {
+               private cdr: ChangeDetectorRef,
+               private domainService: DomainService) {
 
     this.isDomainVisible = this.userService.isDomainVisible();
 
@@ -58,9 +60,7 @@ export class EditUserComponent {
     this.userName = data.user.userName;
     this.email = data.user.email;
     this.domain = data.user.domain;
-    if (data.user.roles) {
-      this.roles = data.user.roles.split(',');
-    }
+    this.role = data.user.roles;
     this.password = data.user.password;
     this.confirmation = data.user.password;
     this.active = data.user.active;
@@ -71,12 +71,12 @@ export class EditUserComponent {
     this.domainTitle = this.isSuperAdmin() ? 'Preferred Domain' : 'Domain';
 
     if (this.editMode) {
-      this.existingRoles = this.getAllowedRoles(data.userroles, data.user.roles);
+      this.existingRoles = this.getAllowedRoles(data.userroles, this.role);
 
       this.userForm = fb.group({
         'userName': new FormControl({value: this.userName, disabled: true}, Validators.nullValidator),
         'email': [null, Validators.pattern],
-        'roles': new FormControl(this.roles, Validators.required),
+        'role': new FormControl(this.role, Validators.required),
         'domain': this.isDomainVisible ? new FormControl({value: this.domain}, Validators.required) : null,
         'password': [null, Validators.pattern],
         'confirmation': [null],
@@ -89,8 +89,8 @@ export class EditUserComponent {
       this.userForm = fb.group({
         'userName': new FormControl(this.userName, Validators.required),
         'email': [null, Validators.pattern],
-        'roles': new FormControl(this.roles, Validators.required),
-        'domain': this.isDomainVisible ? new FormControl({value: this.domain}, Validators.required) : null,
+        'role': new FormControl(this.role, Validators.required),
+        'domain': this.isDomainVisible ? new FormControl({value: this.domain}, [Validators.required]) : null,
         'password': [Validators.required, Validators.pattern],
         'confirmation': [Validators.required],
         'active': [Validators.required]
@@ -129,7 +129,7 @@ export class EditUserComponent {
   }
 
   isSuperAdmin () {
-    return this.roles.includes(SecurityService.ROLE_AP_ADMIN);
+    return this.role === SecurityService.ROLE_AP_ADMIN;
   }
 
   isDomainDisabled () {
@@ -137,14 +137,22 @@ export class EditUserComponent {
     return !this.isSuperAdmin();
   }
 
-  // filters out roles so that the user cannot change from ap admin to the other 2 roles or vice-versa
-  getAllowedRoles(allRoles, userRoles) {
-    //console.log(allRoles, userRoles);
-    if(userRoles.includes(SecurityService.ROLE_AP_ADMIN))
-      return [SecurityService.ROLE_AP_ADMIN];
-    else
-      return allRoles.filter(role => role != SecurityService.ROLE_AP_ADMIN);
+  onRoleChange () {
+    if (this.role !== SecurityService.ROLE_AP_ADMIN) {
+      this.domainService.getCurrentDomain().delay(0)
+        .subscribe((dom) => {
+          this.domain = dom.code;
+        });
+    }
   }
 
+  // filters out roles so that the user cannot change from ap admin to the other 2 roles or vice-versa
+  getAllowedRoles (allRoles, userRole) {
+    if (userRole === SecurityService.ROLE_AP_ADMIN) {
+      return [SecurityService.ROLE_AP_ADMIN];
+    } else {
+      return allRoles.filter(role => role !== SecurityService.ROLE_AP_ADMIN);
+    }
+  }
 
 }
