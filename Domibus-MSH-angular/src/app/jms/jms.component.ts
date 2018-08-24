@@ -130,7 +130,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
     this.rows = [];
 
-    this.getDestinations();
+    this.loadDestinations();
 
     this.queuesInfoGot.subscribe(result => {
       this.setDefaultQueue('.*?[d|D]omibus.?DLQ');
@@ -143,22 +143,40 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   private getDestinations (): Observable<Response> {
-    const observableResponse: Observable<Response> = this.http.get('rest/jms/destinations');
-    observableResponse.subscribe(
-      (response: Response) => {
+    const results = this.http.get('rest/jms/destinations');
+    results.map(response => response.json().jmsDestinations);
+    results.catch((error: Response) => {
+      this.alertService.error('Could not load queues: ' + error);
+      return Promise.reject(error);
+    });
+    return results;
+  }
+
+  private loadDestinations (): Observable<Response> {
+    const result = this.getDestinations();
+    result.subscribe(
+      (destinations) => {
         this.queues = [];
-        let destinations = response.json().jmsDestinations;
-        for (let key in destinations) {
+        for (const key in destinations) {
           this.queues.push(destinations[key]);
         }
         this.queuesInfoGot.emit();
-      },
-      (error: Response) => {
-        this.alertService.error('Could not load queues: ' + error);
       }
     );
 
-    return observableResponse;
+    return result;
+  }
+
+  private refreshDestinations () {
+    this.getDestinations().subscribe(
+      (destinations) => {
+        for (const key in destinations) {
+          this.queues[key].lenght = 0;
+          this.queues[key].push(destinations[key]);
+        }
+        this.queuesInfoGot.emit();
+      }
+    );
   }
 
   private setDefaultQueue (queueName: string) {
@@ -194,12 +212,6 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.timestampFromMaxDate = event.value;
   }
 
-  updateSelectedQueueInfo () {
-
-    if (this.selectedSource)
-      this.selectedSource.numberOfMessages = this.rows.length;
-  }
-
   canSearch () {
     return this.request.source && !this.loading;
   }
@@ -228,7 +240,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.rows = response.json().messages;
         this.loading = false;
 
-        this.updateSelectedQueueInfo();
+        this.refreshDestinations();
       },
       error => {
         this.alertService.error('An error occured while loading the JMS messages. In case you are using the Selector / JMS Type, please follow the rules for Selector / JMS Type according to Help Page / Admin Guide (Error Status: ' + error.status + ')');
@@ -381,7 +393,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         this.alertService.success('The operation \'move messages\' completed successfully.');
 
         //refresh destinations
-        this.getDestinations().subscribe((response: Response) => {
+        this.loadDestinations().subscribe((response: Response) => {
           this.setDefaultQueue(this.currentSearchSelectedSource.name);
         });
 
@@ -406,7 +418,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     }, {headers: this.headers}).subscribe(
       () => {
         this.alertService.success('The operation \'updates on message(s)\' completed successfully.');
-        this.getDestinations();
+        this.loadDestinations();
         this.markedForDeletionMessages = [];
       },
       error => {
