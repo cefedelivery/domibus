@@ -109,14 +109,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
                 throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists.");
         }
 
-        // validate user not already in general schema
-        //get users from current domain
-        Stream<String> domainUsers = userDao.listUsers().stream().map(el -> el.getUserName());
-        for (eu.domibus.api.user.User user : newUsers) {
-            if (domainUsers.anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
-                throw new UserManagementException("Cannot add user with the name: " + user.getUserName() + " because this name already exists in current domain.");
-        }
-
         for (eu.domibus.api.user.User user : newUsers) {
             User userEntity = domainConverter.convert(user, User.class);
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
@@ -135,9 +127,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
                 .collect(Collectors.toList());
         userDao.delete(users);
-        for (User user : users) {
-            userDomainService.deleteDomainForUser(user.getUserName());
-        }
     }
 
     private void addRoleToUser(List<String> authorities, User userEntity) {
