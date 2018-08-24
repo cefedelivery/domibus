@@ -84,16 +84,23 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.columnPicker = this.filter.authType === 'CERTIFICATE' ? this.columnPickerCert : this.columnPickerBasic;
   }
 
-  async changeAuthType (x) {
-    const ok = await this.searchIfOK();
-    if (!ok)
-      this.filter.authType = this.filter.authType === 'CERTIFICATE' ? 'BASIC' : 'CERTIFICATE';
+  changeAuthType (x) {
+    this.clearSearchParams();
+
+    this.searchIfOK();
+  }
+
+  clearSearchParams () {
+    this.filter.authRole = null;
+    this.filter.originalUser = null;
+    this.filter.userName = null;
   }
 
   async searchIfOK (): Promise<boolean> {
     const ok = await this.checkIsDirty();
-    if (ok)
+    if (ok) {
       this.search();
+    }
     return ok;
   }
 
