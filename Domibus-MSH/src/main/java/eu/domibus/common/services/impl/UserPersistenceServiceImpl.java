@@ -22,10 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Ion Perpegel
@@ -74,10 +74,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         updateUserWithPasswordChange(passwordChangedModifiedUsers);
 
         // deletion
-        List<User> usersEntities = domainConverter.convert(users, User.class);
-        List<User> allUsersEntities = userDao.listUsers();
-        List<User> usersEntitiesToDelete = usersToDelete(allUsersEntities, usersEntities);
-        deleteUsers(usersEntitiesToDelete);
+        List<eu.domibus.api.user.User> deletedUsers = filterDeletedUsers(users);
+        LOG.debug("Users to delete:" + deletedUsers.size());
+        deleteUsers(deletedUsers);
     }
 
     private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
@@ -97,18 +96,19 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private List<User> usersToDelete(final List<User> masterData, final List<User> newData) {
-        List<User> result = new ArrayList<>(masterData);
-        result.removeAll(newData);
-        return result;
-    }
-
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
-        //get all users from general schema
+        // validate user not already in general schema
+        //get all users from user-domains table in general schema
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (eu.domibus.api.user.User user : newUsers) {
-            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
-                throw new UserManagementException("Cannot add user " + user.getUserName() + " because this name already exists.");
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName()))) {
+                String errorMessage = "Cannot add user " + user.getUserName() + " because this name already exists in the "
+                        + user.getDomain() + " domain.";
+                if (user.isDeleted()) {
+                    errorMessage += "(it is deleted)";
+                }
+                throw new UserManagementException(errorMessage);
+            }
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
@@ -125,11 +125,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private void deleteUsers(Collection<User> usersEntitiesToDelete) {
-        userDao.delete(usersEntitiesToDelete);
-        for (User user : usersEntitiesToDelete) {
-            userDomainService.deleteDomainForUser(user.getUserName());
-        }
+    private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
+        List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
+                .collect(Collectors.toList());
+        userDao.delete(users);
     }
 
     private void addRoleToUser(List<String> authorities, User userEntity) {
@@ -144,13 +143,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         if (!userEntity.getActive() && user.isActive()) {
             userEntity.setSuspensionDate(null);
             userEntity.setAttemptCount(0);
-
         }
-        if(!user.isActive() && userEntity.getActive()){
-            LOG.debug("User:[{}] has been disabled by administrator",user.getUserName());
+        if (!user.isActive() && userEntity.getActive()) {
+            LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
             final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
-                LOG.debug("Sending account disabled event for user:[{}]",user.getUserName());
+                LOG.debug("Sending account disabled event for user:[{}]", user.getUserName());
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
             }
         }
@@ -171,4 +169,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private Collection<eu.domibus.api.user.User> filterModifiedUserWithPasswordChange(List<eu.domibus.api.user.User> users) {
         return Collections2.filter(users, user -> UserState.UPDATED.name().equals(user.getStatus()) && user.getPassword() != null && !user.getPassword().isEmpty());
     }
+
+    private List<eu.domibus.api.user.User> filterDeletedUsers(List<eu.domibus.api.user.User> users) {
+        return Collections2.filter(users, user -> UserState.REMOVED.name().equals(user.getStatus()))
+                .stream().collect(Collectors.toList());
+    }
+
 }

@@ -17,8 +17,10 @@ public class User {
     private String password;
     private String domain;
     private boolean suspended;
+    private boolean deleted;
 
-    public User(String userName, String email, boolean active, List<String> authorities, UserState userState, Date suspensionDate) {
+    public User(String userName, String email, boolean active, List<String> authorities, UserState userState,
+                Date suspensionDate, boolean deleted) {
         this.userName = userName;
         this.email = email;
         this.active = active;
@@ -28,6 +30,7 @@ public class User {
         if (suspensionDate != null) {
             this.suspended = true;
         }
+        this.deleted = deleted;
     }
 
     public User() {
@@ -95,5 +98,13 @@ public class User {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

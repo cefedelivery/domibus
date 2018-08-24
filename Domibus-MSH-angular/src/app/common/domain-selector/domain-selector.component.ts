@@ -5,6 +5,7 @@ import {Domain} from '../../security/domain';
 import {MdDialog} from '@angular/material';
 import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
 import {Title} from '@angular/platform-browser';
+import {AlertService} from '../../alert/alert.service';
 
 @Component({
   selector: 'domain-selector',
@@ -23,7 +24,8 @@ export class DomainSelectorComponent implements OnInit {
 
   constructor (private domainService: DomainService,
                private securityService: SecurityService,
-               private dialog: MdDialog) {
+               private dialog: MdDialog,
+               private alertService: AlertService) {
   }
 
   async ngOnInit () {
@@ -58,6 +60,8 @@ export class DomainSelectorComponent implements OnInit {
 
       const domain = this.domains.find(d => d.code == this.domainCode);
       await this.domainService.setCurrentDomain(domain);
+
+      this.alertService.clearAlert();
 
       this.domainService.setAppTitle();
 

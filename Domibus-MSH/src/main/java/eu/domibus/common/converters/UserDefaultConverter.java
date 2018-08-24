@@ -31,7 +31,9 @@ public class UserDefaultConverter implements UserConverter {
                 userEntity.getEmail(),
                 userEntity.getActive(),
                 authorities,
-                UserState.PERSISTED, userEntity.getSuspensionDate());
+                UserState.PERSISTED,
+                userEntity.getSuspensionDate(),
+                userEntity.isDeleted());
     }
 
     @Override
