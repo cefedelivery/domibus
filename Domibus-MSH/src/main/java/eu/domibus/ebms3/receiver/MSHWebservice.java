@@ -140,7 +140,8 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             try {
                 LOG.info("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId(), messaging.getUserMessage().getPartyInfo().getTo().getFirstPartyId());
+                final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
                 LOG.info("Ping message {}", userMessageHandlerContext.isTestMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
