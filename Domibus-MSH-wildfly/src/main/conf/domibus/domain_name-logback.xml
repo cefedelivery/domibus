@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <included>
-    <property name="domainName" value="default" scope="local" />
+    <property name="domainName" value="domain_name" scope="local" />
     <appender name="${domainName}-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${JBOSS_HOME}/logs/${domainName}-domibus.log</file>
             <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      

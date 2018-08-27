@@ -14,10 +14,8 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullReceiptSender;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PullRequest;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
@@ -136,7 +134,8 @@ public class PullMessageSender {
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             LOG.trace("handle message");
             final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId(), messaging.getUserMessage().getPartyInfo().getTo().getFirstPartyId());
+            final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
             //TODO this will be changed in 4.1
             /**
