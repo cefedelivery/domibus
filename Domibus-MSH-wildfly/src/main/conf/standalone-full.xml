@@ -150,12 +150,17 @@
                     </security>
                 </datasource>
                 <datasource jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryMysqlNonXADS" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://localhost:3306/domibus</connection-url>
+                    <connection-url>jdbc:mysql://localhost:3306/domibus?autoReconnect=true&amp;useSSL=false</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <!--Connector/J 8.0.x
                         <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
                     -->
                     <driver>com.mysql</driver>
+                    <pool>
+                        <min-pool-size>20</min-pool-size>
+                        <initial-pool-size>5</initial-pool-size>
+                        <max-pool-size>100</max-pool-size>
+                    </pool>
                     <security>
                         <user-name>edelivery</user-name>
                         <password>edelivery</password>
@@ -166,14 +171,36 @@
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
                 </datasource>
+                <!-- Oracle
+                <datasource jta="true" jndi-name="java:/jdbc/cipaeDeliveryNonXADs" pool-name="eDeliveryOracleNonXADS" enabled="true" use-ccm="true">
+                    <connection-url>jdbc:oracle:thin:@localhost:1521[:SID|/Service]</connection-url>
+                    <driver-class>oracle.jdbc.OracleDriver</driver-class>
+                    <driver>com.oracle</driver>
+                    <security>
+                        <user-name>edelivery_username</user-name>
+                        <password>edelivery_password</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
+                        <background-validation>true</background-validation>
+                        <stale-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker"/>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
+                    </validation>
+                </datasource>
+                -->
                 <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryMysqlXADS" enabled="true" use-ccm="true">
                     <xa-datasource-property name="ServerName">
                         localhost
                     </xa-datasource-property>
                     <xa-datasource-property name="DatabaseName">
-                        domibus
+                        domibus?autoReconnect=true&amp;useSSL=false
                     </xa-datasource-property>
                     <driver>com.mysql</driver>
+                    <xa-pool>
+                        <min-pool-size>20</min-pool-size>
+                        <initial-pool-size>5</initial-pool-size>
+                        <max-pool-size>100</max-pool-size>
+                    </xa-pool>
                     <security>
                         <user-name>edelivery</user-name>
                         <password>edelivery</password>
@@ -184,6 +211,23 @@
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
                 </xa-datasource>
+                <!-- Oracle
+                <xa-datasource jndi-name="java:/jdbc/cipaeDeliveryDs" pool-name="eDeliveryOracleXADS" enabled="true" use-ccm="true">
+                    <xa-datasource-property name="URL">
+                        jdbc:oracle:thin:@localhost:1521[:SID|/Service]
+                    </xa-datasource-property>
+                    <xa-datasource-class>oracle.jdbc.xa.client.OracleXADataSource</xa-datasource-class>
+                    <driver>com.oracle</driver>
+                    <security>
+                        <user-name>edelivery_user</user-name>
+                        <password>edelivery_password</password>
+                    </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
+                    </validation>
+                </xa-datasource>
+                -->
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
@@ -196,6 +240,11 @@
                         <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
                         -->
                     </driver>
+                    <!--Oracle
+                    <driver name="com.oracle" module="com.oracle">
+                        <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+                    </driver>
+                    -->
                 </drivers>
             </datasources>
         </subsystem>
@@ -212,10 +261,10 @@
                     <managed-thread-factory name="default" jndi-name="java:jboss/ee/concurrency/factory/default" context-service="default"/>
                 </managed-thread-factories>
                 <managed-executor-services>
-                    <managed-executor-service name="default" jndi-name="java:jboss/ee/concurrency/executor/default" context-service="default" hung-task-threshold="60000" core-threads="5" max-threads="25" keepalive-time="5000"/>
+                    <managed-executor-service name="default" jndi-name="java:jboss/ee/concurrency/executor/default" context-service="default" hung-task-threshold="60000" core-threads="50" max-threads="200" keepalive-time="5000"/>
                 </managed-executor-services>
                 <managed-executor-services>
-                    <managed-executor-service name="domibusExecutorService" jndi-name="java:jboss/ee/concurrency/executor/DomibusExecutorService" context-service="default" hung-task-threshold="60000" core-threads="5" max-threads="25" keepalive-time="5000"/>
+                    <managed-executor-service name="domibusExecutorService" jndi-name="java:jboss/ee/concurrency/executor/DomibusExecutorService" context-service="default" hung-task-threshold="60000" core-threads="50" max-threads="200" keepalive-time="5000"/>
                 </managed-executor-services>
                 <managed-executor-services>
                     <managed-executor-service name="quartzExecutorService" jndi-name="java:jboss/ee/concurrency/executor/QuartzExecutorService" context-service="default" hung-task-threshold="0" long-running-tasks="true"  core-threads="5" max-threads="25" keepalive-time="5000"/>
@@ -404,6 +453,15 @@
                         <redelivery-delay>1000</redelivery-delay>
                         <max-delivery-attempts>0</max-delivery-attempts>
                     </address-setting>
+                    <address-setting match="jms.queue.DomibusAlertMessageQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <max-delivery-attempts>1</max-delivery-attempts>
+                    </address-setting>
+                    <address-setting match="jms.queue.DomibusUIReplicationQueue">
+                        <expiry-address>jms.queue.ExpiryQueue</expiry-address>
+                        <redelivery-delay>1000</redelivery-delay>
+                        <max-delivery-attempts>1</max-delivery-attempts>
+                    </address-setting>
                     <address-setting match="jms.queue.DomibusBusinessMessageOutQueue">
                         <dead-letter-address>jms.queue.DomibusDLQ</dead-letter-address>
                         <expiry-address>jms.queue.ExpiryQueue</expiry-address>
@@ -512,7 +570,7 @@
                     </pooled-connection-factory>
                 </jms-connection-factories>
                 <jms-destinations>
-                   <jms-queue name="DomibusBusinessMessageOutQueue">
+                    <jms-queue name="DomibusBusinessMessageOutQueue">
                         <entry name="java:/jms/domibus.backend.jms.outQueue"/>
                         <entry name="java:/jms/queue/DomibusBusinessMessageOutQueue"/>
                         <durable>true</durable>
@@ -550,6 +608,16 @@
                     <jms-queue name="DomibusPullMessageQueue">
                         <entry name="java:/jms/domibus.internal.pull.queue"/>
                         <entry name="java:/jms/queue/DomibusPullMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusAlertMessageQueue">
+                        <entry name="java:/jms/domibus.internal.alert.queue"/>
+                        <entry name="java:/jms/queue/DomibusAlertMessageQueue"/>
+                        <durable>true</durable>
+                    </jms-queue>
+                    <jms-queue name="DomibusUIReplicationQueue">
+                        <entry name="java:/jms/domibus.internal.ui.replication.queue"/>
+                        <entry name="java:/jms/queue/DomibusUIReplicationQueue"/>
                         <durable>true</durable>
                     </jms-queue>
                     <jms-queue name="DomibusNotifyBackendWebServiceQueue">
@@ -673,13 +741,13 @@
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
+            <any-address/>
         </interface>
         <!-- TODO - only show this if the jacorb subsystem is added  -->
         <interface name="unsecure">
             <!--
               ~  Used for IIOP sockets in the standard configuration.
-              ~                  To secure JacORB you need to setup SSL 
+              ~                  To secure JacORB you need to setup SSL
               -->
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
         </interface>

@@ -11,22 +11,22 @@ import java.math.BigInteger;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="cid" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="mimeType" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="schemaFile" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
- *       &lt;attribute name="maxSize" type="{http://www.w3.org/2001/XMLSchema}integer" />
- *       &lt;attribute name="required" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="cid" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="mimeType" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="schemaFile" type="{http://www.w3.org/2001/XMLSchema}anyURI" /&gt;
+ *       &lt;attribute name="maxSize" type="{http://www.w3.org/2001/XMLSchema}integer" /&gt;
+ *       &lt;attribute name="required" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
@@ -162,6 +162,7 @@ public class Payload extends AbstractBaseEntity {
 
     /**
      * Gets the value of the required property.
+     * @return the value of the required property.
      */
     public boolean isRequired() {
         return this.required;
@@ -169,6 +170,7 @@ public class Payload extends AbstractBaseEntity {
 
     /**
      * Sets the value of the required property.
+     * @param value the new valud of the required property.
      */
     public void setRequired(final boolean value) {
         this.required = value;
@@ -186,7 +188,7 @@ public class Payload extends AbstractBaseEntity {
 
         final Payload payload = (Payload) o;
 
-        if (!name.equals(payload.name)) return false;
+        if (!name.equalsIgnoreCase(payload.name)) return false;
 
         return true;
     }

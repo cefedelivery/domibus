@@ -106,6 +106,10 @@ public abstract class PModeProvider {
 
     public byte[] getPModeFile(int id) {
         final ConfigurationRaw rawConfiguration = getRawConfiguration(id);
+        return getRawConfigurationBytes(rawConfiguration);
+    }
+
+    private byte[] getRawConfigurationBytes(ConfigurationRaw rawConfiguration) {
         if (rawConfiguration != null) {
             return rawConfiguration.getXml();
         }
@@ -114,6 +118,18 @@ public abstract class PModeProvider {
 
     public ConfigurationRaw getRawConfiguration(int id) {
         return this.configurationRawDAO.getConfigurationRaw(id);
+    }
+
+    public PModeArchiveInfo getCurrentPmode() {
+        final ConfigurationRaw currentRawConfiguration = this.configurationRawDAO.getCurrentRawConfiguration();
+        if (currentRawConfiguration != null) {
+            return new PModeArchiveInfo(
+                    currentRawConfiguration.getEntityId(),
+                    currentRawConfiguration.getConfigurationDate(),
+                    "",
+                    currentRawConfiguration.getDescription());
+        }
+        return null;
     }
 
     public void removePMode(int id) {
@@ -137,7 +153,7 @@ public abstract class PModeProvider {
         }
 
         //unmarshall the PMode taking into account the whitespaces
-        return  unmarshall(bytes, false);
+        return unmarshall(bytes, false);
 
     }
 
@@ -150,13 +166,14 @@ public abstract class PModeProvider {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public List<String> updatePModes(byte[] bytes, String description) throws XmlProcessingException {
         LOG.debug("Updating the PMode");
-
+        description = validateDescriptionSize(description);
         List<String> resultMessage = new ArrayList<>();
         final UnmarshallerResult unmarshalledConfiguration = parsePMode(bytes);
         if (!unmarshalledConfiguration.isValid()) {
             resultMessage.add("The PMode file is not XSD compliant. It is recommended to correct the issues:");
             resultMessage.addAll(unmarshalledConfiguration.getErrors());
-            LOG.warn(StringUtils.join(resultMessage, " "));
+            final String message = StringUtils.join(resultMessage, " ");
+            LOG.warn(message);
         }
 
         Configuration configuration = unmarshalledConfiguration.getResult();
@@ -182,6 +199,13 @@ public abstract class PModeProvider {
                 .build(), clusterCommandTopic);
 
         return resultMessage;
+    }
+
+    private String validateDescriptionSize(final String description) {
+        if(StringUtils.isNotEmpty(description) && description.length()>255){
+            return description.substring(0,254);
+        }
+        return description;
     }
 
 
@@ -251,14 +275,19 @@ public abstract class PModeProvider {
             leg = findLegName(agreementName, senderParty, receiverParty, service, action);
             LOG.businessInfo(DomibusMessageCode.BUS_LEG_NAME_FOUND, leg, agreementName, senderParty, receiverParty, service, action);
 
-            if ((action.equals(Ebms3Constants.TEST_ACTION) && (!service.equals(Ebms3Constants.TEST_SERVICE)))) {
+            if ((StringUtils.equalsIgnoreCase(action, Ebms3Constants.TEST_ACTION) && (!StringUtils.equalsIgnoreCase(service, Ebms3Constants.TEST_SERVICE)))) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "ebMS3 Test Service: " + Ebms3Constants.TEST_SERVICE + " and ebMS3 Test Action: " + Ebms3Constants.TEST_ACTION + " can only be used together [CORE]", messageId, null);
             }
 
             MessageExchangeConfiguration messageExchangeConfiguration = new MessageExchangeConfiguration(agreementName, senderParty, receiverParty, service, action, leg);
             LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
             return messageExchangeConfiguration;
+        } catch (EbMS3Exception e) {
+            if(userMessage != null && userMessage.getMessageInfo() != null) {
+                e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
+            }
 
+            throw e;
         } catch (IllegalStateException ise) {
             // It can happen if DB is clean and no pmodes are configured yet!
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "PMode could not be found. Are PModes configured in the database?", messageId, ise);
@@ -317,27 +346,27 @@ public abstract class PModeProvider {
     public abstract Role getBusinessProcessRole(String roleValue);
 
     protected String getSenderPartyNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[0];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[0];
     }
 
     protected String getReceiverPartyNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[1];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[1];
     }
 
     protected String getServiceNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[2];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[2];
     }
 
     protected String getActionNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[3];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[3];
     }
 
     protected String getAgreementRefNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[4];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[4];
     }
 
     protected String getLegConfigurationNameFromPModeKey(final String pModeKey) {
-        return pModeKey.split(":")[5];
+        return pModeKey.split(MessageExchangeConfiguration.PMODEKEY_SEPARATOR)[5];
     }
 
     public abstract List<Process> findPullProcessesByMessageContext(final MessageExchangeConfiguration messageExchangeConfiguration);

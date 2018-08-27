@@ -82,7 +82,6 @@ public class MessageResourceTest {
         Assert.assertEquals(2, responseEntity.getHeaders().size());
         Assert.assertEquals("application/octet-stream", responseEntity.getHeaders().get("Content-Type").get(0));
         Assert.assertEquals("attachment; filename=messageId.xml", responseEntity.getHeaders().get("content-disposition").get(0));
-        Assert.assertEquals("Byte array resource [resource loaded from byte array]", responseEntity.getBody().getDescription());
     }
 
     @Test
@@ -107,6 +106,5 @@ public class MessageResourceTest {
         Assert.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         Assert.assertEquals("application/zip", responseEntity.getHeaders().get("Content-Type").get(0));
         Assert.assertEquals("attachment; filename=messageId.zip", responseEntity.getHeaders().get("content-disposition").get(0));
-        Assert.assertEquals("Byte array resource [resource loaded from byte array]", responseEntity.getBody().getDescription());
     }
 }

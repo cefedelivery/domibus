@@ -40,7 +40,7 @@ public class PayloadProfile extends AbstractBaseEntity {
 
         final PayloadProfile that = (PayloadProfile) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }
@@ -96,7 +96,7 @@ public class PayloadProfile extends AbstractBaseEntity {
         this.payloads = new HashSet<>();
         for (final Attachment att : this.attachment) {
             for (final Payload payload : configuration.getBusinessProcesses().getPayloads()) {
-                if (payload.getName().equals(att.getName())) {
+                if (payload.getName().equalsIgnoreCase(att.getName())) {
                     this.payloads.add(payload);
                     break;
                 }

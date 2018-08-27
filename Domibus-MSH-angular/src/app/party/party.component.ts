@@ -1,15 +1,17 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {PartyService} from './party.service';
-import {PartyResponseRo, ProcessRo, ProcessInfoRo, PartyFilteredResult, CertificateRo} from './party';
+import {CertificateRo, PartyFilteredResult, PartyResponseRo, ProcessRo} from './party';
 import {Observable} from 'rxjs/Observable';
 import {AlertService} from '../alert/alert.service';
 import {AlertComponent} from '../alert/alert.component';
 import {PartyDetailsComponent} from './party-details/party-details.component';
 import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
+import {CurrentPModeComponent} from '../pmode/current/currentPMode.component';
+import {Http} from '@angular/http';
 
 /**
  * @author Thomas Dussart
@@ -29,34 +31,57 @@ export class PartyComponent implements OnInit, DirtyOperations {
   endPoint: string;
   partyID: string;
   process: string;
+  process_role: string;
 
-  rows: PartyResponseRo[] = [];
-  allRows: PartyResponseRo[] = [];
-  selected: PartyResponseRo[] = [];
+  rows: PartyResponseRo[];
+  allRows: PartyResponseRo[];
+  selected: PartyResponseRo[];
 
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
-  offset: number = 0;
+  offset: number;
   pageSize: number;
-  count: number = 0;
-  loading: boolean = false;
+  count: number;
+  loading: boolean;
 
-  newParties: PartyResponseRo[] = [];
-  updatedParties: PartyResponseRo[] = [];
-  deletedParties: PartyResponseRo[] = [];
+  newParties: PartyResponseRo[];
+  updatedParties: PartyResponseRo[];
+  deletedParties: PartyResponseRo[];
 
   allProcesses: string[];
 
+  pModeExists: boolean;
+
   constructor (public dialog: MdDialog,
                public partyService: PartyService,
-               public alertService: AlertService) {
+               public alertService: AlertService,
+               private http: Http) {
   }
 
-  ngOnInit () {
+  async ngOnInit () {
+    this.rows = [];
+    this.allRows = [];
+    this.selected = [];
+
+    this.offset = 0;
+    this.count = 0;
+    this.loading = false;
+
+    this.newParties = [];
+    this.updatedParties = [];
+    this.deletedParties = [];
+
     this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
-    this.listPartiesAndProcesses();
+
+    const res = await this.http.get(CurrentPModeComponent.PMODE_URL + '/current').toPromise();
+    if (res && res.text()) {
+      this.pModeExists = true;
+      this.listPartiesAndProcesses();
+    } else {
+      this.pModeExists = false;
+    }
   }
 
   isDirty (): boolean {
@@ -74,8 +99,9 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   listPartiesAndProcesses () {
+    this.offset = 0;
     return Observable.forkJoin([
-      this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process),
+      this.partyService.listParties(this.name, this.endPoint, this.partyID, this.process, this.process_role),
       this.partyService.listProcesses()
     ])
       .subscribe((data: any[]) => {
@@ -93,7 +119,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
           this.resetDirty();
         },
         error => {
-          this.alertService.error('Could not load parties' + error);
+          this.alertService.error('Could not load parties due to: "' + error + '"');
           this.loading = false;
         }
       );
@@ -118,28 +144,28 @@ export class PartyComponent implements OnInit, DirtyOperations {
   initColumns () {
     this.columnPicker.allColumns = [
       {
-        name: 'Name',
+        name: 'Party Name',
         prop: 'name',
         width: 10
       },
       {
-        name: 'End point',
+        name: 'End Point',
         prop: 'endpoint',
-        width: 200
-      },
-      {
-        name: 'Party id',
-        prop: 'joinedIdentifiers',
-        width: 20
-      },
-      {
-        name: 'Process',
-        prop: 'joinedProcesses',
         width: 150
+      },
+      {
+        name: 'Party Id',
+        prop: 'joinedIdentifiers',
+        width: 10
+      },
+      {
+        name: 'Process (I=Initiator, R=Responder, IR=Both)',
+        prop: 'joinedProcesses',
+        width: 200
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Name', 'End point', 'Party id', 'Process'].indexOf(col.name) != -1
+      return ['name', 'endpoint', 'joinedIdentifiers', 'joinedProcesses'].indexOf(col.prop) !== -1
     })
   }
 
@@ -150,12 +176,13 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.refresh();
   }
 
-  isSaveAsCSVButtonEnabled () {
-    return (this.count < AlertComponent.MAX_COUNT_CSV);
-  }
-
   saveAsCSV () {
-    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process);
+    if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
+    this.partyService.saveAsCsv(this.name, this.endPoint, this.partyID, this.process, this.process_role);
   }
 
   onActivate (event) {
@@ -164,12 +191,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
     }
   }
 
+  canAdd () {
+    return !!this.pModeExists;
+  }
+
   canSave () {
     return this.isDirty();
   }
 
   canEdit () {
-    return this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1;
   }
 
   canCancel () {
@@ -177,7 +208,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canDelete () {
-    return this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1;
   }
 
   cancel () {
@@ -185,15 +216,22 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   save () {
+    try {
+      this.partyService.validateParties(this.rows)
+    } catch (err) {
+      this.alertService.exception('Party validation error:', err, false);
+      return;
+    }
+
     this.partyService.updateParties(this.rows)
       .then(() => {
         this.resetDirty();
         this.alertService.success('Parties saved successfully.', false);
       })
-      .catch(err => this.alertService.exception('Party update error', err, false));
+      .catch(err => this.alertService.exception('Party update error:', err, false));
   }
 
-  add () {
+  async add () {
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
     this.allRows.push(newParty);
@@ -203,10 +241,16 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.count++;
 
     this.newParties.push(newParty);
+    const ok = await this.edit(newParty);
+    if (!ok) {
+      this.remove();
+    }
   }
 
   remove () {
     const deletedParty = this.selected[0];
+    if (!deletedParty) return;
+
     this.rows.splice(this.rows.indexOf(deletedParty), 1);
     this.allRows.splice(this.rows.indexOf(deletedParty), 1);
 
@@ -219,31 +263,32 @@ export class PartyComponent implements OnInit, DirtyOperations {
       this.newParties.splice(this.newParties.indexOf(deletedParty), 1);
   }
 
-  edit (row) {
+  async edit (row): Promise<boolean> {
     row = row || this.selected[0];
-    this.manageCertificate(row)
-      .then(() => {
-        const rowCopy = JSON.parse(JSON.stringify(row));
-        const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-        const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
-          data: {
-            edit: rowCopy,
-            allProcesses: allProcessesCopy
-          }
-        });
+    await this.manageCertificate(row);
 
-        dialogRef.afterClosed().subscribe(ok => {
-          if (ok) {
-            if (JSON.stringify(row) === JSON.stringify(rowCopy))
-              return; // nothing changed
+    const rowCopy = JSON.parse(JSON.stringify(row));
+    const allProcessesCopy = JSON.parse(JSON.stringify(this.allProcesses));
 
-            Object.assign(row, rowCopy);
-            if (this.updatedParties.indexOf(row) < 0)
-              this.updatedParties.push(row);
-          }
-        });
-      });
+    const dialogRef: MdDialogRef<PartyDetailsComponent> = this.dialog.open(PartyDetailsComponent, {
+      data: {
+        edit: rowCopy,
+        allProcesses: allProcessesCopy
+      }
+    });
+
+    const ok = await dialogRef.afterClosed().toPromise();
+    if (ok) {
+      if (JSON.stringify(row) === JSON.stringify(rowCopy))
+        return; // nothing changed
+
+      Object.assign(row, rowCopy);
+      if (this.updatedParties.indexOf(row) < 0)
+        this.updatedParties.push(row);
+    }
+
+    return ok;
   }
 
   manageCertificate (party: PartyResponseRo): Promise<CertificateRo> {

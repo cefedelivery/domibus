@@ -2,19 +2,10 @@
 
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/util
-    http://www.springframework.org/schema/util/spring-util.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- quartz job for the retry  -->
-    <bean id="retryWorkerJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.ebms3.sender.SendRetryWorker"/>
-        <property name="durability" value="true"/>
-    </bean>
     <bean id="pullRequestJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
@@ -39,11 +30,12 @@
         <property name="durability" value="true"/>
     </bean>
 
-    <bean id="retryWorkerTrigger"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
-        <property name="jobDetail" ref="retryWorkerJob"/>
-        <property name="cronExpression" value="${domibus.msh.retry.cron}"/>
+    <bean id="uiReplicationJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.core.replication.UIReplicationJob"/>
+        <property name="durability" value="true"/>
     </bean>
+
     <bean id="pullRequestTrigger"
           class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
         <property name="jobDetail" ref="pullRequestJob"/>
@@ -70,17 +62,11 @@
         <property name="cronExpression" value="${domibus.certificate.check.cron}"/>
     </bean>
 
-    <!-- customizable list of triggers to be executed by quartz -->
-    <bean id="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list>
-                <ref bean="retryWorkerTrigger"/>
-                <ref bean="pullRequestTrigger"/>
-                <ref bean="activateSuspendedUserTrigger"/>
-                <ref bean="saveCertificateAndLogRevocationTrigger"/>
-            </list>
-        </property>
+    <bean id="uiReplicationTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="uiReplicationJob"/>
+        <property name="cronExpression" value="${domibus.ui.replication.sync.cron}"/>
+        <property name="startDelay" value="30000"/>
     </bean>
 
 </beans>

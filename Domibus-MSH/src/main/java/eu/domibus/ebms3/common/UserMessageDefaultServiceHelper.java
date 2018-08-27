@@ -8,6 +8,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -53,7 +54,7 @@ public class UserMessageDefaultServiceHelper implements UserMessageServiceHelper
         }
 
         String messageOriginalSender = getOriginalSender(userMessage);
-        if (StringUtils.equals(messageOriginalSender, providedOriginalSender)) {
+        if (StringUtils.equalsIgnoreCase(messageOriginalSender, providedOriginalSender)) {
             LOG.debug("For message [{}] the provided original sender [{}] is the same as the message original sender", messageId, providedOriginalSender);
             return true;
         }
@@ -71,7 +72,7 @@ public class UserMessageDefaultServiceHelper implements UserMessageServiceHelper
         }
 
         String messageOriginalSender = getFinalRecipient(userMessage);
-        if (StringUtils.equals(messageOriginalSender, providedFinalRecipient)) {
+        if (StringUtils.equalsIgnoreCase(messageOriginalSender, providedFinalRecipient)) {
             LOG.debug("For message [{}] the provided final recipient [{}] is the same as the message final recipient", messageId, providedFinalRecipient);
             return true;
         }
@@ -84,7 +85,7 @@ public class UserMessageDefaultServiceHelper implements UserMessageServiceHelper
         }
         String originalUser = null;
         for (Property property : userMessage.getMessageProperties().getProperty()) {
-            if (property.getName() != null && property.getName().equals(type)) {
+            if (property.getName() != null && property.getName().equalsIgnoreCase(type)) {
                 originalUser = property.getValue();
                 break;
             }

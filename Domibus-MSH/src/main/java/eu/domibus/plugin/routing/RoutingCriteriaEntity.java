@@ -38,7 +38,9 @@ public class RoutingCriteriaEntity extends AbstractBaseEntity implements IRoutin
     /**
      * Standard Constructor
      *
-     * @param name of Routing Criteria
+     * @param name the name of Routing Criteria
+     * @param tooltip the tooltip of Routing Criteria
+     * @param inputPattern the matching pattern of this Routing Criteria
      */
     public RoutingCriteriaEntity(final String name, final String tooltip, final String inputPattern) {
         this.name = name;

@@ -8,14 +8,16 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.PartyDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
+import eu.domibus.common.services.MessagesLogService;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.web.rest.ro.MessageLogRO;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import org.slf4j.Logger;
@@ -37,14 +39,14 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author Tiago Miguel
+ * @author Tiago Miguel, Catalin Enache
  * @since 3.3
  */
 @RestController
 @RequestMapping(value = "/rest/messagelog")
 public class MessageLogResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageLogResource.class);
+    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(MessageLogResource.class);
 
     private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
     private static final String RECEIVED_FROM_STR = "receivedFrom";
@@ -57,32 +59,39 @@ public class MessageLogResource {
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
-
-    @Autowired
     private MessagingDao messagingDao;
 
     @Autowired
     private PartyDao partyDao;
 
     @Autowired
-    DateUtil dateUtil;
+    private DateUtil dateUtil;
 
     @Autowired
-    CsvServiceImpl csvServiceImpl;
+    private CsvServiceImpl csvServiceImpl;
 
-    //significant improvements to the query execution plan have been found by always passing the date.
-    //so we provide a default from and to.
+    @Autowired
+    private UIMessageService uiMessageService;
+
+    @Autowired
+    private MessagesLogService messagesLogService;
+
+    /**
+     * use TB_MESSAGE_UI table instead of joins, defaults to false
+     */
+    boolean useFlatTable;
+
     Date defaultFrom;
 
     Date defaultTo;
 
     @PostConstruct
-    protected void init() {
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd");
+    public void init() {
+        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "true"));
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
         try {
-            defaultFrom = ft.parse("1977-10-25");
-            defaultTo = ft.parse("2977-10-25");
+            defaultFrom = ft.parse("1970-01-01 23:59:00");
+            defaultTo = ft.parse("2977-10-25 23:59:00");
         } catch (ParseException e) {
             LOGGER.error("Impossible to initiate default dates");
         }
@@ -90,11 +99,12 @@ public class MessageLogResource {
 
     @RequestMapping(method = RequestMethod.GET)
     public MessageLogResultRO getMessageLog(
-            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+
             @RequestParam(value = "orderBy", required = false) String column,
             @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -112,11 +122,12 @@ public class MessageLogResource {
 
         LOGGER.debug("Getting message log");
 
-        MessageLogResultRO result = new MessageLogResultRO();
+        //creating the filters
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus,
+                fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
 
-        //TODO why are those filters send back to the GUI??
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
-
+        //we just set default values for received column
+        // in order to improve pagination on large amount of data
         Date from = dateUtil.fromString(receivedFrom);
         if (from == null) {
             from = defaultFrom;
@@ -127,33 +138,25 @@ public class MessageLogResource {
         }
         filters.put(RECEIVED_FROM_STR, from);
         filters.put(RECEIVED_TO_STR, to);
+        filters.put("messageType", messageType);
 
-        result.setFilter(filters);
         LOGGER.debug("using filters [{}]", filters);
 
-        List<MessageLogInfo> resultList = new ArrayList<>();
-        if (messageType == MessageType.SIGNAL_MESSAGE) {
-            int numberOfSignalMessageLogs = signalMessageLogDao.countAllInfo(asc, filters);
-            LOGGER.debug("count Signal Messages Logs [{}]", numberOfSignalMessageLogs);
-            result.setCount(numberOfSignalMessageLogs);
-            resultList = signalMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
-
-        } else if (messageType == MessageType.USER_MESSAGE) {
-            int numberOfUserMessageLogs = userMessageLogDao.countAllInfo(asc, filters);
-            LOGGER.debug("count User Messages Logs [{}]", numberOfUserMessageLogs);
-            result.setCount(numberOfUserMessageLogs);
-            resultList = userMessageLogDao.findAllInfoPaged(pageSize * page, pageSize, column, asc, filters);
+        MessageLogResultRO result;
+        if (useFlatTable) {
+            result = uiMessageService.countAndFindPaged(pageSize * page, pageSize, column, asc, filters);
+        } else {
+            //old, fashioned way
+            result = messagesLogService.countAndFindPaged(messageType, pageSize * page, pageSize, column, asc, filters);
         }
-        //needed here because the info is not needed for the queries but is used by the gui as the filter is returned with
-        //the result. Why??.
-        filters.put("messageType", messageType);
-        if (filters.get(RECEIVED_FROM_STR).equals(defaultFrom)) {
+
+        if (defaultFrom.equals(from)) {
             filters.remove(RECEIVED_FROM_STR);
         }
-        if (filters.get(RECEIVED_TO_STR).equals(defaultTo)) {
+        if (defaultTo.equals(to)) {
             filters.remove(RECEIVED_TO_STR);
         }
-        result.setMessageLogEntries(convertMessageLogInfoList(resultList));
+        result.setFilter(filters);
         result.setMshRoles(MSHRole.values());
         result.setMsgTypes(MessageType.values());
         result.setMsgStatus(MessageStatus.values());
@@ -167,10 +170,29 @@ public class MessageLogResource {
     /**
      * This method returns a CSV file with the contents of Messages table
      *
+     * @param orderByColumn      the column to sort rows by
+     * @param asc                true if the sort direction is ascending
+     * @param messageId          the message id
+     * @param conversationId     the conversation id
+     * @param mshRole            the MSH role
+     * @param messageType        the message type (SIGNAL_MESSAGE or USER_MESSAGE)
+     * @param messageStatus      the message status
+     * @param notificationStatus the notification status
+     * @param fromPartyId        the sender party id
+     * @param toPartyId          the recipient party id
+     * @param refToMessageId     the related message id
+     * @param originalSender     the original sender
+     * @param finalRecipient     the final recipient
+     * @param receivedFrom       received after this date
+     * @param receivedTo         received before this date
+     * @param messageSubtype     the message subtype
      * @return CSV file with the contents of Messages table
      */
     @RequestMapping(path = "/csv", method = RequestMethod.GET)
     public ResponseEntity<String> getCsv(
+            @RequestParam(value = "orderBy", required = false) String orderByColumn,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+
             @RequestParam(value = "messageId", required = false) String messageId,
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "mshRole", required = false) MSHRole mshRole,
@@ -185,36 +207,27 @@ public class MessageLogResource {
             @RequestParam(value = RECEIVED_FROM_STR, required = false) String receivedFrom,
             @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo,
             @RequestParam(value = "messageSubtype", required = false) MessageSubtype messageSubtype) {
-        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus, fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
-        Date from = dateUtil.fromString(receivedFrom);
-        if (from == null) {
-            from = defaultFrom;
-        }
-        Date to = dateUtil.fromString(receivedTo);
-        if (to == null) {
-            to = defaultTo;
-        }
-        filters.put(RECEIVED_FROM_STR, from);
-        filters.put(RECEIVED_TO_STR, to);
+
+        HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus,
+                fromPartyId, toPartyId, refToMessageId, originalSender, finalRecipient, messageSubtype);
+
+        filters.put(RECEIVED_FROM_STR, dateUtil.fromString(receivedFrom));
+        filters.put(RECEIVED_TO_STR, dateUtil.fromString(receivedTo));
+        filters.put("messageType", messageType);
 
         int maxCSVrows = Integer.parseInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
-        List<MessageLogInfo> resultList = new ArrayList<>();
-        if (messageType == MessageType.SIGNAL_MESSAGE) {
-            resultList = signalMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
-        } else if (messageType == MessageType.USER_MESSAGE) {
-            resultList = userMessageLogDao.findAllInfoPaged(0, maxCSVrows, null, true, filters);
+        List<MessageLogInfo> resultList;
+        if (useFlatTable) {
+            resultList = uiMessageService.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
+        } else {
+            resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, orderByColumn, asc, filters);
         }
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(MessageLogInfo.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns());
 
         String resultText;
         try {
-            resultText = csvServiceImpl.exportToCSV(resultList);
+            resultText = csvServiceImpl.exportToCSV(resultList, MessageLogInfo.class,
+                    CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), new ArrayList<>());
         } catch (CsvException e) {
             LOGGER.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
@@ -252,7 +265,7 @@ public class MessageLogResource {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
         SignalMessage signalMessage = messaging.getSignalMessage();
-        if(signalMessage != null) {
+        if (signalMessage != null) {
             String signalMessageId = signalMessage.getMessageInfo().getMessageId();
             SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
 
@@ -271,18 +284,7 @@ public class MessageLogResource {
         return ResponseEntity.notFound().build();
     }
 
-    protected List<MessageLogRO> convertMessageLogInfoList(List<MessageLogInfo> objects) {
-        List<MessageLogRO> result = new ArrayList<>();
-        for(MessageLogInfo object : objects) {
-            final MessageLogRO messageLogRO = convertMessageLogInfo(object);
-            if(messageLogRO != null) {
-                result.add(messageLogRO);
-            }
-        }
-        return result;
-    }
-
-    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype")MessageSubtype messageSubtype) {
+    private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype") MessageSubtype messageSubtype) {
         HashMap<String, Object> filters = new HashMap<>();
         filters.put("messageId", messageId);
         filters.put("conversationId", conversationId);
@@ -298,31 +300,4 @@ public class MessageLogResource {
         return filters;
     }
 
-    private MessageLogRO convertMessageLogInfo(MessageLogInfo messageLogInfo) {
-        if(messageLogInfo == null) {
-            return null;
-        }
-
-        MessageLogRO result = new MessageLogRO();
-        result.setConversationId(messageLogInfo.getConversationId());
-        result.setFromPartyId(messageLogInfo.getFromPartyId());
-        result.setToPartyId(messageLogInfo.getToPartyId());
-        result.setOriginalSender(messageLogInfo.getOriginalSender());
-        result.setFinalRecipient(messageLogInfo.getFinalRecipient());
-        result.setRefToMessageId(messageLogInfo.getRefToMessageId());
-        result.setMessageId(messageLogInfo.getMessageId());
-        result.setMessageStatus(messageLogInfo.getMessageStatus());
-        result.setNotificationStatus(messageLogInfo.getNotificationStatus());
-        result.setMshRole(messageLogInfo.getMshRole());
-        result.setMessageType(messageLogInfo.getMessageType());
-        result.setDeleted(messageLogInfo.getDeleted());
-        result.setReceived(messageLogInfo.getReceived());
-        result.setSendAttempts(messageLogInfo.getSendAttempts());
-        result.setSendAttemptsMax(messageLogInfo.getSendAttemptsMax());
-        result.setNextAttempt(messageLogInfo.getNextAttempt());
-        result.setFailed(messageLogInfo.getFailed());
-        result.setRestored(messageLogInfo.getRestored());
-        result.setMessageSubtype(messageLogInfo.getMessageSubtype());
-        return result;
-    }
 }

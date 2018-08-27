@@ -1,6 +1,5 @@
 package eu.domibus.common.model.logging;
 
-import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.ebms3.common.model.MessageType;
 
 import javax.persistence.*;
@@ -23,7 +22,6 @@ public class SignalMessageLog extends MessageLog {
     public SignalMessageLog() {
         setMessageType(MessageType.SIGNAL_MESSAGE);
         setReceived(new Date());
-        setNextAttempt(getReceived());
     }
 
 

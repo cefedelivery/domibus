@@ -1,6 +1,6 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {UserResponseRO, UserState} from './user';
-import {UserService} from './user.service';
+import {UserSearchCriteria, UserService} from './user.service';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from 'app/user/uservalidator.service';
 import {AlertService} from '../alert/alert.service';
@@ -34,26 +34,34 @@ export class UserComponent implements OnInit, DirtyOperations {
   @ViewChild('passwordTpl') passwordTpl: TemplateRef<any>;
   @ViewChild('editableTpl') editableTpl: TemplateRef<any>;
   @ViewChild('checkBoxTpl') checkBoxTpl: TemplateRef<any>;
+  @ViewChild('deletedTpl') deletedTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  users: Array<UserResponseRO> = [];
-  userRoles: Array<String> = [];
+  users: Array<UserResponseRO>;
+  userRoles: Array<String>;
   domains: Domain[];
   currentDomain: Domain;
 
-  selected = [];
+  selected: any[];
 
-  enableCancel:boolean = false;
-  enableSave:boolean = false;
-  enableDelete:boolean = false;
-  enableEdit:boolean = false;
+  enableCancel: boolean;
+  enableSave: boolean;
+  enableDelete: boolean;
+  enableEdit: boolean;
 
-  rowNumber = -1;
+  rowNumber: number;
 
   editedUser: UserResponseRO;
+
+  dirty: boolean;
+  areRowsDeleted: boolean;
+
+  filter: UserSearchCriteria;
+  deletedStatuses: any[];
+  offset:number;
 
   constructor (private http: Http,
                private userService: UserService,
@@ -65,6 +73,10 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   ngOnInit (): void {
+    this.offset = 0;
+    this.filter = new UserSearchCriteria();
+    this.deletedStatuses = [null, true, false];
+
     this.columnPicker = new ColumnPickerBase();
     this.rowLimiter = new RowLimiterBase();
 
@@ -102,12 +114,20 @@ export class UserComponent implements OnInit, DirtyOperations {
         name: 'Password',
         prop: 'password',
         canAutoResize: true,
-        sortable: false
+        sortable: false,
+        width: 25
       },
       {
         cellTemplate: this.checkBoxTpl,
         name: 'Active',
-        canAutoResize: true
+        canAutoResize: true,
+        width: 25
+      },
+      {
+        cellTemplate: this.deletedTpl,
+        name: 'Deleted',
+        canAutoResize: true,
+        width: 25
       },
       {
         cellTemplate: this.rowActions,
@@ -132,20 +152,21 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.currentDomain = domain);
 
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ['Username', 'Role', 'Domain', 'Password', 'Active', 'Actions'].indexOf(col.name) !== -1
+      return ['Username', 'Role', 'Domain', 'Active', 'Deleted', 'Actions'].indexOf(col.name) !== -1
     });
 
     this.getUsers();
 
     this.getUserRoles();
 
-    if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
-      this.alertService.error('Maximum number of rows reached for downloading CSV');
-    }
+    this.dirty = false;
+    this.areRowsDeleted = false;
   }
 
   getUsers (): void {
-    this.userService.getUsers().subscribe(users => this.users = users);
+    this.userService.getUsers(this.filter).subscribe(results => this.users = results);
+    this.dirty = false;
+    this.areRowsDeleted = false;
   }
 
   getUserRoles (): void {
@@ -170,8 +191,8 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    this.enableDelete = selected.length > 0;
-    this.enableEdit = selected.length == 1;
+    this.enableDelete = selected.length > 0 && !selected.every(el => el.deleted);
+    this.enableEdit = selected.length == 1 && !selected[0].deleted;
   }
 
   private isLoggedInUserSelected (selected): boolean {
@@ -184,10 +205,12 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true, UserState[UserState.NEW], [], false);
+    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
+      UserState[UserState.NEW], [], false, false);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
+    this.setIsDirty();
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: false,
@@ -205,11 +228,16 @@ export class UserComponent implements OnInit, DirtyOperations {
         this.selected = [];
         this.enableEdit = false;
         this.enableDelete = false;
+        this.setIsDirty();
       }
     });
   }
 
   buttonEdit () {
+    if (this.rowNumber >= 0 && this.users[this.rowNumber] && this.users[this.rowNumber].deleted) {
+      this.alertService.error('You cannot edit a deleted user.', false, 3000);
+      return;
+    }
     this.buttonEditAction(this.rowNumber);
   }
 
@@ -238,48 +266,51 @@ export class UserComponent implements OnInit, DirtyOperations {
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
-    if (UserState[UserState.PERSISTED] === user.status) {
-      user.status = UserState[UserState.UPDATED]
+    if (editForm.userForm.dirty) {
+      if (UserState[UserState.PERSISTED] === user.status) {
+        user.status = UserState[UserState.UPDATED]
+      }
     }
 
-    this.enableSave = editForm.userForm.dirty;
-    this.enableCancel = editForm.userForm.dirty;
+    this.setIsDirty();
+  }
+
+  setIsDirty () {
+    this.dirty = this.areRowsDeleted || this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
+
+    this.enableSave = this.dirty;
+    this.enableCancel = this.dirty;
   }
 
   buttonDelete () {
-    if (this.isLoggedInUserSelected(this.selected)) {
-      this.alertService.error('You cannot delete the logged in user: ' + this.securityService.getCurrentUser().username);
-      return;
-    }
-
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
-    this.enableEdit = false;
-
-    // we need to use the old for loop approach to don't mess with the entries on the top before
-    for (let i = this.selected.length - 1; i >= 0; i--) {
-      this.users.splice(this.selected[i].$$index, 1);
-    }
-
-    this.selected = [];
+    this.deleteUsers(this.selected);
   }
 
   buttonDeleteAction (row) {
-    if (this.securityService.getCurrentUser().username === row.userName) {
+    this.deleteUsers([row]);
+  }
+
+  private deleteUsers (users: UserResponseRO[]) {
+    if (this.isLoggedInUserSelected(users)) {
       this.alertService.error('You cannot delete the logged in user: ' + this.securityService.getCurrentUser().username);
       return;
     }
 
-    this.enableCancel = true;
-    this.enableSave = true;
     this.enableDelete = false;
     this.enableEdit = false;
 
-    // we need to use the old for loop approach to don't mess with the entries on the top before
-    this.users.splice(row.$$index, 1);
+    for (const itemToDelete of  users) {
+      if (itemToDelete.status === UserState[UserState.NEW]) {
+        this.users.splice(this.users.indexOf(itemToDelete), 1);
+      } else {
+        itemToDelete.status = UserState[UserState.REMOVED];
+        itemToDelete.deleted = true;
+      }
+    }
 
     this.selected = [];
+    this.areRowsDeleted = true;
+    this.setIsDirty();
   }
 
   private disableSelectionAndButtons () {
@@ -303,13 +334,13 @@ export class UserComponent implements OnInit, DirtyOperations {
   save (withDownloadCSV: boolean) {
     try {
       const isValid = this.userValidatorService.validateUsers(this.users);
-      if(!isValid) return;
+      if (!isValid) return;
 
-      const headers = new Headers({'Content-Type': 'application/json'});
       this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
         if (result) {
           this.disableSelectionAndButtons();
-          this.http.put(UserComponent.USER_USERS_URL, JSON.stringify(this.users), {headers: headers}).subscribe(res => {
+          const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
+          this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
             this.getUsers();
             this.getUserRoles();
             this.alertService.success('The operation \'update users\' completed successfully.', false);
@@ -332,15 +363,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-
-  /**
-   * Method that checks if CSV Button export can be enabled
-   * @returns {boolean} true, if button can be enabled; and false, otherwise
-   */
-  isSaveAsCSVButtonEnabled (): boolean {
-    return this.users.length < AlertComponent.MAX_COUNT_CSV;
-  }
-
   /**
    * Saves the content of the datatable into a CSV file
    */
@@ -348,6 +370,11 @@ export class UserComponent implements OnInit, DirtyOperations {
     if (this.isDirty()) {
       this.save(true);
     } else {
+      if (this.users.length > AlertComponent.MAX_COUNT_CSV) {
+        this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+        return;
+      }
+
       DownloadService.downloadNative(UserComponent.USER_CSV_URL);
     }
   }
@@ -361,4 +388,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.getUsers();
   }
 
+  onChangePage (event: any): void {
+    this.offset = event.offset;
+  }
 }

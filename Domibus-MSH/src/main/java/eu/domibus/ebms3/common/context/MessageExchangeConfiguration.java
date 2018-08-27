@@ -15,7 +15,7 @@ public class MessageExchangeConfiguration {
     private final String leg;
     private final String pmodeKey;
     private final String reversePmodeKey;
-    final static String SEPARATOR=":";
+    public final static String PMODEKEY_SEPARATOR="_pMK_SEP_";
 
     public MessageExchangeConfiguration(final String agreementName, final String senderParty, final String receiverParty, final String service, final String action, final String leg) {
         this.agreementName = agreementName;
@@ -24,8 +24,8 @@ public class MessageExchangeConfiguration {
         this.service = service;
         this.action = action;
         this.leg = leg;
-        this.pmodeKey=senderParty + SEPARATOR + receiverParty + SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
-        this.reversePmodeKey=receiverParty+ SEPARATOR + senderParty+ SEPARATOR+ service + SEPARATOR+ action + SEPARATOR+ agreementName + SEPARATOR+ leg;
+        this.pmodeKey=senderParty + PMODEKEY_SEPARATOR + receiverParty + PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
+        this.reversePmodeKey=receiverParty+ PMODEKEY_SEPARATOR + senderParty+ PMODEKEY_SEPARATOR+ service + PMODEKEY_SEPARATOR+ action + PMODEKEY_SEPARATOR+ agreementName + PMODEKEY_SEPARATOR+ leg;
     }
 
     public String getAgreementName() {
@@ -81,14 +81,14 @@ public class MessageExchangeConfiguration {
 
         MessageExchangeConfiguration that = (MessageExchangeConfiguration) o;
 
-        if (agreementName != null ? !agreementName.equals(that.agreementName) : that.agreementName != null)
+        if (agreementName != null ? !agreementName.equalsIgnoreCase(that.agreementName) : that.agreementName != null)
             return false;
-        if (!senderParty.equals(that.senderParty)) return false;
-        if (!receiverParty.equals(that.receiverParty)) return false;
-        if (!service.equals(that.service)) return false;
-        if (!action.equals(that.action)) return false;
-        if (!leg.equals(that.leg)) return false;
-        return pmodeKey.equals(that.pmodeKey);
+        if (!senderParty.equalsIgnoreCase(that.senderParty)) return false;
+        if (!receiverParty.equalsIgnoreCase(that.receiverParty)) return false;
+        if (!service.equalsIgnoreCase(that.service)) return false;
+        if (!action.equalsIgnoreCase(that.action)) return false;
+        if (!leg.equalsIgnoreCase(that.leg)) return false;
+        return pmodeKey.equalsIgnoreCase(that.pmodeKey);
     }
 
     @Override

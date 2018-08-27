@@ -7,6 +7,7 @@ import {AlertService} from "../alert/alert.service";
 @Component({
   moduleId: module.id,
   templateUrl: 'testservice.component.html',
+  styleUrls: ['testservice.component.css'],
   providers: []
 })
 
@@ -39,6 +40,7 @@ export class TestServiceComponent {
               private alertService: AlertService) {
     this.clearInfo();
     this.getReceiverParties();
+    this.dynamicDiscoveryEnabled = false; // only static is available for now
     this.getSenderParty();
   }
 
@@ -60,7 +62,7 @@ export class TestServiceComponent {
         }).subscribe(() => {
           this.onChangeParties();
         },
-        error => {
+        () => {
           this.alertService.error("Problems while submitting test");
         });
     } else if (this.isDynamicDiscoveryPModeProvider()) {
@@ -74,7 +76,7 @@ export class TestServiceComponent {
         }).subscribe( () => {
           this.onChangeInfo();
       },
-        error => {
+        () => {
           this.alertService.error("Problems while submitting test");
         });
     }
@@ -134,7 +136,8 @@ export class TestServiceComponent {
       if (!isNullOrUndefined(res)) {
         this.receiverParties = res.json();
       }
-      this.dynamicDiscoveryEnabled = this.receiverParties.length == 0;
+      // only static is enabled for now
+      //this.dynamicDiscoveryEnabled = this.receiverParties.length == 0;
     });
   }
 
@@ -151,8 +154,8 @@ export class TestServiceComponent {
 
         this.getLastReceivedRequest(partyId, res.json().messageId);
       }
-    }, error => {
-      this.alertService.error("PartyId '"+ partyId + "' not found!");
+    }, () => {
+      this.alertService.error("No information found for Test Messages of PartyId '" + partyId +"'");
     });
   }
 

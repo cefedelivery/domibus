@@ -46,13 +46,6 @@ public class EbMS3Exception extends Exception {
     private boolean recoverable = true;
     private String signalMessageId;
 
-    /**
-     * "This OPTIONAL element provides a narrative description of the error in the language
-     * defined by the xml:lang attribute. The content of this element is left to
-     * implementation-specific decisions."
-     * (OASIS ebXML Messaging Services Version 3.0: Part 1, Core Features, 1 October 2007)
-     */
-    //private final String description;
     public EbMS3Exception(final ErrorCode.EbMS3ErrorCode ebMS3ErrorCode, final String errorDetail, final String refToMessageId, final Throwable cause) {
         super(errorDetail, cause);
         this.ebMS3ErrorCode = ebMS3ErrorCode;

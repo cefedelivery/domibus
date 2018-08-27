@@ -23,6 +23,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ import java.util.Map;
  * During download, it manages the user authentication and the AS4 message's reading, data clearing and status update.
  *
  * @author Christian Koch, Stefan Mueller, Federico Martini, Ioana Dragusanu
- * @Since 3.0
+ * @since 3.0
  */
 @Service
 public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever {
@@ -117,6 +119,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     @Autowired
     UserMessageService userMessageService;
 
+    @Autowired
+    UIReplicationSignalService uiReplicationSignalService;
+
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public Submission downloadMessage(final String messageId) throws MessageNotFoundException {
@@ -166,12 +171,31 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return transformer.transformFromMessaging(userMessage);
     }
 
+    protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, List<String> recipients) {
+        if (authOriginalUser != null) {
+            LOG.debug("OriginalUser is [{}]", authOriginalUser);
+            /* check the message belongs to the authenticated user */
+            boolean found = false;
+            for(String recipient : recipients) {
+                String originalUser = getOriginalUser(userMessage, recipient);
+                if (originalUser != null && originalUser.equalsIgnoreCase(authOriginalUser)) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                LOG.debug("User [{}] is trying to submit/access a message having as final recipients: [{}]", authOriginalUser, recipients);
+                throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
+            }
+        }
+    }
+
     protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, String recipient) {
         if (authOriginalUser != null) {
             LOG.debug("OriginalUser is [{}]", authOriginalUser);
             /* check the message belongs to the authenticated user */
             String originalUser = getOriginalUser(userMessage, recipient);
-            if (originalUser != null && !originalUser.equals(authOriginalUser)) {
+            if (originalUser != null && !originalUser.equalsIgnoreCase(authOriginalUser)) {
                 LOG.debug("User [{}] is trying to submit/access a message having as final recipient: [{}]", authOriginalUser, originalUser);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
@@ -184,7 +208,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         }
         String originalUser = null;
         for (Property property : userMessage.getMessageProperties().getProperty()) {
-            if (property.getName() != null && property.getName().equals(type)) {
+            if (property.getName() != null && property.getName().equalsIgnoreCase(type)) {
                 originalUser = property.getValue();
                 break;
             }
@@ -210,11 +234,13 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         // check if user can get the status of that message (only admin or original users are authorized to do that)
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
-        validateOriginalUser(userMessage, originalUser, MessageConstants.ORIGINAL_SENDER);
+        List<String> recipients = new ArrayList<>();
+        recipients.add(MessageConstants.ORIGINAL_SENDER);
+        recipients.add(MessageConstants.FINAL_RECIPIENT);
+        validateOriginalUser(userMessage, originalUser, recipients);
 
         return userMessageLogDao.getMessageStatus(messageId);
     }
-
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
@@ -313,6 +339,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             }
 
 
+            uiReplicationSignalService.userMessageSubmitted(userMessage.getMessageInfo().getMessageId());
+
             LOG.info("Message submitted");
             return userMessage.getMessageInfo().getMessageId();
 
@@ -336,6 +364,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             Party gatewayParty = pModeProvider.getGatewayParty();
             backendMessageValidator.validateInitiatorParty(gatewayParty, from);
             backendMessageValidator.validateResponderParty(gatewayParty, to);
+
+            backendMessageValidator.validatePayloads(userMessage.getPayloadInfo());
 
             return to;
         } catch (IllegalArgumentException runTimEx) {

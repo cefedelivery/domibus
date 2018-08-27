@@ -10,18 +10,18 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}anyURI" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}anyURI" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
@@ -49,8 +49,8 @@ public class Binding extends AbstractBaseEntity {
 
         final Binding binding = (Binding) o;
 
-        if (name != null ? !name.equals(binding.name) : binding.name != null) return false;
-        if (value != null ? !value.equals(binding.value) : binding.value != null) return false;
+        if (name != null ? !name.equalsIgnoreCase(binding.name) : binding.name != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(binding.value) : binding.value != null) return false;
 
         return true;
     }

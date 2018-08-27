@@ -15,8 +15,10 @@ export class UserResponseRO {
   domain: string = null;
   status: string;
   suspended: boolean;
+  deleted: boolean;
 
-  constructor (userName: string, domain: string, email: string, password: string, active: boolean, status: string, authorities: Array<string>, suspended: boolean) {
+  constructor (userName: string, domain: string, email: string, password: string, active: boolean, status: string,
+               authorities: Array<string>, suspended: boolean, deleted: boolean) {
     this.userName = userName;
     this.email = email;
     this.password = password;
@@ -28,5 +30,6 @@ export class UserResponseRO {
       this.roles = this.roles.concat(authorities[authority]).concat(' ');
     }
     this.domain = domain;
+    this.deleted = deleted;
   }
 }

@@ -13,6 +13,7 @@ public class MessageConstants {
     public static final String FINAL_RECIPIENT = "finalRecipient";
     public static final String ERROR_CODE = "errorCode";
     public static final String ERROR_DETAIL = "errorDetail";
+    public static final String RETRY_COUNT = "RETRY_COUNT";
 
 
 }

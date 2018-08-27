@@ -7,10 +7,12 @@
         <md-card-content>
           <div class="panel">
             <md-input-container style="width:100%">
-              <input mdInput placeholder="Name" name="name" id="name_id" [(ngModel)]="party.name">
+              <input mdInput placeholder="Name" name="name" id="name_id" [(ngModel)]="party.name" #party_name="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
             <md-input-container style="width:100%">
-              <input mdInput placeholder="End point" name="endPoint" id="endPoint_id" [(ngModel)]="party.endpoint">
+              <input mdInput placeholder="End Point" name="endPoint" id="endPoint_id" [(ngModel)]="party.endpoint" #party_endPoint="ngModel"
+                     required [maxlength]="255">
             </md-input-container>
           </div>
         </md-card-content>
@@ -25,19 +27,19 @@
           <div class="panel">
             <fieldset [disabled]="true" style="border: none;">
               <md-input-container style="width:100%">
-                <input mdInput placeholder="Subject name" name="subjectName" value="{{party.certificate?.subject}}" id="subjectName_id">
+                <input mdInput placeholder="Subject Name" name="subjectName" value="{{party.certificate?.subject}}" id="subjectName_id">
               </md-input-container>
               <md-input-container style="width:40%">
-                <input mdInput placeholder="Valid from" name="validityFrom" value="{{party.certificate?.validFrom | domibusDate: dateFormat}}" id="validityFrom_id">
+                <input mdInput placeholder="Valid From" name="validityFrom" value="{{party.certificate?.validFrom | domibusDate: dateFormat}}" id="validityFrom_id">
               </md-input-container>
               <md-input-container style="width:40%">
-                <input mdInput placeholder="Valid to" name="validityTo" value="{{party.certificate?.validUntil | domibusDate: dateFormat}}" id="validityTo_id">
+                <input mdInput placeholder="Valid To" name="validityTo" value="{{party.certificate?.validUntil | domibusDate: dateFormat}}" id="validityTo_id">
               </md-input-container>
               <md-input-container style="width:100%">
                 <input mdInput placeholder="Issuer" name="issuer" value="{{party.certificate?.issuer}}" id="issuer_id">
               </md-input-container>
               <md-input-container style="width:100%">
-                <input mdInput placeholder="Finger prints" name="fingerPrint" value="{{party.certificate?.fingerprints}}" id="fingerPrint_id">
+                <input mdInput placeholder="Fingerprints" name="fingerPrint" value="{{party.certificate?.fingerprints}}" id="fingerPrint_id">
               </md-input-container>
             </fieldset>
             <label class="custom-file-upload">
@@ -140,7 +142,7 @@
     </div>
 
 
-    <button md-raised-button (click)="ok()" color="primary">
+    <button md-raised-button (click)="ok()" color="primary" [disabled]="party_name.invalid || party_endPoint.invalid">
       <span>OK</span>
     </button>
     <button md-raised-button (click)="cancel()" color="primary">

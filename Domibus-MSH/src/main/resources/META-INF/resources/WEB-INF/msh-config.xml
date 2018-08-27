@@ -3,38 +3,13 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns="http://www.springframework.org/schema/beans"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config/>
     <context:component-scan base-package="eu.domibus"/>
 
     <bean id="messageIdGenerator"
           class="eu.domibus.common.services.impl.MessageIdGenerator">
-        <property name="messageIdSuffix"
-                  value="${domibus.msh.messageid.suffix}"/>
-    </bean>
-
-    <bean id="retentionWorkerJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass"
-                  value="eu.domibus.common.services.impl.RetentionWorker"/>
-        <property name="durability" value="true"/>
-    </bean>
-
-    <bean id="retentionWorkerTrigger"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
-        <property name="jobDetail" ref="retentionWorkerJob"/>
-        <property name="cronExpression" value="${domibus.retentionWorker.cronExpression}"/>
-        <property name="startDelay" value="20000"/>
-    </bean>
-
-    <bean id="domibusStandardTriggerList" parent="userdefinedTriggerList"
-          class="org.springframework.beans.factory.config.ListFactoryBean" scope="prototype">
-        <property name="sourceList">
-            <list merge="true">
-                <ref bean="retentionWorkerTrigger"/>
-            </list>
-        </property>
     </bean>
 
 </beans>

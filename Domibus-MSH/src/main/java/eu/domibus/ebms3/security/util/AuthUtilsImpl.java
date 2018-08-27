@@ -7,6 +7,7 @@ import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,7 +53,8 @@ public class AuthUtilsImpl implements AuthUtils {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String originalUser = null;
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))) {
+        if (!authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_ADMIN.name()))
+                && !authorities.contains(new SimpleGrantedAuthority(AuthRole.ROLE_AP_ADMIN.name()))) {
             originalUser = (String) authentication.getPrincipal();
             LOG.debug("User [{}] has user role and finalRecipient [{}]", getAuthenticatedUser(), originalUser);
         } else {
@@ -95,6 +97,15 @@ public class AuthUtilsImpl implements AuthUtils {
     @Override
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_AP_ADMIN')")
     public void hasUserOrAdminRole() {
+        if(isAdmin() || isSuperAdmin()) {
+            return;
+        }
+        // USER_ROLE - verify the ORIGINAL_USER is configured
+        String originalUser = getOriginalUserFromSecurityContext();
+        if(StringUtils.isEmpty(originalUser)) {
+            throw new AuthenticationException("User " + getAuthenticatedUser() + " has USER_ROLE but is missing the ORIGINAL_USER in the db");
+        }
+        LOG.debug("Logged with USER_ROLE, ORIGINAL_USER is {}", originalUser );
     }
 
     @Override

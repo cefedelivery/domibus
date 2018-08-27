@@ -8,19 +8,19 @@ import javax.xml.bind.annotation.*;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="retry" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="duplicateDetection" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="retry" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="duplicateDetection" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
@@ -128,7 +128,7 @@ public class ReceptionAwareness extends AbstractBaseEntity {
 
         final ReceptionAwareness that = (ReceptionAwareness) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }

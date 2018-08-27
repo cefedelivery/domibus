@@ -1,11 +1,9 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
-import eu.domibus.api.util.HashUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
-import eu.domibus.util.HashUtilImpl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -14,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
@@ -40,10 +39,6 @@ public class CustomAuthenticationProviderTest {
     private static final String ALIAS_CN_AVAILABLE = "cn_available";
     private static final String TEST_KEYSTORE_PASSWORD = "1234";
 
-
-    @Injectable
-    private HashUtil hashUtil = new HashUtilImpl();
-
     @Injectable
     private AuthenticationDAO securityAuthenticationDAO;
 
@@ -55,6 +50,9 @@ public class CustomAuthenticationProviderTest {
 
     @Tested
     CustomAuthenticationProvider securityCustomAuthenticationProvider;
+
+    @Injectable
+    BCryptPasswordEncoder bcryptEncoder;
 
     @Test
     public void authenticateX509Test() {

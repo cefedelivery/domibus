@@ -24,10 +24,10 @@ import java.util.*;
 }
 )
 @NamedQueries({
-        @NamedQuery(name = "User.findAll", query = "FROM User u where u.deleted=false"),
+        @NamedQuery(name = "User.findAll", query = "FROM User u"),
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME and u.deleted=false"),
         @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true and u.deleted=false"),
-        @NamedQuery(name = "User.findSuspendedUser", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false")
+        @NamedQuery(name = "User.findSuspendedUsers", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false")
 })
 
 @Audited(withModifiedFlag = true)

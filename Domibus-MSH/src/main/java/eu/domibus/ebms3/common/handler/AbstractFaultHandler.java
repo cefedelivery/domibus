@@ -32,8 +32,8 @@ public abstract class AbstractFaultHandler implements SOAPHandler<SOAPMessageCon
     /**
      * This method extracts a ebMS3 messaging header {@link Messaging} from a {@link javax.xml.soap.SOAPMessage}
      *
-     * @param soapMessage
-     * @return
+     * @param soapMessage the SOAP message
+     * @return a ebMS3 messaging header {@link Messaging}
      */
     protected Messaging extractMessaging(final SOAPMessage soapMessage) {
         Messaging messaging = null;

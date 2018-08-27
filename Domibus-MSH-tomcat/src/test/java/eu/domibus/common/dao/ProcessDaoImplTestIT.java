@@ -52,7 +52,7 @@ public class ProcessDaoImplTestIT extends AbstractIT{
     @Rollback
     public void findPullByInitiator() throws Exception {
         loadBluePullPmodeFile();
-        Party party = pmodeDao.getReceiverParty(":red_gw");
+        Party party = pmodeDao.getReceiverParty(MessageExchangeConfiguration.PMODEKEY_SEPARATOR + "red_gw");
         List<Process> pullProcessesByInitiator = processDao.findPullProcessesByInitiator(party);
         assertEquals(1, pullProcessesByInitiator.size());
 

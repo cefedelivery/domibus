@@ -42,7 +42,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
         }
         final Domain domain = domainService.getDomain(domainCode);
         if (domain == null) {
-            throw new DomainException("Could not get current domain: domain with code [{}] is not configured");
+            throw new DomainException("Could not get current domain: domain with code [" + domainCode + "] is not configured");
         }
         return domain;
     }
@@ -53,7 +53,7 @@ public class DomainContextProviderImpl implements DomainContextProvider {
         try {
             result = getCurrentDomain();
         } catch (DomainException e) {
-            LOG.trace("Could not get current domain", e);
+            LOG.trace("Could not get current domain [{}]", e.getMessage());
         }
         return result;
 

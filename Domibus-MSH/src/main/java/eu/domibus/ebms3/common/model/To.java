@@ -34,22 +34,24 @@ public class To {
      * The
      * REQUIRED PartyId element occurs one or more times. If it occurs multiple times, each instance
      * MUST identify the same organization.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * This accessor method returns a reference to the live list, not a
      * snapshot. Therefore any modification you make to the returned list will
      * be present inside the JAXB object. This is why there is not a
      * <CODE>set</CODE> method for the partyId property.
-     * <p/>
-     * <p/>
+     *
+     * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPartyId().add(newItem);
      * </pre>
-     * <p/>
-     * <p/>
-     * <p/>
+     *
+     *
+     * <p>
      * Objects of the following type(s) are allowed in the list {@link PartyId }
+     *
+     * @return a reference to the live list of party id
      */
     public Set<PartyId> getPartyId() {
         if (this.partyId == null) {
@@ -96,7 +98,7 @@ public class To {
         final To to = (To) o;
 
         if (!this.partyId.equals(to.partyId)) return false;
-        return !(this.role != null ? !this.role.equals(to.role) : to.role != null);
+        return !(this.role != null ? !this.role.equalsIgnoreCase(to.role) : to.role != null);
 
     }
 

@@ -13,21 +13,21 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="errorAsResponse" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="businessErrorNotifyProducer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="businessErrorNotifyConsumer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="deliveryFailureNotifyProducer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="errorAsResponse" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="businessErrorNotifyProducer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="businessErrorNotifyConsumer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="deliveryFailureNotifyProducer" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
@@ -62,7 +62,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
         final ErrorHandling that = (ErrorHandling) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equalsIgnoreCase(that.name)) return false;
 
         return true;
     }
@@ -96,6 +96,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Gets the value of the errorAsResponse property.
+     * @return the value of the errorAsResponse property.
      */
     public boolean isErrorAsResponse() {
         return this.errorAsResponse;
@@ -103,6 +104,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Sets the value of the errorAsResponse property.
+     * @param value the new value of the errorAsResponse property.
      */
     public void setErrorAsResponse(final boolean value) {
         this.errorAsResponse = value;
@@ -110,6 +112,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Gets the value of the businessErrorNotifyProducer property.
+     * @return the value of the businessErrorNotifyProducer property.
      */
     public boolean isBusinessErrorNotifyProducer() {
         return this.businessErrorNotifyProducer;
@@ -117,6 +120,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Sets the value of the businessErrorNotifyProducer property.
+     * @param value the new value of the businessErrorNotifyProducer property.
      */
     public void setBusinessErrorNotifyProducer(final boolean value) {
         this.businessErrorNotifyProducer = value;
@@ -124,6 +128,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Gets the value of the businessErrorNotifyConsumer property.
+     * @return the value of the businessErrorNotifyConsumer property.
      */
     public boolean isBusinessErrorNotifyConsumer() {
         return this.businessErrorNotifyConsumer;
@@ -131,6 +136,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Sets the value of the businessErrorNotifyConsumer property.
+     * @param value the new value of the businessErrorNotifyConsumer property.
      */
     public void setBusinessErrorNotifyConsumer(final boolean value) {
         this.businessErrorNotifyConsumer = value;
@@ -138,6 +144,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Gets the value of the deliveryFailureNotifyProducer property.
+     * @return the value of the deliveryFailureNotifyProducer property.
      */
     public boolean isDeliveryFailureNotifyProducer() {
         return this.deliveryFailureNotifyProducer;
@@ -145,6 +152,7 @@ public class ErrorHandling extends AbstractBaseEntity {
 
     /**
      * Sets the value of the deliveryFailureNotifyProducer property.
+     * @param value the new value of the deliveryFailureNotifyProducer property.
      */
     public void setDeliveryFailureNotifyProducer(final boolean value) {
         this.deliveryFailureNotifyProducer = value;

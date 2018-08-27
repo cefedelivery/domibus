@@ -176,10 +176,10 @@ public class CollaborationInfo {
 
         final CollaborationInfo that = (CollaborationInfo) o;
 
-        if (!this.action.equals(that.action)) return false;
+        if (!this.action.equalsIgnoreCase(that.action)) return false;
         if (this.agreementRef != null ? !this.agreementRef.equals(that.agreementRef) : that.agreementRef != null)
             return false;
-        if (!this.conversationId.equals(that.conversationId)) return false;
+        if (!this.conversationId.equalsIgnoreCase(that.conversationId)) return false;
         return this.service.equals(that.service);
 
     }

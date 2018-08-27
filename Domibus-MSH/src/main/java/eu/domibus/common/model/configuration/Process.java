@@ -111,7 +111,7 @@ public class Process extends AbstractBaseEntity {
         if (initiatorPartiesXml != null) { // empty means dynamic discovery is used
             for (final InitiatorParty ini : this.initiatorPartiesXml.getInitiatorParty()) {
                 for (final Party party : configuration.getBusinessProcesses().getParties()) {
-                    if (party.getName().equals(ini.getName())) {
+                    if (party.getName().equalsIgnoreCase(ini.getName())) {
                         this.initiatorParties.add(party);
                         break;
                     }
@@ -125,7 +125,7 @@ public class Process extends AbstractBaseEntity {
         if (responderPartiesXml != null) { // empty means dynamic discovery is used
             for (final ResponderParty res : this.responderPartiesXml.getResponderParty()) {
                 for (final Party party : configuration.getBusinessProcesses().getParties()) {
-                    if (party.getName().equals(res.getName())) {
+                    if (party.getName().equalsIgnoreCase(res.getName())) {
                         this.responderParties.add(party);
                         break;
                     }
@@ -138,7 +138,7 @@ public class Process extends AbstractBaseEntity {
         this.legs = new HashSet<>();
         for (final Leg leg : this.legsXml.getLeg()) {
             for (final LegConfiguration legConfiguration : configuration.getBusinessProcesses().getLegConfigurations()) {
-                if (legConfiguration.getName().equals(leg.getName())) {
+                if (legConfiguration.getName().equalsIgnoreCase(leg.getName())) {
                     this.legs.add(legConfiguration);
                     break;
                 }
@@ -146,28 +146,28 @@ public class Process extends AbstractBaseEntity {
         }
 
         for (final Role role : configuration.getBusinessProcesses().getRoles()) {
-            if (role.getName().equals(this.initiatorRoleXml)) {
+            if (role.getName().equalsIgnoreCase(this.initiatorRoleXml)) {
                 this.initiatorRole = role;
             }
-            if (role.getName().equals(this.responderRoleXml)) {
+            if (role.getName().equalsIgnoreCase(this.responderRoleXml)) {
                 this.responderRole = role;
             }
         }
 
         for (final Agreement agreement1 : configuration.getBusinessProcesses().getAgreements()) {
-            if (agreement1.getName().equals(this.agreementXml)) {
+            if (agreement1.getName().equalsIgnoreCase(this.agreementXml)) {
                 this.agreement = agreement1;
                 break;
             }
         }
         for (final Mep mep1 : configuration.getBusinessProcesses().getMeps()) {
-            if (mep1.getName().equals(this.mepXml)) {
+            if (mep1.getName().equalsIgnoreCase(this.mepXml)) {
                 this.mep = mep1;
                 break;
             }
         }
         for (final Binding binding : configuration.getBusinessProcesses().getMepBindings()) {
-            if (binding.getName().equals(this.bindingXml)) {
+            if (binding.getName().equalsIgnoreCase(this.bindingXml)) {
                 this.mepBinding = binding;
                 break;
             }
@@ -195,7 +195,7 @@ public class Process extends AbstractBaseEntity {
 
         final Process process = (Process) o;
 
-        return name.equals(process.name);
+        return name.equalsIgnoreCase(process.name);
     }
 
     @Override

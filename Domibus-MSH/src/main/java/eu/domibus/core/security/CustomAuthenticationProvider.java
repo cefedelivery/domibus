@@ -3,7 +3,6 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.api.util.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -11,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -26,9 +26,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
 
     @Autowired
-    private HashUtil hashUtil;
-
-    @Autowired
     @Qualifier("securityAuthenticationDAO")
     private AuthenticationDAO securityAuthenticationDAO;
 
@@ -39,6 +36,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     @Qualifier("securityX509CertificateServiceImpl")
     private X509CertificateService x509CertificateService;
+
+    @Autowired
+    private BCryptPasswordEncoder bcryptEncoder;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -63,11 +63,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 LOG.debug("Authenticating using the Basic authentication");
                 Boolean res = false;
                 AuthenticationEntity basicAuthenticationEntity = securityAuthenticationDAO.findByUser(authentication.getName());
-                try {
-                    res = hashUtil.getSHA256Hash((String) authentication.getCredentials()).equals(basicAuthenticationEntity.getPasswd());
-                } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-                    LOG.error("Problem hashing the provided password", ex);
-                }
+                res = bcryptEncoder.matches((String) authentication.getCredentials(), basicAuthenticationEntity.getPasswd());
+
                 authentication.setAuthenticated(res);
 
                 ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());

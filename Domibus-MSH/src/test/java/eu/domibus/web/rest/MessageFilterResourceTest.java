@@ -4,8 +4,8 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
-import eu.domibus.common.services.impl.MessageFilterCsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.MessageFilterCsvServiceImpl;
 import eu.domibus.plugin.routing.RoutingService;
 import eu.domibus.web.rest.ro.MessageFilterRO;
 import eu.domibus.web.rest.ro.MessageFilterResultRO;
@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Tiago Miguel
@@ -91,7 +92,7 @@ public class MessageFilterResourceTest {
         new Expectations(messageFilterResource){{
             messageFilterResource.getBackendFiltersInformation();
             result = new ImmutablePair<>(messageFilterResultROS, true);
-            csvService.exportToCSV(messageFilterResultROS);
+            csvService.exportToCSV(messageFilterResultROS, MessageFilterRO.class,null,null);
             result = CSV_TITLE + backendName + "," + fromExpression + ", , , ," + true + System.lineSeparator();
         }};
 
@@ -109,7 +110,7 @@ public class MessageFilterResourceTest {
     public void testGetMessageFilterCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
-            csvService.exportToCSV((List<?>) any);
+            csvService.exportToCSV((List<?>) any, null, null, null);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};
 

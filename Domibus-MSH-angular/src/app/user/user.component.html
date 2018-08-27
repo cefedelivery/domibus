@@ -1,4 +1,38 @@
 <page-header id="usersheader_id">Users</page-header>
+
+<div *ngIf="false" class="selectionCriteria">
+  <md-card>
+    <md-card-content>
+      <div class="panel">
+
+        <md-select placeholder="User role" [(ngModel)]="filter.authRole" id="role_id">
+          <md-option *ngFor="let t of userRoles" [value]="t">
+            {{t}}
+          </md-option>
+        </md-select>
+
+        <md-select placeholder="User deleted" [(ngModel)]="filter.deleted" id="deleted_id">
+          <md-option *ngFor="let t of deletedStatuses" [value]="t">
+            {{t}}
+          </md-option>
+        </md-select>
+
+        <md-input-container>
+          <input mdInput placeholder="Username" [(ngModel)]="filter.userName" id="username_id">
+        </md-input-container>
+
+        <div class="searchArea">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="getUsers()">
+            <md-icon>search</md-icon>
+            <span>Search</span>
+          </button>
+        </div>
+
+      </div>
+    </md-card-content>
+  </md-card>
+</div>
+
 <div class="panel">
 
   <div class="group-filter-button">
@@ -10,7 +44,7 @@
     <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                        (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" [disabled]="!isSaveAsCSVButtonEnabled()" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()"
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
@@ -30,12 +64,14 @@
     [selected]="selected"
     [limit]="rowLimiter.pageSize"
     [selectionType]="'multi'"
-    (select)='onSelect($event)'>
+    (select)='onSelect($event)'
+    [offset]="offset"
+    (page)="onChangePage($event)">
   </ngx-datatable>
 
   <ng-template #editableTpl let-value="value" let-row="row" ngx-datatable-cell-template>
           <span (dblclick)="buttonEdit()"
-                class="clickAble"
+                class="clickAble" [class.user-deleted]="row.deleted"
                 style="word-wrap: break-word">
             {{value}}
           </span>
@@ -55,12 +91,16 @@
     </ng-container>
   </ng-template>
 
+  <ng-template #deletedTpl let-row="row" ngx-datatable-cell-template>
+    <input type="checkbox" [checked]="row['deleted']" disabled>
+  </ng-template>
+
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button (click)="buttonEditAction(row.$$index)"
+    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted" (click)="buttonEditAction(row.$$index)"
             color="primary" tooltip="Edit">
       <md-icon>edit</md-icon>
     </button>
-    <button id="userDeleteButtonRow{{row.$$index}}_id" md-icon-button (click)="buttonDeleteAction(row)" color="primary"
+    <button id="userDeleteButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted" (click)="buttonDeleteAction(row)" color="primary"
             tooltip="Delete">
       <md-icon>delete</md-icon>
     </button>

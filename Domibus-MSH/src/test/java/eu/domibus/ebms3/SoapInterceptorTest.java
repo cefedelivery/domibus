@@ -70,7 +70,7 @@ public class SoapInterceptorTest {
 
         // Create the context map
         MessageImpl message = new MessageImpl();
-        message.put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action");
+        message.put(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, "blue_gw:red_gw:testService1:tc1Action::pushTestcase1tc1Action".replaceAll(":", "_pMK_SEP_"));
         message.put(MSHDispatcher.MESSAGE_TYPE_OUT, MessageType.USER_MESSAGE);
         message.put(DispatchClientDefaultProvider.ASYMMETRIC_SIG_ALGO_PROPERTY, SPConstants.SHA256);
         SoapMessage msg = new SoapMessage(message);

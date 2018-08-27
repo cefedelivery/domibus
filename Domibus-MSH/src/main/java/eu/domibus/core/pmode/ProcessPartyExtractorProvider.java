@@ -13,7 +13,7 @@ public class ProcessPartyExtractorProvider {
 
     public ProcessTypePartyExtractor getProcessTypePartyExtractor(String processType, final String senderParty, final String receiverParty) {
         ProcessTypePartyExtractor processTypePartyExtractor = new PushProcessPartyExtractor(senderParty, receiverParty);
-        if (PULL.getFileMapping().equals(processType)) {
+        if (PULL.getFileMapping().equalsIgnoreCase(processType)) {
             processTypePartyExtractor = new PullProcessPartyExtractor(senderParty, receiverParty);
         }
         return processTypePartyExtractor;

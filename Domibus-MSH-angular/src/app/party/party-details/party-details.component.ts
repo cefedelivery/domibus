@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MD_DIALOG_DATA, MdDialogRef, MdDialog, MdDialogConfig} from '@angular/material';
+import {MD_DIALOG_DATA, MdDialog, MdDialogRef} from '@angular/material';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
-import {CertificateRo, IdentifierRo, PartyFilteredResult, PartyIdTypeRo, PartyResponseRo, ProcessInfoRo, ProcessRo} from '../party';
+import {IdentifierRo, PartyResponseRo, ProcessInfoRo} from '../party';
 import {PartyIdentifierDetailsComponent} from '../party-identifier-details/party-identifier-details.component';
 import {PartyService} from '../party.service';
 import {AlertService} from '../../alert/alert.service';
@@ -101,7 +101,7 @@ export class PartyDetailsComponent implements OnInit {
   initColumns () {
     this.identifiersRowColumnPicker.allColumns = [
       {
-        name: 'Party ID',
+        name: 'Party Id',
         prop: 'partyId',
         width: 100
       },
@@ -111,18 +111,20 @@ export class PartyDetailsComponent implements OnInit {
         width: 150
       },
       {
-        name: 'Party Id value',
+        name: 'Party Id Value',
         prop: 'partyIdType.value',
         width: 280
       }
     ];
     this.identifiersRowColumnPicker.selectedColumns = this.identifiersRowColumnPicker.allColumns.filter(col => {
-      return ['Party ID', 'Party Id Type', 'Party Id value'].indexOf(col.name) != -1
+      return ['Party Id', 'Party Id Type', 'Party Id Value'].indexOf(col.name) != -1
     });
   }
 
-  editIdentifier () {
+  async editIdentifier (): Promise<boolean> {
     const identifierRow = this.selectedIdentifiers[0];
+    if (!identifierRow) return;
+
     const rowClone = Object.assign({}, identifierRow);
 
     const dialogRef: MdDialogRef<PartyIdentifierDetailsComponent> = this.dialog.open(PartyIdentifierDetailsComponent, {
@@ -130,24 +132,34 @@ export class PartyDetailsComponent implements OnInit {
         edit: rowClone
       }
     });
-    dialogRef.afterClosed().subscribe(ok => {
-      const editForm = dialogRef.componentInstance;
-      if (ok) {
-        const test = rowClone;
-        Object.assign(identifierRow, editForm.data.edit);
-      }
-    });
+
+    const ok = await dialogRef.afterClosed().toPromise();
+    if (ok) {
+      Object.assign(identifierRow, rowClone);
+    }
+
+    return ok;
   }
 
   removeIdentifier () {
     const identifierRow = this.selectedIdentifiers[0];
+    if (!identifierRow) return;
+
     this.party.identifiers.splice(this.party.identifiers.indexOf(identifierRow), 1);
     this.selectedIdentifiers.length = 0;
   }
 
-  addIdentifier () {
-    const identifierRow = {entityId: 0, partyId: 'new', partyIdType: {name: '', value: ''}};
+  async addIdentifier () {
+    const identifierRow = {entityId: 0, partyId: '', partyIdType: {name: '', value: ''}};
+
     this.party.identifiers.push(identifierRow);
+    this.selectedIdentifiers.length = 0;
+    this.selectedIdentifiers.push(identifierRow);
+
+    const ok = await this.editIdentifier();
+    if (!ok) {
+      this.removeIdentifier();
+    }
   }
 
   ok () {

@@ -1,6 +1,5 @@
 package eu.domibus.web.rest.ro;
 
-import eu.domibus.common.services.CsvService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -16,14 +15,15 @@ import java.util.List;
 public class UserResponseRO {
     // order of the fields is important for CSV generation
     private String userName;
-    private String email;
     private String roles = StringUtils.EMPTY;
+    private String email;
     private String password;
     private boolean active;
     private List<String> authorities;
     private String status;
     private boolean suspended;
     private String domain;
+    private boolean deleted;
 
     public UserResponseRO() {
     }
@@ -32,7 +32,7 @@ public class UserResponseRO {
         this.userName = userName;
         this.email = email;
         this.active = actif;
-        this.authorities=new ArrayList<>();
+        this.authorities = new ArrayList<>();
     }
 
     public String getUserName() {
@@ -47,15 +47,15 @@ public class UserResponseRO {
         return active;
     }
 
-    public void updateRolesField(){
-        int count=0;
+    public void updateRolesField() {
+        int count = 0;
         String separator = StringUtils.EMPTY;
         for (String authority : authorities) {
-            if(count>0){
-               separator= CsvService.COMMA;
+            if (count > 0) {
+                separator = ",";
             }
             count++;
-            roles+=separator+authority;
+            roles += separator + authority;
         }
     }
 
@@ -114,6 +114,14 @@ public class UserResponseRO {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override

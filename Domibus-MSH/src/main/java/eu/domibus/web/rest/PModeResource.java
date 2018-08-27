@@ -1,11 +1,13 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.common.model.configuration.ConfigurationRaw;
 import eu.domibus.common.services.AuditService;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -27,9 +29,7 @@ import javax.ws.rs.QueryParam;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Mircea Musat
@@ -55,7 +55,7 @@ public class PModeResource {
     private AuditService auditService;
 
     @RequestMapping(path = "{id}", method = RequestMethod.GET, produces = "application/xml")
-    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value="id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
+    public ResponseEntity<? extends Resource> downloadPmode(@PathVariable(value = "id") int id, @DefaultValue("false") @QueryParam("noAudit") boolean noAudit) {
 
         final byte[] rawConfiguration = pModeProvider.getPModeFile(id);
         ByteArrayResource resource = new ByteArrayResource(new byte[0]);
@@ -64,16 +64,28 @@ public class PModeResource {
         }
 
         HttpStatus status = HttpStatus.OK;
-        if(resource.getByteArray().length == 0) {
+        if (resource.getByteArray().length == 0) {
             status = HttpStatus.NO_CONTENT;
         } else if (!noAudit) {
-            auditService.addPModeDownloadedAudit( Integer.toString(id));
+            auditService.addPModeDownloadedAudit(Integer.toString(id));
         }
 
         return ResponseEntity.status(status)
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
                 .header("content-disposition", "attachment; filename=Pmodes.xml")
                 .body(resource);
+    }
+
+    @GetMapping(path = "current")
+    public PModeResponseRO getCurrentPMode() {
+        final PModeArchiveInfo currentPmode = pModeProvider.getCurrentPmode();
+        if(currentPmode!=null) {
+            final PModeResponseRO convert = domainConverter.convert(currentPmode, PModeResponseRO.class);
+            convert.setCurrent(true);
+            return convert;
+        }
+        return null;
+
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -114,26 +126,26 @@ public class PModeResource {
             LOG.error("Impossible to delete PModes", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Impossible to delete PModes due to \n" + ex.getMessage());
         }
-        LOG.debug("PModes " + pmodesString + " were deleted");
+        LOG.debug("PModes {} were deleted", pmodesString);
         return ResponseEntity.ok("PModes were deleted\n");
     }
 
-    @RequestMapping(value = {"/rollback/{id}"}, method = RequestMethod.PUT)
-    public ResponseEntity<String> uploadPmode(@PathVariable(value="id") Integer id) {
-        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(id);
-        rawConfiguration.setEntityId(0);
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
-        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
-        rawConfiguration.setDescription("Reverted to version of " + confDate.format(formatter));
+    @RequestMapping(value = {"/restore/{id}"}, method = RequestMethod.PUT)
+    public ResponseEntity<String> uploadPmode(@PathVariable(value = "id") Integer id) {
+        ConfigurationRaw existingRawConfiguration = pModeProvider.getRawConfiguration(id);
+        ConfigurationRaw newRawConfiguration = new ConfigurationRaw();
+        newRawConfiguration.setEntityId(0);
 
-        rawConfiguration.setConfigurationDate(new Date());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(existingRawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        newRawConfiguration.setDescription("Restored version of " + confDate.format(formatter));
+
+        newRawConfiguration.setConfigurationDate(new Date());
+        newRawConfiguration.setXml(existingRawConfiguration.getXml());
 
         String message = "PMode was successfully uploaded";
         try {
-            byte[] bytes = rawConfiguration.getXml();
-
-            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(bytes, rawConfiguration.getDescription());
+            List<String> pmodeUpdateMessage = pModeProvider.updatePModes(newRawConfiguration.getXml(), newRawConfiguration.getDescription());
 
             if (pmodeUpdateMessage != null && !pmodeUpdateMessage.isEmpty()) {
                 message += " but some issues were detected: \n" + StringUtils.join(pmodeUpdateMessage, "\n");
@@ -163,25 +175,20 @@ public class PModeResource {
         pModeResponseROList.addAll(pmodeList());
 
         // set first PMode as current
-        if(!pModeResponseROList.isEmpty()) {
+        if (!pModeResponseROList.isEmpty()) {
             pModeResponseROList.get(0).setCurrent(true);
         }
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(PModeResponseRO.class);
-
         try {
-            resultText = csvServiceImpl.exportToCSV(pModeResponseROList);
+            resultText = csvServiceImpl.exportToCSV(pModeResponseROList, PModeResponseRO.class,
+                    new HashMap<String, String>(), CsvExcludedItems.PMODE_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(CsvService.APPLICATION_EXCEL_STR))
-                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmode"))
+                .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("pmodearchive"))
                 .body(resultText);
     }
 

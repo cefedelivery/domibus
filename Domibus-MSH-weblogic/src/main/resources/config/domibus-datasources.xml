@@ -23,11 +23,17 @@
     <bean id="pullMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.pull.queue"/>
     </bean>
+    <bean id="alertMessageQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.alert.queue"/>
+    </bean>
     <bean id="notifyBackendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.queue"/>
     </bean>
     <bean id="unknownReceiverQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="jms/domibus.internal.notification.unknown"/>
+    </bean>
+    <bean id="uiReplicationQueue" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="jms/domibus.internal.ui.replication.queue"/>
     </bean>
 
     <bean id="clusterCommandTopic" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -57,13 +63,14 @@
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
     </bean>
-    <bean id="pullJmsListenerContainerFactory"
+    <bean id="alertJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
         <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
         <property name="transactionManager" ref="transactionManager"/>
-        <property name="concurrency" value="${domibus.pull.queue.concurency}"/>
+        <property name="concurrency" value="${domibus.alert.queue.concurrency}"/>
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
+        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
 </beans>

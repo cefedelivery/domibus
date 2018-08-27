@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.*;
  * Examples of the Service element include:
  * {@code <eb:Service>urn:example.org:services:SupplierOrderProcessing</eb:Service>}
  * {@code <eb:Service type="MyServiceTypes">QuoteToCollect</eb:Service>}
- * <p/>
+ * <p>
  * When the value of the element is http://docs.oasis-open.org/ebxmlmsg/
  * ebms/v3.0/ns/core/200704/service, then the receiving MSH MUST NOT deliver this
  * message to the Consumer. With the exception of this delivery behavior, and unless indicated otherwise by
@@ -90,8 +90,8 @@ public class Service {
 
         final Service service = (Service) o;
 
-        if (this.type != null ? !this.type.equals(service.type) : service.type != null) return false;
-        return this.value.equals(service.value);
+        if (this.type != null ? !this.type.equalsIgnoreCase(service.type) : service.type != null) return false;
+        return this.value.equalsIgnoreCase(service.value);
 
     }
 

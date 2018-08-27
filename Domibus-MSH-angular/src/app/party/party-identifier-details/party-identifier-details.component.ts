@@ -7,6 +7,8 @@ import {MD_DIALOG_DATA, MdDialogRef} from "@angular/material";
   styleUrls: ['./party-identifier-details.component.css']
 })
 export class PartyIdentifierDetailsComponent implements OnInit {
+  public partyIdTypePattern = 'urn:oasis:names:tc:ebcore:partyid\\-type:[a-zA-Z0-9_:-]+';
+  public partyIdTypeMessage = 'You should follow the rule: urn:oasis:names:tc:ebcore:partyid-type:[....]';
 
   partyIdentifier: any;
 

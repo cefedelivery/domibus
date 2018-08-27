@@ -2,7 +2,6 @@ package eu.domibus.jms.activemq;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
@@ -12,11 +11,8 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.activemq.broker.Broker;
-import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.jmx.BrokerViewMBean;
 import org.apache.activemq.broker.jmx.QueueViewMBean;
-import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +54,6 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     BrokerViewMBean brokerViewMBean;
 
     @Autowired
-    BrokerService brokerService;
-
-    @Autowired
     JMSDestinationHelper jmsDestinationHelper;
 
     @Resource(name = "jmsSender")
@@ -84,7 +77,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
             for (ObjectName name : getQueueMap().values()) {
                 QueueViewMBean queueMbean = getQueueViewMBean(name);
                 InternalJMSDestination internalJmsDestination = createInternalJmsDestination(name, queueMbean);
-                destinationMap.put(queueMbean.getName(), internalJmsDestination);
+                if (StringUtils.indexOfAny(internalJmsDestination.getName(), SKIP_QUEUE_NAMES) == -1) {
+                    destinationMap.put(queueMbean.getName(), internalJmsDestination);
+                }
             }
             return destinationMap;
         } catch (Exception e) {
@@ -297,8 +292,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return intJmsMsg;
     }
 
-    //TODO: Duplicate code that will be refactored in the scope of a task in 4.0
-    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws Exception {
+    protected List<InternalJmsMessage> getMessagesFromDestination(String destination, String selector) throws JMSActiveMQException {
         Queue queue;
 
         try {
@@ -306,6 +300,11 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         } catch (Exception ex) {
             throw new JMSActiveMQException(ex);
         }
+        if(queue == null) {
+            LOG.warn("Couldn't find queue [{}]", destination);
+            return new ArrayList<>();
+        }
+
         return jmsOperations.browseSelected(queue, selector, (session, browser) -> {
             List<InternalJmsMessage> result = new ArrayList<>();
             Enumeration enumeration = browser.getEnumeration();
@@ -341,20 +340,11 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return result;
     }
 
-    protected Queue getQueue(String queueName) throws JMSActiveMQException {
-        final ActiveMQDestination[] destinations;
-        try {
-            Broker broker = brokerService.getBroker();
-            destinations = broker.getDestinations();
-        } catch (Exception ex) {
-            throw new JMSActiveMQException(ex);
-        }
-
-        for(ActiveMQDestination destination : destinations) {
-            if(queueName.equals(destination.getPhysicalName())) {
-                return (Queue) destination;
-            }
-        }
+    protected Queue getQueue(String queueName) {
+        final InternalJMSDestination internalJMSDestination = findDestinationsGroupedByFQName().get(queueName);
+        if (internalJMSDestination == null) {
         return null;
+    }
+        return new ActiveMQQueue(internalJMSDestination.getName());
     }
 }

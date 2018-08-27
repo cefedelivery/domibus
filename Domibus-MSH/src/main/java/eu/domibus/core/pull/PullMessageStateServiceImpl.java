@@ -4,6 +4,7 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.UpdateRetryLoggingService;
 import eu.domibus.logging.DomibusLogger;
@@ -38,6 +39,9 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
     @Autowired
     private BackendNotificationService backendNotificationService;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
     /**
      * {@inheritDoc}
      */
@@ -69,6 +73,7 @@ public class PullMessageStateServiceImpl implements PullMessageStateService {
         LOG.debug("Change message:[{}] with state:[{}] to state:[{}].", userMessageLog.getMessageId(), userMessageLog.getMessageStatus(), readyToPull);
         userMessageLog.setMessageStatus(readyToPull);
         userMessageLogDao.update(userMessageLog);
+        uiReplicationSignalService.messageStatusChange(userMessageLog.getMessageId());
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, MessageStatus.READY_TO_PULL, new Timestamp(System.currentTimeMillis()));
     }
 

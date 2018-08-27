@@ -1,17 +1,17 @@
-import {Component} from "@angular/core";
-import {MdDialog, MdDialogRef} from "@angular/material";
-import {AlertService} from "../alert/alert.service";
-import {Http, Headers, Response} from "@angular/http";
-import {Observable} from "rxjs/Observable";
-import {MessageFilterResult} from "./messagefilterresult";
-import {BackendFilterEntry} from "./backendfilterentry";
-import {RoutingCriteriaEntry} from "./routingcriteriaentry";
-import {isNullOrUndefined, isUndefined} from "util";
-import {EditMessageFilterComponent} from "./editmessagefilter-form/editmessagefilter-form.component";
-import {DirtyOperations} from "../common/dirty-operations";
-import {CancelDialogComponent} from "../common/cancel-dialog/cancel-dialog.component";
-import {SaveDialogComponent} from "../common/save-dialog/save-dialog.component";
-import {DownloadService} from "../download/download.service";
+import {Component, OnInit} from '@angular/core';
+import {MdDialog, MdDialogRef} from '@angular/material';
+import {AlertService} from '../alert/alert.service';
+import {Http, Headers, Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import {MessageFilterResult} from './messagefilterresult';
+import {BackendFilterEntry} from './backendfilterentry';
+import {RoutingCriteriaEntry} from './routingcriteriaentry';
+import {isNullOrUndefined, isUndefined} from 'util';
+import {EditMessageFilterComponent} from './editmessagefilter-form/editmessagefilter-form.component';
+import {DirtyOperations} from '../common/dirty-operations';
+import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
+import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
+import {DownloadService} from '../download/download.service';
 
 @Component({
   moduleId: module.id,
@@ -20,36 +20,54 @@ import {DownloadService} from "../download/download.service";
   styleUrls: ['./messagefilter.component.css']
 })
 
-export class MessageFilterComponent implements DirtyOperations {
-
-  rows = [];
-  selected = [];
-
-  backendFilterNames = [];
-
-  rowNumber = -1;
-
-  enableCancel = false;
-  enableSave = false;
-  enableDelete = false;
-  enableEdit = false;
-
-  enableMoveUp = false;
-  enableMoveDown = false;
-
-  loading: boolean = false;
-
-  areFiltersPersisted: boolean;
-
+export class MessageFilterComponent implements OnInit, DirtyOperations {
   static readonly MESSAGE_FILTER_URL: string = 'rest/messagefilters';
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  rows: any [];
+  selected: any[];
+
+  backendFilterNames: any[];
+
+  rowNumber: number;
+
+  enableCancel: boolean;
+  enableSave: boolean;
+  enableDelete: boolean;
+  enableEdit: boolean;
+  enableMoveUp: boolean;
+  enableMoveDown: boolean;
+
+  loading: boolean;
+  areFiltersPersisted: boolean;
+  dirty: boolean;
+
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
   }
 
+  ngOnInit () {
+    this.rows = [];
+    this.selected = [];
 
-  getBackendFiltersInfo() {
+    this.backendFilterNames = [];
+
+    this.rowNumber = -1;
+
+    this.enableCancel = false;
+    this.enableSave = false;
+    this.enableDelete = false;
+    this.enableEdit = false;
+
+    this.enableMoveUp = false;
+    this.enableMoveDown = false;
+
+    this.loading = true;
+
+    this.getBackendFiltersInfo();
+  }
+
+  getBackendFiltersInfo () {
+    this.dirty = false;
     this.getMessageFilterEntries().subscribe((result: MessageFilterResult) => {
-      console.log("messagefilter response: " + result);
 
       let newRows = [];
       this.backendFilterNames = [];
@@ -70,31 +88,25 @@ export class MessageFilterComponent implements DirtyOperations {
         this.rows = newRows;
 
         if (!this.areFiltersPersisted && this.backendFilterNames.length > 1) {
-          this.alertService.error("One or several filters in the table were not configured yet (Persisted flag is not checked). " +
-            "It is strongly recommended to double check the filters configuration and afterwards save it.");
+          this.alertService.error('One or several filters in the table were not configured yet (Persisted flag is not checked). ' +
+            'It is strongly recommended to double check the filters configuration and afterwards save it.');
           this.enableSave = true;
         }
       }
     }, (error: any) => {
-      console.log("error getting the message filter: " + error);
+      console.log('error getting the message filter: ' + error);
       this.loading = false;
-      this.alertService.error("Error occurred: " + error);
+      this.alertService.error('Error occurred: ' + error);
     });
   }
 
-  getMessageFilterEntries(): Observable<MessageFilterResult> {
+  getMessageFilterEntries (): Observable<MessageFilterResult> {
     return this.http.get(MessageFilterComponent.MESSAGE_FILTER_URL).map((response: Response) =>
       response.json()
     );
   }
 
-  ngOnInit() {
-    this.loading = true;
-
-    this.getBackendFiltersInfo();
-  }
-
-  createValueProperty(cell, newProp, row) {
+  createValueProperty (cell, newProp, row) {
     switch (cell) {
       case 'from':
         this.rows[row].from = newProp;
@@ -111,36 +123,36 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  buttonNew() {
+  buttonNew () {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {data: {backendFilterNames: this.backendFilterNames}});
     formRef.afterClosed().subscribe(result => {
       if (result == true) {
         let routingCriterias: Array<RoutingCriteriaEntry> = [];
-        if (!isNullOrUndefined(formRef.componentInstance.from) && formRef.componentInstance.from != "") {
+        if (!isNullOrUndefined(formRef.componentInstance.from) && formRef.componentInstance.from != '') {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'from', formRef.componentInstance.from));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.to) && formRef.componentInstance.to != "") {
+        if (!isNullOrUndefined(formRef.componentInstance.to) && formRef.componentInstance.to != '') {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'to', formRef.componentInstance.to));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.action) && formRef.componentInstance.action != "") {
+        if (!isNullOrUndefined(formRef.componentInstance.action) && formRef.componentInstance.action != '') {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'action', formRef.componentInstance.action));
         }
-        if (!isNullOrUndefined(formRef.componentInstance.service) && formRef.componentInstance.service != "") {
+        if (!isNullOrUndefined(formRef.componentInstance.service) && formRef.componentInstance.service != '') {
           routingCriterias.push(new RoutingCriteriaEntry(0, 'service', formRef.componentInstance.service));
         }
         let backendEntry = new BackendFilterEntry(0, this.rowNumber + 1, formRef.componentInstance.plugin, routingCriterias, false);
         if (this.findRowsIndex(backendEntry) == -1) {
           this.rows.push(backendEntry);
-          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+
+          this.setDirty(formRef.componentInstance.messageFilterForm.dirty);
         } else {
-          this.alertService.error("Impossible to insert a duplicate entry");
+          this.alertService.error('Impossible to insert a duplicate entry');
         }
       }
     });
   }
 
-  private findRowsIndex(backendEntry: BackendFilterEntry): number {
+  private findRowsIndex (backendEntry: BackendFilterEntry): number {
     for (let i = 0; i < this.rows.length; i++) {
       let currentRow = this.rows[i];
       if (currentRow.backendName === backendEntry.backendName && this.compareRoutingCriterias(backendEntry.routingCriterias, currentRow.routingCriterias)) {
@@ -150,7 +162,7 @@ export class MessageFilterComponent implements DirtyOperations {
     return -1;
   }
 
-  private compareRoutingCriterias(criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
+  private compareRoutingCriterias (criteriasA: RoutingCriteriaEntry[], criteriasB: RoutingCriteriaEntry[]): boolean {
     let result: boolean = true;
     for (let entry of criteriasA) {
       result = result && this.findRoutingCriteria(entry, criteriasB);
@@ -158,7 +170,7 @@ export class MessageFilterComponent implements DirtyOperations {
     return result;
   }
 
-  private findRoutingCriteria(toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
+  private findRoutingCriteria (toFind: RoutingCriteriaEntry, routingCriterias: RoutingCriteriaEntry[]): boolean {
     for (let entry of routingCriterias) {
       if (entry.name === toFind.name && entry.expression === toFind.expression) {
         return true;
@@ -167,7 +179,7 @@ export class MessageFilterComponent implements DirtyOperations {
     return toFind.expression === '' && routingCriterias.length == 0;
   }
 
-  buttonEditAction(row) {
+  buttonEditAction (row) {
     let formRef: MdDialogRef<EditMessageFilterComponent> = this.dialog.open(EditMessageFilterComponent, {
       data: {
         backendFilterNames: this.backendFilterNames,
@@ -198,18 +210,17 @@ export class MessageFilterComponent implements DirtyOperations {
           this.updateSelectedAction(formRef.componentInstance.action);
           this.updateSelectedService(formRef.componentInstance.service);
 
-          this.enableSave = formRef.componentInstance.messageFilterForm.dirty;
-          this.enableCancel = formRef.componentInstance.messageFilterForm.dirty;
+          this.setDirty(formRef.componentInstance.messageFilterForm.dirty);
         } else {
           if (this.findRowsIndex(backendEntry) != this.rowNumber) {
-            this.alertService.error("Impossible to insert a duplicate entry");
+            this.alertService.error('Impossible to insert a duplicate entry');
           }
         }
       }
     });
   }
 
-  private deleteRoutingCriteria(rc: string) {
+  private deleteRoutingCriteria (rc: string) {
     let numRoutingCriterias = this.rows[this.rowNumber].routingCriterias.length;
     for (let i = 0; i < numRoutingCriterias; i++) {
       let routCriteria = this.rows[this.rowNumber].routingCriterias[i];
@@ -220,7 +231,7 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  private createRoutingCriteria(rc: string, value: string) {
+  private createRoutingCriteria (rc: string, value: string) {
     if (value.length == 0) {
       return;
     }
@@ -229,7 +240,7 @@ export class MessageFilterComponent implements DirtyOperations {
     this.createValueProperty(rc, newRC, this.rowNumber);
   }
 
-  private updateSelectedTo(value: string) {
+  private updateSelectedTo (value: string) {
     if (!isNullOrUndefined(this.rows[this.rowNumber].to)) {
       if (value.length == 0) {
         // delete
@@ -245,11 +256,11 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  private updateSelectedPlugin(value: string) {
+  private updateSelectedPlugin (value: string) {
     this.rows[this.rowNumber].backendName = value;
   }
 
-  private updateSelectedFrom(value: string) {
+  private updateSelectedFrom (value: string) {
     if (!isNullOrUndefined(this.rows[this.rowNumber].from)) {
       if (value.length == 0) {
         // delete
@@ -265,7 +276,7 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  private updateSelectedAction(value: string) {
+  private updateSelectedAction (value: string) {
     if (!isNullOrUndefined(this.rows[this.rowNumber].action)) {
       if (value.length == 0) {
         // delete
@@ -281,7 +292,7 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  private updateSelectedService(value: string) {
+  private updateSelectedService (value: string) {
     if (!isNullOrUndefined(this.rows[this.rowNumber].service)) {
       if (value.length == 0) {
         // delete
@@ -297,7 +308,7 @@ export class MessageFilterComponent implements DirtyOperations {
     }
   }
 
-  private disableSelectionAndButtons() {
+  private disableSelectionAndButtons () {
     this.selected = [];
     this.enableMoveDown = false;
     this.enableMoveUp = false;
@@ -307,19 +318,15 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableDelete = false;
   }
 
-  isSaveAsCSVButtonEnabled() : boolean {
-    return (this.rows.length < 10000);
-  }
-
-  saveAsCSV() {
-    if(this.isDirty()) {
+  saveAsCSV () {
+    if (this.isDirty()) {
       this.saveDialog(true);
     } else {
-      DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+      DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + '/csv');
     }
   }
 
-  cancelDialog() {
+  cancelDialog () {
     let dialogRef = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -329,46 +336,40 @@ export class MessageFilterComponent implements DirtyOperations {
     });
   }
 
-  saveDialog(withDownloadCSV: boolean) {
+  saveDialog (withDownloadCSV: boolean) {
     let headers = new Headers({'Content-Type': 'application/json'});
     let dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
         this.http.put(MessageFilterComponent.MESSAGE_FILTER_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(res => {
-          this.alertService.success("The operation 'update message filters' completed successfully.", false);
+          this.alertService.success('The operation \'update message filters\' completed successfully.', false);
           this.getBackendFiltersInfo();
-          if(withDownloadCSV) {
-            DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+          if (withDownloadCSV) {
+            DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + '/csv');
           }
         }, err => {
-          this.alertService.error("The operation 'update message filters' not completed successfully.", false);
+          this.alertService.error('The operation \'update message filters\' not completed successfully.', false);
         });
       } else {
-        if(withDownloadCSV) {
-          DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + "/csv");
+        if (withDownloadCSV) {
+          DownloadService.downloadNative(MessageFilterComponent.MESSAGE_FILTER_URL + '/csv');
         }
       }
     });
   }
 
-  buttonDeleteAction(row) {
-    this.enableCancel = true;
-    this.enableSave = true;
-    this.enableDelete = false;
-    this.enableEdit = false;
-
-    this.enableMoveUp = false;
-    this.enableMoveDown = false;
-
-    this.rows.splice(row.$$index, 1);
-
-    this.selected = [];
+  buttonDeleteAction (row) {
+    this.deleteItems([row]);
   }
 
-  buttonDelete() {
-    this.enableCancel = true;
-    this.enableSave = true;
+  buttonDelete () {
+    this.deleteItems(this.selected);
+  }
+
+  private deleteItems (items: any[]) {
+    this.setDirty(true);
+
     this.enableDelete = false;
     this.enableEdit = false;
 
@@ -376,14 +377,14 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableMoveDown = false;
 
     // we need to use the old for loop approach to don't mess with the entries on the top before
-    for (let i = this.selected.length - 1; i >= 0; i--) {
-      this.rows.splice(this.selected[i].$$index, 1);
+    for (let i = items.length - 1; i >= 0; i--) {
+      this.rows.splice(items[i].$$index, 1);
     }
 
     this.selected = [];
   }
 
-  private moveUpInternal(rowNumber) {
+  private moveUpInternal (rowNumber) {
     if (rowNumber < 1) {
       return;
     }
@@ -399,22 +400,22 @@ export class MessageFilterComponent implements DirtyOperations {
       this.enableMoveUp = false;
     }
     this.enableMoveDown = true;
-    this.enableSave = true;
-    this.enableCancel = true;
+
+    this.setDirty(true);
   }
 
-  buttonMoveUpAction(row) {
+  buttonMoveUpAction (row) {
     this.moveUpInternal(row.$$index);
     setTimeout(() => {
-      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+      document.getElementById('pluginRow' + (row.$$index) + '_id').click();
     }, 50);
   }
 
-  buttonMoveUp() {
+  buttonMoveUp () {
     this.moveUpInternal(this.rowNumber);
   }
 
-  private moveDownInternal(rowNumber) {
+  private moveDownInternal (rowNumber) {
     if (rowNumber > this.rows.length - 1) {
       return;
     }
@@ -431,22 +432,22 @@ export class MessageFilterComponent implements DirtyOperations {
       this.enableMoveDown = false;
     }
     this.enableMoveUp = true;
-    this.enableSave = true;
-    this.enableCancel = true;
+
+    this.setDirty(true);
   }
 
-  buttonMoveDownAction(row) {
+  buttonMoveDownAction (row) {
     this.moveDownInternal(row.$$index);
     setTimeout(() => {
-      document.getElementById('pluginRow'+(row.$$index)+'_id').click();
+      document.getElementById('pluginRow' + (row.$$index) + '_id').click();
     }, 50);
   }
 
-  buttonMoveDown() {
+  buttonMoveDown () {
     this.moveDownInternal(this.rowNumber);
   }
 
-  onSelect({selected}) {
+  onSelect ({selected}) {
     console.log('Select Event', selected, this.selected);
 
     if (isNullOrUndefined(selected) || selected.length == 0) {
@@ -470,7 +471,13 @@ export class MessageFilterComponent implements DirtyOperations {
     this.enableEdit = selected.length == 1;
   }
 
-  isDirty(): boolean {
+  isDirty (): boolean {
     return this.enableCancel;
+  }
+
+  setDirty (itemValue: boolean) {
+    this.dirty = this.dirty || itemValue;
+    this.enableSave = this.dirty;
+    this.enableCancel = this.dirty;
   }
 }

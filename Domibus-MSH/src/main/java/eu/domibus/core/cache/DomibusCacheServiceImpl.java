@@ -31,7 +31,7 @@ public class DomibusCacheServiceImpl implements DomibusCacheService {
     public void clearCache(String refreshCacheName) {
         Collection<String> cacheNames = cacheManager.getCacheNames();
         for (String cacheName : cacheNames) {
-            if (StringUtils.equals(cacheName, refreshCacheName)) {
+            if (StringUtils.equalsIgnoreCase(cacheName, refreshCacheName)) {
                 final Cache cache = cacheManager.getCache(cacheName);
                 if (cache != null) {
                     LOG.debug("Clearing cache [" + refreshCacheName + "]");

@@ -5,6 +5,7 @@ import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
@@ -36,7 +37,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/security")
 public class AuthenticationResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(AuthenticationResource.class);
 
     @Autowired
     protected AuthenticationService authenticationService;
@@ -133,6 +134,8 @@ public class AuthenticationResource {
 
     /**
      * Set the current domain of the current user (in multi-tenancy mode)
+     *
+     * @param domainCode the code of the new current domain
      */
     @RequestMapping(value = "user/domain", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -11,6 +11,7 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.ErrorHandling;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
@@ -21,6 +22,7 @@ import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
@@ -124,6 +126,9 @@ public class UserMessageHandlerService {
     @Autowired
     protected NonRepudiationService nonRepudiationService;
 
+    @Autowired
+    protected UIReplicationSignalService uiReplicationSignalService;
+
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
@@ -202,7 +207,7 @@ public class UserMessageHandlerService {
      * Required for AS4_TA_12
      *
      * @param messaging the UserMessage received
-     * @throws EbMS3Exception
+     * @throws EbMS3Exception if an attachment with an invalid charset is received
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.info("Checking charset for attachments");
@@ -211,7 +216,7 @@ public class UserMessageHandlerService {
                 continue;
             }
             for (final Property property : partInfo.getPartProperties().getProperties()) {
-                if (Property.CHARSET.equals(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
+                if (Property.CHARSET.equalsIgnoreCase(property.getName()) && !Property.CHARSET_PATTERN.matcher(property.getValue()).matches()) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_CHARSET_INVALID, property.getValue(), messaging.getUserMessage().getMessageInfo().getMessageId());
                     EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, property.getValue() + " is not a valid Charset", messaging.getUserMessage().getMessageInfo().getMessageId(), null);
                     ex.setMshRole(MSHRole.RECEIVING);
@@ -229,8 +234,26 @@ public class UserMessageHandlerService {
      */
     public Boolean checkTestMessage(final UserMessage message) {
         LOG.debug("Checking if it is a test message");
-        return Ebms3Constants.TEST_SERVICE.equals(message.getCollaborationInfo().getService().getValue())
-                && Ebms3Constants.TEST_ACTION.equals(message.getCollaborationInfo().getAction());
+        return Ebms3Constants.TEST_SERVICE.equalsIgnoreCase(message.getCollaborationInfo().getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equalsIgnoreCase(message.getCollaborationInfo().getAction());
+
+    }
+
+    /**
+     * Check if this message is a test message
+     *
+     * @param legConfiguration the legConfiguration that matched the message
+     * @return result of test service and action handle
+     */
+    protected Boolean checkTestMessage(final LegConfiguration legConfiguration) {
+        LOG.debug("Checking if it is a test message");
+
+        if(legConfiguration == null) {
+            return false;
+        }
+
+        return Ebms3Constants.TEST_SERVICE.equalsIgnoreCase(legConfiguration.getService().getValue())
+                && Ebms3Constants.TEST_ACTION.equalsIgnoreCase(legConfiguration.getAction().getValue());
 
     }
 
@@ -273,10 +296,13 @@ public class UserMessageHandlerService {
         Party to = pModeProvider.getReceiverParty(pmodeKey);
         Validate.notNull(to, "Responder party was not found");
 
+        NotificationStatus notificationStatus = (legConfiguration.getErrorHandling() != null &&legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
+        LOG.debug("NotificationStatus [{}]", notificationStatus);
+
         userMessageLogService.save(
                 userMessage.getMessageInfo().getMessageId(),
                 MessageStatus.RECEIVED.toString(),
-                (legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer() ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED).toString(),
+                notificationStatus.toString(),
                 MSHRole.RECEIVING.toString(),
                 0,
                 StringUtils.isEmpty(userMessage.getMpc()) ? Ebms3Constants.DEFAULT_MPC : userMessage.getMpc(),
@@ -284,6 +310,8 @@ public class UserMessageHandlerService {
                 to.getEndpoint(),
                 userMessage.getCollaborationInfo().getService().getValue(),
                 userMessage.getCollaborationInfo().getAction());
+
+        uiReplicationSignalService.userMessageReceived(userMessage.getMessageInfo().getMessageId());
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_PERSISTED);
 
@@ -353,7 +381,7 @@ public class UserMessageHandlerService {
 
     String getFinalRecipientName(UserMessage userMessage) {
         for (Property property : userMessage.getMessageProperties().getProperty()) {
-            if (property.getName() != null && property.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+            if (property.getName() != null && property.getName().equalsIgnoreCase(MessageConstants.FINAL_RECIPIENT)) {
                 return property.getValue();
             }
         }
@@ -460,13 +488,15 @@ public class UserMessageHandlerService {
             // Builds the signal message log
             SignalMessageLogBuilder smlBuilder = SignalMessageLogBuilder.create()
                     .setMessageId(messaging.getSignalMessage().getMessageInfo().getMessageId())
-                    .setMessageStatus(MessageStatus.SEND_IN_PROGRESS)
+                    .setMessageStatus(MessageStatus.ACKNOWLEDGED)
                     .setMshRole(MSHRole.SENDING)
                     .setNotificationStatus(NotificationStatus.NOT_REQUIRED);
             // Saves an entry of the signal message log
             SignalMessageLog signalMessageLog = smlBuilder.build();
             signalMessageLog.setMessageSubtype(messageSubtype);
             signalMessageLogDao.create(signalMessageLog);
+
+            uiReplicationSignalService.signalMessageSubmitted(signalMessageLog.getMessageId());
         } catch (JAXBException | SOAPException ex) {
             LOG.error("Unable to save the SignalMessage due to error: ", ex);
         }

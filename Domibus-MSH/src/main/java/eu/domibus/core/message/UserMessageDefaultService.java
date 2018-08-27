@@ -20,6 +20,7 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.ToExtractor;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.UserMessageServiceHelper;
 import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -100,6 +101,9 @@ public class UserMessageDefaultService implements UserMessageService {
     @Autowired
     private PullMessageService pullMessageService;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
     @Override
     public String getFinalRecipient(String messageId) {
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -149,6 +153,7 @@ public class UserMessageDefaultService implements UserMessageService {
         userMessageLog.setSendAttemptsMax(newMaxAttempts);
 
         userMessageLogDao.update(userMessageLog);
+        uiReplicationSignalService.messageChange(userMessageLog.getMessageId());
 
         if (MessageStatus.READY_TO_PULL != newMessageStatus) {
             scheduleSending(messageId);
@@ -157,6 +162,23 @@ public class UserMessageDefaultService implements UserMessageService {
             LOG.debug("[restoreFailedMessage]:Message:[{}] add lock", userMessageLog.getMessageId());
             pullMessageService.addPullMessageLock(new ToExtractor(userMessage.getPartyInfo().getTo()), userMessage, userMessageLog);
         }
+    }
+
+    @Override
+    public void sendEnqueuedMessage(String messageId) {
+        LOG.info("Sending enqueued message [{}]", messageId);
+
+        final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
+        if (userMessageLog == null) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] does not exist");
+        }
+        if (MessageStatus.SEND_ENQUEUED != userMessageLog.getMessageStatus()) {
+            throw new UserMessageException(DomibusCoreErrorCode.DOM_001, "Message [" + messageId + "] status is not [" + MessageStatus.SEND_ENQUEUED + "]");
+        }
+
+        userMessageLog.setNextAttempt(new Date());
+        userMessageLogDao.update(userMessageLog);
+        scheduleSending(messageId);
     }
 
     protected Integer getMaxAttemptsConfiguration(final String messageId) {
@@ -173,6 +195,11 @@ public class UserMessageDefaultService implements UserMessageService {
     protected Integer computeNewMaxAttempts(final UserMessageLog userMessageLog, final String messageId) {
         Integer maxAttemptsConfiguration = getMaxAttemptsConfiguration(messageId);
         return userMessageLog.getSendAttemptsMax() + maxAttemptsConfiguration;
+    }
+
+    @Override
+    public void scheduleSending(String messageId, int retryCount) {
+        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(retryCount), sendMessageQueue);
     }
 
     @Override

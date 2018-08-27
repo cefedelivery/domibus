@@ -19,6 +19,8 @@ public interface UserMessageService {
 
     void restoreFailedMessage(String messageId);
 
+    void sendEnqueuedMessage(String messageId);
+
     List<String> restoreFailedMessagesDuringPeriod(Date begin, Date end, String finalRecipient);
 
     void deleteFailedMessage(String messageId);
@@ -30,6 +32,8 @@ public interface UserMessageService {
     void scheduleSending(String messageId);
 
     void scheduleSending(String messageId, Long delay);
+
+    void scheduleSending(String messageId, int retryCount);
 
     /**
      * Gets a User Message based on the {@code messageId}

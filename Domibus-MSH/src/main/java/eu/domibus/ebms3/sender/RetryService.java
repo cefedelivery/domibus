@@ -39,8 +39,6 @@ public class RetryService {
 
     public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
 
-    private static final String DELETE_PAYLOAD_ON_SEND_FAILURE = "domibus.sendMessage.failure.delete.payload";
-
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
 
     @Autowired
@@ -79,7 +77,8 @@ public class RetryService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
-        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(Integer.parseInt(domibusPropertyProvider.getProperty(RetryService.TIMEOUT_TOLERANCE)));
+        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(
+                Integer.parseInt(domibusPropertyProvider.getDomainProperty(RetryService.TIMEOUT_TOLERANCE)));
         for (final String messageIdToPurge : messageIdsToPurge) {
             purgeTimedoutMessage(messageIdToPurge);
         }
@@ -138,7 +137,7 @@ public class RetryService {
         }
         userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
 
-        if ("true".equals(domibusPropertyProvider.getProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false"))) {
+        if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE, UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
             messagingDao.clearPayloadData(messageIdToPurge);
         }
     }

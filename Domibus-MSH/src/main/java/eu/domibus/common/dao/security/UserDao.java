@@ -16,7 +16,7 @@ public interface UserDao {
 
     void create(final User user);
 
-    List<User> getSuspendedUser(Date currentTimeMinusSuspensionInterval);
+    List<User> getSuspendedUsers(Date currentTimeMinusSuspensionInterval);
 
     User loadUserByUsername(String userName);
 
@@ -26,7 +26,7 @@ public interface UserDao {
 
     void update(final List<User> users);
 
-    void deleteAll(final Collection<User> delete);
+    void delete(final Collection<User> delete);
 
     void flush();
 }

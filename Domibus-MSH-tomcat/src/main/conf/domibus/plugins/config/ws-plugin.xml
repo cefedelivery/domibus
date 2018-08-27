@@ -35,8 +35,8 @@
     <jaxws:endpoint id="backendInterfaceEndpoint" implementor="#backendWebservice" address="/backend">
 
         <jaxws:properties>
-            <entry key="schema-validation-enabled" value="true"/>
-            <entry key="mtom-enabled" value="false"/>
+            <entry key="schema-validation-enabled" value="${wsplugin.schema.validation.enabled:false}"/>
+            <entry key="mtom-enabled" value="${wsplugin.mtom.enabled:false}"/>
         </jaxws:properties>
 
         <jaxws:schemaLocations>

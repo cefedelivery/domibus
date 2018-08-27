@@ -2,8 +2,10 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.util.DomibusPropertiesService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.web.rest.ro.DomainRO;
@@ -48,6 +50,12 @@ public class ApplicationResourceTest {
     @Injectable
     DomainCoreConverter domainCoreConverter;
 
+    @Injectable
+    DomainContextProvider domainContextProvider;
+
+    @Injectable
+    AuthUtils authUtils;
+
     @Test
     public void testGetDomibusInfo() throws Exception {
         // Given
@@ -67,7 +75,7 @@ public class ApplicationResourceTest {
     public void testDomibusName(String name) {
         // Given
         new Expectations(applicationResource) {{
-            domibusPropertyProvider.getProperty(ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
+            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, ApplicationResource.DOMIBUS_CUSTOM_NAME, ApplicationResource.DOMIBUS_DEFAULTVALUE_NAME);
             result = name;
         }};
 
@@ -133,8 +141,8 @@ public class ApplicationResourceTest {
     public void testGetFourCornerEnabled() throws Exception {
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty(ApplicationResource.FOURCORNERMODEL_ENABLED_KEY, anyString);
-            result = "false";
+            domibusConfigurationService.isFourCornerEnabled();
+            result = false;
         }};
 
         //tested method

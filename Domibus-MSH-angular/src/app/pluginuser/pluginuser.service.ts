@@ -20,7 +20,7 @@ export class PluginUserService {
   public static certificateIdPattern = 'CN=[a-zA-Z0-9_]+,O=[a-zA-Z0-9_]+,C=[a-zA-Z]{2}:[a-zA-Z0-9]+';
   public static certificateIdMessage = 'You should follow the rule CN=[name],O=[name],C=[country code]:[id]';
 
-  public static CSV_URL: string = 'rest/plugin/csv';
+  public static CSV_URL = 'rest/plugin/csv';
 
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
@@ -30,10 +30,17 @@ export class PluginUserService {
   getUsers (filter?: PluginUserSearchCriteria)
     : Observable<{ entries: PluginUserRO[], count: number }> {
 
+    const searchParams = this.createFilterParams(filter);
+
+    return this.http.get(PluginUserService.PLUGIN_USERS_URL, {search: searchParams})
+      .map(this.extractData)
+      .catch(this.handleError);
+  }
+
+  createFilterParams (filter: PluginUserSearchCriteria) {
     const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', '0');
     searchParams.set('pageSize', '10000');
-    searchParams.set('orderBy', 'entityId');
 
     if (filter.authType) {
       searchParams.set('authType', filter.authType);
@@ -47,16 +54,13 @@ export class PluginUserService {
     if (filter.originalUser) {
       searchParams.set('originalUser', filter.originalUser);
     }
-
-    return this.http.get(PluginUserService.PLUGIN_USERS_URL, {search: searchParams})
-      .map(this.extractData)
-      .catch(this.handleError);
+    return searchParams;
   }
 
   createNew (): PluginUserRO {
     const item = new PluginUserRO();
     item.status = UserState[UserState.NEW];
-    item.username = ' ';
+    item.username = '';
     return item;
 
   }

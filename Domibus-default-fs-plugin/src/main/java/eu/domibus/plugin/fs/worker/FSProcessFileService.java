@@ -37,8 +37,8 @@ public class FSProcessFileService {
     private FSFilesManager fsFilesManager;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void processFile(FileObject processableFile) {
-        try (FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME)) {
+    public void processFile(FileObject processableFile) throws FileSystemException, JAXBException, MessagingProcessingException {
+        try(FileObject metadataFile = fsFilesManager.resolveSibling(processableFile, FSSendMessagesService.METADATA_FILE_NAME);) {
             if (metadataFile.exists()) {
                 UserMessage metadata = parseMetadata(metadataFile);
                 LOG.debug("Metadata found and valid: [{}]", processableFile.getName());
@@ -48,7 +48,7 @@ public class FSProcessFileService {
 
                 //we add mimetype later, base name and dataHandler now
                 fsPayloads.put(DEFAULT_CONTENT_ID, new FSPayload(null, processableFile.getName().getBaseName(), dataHandler));
-                FSMessage message= new FSMessage(fsPayloads, metadata);
+                FSMessage message = new FSMessage(fsPayloads, metadata);
                 String messageId = backendFSPlugin.submit(message);
                 LOG.info("Message submitted: [{}]", processableFile.getName());
 
@@ -56,12 +56,6 @@ public class FSProcessFileService {
             } else {
                 LOG.error("Metadata file is missing for " + processableFile.getName().getURI());
             }
-        } catch (FileSystemException ex) {
-            LOG.error("Error processing file " + processableFile.getName().getURI(), ex);
-        } catch (JAXBException ex) {
-            LOG.error("Metadata file is not an XML file", ex);
-        } catch (MessagingProcessingException ex) {
-            LOG.error("Error occurred submitting message to Domibus", ex);
         }
     }
 

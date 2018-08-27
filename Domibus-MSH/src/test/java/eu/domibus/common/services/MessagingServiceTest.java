@@ -1,17 +1,21 @@
 package eu.domibus.common.services;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
-import eu.domibus.configuration.Storage;
+import eu.domibus.configuration.storage.Storage;
+import eu.domibus.configuration.storage.StorageProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.messaging.MessagingUtils;
 import eu.domibus.xml.XMLUtilImpl;
+import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
@@ -54,6 +58,12 @@ public class MessagingServiceTest {
     @Injectable
     Storage storage;
 
+    @Injectable
+    StorageProvider storageProvider;
+
+    @Injectable
+    private DomainContextProvider domainContextProvider;
+
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
         messagingService.storeMessage(messaging, MSHRole.SENDING);
@@ -73,7 +83,11 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageToStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        messagingService.setStorage(new Storage(new File(STORAGE_PATH)));
+        new Expectations() {{
+            storageProvider.forDomain((Domain) any);
+            result = new Storage(new File(STORAGE_PATH));
+        }};
+
         PartInfo partInfo = storeValidMessage();
         byte[] expectedBinaryData = Files.readAllBytes(Paths.get(validContentFilePath));
         byte[] result = Files.readAllBytes(Paths.get(partInfo.getFileName()));
@@ -82,7 +96,10 @@ public class MessagingServiceTest {
 
     @Test
     public void testStoreValidMessageCompressedWithStorageDirectory() throws IOException, JAXBException, XMLStreamException, ParserConfigurationException, SAXException {
-        messagingService.setStorage(new Storage(new File(STORAGE_PATH)));
+        new Expectations() {{
+            storageProvider.forDomain((Domain) any);
+            result = new Storage(new File(STORAGE_PATH));
+        }};
         PartInfo partInfo = storeValidMessage(true);
         byte[] expectedCompressedData = MessagingUtils.compress(validContentFilePath);
         byte[] result = Files.readAllBytes(Paths.get(partInfo.getFileName()));

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -106,7 +107,7 @@ public class PartyServiceImpl implements PartyService {
 
     /**
      * In the actual configuration the link between parties and processes exists from process to party.
-     * We need to reverse this association, we want to have a relation party -> process I am involved in as a responder
+     * We need to reverse this association, we want to have a relation party -&gt; process I am involved in as a responder
      * or initiator.
      *
      * @return a list of party linked with their processes.
@@ -114,7 +115,14 @@ public class PartyServiceImpl implements PartyService {
     protected List<Party> linkPartyAndProcesses() {
 
         //Retrieve all party entities.
-        List<eu.domibus.common.model.configuration.Party> allParties = pModeProvider.findAllParties();
+        List<eu.domibus.common.model.configuration.Party> allParties;
+        try {
+            allParties = pModeProvider.findAllParties();
+        } catch(IllegalStateException e) {
+            LOG.trace("findAllParties thrown: ", e);
+            return new ArrayList<>();
+        }
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("linkPartyAndProcesses for party entities");
             allParties.forEach(party -> LOG.debug("     [{}]", party));
@@ -273,7 +281,7 @@ public class PartyServiceImpl implements PartyService {
             // sync <initiatorParties> and <responderParties>
             Set<String> iParties = partyList.stream()
                     .filter(p -> p.getProcessesWithPartyAsInitiator().stream()
-                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
                     .map(p -> p.getName())
                     .collect(Collectors.toSet());
 
@@ -281,7 +289,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setInitiatorPartiesXml(new InitiatorParties());
             List<InitiatorParty> ip = process.getInitiatorPartiesXml().getInitiatorParty();
             ip.removeIf(x -> !iParties.contains(x.getName()));
-            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name.equals(x.getName())))
+            ip.addAll(iParties.stream().filter(name -> ip.stream().noneMatch(x -> name != null && name.equalsIgnoreCase(x.getName())))
                     .map(name -> {
                         InitiatorParty y = new InitiatorParty();
                         y.setName(name);
@@ -293,7 +301,7 @@ public class PartyServiceImpl implements PartyService {
 
             Set<String> rParties = partyList.stream()
                     .filter(p -> p.getProcessesWithPartyAsResponder().stream()
-                            .anyMatch(pp -> process.getName().equals(pp.getName())))
+                            .anyMatch(pp -> process.getName().equalsIgnoreCase(pp.getName())))
                     .map(p -> p.getName())
                     .collect(Collectors.toSet());
 
@@ -301,7 +309,7 @@ public class PartyServiceImpl implements PartyService {
                 process.setResponderPartiesXml(new ResponderParties());
             List<ResponderParty> rp = process.getResponderPartiesXml().getResponderParty();
             rp.removeIf(x -> !rParties.contains(x.getName()));
-            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equals(x.getName())))
+            rp.addAll(rParties.stream().filter(name -> rp.stream().noneMatch(x -> name.equalsIgnoreCase(x.getName())))
                     .map(name -> {
                         ResponderParty y = new ResponderParty();
                         y.setName(name);
@@ -361,20 +369,14 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public List<eu.domibus.api.process.Process> getAllProcesses() {
-        //Retrieve all processes, neede in UI console to be able to check
-        List<eu.domibus.common.model.configuration.Process> allProcesses = pModeProvider.findAllProcesses();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("findAllProcesses for pmode");
-            allProcesses.forEach(process -> LOG.debug("     [{}]", process));
+        //Retrieve all processes, needed in UI console to be able to check
+        List<eu.domibus.common.model.configuration.Process> allProcesses;
+        try {
+           allProcesses = pModeProvider.findAllProcesses();
+        } catch(IllegalStateException e) {
+            return new ArrayList<>();
         }
-
         List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("     party");
-            processes.forEach(party -> LOG.debug("[{}]", party));
-        }
-
         return processes;
     }
 

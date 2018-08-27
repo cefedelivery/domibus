@@ -93,7 +93,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         super.init();
         dynamicResponderProcesses = findDynamicResponderProcesses();
         dynamicInitiatorProcesses = findDynamicSenderProcesses();
-        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equals(domibusPropertyProvider.getProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
+        if(DynamicDiscoveryClientSpecification.PEPPOL.getName().equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_CLIENT_SPECIFICATION, "OASIS"))) {
             dynamicDiscoveryService = dynamicDiscoveryServicePEPPOL;
         } else { // OASIS client is used by default
             dynamicDiscoveryService = dynamicDiscoveryServiceOASIS;
@@ -135,13 +135,12 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
     }
 
     /**
-     *  Method validates if domibus.smlzone is present for current domain.
-     *
+     * Method validates if dynamic discovery is enabled for current domain.
+     * @return true if domibus.dynamicdiscovery.useDynamicDiscovery is enabled for the current domain.
      */
-    protected boolean useDynamicDiscovery(){
-            String zone = domibusPropertyProvider.getProperty(domainProvider.getCurrentDomain(), DynamicDiscoveryService.SMLZONE_KEY );
-        return !StringUtils.isEmpty(zone);
-
+    protected boolean useDynamicDiscovery() {
+        String val = domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY, "false");
+        return Boolean.valueOf(val);
     }
 
     /* Method finds MessageExchangeConfiguration for given usermesage and role. If property domibus.smlzone
@@ -367,7 +366,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         LOG.info("Perform lookup by finalRecipient: " + finalRecipient.getName() + " " + finalRecipient.getType() + " " +finalRecipient.getValue());
 
         //lookup sml/smp - result is cached
-        final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(finalRecipient.getValue(),
+        final EndpointInfo endpoint = dynamicDiscoveryService.lookupInformation(domainProvider.getCurrentDomain().getCode(), finalRecipient.getValue(),
                 finalRecipient.getType(),
                 userMessage.getCollaborationInfo().getAction(),
                 userMessage.getCollaborationInfo().getService().getValue(),
@@ -423,17 +422,11 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
         }
 
         for (final eu.domibus.ebms3.common.model.Property p : userMessage.getMessageProperties().getProperty()) {
-            if (p.getName() != null && p.getName().equals(MessageConstants.FINAL_RECIPIENT)) {
+            if (p.getName() != null && StringUtils.equalsIgnoreCase(p.getName(), MessageConstants.FINAL_RECIPIENT)) {
                 return p;
             }
             LOG.debug("Property: " + p.getName());
         }
         return null;
-    }
-
-    @Override
-    public List<String> findPartyIdByServiceAndAction(String service, String action) {
-        // not used in DynamicDiscoveryPModeProvider
-        return Collections.emptyList();
     }
 }

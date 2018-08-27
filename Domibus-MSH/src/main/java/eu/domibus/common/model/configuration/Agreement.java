@@ -11,18 +11,18 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * <p/>
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * <p/>
+ *
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
@@ -53,9 +53,9 @@ public class Agreement extends AbstractBaseEntity {
 
         final Agreement agreement = (Agreement) o;
 
-        if (!name.equals(agreement.name)) return false;
-        if (type != null ? !type.equals(agreement.type) : agreement.type != null) return false;
-        if (!value.equals(agreement.value)) return false;
+        if (!name.equalsIgnoreCase(agreement.name)) return false;
+        if (type != null ? !type.equalsIgnoreCase(agreement.type) : agreement.type != null) return false;
+        if (!value.equalsIgnoreCase(agreement.value)) return false;
 
         return true;
     }

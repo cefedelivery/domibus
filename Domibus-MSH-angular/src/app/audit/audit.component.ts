@@ -81,10 +81,6 @@ export class AuditComponent implements OnInit {
     auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
         this.rows = response;
         this.loading = false;
-
-        if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
-          this.alertService.error("Maximum number of rows reached for downloading CSV");
-        }
       },
       error => {
         this.alertService.error("Could not load audits " + error);
@@ -174,11 +170,12 @@ export class AuditComponent implements OnInit {
     })
   }
 
-  isSaveAsCSVButtonEnabled() {
-    return (this.count < AlertComponent.MAX_COUNT_CSV);
-  }
-
   saveAsCSV() {
+    if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+      this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
+      return;
+    }
+
     let auditCriteria: AuditCriteria = this.buildCriteria();
     this.auditService.saveAsCsv(auditCriteria);
   }

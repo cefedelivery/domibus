@@ -6,9 +6,11 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.services.AuditService;
-import eu.domibus.common.services.CsvService;
-import eu.domibus.common.services.impl.CsvServiceImpl;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExcludedItems;
+import eu.domibus.core.csv.CsvService;
+import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.criteria.AuditCriteria;
@@ -116,6 +118,11 @@ public class AuditResource {
 
     /**
      * This method returns a CSV file with the contents of Audit table
+     * @param auditTargetName the type of audit.
+     * @param user the user that performed the audited action.
+     * @param action the type of action linked with audit.
+     * @param from the date from which we want to retrieve audit logs.
+     * @param to the date to which we want to retrieve audit logs.
      *
      * @return CSV file with the contents of Audit table
      */
@@ -143,17 +150,9 @@ public class AuditResource {
         auditCriteria.setMax(maxCSVrows);
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
 
-        // excluding unneeded columns
-        csvServiceImpl.setExcludedItems(CsvExcludedItems.AUDIT_RESOURCE.getExcludedItems());
-
-        // needed for empty csv file purposes
-        csvServiceImpl.setClass(AuditResponseRo.class);
-
-        // column customization
-        csvServiceImpl.customizeColumn(CsvCustomColumns.AUDIT_RESOURCE.getCustomColumns());
-
         try {
-            resultText = csvServiceImpl.exportToCSV(auditResponseRos);
+            resultText = csvServiceImpl.exportToCSV(auditResponseRos, AuditResponseRo.class,
+                    CsvCustomColumns.AUDIT_RESOURCE.getCustomColumns(), CsvExcludedItems.AUDIT_RESOURCE.getExcludedItems());
         } catch (CsvException e) {
             return ResponseEntity.noContent().build();
         }

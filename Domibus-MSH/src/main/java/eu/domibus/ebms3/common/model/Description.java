@@ -72,7 +72,7 @@ public class Description {
         final Description that = (Description) o;
 
         if (this.lang != null ? !this.lang.equals(that.lang) : that.lang != null) return false;
-        return this.value.equals(that.value);
+        return this.value.equalsIgnoreCase(that.value);
 
     }
 

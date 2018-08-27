@@ -4,6 +4,8 @@ import {DomainService} from '../../security/domain.service';
 import {Domain} from '../../security/domain';
 import {MdDialog} from '@angular/material';
 import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
+import {Title} from '@angular/platform-browser';
+import {AlertService} from '../../alert/alert.service';
 
 @Component({
   selector: 'domain-selector',
@@ -20,36 +22,61 @@ export class DomainSelectorComponent implements OnInit {
   @Input()
   currentComponent: any;
 
-  constructor (private domainService: DomainService, private securityService: SecurityService, private dialog: MdDialog) {
+  constructor (private domainService: DomainService,
+               private securityService: SecurityService,
+               private dialog: MdDialog,
+               private alertService: AlertService) {
   }
 
-  ngOnInit () {
-    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
-      if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
-        this.showDomains = true;
-        this.domainService.getCurrentDomain().subscribe((domain: Domain) => this.domainCode = this.currentDomainCode = domain ? domain.code : null);
-        this.domainService.getDomains().subscribe((domains: Domain[]) => this.domains = domains);
-      }
-    });
+  async ngOnInit () {
+    const isMultiDomain = await this.domainService.isMultiDomain().first().toPromise();
+
+    if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
+      this.showDomains = true;
+      const domain = await this.domainService.getCurrentDomain().first().toPromise();
+      this.domainCode = this.currentDomainCode = domain ? domain.code : null;
+      const domains = await this.domainService.getDomains().toPromise();
+      this.domains = domains;
+    }
   }
 
-  changeDomain () {
+  async changeDomain () {
     let canChangeDomain = Promise.resolve(true);
     if (this.currentComponent && this.currentComponent.isDirty && this.currentComponent.isDirty()) {
       canChangeDomain = this.dialog.open(CancelDialogComponent).afterClosed().toPromise<boolean>();
     }
 
-    canChangeDomain.then((canChange: boolean) => {
+    try {
+      const canChange = await canChangeDomain;
       if (!canChange) throw false;
 
-      let domain = this.domains.find(d => d.code == this.domainCode);
-      this.domainService.setCurrentDomain(domain).then(() => {
-        if (this.currentComponent.ngOnInit)
-          this.currentComponent.ngOnInit();
-      });
+      if (this.currentComponent.beforeDomainChange) {
+        try {
+          this.currentComponent.beforeDomainChange();
+        } catch (e) {
+          console.log(e);
+        }
+      }
 
-    }).catch(() => { // domain not changed -> reset the combo value
+      const domain = this.domains.find(d => d.code == this.domainCode);
+      await this.domainService.setCurrentDomain(domain);
+
+      this.alertService.clearAlert();
+
+      this.domainService.setAppTitle();
+
+      if (this.currentComponent.ngOnInit) {
+        try {
+          this.currentComponent.ngOnInit();
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+    } catch (ex) { // domain not changed -> reset the combo value
       this.domainCode = this.currentDomainCode;
-    });
+    }
   }
+
 }
+

@@ -14,9 +14,9 @@ import javax.xml.bind.annotation.*;
  * domain name of one of the parties, or a namespace offered and managed by some other naming or
  * registry service. It is RECOMMENDED that the AgreementRef be a URI. The AgreementRef MAY
  * reference an instance of a CPA as defined in [ebCPPA].
- * An example of the AgreementRef element follows:
- * <eb:AgreementRef>http://registry.example.com/cpas/our_cpa.xml</eb:AgreementRef>
- * If a CPA is referred to and a Receiving MSH detects an inconsistency, then it MUST report it with an
+ * <p>An example of the AgreementRef element follows:
+ * &lt;eb:AgreementRef&gt;http://registry.example.com/cpas/our_cpa.xml&lt;/eb:AgreementRef&gt;
+ * <p>If a CPA is referred to and a Receiving MSH detects an inconsistency, then it MUST report it with an
  * "ValueInconsistent" error of severity "error". If the AgreementRef is not recognized, then the
  * Receiving MSH MUST report it as a "ValueNotRecognized" error of severity "error".
  *
@@ -111,9 +111,9 @@ public class AgreementRef {
 
         final AgreementRef that = (AgreementRef) o;
 
-        if (this.pmode != null ? !this.pmode.equals(that.pmode) : that.pmode != null) return false;
-        if (this.type != null ? !this.type.equals(that.type) : that.type != null) return false;
-        return !(this.value != null ? !this.value.equals(that.value) : that.value != null);
+        if (this.pmode != null ? !this.pmode.equalsIgnoreCase(that.pmode) : that.pmode != null) return false;
+        if (this.type != null ? !this.type.equalsIgnoreCase(that.type) : that.type != null) return false;
+        return !(this.value != null ? !this.value.equalsIgnoreCase(that.value) : that.value != null);
 
     }
 
