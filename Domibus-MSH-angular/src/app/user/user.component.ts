@@ -262,7 +262,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     const user = this.users[this.rowNumber];
 
     user.email = editForm.email;
-    user.roles = editForm.roles.toString();
+    user.roles = editForm.role.toString();
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
