@@ -1,9 +1,9 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.core.replication.UIReplicationDataService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +26,18 @@ public class UIReplicationResource {
     @Autowired
     private UIReplicationDataService uiReplicationDataService;
 
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
+
     @RequestMapping(value = {"/count"}, method = RequestMethod.GET)
     public ResponseEntity<String> countData() {
+        if (!uiReplicationSignalService.isReplicationEnabled()) {
+            LOG.debug("UIReplication is disabled - no processing will occur");
+            return ResponseEntity
+                    .ok()
+                    .body( "UIReplication is disabled. No records will be count to be synced for TB_MESSAGE_UI table");
+        }
+
         LOG.debug("count data was requested");
 
         int rowsToBeSynced = uiReplicationDataService.countSyncUIMessages();
@@ -39,6 +49,13 @@ public class UIReplicationResource {
 
     @RequestMapping(value = {"/sync"}, method = RequestMethod.GET)
     public ResponseEntity<String> syncData(@RequestParam(value = "limit", defaultValue = "10000") int limit) {
+        if (!uiReplicationSignalService.isReplicationEnabled()) {
+            LOG.debug("UIReplication is disabled - no processing will occur");
+            return ResponseEntity
+                    .ok()
+                    .body( "UIReplication is disabled. No records will be synced for TB_MESSAGE_UI table");
+        }
+
         LOG.debug("sync data was requested with limit={}", limit);
 
         int syncedRows = uiReplicationDataService.findAndSyncUIMessages(limit);

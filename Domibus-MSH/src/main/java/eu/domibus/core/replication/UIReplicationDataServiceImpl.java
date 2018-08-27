@@ -207,7 +207,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (!uiMessageEntityList.isEmpty()) {
             LOG.info("start to update TB_MESSAGE_UI");
             try {
-                uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
+                uiMessageEntityList.stream().forEach(uiMessageEntity ->
                         uiMessageDao.saveOrUpdate(uiMessageEntity));
             } catch (OptimisticLockException e) {
                 LOG.warn("Optimistic lock exception detected");
@@ -247,7 +247,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         if (!uiMessageEntityList.isEmpty()) {
             LOG.debug("start to update TB_MESSAGE_UI");
             try {
-                uiMessageEntityList.parallelStream().forEach(uiMessageEntity ->
+                uiMessageEntityList.stream().forEach(uiMessageEntity ->
                         uiMessageDao.saveOrUpdate(uiMessageEntity));
             } catch (OptimisticLockException e) {
                 LOG.warn("Optimistic lock exception detected");
