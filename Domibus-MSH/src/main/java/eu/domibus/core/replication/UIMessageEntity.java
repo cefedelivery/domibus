@@ -24,6 +24,21 @@ import java.util.Date;
 @NamedQueries({
         @NamedQuery(name = "UIMessageEntity.findUIMessageByMessageId",
                 query = "select uiMessageEntity from UIMessageEntity uiMessageEntity where uiMessageEntity.messageId=:MESSAGE_ID")})
+@SqlResultSetMapping(name="updateResult", columns = { @ColumnResult(name = "count")})
+@NamedNativeQueries({
+        @NamedNativeQuery(
+                name    =   "UIMessageEntity.updateMessageStatus",
+                query   =   "UPDATE TB_MESSAGE_UI SET MESSAGE_STATUS=?1, DELETED=?2, NEXT_ATTEMPT=?3, FAILED=?4, LAST_MODIFIED=?5 " +
+                        " WHERE MESSAGE_ID=?6"
+                ,resultSetMapping = "updateResult"
+        ),
+        @NamedNativeQuery(
+                name    =   "UIMessageEntity.updateNotificationStatus",
+                query   =   "UPDATE TB_MESSAGE_UI SET NOTIFICATION_STATUS=?1, LAST_MODIFIED2=?2 " +
+                        " WHERE MESSAGE_ID=?3"
+                ,resultSetMapping = "updateResult"
+        )
+})
 public class UIMessageEntity extends AbstractBaseEntity {
 
     @Column(name = "MESSAGE_ID")
@@ -97,6 +112,10 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_MODIFIED")
     private Date lastModified;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_MODIFIED2")
+    private Date lastModified2;
 
 
     public String getMessageId() {
@@ -259,6 +278,14 @@ public class UIMessageEntity extends AbstractBaseEntity {
         this.lastModified = version;
     }
 
+    public Date getLastModified2() {
+        return lastModified2;
+    }
+
+    public void setLastModified2(Date lastModified2) {
+        this.lastModified2 = lastModified2;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -288,7 +315,7 @@ public class UIMessageEntity extends AbstractBaseEntity {
                 .append(toId, that.toId)
                 .append(toScheme, that.toScheme)
                 .append(refToMessageId, that.refToMessageId)
-                .append(lastModified, that.lastModified)
+                //.append(lastModified, that.lastModified)
                 .isEquals();
     }
 
@@ -315,7 +342,7 @@ public class UIMessageEntity extends AbstractBaseEntity {
                 .append(toId)
                 .append(toScheme)
                 .append(refToMessageId)
-                .append(lastModified)
+               // .append(lastModified)
                 .toHashCode();
     }
 }

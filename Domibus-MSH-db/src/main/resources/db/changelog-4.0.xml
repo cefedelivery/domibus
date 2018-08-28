@@ -2022,6 +2022,7 @@
             <column name="RESTORED" type="DATETIME"/>
             <column name="MESSAGE_SUBTYPE" type="VARCHAR(255)"/>
             <column name="LAST_MODIFIED" type="TIMESTAMP" defaultValueComputed="${now}"/>
+            <column name="LAST_MODIFIED2" type="TIMESTAMP" defaultValueComputed="${now}"/>
         </createTable>
         <addUniqueConstraint
                 columnNames="MESSAGE_ID"
