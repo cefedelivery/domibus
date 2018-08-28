@@ -315,7 +315,6 @@ public class UIMessageEntity extends AbstractBaseEntity {
                 .append(toId, that.toId)
                 .append(toScheme, that.toScheme)
                 .append(refToMessageId, that.refToMessageId)
-                //.append(lastModified, that.lastModified)
                 .isEquals();
     }
 
@@ -342,7 +341,6 @@ public class UIMessageEntity extends AbstractBaseEntity {
                 .append(toId)
                 .append(toScheme)
                 .append(refToMessageId)
-               // .append(lastModified)
                 .toHashCode();
     }
 }

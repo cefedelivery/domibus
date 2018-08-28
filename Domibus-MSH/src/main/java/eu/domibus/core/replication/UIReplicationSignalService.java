@@ -20,6 +20,9 @@ import javax.jms.Queue;
 @Service
 public class UIReplicationSignalService {
 
+    static final String JMS_PROP_STATUS = "status";
+    static final String JMS_PROP_NOTIF_STATUS = "notif_status";
+
     @Autowired
     @Qualifier("uiReplicationQueue")
     private Queue uiReplicationQueue;
@@ -36,8 +39,21 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
+    public void userMessageSubmitted(String messageId) {
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_SUBMITTED);
+
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
+    }
+
+
     public void messageStatusChange(String messageId) {
         final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE);
+
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
+    }
+
+    public void messageNotificationStatusChange(final String messageId, final NotificationStatus notificationStatus) {
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE,notificationStatus);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
@@ -48,17 +64,6 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
-    public void messageNotificationStatusChange(String messageId) {
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE);
-
-        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
-    }
-
-    public void userMessageSubmitted(String messageId) {
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_SUBMITTED);
-
-        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
-    }
 
     public void signalMessageSubmitted(String messageId) {
         final JmsMessage message = createJMSMessage(messageId, UIJMSType.SIGNAL_MESSAGE_SUBMITTED);
