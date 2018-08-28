@@ -3,6 +3,8 @@ import {AlertService} from '../alert/alert.service';
 import {Injectable} from '@angular/core';
 import {AbstractControl} from '@angular/forms';
 import {SecurityService} from '../security/security.service';
+import {ValidationErrors} from '../../../node_modules/@angular/forms/src/directives/validators';
+import {DomainService} from '../security/domain.service';
 
 /**
  * Created by dussath on 6/20/17.
@@ -10,7 +12,8 @@ import {SecurityService} from '../security/security.service';
 @Injectable()
 export class UserValidatorService {
   constructor (private alertService: AlertService,
-               private securityService: SecurityService) {
+               private securityService: SecurityService,
+               private domainService: DomainService) {
   }
 
   validateUsers (users: UserResponseRO[]): boolean {
@@ -64,7 +67,7 @@ export class UserValidatorService {
   matchPassword (form: AbstractControl) {
     const password = form.get('password').value; // to get value in input tag
     const confirmPassword = form.get('confirmation').value; // to get value in input tag
-    if (password != confirmPassword) {
+    if (password !== confirmPassword) {
       form.get('confirmation').setErrors({confirmation: true})
     }
   }
@@ -72,7 +75,22 @@ export class UserValidatorService {
   validateForm () {
     return (form: AbstractControl) => {
       this.matchPassword(form);
+      this.validateDomainOnAdd(form);
     };
+  }
+
+  validateDomainOnAdd (form: AbstractControl) {
+    const role = form.get('role').value;
+    if (role && role !== SecurityService.ROLE_AP_ADMIN) {
+      const domain = form.get('domain').value;
+      this.domainService.getCurrentDomain().delay(0)
+        .subscribe((currDomain) => {
+          if (domain && currDomain && domain !== currDomain.code) {
+            form.get('domain').setErrors({domain: true})
+          }
+        });
+    }
+
   }
 
 }

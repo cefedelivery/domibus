@@ -1,5 +1,7 @@
 package eu.domibus.api.routing;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.Serializable;
 
 /**
@@ -36,5 +38,15 @@ public class RoutingCriteria implements Serializable {
 
     public void setExpression(String expression) {
         this.expression = expression;
+    }
+
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("entityId", entityId)
+                .append("name", name)
+                .append("expression", expression)
+                .toString();
     }
 }

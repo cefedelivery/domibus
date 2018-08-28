@@ -7,6 +7,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
@@ -58,11 +59,11 @@ public class ReliabilityServiceImpl implements ReliabilityService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void handleReliability(final String messageId, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
-        changeMessageStatusAndNotify(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+    public void handleReliability(final String messageId, UserMessage userMessage, final ReliabilityChecker.CheckResult reliabilityCheckSuccessful, final ResponseHandler.CheckResult isOk, final LegConfiguration legConfiguration) {
+        changeMessageStatusAndNotify(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+    private void changeMessageStatusAndNotify(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
 
         if(userMessageHandlerService.checkTestMessage(legConfiguration)) {
             return;
@@ -82,7 +83,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 }
                 backendNotificationService.notifyOfSendSuccess(messageId);
                 messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId);
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId, userMessage.getPartyInfo().getFrom().getFirstPartyId(), userMessage.getPartyInfo().getTo().getFirstPartyId());
                 break;
             case WAITING_FOR_CALLBACK:
                 updateRetryLoggingService.updateWaitingReceiptMessageRetryLogging(messageId, legConfiguration);

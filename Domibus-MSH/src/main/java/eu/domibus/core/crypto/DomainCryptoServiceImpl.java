@@ -200,11 +200,15 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
         Properties result = new Properties();
         result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_TYPE, keystoreType);
-        result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_PASSWORD, keystorePassword);
+        final String keyStorePasswordProperty = Merlin.PREFIX + Merlin.KEYSTORE_PASSWORD;
+        result.setProperty(keyStorePasswordProperty, keystorePassword);
         result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_ALIAS, privateKeyAlias);
         result.setProperty(Merlin.PREFIX + Merlin.KEYSTORE_FILE, keystoreLocation);
 
-        LOG.debug("Keystore properties for domain [{}] are [{}]", domain, result);
+        Properties logProperties = new Properties();
+        logProperties.putAll(result);
+        logProperties.remove(keyStorePasswordProperty);
+        LOG.debug("Keystore properties for domain [{}] are [{}]", domain, logProperties);
 
         return result;
     }
@@ -216,11 +220,15 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
         Properties result = new Properties();
         result.setProperty(Merlin.PREFIX + Merlin.TRUSTSTORE_TYPE, trustStoreType);
-        result.setProperty(Merlin.PREFIX + Merlin.TRUSTSTORE_PASSWORD, trustStorePassword);
+        final String trustStorePasswordProperty = Merlin.PREFIX + Merlin.TRUSTSTORE_PASSWORD;
+        result.setProperty(trustStorePasswordProperty, trustStorePassword);
         result.setProperty(Merlin.PREFIX + Merlin.LOAD_CA_CERTS, "false");
         result.setProperty(Merlin.PREFIX + Merlin.TRUSTSTORE_FILE, trustStoreLocation);
 
-        LOG.debug("Truststore properties for domain [{}] are [{}]", domain, result);
+        Properties logProperties = new Properties();
+        logProperties.putAll(result);
+        logProperties.remove(trustStorePasswordProperty);
+        LOG.debug("Truststore properties for domain [{}] are [{}]", domain, logProperties);
 
         return result;
     }
