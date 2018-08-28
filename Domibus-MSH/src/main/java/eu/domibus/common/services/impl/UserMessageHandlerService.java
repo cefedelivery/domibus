@@ -150,8 +150,8 @@ public class UserMessageHandlerService {
             //check if the message is sent to the same Domibus instance
             final boolean selfSendingFlag = checkSelfSending(pmodeKey);
             if (selfSendingFlag) {
-                /* we add a defined suffix in order to assure DB integrity - messageId unicity
-                basically we are generating another messageId for Signal Message on receievr side
+                /* we add a defined suffix in order to assure DB integrity - messageId uniqueness
+                basically we are generating another messageId for Signal Message on receiver side
                 */
                 messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
             }
@@ -180,10 +180,11 @@ public class UserMessageHandlerService {
                     }
                 }
             }
-            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, messageId);
             return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
         }
     }
+
+
 
     /**
      * It will check if the messages are sent to the same Domibus instance
@@ -210,7 +211,7 @@ public class UserMessageHandlerService {
      * @throws EbMS3Exception if an attachment with an invalid charset is received
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
-        LOG.info("Checking charset for attachments");
+        LOG.debug("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             if(partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
                 continue;
@@ -410,7 +411,7 @@ public class UserMessageHandlerService {
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            LOG.info("Generating receipt for incoming message");
+            LOG.debug("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();

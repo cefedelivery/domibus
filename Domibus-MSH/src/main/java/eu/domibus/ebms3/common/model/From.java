@@ -58,6 +58,13 @@ public class From {
         return this.partyId;
     }
 
+    public String getFirstPartyId() {
+        if(this.partyId == null || this.partyId.isEmpty()) {
+            return null;
+        }
+        return this.partyId.iterator().next().getValue();
+    }
+
     /**
      * The REQUIRED
      * eb:Role element occurs once, and identifies the authorized role (fromAuthorizedRole or

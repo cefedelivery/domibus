@@ -14,10 +14,8 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullReceiptSender;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
-import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.common.model.PullRequest;
-import eu.domibus.ebms3.common.model.SignalMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
@@ -29,13 +27,11 @@ import eu.domibus.util.MessageUtil;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -137,7 +133,9 @@ public class PullMessageSender {
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
             UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
             LOG.trace("handle message");
-            final SOAPMessage acknowlegement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
+            LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
             //TODO this will be changed in 4.1
             /**
@@ -151,7 +149,7 @@ public class PullMessageSender {
              * Ideally the message id should be commited to a queue and the sending of the receipt executed in another proces.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReicept(acknowlegement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
+                executor.execute(() -> pullReceiptSender.sendReicept(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

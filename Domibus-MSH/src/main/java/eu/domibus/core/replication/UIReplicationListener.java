@@ -27,14 +27,23 @@ public class UIReplicationListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationListener.class);
 
     @Autowired
-    protected UIReplicationDataService uiReplicationDataService;
+    private UIReplicationDataService uiReplicationDataService;
 
     @Autowired
-    protected DomainContextProvider domainContextProvider;
+    private DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "uiReplicationJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processUIReplication(final MapMessage map) throws JMSException {
+
+        //disabling read of JMS messages
+        if (!uiReplicationSignalService.isReplicationEnabled()) {
+            LOG.debug("UIReplication is disabled - no processing will occur");
+            return;
+        }
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
         final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
 

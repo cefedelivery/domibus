@@ -9,7 +9,7 @@ import eu.domibus.logging.api.MessageCode;
  */
 public enum DomibusMessageCode implements MessageCode {
 
-    BUS_MESSAGE_RECEIVED("BUS-001", "Message successfully received"),
+    BUS_MESSAGE_RECEIVED("BUS-001", "Message successfully received from [{}] to [{}]"),
     BUS_MESSAGE_RECEIVE_FAILED("BUS-002", "Failed to receive message"),
     BUS_MESSAGE_VALIDATION_FAILED("BUS-003", "Failed to validate message"),
     BUS_BACKEND_NOTIFICATION_FAILED("BUS-004", "Failed to notify backend for incoming message"),
@@ -41,7 +41,7 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_LEG_NAME_FOUND("BUS-030", "Leg name found [{}] for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_LEG_NAME_NOT_FOUND("BUS-031", "Leg name not found found for agreement [{}], senderParty [{}], receiverParty [{}], service [{}] and action [{}]"),
     BUS_MESSAGE_SEND_INITIATION("BUS-032", "Preparing to send message"),
-    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully [{}]"),
+    BUS_MESSAGE_SEND_SUCCESS("BUS-033", "Message sent successfully [{}] from [{}] to [{}]"),
     BUS_MESSAGE_SEND_FAILURE("BUS-034", "Message send failure"),
     BUS_MESSAGE_ATTACHMENT_NOT_FOUND("BUS-035", "No Attachment found for cid [{}]"),
     BUS_MULTIPLE_PART_INFO_REFERENCING_SOAP_BODY("BUS-036", "More than one Partinfo referencing the soap body found"),

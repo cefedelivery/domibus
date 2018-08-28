@@ -69,7 +69,7 @@ public class Storage {
                 Path path = createLocation(location);
                 if (path != null) {
                     storageDirectory = path.toFile();
-                    LOG.info("Initialized payload folder on path [{}]", path);
+                    LOG.info("Initialized payload folder on path [{}] for domain [{}]", path, this.domain);
                 } else {
                     LOG.warn("There was an error initializing the payload folder, so Domibus will be using the database");
                 }

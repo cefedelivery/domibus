@@ -1,6 +1,7 @@
 package eu.domibus.common.services;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
 
@@ -23,6 +24,6 @@ public interface ReliabilityService {
      * @param isOk                       sub status when reliability is ok.
      * @param legConfiguration           the legconfiguration of this message exchange.
      */
-    void handleReliability(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
+    void handleReliability(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration);
 
 }

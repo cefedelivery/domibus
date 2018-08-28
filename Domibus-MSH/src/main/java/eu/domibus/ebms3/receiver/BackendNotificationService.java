@@ -166,7 +166,6 @@ public class BackendNotificationService {
             return;
         }
 
-        LOG.info("Notify backend " + matchingBackendFilter.getBackendName() + " of messageId " + userMessage.getMessageInfo().getMessageId());
         validateAndNotify(userMessage, matchingBackendFilter.getBackendName(), notificationType, properties);
     }
 
@@ -270,17 +269,19 @@ public class BackendNotificationService {
             return;
         }
 
-        LOG.info("Required notifications [{}]", notificationListener.getRequiredNotificationTypeList());
+        LOG.debug("Required notifications [{}]", notificationListener.getRequiredNotificationTypeList());
         if (!notificationListener.getRequiredNotificationTypeList().contains(notificationType)) {
-            LOG.info("No plugin notification sent for message [{}]. Notification type [{}], mode [{}]", messageId, notificationType, notificationListener.getMode());
+            LOG.debug("No plugin notification sent for message [{}]. Notification type [{}], mode [{}]", messageId, notificationType, notificationListener.getMode());
             return;
         }
 
         if (properties != null) {
             String finalRecipient = (String) properties.get(MessageConstants.FINAL_RECIPIENT);
             LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}] and finalRecipient [{}]", backendName, messageId, notificationType, finalRecipient);
+        } else {
+            LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
         }
-        LOG.info("Notifying plugin [{}] for message [{}] with notificationType [{}]", backendName, messageId, notificationType);
+
         jmsManager.sendMessageToQueue(new NotifyMessageCreator(messageId, notificationType, properties).createMessage(), notificationListener.getBackendNotificationQueue());
     }
 

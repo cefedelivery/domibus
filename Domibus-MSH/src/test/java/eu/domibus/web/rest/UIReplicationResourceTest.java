@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.core.replication.UIReplicationDataService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import mockit.Expectations;
 import mockit.FullVerifications;
 import mockit.Injectable;
@@ -29,12 +30,18 @@ public class UIReplicationResourceTest {
     @Injectable
     private UIReplicationDataService uiReplicationDataService;
 
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
+
     @Test
     public void testCountData() {
         final int countRecordsToSync = new Random().nextInt();
         new Expectations() {{
             uiReplicationDataService.countSyncUIMessages();
             result = countRecordsToSync;
+
+            uiReplicationSignalService.isReplicationEnabled();
+            result = true;
 
         }};
 
@@ -56,6 +63,9 @@ public class UIReplicationResourceTest {
             uiReplicationDataService.findAndSyncUIMessages(limit);
             result = syncedRows;
 
+            uiReplicationSignalService.isReplicationEnabled();
+            result = true;
+
         }};
 
         //tested method
@@ -75,6 +85,9 @@ public class UIReplicationResourceTest {
         new Expectations() {{
             uiReplicationDataService.findAndSyncUIMessages(limit);
             result = syncedRows;
+
+            uiReplicationSignalService.isReplicationEnabled();
+            result = true;
 
         }};
 
