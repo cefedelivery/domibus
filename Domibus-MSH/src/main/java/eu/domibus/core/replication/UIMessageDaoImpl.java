@@ -147,10 +147,6 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         LOG.debug("uiMessageEntity having messageId={} have been inserted", uiMessageEntity.getMessageId());
     }
 
-    public void detach(final UIMessageEntity uiMessageEntity) {
-        em.detach(uiMessageEntity);
-    }
-
     @Override
     public boolean updateMessageStatus(String messageId, MessageStatus messageStatus, Date deleted, Date nextAttempt,
                                        Date failed,Date lastModified) {

@@ -53,11 +53,11 @@ public class UIReplicationListener {
                 break;
             case MESSAGE_STATUS_CHANGE:
                 MessageStatus messageStatus = MessageStatus.valueOf(map.getStringProperty(UIReplicationSignalService.JMS_PROP_STATUS));
-                uiReplicationDataService.messageStatusChange(messageId, map.getJMSTimestamp(), messageStatus);
+                uiReplicationDataService.messageStatusChange(messageId, messageStatus, map.getJMSTimestamp());
                 break;
             case MESSAGE_NOTIFICATION_STATUS_CHANGE:
                 NotificationStatus notificationStatus = NotificationStatus.valueOf(map.getStringProperty(UIReplicationSignalService.JMS_PROP_NOTIF_STATUS));
-                uiReplicationDataService.messageNotificationStatusChange(messageId, map.getJMSTimestamp(), notificationStatus);
+                uiReplicationDataService.messageNotificationStatusChange(messageId, notificationStatus, map.getJMSTimestamp());
                 break;
             case MESSAGE_CHANGE:
                 uiReplicationDataService.messageChange(messageId, map.getJMSTimestamp());

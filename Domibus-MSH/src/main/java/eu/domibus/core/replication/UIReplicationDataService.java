@@ -15,64 +15,58 @@ public interface UIReplicationDataService {
      * replicates data on receiver side when a new user message is received
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    void messageReceived(final String messageId);
-
     void messageReceived(final String messageId, long jmsTimestamp);
 
     /**
      * replicates data on sender side when a new user message is submitted
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    void messageSubmitted(final String messageId);
-
     void messageSubmitted(final String messageId, final long jmsTimestamp);
 
     /**
      * updates/sync data on receiver/sender side when a change in messages status appears
-     *  @param messageId
      *
+     *  @param messageId
+     * @param messageStatus
+     * @param jmsTimestamp
      */
-    void messageStatusChange(final String messageId);
-
-    void messageStatusChange(final String messageId, long jmsTimestamp, MessageStatus messageStatus);
+    void messageStatusChange(final String messageId, MessageStatus messageStatus, long jmsTimestamp);
 
     /**
      * updates/sync data on receiver/sender side when a change in messages notification status appears
-     *  @param messageId
      *
+     * @param messageId
+     * @param notificationStatus
+     * @param jmsTimestamp
      */
-    void messageNotificationStatusChange(final String messageId);
-
-    void messageNotificationStatusChange(final String messageId, long jmsTimestamp, NotificationStatus notificationStatus);
+    void messageNotificationStatusChange(final String messageId, NotificationStatus notificationStatus, long jmsTimestamp);
 
     /**
      * updates/sync data on receiver/sender side when a change in message change appears
      *
-     *  @param messageId
-     *
+     * @param messageId
+     * @param jmsTimestamp
      */
-    void messageChange(final String messageId);
-
     void messageChange(final String messageId, final long jmsTimestamp);
 
     /**
      * replicates data on sender side when a new signal message is submitted
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    void signalMessageSubmitted(final String messageId);
-
     void signalMessageSubmitted(final String messageId, final long jmsTimestamp);
 
     /**
      * replicates data on receiver side when a new signal message is received
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    void signalMessageReceived(final String messageId);
-
     void signalMessageReceived(final String messageId, final long jmsTimestamp);
 
     /**
