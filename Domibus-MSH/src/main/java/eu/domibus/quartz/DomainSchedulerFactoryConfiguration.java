@@ -176,7 +176,7 @@ public class DomainSchedulerFactoryConfiguration {
             return null;
         }
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
-        obj.setJobDetail(pullRetryWorkerJob().getObject());
+        obj.setJobDetail(pullRequestWorkerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.pull.cron"));
         obj.setStartDelay(20000);
         return obj;
