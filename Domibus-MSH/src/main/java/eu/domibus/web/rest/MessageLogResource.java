@@ -89,7 +89,7 @@ public class MessageLogResource {
 
     @PostConstruct
     public void init() {
-        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "true"));
+        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "false"));
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
         try {
             defaultFrom = ft.parse("1970-01-01 23:59:00");

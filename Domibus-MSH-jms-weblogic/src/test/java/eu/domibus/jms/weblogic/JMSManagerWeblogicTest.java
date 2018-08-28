@@ -2,6 +2,7 @@ package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJmsMessage;
@@ -57,6 +58,9 @@ public class JMSManagerWeblogicTest {
 
     @Injectable
     private DomibusConfigurationService domibusConfigurationService;
+
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Test
     public void testGetQueueName() throws Exception {

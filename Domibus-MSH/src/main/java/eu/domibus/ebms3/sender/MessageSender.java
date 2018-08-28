@@ -1,11 +1,11 @@
 package eu.domibus.ebms3.sender;
 
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.security.ChainCertificateInvalidException;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -103,9 +103,9 @@ public class MessageSender implements MessageListener {
     private void sendUserMessage(final String messageId, int retryCount) {
         final MessageStatus messageStatus = userMessageLogDao.getMessageStatus(messageId);
 
-        if(MessageStatus.NOT_FOUND == messageStatus) {
-            if(retryCount < MAX_RETRY_COUNT) {
-                userMessageService.scheduleSending(messageId, retryCount+1);
+        if (MessageStatus.NOT_FOUND == messageStatus) {
+            if (retryCount < MAX_RETRY_COUNT) {
+                userMessageService.scheduleSending(messageId, retryCount + 1);
                 LOG.warn("MessageStatus NOT_FOUND, retry count is [{}] -> reschedule sending", retryCount);
                 return;
             }
@@ -204,7 +204,7 @@ public class MessageSender implements MessageListener {
                     LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                     retryService.purgeTimedoutMessageInANewTransaction(messageId);
                 } else {
-                    reliabilityService.handleReliability(messageId, reliabilityCheckSuccessful, isOk, legConfiguration);
+                    reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
                 }
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);
@@ -216,7 +216,7 @@ public class MessageSender implements MessageListener {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void onMessage(final Message message) {
         LOG.debug("Processing message [{}]", message);
@@ -225,7 +225,7 @@ public class MessageSender implements MessageListener {
         int retryCount = 0;
         try {
             messageId = message.getStringProperty(MessageConstants.MESSAGE_ID);
-            if(message.propertyExists(MessageConstants.RETRY_COUNT)) {
+            if (message.propertyExists(MessageConstants.RETRY_COUNT)) {
                 retryCount = message.getIntProperty(MessageConstants.RETRY_COUNT);
             }
             final String domainCode = message.getStringProperty(MessageConstants.DOMAIN);

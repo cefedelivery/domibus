@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <included>
-    <property name="domainName" value="default" scope="local" />
+    <property name="domainName" value="domain_name" scope="local" />
     <appender name="${domainName}-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.home}/logs/${domainName}-domibus.log</file>
+        <file>${JBOSS_HOME}/logs/${domainName}-domibus.log</file>
             <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
                 <domainName>${domainName}</domainName>
                 <markerName>SECURITY,BUSINESS</markerName>
@@ -12,7 +12,7 @@
             </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${JBOSS_HOME}/logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -24,7 +24,7 @@
     </appender>
 
     <appender name="${domainName}-security-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.home}/logs/${domainName}-security.log</file>
+        <file>${JBOSS_HOME}/logs/${domainName}-security.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
@@ -36,7 +36,7 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${JBOSS_HOME}/logs/${domainName}-security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -47,7 +47,7 @@
         </encoder>
     </appender>
     <appender name="${domainName}-business-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.home}/logs/${domainName}-business.log</file>
+        <file>${JBOSS_HOME}/logs/${domainName}-business.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
@@ -59,7 +59,7 @@
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>${catalina.home}/logs/${domainName}-business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${JBOSS_HOME}/logs/${domainName}-business-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!-- each file should be at most 30MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>30MB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -75,7 +75,7 @@
         <appender-ref ref="${domainName}-business-file"/>
     </logger>
 
-    <root level="INFO" additivity="false">
+    <root level="WARN" additivity="false">
         <appender-ref ref="${domainName}-file"/>
     </root>
 

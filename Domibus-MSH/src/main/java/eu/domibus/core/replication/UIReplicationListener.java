@@ -25,21 +25,30 @@ public class UIReplicationListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationListener.class);
 
     @Autowired
-    protected UIReplicationDataService uiReplicationDataService;
+    private UIReplicationDataService uiReplicationDataService;
 
     @Autowired
-    protected DomainContextProvider domainContextProvider;
+    private DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "internalJmsListenerContainerFactory")
     @Transactional(propagation = Propagation.REQUIRED)
     public void processUIReplication(final MapMessage map) throws JMSException {
-        final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
+
         final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
-        LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
         domainContextProvider.setCurrentDomain(domainCode);
 
+        //disabling read of JMS messages
+        if (!uiReplicationSignalService.isReplicationEnabled()) {
+            LOG.debug("UIReplication is disabled - no processing will occur");
+            return;
+        }
+
+        final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
         final String jmsType = map.getJMSType();
-        LOG.debug("processUIReplication for jmsType=[{}]", jmsType);
+        LOG.debug("processUIReplication for messageId=[{}] domain=[{}] jmsType=[{}]", messageId, domainCode, jmsType);
 
         switch (UIJMSType.valueOf(jmsType)) {
             case USER_MESSAGE_RECEIVED:

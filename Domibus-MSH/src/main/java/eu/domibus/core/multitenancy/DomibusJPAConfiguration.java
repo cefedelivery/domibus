@@ -1,6 +1,8 @@
 package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.spring.PrefixedProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.MultiTenancyStrategy;
@@ -28,6 +30,8 @@ import java.util.Properties;
 @Configuration
 public class DomibusJPAConfiguration {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomibusJPAConfiguration.class);
+
     @Autowired
     @Qualifier("domibusProperties")
     protected Properties domibusProperties;
@@ -48,11 +52,11 @@ public class DomibusJPAConfiguration {
     @Primary
     @DependsOn("transactionManager")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(Optional<MultiTenantConnectionProvider> multiTenantConnectionProviderImpl,
-                                                                       Optional<CurrentTenantIdentifierResolver> tenantIdentifierResolver)  {
+                                                                       Optional<CurrentTenantIdentifierResolver> tenantIdentifierResolver) {
         LocalContainerEntityManagerFactoryBean result = new LocalContainerEntityManagerFactoryBean();
         result.setPersistenceUnitName("domibusJTA");
         final String packagesToScanString = domibusPropertyProvider.getProperty("domibus.entityManagerFactory.packagesToScan");
-        if(StringUtils.isNotEmpty(packagesToScanString)) {
+        if (StringUtils.isNotEmpty(packagesToScanString)) {
             final String[] packagesToScan = StringUtils.split(packagesToScanString, ",");
             result.setPackagesToScan(packagesToScan);
         }
@@ -61,7 +65,8 @@ public class DomibusJPAConfiguration {
         final PrefixedProperties jpaProperties = jpaProperties();
 
         final boolean tenantConnectionProviderPresent = multiTenantConnectionProviderImpl.isPresent();
-        if(tenantConnectionProviderPresent) {
+        if (tenantConnectionProviderPresent) {
+            LOG.info("Configuring jpaProperties for multi-tenancy");
             jpaProperties.put(Environment.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
             jpaProperties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProviderImpl.get());
             jpaProperties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantIdentifierResolver.get());

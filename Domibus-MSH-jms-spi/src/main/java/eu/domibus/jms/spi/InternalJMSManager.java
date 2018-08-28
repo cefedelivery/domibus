@@ -15,6 +15,8 @@ public interface InternalJMSManager {
 
     String QUEUE = "Queue";
 
+    String PROP_MAX_BROWSE_SIZE = "domibus.jms.queue.maxBrowseSize";
+
     /** in multi-tenancy mode domain admins should not see any count of messages so we set this value */
     long NB_MESSAGES_ADMIN = -1L;
 

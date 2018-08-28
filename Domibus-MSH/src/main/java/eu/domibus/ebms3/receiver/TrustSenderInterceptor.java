@@ -108,13 +108,14 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             isPullMessage = true;
         }
 
-        LOG.info("Validating sender certificate");
+
         String senderPartyName;
         if (isPullMessage) {
             senderPartyName = getReceiverPartyName(message);
         } else {
             senderPartyName = getSenderPartyName(message);
         }
+        LOG.info("Validating sender certificate for party [{}]", senderPartyName);
         X509Certificate certificate = getSenderCertificate(message);
         if (!checkSenderPartyTrust(certificate, senderPartyName, messageId, isPullMessage)) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] is not trusted", messageId, null);

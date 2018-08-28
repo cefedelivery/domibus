@@ -2,6 +2,7 @@ package eu.domibus.api.routing;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.List;
@@ -93,5 +94,16 @@ public class BackendFilter implements Serializable, Comparable {
                 .append(backendName)
                 .append(active)
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("entityId", entityId)
+                .append("index", index)
+                .append("routingCriterias", routingCriterias)
+                .append("backendName", backendName)
+                .append("active", active)
+                .toString();
     }
 }
