@@ -35,10 +35,10 @@ public class ClearMDCInterceptor extends AbstractPhaseInterceptor<Message> {
     }
 
     private void clearMDC() {
-        LOG.info("Clearing message ID MDC property [{}]", LOG.getMDCKey(DomibusLogger.MDC_MESSAGE_ID));
+        LOG.debug("Clearing message ID MDC property [{}]", LOG.getMDCKey(DomibusLogger.MDC_MESSAGE_ID));
         LOG.removeMDC(DomibusLogger.MDC_MESSAGE_ID);
 
-        LOG.info("Clearing domain [{}]", domainContextProvider.getCurrentDomainSafely());
+        LOG.debug("Clearing domain [{}]", domainContextProvider.getCurrentDomainSafely());
         domainContextProvider.clearCurrentDomain();
     }
 }

@@ -71,7 +71,7 @@ public class MessagingServiceImpl implements MessagingService {
 
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
-        LOG.info("Retrieved Storage for domain [{}]", currentDomain);
+        LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
         if(currentStorage == null)
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
 

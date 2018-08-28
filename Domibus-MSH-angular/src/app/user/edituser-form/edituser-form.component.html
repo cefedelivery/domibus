@@ -17,10 +17,11 @@
       </div>
 
       <div style="margin-top:10px;">
-        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['roles']" [(ngModel)]="roles" required>
+        <md2-select mdInput placeholder="Role" [style.width]="'100%'" [formControl]="userForm.controls['role']"
+                    [(ngModel)]="role" required (change)="onRoleChange()">
           <md2-option *ngFor="let item of existingRoles" [value]="item">{{item}}</md2-option>
         </md2-select>
-        <div *ngIf="userForm.controls['roles'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
+        <div *ngIf="userForm.controls['role'].hasError('required')" style="color:red; font-size: 70%">You need to choose at least one role for this user</div>
       </div>
 
       <div style="margin-top:30px;" [hidden]="!isDomainVisible">
@@ -29,6 +30,7 @@
           <md2-option *ngFor="let item of existingDomains" [(value)]="item.code">{{item.name}}</md2-option>
         </md2-select>
         <div *ngIf="userForm.controls['domain'].hasError('required')" style="color:red; font-size: 70%">You need to choose a domain for this user</div>
+        <div *ngIf="userForm.controls['domain'].hasError('domain')" style="color:red; font-size: 70%">The domain should be the current one</div>
       </div>
 
       <div style="margin-top:15px;">

@@ -14,12 +14,11 @@ import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.pull.PullRequestResult;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.matcher.ReliabilityMatcher;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.handler.PullRequestHandler;
@@ -142,7 +141,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
                 final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
-                LOG.info("Ping message {}", userMessageHandlerContext.isTestMessage());
+                LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
             } catch (TransformerException | SOAPException | JAXBException | IOException e) {
                 throw new UserMessageException(e);
             } catch (final EbMS3Exception e) {

@@ -259,7 +259,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         if (StringUtils.isNotEmpty(messageData.getMessageId())) {
             LOG.putMDC(DomibusLogger.MDC_MESSAGE_ID, messageData.getMessageId());
         }
-        LOG.info("Preparing to submit message");
+        LOG.debug("Preparing to submit message");
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }

@@ -16,9 +16,9 @@ public class UserTest {
 
     @Test
     public void user() {
-        User user = new User("userName", "email", false, new ArrayList<String>(), UserState.UPDATED, null);
+        User user = new User("userName", "email", false, new ArrayList<String>(), UserState.UPDATED, null, false);
         assertFalse(user.isSuspended());
-        user = new User("userName", "email", false, new ArrayList<String>(), UserState.UPDATED, new Date());
+        user = new User("userName", "email", false, new ArrayList<String>(), UserState.UPDATED, new Date(), false);
         assertTrue(user.isSuspended());
     }
 

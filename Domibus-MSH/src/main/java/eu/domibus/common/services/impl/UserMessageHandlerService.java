@@ -211,7 +211,7 @@ public class UserMessageHandlerService {
      * @throws EbMS3Exception if an attachment with an invalid charset is received
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
-        LOG.info("Checking charset for attachments");
+        LOG.debug("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             if(partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
                 continue;
@@ -411,7 +411,7 @@ public class UserMessageHandlerService {
         }
 
         if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
-            LOG.info("Generating receipt for incoming message");
+            LOG.debug("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();

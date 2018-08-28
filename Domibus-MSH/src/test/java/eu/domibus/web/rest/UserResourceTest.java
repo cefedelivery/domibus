@@ -68,7 +68,7 @@ public class UserResourceTest {
     public void testUsers() {
         // Given
         final List<User> userList = new ArrayList<User>();
-        userList.add(new User("username", "email", true, new ArrayList<String>(), UserState.PERSISTED, null));
+        userList.add(new User("username", "email", true, new ArrayList<String>(), UserState.PERSISTED, null, false));
 
         final List<UserResponseRO> userResponseROList = getUserResponseList();
 
