@@ -2,6 +2,7 @@ package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
@@ -12,6 +13,7 @@ import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
@@ -74,6 +76,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -389,10 +394,17 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                     "getCursorSize",
                     new Object[]{messageCursor}, new String[]{String.class.getName()});
 
+            Integer maxBrowseSize = new Integer(totalAmountOfMessages.intValue());
+            final Integer configuredMaxBrowseCount = NumberUtils.toInt(domibusPropertyProvider.getProperty(PROP_MAX_BROWSE_SIZE));
+            if(configuredMaxBrowseCount > 0) {
+                LOG.debug("Setting JMS maxBrowse size to [{}]", configuredMaxBrowseCount);
+                maxBrowseSize = configuredMaxBrowseCount;
+            }
+
             CompositeData[] allMessageMetaData = (CompositeData[]) mbsc.invoke(
                     destination,
                     "getItems",
-                    new Object[]{messageCursor, new Long(0), new Integer(totalAmountOfMessages.intValue())},
+                    new Object[]{messageCursor, new Long(0), maxBrowseSize},
                     new String[]{String.class.getName(), Long.class.getName(), Integer.class.getName()});
 
             if (allMessageMetaData != null) {
