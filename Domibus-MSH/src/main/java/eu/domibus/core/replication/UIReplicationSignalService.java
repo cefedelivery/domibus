@@ -25,6 +25,8 @@ public class UIReplicationSignalService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
 
+    private static final String UI_REPLICATION_ENABLED = "domibus.ui.replication.enabled";
+
     @Autowired
     @Qualifier("uiReplicationQueue")
     private Queue uiReplicationQueue;
@@ -37,6 +39,20 @@ public class UIReplicationSignalService {
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
+
+    /**
+     * just loads the properties value for switching on/off the UI Replication
+     *
+     * @return boolean replication enabled or not
+     */
+    public boolean isReplicationEnabled() {
+        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(UI_REPLICATION_ENABLED, "false"));
+
+        if (!uiReplicationEnabled) {
+            LOG.debug("UIReplication is disabled - no processing will occur");
+        }
+        return uiReplicationEnabled;
+    }
 
     public void userMessageReceived(String messageId) {
         if (!isReplicationEnabled()) {
@@ -109,12 +125,4 @@ public class UIReplicationSignalService {
                 .build();
     }
 
-    public boolean isReplicationEnabled() {
-        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "false"));
-
-        if (!uiReplicationEnabled) {
-            LOG.debug("UIReplication is disabled - no processing will occur");
-        }
-        return uiReplicationEnabled;
-    }
 }

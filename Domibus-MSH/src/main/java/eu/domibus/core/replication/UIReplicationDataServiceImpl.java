@@ -189,7 +189,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         LOG.debug("start counting differences for UIReplication");
 
         int rowsToSyncCount = uiMessageDiffDao.countAll();
-        LOG.info("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
+        LOG.debug("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
 
         int maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
         if (rowsToSyncCount > maxRowsToSync) {
@@ -205,14 +205,14 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
                         collect(Collectors.toList());
 
         if (!uiMessageEntityList.isEmpty()) {
-            LOG.info("start to update TB_MESSAGE_UI");
+            LOG.debug("start to update TB_MESSAGE_UI");
             try {
                 uiMessageEntityList.stream().forEach(uiMessageEntity ->
                         uiMessageDao.saveOrUpdate(uiMessageEntity));
             } catch (OptimisticLockException e) {
                 LOG.warn("Optimistic lock exception detected");
             }
-            LOG.info("finish to update TB_MESSAGE_UI");
+            LOG.debug("finish to update TB_MESSAGE_UI");
         }
     }
 
@@ -231,7 +231,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         startTime = System.currentTimeMillis();
 
         if (recordsToSync == 0) {
-            LOG.info("no records to sync");
+            LOG.debug("no records to sync");
             return 0;
         }
 
