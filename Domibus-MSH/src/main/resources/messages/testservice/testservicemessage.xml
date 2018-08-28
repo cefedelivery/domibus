@@ -9,27 +9,7 @@
       <partyId>_RECEIVER_</partyId>
     </eu.domibus.plugin.Submission_-Party>
   </toParties>
-  <payloads>
-    <eu.domibus.plugin.Submission_-Payload>
-      <contentId>cid:message</contentId>
-      <payloadDatahandler>
-        <dataSource class="javax.mail.util.ByteArrayDataSource">
-          <source>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxs
-bz4=</source>
-          <contentType>text/xml</contentType>
-          <name></name>
-        </dataSource>
-        <transferFlavors/>
-      </payloadDatahandler>
-      <payloadProperties class="list">
-        <eu.domibus.plugin.Submission_-TypedProperty>
-          <key>MimeType</key>
-          <value>text/xml</value>
-        </eu.domibus.plugin.Submission_-TypedProperty>
-      </payloadProperties>
-      <inBody>false</inBody>
-    </eu.domibus.plugin.Submission_-Payload>
-  </payloads>
+  <payloads/>
   <messageProperties class="list">
     <eu.domibus.plugin.Submission_-TypedProperty>
       <key>originalSender</key>
