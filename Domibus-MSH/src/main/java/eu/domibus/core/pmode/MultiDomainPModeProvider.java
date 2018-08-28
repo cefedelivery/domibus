@@ -132,6 +132,11 @@ public class MultiDomainPModeProvider extends PModeProvider {
     }
 
     @Override
+    public Party getPartyByIdentifier(String partyIdentifier) {
+        return getCurrentPModeProvider().getPartyByIdentifier(partyIdentifier);
+    }
+
+    @Override
     public eu.domibus.common.model.configuration.Service getService(String pModeKey) {
         return getCurrentPModeProvider().getService(pModeKey);
     }

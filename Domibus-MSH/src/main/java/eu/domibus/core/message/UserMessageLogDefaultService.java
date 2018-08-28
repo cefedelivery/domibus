@@ -71,7 +71,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
             messageSubtype = MessageSubtype.TEST;
         }
         userMessageLog.setMessageSubtype(messageSubtype);
-        if(!MessageSubtype.TEST.equals(messageSubtype)) {
+        if (!MessageSubtype.TEST.equals(messageSubtype)) {
             backendNotificationService.notifyOfMessageStatusChange(userMessageLog, status, new Timestamp(System.currentTimeMillis()));
         }
         //we set the status after we send the status change event; otherwise the old status and the new status would be the same
@@ -81,7 +81,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
 
     protected void updateMessageStatus(final String messageId, final MessageStatus newStatus) {
         final UserMessageLog messageLog = userMessageLogDao.findByMessageId(messageId);
-        if (MessageType.USER_MESSAGE == messageLog.getMessageType()) {
+        if (MessageType.USER_MESSAGE == messageLog.getMessageType() && !messageLog.isTestMessage()) {
             backendNotificationService.notifyOfMessageStatusChange(messageLog, newStatus, new Timestamp(System.currentTimeMillis()));
         }
         userMessageLogDao.setMessageStatus(messageLog, newStatus);
@@ -121,8 +121,9 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
 
     /**
      * Checks <code>service</code> and <code>action</code> to determine if it's a TEST message
+     *
      * @param service Service
-     * @param action Action
+     * @param action  Action
      * @return True, if it's a test message and false otherwise
      */
     protected Boolean checkTestMessage(final String service, final String action) {

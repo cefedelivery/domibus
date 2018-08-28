@@ -321,6 +321,8 @@ public abstract class PModeProvider {
 
     public abstract Party getGatewayParty();
 
+    public abstract Party getPartyByIdentifier(String partyIdentifier);
+
     public abstract Party getSenderParty(String pModeKey);
 
     public abstract Party getReceiverParty(String pModeKey);

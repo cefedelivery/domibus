@@ -63,10 +63,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     }
 
     private void changeMessageStatusAndNotify(String messageId, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-
-        if(userMessageHandlerService.checkTestMessage(legConfiguration)) {
-            return;
-        }
+        final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
 
         switch (reliabilityCheckSuccessful) {
             case OK:
@@ -80,7 +77,10 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                     default:
                         assert false;
                 }
-                backendNotificationService.notifyOfSendSuccess(messageId);
+                if (!isTestMessage) {
+                    backendNotificationService.notifyOfSendSuccess(messageId);
+                }
+
                 messagingDao.clearPayloadData(messageId);
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId);
                 break;
