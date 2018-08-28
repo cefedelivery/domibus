@@ -74,6 +74,9 @@ public class DomibusQuartzStarterTest {
             times = 1;
             result = Class.forName("eu.domibus.ebms3.sender.SendRetryWorker");
 
+            scheduler.getSchedulerName();
+            times = 1;
+
         }};
 
         //tested method
@@ -103,6 +106,8 @@ public class DomibusQuartzStarterTest {
             times = 1;
             result = new SchedulerException(new ClassNotFoundException("required class was not found: eu.domibus.ebms3.sender.SendRetryWorker"));
 
+            scheduler.getSchedulerName();
+            times = 1;
         }};
 
         //tested method
