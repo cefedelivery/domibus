@@ -39,19 +39,18 @@ public class UIReplicationListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processUIReplication(final MapMessage map) throws JMSException {
 
+        final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
+        domainContextProvider.setCurrentDomain(domainCode);
+
         //disabling read of JMS messages
         if (!uiReplicationSignalService.isReplicationEnabled()) {
             LOG.debug("UIReplication is disabled - no processing will occur");
             return;
         }
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
-        final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
-
-        LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
-        domainContextProvider.setCurrentDomain(domainCode);
-
         final String jmsType = map.getJMSType();
-        LOG.debug("processUIReplication for jmsType=[{}]", jmsType);
+
+        LOG.debug("processUIReplication for messageId=[{}] domain=[{}] jmsType=[{}]", jmsType, messageId, domainCode);
 
         switch (UIJMSType.valueOf(jmsType)) {
             case USER_MESSAGE_RECEIVED:

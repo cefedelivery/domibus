@@ -37,6 +37,12 @@ import java.util.Date;
                 query   =   "UPDATE TB_MESSAGE_UI SET NOTIFICATION_STATUS=?1, LAST_MODIFIED2=?2 " +
                         " WHERE MESSAGE_ID=?3"
                 ,resultSetMapping = "updateResult"
+        ),
+        @NamedNativeQuery(
+                name    =   "UIMessageEntity.updateMessage",
+                query   =   "UPDATE TB_MESSAGE_UI SET MESSAGE_STATUS=?1, DELETED=?2, FAILED=?3, RESTORED=?4, NEXT_ATTEMPT=?5, SEND_ATTEMPTS=?6, SEND_ATTEMPTS_MAX=?7, LAST_MODIFIED=?8 " +
+                        " WHERE MESSAGE_ID=?9"
+                ,resultSetMapping = "updateResult"
         )
 })
 public class UIMessageEntity extends AbstractBaseEntity {

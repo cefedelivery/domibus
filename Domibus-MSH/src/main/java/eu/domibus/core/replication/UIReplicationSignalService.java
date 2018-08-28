@@ -4,9 +4,9 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -51,7 +51,7 @@ public class UIReplicationSignalService {
      * @return boolean replication enabled or not
      */
     public boolean isReplicationEnabled() {
-        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(UI_REPLICATION_ENABLED, "false"));
+        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(UI_REPLICATION_ENABLED));
 
         if (!uiReplicationEnabled) {
             LOG.debug("UIReplication is disabled - no processing will occur");

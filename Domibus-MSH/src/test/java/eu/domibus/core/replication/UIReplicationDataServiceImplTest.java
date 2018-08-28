@@ -253,12 +253,7 @@ public class UIReplicationDataServiceImplTest {
         uiReplicationDataService.messageChange(messageId, jmsTime.getTime());
 
         new FullVerifications(uiReplicationDataService) {{
-            uiReplicationDataService.updateUIMessage(userMessageLog, uiMessageEntity);
-
-            String messageIdActual, operationName;
-            uiReplicationDataService.updateAndFlush(messageIdActual = withCapture(), uiMessageEntity, operationName = withCapture());
-            Assert.assertEquals(messageId, messageIdActual);
-            Assert.assertEquals("messageChange", operationName);
+            uiMessageDao.updateMessage(messageId, messageStatus, deleted, failed, restored, nextAttempt, sendAttempts, sendAttemptsMax, jmsTime);
         }};
     }
 
@@ -391,20 +386,6 @@ public class UIReplicationDataServiceImplTest {
         }};
     }
 
-    @Test
-    public void testUpdateAndFlush_NoExceptionThrown_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
-
-        new Expectations() {{
-        }};
-
-        //tested method
-        uiReplicationDataService.updateAndFlush(messageId, uiMessageEntity, "messageStatusChange");
-
-        new FullVerifications() {{
-            uiMessageDao.update(uiMessageEntity);
-            uiMessageDao.flush();
-        }};
-    }
 
     @Test
     public void testSaveUIMessageFromSignalMessageLog(final @Mocked UIMessageEntity uiMessageEntity) {
@@ -549,43 +530,6 @@ public class UIReplicationDataServiceImplTest {
         }};
     }
 
-    @Test
-    public void testUpdateUIMessage(final @Mocked UIMessageEntity uiMessageEntity) {
-        final UserMessageLog userMessageLog = createUserMessageLog();
-
-        //tested method
-        uiReplicationDataService.updateUIMessage(userMessageLog, uiMessageEntity);
-
-        new FullVerifications(uiMessageEntity) {{
-            MessageStatus messageStatusActual;
-            uiMessageEntity.setMessageStatus(messageStatusActual = withCapture());
-            Assert.assertEquals(messageStatus, messageStatusActual);
-
-            Date dateActual;
-            uiMessageEntity.setDeleted(dateActual = withCapture());
-            Assert.assertEquals(deleted, dateActual);
-
-            uiMessageEntity.setFailed(dateActual = withCapture());
-            Assert.assertEquals(failed, dateActual);
-
-            uiMessageEntity.setRestored(dateActual = withCapture());
-            Assert.assertEquals(restored, dateActual);
-
-            uiMessageEntity.setNextAttempt(dateActual = withCapture());
-            Assert.assertEquals(nextAttempt, dateActual);
-
-            int intActual;
-            uiMessageEntity.setSendAttempts(intActual = withCapture());
-            Assert.assertEquals(sendAttempts, intActual);
-
-            uiMessageEntity.setSendAttemptsMax(intActual = withCapture());
-            Assert.assertEquals(sendAttemptsMax, intActual);
-
-            NotificationStatus notificationStatusActual;
-            uiMessageEntity.setNotificationStatus(notificationStatusActual = withCapture());
-            Assert.assertEquals(notificationStatus, notificationStatusActual);
-        }};
-    }
 
     @Test
     public void testConvertToUIMessageEntity_EntityNotNull_ResultOK(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {

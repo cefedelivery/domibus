@@ -27,4 +27,7 @@ public interface UIMessageDao {
     boolean updateNotificationStatus(final String messageId, final NotificationStatus notificationStatus,
                                       final Date lastModified);
 
+    boolean updateMessage(String messageId, MessageStatus messageStatus, Date deleted, Date failed, Date restored, Date nextAttempt,
+                                 Integer sendAttempts, Integer sendAttemptsMax, Date lastModified);
+
 }
