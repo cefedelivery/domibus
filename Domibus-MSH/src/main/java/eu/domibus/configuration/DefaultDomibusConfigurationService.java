@@ -47,7 +47,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
                 throw new IllegalStateException("Database dialect not configured, please set property: domibus.entityManagerFactory.jpaProperty.hibernate.dialect");
             }
             dataBaseEngine = DataBaseEngine.getDatabaseEngine(property);
-            LOG.info("Database engine:[{}]", dataBaseEngine);
+            LOG.debug("Database engine:[{}]", dataBaseEngine);
         }
         return dataBaseEngine;
     }

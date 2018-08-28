@@ -81,7 +81,7 @@
     <!--  In order to enable logging of request/responses please change the loglevel to INFO -->
     <logger name="org.apache.cxf" level="WARN"/>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="file"/>
         <appender-ref ref="stdout"/>
     </root>

@@ -2,7 +2,7 @@
 
 <configuration>
     <!-- start include domains config files here -->
-    <!--<include optional="true" file="conf/domibus/default-logback.xml"/>-->
+    <!--<include optional="true" file="conf/domibus/domain_name-logback.xml"/>-->
     <!-- end include domains config files here -->
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/domibus.log</file>
@@ -84,7 +84,7 @@
     <!--  In order to enable logging of request/responses please change the loglevel to INFO -->
     <logger name="org.apache.cxf" level="WARN"/>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="file"/>
         <appender-ref ref="stdout"/>
     </root>

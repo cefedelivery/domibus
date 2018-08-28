@@ -37,10 +37,10 @@
         </file>
         <file>
             <source>
-                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/default-logback.xml
+                ${project.basedir}/../Domibus-MSH-tomcat/src/main/conf/domibus/domain_name-logback.xml
             </source>
             <outputDirectory>/</outputDirectory>
-            <destName>default-logback.xml</destName>
+            <destName>domain_name-logback.xml</destName>
             <filtered>false</filtered>
         </file>
         <file>
