@@ -1,6 +1,8 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -30,11 +32,12 @@ public class UIReplicationListener {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
-    @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "internalJmsListenerContainerFactory")
-    @Transactional(propagation = Propagation.REQUIRED)
+    @JmsListener(destination = "${domibus.jms.queue.ui.replication}", containerFactory = "uiReplicationJmsListenerContainerFactory")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processUIReplication(final MapMessage map) throws JMSException {
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
         final String domainCode = map.getStringProperty(MessageConstants.DOMAIN);
+
         LOG.debug("Sending message ID [{}] for domain [{}]", messageId, domainCode);
         domainContextProvider.setCurrentDomain(domainCode);
 
@@ -43,25 +46,27 @@ public class UIReplicationListener {
 
         switch (UIJMSType.valueOf(jmsType)) {
             case USER_MESSAGE_RECEIVED:
-                uiReplicationDataService.messageReceived(messageId);
+                uiReplicationDataService.messageReceived(messageId, map.getJMSTimestamp());
                 break;
             case USER_MESSAGE_SUBMITTED:
-                uiReplicationDataService.messageSubmitted(messageId);
+                uiReplicationDataService.messageSubmitted(messageId, map.getJMSTimestamp());
                 break;
             case MESSAGE_STATUS_CHANGE:
-                uiReplicationDataService.messageStatusChange(messageId);
+                MessageStatus messageStatus = MessageStatus.valueOf(map.getStringProperty(UIReplicationSignalService.JMS_PROP_STATUS));
+                uiReplicationDataService.messageStatusChange(messageId, map.getJMSTimestamp(), messageStatus);
                 break;
             case MESSAGE_NOTIFICATION_STATUS_CHANGE:
-                uiReplicationDataService.messageNotificationStatusChange(messageId);
+                NotificationStatus notificationStatus = NotificationStatus.valueOf(map.getStringProperty(UIReplicationSignalService.JMS_PROP_NOTIF_STATUS));
+                uiReplicationDataService.messageNotificationStatusChange(messageId, map.getJMSTimestamp(), notificationStatus);
                 break;
             case MESSAGE_CHANGE:
-                uiReplicationDataService.messageChange(messageId);
+                uiReplicationDataService.messageChange(messageId, map.getJMSTimestamp());
                 break;
             case SIGNAL_MESSAGE_SUBMITTED:
-                uiReplicationDataService.signalMessageSubmitted(messageId);
+                uiReplicationDataService.signalMessageSubmitted(messageId, map.getJMSTimestamp());
                 break;
             case SIGNAL_MESSAGE_RECEIVED:
-                uiReplicationDataService.signalMessageReceived(messageId);
+                uiReplicationDataService.signalMessageReceived(messageId, map.getJMSTimestamp());
                 break;
             default:
                 throw new AssertionError("Invalid UIJMSType enum value");

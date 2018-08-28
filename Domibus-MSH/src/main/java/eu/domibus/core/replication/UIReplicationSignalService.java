@@ -4,6 +4,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,8 +48,8 @@ public class UIReplicationSignalService {
     }
 
 
-    public void messageStatusChange(String messageId) {
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE);
+    public void messageStatusChange(final String messageId, final MessageStatus messageStatus) {
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE, messageStatus);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
@@ -81,6 +83,24 @@ public class UIReplicationSignalService {
         return JMSMessageBuilder.create()
                 .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
+                .build();
+    }
+
+    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, MessageStatus messageStatus) {
+        return JMSMessageBuilder.create()
+                .type(uiJMSType.name())
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(JMS_PROP_STATUS, messageStatus.name())
+                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
+                .build();
+    }
+
+    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, NotificationStatus notificationStatus) {
+        return JMSMessageBuilder.create()
+                .type(uiJMSType.name())
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(JMS_PROP_NOTIF_STATUS, notificationStatus.name())
                 .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
                 .build();
     }

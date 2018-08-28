@@ -73,4 +73,13 @@
         <property name="destinationResolver" ref="internalDestinationResolver"/>
         <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
+    <bean id="uiReplicationJmsListenerContainerFactory"
+          class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+        <property name="connectionFactory" ref="domibusJMS-XAConnectionFactory"/>
+        <property name="transactionManager" ref="transactionManager"/>
+        <property name="concurrency" value="${domibus.ui.replication.queue.concurency}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="sessionAcknowledgeMode" value="0"/>
+        <property name="destinationResolver" ref="internalDestinationResolver"/>
+    </bean>
 </beans>

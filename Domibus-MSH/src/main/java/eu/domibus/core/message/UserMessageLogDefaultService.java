@@ -86,7 +86,7 @@ public class UserMessageLogDefaultService implements UserMessageLogService {
         }
         userMessageLogDao.setMessageStatus(messageLog, newStatus);
 
-        uiReplicationSignalService.messageStatusChange(messageId);
+        uiReplicationSignalService.messageStatusChange(messageId, newStatus);
     }
 
     @Override
