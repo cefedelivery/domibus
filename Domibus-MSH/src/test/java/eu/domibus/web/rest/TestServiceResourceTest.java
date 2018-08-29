@@ -1,11 +1,10 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.party.PartyService;
-import eu.domibus.core.message.test.TestService;
+import eu.domibus.core.message.testservice.TestService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.messaging.MessagingProcessingException;
-import eu.domibus.plugin.Submission;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.web.rest.ro.TestServiceRequestRO;
 import mockit.Expectations;
