@@ -75,6 +75,9 @@ public class UserMessageLogDefaultServiceTest {
 
             messageLog.getMessageType();
             result = MessageType.USER_MESSAGE;
+
+            messageLog.isTestMessage();
+            result = false;
         }};
 
         userMessageLogDefaultService.updateMessageStatus(messageId, messageStatus);
