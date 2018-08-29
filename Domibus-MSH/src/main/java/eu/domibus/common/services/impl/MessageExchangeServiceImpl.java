@@ -24,9 +24,9 @@ import eu.domibus.common.model.logging.RawEnvelopeLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.validators.ProcessValidator;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -162,7 +162,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             LOG.trace("No pull process configured !");
         }
         String numberOfPullRequestPerMpcProp = domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1");
-        LOG.info("DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE property read for domain[{}]", domainProvider.getCurrentDomain());
+        LOG.debug("DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE property read for domain[{}]", domainProvider.getCurrentDomain());
 
         final Integer numberOfPullRequestPerMpc = Integer.valueOf(numberOfPullRequestPerMpcProp);
         if (!domibusConfigurationService.isMultiTenantAware() && pause(pullProcesses, numberOfPullRequestPerMpc)) {
