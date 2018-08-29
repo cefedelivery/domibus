@@ -6,11 +6,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="pullRequestJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.ebms3.puller.MessagePullerJob"/>
-        <property name="durability" value="true"/>
-    </bean>
 
     <bean id="activateSuspendedUsersJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
@@ -34,13 +29,6 @@
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.core.replication.UIReplicationJob"/>
         <property name="durability" value="true"/>
-    </bean>
-
-    <bean id="pullRequestTrigger"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
-        <property name="jobDetail" ref="pullRequestJob"/>
-        <property name="cronExpression" value="${domibus.msh.pull.cron}"/>
-        <property name="startDelay" value="30000"/>
     </bean>
 
     <bean id="activateSuspendedUserTrigger"

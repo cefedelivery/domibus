@@ -47,10 +47,10 @@ public class UIReplicationListener {
             LOG.debug("UIReplication is disabled - no processing will occur");
             return;
         }
+
         final String messageId = map.getStringProperty(MessageConstants.MESSAGE_ID);
         final String jmsType = map.getJMSType();
-
-        LOG.debug("processUIReplication for messageId=[{}] domain=[{}] jmsType=[{}]", jmsType, messageId, domainCode);
+        LOG.debug("processUIReplication for messageId=[{}] domain=[{}] jmsType=[{}]", messageId, domainCode, jmsType);
 
         switch (UIJMSType.valueOf(jmsType)) {
             case USER_MESSAGE_RECEIVED:

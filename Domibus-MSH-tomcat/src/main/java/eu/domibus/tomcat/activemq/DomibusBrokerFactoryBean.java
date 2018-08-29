@@ -1,6 +1,7 @@
 package eu.domibus.tomcat.activemq;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.jms.spi.InternalJMSManager;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.activemq.broker.region.Destination;
@@ -10,8 +11,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *  This factory bean overrides getObject method just for setting MaxBrowsePageSize as the
- *  maxCount of listPendingMessages
+ * This factory bean overrides getObject method just for setting MaxBrowsePageSize for all JMS queues
  *
  * @author Tiago Miguel
  * @since 3.3.2
@@ -25,14 +25,17 @@ public class DomibusBrokerFactoryBean extends BrokerFactoryBean {
 
     @Override
     public Object getObject() throws Exception {
-        String maxCountPendingMessagesStr = domibusPropertyProvider.getProperty("domibus.listPendingMessages.maxCount");
+        final int maxBrowsePageSize = NumberUtils.toInt(domibusPropertyProvider.getProperty(InternalJMSManager.PROP_MAX_BROWSE_SIZE));
+        if (maxBrowsePageSize <= 0) {
+            return super.getObject();
+        }
+
         ActiveMQDestination[] destinations = this.getBroker().getDestinations();
-        final int maxBrowsePageSize = NumberUtils.toInt(maxCountPendingMessagesStr);
         for (ActiveMQDestination activeMQDestination : destinations) {
             final Destination destination = this.getBroker().getDestination(activeMQDestination);
-            if(destination != null) {
+            if (destination != null) {
                 destination.setMaxBrowsePageSize(maxBrowsePageSize);
-                LOGGER.debug("MaxBrowsePageSize was set to [{}] in [{}]", maxCountPendingMessagesStr, activeMQDestination);
+                LOGGER.debug("MaxBrowsePageSize was set to [{}] in [{}]", maxBrowsePageSize, activeMQDestination);
             }
         }
         return this.getBroker();
