@@ -127,7 +127,7 @@ public class UIReplicationDataServiceImplTest {
         }};
     }
 
-   // @Test
+    @Test
     public void testMessageStatusChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
         final UserMessageLog userMessageLog = createUserMessageLog();
 
@@ -145,22 +145,20 @@ public class UIReplicationDataServiceImplTest {
         //tested method
         uiReplicationDataService.messageStatusChange(messageId, messageStatus, jmsTime.getTime());
 
-        new FullVerifications() {{
+        new FullVerifications(uiReplicationDataService) {{
             String messageIdActual;
             MessageStatus messageStatusActual;
             Date deletedActual, nextAttemptActual, failedActual, lastModifiedActual;
 
             uiMessageDao.updateMessageStatus(messageIdActual = withCapture(), messageStatusActual = withCapture(),
                     deletedActual = withCapture(), nextAttemptActual = withCapture(), failedActual = withCapture(),
-            lastModifiedActual = withCapture());
+            withAny(new java.util.Date()));
 
             Assert.assertEquals(messageId, messageIdActual);
             Assert.assertEquals(messageStatus, messageStatusActual);
             Assert.assertEquals(deleted, deletedActual);
             Assert.assertEquals(nextAttempt, nextAttemptActual);
             Assert.assertEquals(failed, failedActual);
-            Assert.assertEquals(jmsTime.getTime(), lastModifiedActual );
-
         }};
     }
 
@@ -184,7 +182,7 @@ public class UIReplicationDataServiceImplTest {
         }};
     }
 
-   // @Test
+    @Test
     public void testMessageNotificationStatusChange_EntityFound_ResultOK(final @Mocked UIMessageEntity uiMessageEntity) {
         final UserMessageLog userMessageLog = createUserMessageLog();
 
@@ -202,18 +200,16 @@ public class UIReplicationDataServiceImplTest {
         //tested method
         uiReplicationDataService.messageNotificationStatusChange(messageId, notificationStatus, jmsTime.getTime());
 
-        new Verifications() {{
+        new FullVerifications(uiReplicationDataService) {{
             String messageIdActual;
             NotificationStatus notificationStatusActual;
-            Date lastModifiedActual;
 
             uiMessageDao.updateNotificationStatus(messageIdActual = withCapture(),
-                    notificationStatusActual = withCapture(), lastModifiedActual = withCapture());
-
+                    notificationStatusActual = withCapture(), withAny(new java.util.Date()));
 
             Assert.assertEquals(messageId, messageIdActual);
             Assert.assertEquals(notificationStatus, notificationStatusActual);
-            Assert.assertEquals(jmsTime, lastModifiedActual);
+
         }};
     }
 

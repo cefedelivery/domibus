@@ -149,7 +149,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
 
     @Override
     public boolean updateMessageStatus(String messageId, MessageStatus messageStatus, Date deleted, Date nextAttempt,
-                                       Date failed,Date lastModified) {
+                                       Date failed, Date lastModified) {
         try {
             int rowsUpdated = this.em.createNamedQuery("UIMessageEntity.updateMessageStatus", UIMessageEntity.class)
                     .setParameter(1, messageStatus.name())
