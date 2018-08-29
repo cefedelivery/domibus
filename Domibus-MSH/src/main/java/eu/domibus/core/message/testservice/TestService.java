@@ -1,4 +1,4 @@
-package eu.domibus.core.message.test;
+package eu.domibus.core.message.testservice;
 
 import com.thoughtworks.xstream.XStream;
 import eu.domibus.core.pmode.PModeProvider;
