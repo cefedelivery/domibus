@@ -70,7 +70,7 @@ public class UpdateRetryLoggingService {
         userMessageLog.setNextAttempt(userMessageLog.getReceived()); // this is needed for the first computation of "next attempt" if receiver is down
         LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
         userMessageLogDao.update(userMessageLog);
-        if (hasAttemptsLeft(userMessageLog, legConfiguration)) {
+        if (hasAttemptsLeft(userMessageLog, legConfiguration) && !userMessageLog.isTestMessage()) {
             increaseAttempAndNotify(legConfiguration, messageStatus, userMessageLog);
         } else { // max retries reached, mark message as ultimately failed (the message may be pushed back to the send queue by an administrator but this send completely failed)
             messageFailed(userMessageLog);
@@ -81,16 +81,16 @@ public class UpdateRetryLoggingService {
     public void messageFailed(MessageLog userMessageLog) {
         final String messageId = userMessageLog.getMessageId();
         LOG.businessError(DomibusMessageCode.BUS_MESSAGE_SEND_FAILURE);
-        if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus())) {
+        if (NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus()) && !userMessageLog.isTestMessage()) {
             LOG.info("Notifying backend for message failure");
             backendNotificationService.notifyOfSendFailure(messageId);
         }
         userMessageLogService.setMessageAsSendFailure(messageId);
 
-            if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
-                messagingDao.clearPayloadData(messageId);
-            }
+        if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
+            messagingDao.clearPayloadData(messageId);
         }
+    }
 
 
     @Transactional
@@ -119,7 +119,8 @@ public class UpdateRetryLoggingService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
-     * @param userMessageLog the message to check
+     *
+     * @param userMessageLog   the message to check
      * @param legConfiguration processing information for the message
      * @return true if the message can be sent again
      */

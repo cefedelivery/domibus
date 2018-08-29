@@ -24,7 +24,7 @@
     </modules>
     <properties>
         <cxf.version>3.2.4</cxf.version>
-        <spring.version>4.3.14.RELEASE</spring.version>
+        <spring.version>4.3.17.RELEASE</spring.version>
         <spring.security.version>4.2.6.RELEASE</spring.security.version>
         <activemq.version>5.15.2</activemq.version>
         <aspectj.version>1.8.13</aspectj.version>

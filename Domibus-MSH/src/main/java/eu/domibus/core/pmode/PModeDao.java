@@ -450,4 +450,10 @@ public class PModeDao extends PModeProvider {
         // Not implemented on purpose
         return null;
     }
+
+    @Override
+    public Party getPartyByIdentifier(String partyIdentifier) {
+        // Not implemented on purpose
+        return null;
+    }
 }

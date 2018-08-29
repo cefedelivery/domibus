@@ -225,4 +225,11 @@ public abstract class MessageLog extends AbstractBaseAuditEntity {
     public void setBackend(final String backend) {
         this.backend = backend;
     }
+
+    public boolean isTestMessage() {
+        if(MessageSubtype.TEST == messageSubtype) {
+            return true;
+        }
+        return false;
+    }
 }

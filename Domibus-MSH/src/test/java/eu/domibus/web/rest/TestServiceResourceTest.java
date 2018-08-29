@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.party.PartyService;
+import eu.domibus.core.message.test.TestService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.messaging.MessagingProcessingException;
@@ -29,6 +30,9 @@ public class TestServiceResourceTest {
 
     @Tested
     TestServiceResource testServiceResource;
+
+    @Injectable
+    TestService testService;
 
     @Injectable
     PartyService partyService;
@@ -81,17 +85,7 @@ public class TestServiceResourceTest {
         testServiceRequestRO.setReceiver("receiver");
 
         new Expectations() {{
-            pModeProvider.getPartyIdType(anyString);
-            result = "partyIdType";
-            pModeProvider.getServiceType(anyString);
-            result = "serviceType";
-            pModeProvider.getRole("INITIATOR", anyString);
-            result = "initiator";
-            pModeProvider.getRole("RESPONDER", anyString);
-            result = "responder";
-            pModeProvider.getAgreementRef(anyString);
-            result = "agreementref";
-            databaseMessageHandler.submit((Submission) any, "TestService");
+            testService.submitTest(testServiceRequestRO.getSender(),  testServiceRequestRO.getReceiver());
             result = "test";
         }};
 
@@ -112,17 +106,7 @@ public class TestServiceResourceTest {
         testServiceRequestRO.setServiceType("servicetype");
 
         new Expectations() {{
-            pModeProvider.getPartyIdType(anyString);
-            result = "partyIdType";
-            pModeProvider.getServiceType(anyString);
-            result = "serviceType";
-            pModeProvider.getRole("INITIATOR", anyString);
-            result = "initiator";
-            pModeProvider.getRole("RESPONDER", anyString);
-            result = "responder";
-            pModeProvider.getAgreementRef(anyString);
-            result = "agreementref";
-            databaseMessageHandler.submit((Submission) any, "TestService");
+            testService.submitTestDynamicDiscovery(testServiceRequestRO.getSender(),  testServiceRequestRO.getReceiver(), testServiceRequestRO.getReceiverType());
             result = "dynamicdiscovery";
         }};
 

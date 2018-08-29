@@ -2,11 +2,9 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.RawEnvelopeLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.ReliabilityService;
+import eu.domibus.ebms3.common.model.PartyInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -31,12 +29,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(ReliabilityServiceImpl.class);
 
     @Autowired
-    private MessageExchangeService messageExchangeService;
-
-    @Autowired
-    private UserMessageLogDao userMessageLogDao;
-
-    @Autowired
     private UserMessageLogService userMessageLogService;
 
     @Autowired
@@ -47,9 +39,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
 
     @Autowired
     private UpdateRetryLoggingService updateRetryLoggingService;
-
-    @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
@@ -63,11 +52,8 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    private void changeMessageStatusAndNotify(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
-
-        if(userMessageHandlerService.checkTestMessage(legConfiguration)) {
-            return;
-        }
+    private void changeMessageStatusAndNotify(String messageId,  UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+        final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
 
         switch (reliabilityCheckSuccessful) {
             case OK:
@@ -81,9 +67,13 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                     default:
                         assert false;
                 }
-                backendNotificationService.notifyOfSendSuccess(messageId);
+                if (!isTestMessage) {
+                    backendNotificationService.notifyOfSendSuccess(messageId);
+                }
+
                 messagingDao.clearPayloadData(messageId);
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId, userMessage.getPartyInfo().getFrom().getFirstPartyId(), userMessage.getPartyInfo().getTo().getFirstPartyId());
+                final PartyInfo partyInfo = userMessage.getPartyInfo();
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
                 break;
             case WAITING_FOR_CALLBACK:
                 updateRetryLoggingService.updateWaitingReceiptMessageRetryLogging(messageId, legConfiguration);
