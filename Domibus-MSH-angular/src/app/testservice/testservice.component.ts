@@ -110,7 +110,6 @@ export class TestServiceComponent {
     if(this.isDynamicDiscoveryPModeProvider()) {
       this.buttonDisabled = false;
       this.clearInfo();
-      //this.getLastSentRequest(this.filter.finalRecipient);
     } else {
       this.disableButtonAndClearInfo();
     }

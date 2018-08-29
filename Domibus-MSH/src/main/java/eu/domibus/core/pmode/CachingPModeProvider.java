@@ -206,6 +206,19 @@ public class CachingPModeProvider extends PModeProvider {
     }
 
     @Override
+    public Party getPartyByIdentifier(String partyIdentifier) {
+        for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {
+            final Set<Identifier> identifiers = party.getIdentifiers();
+            for (Identifier identifier : identifiers) {
+                if(StringUtils.equalsIgnoreCase(identifier.getPartyId(), partyIdentifier)) {
+                    return party;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Party getSenderParty(final String pModeKey) {
         final String partyKey = this.getSenderPartyNameFromPModeKey(pModeKey);
         for (final Party party : this.getConfiguration().getBusinessProcesses().getParties()) {

@@ -7,19 +7,21 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.MessageLogInfo;
+import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagesLogService;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.NoResultException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,7 +64,7 @@ public class MessageLogResource {
     private MessagingDao messagingDao;
 
     @Autowired
-    private PartyDao partyDao;
+    private PModeProvider pModeProvider;
 
     @Autowired
     private DateUtil dateUtil;
@@ -243,44 +246,55 @@ public class MessageLogResource {
         LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
 
         String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
-        UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(userMessageId);
+        if(StringUtils.isBlank(userMessageId)) {
+            LOGGER.debug("Could not find last user message id for party [{}]", partyId);
+            return ResponseEntity.noContent().build();
+        }
 
-        if (userMessageByMessageId != null) {
+        UserMessageLog userMessageLog = null;
+        //TODO create a UserMessageLog object independent of Hibernate annotations in the domibus-api and use the UserMessageLogService instead
+        try {
+            userMessageLog = userMessageLogDao.findByMessageId(userMessageId);
+        } catch (NoResultException ex){
+            LOGGER.trace("No UserMessageLog found for message with id [{}]", userMessageId);
+        }
+
+        if (userMessageLog != null) {
             TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
             testServiceMessageInfoRO.setMessageId(userMessageId);
-            testServiceMessageInfoRO.setTimeReceived(userMessageByMessageId.getMessageInfo().getTimestamp());
+            testServiceMessageInfoRO.setTimeReceived(userMessageLog.getReceived());
             testServiceMessageInfoRO.setPartyId(partyId);
-            Party party = partyDao.findById(partyId);
+            Party party = pModeProvider.getPartyByIdentifier(partyId);
             testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
 
             return ResponseEntity.ok().body(testServiceMessageInfoRO);
         }
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
     @RequestMapping(value = "test/incoming/latest", method = RequestMethod.GET)
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
         LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
-        SignalMessage signalMessage = messaging.getSignalMessage();
-        if (signalMessage != null) {
-            String signalMessageId = signalMessage.getMessageInfo().getMessageId();
-            SignalMessage signalMessageByMessageId = messagingDao.findSignalMessageByMessageId(signalMessageId);
-
-            if (signalMessageByMessageId != null) {
-                TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
-                testServiceMessageInfoRO.setMessageId(signalMessageId);
-                testServiceMessageInfoRO.setTimeReceived(signalMessageByMessageId.getMessageInfo().getTimestamp());
-                Party party = partyDao.findById(partyId);
-                testServiceMessageInfoRO.setPartyId(partyId);
-                testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
-
-                return ResponseEntity.ok().body(testServiceMessageInfoRO);
-            }
+        if(messaging == null) {
+            LOGGER.debug("Could not find messaging for message ID[{}]", userMessageId);
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.notFound().build();
+        SignalMessage signalMessage = messaging.getSignalMessage();
+        if (signalMessage != null) {
+            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+            testServiceMessageInfoRO.setMessageId(signalMessage.getMessageInfo().getMessageId());
+            testServiceMessageInfoRO.setTimeReceived(signalMessage.getMessageInfo().getTimestamp());
+            Party party = pModeProvider.getPartyByIdentifier(partyId);
+            testServiceMessageInfoRO.setPartyId(partyId);
+            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+        }
+
+        return ResponseEntity.noContent().build();
     }
 
     private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype") MessageSubtype messageSubtype) {
