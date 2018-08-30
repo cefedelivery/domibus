@@ -99,10 +99,6 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
                 internalJmsDestination.setProperty(PROPERTY_OBJECT_NAME, objectName);
                 internalJmsDestination.setProperty(PROPERTY_JNDI_NAME, jmsQueueControl.getAddress());
                 internalJmsDestination.setInternal(jmsDestinationHelper.isInternal(jmsQueueControl.getAddress()));
-                if (StringUtils.indexOfAny(internalJmsDestination.getName(), SKIP_QUEUE_NAMES) == -1) {
-                    destinationMap.put(jmsQueueControl.getName(), internalJmsDestination);
-                }
-
             }
             return destinationMap;
         } catch (Exception e) {
