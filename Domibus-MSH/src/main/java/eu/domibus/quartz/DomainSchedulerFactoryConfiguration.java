@@ -155,7 +155,9 @@ public class DomainSchedulerFactoryConfiguration {
             return null;
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(pullRetryWorkerJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.pull.retry.cron"));
+        String propertyValue = domibusPropertyProvider.getDomainProperty("domibus.pull.retry.cron");
+        obj.setCronExpression(propertyValue);
+        LOG.debug("pullRetryWorkerTrigger configured with cronExpression [{}]", propertyValue);
         obj.setStartDelay(20000);
         return obj;
     }
@@ -177,7 +179,9 @@ public class DomainSchedulerFactoryConfiguration {
         }
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(pullRequestWorkerJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.pull.cron"));
+        String propertyValue = domibusPropertyProvider.getDomainProperty("domibus.msh.pull.cron");
+        obj.setCronExpression(propertyValue);
+        LOG.debug("pullRequestTrigger configured with cronExpression [{}]", propertyValue);
         obj.setStartDelay(20000);
         return obj;
     }
