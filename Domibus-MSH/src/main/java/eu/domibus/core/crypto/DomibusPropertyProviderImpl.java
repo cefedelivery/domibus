@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -37,11 +40,25 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getProperty(Domain domain, String propertyName) {
         final String domainPropertyName = getPropertyName(domain, propertyName);
-        String propertyValue = domibusProperties.getProperty(domainPropertyName);
+        String propertyValue = getPropertyValue(domainPropertyName);
         if (StringUtils.isEmpty(propertyValue) && DomainService.DEFAULT_DOMAIN.equals(domain)) {
-            propertyValue = domibusProperties.getProperty(propertyName);
+            propertyValue = getPropertyValue(propertyName);
         }
         return propertyValue;
+    }
+
+    /**
+     * Get the value from the system properties and if not found get the value from domibus properties
+     *
+     * @param propertyName
+     * @return
+     */
+    protected String getPropertyValue(String propertyName) {
+        String result = System.getProperty(propertyName);
+        if (StringUtils.isEmpty(result)) {
+            result = domibusProperties.getProperty(propertyName);
+        }
+        return result;
     }
 
 
@@ -85,7 +102,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
 
     /**
-     *{@inheritDoc}
+     * {@inheritDoc}
      */
     @Override
     public String getDomainProperty(String propertyName) {
@@ -124,11 +141,11 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
     @Override
     public Set<String> filterPropertiesName(Predicate<String> predicate) {
-        Set<String> filteredPropertyNames=new HashSet<>();
+        Set<String> filteredPropertyNames = new HashSet<>();
         final Enumeration<?> enumeration = domibusProperties.propertyNames();
         while (enumeration.hasMoreElements()) {
             final String propertyName = (String) enumeration.nextElement();
-            if (predicate.test(propertyName)){
+            if (predicate.test(propertyName)) {
                 filteredPropertyNames.add(propertyName);
             }
         }
