@@ -6,6 +6,7 @@ import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.NotificationType;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -292,7 +293,7 @@ public class BackendNotificationService {
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_FAILURE);
         userMessageLogDao.setAsNotified(messageId);
 
-        uiReplicationSignalService.messageNotificationStatusChange(messageId);
+        uiReplicationSignalService.messageNotificationStatusChange(messageId, NotificationStatus.NOTIFIED);
     }
 
     public void notifyOfSendSuccess(final String messageId) {
@@ -303,7 +304,7 @@ public class BackendNotificationService {
         notify(messageId, backendName, NotificationType.MESSAGE_SEND_SUCCESS);
         userMessageLogDao.setAsNotified(messageId);
 
-        uiReplicationSignalService.messageNotificationStatusChange(messageId);
+        uiReplicationSignalService.messageNotificationStatusChange(messageId, NotificationStatus.NOTIFIED);
     }
 
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)

@@ -1,5 +1,7 @@
 package eu.domibus.core.replication;
 
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.logging.DomibusLogger;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -34,6 +37,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
 
     /** message id */
     String MESSAGE_ID = "MESSAGE_ID";
+
 
 
     public UIMessageDaoImpl() {
@@ -141,6 +145,65 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         }
         em.persist(uiMessageEntity);
         LOG.debug("uiMessageEntity having messageId={} have been inserted", uiMessageEntity.getMessageId());
+    }
+
+    @Override
+    public boolean updateMessageStatus(String messageId, MessageStatus messageStatus, Date deleted, Date nextAttempt,
+                                       Date failed, Date lastModified) {
+        try {
+            int rowsUpdated = this.em.createNamedQuery("UIMessageEntity.updateMessageStatus", UIMessageEntity.class)
+                    .setParameter(1, messageStatus.name())
+                    .setParameter(2, deleted, TemporalType.TIMESTAMP)
+                    .setParameter(3, nextAttempt, TemporalType.TIMESTAMP)
+                    .setParameter(4, failed, TemporalType.TIMESTAMP)
+                    .setParameter(5, lastModified, TemporalType.TIMESTAMP)
+                    .setParameter(6, messageId)
+                    .executeUpdate();
+            return rowsUpdated == 1;
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateNotificationStatus(String messageId, NotificationStatus notificationStatus, Date lastModified) {
+        try {
+            int rowsUpdated = this.em.createNamedQuery("UIMessageEntity.updateNotificationStatus", UIMessageEntity.class)
+                    .setParameter(1, notificationStatus.name())
+                    .setParameter(2, lastModified, TemporalType.TIMESTAMP)
+                    .setParameter(3, messageId)
+                    .executeUpdate();
+            return rowsUpdated == 1;
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateMessage(String messageId, MessageStatus messageStatus, Date deleted, Date failed, Date restored, Date nextAttempt,
+                                 Integer sendAttempts, Integer sendAttemptsMax, Date lastModified) {
+        try {
+            int rowsUpdated = this.em.createNamedQuery("UIMessageEntity.updateMessage", UIMessageEntity.class)
+                    .setParameter(1, messageStatus.name())
+                    .setParameter(2, deleted, TemporalType.TIMESTAMP)
+                    .setParameter(3, failed, TemporalType.TIMESTAMP)
+                    .setParameter(4, restored, TemporalType.TIMESTAMP)
+                    .setParameter(5, nextAttempt, TemporalType.TIMESTAMP)
+                    .setParameter(6, sendAttempts)
+                    .setParameter(7, sendAttemptsMax)
+                    .setParameter(8, lastModified, TemporalType.TIMESTAMP)
+                    .setParameter(9, messageId)
+                    .executeUpdate();
+            return rowsUpdated == 1;
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     /**

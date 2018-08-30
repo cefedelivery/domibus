@@ -5,6 +5,8 @@ import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
@@ -22,6 +24,9 @@ import javax.jms.Queue;
  */
 @Service
 public class UIReplicationSignalService {
+
+    static final String JMS_PROP_STATUS = "status";
+    static final String JMS_PROP_NOTIF_STATUS = "notif_status";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
 
@@ -46,7 +51,7 @@ public class UIReplicationSignalService {
      * @return boolean replication enabled or not
      */
     public boolean isReplicationEnabled() {
-        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(UI_REPLICATION_ENABLED, "false"));
+        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(UI_REPLICATION_ENABLED));
 
         if (!uiReplicationEnabled) {
             LOG.debug("UIReplication is disabled - no processing will occur");
@@ -63,11 +68,30 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
-    public void messageStatusChange(String messageId) {
+    public void userMessageSubmitted(String messageId) {
         if (!isReplicationEnabled()) {
             return;
         }
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE);
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_SUBMITTED);
+
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
+    }
+
+
+    public void messageStatusChange(final String messageId, final MessageStatus messageStatus) {
+        if (!isReplicationEnabled()) {
+            return;
+        }
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_STATUS_CHANGE, messageStatus);
+
+        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
+    }
+
+    public void messageNotificationStatusChange(final String messageId, final NotificationStatus notificationStatus) {
+        if (!isReplicationEnabled()) {
+            return;
+        }
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE,notificationStatus);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
@@ -77,24 +101,6 @@ public class UIReplicationSignalService {
             return;
         }
         final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_CHANGE);
-
-        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
-    }
-
-    public void messageNotificationStatusChange(String messageId) {
-        if (!isReplicationEnabled()) {
-            return;
-        }
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE);
-
-        jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
-    }
-
-    public void userMessageSubmitted(String messageId) {
-        if (!isReplicationEnabled()) {
-            return;
-        }
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.USER_MESSAGE_SUBMITTED);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
@@ -121,6 +127,24 @@ public class UIReplicationSignalService {
         return JMSMessageBuilder.create()
                 .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
+                .build();
+    }
+
+    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, MessageStatus messageStatus) {
+        return JMSMessageBuilder.create()
+                .type(uiJMSType.name())
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(JMS_PROP_STATUS, messageStatus.name())
+                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
+                .build();
+    }
+
+    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, NotificationStatus notificationStatus) {
+        return JMSMessageBuilder.create()
+                .type(uiJMSType.name())
+                .property(MessageConstants.MESSAGE_ID, messageId)
+                .property(JMS_PROP_NOTIF_STATUS, notificationStatus.name())
                 .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
                 .build();
     }

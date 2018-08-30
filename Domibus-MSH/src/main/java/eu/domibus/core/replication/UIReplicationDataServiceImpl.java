@@ -1,6 +1,8 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.MessageStatus;
+import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
@@ -17,11 +19,11 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.hibernate.StaleObjectStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.OptimisticLockException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,90 +72,91 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * {@inheritDoc}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
     @Override
-    public void messageReceived(String messageId) {
-        LOG.debug("UserMessage={} received", messageId);
-        saveUIMessageFromUserMessageLog(messageId);
+    public void messageReceived(String messageId, long jmsTimestamp) {
+        saveUIMessageFromUserMessageLog(messageId, jmsTimestamp);
     }
+
 
     /**
      * {@inheritDoc}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
     @Override
-    public void messageSubmitted(String messageId) {
+    public void messageSubmitted(String messageId, long jmsTimestamp) {
         LOG.debug("UserMessage={} submitted", messageId);
-        saveUIMessageFromUserMessageLog(messageId);
+        saveUIMessageFromUserMessageLog(messageId, jmsTimestamp);
     }
 
     /**
      * {@inheritDoc}
      *
      * @param messageId
+     * @param messageStatus
+     * @param jmsTimestamp
      */
     @Override
-    public void messageStatusChange(String messageId) {
+    public void messageStatusChange(String messageId, MessageStatus messageStatus, long jmsTimestamp) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
-        if (entity != null) {
-            entity.setMessageStatus(userMessageLog.getMessageStatus());
-            entity.setDeleted(userMessageLog.getDeleted());
-            entity.setNextAttempt(userMessageLog.getNextAttempt());
-            entity.setFailed(userMessageLog.getFailed());
-
-            updateAndFlush(messageId, entity, "messageStatusChange");
+        if (entity != null && entity.getLastModified().getTime() <= jmsTimestamp) {
+            uiMessageDao.updateMessageStatus(messageId, messageStatus, userMessageLog.getDeleted(),
+                    userMessageLog.getNextAttempt(), userMessageLog.getFailed(), new Date(jmsTimestamp));
         } else {
-            LOG.warn("messageStatusChange failed for messageId={}", messageId);
+            LOG.debug("messageStatusChange skipped for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced, status={}",
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId,
-                userMessageLog.getMessageStatus());
+                messageStatus);
     }
+
 
     /**
      * {@inheritDoc}
      *
      * @param messageId
+     * @param notificationStatus
+     * @param jmsTimestamp
      */
     @Override
-    public void messageNotificationStatusChange(String messageId) {
+    public void messageNotificationStatusChange(String messageId, NotificationStatus notificationStatus, long jmsTimestamp) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
 
-        if (entity != null) {
-            entity.setNotificationStatus(userMessageLog.getNotificationStatus());
-
-            updateAndFlush(messageId, entity, "messageNotificationStatusChange");
+        if (entity != null && entity.getLastModified2().getTime() <= jmsTimestamp) {
+            uiMessageDao.updateNotificationStatus(messageId, notificationStatus, new Date(jmsTimestamp));
         } else {
-            UIReplicationDataServiceImpl.LOG.warn("messageNotificationStatusChange failed for messageId={}", messageId);
+            LOG.debug("messageNotificationStatusChange skipped for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced, notificationStatus={}",
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId,
-                userMessageLog.getNotificationStatus());
-
+                notificationStatus);
     }
-
 
     /**
      * {@inheritDoc}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
     @Override
-    public void messageChange(String messageId) {
-
+    public void messageChange(String messageId, long jmsTimestamp) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UIMessageEntity entity = uiMessageDao.findUIMessageByMessageId(messageId);
+        final Date jmsTime = new Date(jmsTimestamp);
 
-        if (entity != null) {
-            updateUIMessage(userMessageLog, entity);
-
-            updateAndFlush(messageId, entity, "messageChange");
+        if (entity != null && entity.getLastModified().getTime() <= jmsTimestamp) {
+            uiMessageDao.updateMessage(messageId, userMessageLog.getMessageStatus(),
+                    userMessageLog.getDeleted(), userMessageLog.getFailed(), userMessageLog.getRestored(),
+                    userMessageLog.getNextAttempt(), userMessageLog.getSendAttempts(), userMessageLog.getSendAttemptsMax(),
+                    jmsTime);
         } else {
-            UIReplicationDataServiceImpl.LOG.warn("messageChange failed for messageId={}", messageId);
+            LOG.debug("messageChange skipped for messageId={}", messageId);
         }
         LOG.debug("{}Message with messageId={} synced",
                 MessageType.USER_MESSAGE.equals(userMessageLog.getMessageType()) ? "User" : "Signal", messageId);
@@ -163,22 +166,24 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * {@inheritDoc}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
     @Override
-    public void signalMessageSubmitted(final String messageId) {
+    public void signalMessageSubmitted(String messageId, long jmsTimestamp) {
         LOG.debug("SignalMessage={} submitted", messageId);
-        saveUIMessageFromSignalMessageLog(messageId);
+        saveUIMessageFromSignalMessageLog(messageId, jmsTimestamp);
     }
 
     /**
      * {@inheritDoc}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
     @Override
-    public void signalMessageReceived(final String messageId) {
+    public void signalMessageReceived(String messageId, long jmsTimestamp) {
         LOG.debug("SignalMessage={} received", messageId);
-        saveUIMessageFromSignalMessageLog(messageId);
+        saveUIMessageFromSignalMessageLog(messageId, jmsTimestamp);
     }
 
     /**
@@ -254,7 +259,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
             }
             LOG.debug("finish to update TB_MESSAGE_UI after {} milliseconds", System.currentTimeMillis() - startTime);
         }
-        return uiMessageEntityList.size();
+        return recordsToSync;
     }
 
     /**
@@ -274,27 +279,12 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     }
 
     /**
-     * Update (merge) a JPA entity and force the flush in order to catch right away the {@link OptimisticLockException}
-     *
-     * @param messageId
-     * @param entity
-     * @param operationName
-     */
-    void updateAndFlush(String messageId, UIMessageEntity entity, String operationName) {
-        try {
-            uiMessageDao.update(entity);
-            uiMessageDao.flush();
-        } catch (StaleObjectStateException | OptimisticLockException e) {
-            LOG.debug("Optimistic lock detected for {} on messageId={}", operationName, messageId);
-        }
-    }
-
-    /**
      * Replicates {@link SignalMessage} into {@code TB_MESSAGE_UI} table as {@link UIMessageEntity}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    void saveUIMessageFromSignalMessageLog(String messageId) {
+    void saveUIMessageFromSignalMessageLog(String messageId, final long jmsTimestamp) {
         final SignalMessageLog signalMessageLog = signalMessageLogDao.findByMessageId(messageId);
         final SignalMessage signalMessage = messagingDao.findSignalMessageByMessageId(messageId);
 
@@ -303,6 +293,7 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
         UIMessageEntity entity = domainConverter.convert(signalMessageLog, UIMessageEntity.class);
 
+        entity.setEntityId(0); //dozer copies other value here
         entity.setMessageId(messageId);
         entity.setConversationId(StringUtils.EMPTY);
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
@@ -310,6 +301,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setFromScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
         entity.setToScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setRefToMessageId(signalMessage.getMessageInfo().getRefToMessageId());
+        entity.setLastModified(new Date(jmsTimestamp));
+        entity.setLastModified2(entity.getLastModified());
 
         uiMessageDao.create(entity);
         LOG.debug("SignalMessage with messageId={} replicated", messageId);
@@ -319,14 +312,16 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
      * Replicates {@link UserMessage} into {@code TB_MESSAGE_UI} table as {@link UIMessageEntity}
      *
      * @param messageId
+     * @param jmsTimestamp
      */
-    protected void saveUIMessageFromUserMessageLog(String messageId) {
+    protected void saveUIMessageFromUserMessageLog(String messageId, long jmsTimestamp) {
         final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
 
         //using Dozer
         UIMessageEntity entity = domainConverter.convert(userMessageLog, UIMessageEntity.class);
 
+        entity.setEntityId(0); //dozer
         entity.setMessageId(messageId);
         entity.setConversationId(userMessage.getCollaborationInfo().getConversationId());
         entity.setFromId(userMessage.getPartyInfo().getFrom().getPartyId().iterator().next().getValue());
@@ -334,26 +329,11 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         entity.setFromScheme(userMessageDefaultServiceHelper.getOriginalSender(userMessage));
         entity.setToScheme(userMessageDefaultServiceHelper.getFinalRecipient(userMessage));
         entity.setRefToMessageId(userMessage.getMessageInfo().getRefToMessageId());
+        entity.setLastModified(new Date(jmsTimestamp));
+        entity.setLastModified2(entity.getLastModified());
 
         uiMessageDao.create(entity);
         LOG.debug("UserMessage with messageId={} replicated", messageId);
-    }
-
-    /**
-     * Updates {@link UIMessageEntity} fields with info from {@link UserMessageLog}
-     *
-     * @param userMessageLog
-     * @param entity
-     */
-    void updateUIMessage(UserMessageLog userMessageLog, UIMessageEntity entity) {
-        entity.setMessageStatus(userMessageLog.getMessageStatus());
-        entity.setNotificationStatus(userMessageLog.getNotificationStatus());
-        entity.setDeleted(userMessageLog.getDeleted());
-        entity.setFailed(userMessageLog.getFailed());
-        entity.setRestored(userMessageLog.getRestored());
-        entity.setNextAttempt(userMessageLog.getNextAttempt());
-        entity.setSendAttempts(userMessageLog.getSendAttempts());
-        entity.setSendAttemptsMax(userMessageLog.getSendAttemptsMax());
     }
 
     /**

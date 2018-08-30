@@ -21,11 +21,19 @@ import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageDao;
 import eu.domibus.core.replication.UIMessageService;
+import eu.domibus.core.replication.UIReplicationSignalService;
+import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Mocked;
+import mockit.Tested;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +89,9 @@ public class MessageLogResourceTest {
 
     @Injectable
     private MessagesLogService messagesLogService;
+
+    @Injectable
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Parameterized.Parameter(0)
     public MessageType messageType;

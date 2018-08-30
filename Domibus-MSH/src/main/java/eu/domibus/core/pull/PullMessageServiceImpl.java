@@ -311,7 +311,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         userMessageLog.setMessageStatus(waitingForReceipt);
         messagingLockDao.save(lock);
         userMessageLogDao.update(userMessageLog);
-        uiReplicationSignalService.messageStatusChange(userMessageLog.getMessageId());
+        uiReplicationSignalService.messageStatusChange(userMessageLog.getMessageId(), waitingForReceipt);
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
     }
 

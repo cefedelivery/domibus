@@ -23,16 +23,17 @@ public class UIReplicationJob extends DomibusQuartzJobBean {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationJob.class);
 
     @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
     private UIReplicationDataService uiReplicationDataService;
 
     @Autowired
-    private DomibusPropertyProvider domibusPropertyProvider;
+    private UIReplicationSignalService uiReplicationSignalService;
 
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
-        boolean uiReplicationEnabled = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "false"));
-
-        if (!uiReplicationEnabled) {
+        if (!uiReplicationSignalService.isReplicationEnabled()) {
             LOG.debug("UIReplication is disabled - no processing will occur");
             return;
         }

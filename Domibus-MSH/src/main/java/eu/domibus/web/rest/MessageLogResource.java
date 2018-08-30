@@ -17,6 +17,7 @@ import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageService;
+import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
@@ -78,10 +79,8 @@ public class MessageLogResource {
     @Autowired
     private MessagesLogService messagesLogService;
 
-    /**
-     * use TB_MESSAGE_UI table instead of joins, defaults to false
-     */
-    boolean useFlatTable;
+    @Autowired
+    private UIReplicationSignalService uiReplicationSignalService;
 
     Date defaultFrom;
 
@@ -89,7 +88,6 @@ public class MessageLogResource {
 
     @PostConstruct
     public void init() {
-        useFlatTable = Boolean.parseBoolean(domibusPropertyProvider.getProperty("domibus.ui.replication.enabled", "false"));
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
         try {
             defaultFrom = ft.parse("1970-01-01 23:59:00");
@@ -145,7 +143,8 @@ public class MessageLogResource {
         LOGGER.debug("using filters [{}]", filters);
 
         MessageLogResultRO result;
-        if (useFlatTable) {
+        if (uiReplicationSignalService.isReplicationEnabled()) {
+            /** use TB_MESSAGE_UI table instead */
             result = uiMessageService.countAndFindPaged(pageSize * page, pageSize, column, asc, filters);
         } else {
             //old, fashioned way
@@ -220,7 +219,8 @@ public class MessageLogResource {
         int maxCSVrows = Integer.parseInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
 
         List<MessageLogInfo> resultList;
-        if (useFlatTable) {
+        if (uiReplicationSignalService.isReplicationEnabled()) {
+            /** use TB_MESSAGE_UI table instead */
             resultList = uiMessageService.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
         } else {
             resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, orderByColumn, asc, filters);
