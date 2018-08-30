@@ -43,6 +43,13 @@ public class JMSManagerImpl implements JMSManager {
 
     private static final String SELECTOR = "selector";
 
+    /** queue names to be skip from showing into GUI interface */
+    private static final String[] SKIP_QUEUE_NAMES = {};
+
+    /** multi-tenancy mode - JMS plugin queues suffixes per domain */
+    private static final String[] JMS_QUEUE_NAMES = {"domibus.backend.jms.outQueue", "domibus.backend.jms.replyQueue",
+            "domibus.backend.jms.errorNotifyConsumer", "domibus.backend.jms.errorNotifyProducer"};
+
     @Autowired
     InternalJMSManager internalJmsManager;
 

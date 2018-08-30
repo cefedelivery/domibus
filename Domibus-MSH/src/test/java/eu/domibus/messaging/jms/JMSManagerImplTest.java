@@ -4,6 +4,7 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
@@ -14,7 +15,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 
@@ -57,6 +57,9 @@ public class JMSManagerImplTest {
 
     @Injectable
     private JmsTemplate jsonJmsTemplate;
+
+    @Injectable
+    private DomainService domainService;
 
     @Test
     public void testGetDestinations() throws Exception {
