@@ -6,6 +6,7 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
@@ -26,10 +27,8 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.Topic;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Cosmin Baciu
@@ -78,9 +77,23 @@ public class JMSManagerImpl implements JMSManager {
     @Autowired
     protected AuthUtils authUtils;
 
+    @Autowired
+    private DomainService domainService;
+
     @Override
     public Map<String, JMSDestination> getDestinations() {
-        return jmsDestinationMapper.convert(internalJmsManager.findDestinationsGroupedByFQName());
+        Map<String, InternalJMSDestination> destinations = internalJmsManager.findDestinationsGroupedByFQName();
+        Map<String, InternalJMSDestination> result = new HashMap<>();
+
+        for (Map.Entry<String, InternalJMSDestination> mapEntry: destinations.entrySet()) {
+            final String internalQueueName = mapEntry.getValue().getName();
+            if (StringUtils.indexOfAny(internalQueueName, SKIP_QUEUE_NAMES) == -1 &&
+                    !jmsQueueInOtherDomain(internalQueueName)) {
+                result.put(mapEntry.getKey(), mapEntry.getValue());
+            }
+        }
+
+        return jmsDestinationMapper.convert(result);
     }
 
     @Override
@@ -217,5 +230,33 @@ public class JMSManagerImpl implements JMSManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * tests if the given queue should not be show in current domain list
+     * of JMS queues prefixed with domain_name.*
+     *
+     * @param jmsQueueInternalName
+     * @return
+     */
+    protected boolean jmsQueueInOtherDomain(final String jmsQueueInternalName) {
+        /** multi-tenancy but not super-admin*/
+        if (domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin()) {
+            List<Domain> domainsList = domainService.getDomains();
+            Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+
+            List<Domain> domainsToCheck = domainsList.stream().filter(domain -> !domain.equals(DomainService.DEFAULT_DOMAIN) &&
+                    !domain.equals(currentDomain)).collect(Collectors.toList());
+
+            List<String> queuesToCheck = new ArrayList<>();
+            for (Domain domain : domainsToCheck) {
+                for (String jmsQueue : JMS_QUEUE_NAMES) {
+                    queuesToCheck.add(domain.getCode() + "." + jmsQueue);
+                }
+            }
+
+            return StringUtils.indexOfAny(jmsQueueInternalName, queuesToCheck.stream().toArray(String[]::new)) >= 0;
+        }
+        return false;
     }
 }
