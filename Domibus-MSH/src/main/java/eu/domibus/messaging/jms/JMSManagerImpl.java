@@ -233,8 +233,8 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     /**
-     * tests if the given queue should not be show in current domain list
-     * of JMS queues prefixed with domain_name.*
+     * tests if the given queue {@code jmsQueueInternalName} should be excluded from current queues of JMS Monitoring page
+     * - when the user is logged as Admin domain and queue is defined as JMS Plugin queue
      *
      * @param jmsQueueInternalName
      * @return
