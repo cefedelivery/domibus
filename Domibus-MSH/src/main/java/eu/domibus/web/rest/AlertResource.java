@@ -13,7 +13,6 @@ import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -113,7 +112,7 @@ public class AlertResource {
             return Lists.newArrayList();
         }
         switch (alertType) {
-            case MSG_COMMUNICATION_FAILURE:
+            case MSG_STATUS_CHANGED:
                 final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
                 return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
             case CERT_EXPIRED:
@@ -226,7 +225,7 @@ public class AlertResource {
         }
 
         if (StringUtils.isEmpty(alertType)) {
-            alertType = AlertType.MSG_COMMUNICATION_FAILURE.name();
+            alertType = AlertType.MSG_STATUS_CHANGED.name();
         }
         if (parameters != null) {
             final List<String> nonDateParameters = getNonDateParameters(alertType);

@@ -50,7 +50,7 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     @Test
     public void getAlertLevelForMessage(final @Mocked MessagingModuleConfiguration messagingConfiguration) {
         final Alert alert = new Alert();
-        alert.setAlertType(AlertType.MSG_COMMUNICATION_FAILURE);
+        alert.setAlertType(AlertType.MSG_STATUS_CHANGED);
         new Expectations(multiDomainAlertConfigurationService) {{
             multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
             result = messagingConfiguration;
@@ -129,7 +129,7 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
             result = messagingConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.MSG_COMMUNICATION_FAILURE);
+        multiDomainAlertConfigurationService.getMailSubject(AlertType.MSG_STATUS_CHANGED);
         new Verifications() {{
             messagingConfiguration.getMailSubject();
             times = 1;

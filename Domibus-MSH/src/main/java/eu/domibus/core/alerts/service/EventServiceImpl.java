@@ -19,7 +19,6 @@ import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -85,7 +84,7 @@ public class EventServiceImpl implements EventService {
             final MessageStatus oldStatus,
             final MessageStatus newStatus,
             final MSHRole role) {
-        Event event = new Event(EventType.MSG_COMMUNICATION_FAILURE);
+        Event event = new Event(EventType.MSG_STATUS_CHANGED);
         event.addStringKeyValue(OLD_STATUS.name(), oldStatus.name());
         event.addStringKeyValue(NEW_STATUS.name(), newStatus.name());
         event.addStringKeyValue(MESSAGE_ID.name(), messageId);

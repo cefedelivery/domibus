@@ -6,7 +6,6 @@ import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.MessageEvent;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -69,8 +68,8 @@ public class MessagingModuleConfiguration implements AlertModuleConfiguration {
 
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
-        if (AlertType.MSG_COMMUNICATION_FAILURE != alert.getAlertType()) {
-            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_COMMUNICATION_FAILURE);
+        if (AlertType.MSG_STATUS_CHANGED != alert.getAlertType()) {
+            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_STATUS_CHANGED);
             throw new IllegalArgumentException("Invalid alert type of the strategy.");
         }
         final Event event = alert.getEvents().iterator().next();

@@ -9,7 +9,6 @@ import eu.domibus.core.alerts.model.service.*;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -168,7 +167,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
         switch (alert.getAlertType()) {
-            case MSG_COMMUNICATION_FAILURE:
+            case MSG_STATUS_CHANGED:
                 return getMessageCommunicationConfiguration().getAlertLevel(alert);
             case USER_ACCOUNT_DISABLED:
                 return getAccountDisabledConfiguration().getAlertLevel(alert);
@@ -190,7 +189,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public String getMailSubject(AlertType alertType) {
         switch (alertType) {
-            case MSG_COMMUNICATION_FAILURE:
+            case MSG_STATUS_CHANGED:
                 return getMessageCommunicationConfiguration().getMailSubject();
             case USER_ACCOUNT_DISABLED:
                 return getAccountDisabledConfiguration().getMailSubject();
