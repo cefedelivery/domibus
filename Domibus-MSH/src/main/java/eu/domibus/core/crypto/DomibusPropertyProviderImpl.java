@@ -54,7 +54,7 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
      * @return
      */
     protected String getPropertyValue(String propertyName) {
-        String result = System.getProperty(propertyName);
+        String result = System.getenv(propertyName);
         if (StringUtils.isEmpty(result)) {
             result = domibusProperties.getProperty(propertyName);
         }
