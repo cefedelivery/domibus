@@ -5,11 +5,13 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import mockit.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.Callable;
 
@@ -35,6 +37,9 @@ public class UserDomainServiceMultiDomainTest {
 
     @Injectable
     protected DomainContextProvider domainContextProvider;
+
+    @Injectable
+    protected DomibusCacheService domibusCacheService;
 
     @Tested
     UserDomainServiceMultiDomainImpl userDomainServiceMultiDomainImpl;
