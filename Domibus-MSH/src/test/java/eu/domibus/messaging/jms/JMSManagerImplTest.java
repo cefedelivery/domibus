@@ -332,7 +332,22 @@ public class JMSManagerImplTest {
         }};
 
         Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
+    }
 
+    @Test
+    public void testJmsQueueInOtherDomain_NonMultitenancy() {
+        final String jmsQueueInternalName = "domain1.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = false;
+        }};
+
+        Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
     }
 
 }
