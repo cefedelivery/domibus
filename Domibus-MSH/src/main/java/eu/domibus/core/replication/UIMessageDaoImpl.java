@@ -18,10 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * DAO implementation for {@link UIMessageEntity}
@@ -36,8 +33,16 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIMessageDaoImpl.class);
 
     /** message id */
-    String MESSAGE_ID = "MESSAGE_ID";
+    private static final String MESSAGE_ID = "MESSAGE_ID";
 
+    /** just map special column names which doesn't match filterKey*/
+    private static Map<String, String> filterKeyToColumnMap = new HashMap<>();
+    static {
+        filterKeyToColumnMap.put("fromPartyId", "fromId");
+        filterKeyToColumnMap.put("toPartyId", "toId");
+        filterKeyToColumnMap.put("originalSender", "fromScheme");
+        filterKeyToColumnMap.put("finalRecipient", "toScheme");
+    }
 
 
     public UIMessageDaoImpl() {
@@ -110,6 +115,10 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         List<Predicate> predicates = getPredicates(filters, cb, root);
         cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
         if (column != null) {
+            String filterColumn = filterKeyToColumnMap.get(column);
+            if (StringUtils.isNotBlank(filterColumn)) {
+                column = filterColumn;
+            }
             if (asc) {
                 cq.orderBy(cb.asc(root.get(column)));
             } else {
@@ -238,23 +247,9 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
 
     private void addStringPredicates(CriteriaBuilder cb, Root<? extends UIMessageEntity> ume, List<Predicate> predicates, Map.Entry<String, Object> filter, String filterKey, Object filterValue) {
         if (StringUtils.isNotBlank(filterKey) && !filter.getValue().toString().isEmpty()) {
-            switch (filterKey) {
-                case "fromPartyId":
-                    predicates.add(cb.equal(ume.get("fromId"), filterValue));
-                    break;
-                case "toPartyId":
-                    predicates.add(cb.equal(ume.get("toId"), filterValue));
-                    break;
-                case "originalSender":
-                    predicates.add(cb.equal(ume.get("fromScheme"), filterValue));
-                    break;
-                case "finalRecipient":
-                    predicates.add(cb.equal(ume.get("toScheme"), filterValue));
-                    break;
-                default:
-                    predicates.add(cb.equal(ume.get(filterKey), filterValue));
-                    break;
-            }
+
+            String filterColumn = filterKeyToColumnMap.get(filterKey);
+            predicates.add(cb.equal(ume.get(filterColumn != null ? filterColumn : filterKey), filterValue));
         }
     }
 
@@ -262,10 +257,10 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
         if (!filterValue.toString().isEmpty()) {
             switch (filterKey) {
                 case "receivedFrom":
-                    predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), (Date)filterValue));
+                    predicates.add(cb.greaterThanOrEqualTo(ume.<Date>get("received"), (Date) filterValue));
                     break;
                 case "receivedTo":
-                           predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), (Date)filterValue));
+                    predicates.add(cb.lessThanOrEqualTo(ume.<Date>get("received"), (Date) filterValue));
                     break;
                 default:
                     break;
