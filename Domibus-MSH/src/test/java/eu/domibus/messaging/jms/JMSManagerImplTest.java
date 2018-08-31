@@ -265,4 +265,74 @@ public class JMSManagerImplTest {
         new FullVerifications(){{}};
     }
 
+    @Test
+    public void testJmsQueueInOtherDomain_Domain1Current_QueueDomain2() {
+        final String jmsQueueInternalName = "domain2.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+        Domain domain1 = new Domain();
+        domain1.setCode("domain1");
+        domain1.setName("Domain1");
+        domains.add(domain1);
+
+        Domain domain2 = new Domain();
+        domain2.setCode("domain2");
+        domain2.setName("Domain2");
+        domains.add(domain2);
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainService.getDomains();
+            result = domains;
+
+            domainContextProvider.getCurrentDomainSafely();
+            result = domain1;
+
+        }};
+
+        Assert.assertTrue(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
+
+    }
+
+    @Test
+    public void testJmsQueueInOtherDomain_Domain1Current_QueueDomain1() {
+        final String jmsQueueInternalName = "domain1.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+        Domain domain1 = new Domain();
+        domain1.setCode("domain1");
+        domain1.setName("Domain1");
+        domains.add(domain1);
+
+        Domain domain2 = new Domain();
+        domain2.setCode("domain2");
+        domain2.setName("Domain2");
+        domains.add(domain2);
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainService.getDomains();
+            result = domains;
+
+            domainContextProvider.getCurrentDomainSafely();
+            result = domain1;
+
+        }};
+
+        Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
+
+    }
+
 }
