@@ -126,9 +126,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
                         /* in multi-tenancy mode we show the number of messages only to super admin */
                         destination.setNumberOfMessages(domibusConfigurationService.isMultiTenantAware() && !authUtils.isSuperAdmin() ? NB_MESSAGES_ADMIN :
                                 getMessagesTotalCount(mbsc, jmsDestination));
-                        if (StringUtils.indexOfAny(configQueueJndiName, SKIP_QUEUE_NAMES) == -1) {
-                            destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
-                        }
+                        destinationMap.put(removeJmsModuleAndServer(destinationFQName), destination);
                     }
                 }
             }
