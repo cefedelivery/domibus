@@ -35,7 +35,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
     /** message id */
     private static final String MESSAGE_ID = "MESSAGE_ID";
 
-    /** just map special column names which doesn't match filterKey*/
+    /** just map special column names which doesn't match filterKey with the same name */
     private static Map<String, String> filterKeyToColumnMap = new HashMap<>();
     static {
         filterKeyToColumnMap.put("fromPartyId", "fromId");
