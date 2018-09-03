@@ -79,7 +79,7 @@ public class PModeResource {
     @GetMapping(path = "current")
     public PModeResponseRO getCurrentPMode() {
         final PModeArchiveInfo currentPmode = pModeProvider.getCurrentPmode();
-        if(currentPmode!=null) {
+        if (currentPmode != null) {
             final PModeResponseRO convert = domainConverter.convert(currentPmode, PModeResponseRO.class);
             convert.setCurrent(true);
             return convert;
@@ -104,10 +104,15 @@ public class PModeResource {
             return ResponseEntity.ok(message);
         } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e) + "\n" + StringUtils.join(e.getErrors(), "\n"));
+            String message = "Failed to upload the PMode file due to: " + ExceptionUtils.getRootCauseMessage(e);
+            if (e.getErrors() != null && !e.getErrors().isEmpty()) {
+                message += ";" + StringUtils.join(e.getErrors(), ";");
+
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
         } catch (Exception e) {
             LOG.error("Error uploading the PMode", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: \n " + ExceptionUtils.getRootCauseMessage(e));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload the PMode file due to: " + ExceptionUtils.getRootCauseMessage(e));
         }
     }
 
