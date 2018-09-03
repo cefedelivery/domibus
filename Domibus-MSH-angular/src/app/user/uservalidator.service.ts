@@ -80,6 +80,9 @@ export class UserValidatorService {
   }
 
   validateDomainOnAdd (form: AbstractControl) {
+    if (!form.get('domain')) {
+      return;
+    }
     const role = form.get('role').value;
     if (role && role !== SecurityService.ROLE_AP_ADMIN) {
       const domain = form.get('domain').value;
