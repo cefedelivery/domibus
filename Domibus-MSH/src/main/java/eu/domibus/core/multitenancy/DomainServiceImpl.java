@@ -3,9 +3,11 @@ package eu.domibus.core.multitenancy;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.multitenancy.dao.DomainDao;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +28,16 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     protected DomainDao domainDao;
 
-    //TODO add caching
+
     @Override
     public List<Domain> getDomains() {
         return domainDao.findAll();
     }
 
-    //TODO add caching
+    @Cacheable(value = DomibusCacheService.DOMAIN_BY_CODE_CACHE, key = "#code")
     @Override
     public Domain getDomain(String code) {
-        final List<Domain> domains = domainDao.findAll();
+        final List<Domain> domains = getDomains();
         if (domains == null) {
             return null;
         }
@@ -47,6 +49,7 @@ public class DomainServiceImpl implements DomainService {
         return null;
     }
 
+    @Cacheable(value = DomibusCacheService.DOMAIN_BY_SCHEDULER_CACHE, key = "#schedulerName")
     @Override
     public Domain getDomainForScheduler(String schedulerName) {
         if (DEFAULT_QUARTZ_SCHEDULER_NAME.equalsIgnoreCase(schedulerName)) {
