@@ -5,7 +5,6 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.core.alerts.service.ConfigurationReader;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -31,16 +30,17 @@ public class ConfigurationLoader<E> {
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
         final Domain domain = domainContextProvider.getCurrentDomain();
-        E configuration = this.configuration.get(domain);
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
-        if (configuration == null) {
+        if (this.configuration.get(domain) == null) {
             synchronized (this.configuration) {
-                this.configuration.computeIfAbsent(domain, configurationReader::readConfiguration);
+                if (this.configuration.get(domain) == null) {
+                    this.configuration.computeIfAbsent(domain, configurationReader::readConfiguration);
+                }
             }
         }
-        configuration = this.configuration.get(domain);
-        LOG.debug("Alert messaging configuration:[{}]", configuration);
-        return configuration;
+        E result = this.configuration.get(domain);
+        LOG.debug("Alert messaging configuration:[{}]", result);
+        return result;
 
     }
 
