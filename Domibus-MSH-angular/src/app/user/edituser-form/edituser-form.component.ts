@@ -1,4 +1,4 @@
-import {Component, Inject, ChangeDetectorRef} from '@angular/core';
+import {Component, Inject, ChangeDetectorRef, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from '../uservalidator.service';
@@ -17,7 +17,7 @@ const EDIT_MODE = 'User Edit';
   providers: [UserService, UserValidatorService]
 })
 
-export class EditUserComponent {
+export class EditUserComponent implements OnInit {
 
   existingRoles = [];
   existingDomains = [];
@@ -49,8 +49,6 @@ export class EditUserComponent {
                private securityService: SecurityService,
                private cdr: ChangeDetectorRef,
                private domainService: DomainService) {
-
-    this.isDomainVisible = this.userService.isDomainVisible();
 
     this.existingRoles = data.userroles;
     this.existingDomains = data.userdomains;
@@ -95,6 +93,10 @@ export class EditUserComponent {
         validator: userValidatorService.validateForm()
       });
     }
+  }
+
+  async ngOnInit () {
+    this.isDomainVisible = await this.userService.isDomainVisible();
   }
 
   updateUserName (event) {

@@ -72,7 +72,7 @@ export class UserComponent implements OnInit, DirtyOperations {
                private domainService: DomainService) {
   }
 
-  ngOnInit (): void {
+  async ngOnInit () {
     this.offset = 0;
     this.filter = new UserSearchCriteria();
     this.deletedStatuses = [null, true, false];
@@ -138,7 +138,8 @@ export class UserComponent implements OnInit, DirtyOperations {
       }
     ];
 
-    if (this.userService.isDomainVisible()) {
+    const showDomain = await this.userService.isDomainVisible();
+    if (showDomain) {
       this.getUserDomains();
 
       this.columnPicker.allColumns.splice(2, 0,
