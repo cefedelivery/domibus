@@ -36,7 +36,6 @@ export class EditUserComponent {
   editMode: boolean;
   canChangePassword: boolean;
   isDomainVisible: boolean;
-  domainTitle: string;
 
   formTitle: string = EDIT_MODE;
 
@@ -67,8 +66,6 @@ export class EditUserComponent {
 
     this.canChangePassword = securityService.isCurrentUserSuperAdmin()
       || (securityService.isCurrentUserAdmin() && this.isCurrentUser());
-
-    this.domainTitle = this.isSuperAdmin() ? 'Preferred Domain' : 'Domain';
 
     if (this.editMode) {
       this.existingRoles = this.getAllowedRoles(data.userroles, this.role);
