@@ -25,7 +25,7 @@
       </div>
 
       <div style="margin-top:30px;" [hidden]="!isDomainVisible">
-        <md2-select mdInput placeholder="{{domainTitle}}" [style.width]="'100%'" [formControl]="userForm.controls['domain']"
+        <md2-select mdInput placeholder="{{isSuperAdmin() ? 'Preferred Domain' : 'Domain'}}" [style.width]="'100%'" [formControl]="userForm.controls['domain']"
                     [(ngModel)]="domain" [disabled]="isDomainDisabled()" required>
           <md2-option *ngFor="let item of existingDomains" [(value)]="item.code">{{item.name}}</md2-option>
         </md2-select>

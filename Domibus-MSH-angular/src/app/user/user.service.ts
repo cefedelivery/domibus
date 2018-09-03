@@ -8,15 +8,11 @@ import {DomainService} from '../security/domain.service';
 
 @Injectable()
 export class UserService {
-  isMultiDomain: boolean;
 
   constructor (private http: Http,
                private alertService: AlertService,
                private securityService: SecurityService,
                private domainService: DomainService) {
-    this.domainService.isMultiDomain().subscribe((isMultiDomain: boolean) => {
-      this.isMultiDomain = isMultiDomain;
-    });
   }
 
   getUsers (filter: UserSearchCriteria): Observable<UserResponseRO[]> {
@@ -62,8 +58,9 @@ export class UserService {
     }
   }
 
-  isDomainVisible (): boolean {
-    return this.isMultiDomain && this.securityService.isCurrentUserSuperAdmin();
+  async isDomainVisible (): Promise<boolean> {
+    const isMultiDomain = await this.domainService.isMultiDomain().toPromise();
+    return isMultiDomain && this.securityService.isCurrentUserSuperAdmin();
   }
 
   private extractData (res: Response) {

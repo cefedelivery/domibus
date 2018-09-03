@@ -68,10 +68,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         // update
         Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
         LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
-        updateUserWithoutPasswordChange(noPasswordChangedModifiedUsers);
+        updateUsers(noPasswordChangedModifiedUsers, false);
         Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
         LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
-        updateUserWithPasswordChange(passwordChangedModifiedUsers);
+        updateUsers(passwordChangedModifiedUsers, true);
 
         // deletion
         List<eu.domibus.api.user.User> deletedUsers = filterDeletedUsers(users);
@@ -79,20 +79,18 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         deleteUsers(deletedUsers);
     }
 
-    private void updateUserWithoutPasswordChange(Collection<eu.domibus.api.user.User> users) {
+    private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
+            if (withPasswordChange) {
+                userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
+            }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
-        }
-    }
 
-    private void updateUserWithPasswordChange(Collection<eu.domibus.api.user.User> users) {
-        for (eu.domibus.api.user.User user : users) {
-            User userEntity = prepareUserForUpdate(user);
-            userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
-            addRoleToUser(user.getAuthorities(), userEntity);
-            userDao.update(userEntity);
+            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
+                userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
+            }
         }
     }
 
@@ -126,7 +124,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
-        List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
+        List<User> users = usersToDelete.stream()
+                .map(user -> userDao.loadUserByUsername(user.getUserName()))
+                .filter(user -> user != null)
                 .collect(Collectors.toList());
         userDao.delete(users);
     }
