@@ -7,11 +7,14 @@ import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.user.User;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.core.multitenancy.dao.UserDomainEntity;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -41,12 +44,17 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
+    @Autowired
+    protected DomibusCacheService domibusCacheService;
+
+
     /**
      * Get the domain associated to the provided user from the general schema. <br>
      * This is done in a separate thread as the DB connection is cached per thread and cannot be changed anymore to the schema of the associated domain
      *
      * @return the domain code of the user
      */
+    @Cacheable(value = DomibusCacheService.USER_DOMAIN_CACHE, key = "#user")
     @Override
     public String getDomainForUser(String user) {
         LOG.debug("Searching domain for user [{}]", user);
@@ -61,6 +69,7 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
      *
      * @return the code of the preferred domain of a super user
      */
+    @Cacheable(value = DomibusCacheService.PREFERRED_USER_DOMAIN_CACHE, key = "#user")
     @Override
     public String getPreferredDomainForUser(String user) {
         LOG.debug("Searching preferred domain for user [{}]", user);
@@ -100,6 +109,7 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
         domainTaskExecutor.submit(() -> {
             userDomainDao.setDomainByUser(user, domainCode);
+            domibusCacheService.clearCache(DomibusCacheService.USER_DOMAIN_CACHE);
             return null;
         });
     }
@@ -110,6 +120,7 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
         domainTaskExecutor.submit(() -> {
             userDomainDao.setPreferredDomainByUser(user, domainCode);
+            domibusCacheService.clearCache(DomibusCacheService.PREFERRED_USER_DOMAIN_CACHE);
             return null;
         });
     }
@@ -120,6 +131,7 @@ public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
         domainTaskExecutor.submit(() -> {
             userDomainDao.deleteDomainByUser(user);
+            domibusCacheService.clearCache(DomibusCacheService.USER_DOMAIN_CACHE);
             return null;
         });
     }

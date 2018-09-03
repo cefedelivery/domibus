@@ -7,6 +7,9 @@ package eu.domibus.common.services;
 
 public interface DomibusCacheService {
 
+    String USER_DOMAIN_CACHE = "userDomain";
+    String PREFERRED_USER_DOMAIN_CACHE = "preferredUserDomain";
+
     void clearCache(String refreshCacheName);
 
 }

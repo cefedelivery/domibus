@@ -4,7 +4,7 @@ package eu.domibus.core.alerts.model.common;
  * @since 4.0
  */
 public enum EventType {
-    MSG_COMMUNICATION_FAILURE,
+    MSG_STATUS_CHANGED,
     CERT_IMMINENT_EXPIRATION,
     CERT_EXPIRED,
     USER_LOGIN_FAILURE,

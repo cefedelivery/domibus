@@ -4,6 +4,7 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.jms.spi.InternalJMSDestination;
@@ -14,7 +15,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 
@@ -57,6 +57,9 @@ public class JMSManagerImplTest {
 
     @Injectable
     private JmsTemplate jsonJmsTemplate;
+
+    @Injectable
+    private DomainService domainService;
 
     @Test
     public void testGetDestinations() throws Exception {
@@ -260,6 +263,91 @@ public class JMSManagerImplTest {
         Assert.assertEquals("DOMAIN ='taxud1'", jmsManager.getDomainSelector(selector));
 
         new FullVerifications(){{}};
+    }
+
+    @Test
+    public void testJmsQueueInOtherDomain_Domain1Current_QueueDomain2() {
+        final String jmsQueueInternalName = "domain2.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+        Domain domain1 = new Domain();
+        domain1.setCode("domain1");
+        domain1.setName("Domain1");
+        domains.add(domain1);
+
+        Domain domain2 = new Domain();
+        domain2.setCode("domain2");
+        domain2.setName("Domain2");
+        domains.add(domain2);
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainService.getDomains();
+            result = domains;
+
+            domainContextProvider.getCurrentDomainSafely();
+            result = domain1;
+
+        }};
+
+        Assert.assertTrue(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
+
+    }
+
+    @Test
+    public void testJmsQueueInOtherDomain_Domain1Current_QueueDomain1() {
+        final String jmsQueueInternalName = "domain1.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+        Domain domain1 = new Domain();
+        domain1.setCode("domain1");
+        domain1.setName("Domain1");
+        domains.add(domain1);
+
+        Domain domain2 = new Domain();
+        domain2.setCode("domain2");
+        domain2.setName("Domain2");
+        domains.add(domain2);
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = true;
+
+            authUtils.isSuperAdmin();
+            result = false;
+
+            domainService.getDomains();
+            result = domains;
+
+            domainContextProvider.getCurrentDomainSafely();
+            result = domain1;
+
+        }};
+
+        Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
+    }
+
+    @Test
+    public void testJmsQueueInOtherDomain_NonMultitenancy() {
+        final String jmsQueueInternalName = "domain1.domibus.backend.jms.outQueue";
+
+        final List<Domain> domains = new ArrayList<>();
+        domains.add(DomainService.DEFAULT_DOMAIN);
+
+
+        new Expectations() {{
+            domibusConfigurationService.isMultiTenantAware();
+            result = false;
+        }};
+
+        Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
     }
 
 }
