@@ -67,7 +67,7 @@ export class UserValidatorService {
   matchPassword (form: AbstractControl) {
     const password = form.get('password').value; // to get value in input tag
     const confirmPassword = form.get('confirmation').value; // to get value in input tag
-    if (password !== confirmPassword) {
+    if (password && confirmPassword && password !== confirmPassword) {
       form.get('confirmation').setErrors({confirmation: true})
     }
   }
@@ -86,7 +86,7 @@ export class UserValidatorService {
     const role = form.get('role').value;
     if (role && role !== SecurityService.ROLE_AP_ADMIN) {
       const domain = form.get('domain').value;
-      this.domainService.getCurrentDomain().delay(0)
+      this.domainService.getCurrentDomain()
         .subscribe((currDomain) => {
           if (domain && currDomain && domain !== currDomain.code) {
             form.get('domain').setErrors({domain: true})

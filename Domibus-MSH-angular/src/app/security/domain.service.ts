@@ -1,7 +1,7 @@
 ﻿import {Injectable} from '@angular/core';
 import {Http, Headers, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
-import {ReplaySubject} from 'rxjs';
+import {AsyncSubject, BehaviorSubject, Subject} from 'rxjs';
 import 'rxjs/add/operator/map';
 import {Domain} from './domain';
 import {Title} from '@angular/platform-browser';
@@ -13,20 +13,22 @@ export class DomainService {
   static readonly CURRENT_DOMAIN_URL: string = 'rest/security/user/domain';
   static readonly DOMAIN_LIST_URL: string = 'rest/application/domains';
 
-  private isMultiDomainSubject: ReplaySubject<boolean>;
-  private domainSubject: ReplaySubject<Domain>;
+  private isMultiDomainSubject: Subject<boolean>;
+  private domainSubject: Subject<Domain>;
 
   constructor (private http: Http, private titleService: Title) {
   }
 
   isMultiDomain (): Observable<boolean> {
     if (!this.isMultiDomainSubject) {
-      this.isMultiDomainSubject = new ReplaySubject<boolean>();
+      this.isMultiDomainSubject = new AsyncSubject<boolean>();
       this.http.get(DomainService.MULTI_TENANCY_URL).subscribe((res: Response) => {
         this.isMultiDomainSubject.next(res.json());
       }, (error: any) => {
         console.log('get isMultiDomain:' + error);
         this.isMultiDomainSubject.next(false);
+      }, () => {
+        this.isMultiDomainSubject.complete();
       });
     }
     return this.isMultiDomainSubject.asObservable();
@@ -34,7 +36,7 @@ export class DomainService {
 
   getCurrentDomain (): Observable<Domain> {
     if (!this.domainSubject) {
-      this.domainSubject = new ReplaySubject<Domain>();
+      this.domainSubject = new BehaviorSubject<Domain>(null);
       this.http.get(DomainService.CURRENT_DOMAIN_URL).subscribe((res: Response) => {
         this.domainSubject.next(res.json());
       }, (error: any) => {
@@ -52,8 +54,8 @@ export class DomainService {
     this.domainSubject = null;
   }
 
-  getDomains (): Observable<Domain[]> {
-    return this.http.get(DomainService.DOMAIN_LIST_URL).map((res: Response) => res.json());
+  getDomains (): Promise<Domain[]> {
+    return this.http.get(DomainService.DOMAIN_LIST_URL).map((res: Response) => res.json()).toPromise();
   }
 
   setCurrentDomain (domain: Domain) {
@@ -68,7 +70,7 @@ export class DomainService {
     return this.http.get('rest/application/name').map((resp: Response) => resp.json()).toPromise();
   }
 
-  setAppTitle() {
+  setAppTitle () {
     this.getTitle().then((title) => {
       this.titleService.setTitle(title);
     });

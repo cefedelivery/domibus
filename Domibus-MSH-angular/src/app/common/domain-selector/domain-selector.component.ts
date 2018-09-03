@@ -29,14 +29,15 @@ export class DomainSelectorComponent implements OnInit {
   }
 
   async ngOnInit () {
-    const isMultiDomain = await this.domainService.isMultiDomain().first().toPromise();
+    const isMultiDomain = await this.domainService.isMultiDomain().toPromise();
 
     if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
+      this.domains = await this.domainService.getDomains();
       this.showDomains = true;
-      const domain = await this.domainService.getCurrentDomain().first().toPromise();
-      this.domainCode = this.currentDomainCode = domain ? domain.code : null;
-      const domains = await this.domainService.getDomains().toPromise();
-      this.domains = domains;
+
+      this.domainService.getCurrentDomain().subscribe(domain => {
+        this.domainCode = this.currentDomainCode = (domain ? domain.code : null);
+      });
     }
   }
 
