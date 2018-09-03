@@ -5,9 +5,11 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.services.DomibusCacheService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -33,6 +35,7 @@ public class DomainDaoImpl implements DomainDao {
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
 
+    @Cacheable(value = DomibusCacheService.ALL_DOMAINS_CACHE, key = "#root.methodName")
     @Override
     public List<Domain> findAll() {
         List<Domain> result = new ArrayList<>();
