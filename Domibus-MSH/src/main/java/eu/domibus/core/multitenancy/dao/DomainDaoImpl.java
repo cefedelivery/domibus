@@ -35,7 +35,7 @@ public class DomainDaoImpl implements DomainDao {
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
 
-    @Cacheable(value = DomibusCacheService.ALL_DOMAINS_CACHE, key = "#root.methodName")
+    @Cacheable(value = DomibusCacheService.ALL_DOMAINS_CACHE)
     @Override
     public List<Domain> findAll() {
         List<Domain> result = new ArrayList<>();
