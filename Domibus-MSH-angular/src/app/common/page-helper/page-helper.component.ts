@@ -18,17 +18,23 @@ export class PageHelperComponent implements OnInit {
   }
 
   ngOnInit() {
-    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v3.3+Admin+Console+Help";
-    let VERSION_SPECIFIC_PAGE = "#Domibusv3.3AdminConsoleHelp-";
+    let MAIN_HELP_PAGE = "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Domibus+v4.0+Admin+Console+Help";
+    let VERSION_SPECIFIC_PAGE = "#Domibusv4.0AdminConsoleHelp-";
 
     this.helpPages.set("/", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Messages");
     this.helpPages.set("/login", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Login");
     this.helpPages.set("/messagefilter", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "MessageFilter");
     this.helpPages.set("/truststore", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Truststore");
-    this.helpPages.set("/pmode", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode");
+    this.helpPages.set("/pmode-current", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Current");
+    this.helpPages.set("/pmode-archive", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Archive");
+    this.helpPages.set("/pmode-party", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PMode-Parties");
     this.helpPages.set("/errorlog", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "ErrorLog");
     this.helpPages.set("/jms", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "JMSMonitoring");
     this.helpPages.set("/user", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Users");
+    this.helpPages.set("/pluginuser", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "PluginUsers");
+    this.helpPages.set("/audit", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Audit");
+    this.helpPages.set("/alerts", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "Alerts");
+    this.helpPages.set("/testservice", MAIN_HELP_PAGE + VERSION_SPECIFIC_PAGE + "TestService");
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         console.log("Navigation change [" + event.url + "]");
