@@ -13,6 +13,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.ro.PModeResponseRO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +106,7 @@ public class PModeResource {
         } catch (XmlProcessingException e) {
             LOG.error("Error uploading the PMode", e);
             String message = "Failed to upload the PMode file due to: " + ExceptionUtils.getRootCauseMessage(e);
-            if (e.getErrors() != null && !e.getErrors().isEmpty()) {
+            if (CollectionUtils.isNotEmpty(e.getErrors())) {
                 message += ";" + StringUtils.join(e.getErrors(), ";");
 
             }
