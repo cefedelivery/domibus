@@ -67,7 +67,7 @@ public class AlertServiceImplTest {
     public void createAlertOnEvent() {
         final Event event = new Event();
         event.setEntityId(1);
-        event.setType(EventType.MSG_COMMUNICATION_FAILURE);
+        event.setType(EventType.MSG_STATUS_CHANGED);
 
         final eu.domibus.core.alerts.model.persist.Event eventEntity = new eu.domibus.core.alerts.model.persist.Event();
         new Expectations() {{
@@ -85,7 +85,7 @@ public class AlertServiceImplTest {
             eu.domibus.core.alerts.model.persist.Alert alert;
             alertDao.create(alert = withCapture());
             times = 1;
-            assertEquals(AlertType.MSG_COMMUNICATION_FAILURE, alert.getAlertType());
+            assertEquals(AlertType.MSG_STATUS_CHANGED, alert.getAlertType());
             assertEquals(0, alert.getAttempts(), 0);
             assertEquals(5, alert.getMaxAttempts(), 0);
             assertEquals(AlertStatus.SEND_ENQUEUED, alert.getAlertStatus());
@@ -112,7 +112,7 @@ public class AlertServiceImplTest {
         final String mailSubjet = "Message failure";
         final String messageId = "messageId";
         final int entityId = 1;
-        final AlertType alertType = AlertType.MSG_COMMUNICATION_FAILURE;
+        final AlertType alertType = AlertType.MSG_STATUS_CHANGED;
         final AlertLevel alertLevel = AlertLevel.HIGH;
 
         Alert alert = new Alert();

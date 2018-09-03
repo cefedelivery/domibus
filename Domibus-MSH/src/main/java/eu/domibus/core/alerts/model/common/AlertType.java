@@ -4,7 +4,7 @@ package eu.domibus.core.alerts.model.common;
  * @since 4.0
  */
 public enum AlertType {
-    MSG_COMMUNICATION_FAILURE("message.ftl"),
+    MSG_STATUS_CHANGED("message.ftl"),
     CERT_IMMINENT_EXPIRATION("cert_imminent_expiration.ftl"),
     CERT_EXPIRED("cert_expired.ftl"),
     USER_LOGIN_FAILURE("login_failure.ftl"),
@@ -13,8 +13,8 @@ public enum AlertType {
     //in the future an alert will not have one to one mapping.
     public static AlertType getAlertTypeFromEventType(EventType eventType) {
         switch (eventType) {
-            case MSG_COMMUNICATION_FAILURE:
-                return MSG_COMMUNICATION_FAILURE;
+            case MSG_STATUS_CHANGED:
+                return MSG_STATUS_CHANGED;
             case CERT_IMMINENT_EXPIRATION:
                 return CERT_IMMINENT_EXPIRATION;
             case CERT_EXPIRED:

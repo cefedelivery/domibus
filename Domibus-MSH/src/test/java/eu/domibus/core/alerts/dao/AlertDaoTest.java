@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,13 +60,13 @@ public class AlertDaoTest {
         event.addProperty("FROM_PARTY", blue_gw);
         event.addProperty("TO_PARTY", red_gw);
         event.addProperty("ROLE", role);
-        event.setType(EventType.MSG_COMMUNICATION_FAILURE);
+        event.setType(EventType.MSG_STATUS_CHANGED);
         event.setReportingTime(new Date());
 
 
         Alert alert=new Alert();
         alert.setAlertStatus(AlertStatus.FAILED);
-        alert.setAlertType(AlertType.MSG_COMMUNICATION_FAILURE);
+        alert.setAlertType(AlertType.MSG_STATUS_CHANGED);
         alert.addEvent(event);
         alert.setAlertLevel(AlertLevel.MEDIUM);
         alert.setMaxAttempts(1);
