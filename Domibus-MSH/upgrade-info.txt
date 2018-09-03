@@ -29,13 +29,11 @@ Domibus 4.0 RC1 (from 3.3.4):
                     Modify file "\conf\domibus\domibus.properties":
                          o add the following properties:
                              domibus.jms.queue.alert=jms/domibus.internal.alert.queue
-                             domibus.jms.queue.ui.replication=jms/domibus.internal.ui.replication.queue
                          o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3.4-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
                 - [Tomcat only]
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following properties:
                               domibus.jms.queue.alert=domibus.internal.alert.queue
-                              domibus.jms.queue.ui.replication=domibus.internal.ui.replication.queue
                           o in file "cef_edelivery_path\domibus\conf\domibus\internal\activemq.xml":
                               - in the destinations section add the following queuea:
                                          .............................
@@ -67,7 +65,6 @@ Domibus 4.0 RC1 (from 3.3.4):
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following property:
                               domibus.jms.queue.alert=jms/domibus.internal.alert.queue
-                              domibus.jms.queue.ui.replication=jms/domibus.internal.ui.replication.queue
                           o in file "cef_edelivery_path\domibus\standalone\configuration\standalone-full.xml":
                            - add the following queues in the destination section
                                        .............................
