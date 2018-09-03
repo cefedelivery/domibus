@@ -1,17 +1,21 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.api.multitenancy.*;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -37,7 +41,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/security")
 public class AuthenticationResource {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(AuthenticationResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationResource.class);
 
     @Autowired
     protected AuthenticationService authenticationService;
@@ -54,12 +58,14 @@ public class AuthenticationResource {
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
     @ExceptionHandler({AuthenticationException.class})
     public ErrorRO handleException(Exception ex) {
+        LOG.error(ex.getMessage(), ex);
         return new ErrorRO(ex.getMessage());
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({DomainException.class})
     public ErrorRO handleDomainException(Exception ex) {
+        LOG.error(ex.getMessage(), ex);
         return new ErrorRO(ex.getMessage());
     }
 
@@ -70,11 +76,16 @@ public class AuthenticationResource {
         String domainCode = userDomainService.getDomainForUser(loginRO.getUsername());
         LOG.debug("Determined domain [{}] for user [{}]", domainCode, loginRO.getUsername());
 
-        if (domainCode != null) {   //domain user
+        if (StringUtils.isNotBlank(domainCode)) {   //domain user
             domainContextProvider.setCurrentDomain(domainCode);
         } else {                    //ap user
             domainContextProvider.clearCurrentDomain();
             domainCode = userDomainService.getPreferredDomainForUser(loginRO.getUsername());
+            if (StringUtils.isBlank(domainCode)) {
+                LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, loginRO.getUsername());
+                throw new BadCredentialsException("The username/password combination you provided are not valid. Please try again or contact your administrator.");
+            }
+
             LOG.debug("Determined preferred domain [{}] for user [{}]", domainCode, loginRO.getUsername());
         }
 
@@ -83,8 +94,6 @@ public class AuthenticationResource {
         if (principal.isDefaultPasswordUsed()) {
             LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
-
-        domainContextProvider.setCurrentDomain(domainCode);
 
         //Parse Granted authorities to a list of string authorities
         List<String> authorities = new ArrayList<>();

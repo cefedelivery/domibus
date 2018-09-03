@@ -10,8 +10,8 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.services.DomibusCacheService;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.core.multitenancy.dao.UserDomainEntity;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -22,10 +22,9 @@ import java.util.List;
  * @author Ion Perpegel(nperpion)
  * @since 4.0
  */
-@Service
 public class UserDomainServiceMultiDomainImpl implements UserDomainService {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(UserDomainServiceMultiDomainImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserDomainServiceMultiDomainImpl.class);
 
     @Autowired
     protected DomainTaskExecutor domainTaskExecutor;

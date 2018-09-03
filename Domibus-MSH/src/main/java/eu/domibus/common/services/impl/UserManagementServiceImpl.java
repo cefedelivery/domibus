@@ -137,6 +137,12 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
+        //TODO trigger events for super user in 4.1 EDELIVERY-3768
+        if(domainContextProvider.getCurrentDomainSafely() == null) {
+            LOG.debug("User alerts disabled for super users");
+            return;
+        }
+
         final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
