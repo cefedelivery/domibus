@@ -124,7 +124,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
-        List<User> users = usersToDelete.stream().map(user -> userDao.loadUserByUsername(user.getUserName()))
+        List<User> users = usersToDelete.stream()
+                .map(user -> userDao.loadUserByUsername(user.getUserName()))
+                .filter(user -> user != null)
                 .collect(Collectors.toList());
         userDao.delete(users);
     }
