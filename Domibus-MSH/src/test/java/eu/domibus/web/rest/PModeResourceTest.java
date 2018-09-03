@@ -179,7 +179,29 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n XmlProcessingException: UnitTest1\n",
+        Assert.assertEquals("Failed to upload the PMode file due to: XmlProcessingException: UnitTest1",
+                stringResponseEntity.getBody());
+    }
+
+    @Test
+    public void testUploadPModesXmlProcessingWithErrorException() throws XmlProcessingException {
+        // Given
+        MultipartFile file = new MockMultipartFile("filename", new byte[]{1, 0, 1});
+        XmlProcessingException xmlProcessingException = new XmlProcessingException("UnitTest1");
+        xmlProcessingException.getErrors().add("error1");
+
+        new Expectations() {{
+            pModeProvider.updatePModes((byte[]) any, anyString);
+            result = xmlProcessingException;
+        }};
+
+        // When
+        ResponseEntity<String> stringResponseEntity = pModeResource.uploadPmodes(file, "description");
+
+        // Then
+        Assert.assertNotNull(stringResponseEntity);
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
+        Assert.assertEquals("Failed to upload the PMode file due to: XmlProcessingException: UnitTest1;error1",
                 stringResponseEntity.getBody());
     }
 
@@ -199,7 +221,7 @@ public class PModeResourceTest {
         // Then
         Assert.assertNotNull(stringResponseEntity);
         Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, stringResponseEntity.getStatusCode());
-        Assert.assertEquals("Failed to upload the PMode file due to: \n Exception: UnitTest2",
+        Assert.assertEquals("Failed to upload the PMode file due to: Exception: UnitTest2",
                 stringResponseEntity.getBody());
 
     }
