@@ -11,10 +11,10 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,7 @@ import java.util.List;
 @RequestMapping(value = "/rest/errorlogs")
 public class ErrorLogResource {
 
-    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(ErrorLogResource.class);
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(ErrorLogResource.class);
 
 
     @Autowired
