@@ -2,7 +2,6 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -16,7 +15,6 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessagesLogService;
-import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageDao;
@@ -24,9 +22,8 @@ import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.SignalMessage;
-import eu.domibus.ebms3.common.model.UserMessage;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.web.rest.ro.MessageLogRO;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
@@ -66,20 +63,14 @@ public class MessageLogResourceTest {
     @Injectable
     MessagingDao messagingDao;
 
-    // needed Injectable
     @Injectable
     PartyDao partyDao;
 
-    // needed Injectable
     @Injectable
     DateUtil dateUtil;
 
-    // needed Injectable
     @Injectable
     CsvServiceImpl csvServiceImpl;
-
-    @Injectable
-    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private UIMessageService uiMessageService;
@@ -158,8 +149,8 @@ public class MessageLogResourceTest {
         List<MessageLogInfo> messageList = getMessageList(messageType, date, messageSubtype);
 
         new Expectations() {{
-            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = CsvService.MAX_NUMBER_OF_ENTRIES;
+            csvServiceImpl.getMaxNumberRowsToExport();
+            result = 10000;
 
             messagesLogService.findAllInfoCSV(messageType, anyInt, "received", true, (HashMap<String, Object>) any);
             result = messageList;
@@ -188,8 +179,9 @@ public class MessageLogResourceTest {
     public void testUserMessageGetCsv_Exception() throws CsvException {
         // Given
         new Expectations() {{
-            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = CsvService.MAX_NUMBER_OF_ENTRIES;
+            csvServiceImpl.getMaxNumberRowsToExport();
+            result = 10000;
+
             csvServiceImpl.exportToCSV((List<?>) any, null, null, null);
             result = new CsvException(DomibusCoreErrorCode.DOM_001, "Exception", new Exception());
         }};

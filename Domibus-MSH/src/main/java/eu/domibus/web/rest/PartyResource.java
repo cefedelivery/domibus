@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.util.*;
@@ -113,7 +112,7 @@ public class PartyResource {
                                          @RequestParam(value = "partyId", required = false) String partyId,
                                          @RequestParam(value = "process", required = false) String process) {
         String resultText;
-        final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
+        final List<PartyResponseRo> partyResponseRoList = listParties(name, endPoint, partyId, process, 0, csvServiceImpl.getMaxNumberRowsToExport());
 
         try {
             resultText = csvServiceImpl.exportToCSV(partyResponseRoList, PartyResponseRo.class,

@@ -1,7 +1,6 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -46,9 +45,6 @@ public class ErrorLogResourceTest {
 
     @Injectable
     ErrorLogCsvServiceImpl errorLogCsvServiceImpl;
-
-    @Injectable
-    DomibusPropertyProvider domibusPropertyProvider;
 
 
     @Test
@@ -123,12 +119,15 @@ public class ErrorLogResourceTest {
         errorLogRO.setNotified(date);
         errorLogROEntries.add(errorLogRO);
         new Expectations() {{
-            domibusPropertyProvider.getProperty("domibus.ui.maximumcsvrows", anyString);
-            result = ErrorLogCsvServiceImpl.MAX_NUMBER_OF_ENTRIES;
+            errorLogCsvServiceImpl.getMaxNumberRowsToExport();
+            result = 10000;
+
             errorLogDao.findPaged(anyInt,anyInt,anyString,anyBoolean, (HashMap<String, Object>) any);
             result = errorLogEntries;
+
             domainConverter.convert(errorLogEntries, ErrorLogRO.class);
             result = errorLogROEntries;
+
             errorLogCsvServiceImpl.exportToCSV(errorLogROEntries, ErrorLogRO.class, (Map<String, String>)any, (List<String>)any);
             result = CSV_TITLE +
                     signalMessageIdStr + "," + MSHRole.RECEIVING + "," + refToMessageIdStr + "," + ErrorCode.EBMS_0001.getErrorCodeName() + "," +

@@ -109,7 +109,7 @@ public class PluginUserResource {
         String resultText;
 
         // get list of users
-        final PluginUserResultRO pluginUserROList = findUsers(authType, authRole, originalUser, userName, 0, CsvService.MAX_NUMBER_OF_ENTRIES);
+        final PluginUserResultRO pluginUserROList = findUsers(authType, authRole, originalUser, userName, 0, csvServiceImpl.getMaxNumberRowsToExport());
 
         try {
             resultText = csvServiceImpl.exportToCSV(pluginUserROList.getEntries(), PluginUserRO.class,

@@ -1,9 +1,11 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.routing.RoutingCriteria;
 import eu.domibus.core.csv.MessageFilterCsvServiceImpl;
 import eu.domibus.web.rest.ro.MessageFilterRO;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -24,8 +26,12 @@ public class MessageFilterCsvServiceImplTest {
     private static final String MESSAGE_FILTER_HEADER = "Plugin,From,To,Action,Service,Persisted";
 
     private static final String LINE_SEPARATOR = "\n";
+
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
+
     @Tested
-    MessageFilterCsvServiceImpl messageFilterCsvService;
+    private MessageFilterCsvServiceImpl messageFilterCsvService;
 
     @Test
     public void testExportToCsv_EmptyList() throws CsvException {

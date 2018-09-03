@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
@@ -8,6 +9,7 @@ import eu.domibus.common.model.logging.MessageLogInfo;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.ebms3.common.model.MessageSubtype;
 import eu.domibus.ebms3.common.model.MessageType;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -28,6 +30,9 @@ import java.util.List;
 
 @RunWith(JMockit.class)
 public class CsvServiceImplTest {
+
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Tested
     CsvServiceImpl csvServiceImpl;

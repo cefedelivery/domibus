@@ -1,7 +1,6 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
@@ -18,12 +17,15 @@ import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
-import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.common.model.SignalMessage;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.MessageLogResultRO;
 import eu.domibus.web.rest.ro.TestServiceMessageInfoRO;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,14 +51,10 @@ import java.util.List;
 @RequestMapping(value = "/rest/messagelog")
 public class MessageLogResource {
 
-    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(MessageLogResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageLogResource.class);
 
-    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
     private static final String RECEIVED_FROM_STR = "receivedFrom";
     private static final String RECEIVED_TO_STR = "receivedTo";
-
-    @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -93,7 +91,7 @@ public class MessageLogResource {
             defaultFrom = ft.parse("1970-01-01 23:59:00");
             defaultTo = ft.parse("2977-10-25 23:59:00");
         } catch (ParseException e) {
-            LOGGER.error("Impossible to initiate default dates");
+            LOG.error("Impossible to initiate default dates");
         }
     }
 
@@ -120,7 +118,7 @@ public class MessageLogResource {
             @RequestParam(value = RECEIVED_TO_STR, required = false) String receivedTo,
             @RequestParam(value = "messageSubtype", required = false) MessageSubtype messageSubtype) {
 
-        LOGGER.debug("Getting message log");
+        LOG.debug("Getting message log");
 
         //creating the filters
         HashMap<String, Object> filters = createFilterMap(messageId, conversationId, mshRole, messageStatus, notificationStatus,
@@ -140,7 +138,7 @@ public class MessageLogResource {
         filters.put(RECEIVED_TO_STR, to);
         filters.put("messageType", messageType);
 
-        LOGGER.debug("using filters [{}]", filters);
+        LOG.debug("using filters [{}]", filters);
 
         MessageLogResultRO result;
         if (uiReplicationSignalService.isReplicationEnabled()) {
@@ -216,14 +214,14 @@ public class MessageLogResource {
         filters.put(RECEIVED_TO_STR, dateUtil.fromString(receivedTo));
         filters.put("messageType", messageType);
 
-        int maxCSVrows = Integer.parseInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
+        int maxNumberRowsToExport = csvServiceImpl.getMaxNumberRowsToExport();
 
         List<MessageLogInfo> resultList;
         if (uiReplicationSignalService.isReplicationEnabled()) {
             /** use TB_MESSAGE_UI table instead */
-            resultList = uiMessageService.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
+            resultList = uiMessageService.findPaged(0, maxNumberRowsToExport, orderByColumn, asc, filters);
         } else {
-            resultList = messagesLogService.findAllInfoCSV(messageType, maxCSVrows, orderByColumn, asc, filters);
+            resultList = messagesLogService.findAllInfoCSV(messageType, maxNumberRowsToExport, orderByColumn, asc, filters);
         }
 
         String resultText;
@@ -231,7 +229,7 @@ public class MessageLogResource {
             resultText = csvServiceImpl.exportToCSV(resultList, MessageLogInfo.class,
                     CsvCustomColumns.MESSAGE_RESOURCE.getCustomColumns(), new ArrayList<>());
         } catch (CsvException e) {
-            LOGGER.error("Exception caught during export to CSV", e);
+            LOG.error("Exception caught during export to CSV", e);
             return ResponseEntity.noContent().build();
         }
 
@@ -243,11 +241,11 @@ public class MessageLogResource {
 
     @RequestMapping(value = "test/outgoing/latest", method = RequestMethod.GET)
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestSent(@RequestParam(value = "partyId") String partyId) {
-        LOGGER.debug("Getting last sent test message for partyId='{}'", partyId);
+        LOG.debug("Getting last sent test message for partyId='{}'", partyId);
 
         String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
         if(StringUtils.isBlank(userMessageId)) {
-            LOGGER.debug("Could not find last user message id for party [{}]", partyId);
+            LOG.debug("Could not find last user message id for party [{}]", partyId);
             return ResponseEntity.noContent().build();
         }
 
@@ -256,7 +254,7 @@ public class MessageLogResource {
         try {
             userMessageLog = userMessageLogDao.findByMessageId(userMessageId);
         } catch (NoResultException ex){
-            LOGGER.trace("No UserMessageLog found for message with id [{}]", userMessageId);
+            LOG.trace("No UserMessageLog found for message with id [{}]", userMessageId);
         }
 
         if (userMessageLog != null) {
@@ -275,10 +273,10 @@ public class MessageLogResource {
 
     @RequestMapping(value = "test/incoming/latest", method = RequestMethod.GET)
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
-        LOGGER.debug("Getting last received test message from partyId='{}'", partyId);
+        LOG.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
         if(messaging == null) {
-            LOGGER.debug("Could not find messaging for message ID[{}]", userMessageId);
+            LOG.debug("Could not find messaging for message ID[{}]", userMessageId);
             return ResponseEntity.noContent().build();
         }
 

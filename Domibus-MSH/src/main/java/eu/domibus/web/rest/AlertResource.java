@@ -18,8 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -160,9 +160,10 @@ public class AlertResource {
                                          @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
                                          @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
     ) {
+
         AlertCriteria alertCriteria = getAlertCriteria(
-                page,
-                pageSize,
+                0,
+                csvServiceImpl.getMaxNumberRowsToExport(),
                 ask,
                 column,
                 processed,
@@ -180,6 +181,8 @@ public class AlertResource {
 
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+
+
         String resultText;
         try {
 
