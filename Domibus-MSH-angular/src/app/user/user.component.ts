@@ -173,8 +173,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.userService.getUserRoles().subscribe(userroles => this.userRoles = userroles);
   }
 
-  getUserDomains (): void {
-    this.domainService.getDomains().subscribe((domains: Domain[]) => this.domains = domains);
+  async getUserDomains () {
+    this.domains = await this.domainService.getDomains();
   }
 
   onSelect ({selected}) {
