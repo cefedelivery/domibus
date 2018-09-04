@@ -2,7 +2,6 @@ package eu.domibus.web.rest;
 
 import com.google.common.primitives.Ints;
 import eu.domibus.api.csv.CsvException;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -12,14 +11,11 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.ErrorLogRO;
 import eu.domibus.web.rest.ro.ErrorLogResultRO;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -40,12 +35,8 @@ import java.util.Properties;
 @RequestMapping(value = "/rest/errorlogs")
 public class ErrorLogResource {
 
-    private static final Logger LOGGER = DomibusLoggerFactory.getLogger(ErrorLogResource.class);
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(ErrorLogResource.class);
 
-    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
-
-    @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private ErrorLogDao errorLogDao;
@@ -131,9 +122,7 @@ public class ErrorLogResource {
         HashMap<String, Object> filters = createFilterMap(errorSignalMessageId, mshRole, messageInErrorId, errorCode, errorDetail, timestampFrom, timestampTo, notifiedFrom, notifiedTo);
         result.setFilter(filters);
 
-        int maxCSVrows = NumberUtils.toInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
-
-        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, maxCSVrows, orderByColumn, asc, filters);
+        final List<ErrorLogEntry> errorLogEntries = errorLogDao.findPaged(0, errorLogCsvServiceImpl.getMaxNumberRowsToExport(), orderByColumn, asc, filters);
         final List<ErrorLogRO> errorLogROList = domainConverter.convert(errorLogEntries, ErrorLogRO.class);
 
         String resultText;

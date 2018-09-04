@@ -125,8 +125,8 @@ export class PartyDetailsComponent implements OnInit {
     const identifierRow = this.selectedIdentifiers[0];
     if (!identifierRow) return;
 
-    const rowClone = Object.assign({}, identifierRow);
-
+    const rowClone = JSON.parse(JSON.stringify(identifierRow));
+    
     const dialogRef: MdDialogRef<PartyIdentifierDetailsComponent> = this.dialog.open(PartyIdentifierDetailsComponent, {
       data: {
         edit: rowClone
