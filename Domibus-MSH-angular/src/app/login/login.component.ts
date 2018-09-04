@@ -37,8 +37,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
     this.httpEventService.subscribe((error) => {
-      console.log('Received forbidden request event');
-      this.securityService.logout();
+      if (error && (error.status === 403 || error.status === 401)) {
+        console.log('Received forbidden request event');
+        this.securityService.logout();
+      }
     });
 
     this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
