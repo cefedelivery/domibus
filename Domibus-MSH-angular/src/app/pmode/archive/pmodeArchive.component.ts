@@ -1,4 +1,4 @@
-﻿import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {Http, Headers, Response} from '@angular/http';
@@ -338,9 +338,11 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
   deleteArchive () {
     for (let i = this.selected.length - 1; i >= 0; i--) {
       let array = this.tableRows.slice();
-      array.splice(this.selected[i].$$index, 1);
+      // index is changed if selected items are not sorted recalculate new index
+      let  idx = array.indexOf(this.selected[i]);
+      array.splice(idx, 1);
       array = array.concat(this.allPModes[this.offset * this.rowLimiter.pageSize + this.rowLimiter.pageSize]);
-      this.allPModes.splice(this.offset * this.rowLimiter.pageSize + this.selected[i].$$index, 1);
+      this.allPModes.splice(this.offset * this.rowLimiter.pageSize +idx, 1);
       this.tableRows = array.slice();
       this.deleteList.push(this.selected[i].id);
       this.count--;
