@@ -2,8 +2,8 @@ package eu.domibus.web.rest;
 
 import eu.domibus.core.replication.UIReplicationDataService;
 import eu.domibus.core.replication.UIReplicationSignalService;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/rest/uireplication")
 public class UIReplicationResource {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(UIReplicationResource.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationResource.class);
 
     @Autowired
     private UIReplicationDataService uiReplicationDataService;
