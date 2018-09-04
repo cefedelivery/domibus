@@ -1,10 +1,12 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.core.csv.ErrorLogCsvServiceImpl;
 import eu.domibus.web.rest.ro.ErrorLogRO;
+import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
@@ -25,6 +27,9 @@ import java.util.List;
 
 @RunWith(JMockit.class)
 public class ErrorLogCsvServiceImplTest {
+
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Tested
     ErrorLogCsvServiceImpl errorLogCsvService;

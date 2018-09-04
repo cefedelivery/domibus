@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.DomibusStringUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
@@ -29,6 +32,11 @@ import java.util.stream.Collectors;
 public class CsvServiceImpl implements CsvService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CsvServiceImpl.class);
 
+    static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.csv.max.rows";
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
     @Override
     public String exportToCSV(List<?> list, Class theClass,
                               Map<String, String> customColumnNames, List<String> excludedColumns) {
@@ -41,6 +49,11 @@ public class CsvServiceImpl implements CsvService {
         createCSVContents(list, csvBuilder, activeFields);
 
         return result.toString();
+    }
+
+    @Override
+    public int getMaxNumberRowsToExport() {
+        return NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAXIMUM_NUMBER_CSV_ROWS));
     }
 
     public String getCsvFilename(String module) {

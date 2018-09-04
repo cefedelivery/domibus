@@ -15,7 +15,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.criteria.AuditCriteria;
 import eu.domibus.web.rest.ro.AuditResponseRo;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +34,6 @@ import java.util.stream.Collectors;
 public class AuditResource {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuditResource.class);
-
-    private static final String MAXIMUM_NUMBER_CSV_ROWS = "domibus.ui.maximumcsvrows";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -135,8 +132,6 @@ public class AuditResource {
             @RequestParam(value = "to", required = false) String to) {
         String resultText;
 
-        int maxCSVrows = NumberUtils.toInt(domibusPropertyProvider.getProperty(MAXIMUM_NUMBER_CSV_ROWS, String.valueOf(CsvService.MAX_NUMBER_OF_ENTRIES)));
-
         // get list of audits
         AuditCriteria auditCriteria = new AuditCriteria();
         auditCriteria.setAuditTargetName(auditTargetName);
@@ -147,7 +142,7 @@ public class AuditResource {
         Date receivedTo = dateUtil.fromString(to);
         auditCriteria.setTo(receivedTo);
         auditCriteria.setStart(0);
-        auditCriteria.setMax(maxCSVrows);
+        auditCriteria.setMax(csvServiceImpl.getMaxNumberRowsToExport());
         final List<AuditResponseRo> auditResponseRos = listAudits(auditCriteria);
 
         try {
