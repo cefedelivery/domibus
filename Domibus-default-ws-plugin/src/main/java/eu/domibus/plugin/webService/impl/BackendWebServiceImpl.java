@@ -77,7 +77,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
      */
     @SuppressWarnings("ValidExternallyBoundObject")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, timeout = 300)
+    @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.debug("Received message");
 
