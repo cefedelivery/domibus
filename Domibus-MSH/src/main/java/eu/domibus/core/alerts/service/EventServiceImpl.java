@@ -18,6 +18,7 @@ import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,6 +52,8 @@ public class EventServiceImpl implements EventService {
     static final String CERTIFICATE_IMMINENT_EXPIRATION = "certificateImminentExpiration";
 
     private static final String EVENT_ADDED_TO_THE_QUEUE = "Event:[{}] added to the queue";
+
+    private static final int MAX_DESCRIPTION_LENGTH = 255;
 
     @Autowired
     private EventDao eventDao;
@@ -180,7 +183,7 @@ public class EventServiceImpl implements EventService {
                     stream().
                     map(ErrorLogEntry::getErrorDetail).forEach(errors::append);
             if (!errors.toString().isEmpty()) {
-                event.addStringKeyValue(DESCRIPTION.name(), errors.toString());
+                event.addStringKeyValue(DESCRIPTION.name(), StringUtils.truncate(errors.toString(), MAX_DESCRIPTION_LENGTH));
             }
         } catch (EbMS3Exception e) {
             LOG.error("Message:[{}] Errors while enriching message event", messageId, e);
