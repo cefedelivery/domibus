@@ -2,18 +2,22 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.core.csv.CsvCustomColumns;
+import eu.domibus.core.csv.CsvExportException;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +42,12 @@ public class AlertResource {
     @Autowired
     CsvServiceImpl csvServiceImpl;
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({DomibusCoreException.class})
+    public ErrorRO handleException(Exception ex) {
+        LOG.error(ex.getMessage(), ex);
+        return new ErrorRO(ex.getMessage());
+    }
 
     @GetMapping
     public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -178,6 +188,13 @@ public class AlertResource {
                 nonDateDynamicParameters,
                 dynamicaPropertyFrom,
                 dynamicaPropertyTo);
+
+        //check first how many rows to export
+        Long countAlerts = alertService.countAlerts(alertCriteria);
+        int maxNumberRowsToExport = csvServiceImpl.getMaxNumberRowsToExport();
+        if (countAlerts > maxNumberRowsToExport) {
+            throw new CsvExportException("Maximum number of rows (" + maxNumberRowsToExport + ") reached for downloading CSV");
+        }
 
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
