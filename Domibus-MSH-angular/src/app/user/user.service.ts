@@ -19,7 +19,7 @@ export class UserService {
     return this.http.get('rest/user/users')
       .map(this.extractData)
       .filter(this.filterData(filter))
-      .catch(this.handleError);
+      .catch(err => this.handleError(err));
   }
 
   getUserNames (): Observable<string> {
@@ -31,7 +31,7 @@ export class UserService {
   getUserRoles (): Observable<String[]> {
     return this.http.get('rest/user/userroles')
       .map(this.extractData)
-      .catch(this.handleError);
+      .catch(err => this.handleError(err));
   }
 
   deleteUsers (users: Array<UserResponseRO>): void {
