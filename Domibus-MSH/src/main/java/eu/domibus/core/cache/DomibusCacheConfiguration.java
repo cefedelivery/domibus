@@ -36,21 +36,29 @@ public class DomibusCacheConfiguration {
         EhCacheCacheManager ehCacheManager = new EhCacheCacheManager();
         ehCacheManager.setCacheManager(cacheManager);
 
-        if (new File(externalEhCacheFile).exists()) {
-            LOG.debug("External ehCache file exists [{}]. Overriding the default ehCache configuration", externalEhCacheFile);
-            CacheManager externalCacheManager = CacheManager.newInstance(externalEhCacheFile);
-            final String[] cacheNames = externalCacheManager.getCacheNames();
-            for (String cacheName : cacheNames) {
-                if (cacheManager.cacheExists(cacheName)) {
-                    LOG.debug("Overriding the default cache [{}]", cacheName);
-                    cacheManager.removeCache(cacheName);
-                    final CacheConfiguration cacheConfiguration = externalCacheManager.getCache(cacheName).getCacheConfiguration();
-                    cacheManager.addCache(new Cache(cacheConfiguration));
-                }
-            }
+        if (externalCacheFileExists()) {
+            mergeExternalCacheConfiguration(cacheManager);
         }
 
         return ehCacheManager;
+    }
+
+    protected boolean externalCacheFileExists() {
+        return new File(externalEhCacheFile).exists();
+    }
+
+    protected void mergeExternalCacheConfiguration(CacheManager cacheManager) {
+        LOG.debug("External ehCache file exists [{}]. Overriding the default ehCache configuration", externalEhCacheFile);
+        CacheManager externalCacheManager = CacheManager.newInstance(externalEhCacheFile);
+        final String[] cacheNames = externalCacheManager.getCacheNames();
+        for (String cacheName : cacheNames) {
+            if (cacheManager.cacheExists(cacheName)) {
+                LOG.debug("Overriding the default cache [{}]", cacheName);
+                cacheManager.removeCache(cacheName);
+            }
+            final CacheConfiguration cacheConfiguration = externalCacheManager.getCache(cacheName).getCacheConfiguration();
+            cacheManager.addCache(new Cache(cacheConfiguration));
+        }
     }
 
 
