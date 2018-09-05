@@ -25,6 +25,7 @@
         <intercept-url pattern="/rest/application/info" access="permitAll"/>
         <intercept-url pattern="/rest/application/name" access="permitAll"/>
         <intercept-url pattern="/rest/application/multitenancy" access="permitAll"/>
+        <intercept-url pattern="/rest/application/fourcornerenabled" access="permitAll"/>
         <intercept-url pattern="/rest/application/domains" access="hasRole('ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/security/user/domain" access="hasRole('ROLE_AP_ADMIN')" method="PUT"/>
         <intercept-url pattern="/rest/pmode/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
