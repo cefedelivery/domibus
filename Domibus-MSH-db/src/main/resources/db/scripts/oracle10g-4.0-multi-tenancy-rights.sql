@@ -9,6 +9,7 @@
 DECLARE
   DOMAIN_SCHEMA varchar2(100) := 'domain_schema';
   GENERAL_SCHEMA varchar2(100) := 'general_schema';
+  sql_stmt  VARCHAR2(300);
 BEGIN
     FOR t IN (
         SELECT
@@ -29,22 +30,25 @@ BEGIN
                 'TABLE'
             )
         THEN
-            EXECUTE IMMEDIATE 'GRANT SELECT, UPDATE, INSERT, DELETE ON '
+            sql_stmt := 'GRANT SELECT, UPDATE, INSERT, DELETE ON '
             || DOMAIN_SCHEMA || '.'
             || t.object_name
             || ' TO ' || GENERAL_SCHEMA;
-
+            EXECUTE IMMEDIATE sql_stmt;
+            DBMS_OUTPUT.PUT_LINE(sql_stmt);
         ELSIF
             t.object_type IN (
                 'VIEW',
                 'SEQUENCE'
             )
         THEN
-            EXECUTE IMMEDIATE 'GRANT SELECT ON '
+            sql_stmt := 'GRANT SELECT ON '
             || DOMAIN_SCHEMA || '.'
             || t.object_name
             || ' TO ' || GENERAL_SCHEMA;
-
+            EXECUTE IMMEDIATE sql_stmt;
+            DBMS_OUTPUT.PUT_LINE(sql_stmt);
         END IF;
     END LOOP;
 END;
+/
