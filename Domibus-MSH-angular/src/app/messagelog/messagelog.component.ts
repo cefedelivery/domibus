@@ -23,8 +23,8 @@ import {DatatableComponent} from '@swimlane/ngx-datatable';
 
 export class MessageLogComponent implements OnInit {
 
-  static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
-  static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
+  static readonly RESEND_URL: string = 'rest/message/restore?messageId=${messageId}';
+  static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/download?messageId=${messageId}';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
@@ -369,7 +369,7 @@ export class MessageLogComponent implements OnInit {
   resend (messageId: string) {
     console.log('Resending message with id ', messageId);
 
-    let url = MessageLogComponent.RESEND_URL.replace('${messageId}', messageId);
+    let url = MessageLogComponent.RESEND_URL.replace('${messageId}', encodeURIComponent(messageId));
 
     console.log('URL is  ', url);
 
@@ -406,7 +406,7 @@ export class MessageLogComponent implements OnInit {
   }
 
   private downloadMessage (messageId) {
-    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace('${messageId}', messageId);
+    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace('${messageId}', encodeURIComponent(messageId));
     DownloadService.downloadNative(url);
   }
 
