@@ -444,7 +444,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
       const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
       PModeArchiveComponent.downloadFile(res.text(), this.currentDomain.name, uploadDateStr);
     }, err => {
-      this.alertService.error(err._body);
+      this.alertService.error(err);
     });
   }
 
@@ -534,7 +534,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         });
       }
     }, err => {
-      this.alertService.error(err._body);
+      this.alertService.error(err);
     });
   }
 

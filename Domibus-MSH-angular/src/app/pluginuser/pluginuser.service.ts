@@ -6,6 +6,7 @@ import {UserState} from '../user/user';
 import {UserService} from '../user/user.service';
 import {SecurityService} from '../security/security.service';
 import {UserComponent} from '../user/user.component';
+import {AlertService} from '../alert/alert.service';
 
 @Injectable()
 export class PluginUserService {
@@ -24,7 +25,7 @@ export class PluginUserService {
 
   readonly ROLE_AP_ADMIN = SecurityService.ROLE_AP_ADMIN;
 
-  constructor (private http: Http, private userService: UserService) {
+  constructor (private http: Http, private userService: UserService, private alertService: AlertService) {
   }
 
   getUsers (filter?: PluginUserSearchCriteria)
@@ -34,7 +35,7 @@ export class PluginUserService {
 
     return this.http.get(PluginUserService.PLUGIN_USERS_URL, {search: searchParams})
       .map(this.extractData)
-      .catch(this.handleError);
+      .catch(err => this.alertService.handleError(err));
   }
 
   createFilterParams (filter: PluginUserSearchCriteria) {
@@ -62,11 +63,10 @@ export class PluginUserService {
     item.status = UserState[UserState.NEW];
     item.username = '';
     return item;
-
   }
 
   saveUsers (users: PluginUserRO[]): Promise<Response> {
-  	users = users.filter(el => el.status !== UserState[UserState.PERSISTED]);
+    users = users.filter(el => el.status !== UserState[UserState.PERSISTED]);
     return this.http.put(PluginUserService.PLUGIN_USERS_URL, users).toPromise();
   }
 
@@ -82,17 +82,6 @@ export class PluginUserService {
     return r;
   }
 
-  private handleError (error: Response | any) {
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    return Promise.reject(errMsg);
-  }
 }
 
 export class PluginUserSearchCriteria {

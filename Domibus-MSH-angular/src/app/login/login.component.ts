@@ -63,8 +63,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         switch (error.status) {
           case HTTP_UNAUTHORIZED:
           case HTTP_FORBIDDEN:
-            let forbiddenCode = error.json().message;
-            console.log('User forbiden code ' + forbiddenCode);
+            const forbiddenCode = error.json().message;
+            console.log('User forbidden code ' + forbiddenCode);
             switch (forbiddenCode) {
               case USER_INACTIVE:
                 message = 'The user is inactive. Please contact your administrator.';
