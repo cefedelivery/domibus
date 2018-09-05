@@ -369,7 +369,7 @@ export class MessageLogComponent implements OnInit {
   resend (messageId: string) {
     console.log('Resending message with id ', messageId);
 
-    let url = MessageLogComponent.RESEND_URL.replace('${messageId}', messageId);
+    let url = MessageLogComponent.RESEND_URL.replace('${messageId}', encodeURIComponent(messageId));
 
     console.log('URL is  ', url);
 
