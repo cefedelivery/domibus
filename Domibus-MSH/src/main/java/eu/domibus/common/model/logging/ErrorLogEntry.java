@@ -23,7 +23,7 @@ import java.util.Date;
 @Table(name = "TB_ERROR_LOG")
 @NamedQueries({
         @NamedQuery(name = "ErrorLogEntry.findUnnotifiedErrorsByMessageId", query = "select e from ErrorLogEntry e where e.messageInErrorId = :MESSAGE_ID and e.notified is null"),
-        @NamedQuery(name = "ErrorLogEntry.findErrorsByMessageId", query = "select e from ErrorLogEntry e where e.messageInErrorId = :MESSAGE_ID"),
+        @NamedQuery(name = "ErrorLogEntry.findErrorsByMessageId", query = "select e from ErrorLogEntry e where e.messageInErrorId = :MESSAGE_ID order by e.timestamp desc"),
         @NamedQuery(name = "ErrorLogEntry.findEntries", query = "select e from ErrorLogEntry e"),
         @NamedQuery(name = "ErrorLogEntry.countEntries", query = "select count(e.entityId)  from ErrorLogEntry e")
 })
