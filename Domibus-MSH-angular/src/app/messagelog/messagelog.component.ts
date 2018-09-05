@@ -30,8 +30,8 @@ export class MessageLogComponent {
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
 
-  static readonly RESEND_URL: string = 'rest/message/${messageId}/restore';
-  static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/${messageId}/download';
+  static readonly RESEND_URL: string = 'rest/message/restore?messageId=${messageId}';
+  static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/download?messageId=${messageId}';
   static readonly MESSAGE_LOG_URL: string = 'rest/messagelog';
 
   selected = [];
@@ -376,7 +376,7 @@ export class MessageLogComponent {
   }
 
   private downloadMessage(messageId) {
-    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", messageId);
+    const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace("${messageId}", encodeURIComponent(messageId));
     DownloadService.downloadNative(url);
   }
 
