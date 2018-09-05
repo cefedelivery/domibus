@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.util.HashMap;
@@ -31,7 +28,7 @@ import java.util.zip.ZipOutputStream;
  * Created by musatmi on 10/05/2017.
  */
 @RestController
-@RequestMapping(value = "/rest/message/")
+@RequestMapping(value = "/rest/message")
 public class MessageResource {
 
     private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(MessageResource.class);
@@ -49,13 +46,13 @@ public class MessageResource {
     private AuditService auditService;
 
 
-    @RequestMapping(path = "{messageId:.+}/restore", method = RequestMethod.PUT)
-    public void resend(@PathVariable(value = "messageId") String messageId) {
+    @RequestMapping(path = "/restore", method = RequestMethod.PUT)
+    public void resend(@RequestParam(value = "messageId", required = true) String messageId) {
         userMessageService.restoreFailedMessage(messageId);
         auditService.addMessageResentAudit(messageId);
     }
 
-    @RequestMapping(path = "{messageId:.+}/downloadOld", method = RequestMethod.GET)
+    @RequestMapping(path = "/{messageId:.+}/downloadOld", method = RequestMethod.GET)
     public ResponseEntity<ByteArrayResource> download(@PathVariable(value = "messageId") String messageId) {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
@@ -77,8 +74,8 @@ public class MessageResource {
                 .body(resource);
     }
 
-    @RequestMapping(value = "{messageId:.+}/download")
-    public ResponseEntity<ByteArrayResource> zipFiles(@PathVariable(value = "messageId") String messageId) throws IOException {
+    @RequestMapping(value = "/download")
+    public ResponseEntity<ByteArrayResource> zipFiles(@RequestParam(value = "messageId", required = true) String messageId) throws IOException {
 
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         if (userMessage == null)
