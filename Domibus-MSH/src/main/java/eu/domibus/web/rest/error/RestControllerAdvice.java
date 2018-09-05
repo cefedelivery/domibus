@@ -19,7 +19,6 @@ import javax.persistence.RollbackException;
 @RequestMapping(produces = "application/vnd.error+json")
 public class RestControllerAdvice extends ResponseEntityExceptionHandler {
 
-
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RestControllerAdvice.class);
 
     @ExceptionHandler({UserManagementException.class})
@@ -34,19 +33,22 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
             return handleUserManagementException((UserManagementException) ExceptionUtils.getRootCause(ex));
         }
 
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ExceptionUtils.getRootCause(ex).getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return handleWrappedException(ex);
     }
 
     @ExceptionHandler({RollbackException.class})
     public ResponseEntity<ErrorRO> handleRollbackException(RollbackException ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ExceptionUtils.getRootCause(ex).getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return handleWrappedException(ex);
     }
 
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorRO> handleException(Exception ex) {
         LOG.error(ex.getMessage(), ex);
         return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorRO> handleWrappedException(Exception ex) {
+        LOG.error(ex.getMessage(), ex);
+        return new ResponseEntity(new ErrorRO(ExceptionUtils.getRootCause(ex).getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
