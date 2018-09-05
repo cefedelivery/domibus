@@ -65,13 +65,6 @@ public class UserResource {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({UserManagementException.class})
-    public ErrorRO handleUserManagementException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
-    }
-
     /**
      * {@inheritDoc}
      */
