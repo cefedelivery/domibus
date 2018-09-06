@@ -47,6 +47,12 @@ public class DomibusCacheConfiguration {
         return new File(externalEhCacheFile).exists();
     }
 
+    /**
+     * Get the configuration defined in the external ehcache.xml file and merge it into the default ehcache-default.xml configuration.
+     * An existing cache entry is overridden, otherwise a new cache entry is created.
+     *
+     * @param cacheManager
+     */
     protected void mergeExternalCacheConfiguration(CacheManager cacheManager) {
         LOG.debug("External ehCache file exists [{}]. Overriding the default ehCache configuration", externalEhCacheFile);
         CacheManager externalCacheManager = CacheManager.newInstance(externalEhCacheFile);
