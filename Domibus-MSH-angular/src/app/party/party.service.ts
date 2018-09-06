@@ -14,7 +14,7 @@ import {DownloadService} from '../download/download.service';
 export class PartyService {
   static readonly CERTIFICATE: string = 'rest/party/{partyName}/certificate';
   static readonly LIST_PROCESSES: string = 'rest/party/processes';
-  static readonly LIST_PARTIES: string = 'rest/party/list';
+  static readonly LIST_PARTIES: string = 'rest/party/list?pageSize=0';
   static readonly UPDATE_PARTIES: string = 'rest/party/update';
   static readonly CSV_PARTIES: string = 'rest/party/csv';
 
