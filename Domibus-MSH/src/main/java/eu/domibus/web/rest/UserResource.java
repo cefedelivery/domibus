@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.user.User;
@@ -17,6 +18,7 @@ import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.UserResponseRO;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -63,6 +65,22 @@ public class UserResource {
         } else {
             return userManagementService;
         }
+    }
+
+    @ExceptionHandler({UserManagementException.class})
+    public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({DomainException.class})
+    public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
+        if (ExceptionUtils.getRootCause(ex) instanceof UserManagementException) {
+            return handleUserManagementException((UserManagementException) ExceptionUtils.getRootCause(ex));
+        }
+
+        LOG.error(ex.getMessage(), ex);
+        return new ResponseEntity(new ErrorRO(ExceptionUtils.getRootCause(ex).getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

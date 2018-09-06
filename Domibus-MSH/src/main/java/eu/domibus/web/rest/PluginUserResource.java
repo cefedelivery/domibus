@@ -47,6 +47,12 @@ public class PluginUserResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
+    @ExceptionHandler({UserManagementException.class})
+    public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
+        LOG.error(ex.getMessage(), ex);
+        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
+    }
+
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)
     public PluginUserResultRO findUsers(
             @RequestParam(value = "authType", required = false) AuthType authType,

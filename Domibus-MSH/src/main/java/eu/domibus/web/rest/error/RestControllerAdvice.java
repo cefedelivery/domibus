@@ -1,7 +1,6 @@
 package eu.domibus.web.rest.error;
 
 import eu.domibus.api.multitenancy.DomainException;
-import eu.domibus.api.user.UserManagementException;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -21,18 +20,8 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RestControllerAdvice.class);
 
-    @ExceptionHandler({UserManagementException.class})
-    public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler({DomainException.class})
     public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
-        if (ExceptionUtils.getRootCause(ex) instanceof UserManagementException) {
-            return handleUserManagementException((UserManagementException) ExceptionUtils.getRootCause(ex));
-        }
-
         return handleWrappedException(ex);
     }
 
