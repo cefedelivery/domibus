@@ -92,6 +92,10 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.deletedParties.length = 0;
   }
 
+  searchIfOK () {
+    this.checkIsDirtyAndThen(this.listPartiesAndProcesses);
+  }
+
   listPartiesAndProcesses () {
     this.offset = 0;
     return Observable.forkJoin([
