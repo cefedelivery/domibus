@@ -47,7 +47,7 @@ md-card-content:before,
 table.buttonsRow:before,
 table.buttonsMoveRow,
 md-input-container:before,
-ngx-datatable span:before {
+ngx-datatable span:before:not([class^="datatable-icon-"]) {
   content: " " !important;
 }
 
