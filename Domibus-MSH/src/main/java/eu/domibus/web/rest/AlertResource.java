@@ -99,7 +99,7 @@ public class AlertResource {
     @GetMapping(path = "/status")
     public List<String> getAlertStatus() {
         final List<AlertStatus> alertLevels = Lists.newArrayList(AlertStatus.values());
-        return alertLevels.stream().filter(alertStatus -> AlertStatus.SEND_ENQUEUED!=alertStatus).map(Enum::name).collect(Collectors.toList());
+        return alertLevels.stream().map(Enum::name).collect(Collectors.toList());
     }
 
     @GetMapping(path = "/params")
