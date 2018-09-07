@@ -60,7 +60,7 @@ export class PmodeUploadComponent implements OnInit {
           this.alertService.success(res.text(), false);
           this.dialogRef.close({done: true});
         }, err => {
-          this.alertService.error(err._body, false);
+          this.alertService.error(err, false);
           this.dialogRef.close({done: false});
         },
         () => {

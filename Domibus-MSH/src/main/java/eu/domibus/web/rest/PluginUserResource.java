@@ -47,11 +47,10 @@ public class PluginUserResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({UserManagementException.class})
-    public ErrorRO handleUserManagementException(Exception ex) {
+    public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
         LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
+        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)

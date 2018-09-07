@@ -164,21 +164,29 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
    * Gets all the PModes Entries
    */
   getAllPModeEntries () {
+    this.loading = true;
     this.getResultObservable().subscribe((response: Response) => {
         this.offset = 0;
-        this.allPModes = response.json();
-        this.allPModes[0].current = true;
-        this.actualId = this.allPModes[0].id;
         this.actualRow = 0;
-        this.count = response.json().length;
+        this.actualId = undefined;
 
+        this.allPModes = response.json();
+        this.count = this.allPModes.length;
+        if (this.count > 0) {
+          this.allPModes[0].current = true;
+          this.actualId = this.allPModes[0].id;
+        }
       },
       () => {
+        this.loading = false;
       },
       () => {
         this.tableRows = this.allPModes.slice(0, this.rowLimiter.pageSize);
-        this.tableRows[0].current = true;
-        this.tableRows[0].description = '[CURRENT]: ' + this.allPModes[0].description;
+        if (this.tableRows.length > 0) {
+          this.tableRows[0].current = true;
+          this.tableRows[0].description = '[CURRENT]: ' + this.allPModes[0].description;
+        }
+        this.loading = false;
       });
   }
 
@@ -339,10 +347,10 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     for (let i = this.selected.length - 1; i >= 0; i--) {
       let array = this.tableRows.slice();
       // index is changed if selected items are not sorted recalculate new index
-      let  idx = array.indexOf(this.selected[i]);
+      let idx = array.indexOf(this.selected[i]);
       array.splice(idx, 1);
       array = array.concat(this.allPModes[this.offset * this.rowLimiter.pageSize + this.rowLimiter.pageSize]);
-      this.allPModes.splice(this.offset * this.rowLimiter.pageSize +idx, 1);
+      this.allPModes.splice(this.offset * this.rowLimiter.pageSize + idx, 1);
       this.tableRows = array.slice();
       this.deleteList.push(this.selected[i].id);
       this.count--;
@@ -444,7 +452,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
       const uploadDateStr = DateFormatService.format(new Date(row.configurationDate));
       PModeArchiveComponent.downloadFile(res.text(), this.currentDomain.name, uploadDateStr);
     }, err => {
-      this.alertService.error(err._body);
+      this.alertService.error(err);
     });
   }
 
@@ -534,7 +542,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         });
       }
     }, err => {
-      this.alertService.error(err._body);
+      this.alertService.error(err);
     });
   }
 
