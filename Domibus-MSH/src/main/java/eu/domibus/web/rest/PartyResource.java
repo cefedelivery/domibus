@@ -68,6 +68,7 @@ public class PartyResource {
             LOG.debug("pageSize [{}]", pageSize);
         }
 
+        // basic user input sanitizing; pageSize = 0 means no pagination.
         if (pageStart <= 0) {
             pageStart = 0;
         }
