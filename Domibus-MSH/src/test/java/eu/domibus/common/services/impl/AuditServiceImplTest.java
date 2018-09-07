@@ -50,9 +50,8 @@ public class AuditServiceImplTest {
     public void listAuditTarget() throws Exception {
         List<String> targets = auditService.listAuditTarget();
         targets.stream().forEach(System.out::println);
-        assertEquals(7, targets.size());
+        assertEquals(6, targets.size());
         assertTrue(targets.contains("User"));
-        assertTrue(targets.contains("Party"));
         assertTrue(targets.contains("Pmode"));
         assertTrue(targets.contains("Pmode Archive"));
         assertTrue(targets.contains("Message"));
