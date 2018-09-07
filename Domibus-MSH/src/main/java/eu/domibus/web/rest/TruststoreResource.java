@@ -60,6 +60,7 @@ public class TruststoreResource {
                 byte[] bytes = truststore.getBytes();
                 multiDomainCertificateProvider.replaceTrustStore(domainProvider.getCurrentDomain(), bytes, password);
                 domibusCacheService.clearCache("certValidationByAlias");
+                domibusCacheService.clearCache("dispatchClient");
                 return ResponseEntity.ok("Truststore file has been successfully replaced.");
             } catch (Exception e) {
                 LOG.error("Failed to upload the truststore file", e);

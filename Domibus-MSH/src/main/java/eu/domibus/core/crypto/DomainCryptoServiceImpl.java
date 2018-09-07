@@ -92,17 +92,19 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public synchronized void refreshTrustStore() throws CryptoException {
+        LOG.info("loadTrustStore");
         final KeyStore trustStore = loadTrustStore();
+        LOG.info("setTrustStore");
         setTrustStore(trustStore);
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoException {
-        LOG.debug("Replacing the existing trust store file [{}] with the provided one", getTrustStoreLocation());
+        LOG.info("Replacing the existing trust store file [{}] with the provided one", getTrustStoreLocation());
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
             certificateService.validateLoadOperation(newTrustStoreBytes, password);
-
+            LOG.info("truststore.load");
             truststore.load(newTrustStoreBytes, password.toCharArray());
 
             persistTrustStore();
@@ -110,14 +112,19 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             throw new CryptoException("Could not replace truststore", e);
         }
 
+        LOG.info("signalTrustStoreUpdate in replace truststore");
         signalTrustStoreUpdate();
+        LOG.info("after signalTrustStoreUpdate in replace truststore");
     }
 
     private synchronized void persistTrustStore() throws CryptoException {
+        LOG.info("Synchronized persistTrustStore");
+
         String trustStoreFileValue = getTrustStoreLocation();
+        LOG.info("TrustoreLocation is: [{}]", trustStoreFileValue);
         File trustStoreFile = new File(trustStoreFileValue);
         if (!trustStoreFile.getParentFile().exists()) {
-            LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
+            LOG.info("Creating directory [" + trustStoreFile.getParentFile() + "]");
             try {
                 FileUtils.forceMkdir(trustStoreFile.getParentFile());
             } catch (IOException e) {
@@ -125,13 +132,18 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             }
         }
 
+        LOG.info("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
+
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
+            LOG.info("truststore store: [{}]", getTrustStorePassword().toCharArray());
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
         } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e ) {
             throw new CryptoException("Could not persist truststore:", e);
         }
 
+        LOG.info("signalTrustStoreUpdate");
         signalTrustStoreUpdate();
+        LOG.info("after signalTrustStoreUpdate");
     }
 
     @Override
@@ -169,6 +181,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     protected KeyStore loadTrustStore() {
         String trustStoreLocation = getTrustStoreLocation();
+        LOG.info("trustStoreLocation [{}]", trustStoreLocation);
         if (trustStoreLocation != null) {
             trustStoreLocation = trustStoreLocation.trim();
 
@@ -183,7 +196,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                     type = type.trim();
                 }
                 final KeyStore trustStore = load(is, passwd, null, type);
-                LOG.debug("The TrustStore {} of type {} has been loaded", trustStoreLocation, type);
+                LOG.info("The TrustStore {} of type {} has been loaded", trustStoreLocation, type);
                 return trustStore;
             } catch (WSSecurityException | IOException e) {
                 throw new CryptoException("Error loading truststore", e);

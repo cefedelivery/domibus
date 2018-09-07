@@ -112,6 +112,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     @Override
     public void refreshTrustStore(Domain domain) {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        LOG.info("domainCertificateProvider.refreshTrustStore");
         domainCertificateProvider.refreshTrustStore();
     }
 

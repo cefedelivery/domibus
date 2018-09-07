@@ -46,6 +46,7 @@ public class ControllerListenerService implements MessageListener {
     @Override
     @Transactional
     public void onMessage(Message message) {
+        LOG.info("On message: ", message.toString());
         String command = null;
         try {
             command = message.getStringProperty(Command.COMMAND);
@@ -80,6 +81,7 @@ public class ControllerListenerService implements MessageListener {
                 }
                 break;
             case Command.RELOAD_TRUSTSTORE:
+                LOG.info("refreshTrustStore domain [{}]", domain);
                 multiDomainCryptoService.refreshTrustStore(domain);
                 break;
             default:
