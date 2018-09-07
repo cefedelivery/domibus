@@ -67,6 +67,15 @@ public class PartyResource {
             LOG.debug("pageStart [{}]", pageStart);
             LOG.debug("pageSize [{}]", pageSize);
         }
+
+        // basic user input sanitizing; pageSize = 0 means no pagination.
+        if (pageStart <= 0) {
+            pageStart = 0;
+        }
+        if (pageSize <= 0) {
+            pageSize = Integer.MAX_VALUE;
+        }
+
         List<PartyResponseRo> partyResponseRos = domainConverter.convert(
                 partyService.getParties(
                         name,
