@@ -7,6 +7,7 @@ import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,36 +80,40 @@ public class MessageRetentionService {
 
     @Transactional
     public void deleteExpiredMessages(String mpc, Integer expiredDownloadedMessagesLimit, Integer expiredNotDownloadedMessagesLimit) {
-        LOG.debug("Deleting expired messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]" +
-                " and expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
+        LOG.debug("Deleting expired messages for MPC [{}] using expiredDownloadedMessagesLimit [{}]" +
+                " and expiredNotDownloadedMessagesLimit [{}]", mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         deleteExpiredDownloadedMessages(mpc, expiredDownloadedMessagesLimit);
         deleteExpiredNotDownloadedMessages(mpc, expiredNotDownloadedMessagesLimit);
     }
 
     protected void deleteExpiredDownloadedMessages(String mpc, Integer expiredDownloadedMessagesLimit) {
-        LOG.debug("Deleting expired downloaded messages for MPC [" + mpc + "] using expiredDownloadedMessagesLimit [" + expiredDownloadedMessagesLimit + "]");
+        LOG.debug("Deleting expired downloaded messages for MPC [{}] using expiredDownloadedMessagesLimit [{}]", mpc, expiredDownloadedMessagesLimit);
         final int messageRetentionDownloaded = pModeProvider.getRetentionDownloadedByMpcURI(mpc);
         String fileLocation = domibusPropertyProvider.getDomainProperty(DOMIBUS_ATTACHMENT_STORAGE_LOCATION);
         // If messageRetentionDownloaded is equal to -1, the messages will be kept indefinitely and, if 0 and no file system storage was used, they have already been deleted during download operation.
         if (messageRetentionDownloaded > 0 || (StringUtils.isNotEmpty(fileLocation) && messageRetentionDownloaded >= 0)) {
-            List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1), mpc);
-            if (downloadedMessageIds != null && downloadedMessageIds.size() > 0) {
-                LOG.debug("Found [" + downloadedMessageIds.size() + "] downloaded messages to delete");
-                final Integer deleted = delete(downloadedMessageIds, expiredDownloadedMessagesLimit);
-                LOG.debug("Deleted [" + deleted + "] downloaded messages");
+            List<String> downloadedMessageIds = userMessageLogDao.getDownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionDownloaded * -1),
+                    mpc, expiredDownloadedMessagesLimit);
+            if (CollectionUtils.isNotEmpty(downloadedMessageIds)) {
+                final int deleted = downloadedMessageIds.size();
+                LOG.debug("Found [{}] downloaded messages to delete", deleted);
+                userMessageService.delete(downloadedMessageIds);
+                LOG.debug("Deleted [{}] downloaded messages", deleted);
             }
         }
     }
 
     protected void deleteExpiredNotDownloadedMessages(String mpc, Integer expiredNotDownloadedMessagesLimit) {
-        LOG.debug("Deleting expired not-downloaded messages for MPC [" + mpc + "] using expiredNotDownloadedMessagesLimit [" + expiredNotDownloadedMessagesLimit + "]");
+        LOG.debug("Deleting expired not-downloaded messages for MPC [{}] using expiredNotDownloadedMessagesLimit [{}]", mpc, expiredNotDownloadedMessagesLimit);
         final int messageRetentionNotDownloaded = pModeProvider.getRetentionUndownloadedByMpcURI(mpc);
-        if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinetely and if 0, although it makes no sense, is legal
-            final List<String> notDownloadedMessageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionNotDownloaded * -1), mpc);
-            if (notDownloadedMessageIds != null && notDownloadedMessageIds.size() > 0) {
-                LOG.debug("Found [" + notDownloadedMessageIds.size() + "] not-downloaded messages to delete");
-                final Integer deleted = delete(notDownloadedMessageIds, expiredNotDownloadedMessagesLimit);
-                LOG.debug("Deleted [" + deleted + "] not-downloaded messages");
+        if (messageRetentionNotDownloaded > -1) { // if -1 the messages will be kept indefinitely and if 0, although it makes no sense, is legal
+            final List<String> notDownloadedMessageIds = userMessageLogDao.getUndownloadedUserMessagesOlderThan(DateUtils.addMinutes(new Date(), messageRetentionNotDownloaded * -1),
+                    mpc, expiredNotDownloadedMessagesLimit);
+            if (CollectionUtils.isNotEmpty(notDownloadedMessageIds)) {
+                final int deleted = notDownloadedMessageIds.size();
+                LOG.debug("Found [{}] not-downloaded messages to delete", deleted);
+                userMessageService.delete(notDownloadedMessageIds);
+                LOG.debug("Deleted [{}] not-downloaded messages", deleted);
             }
         }
     }
@@ -116,27 +121,15 @@ public class MessageRetentionService {
     protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
         final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
         if (propertyValueString == null) {
-            LOG.debug("Could not find property [" + propertyName + "]. Using the default value [" + defaultValue + "]");
+            LOG.debug("Could not find property [{}]. Using the default value [{}]", propertyName, defaultValue);
             return defaultValue;
         }
         try {
             return Integer.parseInt(propertyValueString);
         } catch (NumberFormatException e) {
-            LOG.warn("Could not parse value [" + propertyValueString + "] for property [" + propertyName + "]. Using default value [" + defaultValue + "]");
+            LOG.warn("Could not parse value [{}] for property [{}]. Using default value [{}]", propertyValueString, propertyName, defaultValue);
         }
         return defaultValue;
     }
-
-    protected Integer delete(List<String> messageIds, Integer limit) {
-        List<String> toDelete = messageIds;
-        if (messageIds.size() > limit) {
-            LOG.debug("Only the first [" + limit + "] will be deleted");
-            toDelete = collectionUtil.safeSubList(messageIds, 0, limit);
-        }
-        userMessageService.delete(toDelete);
-        return toDelete.size();
-    }
-
-
 
 }

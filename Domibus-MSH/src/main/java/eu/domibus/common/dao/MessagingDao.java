@@ -76,6 +76,7 @@ public class MessagingDao extends BasicDao<Messaging> {
     @Transactional(propagation = Propagation.MANDATORY)
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
     public void clearPayloadData(String messageId) {
+        LOG.debug("start clearPayloadData");
 
         //add messageId to MDC map
         if (StringUtils.isNotBlank(messageId)) {

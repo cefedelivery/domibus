@@ -148,10 +148,11 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         return query.getResultList();
     }
 
-    public List<String> getUndownloadedUserMessagesOlderThan(Date date, String mpc) {
+    public List<String> getUndownloadedUserMessagesOlderThan(Date date, String mpc, Integer expiredNotDownloadedMessagesLimit) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findUndownloadedUserMessagesOlderThan", String.class);
         query.setParameter("DATE", date);
         query.setParameter("MPC", mpc);
+        query.setMaxResults(expiredNotDownloadedMessagesLimit);
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
@@ -160,10 +161,11 @@ public class UserMessageLogDao extends MessageLogDao<UserMessageLog> {
         }
     }
 
-    public List<String> getDownloadedUserMessagesOlderThan(Date date, String mpc) {
+    public List<String> getDownloadedUserMessagesOlderThan(Date date, String mpc, Integer expiredDownloadedMessagesLimit) {
         TypedQuery<String> query = em.createNamedQuery("UserMessageLog.findDownloadedUserMessagesOlderThan", String.class);
         query.setParameter("DATE", date);
         query.setParameter("MPC", mpc);
+        query.setMaxResults(expiredDownloadedMessagesLimit);
         try {
             return query.getResultList();
         } catch (NoResultException nrEx) {
