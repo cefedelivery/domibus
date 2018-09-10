@@ -53,8 +53,9 @@ export class AlertService {
     this.subject.next({type: 'success', text: message});
   }
 
-  error (message: string | any, keepAfterNavigationChange = false, fadeTime: number = 0) {
+  error (message: Response | string | any, keepAfterNavigationChange = false, fadeTime: number = 0) {
     if (message.handled) return;
+    if (message instanceof Response && (message.status === 401 || message.status === 403)) return;
 
     const errMsg = this.formatError(message);
     this.subject.next({type: 'error', text: errMsg});
