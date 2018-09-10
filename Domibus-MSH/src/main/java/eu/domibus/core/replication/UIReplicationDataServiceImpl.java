@@ -50,8 +50,6 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
     @Autowired
     private UserMessageDefaultServiceHelper userMessageDefaultServiceHelper;
 
-
-
     @Autowired
     private DomainCoreConverter domainConverter;
 

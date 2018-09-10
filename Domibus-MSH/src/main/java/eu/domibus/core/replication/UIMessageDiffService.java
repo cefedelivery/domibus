@@ -8,6 +8,8 @@ public interface UIMessageDiffService {
 
     List<UIMessageDiffEntity> findAll();
 
+    List<UIMessageDiffEntity> findAll(int limit);
+
     /**
      * run the diff query against {@code V_MESSAGE_UI} view and sync the data
      */

@@ -58,6 +58,17 @@ public class UIMessageDiffServiceImpl implements UIMessageDiffService {
         return uiMessageDiffEntityList;
     }
 
+    @Override
+    public List<UIMessageDiffEntity> findAll(int limit) {
+        LOG.debug("start to find UIMessages to be synced, limit={}", limit);
+        long startTime = System.currentTimeMillis();
+
+        List<UIMessageDiffEntity> uiMessageDiffEntityList = uiMessageDiffDao.findAllNative(limit);
+
+        LOG.debug("{} milliseconds to find all UIMessages to be synced", System.currentTimeMillis() - startTime);
+        return uiMessageDiffEntityList;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -116,7 +127,7 @@ public class UIMessageDiffServiceImpl implements UIMessageDiffService {
         }
 
         List<UIMessageEntity> uiMessageEntityList =
-                uiMessageDiffDao.findAll(limit).
+                findAll(limit).
                         stream().
                         map(objects -> convertToUIMessageEntity(objects)).
                         collect(Collectors.toList());

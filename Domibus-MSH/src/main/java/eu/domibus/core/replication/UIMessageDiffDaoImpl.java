@@ -80,4 +80,15 @@ public class UIMessageDiffDaoImpl implements UIMessageDiffDao {
         return query.getResultList();
     }
 
+    @Override
+    public List<UIMessageDiffEntity> findAllNative(int limit) {
+        final Query query = this.em.createNamedQuery("UIMessageDiffEntity.findDiffMessages_" +
+                domibusConfigurationService.getDataBaseEngine().name().toUpperCase(), UIMessageDiffEntity.class);
+        if (limit > 0) {
+            query.setFirstResult(0);
+            query.setMaxResults(limit);
+        }
+        return query.getResultList();
+    }
+
 }
