@@ -69,21 +69,4 @@ public interface UIReplicationDataService {
      */
     void signalMessageReceived(final String messageId, final long jmsTimestamp);
 
-    /**
-     * run the diff query against {@code V_MESSAGE_UI} view and sync the data
-     */
-    void findAndSyncUIMessages();
-
-    /**
-     * run the diff query against {@code V_MESSAGE_UI} view and sync the data
-     */
-    int findAndSyncUIMessages(int limit);
-
-    /**
-     * count no of records from  {@code V_MESSAGE_UI}
-     *
-     * @return no of records
-     */
-    int countSyncUIMessages();
-
 }

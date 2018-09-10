@@ -18,6 +18,13 @@ public interface UIMessageDiffDao {
     int countAll();
 
     /**
+     * count all rows of {@code V_MESSAGE_UI_DIFF}
+     *
+     * @return
+     */
+    int countAllNative();
+
+    /**
      * returns max rows equals to limit parameter of of {@code V_MESSAGE_UI_DIFF}
      *
      * @param limit
@@ -31,4 +38,8 @@ public interface UIMessageDiffDao {
      * @return
      */
     List<UIMessageDiffEntity> findAll();
+
+
+
+    List<UIMessageDiffEntity> findAllNative();
 }

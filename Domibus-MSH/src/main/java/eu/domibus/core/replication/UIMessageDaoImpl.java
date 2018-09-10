@@ -56,7 +56,7 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
      * @return an instance of {@link UIMessageEntity}
      */
     @Override
-    @Transactional(readOnly=true, isolation=Isolation.READ_UNCOMMITTED)
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public UIMessageEntity findUIMessageByMessageId(final String messageId) {
 
         final TypedQuery<UIMessageEntity> query = this.em.createNamedQuery("UIMessageEntity.findUIMessageByMessageId", UIMessageEntity.class);

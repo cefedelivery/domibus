@@ -1,7 +1,6 @@
 package eu.domibus.core.replication;
 
 import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.quartz.DomibusQuartzJobBean;
@@ -23,10 +22,7 @@ public class UIReplicationJob extends DomibusQuartzJobBean {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationJob.class);
 
     @Autowired
-    private DomibusPropertyProvider domibusPropertyProvider;
-
-    @Autowired
-    private UIReplicationDataService uiReplicationDataService;
+    private UIMessageDiffService uiMessageDiffService;
 
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
@@ -34,11 +30,11 @@ public class UIReplicationJob extends DomibusQuartzJobBean {
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
         if (!uiReplicationSignalService.isReplicationEnabled()) {
-            LOG.debug("UIReplication is disabled - no processing will occur");
             return;
         }
 
         LOG.debug("UIReplicationJob start");
-        uiReplicationDataService.findAndSyncUIMessages();
+        uiMessageDiffService.findAndSyncUIMessages();
+        LOG.debug("UIReplicationJob end");
     }
 }

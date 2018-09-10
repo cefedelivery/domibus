@@ -1,6 +1,6 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.core.replication.UIReplicationDataService;
+import eu.domibus.core.replication.UIMessageDiffService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import mockit.Expectations;
 import mockit.FullVerifications;
@@ -28,7 +28,7 @@ public class UIReplicationResourceTest {
     private UIReplicationResource uiReplicationResource;
 
     @Injectable
-    private UIReplicationDataService uiReplicationDataService;
+    private UIMessageDiffService uiMessageDiffService;
 
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;
@@ -37,7 +37,7 @@ public class UIReplicationResourceTest {
     public void testCountData() {
         final int countRecordsToSync = new Random().nextInt();
         new Expectations() {{
-            uiReplicationDataService.countSyncUIMessages();
+            uiMessageDiffService.countAll();
             result = countRecordsToSync;
 
             uiReplicationSignalService.isReplicationEnabled();
@@ -60,7 +60,7 @@ public class UIReplicationResourceTest {
         final int limit = new Random().nextInt();
         final int syncedRows = new Random().nextInt();
         new Expectations() {{
-            uiReplicationDataService.findAndSyncUIMessages(limit);
+            uiMessageDiffService.findAndSyncUIMessages(limit);
             result = syncedRows;
 
             uiReplicationSignalService.isReplicationEnabled();
@@ -83,7 +83,7 @@ public class UIReplicationResourceTest {
         final int limit = new Random().nextInt();
         final int syncedRows = 0;
         new Expectations() {{
-            uiReplicationDataService.findAndSyncUIMessages(limit);
+            uiMessageDiffService.findAndSyncUIMessages(limit);
             result = syncedRows;
 
             uiReplicationSignalService.isReplicationEnabled();
