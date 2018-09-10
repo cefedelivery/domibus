@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class MailAlertDispatcherServiceImplTest {
+public class AlertDispatcherServiceImplTest {
 
     @Tested
     private AlertDispatcherServiceImpl alertDispatcherService;
