@@ -178,7 +178,7 @@ export class MessageLogComponent implements OnInit {
       return ['Message Id', 'From Party Id', 'To Party Id', 'Message Status', 'Received', 'AP Role', 'Message Type', 'Actions'].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   public beforeDomainChange () {
@@ -256,7 +256,8 @@ export class MessageLogComponent implements OnInit {
     return searchParams;
   }
 
-  getMessageLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<MessageLogResult> {
+  getMessageLogEntries (offset: number, pageSize: number): Observable<MessageLogResult> {
+
     const searchParams = this.createSearchParams();
 
     searchParams.set('page', offset.toString());
@@ -268,15 +269,13 @@ export class MessageLogComponent implements OnInit {
       );
   }
 
-  page (offset, pageSize, orderBy, asc) {
+  page (offset, pageSize) {
     this.loading = true;
 
-    this.getMessageLogEntries(offset, pageSize, orderBy, asc).subscribe((result: MessageLogResult) => {
+    this.getMessageLogEntries(offset, pageSize).subscribe((result: MessageLogResult) => {
       // console.log('messageLog response:' + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
-      this.orderBy = orderBy;
-      this.asc = asc;
       this.count = result.count;
       this.selected = [];
 
@@ -314,17 +313,14 @@ export class MessageLogComponent implements OnInit {
   }
 
   onPage (event) {
-    console.log('Page Event', event);
-    this.page(event.offset, event.pageSize, this.orderBy, this.asc);
+    this.page(event.offset, event.pageSize);
   }
 
   onSort (event) {
-    console.log('Sort Event', event);
-    let ascending = true;
-    if (event.newValue === 'desc') {
-      ascending = false;
-    }
-    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
+    this.orderBy = event.column.prop;
+    this.asc = (event.newValue === 'desc') ? false : true;
+
+    this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   onSelect ({selected}) {
@@ -341,12 +337,12 @@ export class MessageLogComponent implements OnInit {
 
   changePageSize (newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
-    this.page(0, newPageLimit, this.orderBy, this.asc);
+    this.page(0, newPageLimit);
   }
 
   search () {
     console.log('Searching using filter:' + this.filter);
-    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize);
   }
 
   resendDialog () {
