@@ -122,6 +122,13 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 throw new CryptoException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
             }
             throw new CryptoException("Could not replace truststore, using old truststore", e);
+        } finally {
+            try {
+                LOG.debug("Closing old truststore output stream.");
+                oldTrustStoreBytes.close();
+            } catch (IOException e) {
+                LOG.error("Could not close oldTrustStoreBytes output stream");
+            }
         }
 
         signalTrustStoreUpdate();
