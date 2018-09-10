@@ -21,7 +21,6 @@ public class AlertListener {
     private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertListener.class);
 
     @Autowired
-    @Qualifier("alertDispatcher")
     private AlertDispatcherService alertDispatcherService;
 
     @Autowired
