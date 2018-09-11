@@ -71,6 +71,7 @@ public class UIMessageServiceImpl implements UIMessageService {
         try {
             uiMessageDao.saveOrUpdate(uiMessageEntity);
         } catch (Exception e) {
+            //we log here just in case an exception is thrown
             LOG.error(e.getMessage(), e);
         }
     }
