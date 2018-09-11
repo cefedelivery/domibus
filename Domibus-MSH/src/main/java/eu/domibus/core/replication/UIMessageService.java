@@ -17,4 +17,6 @@ public interface UIMessageService {
     List<MessageLogInfo> findPaged(int from, int max, String column, boolean asc, Map<String, Object> filters);
 
     MessageLogResultRO countAndFindPaged(int from, int max, String column, boolean asc, Map<String, Object> filters);
+
+    void saveOrUpdate(UIMessageEntity uiMessageEntity);
 }

@@ -1,6 +1,6 @@
 package eu.domibus.web.rest;
 
-import eu.domibus.core.replication.UIReplicationDataService;
+import eu.domibus.core.replication.UIMessageDiffService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -24,7 +24,7 @@ public class UIReplicationResource {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationResource.class);
 
     @Autowired
-    private UIReplicationDataService uiReplicationDataService;
+    private UIMessageDiffService uiMessageDiffService;
 
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
@@ -40,7 +40,7 @@ public class UIReplicationResource {
 
         LOG.debug("count data was requested");
 
-        int rowsToBeSynced = uiReplicationDataService.countSyncUIMessages();
+        int rowsToBeSynced = uiMessageDiffService.countAll();
 
         return ResponseEntity
                 .ok()
@@ -58,7 +58,7 @@ public class UIReplicationResource {
 
         LOG.debug("sync data was requested with limit={}", limit);
 
-        int syncedRows = uiReplicationDataService.findAndSyncUIMessages(limit);
+        int syncedRows = uiMessageDiffService.findAndSyncUIMessages(limit);
 
         return ResponseEntity
                 .ok()

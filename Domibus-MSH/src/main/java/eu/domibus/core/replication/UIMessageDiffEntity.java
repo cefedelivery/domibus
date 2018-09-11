@@ -23,6 +23,25 @@ import java.util.Date;
         @NamedQuery(name = "UIMessageDiffEntity.findDiffMessages", query = "select e from UIMessageDiffEntity e"),
         @NamedQuery(name = "UIMessageDiffEntity.countDiffMessages", query = "select count(e.messageId) from UIMessageDiffEntity e")
 })
+@NamedNativeQueries({
+        @NamedNativeQuery(
+                name    =   "UIMessageDiffEntity.countDiffMessages_ORACLE",
+                query   =   "SELECT COUNT(*) /*+ PARALLEL(8) */ FROM V_MESSAGE_UI_DIFF "
+        ),
+        @NamedNativeQuery(
+                name    =   "UIMessageDiffEntity.countDiffMessages_MYSQL",
+                query   =   "SELECT COUNT(*) FROM V_MESSAGE_UI_DIFF "
+        ),
+        @NamedNativeQuery(
+                name    =   "UIMessageDiffEntity.findDiffMessages_ORACLE",
+                query   =   "SELECT * /*+ PARALLEL(8) */ FROM V_MESSAGE_UI_DIFF ",
+                resultClass = UIMessageDiffEntity.class
+        ),
+        @NamedNativeQuery(
+                name    =   "UIMessageDiffEntity.findDiffMessages_MYSQL",
+                query   =   "SELECT * FROM V_MESSAGE_UI_DIFF ",
+                resultClass = UIMessageDiffEntity.class
+        )})
 public class UIMessageDiffEntity {
 
     @Id

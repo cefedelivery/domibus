@@ -1,6 +1,5 @@
 package eu.domibus.core.replication;
 
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
@@ -8,7 +7,6 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
-import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ebms3.common.UserMessageDefaultServiceHelper;
 import eu.domibus.ebms3.common.model.MessageType;
@@ -18,14 +16,10 @@ import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.OptimisticLockException;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -41,14 +35,8 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationDataServiceImpl.class);
 
-    /** max no of records to be synchronized using cron job */
-    static final String MAX_ROWS_KEY = "domibus.ui.replication.sync.cron.max.rows";
-
     @Autowired
     private UIMessageDaoImpl uiMessageDao;
-
-    @Autowired
-    private UIMessageDiffDao uiMessageDiffDao;
 
     @Autowired
     private UserMessageLogDao userMessageLogDao;
@@ -61,9 +49,6 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
 
     @Autowired
     private UserMessageDefaultServiceHelper userMessageDefaultServiceHelper;
-
-    @Autowired
-    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -186,97 +171,6 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         saveUIMessageFromSignalMessageLog(messageId, jmsTimestamp);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void findAndSyncUIMessages() {
-        LOG.debug("start counting differences for UIReplication");
-
-        int rowsToSyncCount = uiMessageDiffDao.countAll();
-        LOG.debug("Found {} differences between native tables and TB_MESSAGE_UI", rowsToSyncCount);
-
-        int maxRowsToSync = NumberUtils.toInt(domibusPropertyProvider.getDomainProperty(MAX_ROWS_KEY, "1000"));
-        if (rowsToSyncCount > maxRowsToSync) {
-            LOG.warn(WarningUtil.warnOutput("There are more than {} rows to sync into TB_MESSAGE_UI table " +
-                    "please use the REST resource instead."), maxRowsToSync);
-            return;
-        }
-
-        List<UIMessageEntity> uiMessageEntityList =
-                uiMessageDiffDao.findAll().
-                        stream().
-                        map(objects -> convertToUIMessageEntity(objects)).
-                        collect(Collectors.toList());
-
-        if (!uiMessageEntityList.isEmpty()) {
-            LOG.debug("start to update TB_MESSAGE_UI");
-            try {
-                uiMessageEntityList.stream().forEach(uiMessageEntity ->
-                        uiMessageDao.saveOrUpdate(uiMessageEntity));
-            } catch (OptimisticLockException e) {
-                LOG.warn("Optimistic lock exception detected");
-            }
-            LOG.debug("finish to update TB_MESSAGE_UI");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int findAndSyncUIMessages(int limit) {
-        LOG.debug("find and sync first {} UIMessages", limit);
-        long startTime = System.currentTimeMillis();
-
-
-        int recordsToSync = uiMessageDiffDao.countAll();
-
-        LOG.debug("{} milliseconds to count the records", System.currentTimeMillis() - startTime);
-        startTime = System.currentTimeMillis();
-
-        if (recordsToSync == 0) {
-            LOG.debug("no records to sync");
-            return 0;
-        }
-
-        List<UIMessageEntity> uiMessageEntityList =
-                uiMessageDiffDao.findAll(limit).
-                        stream().
-                        map(objects -> convertToUIMessageEntity(objects)).
-                        collect(Collectors.toList());
-
-        LOG.debug("{} milliseconds to fetch the records", System.currentTimeMillis() - startTime);
-        startTime = System.currentTimeMillis();
-
-        if (!uiMessageEntityList.isEmpty()) {
-            LOG.debug("start to update TB_MESSAGE_UI");
-            try {
-                uiMessageEntityList.stream().forEach(uiMessageEntity ->
-                        uiMessageDao.saveOrUpdate(uiMessageEntity));
-            } catch (OptimisticLockException e) {
-                LOG.warn("Optimistic lock exception detected");
-            }
-            LOG.debug("finish to update TB_MESSAGE_UI after {} milliseconds", System.currentTimeMillis() - startTime);
-        }
-        return recordsToSync;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     */
-    @Override
-    public int countSyncUIMessages() {
-        LOG.debug("start to count UIMessages to be synced");
-        long startTime = System.currentTimeMillis();
-
-        int recordsToSync = uiMessageDiffDao.countAll();
-
-        LOG.debug("{} milliseconds to count the records", System.currentTimeMillis() - startTime);
-
-        return recordsToSync;
-    }
 
     /**
      * Replicates {@link SignalMessage} into {@code TB_MESSAGE_UI} table as {@link UIMessageEntity}
@@ -336,18 +230,6 @@ public class UIReplicationDataServiceImpl implements UIReplicationDataService {
         LOG.debug("UserMessage with messageId={} replicated", messageId);
     }
 
-    /**
-     * Converts one record of the diff query to {@link UIMessageEntity}
-     *
-     * @param diffEntity
-     * @return
-     */
-    protected UIMessageEntity convertToUIMessageEntity(UIMessageDiffEntity diffEntity) {
-        if (null == diffEntity) {
-            return null;
-        }
 
-        return domainConverter.convert(diffEntity, UIMessageEntity.class);
-    }
 
 }

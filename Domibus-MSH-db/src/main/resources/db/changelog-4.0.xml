@@ -2153,7 +2153,7 @@
             AND message_info.ref_to_message_id = message_info2.message_id
             AND property.name = 'originalSender'
             AND property2.name = 'finalRecipient'
-            ) result
+            ) result WHERE result.received BETWEEN systimestamp - INTERVAL '48' HOUR AND systimestamp + INTERVAL '1' HOUR
             MINUS
             SELECT
             message_id,
@@ -2176,7 +2176,8 @@
             restored,
             message_subtype
             FROM
-            TB_MESSAGE_UI
+            TB_MESSAGE_UI WHERE
+            received BETWEEN systimestamp - INTERVAL '48' HOUR AND systimestamp + INTERVAL '1' HOUR
         </createView>
     </changeSet>
     <changeSet id="EDELIVERY-3361-2" author="CatalinEnache" dbms="mysql">
@@ -2235,7 +2236,9 @@
         WHERE
         user_message.messageInfo_ID_PK = message_info.ID_PK
         AND property3_.NAME = 'originalSender'
-        AND property4_.NAME = 'finalRecipient' UNION SELECT
+        AND property4_.NAME = 'finalRecipient'
+        AND message_log.received BETWEEN DATE_SUB(NOW(), INTERVAL 48 HOUR) AND DATE_ADD(NOW(), INTERVAL 1 HOUR)
+        UNION SELECT
         message_log.MESSAGE_ID,
         message_log.MESSAGE_STATUS,
         message_log.NOTIFICATION_STATUS,
@@ -2271,7 +2274,8 @@
         AND messageinf4_.MESSAGE_ID = message_log.MESSAGE_ID
         AND messageinf4_.REF_TO_MESSAGE_ID = messageinf11_.MESSAGE_ID
         AND property5_.NAME = 'originalSender'
-        AND property6_.NAME = 'finalRecipient') result
+        AND property6_.NAME = 'finalRecipient'
+        AND message_log.received BETWEEN DATE_SUB(NOW(), INTERVAL 48 HOUR) AND DATE_ADD(NOW(), INTERVAL 1 HOUR) ) result
         LEFT JOIN
         TB_MESSAGE_UI flat_table ON result.message_id &lt;=&gt; flat_table.message_id
         AND result.message_Status &lt;=&gt; flat_table.message_status
@@ -2293,7 +2297,7 @@
         AND result.RESTORED &lt;=&gt; flat_table.RESTORED
         AND result.MESSAGE_SUBTYPE &lt;=&gt; flat_table.MESSAGE_SUBTYPE
         WHERE
-        flat_table.message_id IS NULL
+        flat_table.message_id IS NULL;
     </createView>
     </changeSet>
 
