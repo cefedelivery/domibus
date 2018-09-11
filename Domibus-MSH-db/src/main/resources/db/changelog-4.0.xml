@@ -2297,8 +2297,7 @@
         AND result.RESTORED &lt;=&gt; flat_table.RESTORED
         AND result.MESSAGE_SUBTYPE &lt;=&gt; flat_table.MESSAGE_SUBTYPE
         WHERE
-        flat_table.message_id IS NULL
-        AND flat_table.received between DATE_SUB(NOW(), INTERVAL 48 HOUR) AND DATE_ADD(NOW(), INTERVAL 1 HOUR);
+        flat_table.message_id IS NULL;
     </createView>
     </changeSet>
 
