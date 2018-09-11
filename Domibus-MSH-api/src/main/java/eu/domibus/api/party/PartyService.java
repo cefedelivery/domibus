@@ -19,7 +19,7 @@ public interface PartyService {
      * @param processName criteria to search party that are configured as initiator or responder in a process named like this criteria
      * @param pageStart pagination start
      * @param pageSize page size.
-     * @return a lit of party.
+     * @return a list of party.
      */
     List<Party> getParties(String name,
                            String endPoint,

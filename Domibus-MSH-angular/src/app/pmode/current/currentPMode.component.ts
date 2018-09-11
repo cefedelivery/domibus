@@ -115,7 +115,7 @@ export class CurrentPModeComponent implements OnInit, DirtyOperations {
         const uploadDateStr = DateFormatService.format(new Date(pmode.configurationDate));
         CurrentPModeComponent.downloadFile(res.text(), uploadDateStr);
       }, err => {
-        this.alertService.error(err._body);
+        this.alertService.error(err);
       });
     } else {
       this.alertService.error(this.ERROR_PMODE_EMPTY)

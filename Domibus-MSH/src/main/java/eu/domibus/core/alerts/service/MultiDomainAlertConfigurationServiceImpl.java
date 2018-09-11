@@ -243,7 +243,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             throw new IllegalArgumentException("Invalid email address configured for the alert module.");
         }
         return new CommonConfiguration(alertLifeTimeInDays, alertEmailSender, alertEmailReceiver);
-    }
+}
 
     protected MessagingModuleConfiguration readMessageConfiguration(Domain domain) {
         try {

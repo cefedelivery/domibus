@@ -8,6 +8,8 @@ import eu.domibus.common.model.audit.MessageAudit;
 import eu.domibus.common.model.audit.PModeAudit;
 import eu.domibus.common.model.common.ModificationType;
 import eu.domibus.common.model.common.RevisionLogicalName;
+import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.PartyIdType;
 import eu.domibus.common.services.AuditService;
 import eu.domibus.common.util.AnnotationsUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -92,11 +94,13 @@ public class AuditServiceImpl implements AuditService {
         Set<Class<?>> typesAnnotatedWith = new Reflections("eu.domibus").
                 getTypesAnnotatedWith(RevisionLogicalName.class);
         return typesAnnotatedWith.stream().
+                filter(aClass -> aClass != Party.class && aClass != PartyIdType.class).
                 map(aClass -> annotationsUtil.getValue(aClass, RevisionLogicalName.class)).
                 //check if present is needed because the set contains subclasses that do not contain the annotation.
                         filter(Optional::isPresent).
                         map(Optional::get).
                         distinct().
+                        sorted().
                         collect(Collectors.toList());
     }
 
