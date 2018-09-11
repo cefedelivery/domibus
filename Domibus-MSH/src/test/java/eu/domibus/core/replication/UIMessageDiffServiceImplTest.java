@@ -16,7 +16,6 @@ import java.util.List;
  *
  * @author Catalin Enache
  * @since 4.0
- *
  */
 @RunWith(JMockit.class)
 public class UIMessageDiffServiceImplTest {
@@ -95,7 +94,7 @@ public class UIMessageDiffServiceImplTest {
         //tested method
         uiMessageDiffService.findAndSyncUIMessages();
 
-        new FullVerifications(uiMessageDiffService){{
+        new FullVerifications(uiMessageDiffService) {{
             uiMessageDiffService.convertToUIMessageEntity(uiMessageDiffEntity);
 
             uiMessageService.saveOrUpdate(withAny(new UIMessageEntity()));
@@ -121,7 +120,7 @@ public class UIMessageDiffServiceImplTest {
         final int syncedRows = uiMessageDiffService.findAndSyncUIMessages(limit);
         Assert.assertEquals(10, syncedRows);
 
-        new FullVerifications(uiMessageDiffService){{
+        new FullVerifications(uiMessageDiffService) {{
             int actualValue;
             uiMessageDiffService.findAll(actualValue = withCapture());
             Assert.assertEquals(limit, actualValue);

@@ -4,10 +4,25 @@ import java.util.List;
 
 public interface UIMessageDiffService {
 
+    /**
+     * count all records of {@code V_MESSAGE_UI_DIFF} view
+     *
+     * @return
+     */
     int countAll();
 
+    /**
+     * brings all records from {@code V_MESSAGE_UI_DIFF} view
+     *
+     * @return
+     */
     List<UIMessageDiffEntity> findAll();
 
+    /**
+     * brings {@code limit} records from {@code V_MESSAGE_UI_DIFF} view
+     *
+     * @return
+     */
     List<UIMessageDiffEntity> findAll(int limit);
 
     /**

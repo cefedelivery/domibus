@@ -521,7 +521,7 @@
             AND message_info.ref_to_message_id = message_info2.message_id
             AND property.name = 'originalSender'
             AND property2.name = 'finalRecipient'
-            ) result
+            ) result WHERE result.received BETWEEN systimestamp - INTERVAL '48' HOUR AND systimestamp + INTERVAL '1' HOUR
             MINUS
             SELECT
             message_id,
@@ -544,7 +544,8 @@
             restored,
             message_subtype
             FROM
-            TB_MESSAGE_UI
+            TB_MESSAGE_UI WHERE
+            received BETWEEN systimestamp - INTERVAL '48' HOUR AND systimestamp + INTERVAL '1' HOUR
         </createView>
     </changeSet>
     <changeSet id="EDELIVERY-3361-2" author="CatalinEnache" dbms="mysql">
