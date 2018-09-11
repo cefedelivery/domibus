@@ -189,37 +189,43 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             setTargetFromPartyIdAndFromPartyType(messageIn, target);
 
-            target.setFromRole(trim(messageIn.getStringProperty(FROM_ROLE)));
-            if (isEmpty(target.getFromRole())) {
-                target.setFromRole(getProperty(FROM_ROLE));
+            String fromRole = trim(messageIn.getStringProperty(FROM_ROLE));
+            if (isEmpty(fromRole)) {
+                fromRole = getProperty(FROM_ROLE);
             }
+            target.setFromRole(fromRole);
 
             setTargetToPartyIdAndToPartyType(messageIn, target);
 
-            target.setToRole(trim(messageIn.getStringProperty(TO_ROLE)));
-            if (isEmpty(target.getToRole())) {
-                target.setToRole(getProperty(TO_ROLE));
+            String toRole = trim(messageIn.getStringProperty(TO_ROLE));
+            if (isEmpty(toRole)) {
+                toRole = getProperty(TO_ROLE);
             }
+            target.setToRole(toRole);
 
-            target.setAction(trim(messageIn.getStringProperty(ACTION)));
-            if (isEmpty(target.getAction())) {
-                target.setAction(getProperty(ACTION));
+            String action = trim(messageIn.getStringProperty(ACTION));
+            if (isEmpty(action)) {
+                action = getProperty(ACTION);
             }
+            target.setAction(action);
 
-            target.setService(trim(messageIn.getStringProperty(SERVICE)));
-            if (isEmpty(target.getService())) {
-                target.setService(getProperty(SERVICE));
+            String service = trim(messageIn.getStringProperty(SERVICE));
+            if (isEmpty(service)) {
+                service = getProperty(SERVICE);
             }
+            target.setService(service);
 
-            target.setServiceType(trim(messageIn.getStringProperty(SERVICE_TYPE)));
-            if (isEmpty(target.getServiceType())) {
-                target.setServiceType(getProperty(SERVICE_TYPE));
+            String serviceType = trim(messageIn.getStringProperty(SERVICE_TYPE));
+            if (isEmpty(serviceType)) {
+                serviceType = getProperty(SERVICE_TYPE);
             }
+            target.setServiceType(serviceType);
 
-            target.setAgreementRef(trim(messageIn.getStringProperty(AGREEMENT_REF)));
-            if (isEmpty(target.getAgreementRef())) {
-                target.setAgreementRef(getProperty(AGREEMENT_REF));
+            String agreementRef = trim(messageIn.getStringProperty(AGREEMENT_REF));
+            if (isEmpty(agreementRef)) {
+                agreementRef = getProperty(AGREEMENT_REF);
             }
+            target.setAgreementRef(agreementRef);
 
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
 

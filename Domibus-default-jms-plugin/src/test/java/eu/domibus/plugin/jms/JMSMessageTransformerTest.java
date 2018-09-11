@@ -4,6 +4,7 @@ import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.plugin.Submission;
 import mockit.Injectable;
+import mockit.NonStrictExpectations;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMapMessage;
@@ -45,6 +46,7 @@ public class JMSMessageTransformerTest {
     private static final String PAYLOAD_FILENAME = "FileName";
     private static final String PAYLOAD_1_FILENAME = "payload_1_fileName";
     private static final String FILENAME_TEST = "09878378732323.payload";
+    private static final String CUSTOM_AGREEMENT_REF = "customAgreement";
 
 
     @Injectable
@@ -205,7 +207,7 @@ public class JMSMessageTransformerTest {
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, "\t" + ORIGINAL_SENDER + "    ");
         messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, "\t" + FINAL_RECIPIENT + "\t");
         messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, "\t" + PROTOCOL_AS4 + "\t\t");
-        messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, "customAgreement");
+        messageMap.setStringProperty(JMSMessageConstants.AGREEMENT_REF, CUSTOM_AGREEMENT_REF);
 
         messageMap.setJMSCorrelationID("12345");
 
@@ -235,6 +237,81 @@ public class JMSMessageTransformerTest {
         Assert.assertEquals(SERVICE_NOPROCESS, objSubmission.getService());
         Assert.assertEquals(SERVICE_TYPE_TC1, objSubmission.getServiceType());
         Assert.assertEquals(ACTION_TC1LEG1, objSubmission.getAction());
+    }
+
+    /*
+     * Testing for bug EDELIVERY-1386, fallback to defaults for missing properties
+     */
+    @Test
+    public void transformToSubmission_FallbackToDefaults() throws Exception {
+
+        new NonStrictExpectations(testObj){{
+            testObj.getProperty(JMSMessageConstants.SERVICE);
+            result = SERVICE_NOPROCESS;
+
+            testObj.getProperty(JMSMessageConstants.SERVICE_TYPE);
+            result = SERVICE_TYPE_TC1;
+
+            testObj.getProperty(JMSMessageConstants.ACTION);
+            result = ACTION_TC1LEG1;
+
+            testObj.getProperty(JMSMessageConstants.FROM_ROLE);
+            result = INITIATOR_ROLE;
+
+            testObj.getProperty(JMSMessageConstants.TO_ROLE);
+            result = RESPONDER_ROLE;
+
+            testObj.getProperty(JMSMessageConstants.FROM_PARTY_ID);
+            result = DOMIBUS_BLUE;
+
+            testObj.getProperty(JMSMessageConstants.FROM_PARTY_TYPE);
+            result = UNREGISTERED_PARTY_TYPE;
+
+            testObj.getProperty(JMSMessageConstants.TO_PARTY_ID);
+            result = DOMIBUS_RED;
+
+            testObj.getProperty(JMSMessageConstants.TO_PARTY_TYPE);
+            result = UNREGISTERED_PARTY_TYPE;
+
+            testObj.getProperty(JMSMessageConstants.AGREEMENT_REF);
+            result = CUSTOM_AGREEMENT_REF;
+        }};
+
+        MapMessage messageMap = new ActiveMQMapMessage();
+        messageMap.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, "submitMessage");
+        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, "\t" + ORIGINAL_SENDER + "    ");
+        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, "\t" + FINAL_RECIPIENT + "\t");
+        messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, "\t" + PROTOCOL_AS4 + "\t\t");
+
+        messageMap.setJMSCorrelationID("12345");
+
+        messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "1");
+        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), "\t" + PAYLOAD_ID + "   ");
+        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), "   " + DEFAULT_MT + "\t\t");
+        String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
+        byte[] payload = pay1.getBytes();
+        messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);
+
+        Submission objSubmission = testObj.transformToSubmission(messageMap);
+        Assert.assertNotNull("Submission object in the response should not be null:", objSubmission);
+        for (Iterator<Submission.Party> itr = objSubmission.getFromParties().iterator(); itr.hasNext(); ) {
+            Submission.Party fromPartyObj = itr.next();
+            Assert.assertEquals(DOMIBUS_BLUE, fromPartyObj.getPartyId());
+            Assert.assertEquals(UNREGISTERED_PARTY_TYPE, fromPartyObj.getPartyIdType());
+        }
+        Assert.assertEquals(INITIATOR_ROLE, objSubmission.getFromRole());
+
+        for (Iterator<Submission.Party> itr = objSubmission.getToParties().iterator(); itr.hasNext(); ) {
+            Submission.Party toPartyObj = itr.next();
+            Assert.assertEquals(DOMIBUS_RED, toPartyObj.getPartyId());
+            Assert.assertEquals(UNREGISTERED_PARTY_TYPE, toPartyObj.getPartyIdType());
+        }
+        Assert.assertEquals(RESPONDER_ROLE, objSubmission.getToRole());
+
+        Assert.assertEquals(SERVICE_NOPROCESS, objSubmission.getService());
+        Assert.assertEquals(SERVICE_TYPE_TC1, objSubmission.getServiceType());
+        Assert.assertEquals(ACTION_TC1LEG1, objSubmission.getAction());
+        Assert.assertEquals(CUSTOM_AGREEMENT_REF, objSubmission.getAgreementRef());
     }
 
 }
