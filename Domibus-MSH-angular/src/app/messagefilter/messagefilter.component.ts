@@ -412,7 +412,8 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   }
 
   buttonMoveUp () {
-    this.moveUpInternal(this.rowNumber);
+    this.buttonMoveUpAction(this.selected[0]);
+    // this.moveUpInternal(this.rowNumber);
   }
 
   private moveDownInternal (rowNumber) {
@@ -444,11 +445,12 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
   }
 
   buttonMoveDown () {
-    this.moveDownInternal(this.rowNumber);
+    //this.moveDownInternal(this.rowNumber);
+    this.buttonMoveDownAction(this.selected[0]);
   }
 
   onSelect ({selected}) {
-    console.log('Select Event', selected, this.selected);
+    // console.log('Select Event', selected, this.selected);
 
     if (isNullOrUndefined(selected) || selected.length == 0) {
       // unselect
