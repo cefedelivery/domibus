@@ -36,7 +36,7 @@ export class ExtendedHttpClient extends Http {
 
     return super.request(url, options).catch((error: Response) => {
       if ((error.status === 403)) {
-        console.log('The authentication session expires or the user is not authorised');
+        console.log('The authentication session expired or the user is not authorised');
         this.httpEventService.requestForbiddenEvent(error);
         // return Observable.empty();
       }
