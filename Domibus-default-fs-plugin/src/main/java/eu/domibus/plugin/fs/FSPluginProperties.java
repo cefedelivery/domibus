@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import static eu.domibus.plugin.fs.worker.FSSendMessagesService.DEFAULT_DOMAIN;
+
 /**
  * File System Plugin Properties
  *
@@ -283,7 +285,7 @@ public class FSPluginProperties {
     }
 
     private String getDomainProperty(String domain, String propertyName, String defaultValue) {
-        String domainFullPropertyName = DOMAIN_PREFIX + domain + DOT + propertyName;
+        String domainFullPropertyName = getDomainPropertyName(domain, propertyName);
         if (properties.containsKey(domainFullPropertyName)) {
             return properties.getProperty(domainFullPropertyName, defaultValue);
         }
@@ -291,11 +293,19 @@ public class FSPluginProperties {
     }
 
     private String getDomainPropertyNoDefault(String domain, String propertyName, String defaultValue) {
-        String domainFullPropertyName = DOMAIN_PREFIX + domain + DOT + propertyName;
+        String domainFullPropertyName = getDomainPropertyName(domain, propertyName);
         if (properties.containsKey(domainFullPropertyName)) {
             return properties.getProperty(domainFullPropertyName, defaultValue);
         }
+        if(DEFAULT_DOMAIN.equals(domain)) {
+            return properties.getProperty(PROPERTY_PREFIX + propertyName, defaultValue);
+        }
+        // cannot use default values
         return null;
+    }
+
+    protected String getDomainPropertyName(String domain, String propertyName) {
+        return DOMAIN_PREFIX + domain + DOT + propertyName;
     }
 
     private Integer getInteger(String value, Integer defaultValue) {
