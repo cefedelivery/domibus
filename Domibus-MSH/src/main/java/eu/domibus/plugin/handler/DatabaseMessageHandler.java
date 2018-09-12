@@ -225,28 +225,29 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return messageStatus;
     }
 
-    @Override
-    public MessageStatus getStatus(final String messageId) {
+    protected void validateAccessToStatusAndErrors(String messageId) {
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
 
-        // check if user can get the status of that message (only admin or original users are authorized to do that)
+        // check if user can get the status/errors of that message (only admin or original users are authorized to do that)
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
         List<String> recipients = new ArrayList<>();
         recipients.add(MessageConstants.ORIGINAL_SENDER);
         recipients.add(MessageConstants.FINAL_RECIPIENT);
         validateOriginalUser(userMessage, originalUser, recipients);
+    }
 
+    @Override
+    public MessageStatus getStatus(final String messageId) {
+        validateAccessToStatusAndErrors(messageId);
         return userMessageLogDao.getMessageStatus(messageId);
     }
 
     @Override
     public List<? extends ErrorResult> getErrorsForMessage(final String messageId) {
-        if (!authUtils.isUnsecureLoginAllowed()) {
-            authUtils.hasAdminRole();
-        }
+        validateAccessToStatusAndErrors(messageId);
         return errorLogDao.getErrorsForMessage(messageId);
     }
 
