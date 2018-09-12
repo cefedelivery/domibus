@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -96,6 +97,31 @@ public class Event {
         properties.put(key, new DatePropertyValue(key,value));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Event event = (Event) o;
+
+        return new EqualsBuilder()
+                .append(entityId, event.entityId)
+                .append(reportingTime, event.reportingTime)
+                .append(type, event.type)
+                .append(properties, event.properties)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(entityId)
+                .append(reportingTime)
+                .append(type)
+                .append(properties)
+                .toHashCode();
+    }
 
     @Override
     public String toString() {

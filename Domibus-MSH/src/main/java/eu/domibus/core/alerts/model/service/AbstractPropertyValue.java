@@ -3,8 +3,8 @@ package eu.domibus.core.alerts.model.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * @author Thomas Dussart
@@ -38,4 +38,23 @@ public abstract class AbstractPropertyValue<T> {
     public abstract void  setValue(T t);
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractPropertyValue<?> that = (AbstractPropertyValue<?>) o;
+
+        return new EqualsBuilder()
+                .append(key, that.key)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(key)
+                .toHashCode();
+    }
 }

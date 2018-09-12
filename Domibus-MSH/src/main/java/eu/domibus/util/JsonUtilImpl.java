@@ -1,14 +1,12 @@
 package eu.domibus.util;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.domibus.api.util.JsonException;
 import eu.domibus.api.util.JsonUtil;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
 /**
  * Created by Cosmin Baciu on 22-Aug-16.
@@ -16,23 +14,23 @@ import java.util.Map;
 @Component
 public class JsonUtilImpl implements JsonUtil {
 
+    private ObjectMapper mapper = new ObjectMapper();
+
     @Override
-    public Map<String, Object> jsonToMap(String map) {
-        if (map == null) {
-            return null;
+    public String writeValueAsString(Object object) {
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new JsonException(e);
         }
-        Type type = new TypeToken<Map<String, Object>>() {
-        }.getType();
-        return new Gson().fromJson(map, type);
     }
 
     @Override
-    public List<String> jsonToList(String list) {
-        if (list == null) {
-            return null;
+    public <T> T readValue(String content, Class<T> valueType) {
+        try {
+            return (T) mapper.readValue(content, valueType);
+        } catch (IOException e) {
+            throw new JsonException(e);
         }
-        Type type = new TypeToken<ArrayList<String>>() {
-        }.getType();
-        return new Gson().fromJson(list, type);
     }
 }

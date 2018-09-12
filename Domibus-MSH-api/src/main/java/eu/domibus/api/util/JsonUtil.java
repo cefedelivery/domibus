@@ -1,14 +1,12 @@
 package eu.domibus.api.util;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Created by Cosmin Baciu on 22-Aug-16.
  */
 public interface JsonUtil {
 
-    Map<String, Object> jsonToMap(String map);
+    String writeValueAsString(Object object);
 
-    List<String> jsonToList(String list);
+    public <T> T readValue(String content, Class<T> valueType);
+
 }

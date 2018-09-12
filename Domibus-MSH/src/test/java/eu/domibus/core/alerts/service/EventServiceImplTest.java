@@ -2,6 +2,8 @@ package eu.domibus.core.alerts.service;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JmsMessage;
+import eu.domibus.api.util.JsonUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -62,6 +64,9 @@ public class EventServiceImplTest {
     @Injectable
     private Queue alertMessageQueue;
 
+    @Injectable
+    private JsonUtil jsonUtil;
+
 
     @Test
     public void enqueueMessageEvent() {
@@ -69,10 +74,16 @@ public class EventServiceImplTest {
         final MessageStatus oldMessageStatus = MessageStatus.SEND_ENQUEUED;
         final MessageStatus newMessageStatus = MessageStatus.ACKNOWLEDGED;
         final MSHRole mshRole = MSHRole.SENDING;
+
+        new Expectations(eventService) {{
+            eventService.signalEventCreate(withAny(new Event()), EventServiceImpl.EVENT_JMS_TYPE);
+        }};
+
         eventService.enqueueMessageEvent(messageId, oldMessageStatus, newMessageStatus, mshRole);
+
         new Verifications() {{
             Event event;
-            jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, eventService.MESSAGE_EVENT_SELECTOR);
+            eventService.signalEventCreate(event = withCapture(), EventServiceImpl.EVENT_JMS_TYPE);
             times = 1;
             Assert.assertEquals(oldMessageStatus.name(), event.getProperties().get(OLD_STATUS.name()).getValue());
             Assert.assertEquals(newMessageStatus.name(), event.getProperties().get(NEW_STATUS.name()).getValue());
@@ -87,6 +98,12 @@ public class EventServiceImplTest {
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         final Date loginTime = parser.parse("25/10/1977 00:00:00");
         final boolean accountDisabled = false;
+
+        new Expectations(eventService) {{
+            eventService.signalEventCreate(withAny(new Event()), EventServiceImpl.EVENT_JMS_TYPE);
+        }};
+
+
         eventService.enqueueLoginFailureEvent(userName, loginTime, accountDisabled);
         new Verifications() {{
             Event event;
@@ -122,6 +139,12 @@ public class EventServiceImplTest {
         final String alias = "blue_gw";
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         final Date expirationDate = parser.parse("25/10/1977 00:00:00");
+
+        new Expectations(eventService) {{
+            eventService.signalEventCreate(withAny(new Event()), EventServiceImpl.EVENT_JMS_TYPE);
+        }};
+
+
         eventService.enqueueImminentCertificateExpirationEvent(accessPoint, alias, expirationDate);
         new Verifications() {{
             Event event;
@@ -139,6 +162,12 @@ public class EventServiceImplTest {
         final String alias = "blue_gw";
         SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
         final Date expirationDate = parser.parse("25/10/1977 00:00:00");
+
+        new Expectations(eventService) {{
+            eventService.signalEventCreate(withAny(new Event()), EventServiceImpl.EVENT_JMS_TYPE);
+        }};
+
+
         eventService.enqueueCertificateExpiredEvent(accessPoint, alias, expirationDate);
         new Verifications() {{
             Event event;
@@ -227,4 +256,5 @@ public class EventServiceImplTest {
         event.addStringKeyValue(MESSAGE_ID.name(), messageId);
         eventService.enrichMessageEvent(event);
     }
+
 }

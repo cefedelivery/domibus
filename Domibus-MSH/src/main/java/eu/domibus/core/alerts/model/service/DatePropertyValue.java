@@ -2,6 +2,8 @@ package eu.domibus.core.alerts.model.service;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 
@@ -31,5 +33,27 @@ public class DatePropertyValue extends AbstractPropertyValue<Date> {
     @Override
     public void setValue(Date value) {
         this.value=value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DatePropertyValue that = (DatePropertyValue) o;
+
+        return new EqualsBuilder()
+                .appendSuper(super.equals(o))
+                .append(value, that.value)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .appendSuper(super.hashCode())
+                .append(value)
+                .toHashCode();
     }
 }

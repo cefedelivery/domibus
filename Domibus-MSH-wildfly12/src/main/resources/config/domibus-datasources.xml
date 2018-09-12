@@ -67,7 +67,6 @@
         <property name="sessionTransacted" value="true"/>
         <property name="sessionAcknowledgeMode" value="0"/>
         <property name="destinationResolver" ref="internalDestinationResolver"/>
-        <property name="messageConverter"><ref bean="jackson2MessageConverter"/> </property>
     </bean>
     <bean id="uiReplicationJmsListenerContainerFactory"
           class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">

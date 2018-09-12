@@ -56,9 +56,6 @@ public class JMSManagerImplTest {
     private MessageConverter messageConverter;
 
     @Injectable
-    private JmsTemplate jsonJmsTemplate;
-
-    @Injectable
     private DomainService domainService;
 
     @Test

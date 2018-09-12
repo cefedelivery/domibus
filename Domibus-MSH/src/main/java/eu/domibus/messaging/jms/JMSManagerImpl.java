@@ -17,8 +17,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +37,6 @@ import java.util.stream.Collectors;
 public class JMSManagerImpl implements JMSManager {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSManagerImpl.class);
-
-    private static final String SELECTOR = "selector";
 
     /** queue names to be skip from showing into GUI interface */
     private static final String[] SKIP_QUEUE_NAMES = {};
@@ -63,13 +59,6 @@ public class JMSManagerImpl implements JMSManager {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
-
-    @Autowired
-    private MessageConverter messageConverter;
-
-    @Autowired
-    @Qualifier("jsonJmsTemplate")
-    private JmsTemplate jmsTemplate;
 
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
@@ -148,16 +137,16 @@ public class JMSManagerImpl implements JMSManager {
         sendMessageToQueue(message, destination, InternalJmsMessage.MessageType.MAP_MESSAGE);
     }
 
-    @Override
-    public void convertAndSendToQueue(final Object message, final Queue destination, final String selector){
-        jmsTemplate.convertAndSend(destination, message, message1 -> {
-            final Domain currentDomain = domainContextProvider.getCurrentDomain();
-            message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
-            message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
-            message1.setStringProperty(SELECTOR, selector);
-            return message1;
-        });
-    }
+//    @Override
+//    public void convertAndSendToQueue(final Object message, final Queue destination, final String selector){
+//        jmsTemplate.convertAndSend(destination, message, message1 -> {
+//            final Domain currentDomain = domainContextProvider.getCurrentDomain();
+//            message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
+//            message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
+//            message1.setStringProperty(SELECTOR, selector);
+//            return message1;
+//        });
+//    }
 
 
     protected void sendMessageToQueue(JmsMessage message, String destination, InternalJmsMessage.MessageType messageType) {

@@ -1,10 +1,12 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.alerts.model.common.AlertCriteria;
+import eu.domibus.api.util.JsonUtil;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.persist.Alert;
@@ -12,9 +14,9 @@ import eu.domibus.core.alerts.model.persist.Event;
 import eu.domibus.core.alerts.model.service.DefaultMailModel;
 import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,7 +37,7 @@ import static eu.domibus.core.alerts.model.common.AlertStatus.*;
 @Service
 public class AlertServiceImpl implements AlertService {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AlertServiceImpl.class);
 
     static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
 
@@ -61,6 +63,9 @@ public class AlertServiceImpl implements AlertService {
 
     @Autowired
     private JMSManager jmsManager;
+
+    @Autowired
+    private JsonUtil jsonUtil;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -98,7 +103,10 @@ public class AlertServiceImpl implements AlertService {
      */
     @Override
     public void enqueueAlert(eu.domibus.core.alerts.model.service.Alert alert) {
-        jmsManager.convertAndSendToQueue(alert, alertMessageQueue, ALERT_SELECTOR);
+        jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
+                .type("alert")
+                .property("alertBody", jsonUtil.writeValueAsString(alert))
+                .build(), alertMessageQueue);
     }
 
     /**

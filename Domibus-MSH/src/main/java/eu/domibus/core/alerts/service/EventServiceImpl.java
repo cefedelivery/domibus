@@ -1,6 +1,8 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.util.JsonUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.ErrorLogDao;
@@ -41,7 +43,7 @@ public class EventServiceImpl implements EventService {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(EventServiceImpl.class);
 
-    static final String MESSAGE_EVENT_SELECTOR = "message";
+    static final String EVENT_JMS_TYPE = "message";
 
     static final String LOGIN_FAILURE = "loginFailure";
 
@@ -73,6 +75,9 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private JMSManager jmsManager;
 
+    @Autowired
+    private JsonUtil jsonUtil;
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     @Qualifier("alertMessageQueue")
@@ -92,8 +97,18 @@ public class EventServiceImpl implements EventService {
         event.addStringKeyValue(NEW_STATUS.name(), newStatus.name());
         event.addStringKeyValue(MESSAGE_ID.name(), messageId);
         event.addStringKeyValue(ROLE.name(), role.name());
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, MESSAGE_EVENT_SELECTOR);
+
+        signalEventCreate(event, EVENT_JMS_TYPE);
+
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
+    }
+
+    protected void signalEventCreate(Event event, String selector) {
+        jmsManager.sendMapMessageToQueue(JMSMessageBuilder.create()
+                .type("event")
+                .property("eventType", selector)
+                .property("eventBody", jsonUtil.writeValueAsString(event))
+                .build(), alertMessageQueue);
     }
 
     /**
@@ -105,7 +120,7 @@ public class EventServiceImpl implements EventService {
             final Date loginTime,
             final boolean accountDisabled) {
         Event event = prepareAuthenticatorEvent(userName, loginTime, Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
+        signalEventCreate(event, LOGIN_FAILURE);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
@@ -118,7 +133,7 @@ public class EventServiceImpl implements EventService {
             final Date accountDisabledTime,
             final boolean accountDisabled) {
         Event event = prepareAuthenticatorEvent(userName, accountDisabledTime, Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
+        signalEventCreate(event, ACCOUNT_DISABLED);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
@@ -129,7 +144,7 @@ public class EventServiceImpl implements EventService {
     public void enqueueImminentCertificateExpirationEvent(final String accessPoint, final String alias, final Date expirationDate) {
         EventType eventType = EventType.CERT_IMMINENT_EXPIRATION;
         final Event event = prepareCertificateEvent(accessPoint, alias, expirationDate, eventType);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, CERTIFICATE_IMMINENT_EXPIRATION);
+        signalEventCreate(event, CERTIFICATE_IMMINENT_EXPIRATION);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
@@ -140,7 +155,7 @@ public class EventServiceImpl implements EventService {
     public void enqueueCertificateExpiredEvent(final String accessPoint, final String alias, final Date expirationDate) {
         EventType eventType = EventType.CERT_EXPIRED;
         final Event event = prepareCertificateEvent(accessPoint, alias, expirationDate, eventType);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, CERTIFICATE_EXPIRED);
+        signalEventCreate(event, CERTIFICATE_EXPIRED);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
