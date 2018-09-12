@@ -245,7 +245,7 @@ public class JMSMessageTransformerTest {
     @Test
     public void transformToSubmission_FallbackToDefaults() throws Exception {
 
-        new NonStrictExpectations(testObj){{
+        new NonStrictExpectations(testObj) {{
             testObj.getProperty(JMSMessageConstants.SERVICE);
             result = SERVICE_NOPROCESS;
 
@@ -279,15 +279,15 @@ public class JMSMessageTransformerTest {
 
         MapMessage messageMap = new ActiveMQMapMessage();
         messageMap.setStringProperty(JMSMessageConstants.JMS_BACKEND_MESSAGE_TYPE_PROPERTY_KEY, "submitMessage");
-        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, "\t" + ORIGINAL_SENDER + "    ");
-        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, "\t" + FINAL_RECIPIENT + "\t");
-        messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, "\t" + PROTOCOL_AS4 + "\t\t");
+        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
+        messageMap.setStringProperty(JMSMessageConstants.PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
+        messageMap.setStringProperty(JMSMessageConstants.PROTOCOL, PROTOCOL_AS4);
 
         messageMap.setJMSCorrelationID("12345");
 
         messageMap.setStringProperty(JMSMessageConstants.TOTAL_NUMBER_OF_PAYLOADS, "1");
-        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), "\t" + PAYLOAD_ID + "   ");
-        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), "   " + DEFAULT_MT + "\t\t");
+        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_CONTENT_ID_FORMAT, 1), PAYLOAD_ID);
+        messageMap.setStringProperty(MessageFormat.format(PAYLOAD_MIME_TYPE_FORMAT, 1), DEFAULT_MT);
         String pay1 = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
         byte[] payload = pay1.getBytes();
         messageMap.setBytes(MessageFormat.format(PAYLOAD_NAME_FORMAT, 1), payload);

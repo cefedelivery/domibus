@@ -189,49 +189,19 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             setTargetFromPartyIdAndFromPartyType(messageIn, target);
 
-//            String fromRole = trim(messageIn.getStringProperty(FROM_ROLE));
-//            if (isEmpty(fromRole)) {
-//                fromRole = getProperty(FROM_ROLE);
-//            }
-            String fromRole = getPropertyWithFallback(messageIn, FROM_ROLE);
-            target.setFromRole(fromRole);
+            target.setFromRole(getPropertyWithFallback(messageIn, FROM_ROLE));
 
             setTargetToPartyIdAndToPartyType(messageIn, target);
 
-//            String toRole = trim(messageIn.getStringProperty(TO_ROLE));
-//            if (isEmpty(toRole)) {
-//                toRole = getProperty(TO_ROLE);
-//            }
-            String toRole = getPropertyWithFallback(messageIn, TO_ROLE);
-            target.setToRole(toRole);
+            target.setToRole(getPropertyWithFallback(messageIn, TO_ROLE));
 
-//            String action = trim(messageIn.getStringProperty(ACTION));
-//            if (isEmpty(action)) {
-//                action = getProperty(ACTION);
-//            }
-            String action = getPropertyWithFallback(messageIn, ACTION);
-            target.setAction(action);
+            target.setAction(getPropertyWithFallback(messageIn, ACTION));
 
-//            String service = trim(messageIn.getStringProperty(SERVICE));
-//            if (isEmpty(service)) {
-//                service = getProperty(SERVICE);
-//            }
-            String service = getPropertyWithFallback(messageIn, SERVICE);
-            target.setService(service);
+            target.setService(getPropertyWithFallback(messageIn, SERVICE));
 
-//            String serviceType = trim(messageIn.getStringProperty(SERVICE_TYPE));
-//            if (isEmpty(serviceType)) {
-//                serviceType = getProperty(SERVICE_TYPE);
-//            }
-            String serviceType = getPropertyWithFallback(messageIn, SERVICE_TYPE);
-            target.setServiceType(serviceType);
+            target.setServiceType(getPropertyWithFallback(messageIn, SERVICE_TYPE));
 
-//            String agreementRef = trim(messageIn.getStringProperty(AGREEMENT_REF));
-//            if (isEmpty(agreementRef)) {
-//                agreementRef = getProperty(AGREEMENT_REF);
-//            }
-            String agreementRef = getPropertyWithFallback(messageIn, AGREEMENT_REF);
-            target.setAgreementRef(agreementRef);
+            target.setAgreementRef(getPropertyWithFallback(messageIn, AGREEMENT_REF));
 
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
 
@@ -287,28 +257,14 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
     }
 
     private void setTargetToPartyIdAndToPartyType(MapMessage messageIn, Submission target) throws JMSException {
-        String toPartyID = trim(messageIn.getStringProperty(TO_PARTY_ID));
-        if (isEmpty(toPartyID)) {
-            toPartyID = getProperty(TO_PARTY_ID);
-        }
-
-        String toPartyType = trim(messageIn.getStringProperty(TO_PARTY_TYPE));
-        if (isEmpty(toPartyType)) {
-            toPartyType = getProperty(TO_PARTY_TYPE);
-        }
+        String toPartyID = getPropertyWithFallback(messageIn, TO_PARTY_ID);
+        String toPartyType = getPropertyWithFallback(messageIn, TO_PARTY_TYPE);
         target.addToParty(toPartyID, toPartyType);
     }
 
     private void setTargetFromPartyIdAndFromPartyType(MapMessage messageIn, Submission target) throws JMSException {
-        String fromPartyID = trim(messageIn.getStringProperty(FROM_PARTY_ID));
-        if (isEmpty(fromPartyID)) {
-            fromPartyID = getProperty(FROM_PARTY_ID);
-        }
-
-        String fromPartyType = trim(messageIn.getStringProperty(FROM_PARTY_TYPE));
-        if (isEmpty(fromPartyType)) {
-            fromPartyType = getProperty(FROM_PARTY_TYPE);
-        }
+        String fromPartyID = getPropertyWithFallback(messageIn, FROM_PARTY_ID);
+        String fromPartyType = getPropertyWithFallback(messageIn, FROM_PARTY_TYPE);
         target.addFromParty(fromPartyID, fromPartyType);
     }
 
