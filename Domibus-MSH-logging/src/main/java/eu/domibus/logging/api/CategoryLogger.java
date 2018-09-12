@@ -155,7 +155,7 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     public void removeMDC(String key) {
         final String mdcKey = getMDCKey(key);
         MDC.remove(mdcKey);
-        LOG.debug("Removed key [{}] from MDC", mdcKey);
+        LOG.trace("Removed key [{}] from MDC", mdcKey);
     }
 
     public String getMDC(String key) {
