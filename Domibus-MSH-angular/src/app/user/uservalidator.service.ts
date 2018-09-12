@@ -30,13 +30,13 @@ export class UserValidatorService {
     // check at least one active domain admin
     const domainAdmins = activeUsers.filter(user => user.roles.includes(SecurityService.ROLE_DOMAIN_ADMIN));
     if (domainAdmins.length < 1) {
-      errorMessage = errorMessage.concat('There must always be at least one active Domain Admin for each Domain');
+      errorMessage = errorMessage.concat(' There must always be at least one active Domain Admin for each Domain.');
     }
     // check at least one ap admin
     if (this.securityService.isCurrentUserSuperAdmin()) {
       const apAdmins = activeUsers.filter(user => user.roles.includes(SecurityService.ROLE_AP_ADMIN));
       if (apAdmins.length < 1) {
-        errorMessage = errorMessage.concat('There must always be at least one active AP Admin');
+        errorMessage = errorMessage.concat(' There must always be at least one active AP Admin');
       }
     }
     return errorMessage;
@@ -47,7 +47,7 @@ export class UserValidatorService {
     let seen = new Set();
     allUsers.every(function (user) {
       if (seen.size === seen.add(user.userName).size) {
-        errorMessage = errorMessage.concat('Duplicate user name with user [' + allUsers.indexOf(user) + ']: ' + user.userName);
+        errorMessage = errorMessage.concat('Duplicate user name for user: ' + user.userName + '.');
         return false;
       }
       return true;
