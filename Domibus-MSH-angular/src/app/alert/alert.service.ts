@@ -56,7 +56,7 @@ export class AlertService {
   error (message: Response | string | any, keepAfterNavigationChange = false, fadeTime: number = 0) {
     if (message.handled) return;
     if (message instanceof Response && (message.status === 401 || message.status === 403)) return;
-    if (message.toString().indexOf('Response with status: 403 Forbidden')>=0) return;
+    if (message.toString().indexOf('Response with status: 403 Forbidden') >= 0) return;
 
     const errMsg = this.formatError(message);
     this.subject.next({type: 'error', text: errMsg});
@@ -76,6 +76,7 @@ export class AlertService {
 
   private formatError (error: Response | string | any, message: string = null): string {
     let errMsg: string = typeof error === 'string' ? error : error.message;
+
     if (!errMsg) {
       try {
         if (error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8') {
@@ -93,9 +94,11 @@ export class AlertService {
         }
       } catch (e) {
       }
-    } else {
-      errMsg = errMsg.replace('Uncaught (in promise):', '');
     }
+
+    errMsg = errMsg.replace('Uncaught (in promise):', '');
+    errMsg = errMsg.replace('[object ProgressEvent]', '');
+
     return (message ? message + ' \n' : '') + (errMsg || '');
   }
 
