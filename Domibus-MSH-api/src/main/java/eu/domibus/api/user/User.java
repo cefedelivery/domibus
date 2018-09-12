@@ -1,5 +1,7 @@
 package eu.domibus.api.user;
 
+import eu.domibus.api.security.AuthRole;
+
 import java.util.Date;
 import java.util.List;
 
@@ -106,5 +108,12 @@ public class User {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public boolean isSuperAdmin() {
+        if(authorities == null) {
+            return false;
+        }
+        return authorities.contains(AuthRole.ROLE_AP_ADMIN.name());
     }
 }

@@ -5,13 +5,13 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
@@ -21,16 +21,15 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static eu.domibus.common.model.security.UserLoginErrorReason.BAD_CREDENTIALS;
-
-
-import eu.domibus.common.services.UserPersistenceService;
-import org.springframework.context.annotation.Primary;
 
 /**
  * @author Thomas Dussart
@@ -202,17 +201,22 @@ public class UserManagementServiceImpl implements UserService {
             final Date suspensionDate = new Date(System.currentTimeMillis());
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
-            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-            if (accountDisabledConfiguration.isActive()) {
-                eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
+
+            //TODO trigger events for super user in 4.1 EDELIVERY-3768
+            if(!user.isSuperAdmin()) {
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+                if (accountDisabledConfiguration.isActive()) {
+                    eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
+                }
             }
+
         }
         userDao.update(user);
     }
 
     private Domain getCurrentOrDefaultDomainForUser(User user) {
         String domainCode;
-        boolean isSuperAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals(AuthRole.ROLE_AP_ADMIN.name()));
+        boolean isSuperAdmin = user.isSuperAdmin();
         if (isSuperAdmin) {
             domainCode = domainService.DEFAULT_DOMAIN.getCode();
         } else {
