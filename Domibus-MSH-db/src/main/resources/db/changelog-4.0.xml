@@ -2035,6 +2035,15 @@
             <column name="MESSAGE_SUBTYPE"/>
             <column name="RECEIVED"/>
         </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TYPE_STYPE_RCV" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_TYPE"/>
+            <column name="MESSAGE_SUBTYPE"/>
+            <column name="RECEIVED"/>
+        </createIndex>
+        <createIndex indexName="IDX_MSG_UI_TYPE_RCV" tableName="TB_MESSAGE_UI">
+            <column name="MESSAGE_TYPE"/>
+            <column name="RECEIVED"/>
+        </createIndex>
         <createIndex indexName="IDX_MSG_UI_MSH_ROLE" tableName="TB_MESSAGE_UI">
             <column name="MSH_ROLE"/>
         </createIndex>
