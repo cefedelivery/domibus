@@ -132,7 +132,9 @@ export class TestServiceComponent implements OnInit {
     this.sender = '';
     this.http.get(TestServiceComponent.TEST_SERVICE_SENDER_URL).subscribe(res => {
       this.sender = res.json();
-    })
+    }, error => {
+      this.alertService.exception('The test service is not properly configured.', error, false);
+    });
   }
 
   getReceiverParties () {
@@ -141,12 +143,12 @@ export class TestServiceComponent implements OnInit {
       if (!isNullOrUndefined(res) && res.json() && res.json().length) {
         this.receiverParties = res.json();
       } else {
-        this.alertService.error('The test service is not properly configured.',false);
+        this.alertService.error('The test service is not properly configured.', false);
       }
       // only static is enabled for now
       //this.dynamicDiscoveryEnabled = this.receiverParties.length == 0;
     }, error => {
-      this.alertService.exception('The test service is not properly configured.', error,false);
+      this.alertService.exception('The test service is not properly configured.', error, false);
     });
   }
 
