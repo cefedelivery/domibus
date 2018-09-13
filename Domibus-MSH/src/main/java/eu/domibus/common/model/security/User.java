@@ -171,7 +171,7 @@ public class User extends AbstractBaseEntity{
         if(roles == null) {
             return false;
         }
-        return roles.stream().anyMatch(role -> role.getName().equals(AuthRole.ROLE_AP_ADMIN.name()));
+        return roles.stream().anyMatch(role -> AuthRole.ROLE_AP_ADMIN.name().equals(role.getName()));
     }
 
 }
