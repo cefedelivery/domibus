@@ -77,7 +77,7 @@ public class AuthUtilsImpl implements AuthUtils {
     @Override
     public boolean isUnsecureLoginAllowed() {
         if(domibusConfigurationService.isMultiTenantAware()) {
-            LOG.debug("Unsecured login not allowed: Domibus is running in multi-tenancy mode");
+            LOG.trace("Unsecured login not allowed: Domibus is running in multi-tenancy mode");
             return false;
         }
         /* unsecured login allowed */
