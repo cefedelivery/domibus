@@ -216,15 +216,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         return originalUser;
     }
 
-    protected MessageStatus convertMessageStatus(MessageStatus messageStatus) {
-        if (MessageStatus.DOWNLOADED == messageStatus) {
-            LOG.warn("Using deprecated method that converts DOWNLOADED status to RECEIVED");
-            //convert the DOWNLOADED status to RECEIVED to assure backwards compatibility
-            messageStatus = eu.domibus.common.MessageStatus.RECEIVED;
-        }
-        return messageStatus;
-    }
-
     protected void validateAccessToStatusAndErrors(String messageId) {
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();

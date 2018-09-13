@@ -48,7 +48,7 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
             return legConfiguration;
         } catch (PModeException p) {
             EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Error for pullrequest with mpc:" + pullRequest.getMpc() + " " + p.getMessage(), null, null);
-            LOG.warn(ebMS3Exception.getErrorDetail());
+            LOG.warn(ebMS3Exception.getErrorDetail(), p);
             throw ebMS3Exception;
         }
     }
