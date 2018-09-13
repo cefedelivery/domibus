@@ -67,7 +67,7 @@ public class DomibusQuartzStarter {
             try {
                 checkJobsAndStartScheduler(domain);
             } catch (SchedulerException e) {
-                LOG.error("Could not initialize the Quartz Scheduler for domain [{}]", e, domain);
+                LOG.error("Could not initialize the Quartz Scheduler for domain [{}]", domain, e);
             }
         }
     }
@@ -93,7 +93,7 @@ public class DomibusQuartzStarter {
             try {
                 quartzScheduler.shutdown(true);
             } catch (SchedulerException e) {
-                LOG.error("Error while shutting down Quartz Scheduler for domain [{}]", e, domain);
+                LOG.error("Error while shutting down Quartz Scheduler for domain [{}]", domain, e);
             }
         }
     }

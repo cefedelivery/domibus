@@ -127,7 +127,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 LOG.debug("Closing old truststore output stream.");
                 oldTrustStoreBytes.close();
             } catch (IOException e) {
-                LOG.error("Could not close oldTrustStoreBytes output stream");
+                LOG.error("Could not close oldTrustStoreBytes output stream", e);
             }
         }
 

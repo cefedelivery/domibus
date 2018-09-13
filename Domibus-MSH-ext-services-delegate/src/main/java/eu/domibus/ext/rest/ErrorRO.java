@@ -1,5 +1,9 @@
 package eu.domibus.ext.rest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.Serializable;
 
 /**
@@ -20,5 +24,14 @@ public class ErrorRO implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @JsonIgnore
+    public int getContentLength() {
+        try {
+            return new ObjectMapper().writeValueAsString(this).length();
+        } catch (JsonProcessingException e) {
+            return -1;
+        }
     }
 }

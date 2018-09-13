@@ -28,7 +28,7 @@ public class MessagePullerJob extends DomibusQuartzJobBean {
         try {
             messageExchangeService.initiatePullRequest();
         } catch (PModeException e) {
-            LOG.warn("Invalid pmode configuration for pull request " + e.getMessage());
+            LOG.warn("Invalid pmode configuration for pull request " + e.getMessage(), e);
         }
     }
 }

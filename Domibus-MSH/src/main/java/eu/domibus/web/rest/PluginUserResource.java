@@ -19,6 +19,7 @@ import eu.domibus.web.rest.ro.PluginUserRO;
 import eu.domibus.web.rest.ro.PluginUserResultRO;
 import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,14 @@ public class PluginUserResource {
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
         LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+        //keep this for the moment in case the connection close header proves not good in the end
+        //headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(error.getContentLength()));
+
+        return new ResponseEntity(error, headers, HttpStatus.CONFLICT);
     }
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)
