@@ -54,7 +54,9 @@ public class PluginUserResource {
 
         ErrorRO error = new ErrorRO(ex.getMessage());
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(error.getContentLength()));
+        headers.set(HttpHeaders.CONNECTION, "close");
+        //keep this for the moment in case the connection close header proves not good in the end
+        //headers.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(error.getContentLength()));
 
         return new ResponseEntity(error, headers, HttpStatus.CONFLICT);
     }
