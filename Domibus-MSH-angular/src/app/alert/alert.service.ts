@@ -56,6 +56,7 @@ export class AlertService {
   error (message: Response | string | any, keepAfterNavigationChange = false, fadeTime: number = 0) {
     if (message.handled) return;
     if (message instanceof Response && (message.status === 401 || message.status === 403)) return;
+    if (message.toString().indexOf('Response with status: 403 Forbidden')>=0) return;
 
     const errMsg = this.formatError(message);
     this.subject.next({type: 'error', text: errMsg});
@@ -78,12 +79,22 @@ export class AlertService {
     if (!errMsg) {
       try {
         if (error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8') {
-          errMsg = error.json ? (error.json().message || error.json() || error) : (error._body || error);
+          if (error.json) {
+            if (error.json().hasOwnProperty('message')) {
+              errMsg = error.json().message;
+            } else {
+              errMsg = error.json().toString();
+            }
+          } else {
+            errMsg = error._body;
+          }
         } else {
           errMsg = error._body ? error._body.match(/<h1>(.+)<\/h1>/)[1] : error;
         }
       } catch (e) {
       }
+    } else {
+      errMsg = errMsg.replace('Uncaught (in promise):', '');
     }
     return (message ? message + ' \n' : '') + (errMsg || '');
   }

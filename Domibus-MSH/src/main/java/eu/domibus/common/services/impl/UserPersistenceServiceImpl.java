@@ -146,10 +146,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
         if (!user.isActive() && userEntity.getActive()) {
             LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
-            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-            if (accountDisabledConfiguration.isActive()) {
-                LOG.debug("Sending account disabled event for user:[{}]", user.getUserName());
-                eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
+            //TODO trigger events for super user in 4.1 EDELIVERY-3768
+            if (!user.isSuperAdmin()) {
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+                if (accountDisabledConfiguration.isActive()) {
+                    LOG.debug("Sending account disabled event for user:[{}]", user.getUserName());
+                    eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
+                }
             }
         }
         userEntity.setActive(user.isActive());

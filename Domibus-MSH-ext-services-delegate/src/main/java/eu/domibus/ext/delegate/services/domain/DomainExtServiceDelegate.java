@@ -1,5 +1,6 @@
 package eu.domibus.ext.delegate.services.domain;
 
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.ext.delegate.converter.DomainExtConverter;
@@ -30,6 +31,10 @@ public class DomainExtServiceDelegate implements DomainExtService {
     }
 
     public DomainDTO getDomain(String code) {
-        return domainConverter.convert(domainService.getDomain(code), DomainDTO.class);
+        Domain domain = domainService.getDomain(code);
+        if(domain != null) {
+            return domainConverter.convert(domain, DomainDTO.class);
+        }
+        return null;
     }
 }

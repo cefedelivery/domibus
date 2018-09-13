@@ -96,7 +96,7 @@ public class MailSender {
     }
 
     //TODO add unit test here.
-    public <T extends MailModel> void sendMail(final T model, final String to, final String from) {
+    public <T extends MailModel> void sendMail(final T model, final String from, final String to) {
         if(!mailSenderInitiated){
             mailSenderInitiated=true;
             try {
