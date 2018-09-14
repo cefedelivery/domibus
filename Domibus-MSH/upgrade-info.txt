@@ -26,10 +26,13 @@ Domibus 4.0 RC1 (from 3.3.4):
                   The value of eb:UserMessage/eb:CollaborationInfo/eb:Service matches now the entire Scheme::ProcessIdentifier construction while
                   the Service@type is not taken into consideration and therefore can take any needed value.
                 - [WebLogic only]
-                    Modify file "\conf\domibus\domibus.properties":
-                         o add the following properties:
+                     o  Modify the XA datasource "cipaeDeliveryDs" settings in the WebLogic Console
+                        - In the "cipaeDeliveryDs" datasource menu, tab Configuration/Transaction, enable the setting "Set XA Transaction Timeout"
+                     o  Modify file "\conf\domibus\domibus.properties":
+                         - add the following properties:
                              domibus.jms.queue.alert=jms/domibus.internal.alert.queue
-                         o execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3.4-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
+                         - execute the WLST API script(from "\conf\domibus\scripts\upgrades") 3.3.4-to-4.0-WeblogicSingleServer.properties for single server deployment or 3.3(+)-to-4.0-WeblogicCluster.properties for cluster deployment
+
                 - [Tomcat only]
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following properties:
