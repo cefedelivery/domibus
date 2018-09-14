@@ -189,37 +189,19 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
 
             setTargetFromPartyIdAndFromPartyType(messageIn, target);
 
-            target.setFromRole(trim(messageIn.getStringProperty(FROM_ROLE)));
-            if (isEmpty(target.getFromRole())) {
-                target.setFromRole(getProperty(FROM_ROLE));
-            }
+            target.setFromRole(getPropertyWithFallback(messageIn, FROM_ROLE));
 
             setTargetToPartyIdAndToPartyType(messageIn, target);
 
-            target.setToRole(trim(messageIn.getStringProperty(TO_ROLE)));
-            if (isEmpty(target.getToRole())) {
-                target.setToRole(getProperty(TO_ROLE));
-            }
+            target.setToRole(getPropertyWithFallback(messageIn, TO_ROLE));
 
-            target.setAction(trim(messageIn.getStringProperty(ACTION)));
-            if (isEmpty(target.getAction())) {
-                target.setAction(getProperty(ACTION));
-            }
+            target.setAction(getPropertyWithFallback(messageIn, ACTION));
 
-            target.setService(trim(messageIn.getStringProperty(SERVICE)));
-            if (isEmpty(target.getService())) {
-                target.setService(getProperty(SERVICE));
-            }
+            target.setService(getPropertyWithFallback(messageIn, SERVICE));
 
-            target.setServiceType(trim(messageIn.getStringProperty(SERVICE_TYPE)));
-            if (isEmpty(target.getServiceType())) {
-                target.setServiceType(getProperty(SERVICE_TYPE));
-            }
+            target.setServiceType(getPropertyWithFallback(messageIn, SERVICE_TYPE));
 
-            target.setAgreementRef(trim(messageIn.getStringProperty(AGREEMENT_REF)));
-            if (isEmpty(target.getAgreementRef())) {
-                target.setAgreementRef(getProperty(AGREEMENT_REF));
-            }
+            target.setAgreementRef(getPropertyWithFallback(messageIn, AGREEMENT_REF));
 
             target.setConversationId(trim(messageIn.getStringProperty(CONVERSATION_ID)));
 
@@ -263,29 +245,26 @@ public class JMSMessageTransformer implements MessageRetrievalTransformer<MapMes
         return target;
     }
 
-    private void setTargetToPartyIdAndToPartyType(MapMessage messageIn, Submission target) throws JMSException {
-        String toPartyID = trim(messageIn.getStringProperty(TO_PARTY_ID));
-        if (isEmpty(toPartyID)) {
-            toPartyID = getProperty(TO_PARTY_ID);
+    private String getPropertyWithFallback(final MapMessage messageIn, String propName) throws JMSException {
+        String propValue = null;
+
+        propValue = trim(messageIn.getStringProperty(propName));
+        if (isEmpty(propValue)) {
+            propValue = getProperty(propName);
         }
 
-        String toPartyType = trim(messageIn.getStringProperty(TO_PARTY_TYPE));
-        if (isEmpty(toPartyType)) {
-            toPartyType = getProperty(TO_PARTY_TYPE);
-        }
+        return propValue;
+    }
+
+    private void setTargetToPartyIdAndToPartyType(MapMessage messageIn, Submission target) throws JMSException {
+        String toPartyID = getPropertyWithFallback(messageIn, TO_PARTY_ID);
+        String toPartyType = getPropertyWithFallback(messageIn, TO_PARTY_TYPE);
         target.addToParty(toPartyID, toPartyType);
     }
 
     private void setTargetFromPartyIdAndFromPartyType(MapMessage messageIn, Submission target) throws JMSException {
-        String fromPartyID = trim(messageIn.getStringProperty(FROM_PARTY_ID));
-        if (isEmpty(fromPartyID)) {
-            fromPartyID = getProperty(FROM_PARTY_ID);
-        }
-
-        String fromPartyType = trim(messageIn.getStringProperty(FROM_PARTY_TYPE));
-        if (isEmpty(fromPartyType)) {
-            fromPartyType = getProperty(FROM_PARTY_TYPE);
-        }
+        String fromPartyID = getPropertyWithFallback(messageIn, FROM_PARTY_ID);
+        String fromPartyType = getPropertyWithFallback(messageIn, FROM_PARTY_TYPE);
         target.addFromParty(fromPartyID, fromPartyType);
     }
 

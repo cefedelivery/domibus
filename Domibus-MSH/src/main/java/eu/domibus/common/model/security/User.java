@@ -1,5 +1,6 @@
 package eu.domibus.common.model.security;
 
+import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.hibernate.envers.Audited;
@@ -164,6 +165,13 @@ public class User extends AbstractBaseEntity{
 
     public void setSuspensionDate(Date suspensionDate) {
         this.suspensionDate = suspensionDate;
+    }
+
+    public boolean isSuperAdmin() {
+        if(roles == null) {
+            return false;
+        }
+        return roles.stream().anyMatch(role -> AuthRole.ROLE_AP_ADMIN.name().equals(role.getName()));
     }
 
 }

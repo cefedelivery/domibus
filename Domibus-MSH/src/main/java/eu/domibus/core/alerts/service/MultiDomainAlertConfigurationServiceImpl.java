@@ -243,7 +243,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             throw new IllegalArgumentException("Invalid email address configured for the alert module.");
         }
         return new CommonConfiguration(alertLifeTimeInDays, alertEmailSender, alertEmailReceiver);
-    }
+}
 
     protected MessagingModuleConfiguration readMessageConfiguration(Domain domain) {
         try {
@@ -300,7 +300,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     accountDisabledMailSubject);
 
         } catch (Exception e) {
-            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain);
+            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
             return new AccountDisabledModuleConfiguration();
         }
 
@@ -323,7 +323,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     loginFailureMailSubject);
 
         } catch (Exception e) {
-            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain);
+            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
             return new LoginFailureModuleConfiguration();
         }
 
@@ -351,7 +351,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     imminentExpirationMailSubject);
 
         } catch (Exception e) {
-            LOG.warn("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain);
+            LOG.warn("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain, e);
             return new ImminentExpirationCertificateModuleConfiguration();
         }
 
@@ -379,7 +379,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                     expiredMailSubject);
 
         } catch (Exception e) {
-            LOG.error("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain);
+            LOG.error("An error occurred while reading certificate scanner alert module configuration for domain:[{}], ", domain, e);
             return new ExpiredCertificateModuleConfiguration();
         }
     }

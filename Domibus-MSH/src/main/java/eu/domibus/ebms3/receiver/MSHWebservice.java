@@ -208,7 +208,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         } catch (final EbMS3Exception e) {
             reliabilityChecker.handleEbms3Exception(e, messageId);
         } catch (ReliabilityException r) {
-            LOG.warn(r.getMessage());
+            LOG.warn(r.getMessage(), r);
         } finally {
             final PullRequestResult pullRequestResult = pullMessageService.updatePullMessageAfterReceipt(reliabilityCheckSuccessful, isOk, userMessageLog, legConfiguration, userMessage);
             pullMessageService.releaseLockAfterReceipt(pullRequestResult);

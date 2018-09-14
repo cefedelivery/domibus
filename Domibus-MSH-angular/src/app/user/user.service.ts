@@ -19,19 +19,20 @@ export class UserService {
     return this.http.get('rest/user/users')
       .map(this.extractData)
       .filter(this.filterData(filter))
-      .catch(this.handleError);
+      .catch(err => this.alertService.handleError(err));
   }
 
   getUserNames (): Observable<string> {
     return this.http.get('rest/user/users')
       .flatMap(res => res.json())
-      .map((user: UserResponseRO) => user.userName);
+      .map((user: UserResponseRO) => user.userName)
+      .catch(err => this.alertService.handleError(err));
   }
 
   getUserRoles (): Observable<String[]> {
     return this.http.get('rest/user/userroles')
       .map(this.extractData)
-      .catch(this.handleError);
+      .catch(err => this.alertService.handleError(err));
   }
 
   deleteUsers (users: Array<UserResponseRO>): void {
@@ -78,20 +79,6 @@ export class UserService {
       users.push(...results);
       return users;
     }
-  }
-
-  private handleError (error: Response | any) {
-    this.alertService.error(error, false);
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.json() || '';
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Promise.reject(errMsg);
   }
 
 }

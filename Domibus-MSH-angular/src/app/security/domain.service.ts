@@ -36,13 +36,14 @@ export class DomainService {
 
   getCurrentDomain (): Observable<Domain> {
     if (!this.domainSubject) {
-      this.domainSubject = new BehaviorSubject<Domain>(null);
+      var subject = new BehaviorSubject<Domain>(null);
       this.http.get(DomainService.CURRENT_DOMAIN_URL).subscribe((res: Response) => {
-        this.domainSubject.next(res.json());
+        subject.next(res.json());
       }, (error: any) => {
         console.log('getCurrentDomain:' + error);
-        this.domainSubject.next(null);
+        subject.next(null);
       });
+      this.domainSubject = subject;
     }
     return this.domainSubject.asObservable();
   }

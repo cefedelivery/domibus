@@ -41,7 +41,6 @@ export class PartyComponent implements OnInit, DirtyOperations {
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
 
   offset: number;
-  pageSize: number;
   count: number;
   loading: boolean;
 
@@ -72,7 +71,6 @@ export class PartyComponent implements OnInit, DirtyOperations {
     this.updatedParties = [];
     this.deletedParties = [];
 
-    this.pageSize = this.rowLimiter.pageSizes[0].value;
     this.initColumns();
 
     const res = await this.http.get(CurrentPModeComponent.PMODE_URL + '/current').toPromise();
@@ -171,9 +169,13 @@ export class PartyComponent implements OnInit, DirtyOperations {
 
   changePageSize (newPageLimit: number) {
     this.offset = 0;
-    this.pageSize = newPageLimit;
+    this.rowLimiter.pageSize = newPageLimit;
 
     this.refresh();
+  }
+
+  onPageChange (event: any) {
+    this.offset = event.offset;
   }
 
   saveAsCSV () {

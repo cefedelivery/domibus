@@ -48,11 +48,14 @@ public class BackendJMSReceivingListener {
     //Propagation.REQUIRES_NEW is needed in order to avoid sending the JMS message before the database data is commited; probably this is a bug in Atomikos which will be solved by performing an upgrade
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void receiveMessage(final MapMessage map) {
-        if (domibusConfigurationExtService.isMultiTenantAware()) {
-            authenticate(map);
+        try {
+            if (domibusConfigurationExtService.isMultiTenantAware()) {
+                authenticate(map);
+            }
+            backendJMS.receiveMessage(map);
+        } finally {
+            LOG.clearCustomKeys();
         }
-
-        backendJMS.receiveMessage(map);
     }
 
     protected void authenticate(final MapMessage map) {

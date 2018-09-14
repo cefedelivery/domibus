@@ -97,7 +97,7 @@ export class ErrorLogComponent implements AfterViewInit {
       return ['Message Id', 'Error Code', 'Timestamp'].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   createSearchParams (): URLSearchParams {
@@ -141,7 +141,7 @@ export class ErrorLogComponent implements AfterViewInit {
     return searchParams;
   }
 
-  getErrorLogEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<ErrorLogResult> {
+  getErrorLogEntries (offset: number, pageSize: number): Observable<ErrorLogResult> {
     const searchParams = this.createSearchParams();
 
     searchParams.set('page', offset.toString());
@@ -154,15 +154,14 @@ export class ErrorLogComponent implements AfterViewInit {
     );
   }
 
-  page (offset, pageSize, orderBy, asc) {
+  page (offset, pageSize) {
     this.loading = true;
 
-    this.getErrorLogEntries(offset, pageSize, orderBy, asc).subscribe((result: ErrorLogResult) => {
+    this.getErrorLogEntries(offset, pageSize).subscribe((result: ErrorLogResult) => {
       console.log('errorLog response:' + result);
+
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
-      this.orderBy = orderBy;
-      this.asc = asc;
       this.count = result.count;
 
       const start = offset * pageSize;
@@ -203,27 +202,23 @@ export class ErrorLogComponent implements AfterViewInit {
   }
 
   onPage (event) {
-    console.log('Page Event', event);
-    this.page(event.offset, event.pageSize, this.orderBy, this.asc);
+    this.page(event.offset, event.pageSize);
   }
 
   onSort (event) {
-    console.log('Sort Event', event);
-    let ascending = true;
-    if (event.newValue === 'desc') {
-      ascending = false;
-    }
-    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
+    this.orderBy = event.column.prop;
+    this.asc = (event.newValue === 'desc') ? false : true;
+
+    this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   changePageSize (newPageLimit: number) {
-    console.log('New page limit:', newPageLimit);
-    this.page(0, newPageLimit, this.orderBy, this.asc);
+    this.page(0, newPageLimit);
   }
 
   search () {
     console.log('Searching using filter:' + this.filter);
-    this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.page(0, this.rowLimiter.pageSize);
   }
 
   onTimestampFromChange (event) {

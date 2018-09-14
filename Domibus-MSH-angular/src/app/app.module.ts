@@ -1,5 +1,5 @@
 import {BrowserModule} from "@angular/platform-browser";
-import {NgModule} from "@angular/core";
+import {ErrorHandler, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
@@ -80,6 +80,7 @@ import { PluginUserComponent } from './pluginuser/pluginuser.component';
 import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
 import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
+import {GlobalErrorHandler} from './common/global.error-handler';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -197,6 +198,10 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
       useFactory: extendedHttpClientFactory,
       deps: [XHRBackend, RequestOptions, HttpEventService],
       multi: false
+    },
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler
     }
   ],
   bootstrap: [AppComponent]

@@ -61,15 +61,15 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
         final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         String databaseSchema = null;
         if (currentDomain != null) {
-            LOG.debug("Getting schema for domain [{}]", currentDomain);
+            LOG.trace("Getting schema for domain [{}]", currentDomain);
             databaseSchema = domainService.getDatabaseSchema(currentDomain);
         } else {
-            LOG.debug("Getting general schema");
+            LOG.trace("Getting general schema");
             databaseSchema = domainService.getGeneralSchema();
         }
 
         final Connection connection = getAnyConnection();
-        LOG.debug("Setting database schema to [{}] ", databaseSchema);
+        LOG.trace("Setting database schema to [{}] ", databaseSchema);
         setSchema(connection, databaseSchema);
         return connection;
     }
@@ -98,7 +98,7 @@ public class DomibusMultiTenantConnectionProvider implements MultiTenantConnecti
     @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
         final String generalSchema = domainService.getGeneralSchema();
-        LOG.debug("Releasing connection, setting database schema to [{}] ", generalSchema);
+        LOG.trace("Releasing connection, setting database schema to [{}] ", generalSchema);
         setSchema(connection, generalSchema);
         connection.close();
     }

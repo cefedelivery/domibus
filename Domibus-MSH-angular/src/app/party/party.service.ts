@@ -14,7 +14,7 @@ import {DownloadService} from '../download/download.service';
 export class PartyService {
   static readonly CERTIFICATE: string = 'rest/party/{partyName}/certificate';
   static readonly LIST_PROCESSES: string = 'rest/party/processes';
-  static readonly LIST_PARTIES: string = 'rest/party/list';
+  static readonly LIST_PARTIES: string = 'rest/party/list?pageSize=0';
   static readonly UPDATE_PARTIES: string = 'rest/party/update';
   static readonly CSV_PARTIES: string = 'rest/party/csv';
 
@@ -54,7 +54,13 @@ export class PartyService {
         records = records.filter(party => party.identifiers.filter(x => x.partyId === partyId).length > 0);
       }
       if (process) {
-        records = records.filter(party => party.joinedProcesses.lastIndexOf(process + process_role) >= 0);
+        let query: string = process + '(';
+        records = records.filter(party => party.joinedProcesses.indexOf(query) >= 0);
+      }
+      if (process_role) {
+        let query1: string = (process || '') + process_role;
+        let query2: string = (process || '') + '(IR)';
+        records = records.filter(party => party.joinedProcesses.indexOf(query1) >= 0 || party.joinedProcesses.indexOf(query2) >= 0);
       }
 
       return {data: records, allData: allRecords};

@@ -97,7 +97,7 @@ public class MessageRetentionServiceTest {
         messageRetentionService.deleteExpiredDownloadedMessages(mpc1, 10);
 
         new Verifications() {{
-            userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), anyString);
+            userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), anyString, null);
             times = 0;
         }};
     }
@@ -114,7 +114,7 @@ public class MessageRetentionServiceTest {
         messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, 10);
 
         new Verifications() {{
-            userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), anyString);
+            userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), anyString, null);
             times = 0;
         }};
     }
@@ -131,14 +131,14 @@ public class MessageRetentionServiceTest {
             pModeProvider.getRetentionDownloadedByMpcURI(mpc1);
             result = 10;
 
-            userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), mpc1);
+            userMessageLogDao.getDownloadedUserMessagesOlderThan(withAny(new Date()), mpc1, null);
             result = downloadedMessageIds;
         }};
 
         messageRetentionService.deleteExpiredDownloadedMessages(mpc1, messagesDeleteLimit);
 
         new Verifications() {{
-            messageRetentionService.delete(downloadedMessageIds, messagesDeleteLimit);
+            userMessageService.delete(downloadedMessageIds);
         }};
     }
 
@@ -154,14 +154,14 @@ public class MessageRetentionServiceTest {
             pModeProvider.getRetentionUndownloadedByMpcURI(mpc1);
             result = 10;
 
-            userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), mpc1);
+            userMessageLogDao.getUndownloadedUserMessagesOlderThan(withAny(new Date()), mpc1, null);
             result = downloadedMessageIds;
         }};
 
         messageRetentionService.deleteExpiredNotDownloadedMessages(mpc1, messagesDeleteLimit);
 
         new Verifications() {{
-            messageRetentionService.delete(downloadedMessageIds, messagesDeleteLimit);
+            userMessageService.delete(downloadedMessageIds);
         }};
     }
 

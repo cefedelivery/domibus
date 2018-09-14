@@ -17,33 +17,33 @@ import java.util.Date;
 public class MessageLogInfo {
     // order of the fields is important for CSV generation
 
-    private final String messageId;
+    private String messageId;
 
     private String fromPartyId;
 
     private String toPartyId;
 
-    private final MessageStatus messageStatus;
+    private MessageStatus messageStatus;
 
-    private final NotificationStatus notificationStatus;
+    private NotificationStatus notificationStatus;
 
-    private final Date received;
+    private Date received;
 
-    private final MSHRole mshRole;
+    private MSHRole mshRole;
 
-    private final int sendAttempts;
+    private int sendAttempts;
 
-    private final int sendAttemptsMax;
+    private int sendAttemptsMax;
 
-    private final Date nextAttempt;
+    private Date nextAttempt;
 
     private String conversationId;
 
-    private final MessageType messageType;
+    private MessageType messageType;
 
-    private final MessageSubtype messageSubtype;
+    private MessageSubtype messageSubtype;
 
-    private final Date deleted;
+    private Date deleted;
 
     private String originalSender;
 
@@ -51,9 +51,13 @@ public class MessageLogInfo {
 
     private String refToMessageId;
 
-    private final Date failed;
+    private Date failed;
 
-    private final Date restored;
+    private Date restored;
+
+
+    public MessageLogInfo() {
+    }
 
     public MessageLogInfo(final String messageId,
                           final MessageStatus messageStatus,

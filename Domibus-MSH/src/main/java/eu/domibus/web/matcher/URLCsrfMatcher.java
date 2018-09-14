@@ -31,7 +31,7 @@ public class URLCsrfMatcher implements RequestMatcher {
     @Override
     public boolean matches(HttpServletRequest request) {
         if(this.allowedMethods.contains(request.getMethod())) {
-            LOGGER.debug("Matched method [{}]", request.getMethod());
+            LOGGER.trace("Matched method [{}]", request.getMethod());
             return false;
         }
         return !unprotectedMatcher.matches(request);

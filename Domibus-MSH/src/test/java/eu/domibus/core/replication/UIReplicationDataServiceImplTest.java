@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.sql.Date;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -308,82 +306,6 @@ public class UIReplicationDataServiceImplTest {
     }
 
     @Test
-    public void testFindAndSyncUIMessages(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
-        final int countAllRows = 10;
-        final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
-
-        new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(UIReplicationDataServiceImpl.MAX_ROWS_KEY, "1000");
-            result = 10000;
-
-            uiMessageDiffDao.countAll();
-            result = countAllRows;
-
-            uiMessageDiffDao.findAll();
-            result = uiMessageDiffEntityList;
-        }};
-
-        //tested method
-        uiReplicationDataService.findAndSyncUIMessages();
-
-        new FullVerifications(){{
-            uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
-
-            uiMessageDao.saveOrUpdate(withAny(new UIMessageEntity()));
-        }};
-    }
-
-    @Test
-    public void testFindAndSyncUIMessagesWithLimit(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
-        final int countAllRows = 10;
-        final int limit = 20;
-        final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
-
-        new Expectations() {{
-
-            uiMessageDiffDao.countAll();
-            result = countAllRows;
-
-            uiMessageDiffDao.findAll(anyInt);
-            result = uiMessageDiffEntityList;
-        }};
-
-        //tested method
-        final int syncedRows = uiReplicationDataService.findAndSyncUIMessages(limit);
-        Assert.assertEquals(10, syncedRows);
-
-        new FullVerifications(){{
-            int actualValue;
-            uiMessageDiffDao.findAll(actualValue = withCapture());
-            Assert.assertEquals(limit, actualValue);
-
-            uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
-
-            uiMessageDao.saveOrUpdate(withAny(new UIMessageEntity()));
-        }};
-    }
-
-    @Test
-    public void testCountSyncUIMessages() {
-
-        final int records = 214;
-        new Expectations() {{
-            uiMessageDiffDao.countAll();
-            result = records;
-
-        }};
-
-        //tested method
-        final int recordsToSync = uiReplicationDataService.countSyncUIMessages();
-        Assert.assertEquals(records, recordsToSync);
-
-        new FullVerifications() {{
-            uiMessageDiffDao.countAll();
-        }};
-    }
-
-
-    @Test
     public void testSaveUIMessageFromSignalMessageLog(final @Mocked UIMessageEntity uiMessageEntity) {
         final UserMessageLog userMessageLog = createUserMessageLog();
         final UserMessage userMessage = createUserMessage();
@@ -524,28 +446,6 @@ public class UIReplicationDataServiceImplTest {
             Assert.assertNotNull(entityActual);
 
         }};
-    }
-
-
-    @Test
-    public void testConvertToUIMessageEntity_EntityNotNull_ResultOK(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
-
-        //tested method
-        uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
-
-        new Verifications() {{
-            //just test the call to converter
-            domainConverter.convert(uiMessageDiffEntity, UIMessageEntity.class);
-            times = 1;
-        }};
-    }
-
-    @Test
-    public void testConvertToUIMessageEntity_EntityNull_ResultNull(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
-
-        //tested method
-        final UIMessageEntity uiMessageEntity = uiReplicationDataService.convertToUIMessageEntity(uiMessageDiffEntity);
-        Assert.assertNull(uiMessageEntity);
     }
 
     private UserMessageLog createUserMessageLog() {

@@ -15,6 +15,7 @@ import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,14 +101,34 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')")
     public synchronized void replaceTrustStore(byte[] store, String password) throws CryptoException {
         LOG.debug("Replacing the existing trust store file [{}] with the provided one", getTrustStoreLocation());
+
+        ByteArrayOutputStream oldTrustStoreBytes = new ByteArrayOutputStream();
+        try {
+            truststore.store(oldTrustStoreBytes, getTrustStorePassword().toCharArray());
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException exc) {
+            throw new CryptoException("Could not replace truststore", exc);
+        }
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
             certificateService.validateLoadOperation(newTrustStoreBytes, password);
-
             truststore.load(newTrustStoreBytes, password.toCharArray());
-
+            LOG.debug("Truststore successfully loaded");
             persistTrustStore();
-        } catch (CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new CryptoException("Could not replace truststore", e);
+            LOG.debug("Truststore successfully persisted");
+        } catch (CertificateException | NoSuchAlgorithmException | IOException | CryptoException e) {
+            LOG.error("Could not replace truststore", e);
+            try {
+                truststore.load(oldTrustStoreBytes.toInputStream(), getTrustStorePassword().toCharArray());
+            } catch (CertificateException | NoSuchAlgorithmException | IOException exc) {
+                throw new CryptoException("Could not replace truststore and old truststore was not reverted properly. Please correct the error before continuing.", exc);
+            }
+            throw new CryptoException("Could not replace truststore, using old truststore", e);
+        } finally {
+            try {
+                LOG.debug("Closing old truststore output stream.");
+                oldTrustStoreBytes.close();
+            } catch (IOException e) {
+                LOG.error("Could not close oldTrustStoreBytes output stream", e);
+            }
         }
 
         signalTrustStoreUpdate();
@@ -115,6 +136,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     private synchronized void persistTrustStore() throws CryptoException {
         String trustStoreFileValue = getTrustStoreLocation();
+        LOG.debug("TrustoreLocation is: [{}]", trustStoreFileValue);
         File trustStoreFile = new File(trustStoreFileValue);
         if (!trustStoreFile.getParentFile().exists()) {
             LOG.debug("Creating directory [" + trustStoreFile.getParentFile() + "]");
@@ -125,6 +147,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             }
         }
 
+        LOG.debug("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
         } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e ) {

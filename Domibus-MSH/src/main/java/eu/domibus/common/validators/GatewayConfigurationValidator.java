@@ -71,7 +71,7 @@ public class GatewayConfigurationValidator {
         try {
             trustStore = multiDomainCertificateProvider.getTrustStore(domain);
         } catch (Exception e) {
-            LOG.warn("Failed to load certificates for domain [{}]! : [{}]", domain.getCode(), e.getMessage());
+            LOG.warn("Failed to load certificates for domain [{}]! : [{}]", domain.getCode(), e.getMessage(), e);
             warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
         if(trustStore == null) {
@@ -84,7 +84,7 @@ public class GatewayConfigurationValidator {
                 warnOutput(domain,"SAMPLE CERTIFICATES ARE BEING USED - NOT FOR PRODUCTION USAGE");
             }
         } catch (KeyStoreException e) {
-            LOG.warn("Failed to load certificates! " + e.getMessage());
+            LOG.warn("Failed to load certificates! " + e.getMessage(), e);
             warnOutput(domain, "CERTIFICATES ARE NOT CONFIGURED PROPERLY - NOT FOR PRODUCTION USAGE");
         }
     }

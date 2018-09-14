@@ -55,20 +55,13 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
         List<eu.domibus.api.user.User> superUsers = users.stream()
                 .filter(u -> u.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name()))
                 .collect(Collectors.toList());
-        try {
-            domainTaskExecutor.submit(() -> {
-                // this block needs to called inside a transaction;
-                // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
-                super.updateUsers(superUsers);
-                return null;
-            });
-        } catch (eu.domibus.api.multitenancy.DomainException ex) {
-            if (ExceptionUtils.getRootCause(ex) instanceof UserManagementException) {
-                throw (UserManagementException) ExceptionUtils.getRootCause(ex);
-            } else {
-                throw ex;
-            }
-        }
+
+        domainTaskExecutor.submit(() -> {
+            // this block needs to called inside a transaction;
+            // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
+            super.updateUsers(superUsers);
+            return null;
+        });
     }
 
 }

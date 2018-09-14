@@ -1176,7 +1176,7 @@ public class DatabaseMessageHandlerTest {
 
 
         new Verifications() {{
-            authUtils.hasAdminRole();
+            authUtils.hasUserOrAdminRole();
             errorLogDao.getErrorsForMessage(MESS_ID);
             Assert.assertNotNull(results);
             ErrorResult errRes = results.iterator().next();

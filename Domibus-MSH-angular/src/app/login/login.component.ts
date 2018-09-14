@@ -37,8 +37,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
     this.httpEventService.subscribe((error) => {
-      console.log('Received forbidden request event');
-      this.securityService.logout();
+      if (error && (error.status === 403 || error.status === 401)) {
+        console.log('Received forbidden request event');
+        this.securityService.logout();
+      }
     });
 
     this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
@@ -61,8 +63,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         switch (error.status) {
           case HTTP_UNAUTHORIZED:
           case HTTP_FORBIDDEN:
-            let forbiddenCode = error.json().message;
-            console.log('User forbiden code ' + forbiddenCode);
+            const forbiddenCode = error.json().message;
+            console.log('User forbidden code ' + forbiddenCode);
             switch (forbiddenCode) {
               case USER_INACTIVE:
                 message = 'The user is inactive. Please contact your administrator.';

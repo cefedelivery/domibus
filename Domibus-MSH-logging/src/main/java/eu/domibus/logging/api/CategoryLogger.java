@@ -149,13 +149,13 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
     public void putMDC(String key, String val) {
         final String mdcKey = getMDCKey(key);
         MDC.put(mdcKey, val);
-        LOG.debug("Added key [{}] with value [{}] to MDC", mdcKey, val);
+        LOG.trace("Added key [{}] with value [{}] to MDC", mdcKey, val);
     }
 
     public void removeMDC(String key) {
         final String mdcKey = getMDCKey(key);
         MDC.remove(mdcKey);
-        LOG.debug("Removed key [{}] from MDC", mdcKey);
+        LOG.trace("Removed key [{}] from MDC", mdcKey);
     }
 
     public String getMDC(String key) {

@@ -209,7 +209,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       await this.pluginUserService.saveUsers(this.users);
       this.search();
     } catch (err) {
-      this.alertService.exception('Error when saving plugin users ', err, false);
+      this.alertService.exception('Error saving plugin users. ', err, false);
     }
   }
 
