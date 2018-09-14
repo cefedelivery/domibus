@@ -140,29 +140,34 @@ export class AuditComponent implements OnInit {
       {
         name: 'Table',
         prop: 'auditTargetName',
-        width: 20
+        width: 20,
+        sortable: false
       },
       {
         name: 'User',
         prop: 'user',
-        width: 20
+        width: 20,
+        sortable: false
       },
       {
         cellTemplate: this.rowWithActionMapTpl,
         name: 'Action',
         prop: 'action',
-        width: 20
+        width: 20,
+        sortable: false
       },
       {
         cellTemplate: this.rowWithDateFormatTpl,
         name: 'Changed',
         prop: 'changed',
-        width: 80
+        width: 80,
+        sortable: false
       },
       {
         name: 'Id',
         prop: "id",
-        width: 300
+        width: 300,
+        sortable: false
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
