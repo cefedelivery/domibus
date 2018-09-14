@@ -170,10 +170,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.isBusy = true;
     this.userService.getUsers(this.filter).subscribe(results => {
       this.users = results;
-    }, err => {
-      this.alertService.exception('Error getting users.', err);
-    }, () => {
       this.isBusy = false;
+    }, err => {
+      this.isBusy = false;
+      // this.alertService.exception('Error getting users.', err);
     });
     this.dirty = false;
     this.areRowsDeleted = false;
@@ -356,6 +356,7 @@ export class UserComponent implements OnInit, DirtyOperations {
           const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
           this.isBusy = true;
           this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
+            this.isBusy = false;
             this.getUsers();
             // this.getUserRoles();
             this.alertService.success('The operation \'update users\' completed successfully.', false);
@@ -363,11 +364,10 @@ export class UserComponent implements OnInit, DirtyOperations {
               DownloadService.downloadNative(UserComponent.USER_CSV_URL);
             }
           }, err => {
+            this.isBusy = false;
             this.getUsers();
             // this.getUserRoles();
             this.alertService.exception('The operation \'update users\' not completed successfully.', err, false);
-          }, ()=>{
-            this.isBusy = false;
           });
         } else {
           if (withDownloadCSV) {
