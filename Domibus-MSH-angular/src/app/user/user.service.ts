@@ -19,7 +19,7 @@ export class UserService {
     return this.http.get('rest/user/users')
       .map(this.extractData)
       .filter(this.filterData(filter))
-      .catch(err => this.alertService.handleError(err));
+      // .catch(err => this.alertService.handleError(err));
   }
 
   getUserNames (): Observable<string> {

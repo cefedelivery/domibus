@@ -61,7 +61,9 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   filter: UserSearchCriteria;
   deletedStatuses: any[];
-  offset:number;
+  offset: number;
+
+  isBusy = false;
 
   constructor (private http: Http,
                private userService: UserService,
@@ -165,7 +167,14 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   getUsers (): void {
-    this.userService.getUsers(this.filter).subscribe(results => this.users = results);
+    this.isBusy = true;
+    this.userService.getUsers(this.filter).subscribe(results => {
+      this.users = results;
+    }, err => {
+      this.alertService.exception('Error getting users.', err);
+    }, () => {
+      this.isBusy = false;
+    });
     this.dirty = false;
     this.areRowsDeleted = false;
   }
@@ -206,6 +215,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
+    if(this.isBusy) return;
+
     this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
       UserState[UserState.NEW], [], false, false);
     this.users.push(this.editedUser);
@@ -243,6 +254,8 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEditAction (rowNumber) {
+    if(this.isBusy) return;
+
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
@@ -341,17 +354,20 @@ export class UserComponent implements OnInit, DirtyOperations {
         if (result) {
           this.disableSelectionAndButtons();
           const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
+          this.isBusy = true;
           this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
             this.getUsers();
-            this.getUserRoles();
+            // this.getUserRoles();
             this.alertService.success('The operation \'update users\' completed successfully.', false);
             if (withDownloadCSV) {
               DownloadService.downloadNative(UserComponent.USER_CSV_URL);
             }
           }, err => {
             this.getUsers();
-            this.getUserRoles();
+            // this.getUserRoles();
             this.alertService.exception('The operation \'update users\' not completed successfully.', err, false);
+          }, ()=>{
+            this.isBusy = false;
           });
         } else {
           if (withDownloadCSV) {
@@ -360,6 +376,7 @@ export class UserComponent implements OnInit, DirtyOperations {
         }
       });
     } catch (err) {
+      this.isBusy = false;
       this.alertService.exception('The operation \'update users\' completed with errors.', err);
     }
   }
