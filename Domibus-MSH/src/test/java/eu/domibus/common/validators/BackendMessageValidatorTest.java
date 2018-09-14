@@ -1,5 +1,7 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -33,7 +35,10 @@ public class BackendMessageValidatorTest {
     private static final String RESPONDER_ROLE = "defaultResponderRole";
 
     @Injectable
-    DomibusPropertyProvider domibusPropertyProvider;;
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    DomainContextProvider domainContextProvider;
 
     @Tested
     BackendMessageValidator backendMessageValidatorObj;
@@ -43,7 +48,7 @@ public class BackendMessageValidatorTest {
     public void validateMessageId() throws Exception {
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty((Domain) any, BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = MESSAGE_ID_PATTERN;
 
         }};
@@ -128,7 +133,7 @@ public class BackendMessageValidatorTest {
     public void validateRefToMessageId() throws Exception {
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty((Domain) any, BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = MESSAGE_ID_PATTERN;
 
         }};
@@ -211,7 +216,7 @@ public class BackendMessageValidatorTest {
     public void testConfigurationNotSpecified() {
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(BackendMessageValidator.KEY_MESSAGEID_PATTERN);
+            domibusPropertyProvider.getProperty((Domain) any, BackendMessageValidator.KEY_MESSAGEID_PATTERN);
             result = null;
         }};
 

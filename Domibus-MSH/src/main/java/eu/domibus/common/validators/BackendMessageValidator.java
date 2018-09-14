@@ -1,5 +1,7 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.exception.EbMS3Exception;
@@ -52,6 +54,8 @@ public class BackendMessageValidator {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    DomainContextProvider domainContextProvider;
 
     /**
      * Validations pertaining to the field - UserMessage/MessageInfo/MessageId<br><br>
@@ -91,17 +95,7 @@ public class BackendMessageValidator {
             throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "MessageId value is too long (over 255 characters)", null, null);
         }
 
-        //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-        String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
-        LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
-        if (StringUtils.isNotBlank(messageIdPattern)) {
-            Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
-            Matcher m = patternNoControlChar.matcher(messageId);
-            if (!m.matches()) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
-            }
-        }
-
+        validateMessageIdPattern(messageId, "eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:MessageId");
     }
 
 
@@ -118,20 +112,29 @@ public class BackendMessageValidator {
             if (refToMessageId.length() > 255) {
                 throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0008, "RefToMessageId value is too long (over 255 characters)", refToMessageId, null);
             }
-
-            //Validating for presence of non printable control characters. This validation will be skipped if the pattern is not present in the configuration file.
-            String messageIdPattern = domibusPropertyProvider.getDomainProperty(KEY_MESSAGEID_PATTERN);
-            LOG.debug("MessageIdPattern Read From File :" + messageIdPattern);
-            if (StringUtils.isNotBlank(messageIdPattern)) {
-                Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
-                Matcher m = patternNoControlChar.matcher(refToMessageId);
-                if (!m.matches()) {
-                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, "element eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId does not conform to RFC2822 [CORE 5.2.2.1]", null, null);
-                }
-            }
+            validateMessageIdPattern(refToMessageId, "eb:Messaging/eb:UserMessage/eb:MessageInfo/eb:RefToMessageId");
         }
     }
 
+    /* Validating for presence of non printable control characters.
+     * This validation will be skipped if the pattern is not present in the configuration file.
+     */
+    protected void validateMessageIdPattern(String messageId, String elementType) throws EbMS3Exception {
+
+        Domain domain = domainContextProvider.getCurrentDomain();
+        String messageIdPattern = domibusPropertyProvider.getProperty(domain, KEY_MESSAGEID_PATTERN);
+        LOG.debug("MessageIdPattern read from file is [{}]", messageIdPattern);
+
+        if (StringUtils.isBlank(messageIdPattern)) {
+            return;
+        }
+        Pattern patternNoControlChar = Pattern.compile(messageIdPattern);
+        Matcher m = patternNoControlChar.matcher(messageId);
+        if (!m.matches()) {
+            String errorMessage = "Element " + elementType + " does not conform to the required MessageIdPattern: " + messageIdPattern;
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0009, errorMessage, null, null);
+        }
+    }
 
     /**
      * Verifies that the initiator and the responder parties are different.
