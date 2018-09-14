@@ -29,10 +29,15 @@
         <intercept-url pattern="/rest/application/domains" access="hasRole('ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/security/user/domain" access="hasRole('ROLE_AP_ADMIN')" method="PUT"/>
         <intercept-url pattern="/rest/pmode/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/party/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/truststore/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/messagefilters/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/jms/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/user/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/plugin/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/audit/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/alerts/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/testservice/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_AP_ADMIN')"/>
 
         <!-- Enable CSRF protection -->

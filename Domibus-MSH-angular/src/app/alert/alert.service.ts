@@ -108,7 +108,7 @@ export class AlertService {
 
     let errMsg: string;
     if (error instanceof Response) {
-      const body = error.json() || '';
+      const body = error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8' ?  error.json() || '' : error.toString();
       const err = body.error || JSON.stringify(body);
       errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
     } else {
