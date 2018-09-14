@@ -96,11 +96,11 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted" (click)="buttonEditAction(row.$$index)"
+    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted || isBusy" (click)="buttonEditAction(row.$$index)"
             color="primary" tooltip="Edit">
       <md-icon>edit</md-icon>
     </button>
-    <button id="userDeleteButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted" (click)="buttonDeleteAction(row)" color="primary"
+    <button id="userDeleteButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted || isBusy" (click)="buttonDeleteAction(row)" color="primary"
             tooltip="Delete">
       <md-icon>delete</md-icon>
     </button>
@@ -118,16 +118,15 @@
           <md-icon>save</md-icon>
           <span>Save</span>
         </button>
-        <button id="userNewButton" md-raised-button (click)="buttonNew()" color="primary">
+        <button id="userNewButton" md-raised-button (click)="buttonNew()" [disabled]="isBusy" color="primary">
           <md-icon>add</md-icon>
           <span>New</span>
         </button>
-        <button id="userEditButton" md-raised-button (click)="buttonEdit()" color="primary" [disabled]="!enableEdit">
+        <button id="userEditButton" md-raised-button (click)="buttonEdit()" [disabled]="!enableEdit || isBusy" color="primary">
           <md-icon>edit</md-icon>
           <span>Edit</span>
         </button>
-        <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" color="primary"
-                [disabled]="!enableDelete">
+        <button id="userDeleteButton" md-raised-button (click)="buttonDelete()" [disabled]="!enableDelete || isBusy" color="primary">
           <md-icon>delete</md-icon>
           <span>Delete</span>
         </button>
