@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {AlertService} from '../alert/alert.service';
@@ -63,7 +63,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   private initColumns () {
     this.columnPickerBasic.allColumns = [
       {name: 'User Name', prop: 'username', width: 20},
-      {name: 'Password', prop: 'hiddenPassword', width: 20},
+      {name: 'Password', prop: 'hiddenPassword', width: 20, sortable: false},
       {name: 'Role', prop: 'authRoles', width: 10},
       {name: 'Original User', prop: 'originalUser', width: 240},
     ];
