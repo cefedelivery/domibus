@@ -10,6 +10,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.PluginUserService;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -74,6 +75,23 @@ public class PluginUserServiceImpl implements PluginUserService {
      * @param addedUsers
      */
     private void checkUsers(List<AuthenticationEntity> addedUsers) {
+        // check duplicates with other plugin users
+        for (AuthenticationEntity user : addedUsers) {
+            if (!StringUtils.isEmpty(user.getUsername())) {
+                if (addedUsers.stream().anyMatch(x -> x != user && user.getUsername().equalsIgnoreCase(x.getUsername())))
+                    throw new UserManagementException("Cannot add user " + user.getUsername() + " more than once.");
+                if (!securityAuthenticationDAO.listByUser(user.getUsername()).isEmpty())
+                    throw new UserManagementException("Cannot add user " + user.getUsername() + " because this name already exists.");
+            }
+            if (!StringUtils.isEmpty(user.getCertificateId())) {
+                if (addedUsers.stream().anyMatch(x -> x != user && user.getCertificateId().equalsIgnoreCase(x.getCertificateId())))
+                    throw new UserManagementException("Cannot add user with certificate " + user.getCertificateId() + " more than once.");
+                if (!securityAuthenticationDAO.listByCertificateId(user.getCertificateId()).isEmpty())
+                    throw new UserManagementException("Cannot add user with certificate " + user.getCertificateId() + " because this certificate already exists.");
+            }
+        }
+
+        // check for duplicates with other users or plugin users in multi-tenancy mode
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (AuthenticationEntity user : addedUsers) {
             if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUsername())))

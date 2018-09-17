@@ -31,6 +31,13 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         return query.getSingleResult();
     }
 
+    public List<AuthenticationEntity> listByUser(final String username) {
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByUsername", AuthenticationEntity.class);
+        query.setParameter("USERNAME", username);
+
+        return query.getResultList();
+    }
+
     public List<AuthRole> getRolesForUser(final String username) {
         final TypedQuery<String> query = this.em.createNamedQuery("AuthenticationEntity.getRolesForUsername", String.class);
         query.setParameter("USERNAME", username);
@@ -49,6 +56,13 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         query.setParameter("CERTIFICATE_ID", certificateId);
 
         return query.getSingleResult();
+    }
+
+    public List<AuthenticationEntity> listByCertificateId(final String certificateId) {
+        final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByCertificateId", AuthenticationEntity.class);
+        query.setParameter("CERTIFICATE_ID", certificateId);
+
+        return query.getResultList();
     }
 
     public List<AuthRole> getRolesForCertificateId(final String certificateId) {
