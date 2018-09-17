@@ -118,13 +118,16 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
     this.columnPicker.allColumns = [
       {
         cellTemplate: this.rowWithDateFormatTpl,
-        name: 'Configuration Date'
+        name: 'Configuration Date',
+        sortable: false
       },
       {
-        name: 'Username'
+        name: 'Username',
+        sortable: false
       },
       {
-        name: 'Description'
+        name: 'Description',
+        sortable: false
       },
       {
         cellTemplate: this.rowActions,
