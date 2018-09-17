@@ -37,11 +37,7 @@ export class TrustStoreUploadComponent {
         this.onTruststoreUploaded.emit();
       },
       err => {
-        if(!err.ok && err.statusText.length == 0) {
-          this.alertService.error("Error updating truststore file (" + fi.files[0].name + ")", false);
-        } else {
-          this.alertService.error(err.text() + " (" + fi.files[0].name + ")", false);
-        }
+        this.alertService.exception("Error updating truststore file (" + fi.files[0].name + ")", err, false);
       }
     );
     this.dialogRef.close();
