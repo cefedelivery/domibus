@@ -1,4 +1,4 @@
-Domibus 4.0 RC1 (from 3.3.4):
+Domibus 4.0 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
                 - The following changes have been implemented in the Default WS Plugin which is not backward compatible. The client of the Default WS Plugin need to take into account the following changes:
