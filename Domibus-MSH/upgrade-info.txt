@@ -108,17 +108,7 @@ Domibus 4.0 (from 3.3.4):
                  Custom users should be recreated using the new functionality in the Domibus Admin Console.
                - [WS-Plugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
                - [JMS-Plugin] Description is no longer available as a property of a payload, remove it from the input message.
-               - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
-                    <ehcache>
-                    ........................
-                    <cache name="auditTarget"
-                               maxBytesLocalHeap="5m"
-                               timeToLiveSeconds="3600"
-                               overflowToDisk="false">
-                     </cache>
-                  ........................
-                  </ehcache>
-                - Modify file "\conf\domibus\domibus.properties":
+               - Modify file "\conf\domibus\domibus.properties":
                     o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                     o update all the cron expressions from 0/60 * * * * ? to 0 0/1 * * * ?
                     o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class and replace it by:
@@ -146,8 +136,8 @@ Domibus 4.0 (from 3.3.4):
                                  domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?pinGlobalTxToPhysicalConnection=true
                                  domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
                     Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
-                - Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
-                  Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
+                - (Optional)Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
+                            Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
 Domibus 3.3.4 (from 3.3.3):
                  - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
