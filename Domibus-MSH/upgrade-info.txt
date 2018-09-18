@@ -106,8 +106,8 @@ Domibus 4.0 (from 3.3.4):
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
                  TB_AUTHENTICATION_ENTRY table was restored to defaults, having two users 'admin' and 'user' with default password '123456' encrypted using the new algorithm.
                  Custom users should be recreated using the new functionality in the Domibus Admin Console.
-               - [WS-PLugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
-               - [JMS-PLugin] Description is no longer available as a property of a payload, remove it from the input message.
+               - [WS-Plugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
+               - [JMS-Plugin] Description is no longer available as a property of a payload, remove it from the input message.
                - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
                     <ehcache>
                     ........................
