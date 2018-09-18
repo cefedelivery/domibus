@@ -7,6 +7,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.classloader.PluginClassLoader;
 import eu.domibus.property.PropertyResolver;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.web.context.ContextLoaderListener;
 
 import javax.servlet.ServletContext;
@@ -14,6 +15,7 @@ import javax.servlet.ServletContextEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.security.Security;
 
 /**
  * Created by Cosmin Baciu on 6/13/2016.
@@ -26,6 +28,8 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+        registerBouncyCastle();
+
         ServletContext servletContext = servletContextEvent.getServletContext();
         String pluginsLocation = servletContext.getInitParameter("pluginsLocation");
         if (StringUtils.isEmpty(pluginsLocation)) {
@@ -41,6 +45,13 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
         }
         Thread.currentThread().setContextClassLoader(pluginClassLoader);
         super.contextInitialized(servletContextEvent);
+    }
+
+    protected void registerBouncyCastle() {
+        LOG.info("Registering BouncyCastle...");
+        final BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
+        Security.insertProviderAt (bouncyCastleProvider, 1);
+        LOG.info("Registered BouncyCastle.");
     }
 
     @Override
