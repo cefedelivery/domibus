@@ -150,7 +150,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         LOG.debug("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
-        } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e ) {
+        } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e) {
             throw new CryptoException("Could not persist truststore:", e);
         }
 
@@ -274,5 +274,27 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
                 .property(MessageConstants.DOMAIN, domain.getCode())
                 .build(), clusterCommandTopic);
+    }
+
+    @Override
+    public boolean removeCertificate(String alias) {
+        boolean containsAlias;
+        try {
+            containsAlias = getTrustStore().containsAlias(alias);
+        } catch (final KeyStoreException e) {
+            throw new CryptoException("Error while trying to get the alias from the truststore. This should never happen", e);
+        }
+        if (!containsAlias) {
+            return false;
+        }
+        try {
+            getTrustStore().deleteEntry(alias);
+            persistTrustStore();
+
+            return true;
+        } catch (final KeyStoreException e) {
+            throw new ConfigurationException(e);
+        }
+
     }
 }
