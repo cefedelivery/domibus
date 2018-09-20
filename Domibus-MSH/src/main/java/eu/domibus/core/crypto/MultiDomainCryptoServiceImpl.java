@@ -158,4 +158,10 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromTrustStore(alias);
     }
+
+    @Override
+    public boolean removeCertificate(Domain domain, String alias) {
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.removeCertificate(alias);
+    }
 }
