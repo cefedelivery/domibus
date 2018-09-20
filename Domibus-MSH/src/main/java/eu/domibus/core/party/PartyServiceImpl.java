@@ -2,6 +2,7 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mchange.v2.collection.MapEntry;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
@@ -28,10 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -363,24 +361,25 @@ public class PartyServiceImpl implements PartyService {
         }
 
         Domain currentDomain = domainProvider.getCurrentDomain();
-        removedParties.forEach(party -> {
-            multiDomainCertificateProvider.removeCertificate(currentDomain, party.getName());
-        });
+        List<String> aliases = removedParties.stream().map(party -> party.getName()).collect(toList());
+        multiDomainCertificateProvider.removeCertificate(currentDomain, aliases);
 
-        certificateList.entrySet().stream()
-                .filter(pair -> pair.getValue() != null)
-                .forEach(pair -> {
-                    String partyName = pair.getKey();
-                    String certificateContent = pair.getValue();
-                    X509Certificate cert = null;
-                    try {
-                        cert = certificateService.loadCertificateFromString(certificateContent);
-                    } catch (CertificateException e) {
-                        LOG.error("Error deserializing certificate", e);
-                        throw new IllegalStateException(e);
-                    }
-                    multiDomainCertificateProvider.addCertificate(currentDomain, cert, partyName, true);
-                });
+        List<Map.Entry<String, X509Certificate>> certificates = new ArrayList<>();
+        for (Map.Entry<String, String> pair : certificateList.entrySet()) {
+            if (pair.getValue() == null) continue;
+
+            String partyName = pair.getKey();
+            String certificateContent = pair.getValue();
+            X509Certificate cert = null;
+            try {
+                cert = certificateService.loadCertificateFromString(certificateContent);
+                certificates.add(new AbstractMap.SimpleEntry<String, X509Certificate>(partyName, cert));
+            } catch (CertificateException e) {
+                LOG.error("Error deserializing certificate", e);
+                throw new IllegalStateException(e);
+            }
+        }
+        multiDomainCertificateProvider.addCertificate(currentDomain, certificates, true);
     }
 
     @Override

@@ -31,7 +31,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Cosmin Baciu
@@ -167,6 +168,24 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public synchronized boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
+        boolean added = doAddCertificate(certificate, alias, overwrite);
+        persistTrustStore();
+        return added;
+    }
+
+    @Override
+    public synchronized boolean addCertificate(List<Map.Entry<String, X509Certificate>> certificates, boolean overwrite) {
+        Boolean[] added = new Boolean[certificates.size()];
+        for (int i = 0; i < certificates.size(); i++) {
+            String alias = certificates.get(i).getKey();
+            X509Certificate cert = certificates.get(i).getValue();
+            added[i] = doAddCertificate(cert, alias, overwrite);
+        }
+        persistTrustStore();
+        return Stream.of(added).allMatch(el -> el.equals(true));
+    }
+
+    private boolean doAddCertificate(X509Certificate certificate, String alias, boolean overwrite) {
         boolean containsAlias;
         try {
             containsAlias = getTrustStore().containsAlias(alias);
@@ -181,8 +200,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 getTrustStore().deleteEntry(alias);
             }
             getTrustStore().setCertificateEntry(alias, certificate);
-
-            persistTrustStore();
 
             return true;
         } catch (final KeyStoreException e) {
@@ -278,6 +295,22 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public boolean removeCertificate(String alias) {
+        boolean removed = doRemoveCertificate(alias);
+        persistTrustStore();
+        return removed;
+    }
+
+    @Override
+    public boolean removeCertificate(List<String> aliases) {
+        Boolean[] removed = new Boolean[aliases.size()];
+        for (int i = 0; i < aliases.size(); i++) {
+            removed[i] = removeCertificate(aliases.get(i));
+        }
+        persistTrustStore();
+        return Stream.of(removed).allMatch(el -> el.equals(true));
+    }
+
+    private synchronized boolean doRemoveCertificate(String alias) {
         boolean containsAlias;
         try {
             containsAlias = getTrustStore().containsAlias(alias);
@@ -289,12 +322,9 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         }
         try {
             getTrustStore().deleteEntry(alias);
-            persistTrustStore();
-
             return true;
         } catch (final KeyStoreException e) {
             throw new ConfigurationException(e);
         }
-
     }
 }

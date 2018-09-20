@@ -23,6 +23,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -154,6 +155,12 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
+    public boolean addCertificate(Domain domain, List<Map.Entry<String, X509Certificate>> certificates, boolean overwrite) {
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.addCertificate(certificates, overwrite);
+    }
+
+    @Override
     public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException{
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromTrustStore(alias);
@@ -163,5 +170,11 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     public boolean removeCertificate(Domain domain, String alias) {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.removeCertificate(alias);
+    }
+
+    @Override
+    public boolean removeCertificate(Domain domain, List<String> aliases) {
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        return domainCertificateProvider.removeCertificate(aliases);
     }
 }
