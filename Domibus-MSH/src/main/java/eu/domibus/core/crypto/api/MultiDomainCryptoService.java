@@ -60,5 +60,5 @@ public interface MultiDomainCryptoService {
 
     boolean removeCertificate(Domain domain, String alias);
 
-    boolean removeCertificate(Domain domain, List<String> aliases);
+    void removeCertificate(Domain domain, List<String> aliases);
 }

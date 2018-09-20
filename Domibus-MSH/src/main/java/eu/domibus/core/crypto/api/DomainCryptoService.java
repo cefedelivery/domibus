@@ -62,6 +62,6 @@ public interface DomainCryptoService {
 
     boolean removeCertificate(String alias);
 
-    boolean removeCertificate(List<String> aliases);
+    void removeCertificate(List<String> aliases);
 
 }

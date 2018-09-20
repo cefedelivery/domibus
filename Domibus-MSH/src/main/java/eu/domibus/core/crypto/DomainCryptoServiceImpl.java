@@ -177,9 +177,8 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public synchronized void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
-        certificates.forEach( certEntry -> {
-            doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite);
-        });
+        certificates.forEach(certEntry ->
+                doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite));
         persistTrustStore();
     }
 
@@ -299,13 +298,9 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Override
-    public boolean removeCertificate(List<String> aliases) {
-        Boolean[] removed = new Boolean[aliases.size()];
-        for (int i = 0; i < aliases.size(); i++) {
-            removed[i] = removeCertificate(aliases.get(i));
-        }
+    public void removeCertificate(List<String> aliases) {
+        aliases.forEach(alias -> removeCertificate(alias));
         persistTrustStore();
-        return Stream.of(removed).allMatch(el -> el.equals(true));
     }
 
     private synchronized boolean doRemoveCertificate(String alias) {
