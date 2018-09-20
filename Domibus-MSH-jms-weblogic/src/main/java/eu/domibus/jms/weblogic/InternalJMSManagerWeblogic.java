@@ -481,15 +481,13 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
      * @return
      */
     @Override
-    public List<InternalJmsMessage> browseMessages(String source) {
+    public List<InternalJmsMessage> browseClusterMessages(String source, String selector) {
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
         final String sourceWithoutJMSModule = removeJmsModule(source);
         List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
         for (InternalJMSDestination destination : destinations) {
             String destinationType = destination.getType();
             if (QUEUE.equals(destinationType)) {
-                Map<String, Object> criteria = new HashMap<>();
-                String selector = jmsSelectorUtil.getSelector(criteria);
                 try {
                     ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
                     internalJmsMessages.addAll(getMessagesFromDestination(jmsDestination, selector));

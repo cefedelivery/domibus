@@ -5,7 +5,6 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -219,10 +218,11 @@ public class NotificationListenerService implements MessageListener, JmsListener
         if (finalRecipient != null) {
             selector += " and " + MessageConstants.FINAL_RECIPIENT + "='" + finalRecipient + "'";
         }
+        selector = jmsManager.getDomainSelector(selector);
 
         List<JmsMessage> messages;
         try {
-            messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName(), selector);
+            messages = jmsManager.browseClusterMessages(backendNotificationQueue.getQueueName(), selector);
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
