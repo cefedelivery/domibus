@@ -2,6 +2,7 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
 import eu.domibus.api.party.PartyService;
@@ -16,11 +17,14 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
+
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -118,7 +122,7 @@ public class PartyServiceImpl implements PartyService {
         List<eu.domibus.common.model.configuration.Party> allParties;
         try {
             allParties = pModeProvider.findAllParties();
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             LOG.trace("findAllParties thrown: ", e);
             return new ArrayList<>();
         }
@@ -258,17 +262,22 @@ public class PartyServiceImpl implements PartyService {
         return DEFAULT_PREDICATE;
     }
 
-    protected void replaceParties(List<Party> partyList, Configuration configuration) {
+    protected List<eu.domibus.common.model.configuration.Party> replaceParties(List<Party> partyList, Configuration configuration) {
 
-        List<eu.domibus.common.model.configuration.Party> list = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
+        List<eu.domibus.common.model.configuration.Party> newParties = domainCoreConverter.convert(partyList, eu.domibus.common.model.configuration.Party.class);
 
         BusinessProcesses bp = configuration.getBusinessProcesses();
         Parties parties = bp.getPartiesXml();
+
+        List<eu.domibus.common.model.configuration.Party> removedParties = parties.getParty().stream()
+                .filter(existingP -> !newParties.stream().anyMatch(newP -> newP.getName().equals(existingP.getName())))
+                .collect(toList());
+
         parties.getParty().clear();
-        parties.getParty().addAll(list);
+        parties.getParty().addAll(newParties);
 
         PartyIdTypes partyIdTypes = bp.getPartiesXml().getPartyIdTypes();
-        list.forEach(party -> {
+        newParties.forEach(party -> {
             party.getIdentifiers().forEach(identifier -> {
                 if (!partyIdTypes.getPartyIdType().contains(identifier.getPartyIdType())) {
                     partyIdTypes.getPartyIdType().add(identifier.getPartyIdType());
@@ -318,6 +327,8 @@ public class PartyServiceImpl implements PartyService {
             if (rp.isEmpty())
                 process.setResponderPartiesXml(null);
         });
+
+        return removedParties;
     }
 
     @Override
@@ -336,7 +347,7 @@ public class PartyServiceImpl implements PartyService {
             throw new IllegalStateException(e);
         }
 
-        replaceParties(partyList, configuration);
+        List<eu.domibus.common.model.configuration.Party> removedParties = replaceParties(partyList, configuration);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
         ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
@@ -351,6 +362,11 @@ public class PartyServiceImpl implements PartyService {
             throw new IllegalStateException(e);
         }
 
+        Domain currentDomain = domainProvider.getCurrentDomain();
+        removedParties.forEach(party -> {
+            multiDomainCertificateProvider.removeCertificate(currentDomain, party.getName());
+        });
+
         certificateList.entrySet().stream()
                 .filter(pair -> pair.getValue() != null)
                 .forEach(pair -> {
@@ -363,7 +379,7 @@ public class PartyServiceImpl implements PartyService {
                         LOG.error("Error deserializing certificate", e);
                         throw new IllegalStateException(e);
                     }
-                    multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), cert, partyName, true);
+                    multiDomainCertificateProvider.addCertificate(currentDomain, cert, partyName, true);
                 });
     }
 
@@ -372,8 +388,8 @@ public class PartyServiceImpl implements PartyService {
         //Retrieve all processes, needed in UI console to be able to check
         List<eu.domibus.common.model.configuration.Process> allProcesses;
         try {
-           allProcesses = pModeProvider.findAllProcesses();
-        } catch(IllegalStateException e) {
+            allProcesses = pModeProvider.findAllProcesses();
+        } catch (IllegalStateException e) {
             return new ArrayList<>();
         }
         List<eu.domibus.api.process.Process> processes = domainCoreConverter.convert(allProcesses, eu.domibus.api.process.Process.class);
