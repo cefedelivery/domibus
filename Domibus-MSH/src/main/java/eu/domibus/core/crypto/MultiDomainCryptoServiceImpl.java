@@ -156,9 +156,9 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public boolean addCertificate(Domain domain, List<CertificateEntry> certificates, boolean overwrite) {
+    public void addCertificate(Domain domain, List<CertificateEntry> certificates, boolean overwrite) {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
-        return domainCertificateProvider.addCertificate(certificates, overwrite);
+        domainCertificateProvider.addCertificate(certificates, overwrite);
     }
 
     @Override

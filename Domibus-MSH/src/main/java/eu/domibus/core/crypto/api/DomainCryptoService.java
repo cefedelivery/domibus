@@ -56,7 +56,7 @@ public interface DomainCryptoService {
 
     boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
 
-    boolean addCertificate(List<CertificateEntry> certificates, boolean overwrite);
+    void addCertificate(List<CertificateEntry> certificates, boolean overwrite);
 
     X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException;
 

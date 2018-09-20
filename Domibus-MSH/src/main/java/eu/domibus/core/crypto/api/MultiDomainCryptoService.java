@@ -54,7 +54,7 @@ public interface MultiDomainCryptoService {
 
     boolean addCertificate(Domain domain, final X509Certificate certificate, final String alias, final boolean overwrite);
 
-    boolean addCertificate(Domain domain, List<CertificateEntry> certificates, final boolean overwrite);
+    void addCertificate(Domain domain, List<CertificateEntry> certificates, final boolean overwrite);
 
     X509Certificate getCertificateFromTruststore(Domain domain, String senderName) throws KeyStoreException;
 

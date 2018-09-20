@@ -176,15 +176,11 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Override
-    public synchronized boolean addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
-        Boolean[] added = new Boolean[certificates.size()];
-        for (int i = 0; i < certificates.size(); i++) {
-            String alias = certificates.get(i).getAlias();
-            X509Certificate cert = certificates.get(i).getCertificate();
-            added[i] = doAddCertificate(cert, alias, overwrite);
-        }
+    public synchronized void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
+        certificates.forEach( certEntry -> {
+            doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite);
+        });
         persistTrustStore();
-        return Stream.of(added).allMatch(el -> el.equals(true));
     }
 
     private boolean doAddCertificate(X509Certificate certificate, String alias, boolean overwrite) {
