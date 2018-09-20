@@ -8,6 +8,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.certificate.Certificate;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -174,11 +176,11 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     }
 
     @Override
-    public synchronized boolean addCertificate(List<Map.Entry<String, X509Certificate>> certificates, boolean overwrite) {
+    public synchronized boolean addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
         Boolean[] added = new Boolean[certificates.size()];
         for (int i = 0; i < certificates.size(); i++) {
-            String alias = certificates.get(i).getKey();
-            X509Certificate cert = certificates.get(i).getValue();
+            String alias = certificates.get(i).getAlias();
+            X509Certificate cert = certificates.get(i).getCertificate();
             added[i] = doAddCertificate(cert, alias, overwrite);
         }
         persistTrustStore();

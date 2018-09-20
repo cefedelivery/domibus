@@ -2,7 +2,6 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mchange.v2.collection.MapEntry;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
@@ -12,6 +11,7 @@ import eu.domibus.common.dao.PartyDao;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.core.converter.DomainCoreConverter;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -364,7 +364,7 @@ public class PartyServiceImpl implements PartyService {
         List<String> aliases = removedParties.stream().map(party -> party.getName()).collect(toList());
         multiDomainCertificateProvider.removeCertificate(currentDomain, aliases);
 
-        List<Map.Entry<String, X509Certificate>> certificates = new ArrayList<>();
+        List<CertificateEntry> certificates = new ArrayList<>();
         for (Map.Entry<String, String> pair : certificateList.entrySet()) {
             if (pair.getValue() == null) continue;
 
@@ -373,7 +373,7 @@ public class PartyServiceImpl implements PartyService {
             X509Certificate cert = null;
             try {
                 cert = certificateService.loadCertificateFromString(certificateContent);
-                certificates.add(new AbstractMap.SimpleEntry<String, X509Certificate>(partyName, cert));
+                certificates.add(new CertificateEntry(partyName, cert));
             } catch (CertificateException e) {
                 LOG.error("Error deserializing certificate", e);
                 throw new IllegalStateException(e);

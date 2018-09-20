@@ -1,6 +1,7 @@
 package eu.domibus.core.crypto;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
@@ -155,7 +156,7 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
-    public boolean addCertificate(Domain domain, List<Map.Entry<String, X509Certificate>> certificates, boolean overwrite) {
+    public boolean addCertificate(Domain domain, List<CertificateEntry> certificates, boolean overwrite) {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.addCertificate(certificates, overwrite);
     }
