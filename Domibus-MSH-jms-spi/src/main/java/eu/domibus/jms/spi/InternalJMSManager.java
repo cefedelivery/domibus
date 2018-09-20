@@ -34,5 +34,7 @@ public interface InternalJMSManager {
 
     List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selector);
 
+    List<InternalJmsMessage> browseMessages(String source);
+
     InternalJmsMessage consumeMessage(String source, String customMessageId);
 }
