@@ -63,7 +63,7 @@ public class Storage {
 
     @PostConstruct
     public void initFileSystemStorage() {
-        final String location = domibusPropertyProvider.getDomainProperty(this.domain, ATTACHMENT_STORAGE_LOCATION);
+        final String location = domibusPropertyProvider.getProperty(this.domain, ATTACHMENT_STORAGE_LOCATION);
         if (location != null && !location.isEmpty()) {
             if (storageDirectory == null) {
                 Path path = createLocation(location);
