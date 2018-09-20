@@ -1,6 +1,7 @@
 package eu.domibus.core.crypto;
 
 import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
@@ -23,6 +24,7 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -154,6 +156,12 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     }
 
     @Override
+    public void addCertificate(Domain domain, List<CertificateEntry> certificates, boolean overwrite) {
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        domainCertificateProvider.addCertificate(certificates, overwrite);
+    }
+
+    @Override
     public X509Certificate getCertificateFromTruststore(Domain domain, String alias) throws KeyStoreException{
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.getCertificateFromTrustStore(alias);
@@ -163,5 +171,11 @@ public class MultiDomainCryptoServiceImpl implements MultiDomainCryptoService {
     public boolean removeCertificate(Domain domain, String alias) {
         final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
         return domainCertificateProvider.removeCertificate(alias);
+    }
+
+    @Override
+    public void removeCertificate(Domain domain, List<String> aliases) {
+        final DomainCryptoService domainCertificateProvider = getDomainCertificateProvider(domain);
+        domainCertificateProvider.removeCertificate(aliases);
     }
 }

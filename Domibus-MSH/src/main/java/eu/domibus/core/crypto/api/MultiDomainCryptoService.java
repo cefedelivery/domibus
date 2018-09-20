@@ -13,6 +13,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -53,7 +54,11 @@ public interface MultiDomainCryptoService {
 
     boolean addCertificate(Domain domain, final X509Certificate certificate, final String alias, final boolean overwrite);
 
+    void addCertificate(Domain domain, List<CertificateEntry> certificates, final boolean overwrite);
+
     X509Certificate getCertificateFromTruststore(Domain domain, String senderName) throws KeyStoreException;
 
     boolean removeCertificate(Domain domain, String alias);
+
+    void removeCertificate(Domain domain, List<String> aliases);
 }

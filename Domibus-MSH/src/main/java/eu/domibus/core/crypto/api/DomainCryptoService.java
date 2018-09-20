@@ -12,6 +12,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -54,7 +56,12 @@ public interface DomainCryptoService {
 
     boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite);
 
+    void addCertificate(List<CertificateEntry> certificates, boolean overwrite);
+
     X509Certificate getCertificateFromTrustStore(String alias) throws KeyStoreException;
 
     boolean removeCertificate(String alias);
+
+    void removeCertificate(List<String> aliases);
+
 }
