@@ -299,7 +299,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public void removeCertificate(List<String> aliases) {
-        aliases.forEach(alias -> removeCertificate(alias));
+        aliases.forEach(alias -> doRemoveCertificate(alias));
         persistTrustStore();
     }
 
