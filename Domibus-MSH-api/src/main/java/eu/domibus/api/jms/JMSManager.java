@@ -38,7 +38,7 @@ public interface JMSManager {
      * @param source queue or topic
      * @return a list of JmsMessage
      */
-    List<JmsMessage> browseMessages(String source);
+    List<JmsMessage> browseClusterMessages(String source);
 
     /**
      * Operation to browse a JMS source with restrictions given by the selector.
@@ -47,7 +47,7 @@ public interface JMSManager {
      * @param selector selector
      * @return a list of JmsMessage
      */
-    List<JmsMessage> browseMessages(String source, String selector);
+    List<JmsMessage> browseClusterMessages(String source, String selector);
 
 
     /**
@@ -100,4 +100,6 @@ public interface JMSManager {
      * @return the number of messages contained in the destination.
      */
     long getDestinationSize(String nameLike);
+
+    String getDomainSelector(String selector);
 }
