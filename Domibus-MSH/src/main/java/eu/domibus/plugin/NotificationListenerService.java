@@ -5,7 +5,6 @@ import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JmsMessage;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -94,12 +93,12 @@ public class NotificationListenerService implements MessageListener, JmsListener
         }
     }
 
-    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode ) {
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode) {
         backendNotificationQueue = queue;
         this.mode = mode;
     }
 
-    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications ) {
+    public NotificationListenerService(final Queue queue, final BackendConnector.Mode mode, final List<NotificationType> requiredNotifications) {
         backendNotificationQueue = queue;
         this.mode = mode;
         this.requiredNotifications = requiredNotifications;
@@ -199,19 +198,6 @@ public class NotificationListenerService implements MessageListener, JmsListener
         return getQueueElements(NotificationType.MESSAGE_RECEIVED, originalUser);
     }
 
-    public Collection<String> listSendFailureMessages() {
-        return getQueueElements(NotificationType.MESSAGE_SEND_FAILURE);
-    }
-
-    public Collection<String> listReceiveFailureMessages() {
-        return getQueueElements(NotificationType.MESSAGE_RECEIVED_FAILURE);
-    }
-
-    private Collection<String> getQueueElements(final NotificationType notificationType) {
-        return getQueueElements(notificationType, null);
-    }
-
-
     private Collection<String> getQueueElements(final NotificationType notificationType, final String finalRecipient) {
         if (this.mode == BackendConnector.Mode.PUSH) {
             throw new UnsupportedOperationException("this method is only available for clients using Mode.PULL");
@@ -229,13 +215,14 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         String selector = MessageConstants.NOTIFICATION_TYPE + "='" + notificationType.name() + "'";
 
-        if(finalRecipient != null ) {
+        if (finalRecipient != null) {
             selector += " and " + MessageConstants.FINAL_RECIPIENT + "='" + finalRecipient + "'";
         }
+        selector = jmsManager.getDomainSelector(selector);
 
         List<JmsMessage> messages;
         try {
-            messages = jmsManager.browseMessages(backendNotificationQueue.getQueueName(), selector);
+            messages = jmsManager.browseClusterMessages(backendNotificationQueue.getQueueName(), selector);
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
@@ -243,14 +230,14 @@ public class NotificationListenerService implements MessageListener, JmsListener
 
         int countOfMessagesIncluded = 0;
         for (JmsMessage message : messages) {
-                    String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
-                    result.add(messageId);
-                    countOfMessagesIncluded++;
-                    LOG.debug("Added MessageId [" + messageId + "]");
-                    if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
-                        LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
-                        break;
-                    }
+            String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
+            result.add(messageId);
+            countOfMessagesIncluded++;
+            LOG.debug("Added MessageId [" + messageId + "]");
+            if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
+                LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
+                break;
+            }
         }
 
         return result;
@@ -333,5 +320,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
     }
 
     @Override
-    public List<NotificationType> getRequiredNotificationTypeList() {return this.requiredNotifications; }
+    public List<NotificationType> getRequiredNotificationTypeList() {
+        return this.requiredNotifications;
+    }
 }

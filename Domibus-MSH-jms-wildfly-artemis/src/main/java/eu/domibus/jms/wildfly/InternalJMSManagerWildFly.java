@@ -243,6 +243,11 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     }
 
     @Override
+    public List<InternalJmsMessage> browseClusterMessages(String source, String selector) {
+        return browseMessages(source, null, null, null, selector);
+    }
+
+    @Override
     public List<InternalJmsMessage> browseMessages(String source, String jmsType, Date fromDate, Date toDate, String selectorClause) {
         if (StringUtils.isEmpty(source)) {
             throw new InternalJMSException("Source has not been specified");
