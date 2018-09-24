@@ -75,6 +75,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   async ngOnInit () {
+    this.isBusy = true;
     this.offset = 0;
     this.filter = new UserSearchCriteria();
     this.deletedStatuses = [null, true, false];
