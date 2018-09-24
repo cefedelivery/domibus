@@ -483,14 +483,20 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public List<InternalJmsMessage> browseClusterMessages(String source, String selector) {
         List<InternalJmsMessage> internalJmsMessages = new ArrayList<>();
+        LOG.info("Source: " +source);
         final String sourceWithoutJMSModule = removeJmsModule(source);
         List<InternalJMSDestination> destinations = getInternalJMSDestinations(sourceWithoutJMSModule);
+        LOG.info("Destinations size " + destinations.size());
         for (InternalJMSDestination destination : destinations) {
             String destinationType = destination.getType();
+            LOG.info("QUEUE is " +QUEUE);
+            LOG.info("Destination is " + destination);
             if (QUEUE.equals(destinationType)) {
                 try {
                     ObjectName jmsDestination = destination.getProperty(PROPERTY_OBJECT_NAME);
+                    LOG.info("jmsDestination " + jmsDestination);
                     internalJmsMessages.addAll(getMessagesFromDestination(jmsDestination, selector));
+                    LOG.info("internalJmsMessages size " + internalJmsMessages.size());
                 } catch (Exception e) {
                     throw new InternalJMSException("Error getting messages for [" + source + "] with selector [" + selector + "]", e);
                 }

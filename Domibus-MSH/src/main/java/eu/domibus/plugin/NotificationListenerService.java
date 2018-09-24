@@ -211,7 +211,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         final Collection<String> result = new ArrayList<>();
         final String strMaxPendingMessagesRetrieveCount = domibusPropertyProvider.getProperty(PROP_LIST_PENDING_MESSAGES_MAXCOUNT, "500");
         final int intMaxPendingMessagesRetrieveCount = Integer.parseInt(strMaxPendingMessagesRetrieveCount);
-        LOG.debug("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
+        LOG.info("maxPendingMessagesRetrieveCount:" + intMaxPendingMessagesRetrieveCount);
 
         String selector = MessageConstants.NOTIFICATION_TYPE + "='" + notificationType.name() + "'";
 
@@ -219,6 +219,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
             selector += " and " + MessageConstants.FINAL_RECIPIENT + "='" + finalRecipient + "'";
         }
         selector = jmsManager.getDomainSelector(selector);
+        LOG.info("Selector " + selector);
 
         List<JmsMessage> messages;
         try {
@@ -228,12 +229,14 @@ public class NotificationListenerService implements MessageListener, JmsListener
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
         }
 
+        LOG.info("messages size is " + messages.size());
+
         int countOfMessagesIncluded = 0;
         for (JmsMessage message : messages) {
             String messageId = message.getCustomStringProperty(MessageConstants.MESSAGE_ID);
             result.add(messageId);
             countOfMessagesIncluded++;
-            LOG.debug("Added MessageId [" + messageId + "]");
+            LOG.info("Added MessageId [" + messageId + "]");
             if ((intMaxPendingMessagesRetrieveCount != 0) && (countOfMessagesIncluded >= intMaxPendingMessagesRetrieveCount)) {
                 LOG.info("Limit of pending messages to return has been reached [" + countOfMessagesIncluded + "]");
                 break;

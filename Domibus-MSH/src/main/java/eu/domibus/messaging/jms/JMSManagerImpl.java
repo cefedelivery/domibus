@@ -136,7 +136,7 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public List<JmsMessage> browseClusterMessages(String source, String selector) {
-        LOG.debug("browseClusterMessages using selector [{}]", selector);
+        LOG.info("browseClusterMessages using selector [{}]", selector);
         List<InternalJmsMessage> messagesSPI = internalJmsManager.browseClusterMessages(source, selector);
         return jmsMessageMapper.convert(messagesSPI);
     }
