@@ -824,7 +824,7 @@ Domibus.uploadPmode("receiver","default","\\cloud\\weblogic\\red\\domibus-pmode-
             
             
             <con:testStep type="groovy" name="Set custom properties" id="6495e4a6-bc87-411f-ad66-4e24c2e8d110"><con:settings/><con:config><script>// blue: wildfly (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly");
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:23306/domibus33wildfly");
@@ -969,7 +969,7 @@ Domibus.uploadPmode("receiver","default","\\cloud\\weblogic\\red\\domibus-pmode-
             
             
             <con:testStep type="groovy" name="Set custom properties" id="10f6d8df-3e1c-4f41-afec-0954451dc095"><con:settings/><con:config><script>// blue: wildfly (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly");
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:23306/domwildfly_bugfix");

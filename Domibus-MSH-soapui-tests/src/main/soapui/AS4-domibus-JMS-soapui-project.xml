@@ -897,7 +897,7 @@ Domibus.uploadPmode("receiver","default","\\cloud\\tomcat\\red\\domibus-pmode-re
             
             
             <con:testStep type="groovy" name="Set custom properties" id="5daf8fd6-b640-4ed4-9465-35c82e0b79d1"><con:settings/><con:config><script>// blue: wildfly (edeltest2)
-testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus-wildfly");
+testRunner.testCase.testSuite.project.setPropertyValue("localUrl", "http://edeltest2.westeurope.cloudapp.azure.com:8085/domibus");
 testRunner.testCase.testSuite.project.setPropertyValue("databaseBlue", "mysql");
 testRunner.testCase.testSuite.project.setPropertyValue("driverBlue", "com.mysql.jdbc.Driver");
 testRunner.testCase.testSuite.project.setPropertyValue("jdbcUrlBlue", "jdbc:mysql://localhost:23306/domibus33wildfly");

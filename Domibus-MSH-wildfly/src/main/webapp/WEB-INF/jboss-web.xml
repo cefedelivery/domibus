@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <jboss-web>
-    <context-root>/domibus-wildfly</context-root>
+    <context-root>/domibus</context-root>
 </jboss-web>
