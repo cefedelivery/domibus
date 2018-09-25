@@ -269,7 +269,7 @@ Domibus 3.3 (from 3.2.5):
                         o new properties added:
                                 - check the section "#Non-XA Datasource" and adapt the properties based on the used database(MySQL or Oracle)
                 - [WebLogic only]
-                   o in case the probe URL is used, the new probe URL is /domibus-weblogic/services/msh
+                   o in case the probe URL is used, the new probe URL is /domibus/services/msh
                    o modify the following parameters for the queue DomibusSendMessageQueue(jms/domibus.internal.dispatch.queue):
                        - Set "Expiration Policy" to "Discard"
                        - Set "Error Destination" to "None"

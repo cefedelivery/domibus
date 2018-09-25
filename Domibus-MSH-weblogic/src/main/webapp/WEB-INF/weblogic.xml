@@ -3,7 +3,7 @@
 <weblogic-web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app"
                   xsi:schemaLocation="http://xmlns.oracle.com/weblogic/weblogic-web-app http://xmlns.oracle.com/weblogic/weblogic-web-app/1.4/weblogic-web-app.xsd">
-    <context-root>/domibus-weblogic</context-root>
+    <context-root>/domibus</context-root>
     <container-descriptor>
         <prefer-application-packages>
             <package-name>com.google.*</package-name>
