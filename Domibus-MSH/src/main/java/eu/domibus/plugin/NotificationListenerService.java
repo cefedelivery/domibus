@@ -223,6 +223,7 @@ public class NotificationListenerService implements MessageListener, JmsListener
         List<JmsMessage> messages;
         try {
             messages = jmsManager.browseClusterMessages(backendNotificationQueue.getQueueName(), selector);
+            LOG.info("[{}] messages selected from [{}] with selector [{}]", (messages != null ? messages.size() : 0), backendNotificationQueue.getQueueName(), selector);
         } catch (JMSException jmsEx) {
             LOG.error("Error trying to read the queue name", jmsEx);
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not get the queue name", jmsEx.getCause());
