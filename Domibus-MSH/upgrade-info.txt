@@ -37,8 +37,12 @@ Domibus 4.0 (from 3.3.4):
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following properties:
                               domibus.jms.queue.alert=domibus.internal.alert.queue
+                          o update the following properties:
+                              domibus.datasource.maxLifetime=30
+                              domibus.jms.XAConnectionFactory.maxPoolSize=100
+                              com.atomikos.icatch.max_actives=300
                           o in file "cef_edelivery_path\domibus\conf\domibus\internal\activemq.xml":
-                              - in the destinations section add the following queuea:
+                              - in the destinations section add the following queues:
                                          .............................
                                          <destinations>
                                              .............................
@@ -58,8 +62,7 @@ Domibus 4.0 (from 3.3.4):
                                                  .............................
                                              </redeliveryPolicyEntries>
                                              .............................
-                              -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the dropOnly parameter:
-                                        E.G:
+                              -  in the discardingDLQBrokerPlugin update the dropOnly parameter value as below:
                                             - original:
                                                 <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
                                             -new configuration:
@@ -126,6 +129,9 @@ Domibus 4.0 (from 3.3.4):
                            Eg: #MySQL
                                domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?pinGlobalTxToPhysicalConnection=true
                                domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?useSSL=false
+                    o delete properties
+                        - domibus.backend.jmsInQueue
+                        - domibus.pmode.dao.implementation
                 - Optional changes(only if Domibus is used in multi-tenancy mode):
                     o create a new database schema using the DB script(mysql5innoDb-4.0-multi-tenancy.ddl for MySQL or oracle10g-4.0-multi-tenancy.ddl for Oracle)
                     o add the new property "domibus.database.general.schema" in the Database section of "/conf/domibus/domibus.properties" file and configure it with the general schema created in the previous step

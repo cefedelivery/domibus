@@ -21,7 +21,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,7 +105,7 @@ public class RetryService {
     protected List<String> getQueuedMessages() {
         List<String> result = new ArrayList<>();
         try {
-            final List<JmsMessage> jmsMessages = jmsManager.browseMessages(dispatchQueue.getQueueName());
+            final List<JmsMessage> jmsMessages = jmsManager.browseClusterMessages(dispatchQueue.getQueueName());
             if (jmsMessages == null) {
                 return result;
             }
