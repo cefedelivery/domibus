@@ -128,7 +128,7 @@ public class UserManagementServiceImpl implements UserService {
                 throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User name cannot be null.");
             }
 
-            if (Strings.isNullOrEmpty(user.getUserName())) {
+            if (user.getAuthorities() == null || user.getAuthorities().isEmpty()) {
                 throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User role cannot be null.");
             }
         });
