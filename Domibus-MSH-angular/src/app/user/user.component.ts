@@ -233,14 +233,11 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.setPage(this.getLastPage());
 
     this.editedUser = new UserResponseRO('', this.currentDomain, '', '', true, UserState[UserState.NEW], [], false, false);
-    this.users.push(this.editedUser);
-    this.users = this.users.slice();
-    this.rowNumber = this.users.length - 1;
     this.setIsDirty();
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: false,
-        user: this.users[this.rowNumber],
+        user: this.editedUser,
         userroles: this.userRoles,
         userdomains: this.domains
       }
@@ -248,8 +245,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     formRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.onSaveEditForm(formRef);
+
+        this.users.push(this.editedUser);
+        this.rowNumber = this.users.length - 1;
       } else {
-        this.users.pop();
         this.selected = [];
         this.enableEdit = false;
         this.enableDelete = false;
