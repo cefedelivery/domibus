@@ -106,6 +106,8 @@ public class MessageResource {
             try {
                 if (info.getHref() != null && info.getPayloadDatahandler() != null) {
                     ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
+                } else {
+                    LOGGER.warn("Attachment of [{}] is [{}]", info.getHref(), info.getPayloadDatahandler());
                 }
             } catch (IOException e) {
                 LOGGER.error("Error getting input stream for attachment [{}]", info.getHref());
