@@ -151,7 +151,7 @@ export class UserComponent implements OnInit, DirtyOperations {
         {
           cellTemplate: this.editableTpl,
           name: 'Domain',
-          prop: 'domain',
+          prop: 'domainName',
           canAutoResize: true
         });
     }
@@ -172,6 +172,14 @@ export class UserComponent implements OnInit, DirtyOperations {
   getUsers (): void {
     this.isBusy = true;
     this.userService.getUsers(this.filter).subscribe(results => {
+      const domains = this.domains;
+      if(domains) {
+        results.forEach(user => {
+          const domain = domains.find(d => d.code == user.domain);
+          if (domain)
+            user.domainName = domain.name;
+        });
+      }
       this.users = results;
       this.isBusy = false;
     }, err => {
@@ -185,8 +193,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.userService.getUserRoles().subscribe(userroles => this.userRoles = userroles);
   }
 
-  async getUserDomains () {
-    this.domains = await this.domainService.getDomains();
+  async getUserDomains (): Promise<Domain[]> {
+    var res = await this.domainService.getDomains();
+    this.domains = res;
+    return res;
   }
 
   onSelect ({selected}) {
@@ -220,8 +230,9 @@ export class UserComponent implements OnInit, DirtyOperations {
   buttonNew (): void {
     if (this.isBusy) return;
 
-    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
-      UserState[UserState.NEW], [], false, false);
+    this.setPage(this.getLastPage());
+
+    this.editedUser = new UserResponseRO('', this.currentDomain, '', '', true, UserState[UserState.NEW], [], false, false);
     this.users.push(this.editedUser);
     this.users = this.users.slice();
     this.rowNumber = this.users.length - 1;
@@ -410,6 +421,16 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   onChangePage (event: any): void {
-    this.offset = event.offset;
+    this.setPage(event.offset);
+  }
+
+  setPage (offset: number): void {
+    this.offset = offset;
+  }
+
+  getLastPage (): number {
+    if (!this.users || !this.rowLimiter || !this.rowLimiter.pageSize)
+      return 0;
+    return Math.floor(this.users.length / this.rowLimiter.pageSize);
   }
 }

@@ -109,7 +109,7 @@ public class JMSManagerImpl implements JMSManager {
         return jmsMessageMapper.convert(messagesSPI);
     }
 
-    protected String getDomainSelector(String selector) {
+    public String getDomainSelector(String selector) {
         if (!domibusConfigurationService.isMultiTenantAware()) {
             return selector;
         }
@@ -129,13 +129,16 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public List<JmsMessage> browseMessages(String source) {
-        return browseMessages(source, null, null, null, null);
+    public List<JmsMessage> browseClusterMessages(String source) {
+        final String domainSelector = getDomainSelector(null);
+        return browseClusterMessages(source, domainSelector);
     }
 
     @Override
-    public List<JmsMessage> browseMessages(String source, String selector) {
-        return browseMessages(source, null, null, null, selector);
+    public List<JmsMessage> browseClusterMessages(String source, String selector) {
+        LOG.debug("browseClusterMessages using selector [{}]", selector);
+        List<InternalJmsMessage> messagesSPI = internalJmsManager.browseClusterMessages(source, selector);
+        return jmsMessageMapper.convert(messagesSPI);
     }
 
     @Override

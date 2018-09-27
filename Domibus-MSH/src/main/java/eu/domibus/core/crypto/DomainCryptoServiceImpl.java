@@ -8,6 +8,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.clustering.Command;
 import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.common.model.certificate.Certificate;
+import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -31,7 +33,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Cosmin Baciu
@@ -150,7 +153,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         LOG.debug("TrustStoreFile is: [{}]", trustStoreFile.getAbsolutePath());
         try (FileOutputStream fileOutputStream = new FileOutputStream(trustStoreFile)) {
             truststore.store(fileOutputStream, getTrustStorePassword().toCharArray());
-        } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e ) {
+        } catch (NoSuchAlgorithmException | IOException | CertificateException | KeyStoreException e) {
             throw new CryptoException("Could not persist truststore:", e);
         }
 
@@ -167,6 +170,19 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     @Override
     public synchronized boolean addCertificate(X509Certificate certificate, String alias, boolean overwrite) {
+        boolean added = doAddCertificate(certificate, alias, overwrite);
+        persistTrustStore();
+        return added;
+    }
+
+    @Override
+    public synchronized void addCertificate(List<CertificateEntry> certificates, boolean overwrite) {
+        certificates.forEach(certEntry ->
+                doAddCertificate(certEntry.getCertificate(), certEntry.getAlias(), overwrite));
+        persistTrustStore();
+    }
+
+    private boolean doAddCertificate(X509Certificate certificate, String alias, boolean overwrite) {
         boolean containsAlias;
         try {
             containsAlias = getTrustStore().containsAlias(alias);
@@ -181,8 +197,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 getTrustStore().deleteEntry(alias);
             }
             getTrustStore().setCertificateEntry(alias, certificate);
-
-            persistTrustStore();
 
             return true;
         } catch (final KeyStoreException e) {
@@ -274,5 +288,36 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
                 .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
                 .property(MessageConstants.DOMAIN, domain.getCode())
                 .build(), clusterCommandTopic);
+    }
+
+    @Override
+    public boolean removeCertificate(String alias) {
+        boolean removed = doRemoveCertificate(alias);
+        persistTrustStore();
+        return removed;
+    }
+
+    @Override
+    public void removeCertificate(List<String> aliases) {
+        aliases.forEach(alias -> doRemoveCertificate(alias));
+        persistTrustStore();
+    }
+
+    private synchronized boolean doRemoveCertificate(String alias) {
+        boolean containsAlias;
+        try {
+            containsAlias = getTrustStore().containsAlias(alias);
+        } catch (final KeyStoreException e) {
+            throw new CryptoException("Error while trying to get the alias from the truststore. This should never happen", e);
+        }
+        if (!containsAlias) {
+            return false;
+        }
+        try {
+            getTrustStore().deleteEntry(alias);
+            return true;
+        } catch (final KeyStoreException e) {
+            throw new ConfigurationException(e);
+        }
     }
 }

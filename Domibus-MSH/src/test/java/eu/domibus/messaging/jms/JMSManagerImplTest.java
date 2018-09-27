@@ -234,20 +234,17 @@ public class JMSManagerImplTest {
             result = false;
 
             domainContextProvider.getCurrentDomain();
-            result = new Domain("taxud", "Taxud");
+            result = new Domain("digit", "digit");
 
         }};
 
-        Assert.assertEquals(selector + " AND DOMAIN ='taxud'", jmsManager.getDomainSelector(selector));
+        Assert.assertEquals(selector + " AND DOMAIN ='digit'", jmsManager.getDomainSelector(selector));
 
         new FullVerifications(){{}};
     }
 
     @Test
     public void testGetDomainSelector_MultiTenant_Admin_EmptySelector() {
-
-        final String selector = null;
-
         new Expectations() {{
             domibusConfigurationService.isMultiTenantAware();
             result = true;
@@ -256,11 +253,11 @@ public class JMSManagerImplTest {
             result = false;
 
             domainContextProvider.getCurrentDomain();
-            result = new Domain("taxud1", "Taxud1");
+            result = new Domain("digit1", "digit1");
 
         }};
 
-        Assert.assertEquals("DOMAIN ='taxud1'", jmsManager.getDomainSelector(selector));
+        Assert.assertEquals("DOMAIN ='digit1'", jmsManager.getDomainSelector(null));
 
         new FullVerifications(){{}};
     }

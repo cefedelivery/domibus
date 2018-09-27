@@ -44,6 +44,11 @@ Domibus 4.0
 - Support for the new PEPPOL PKI. Maintain backwards compatibility with the old PEPPOL PKI. Tested in multi-tenancy mode, one domain
   uses old PKI while other domain uses the new PKI.
 - Added a new feature when the GUI loads Messages page from a single table, speed up the search for large DB volumes
+- Improve performance of Messages page when DB contains > 300k records
+- Possibility to resend messages with status SEND_ENQUEUED
+- Allow plugins to load their xml config files from the jars
+- Improvements to Weblogic WLST
+- Fixed bug when PKCS12 format was not supported for keystore/truststore
 Domibus 3.3.4
 - Performance improvement in the Messages page
 - The order of the PartInfo payloads sent by the backend is preserved from C1 to C4.

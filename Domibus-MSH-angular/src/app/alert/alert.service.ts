@@ -95,10 +95,10 @@ export class AlertService {
       } catch (e) {
       }
     }
-
-    errMsg = errMsg.replace('Uncaught (in promise):', '');
-    errMsg = errMsg.replace('[object ProgressEvent]', '');
-
+    if(errMsg) {
+      errMsg = errMsg.replace('Uncaught (in promise):', '');
+      errMsg = errMsg.replace('[object ProgressEvent]', '');
+    }
     return (message ? message + ' \n' : '') + (errMsg || '');
   }
 

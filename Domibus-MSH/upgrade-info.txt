@@ -1,4 +1,4 @@
-Domibus 4.0 RC1 (from 3.3.4):
+Domibus 4.0 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
                 - The following changes have been implemented in the Default WS Plugin which is not backward compatible. The client of the Default WS Plugin need to take into account the following changes:
@@ -37,8 +37,12 @@ Domibus 4.0 RC1 (from 3.3.4):
                      Modify file "\conf\domibus\domibus.properties":
                           o add the following properties:
                               domibus.jms.queue.alert=domibus.internal.alert.queue
+                          o update the following properties:
+                              domibus.datasource.maxLifetime=30
+                              domibus.jms.XAConnectionFactory.maxPoolSize=100
+                              com.atomikos.icatch.max_actives=300
                           o in file "cef_edelivery_path\domibus\conf\domibus\internal\activemq.xml":
-                              - in the destinations section add the following queuea:
+                              - in the destinations section add the following queues:
                                          .............................
                                          <destinations>
                                              .............................
@@ -58,8 +62,7 @@ Domibus 4.0 RC1 (from 3.3.4):
                                                  .............................
                                              </redeliveryPolicyEntries>
                                              .............................
-                              -  in the discardingDLQBrokerPlugin add as space and the name of the queue at the end of the dropOnly parameter:
-                                        E.G:
+                              -  in the discardingDLQBrokerPlugin update the dropOnly parameter value as below:
                                             - original:
                                                 <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue" reportInterval="10000"/>
                                             -new configuration:
@@ -106,19 +109,9 @@ Domibus 4.0 RC1 (from 3.3.4):
                - Authentication uses BCryptPasswordEncoder, similar to the UI users.
                  TB_AUTHENTICATION_ENTRY table was restored to defaults, having two users 'admin' and 'user' with default password '123456' encrypted using the new algorithm.
                  Custom users should be recreated using the new functionality in the Domibus Admin Console.
-               - [WS-PLugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
-               - [JMS-PLugin] Description is no longer available as a property of a payload, remove it from the input message.
-               - In file "\conf\domibus\internal\ehcache.xml" add the following cache definition at the end of caches definition:
-                    <ehcache>
-                    ........................
-                    <cache name="auditTarget"
-                               maxBytesLocalHeap="5m"
-                               timeToLiveSeconds="3600"
-                               overflowToDisk="false">
-                     </cache>
-                  ........................
-                  </ehcache>
-                - Modify file "\conf\domibus\domibus.properties":
+               - [WS-Plugin] Remove from PartInfo the Description and Schema headers from the SOAP messages. These headers were deprecated in ebMS3 and as a result were removed from the WS-plugin XSD. When received on the MSH side, they are simply ignored.
+               - [JMS-Plugin] Description is no longer available as a property of a payload, remove it from the input message.
+               - Modify file "\conf\domibus\domibus.properties":
                     o add property domibus.dynamicdiscovery.useDynamicDiscovery=true or false
                     o update all the cron expressions from 0/60 * * * * ? to 0 0/1 * * * ?
                     o delete property domibus.entityManagerFactory.jpaProperty.hibernate.transaction.manager_lookup_class and replace it by:
@@ -136,6 +129,9 @@ Domibus 4.0 RC1 (from 3.3.4):
                            Eg: #MySQL
                                domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?pinGlobalTxToPhysicalConnection=true
                                domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.schema}?useSSL=false
+                    o delete properties
+                        - domibus.backend.jmsInQueue
+                        - domibus.pmode.dao.implementation
                 - Optional changes(only if Domibus is used in multi-tenancy mode):
                     o create a new database schema using the DB script(mysql5innoDb-4.0-multi-tenancy.ddl for MySQL or oracle10g-4.0-multi-tenancy.ddl for Oracle)
                     o add the new property "domibus.database.general.schema" in the Database section of "/conf/domibus/domibus.properties" file and configure it with the general schema created in the previous step
@@ -146,8 +142,8 @@ Domibus 4.0 RC1 (from 3.3.4):
                                  domibus.datasource.xa.property.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?pinGlobalTxToPhysicalConnection=true
                                  domibus.datasource.url=jdbc:mysql://${domibus.database.serverName}:${domibus.database.port}/${domibus.database.general.schema}?useSSL=false
                     Please check the Admin Guide for more details how to set up Domibus in multi-tenancy mode
-                - Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
-                  Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
+                - (Optional)Security policies were updated and renamed. Change your pMode to use eDeliveryAS4Policy.xml instead of eDeliveryPolicy.xml and eSensPolicy(.v2.0).xml.
+                            Replace both eDeliveryPolicy_CA.xml and eSensPolicy.v2.0_CA.xml, by eDeliveryAS4Policy_BST.xml
 Domibus 3.3.4 (from 3.3.3):
                  - Run the appropriate DB migration script (mysql5innoDb-3.3.2(+)-to-3.3.4-migration.ddl for MySQL or oracle10g-3.3.2(+)-to-3.3.4-migration.ddl for Oracle)
                  - In the file "/conf/domibus/domibus.properties" add the following properties :
