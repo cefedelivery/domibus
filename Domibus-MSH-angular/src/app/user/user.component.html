@@ -96,7 +96,7 @@
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>
-    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted || isBusy" (click)="buttonEditAction(row.$$index)"
+    <button id="userEditButtonRow{{row.$$index}}_id" md-icon-button [disabled]="row.deleted || isBusy" (click)="buttonEditAction(row)"
             color="primary" tooltip="Edit">
       <md-icon>edit</md-icon>
     </button>

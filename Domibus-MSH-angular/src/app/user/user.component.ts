@@ -52,7 +52,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   enableDelete: boolean;
   enableEdit: boolean;
 
-  rowNumber: number;
+  currentUser: UserResponseRO;
 
   editedUser: UserResponseRO;
 
@@ -90,7 +90,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableSave = false;
     this.enableDelete = false;
     this.enableEdit = false;
-    this.rowNumber = -1;
+    this.currentUser = null;
     this.editedUser = null;
 
     this.selected = [];
@@ -209,8 +209,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
 
     // select
-    this.rowNumber = this.selected[0].$$index;
-    this.editedUser = this.selected[0];
+    this.currentUser = this.selected[0];
+    this.editedUser = this.currentUser;
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
@@ -247,7 +247,7 @@ export class UserComponent implements OnInit, DirtyOperations {
         this.onSaveEditForm(formRef);
 
         this.users.push(this.editedUser);
-        this.rowNumber = this.users.length - 1;
+        this.currentUser = this.editedUser;
       } else {
         this.selected = [];
         this.enableEdit = false;
@@ -258,20 +258,20 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEdit () {
-    if (this.rowNumber >= 0 && this.users[this.rowNumber] && this.users[this.rowNumber].deleted) {
+    if (this.currentUser && this.currentUser.deleted) {
       this.alertService.error('You cannot edit a deleted user.', false, 3000);
       return;
     }
-    this.buttonEditAction(this.rowNumber);
+    this.buttonEditAction(this.currentUser);
   }
 
-  buttonEditAction (rowNumber) {
+  buttonEditAction (currentUser) {
     if (this.isBusy) return;
 
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
-        user: this.users[rowNumber],
+        user: currentUser,
         userroles: this.userRoles,
         userdomains: this.domains
       }
