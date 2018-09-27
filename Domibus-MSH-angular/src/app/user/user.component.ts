@@ -91,6 +91,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
     this.enableEdit = false;
     this.rowNumber = -1;
+    this.editedUser = null;
+
     this.selected = [];
 
     this.columnPicker.allColumns = [
@@ -198,6 +200,7 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     // select
     this.rowNumber = this.selected[0].$$index;
+    this.editedUser = this.selected[0];
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
@@ -215,7 +218,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    if(this.isBusy) return;
+    if (this.isBusy) return;
 
     this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
       UserState[UserState.NEW], [], false, false);
@@ -233,7 +236,6 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
     formRef.afterClosed().subscribe(result => {
       if (result === true) {
-        this.users[this.rowNumber].userName = formRef.componentInstance.userName;
         this.onSaveEditForm(formRef);
       } else {
         this.users.pop();
@@ -254,7 +256,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonEditAction (rowNumber) {
-    if(this.isBusy) return;
+    if (this.isBusy) return;
 
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
@@ -273,13 +275,16 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   private onSaveEditForm (formRef: MdDialogRef<EditUserComponent>) {
     const editForm = formRef.componentInstance;
-    const user = this.users[this.rowNumber];
+    const user = this.editedUser;
+    if (!user) return;
 
+    user.userName = editForm.userName || user.userName; // only for add
     user.email = editForm.email;
     user.roles = editForm.role.toString();
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
+
     if (editForm.userForm.dirty) {
       if (UserState[UserState.PERSISTED] === user.status) {
         user.status = UserState[UserState.UPDATED]
