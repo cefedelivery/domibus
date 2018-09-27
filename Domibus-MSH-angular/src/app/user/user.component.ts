@@ -242,18 +242,17 @@ export class UserComponent implements OnInit, DirtyOperations {
         userdomains: this.domains
       }
     });
-    formRef.afterClosed().subscribe(result => {
-      if (result === true) {
+    formRef.afterClosed().subscribe(ok => {
+      if (ok) {
         this.onSaveEditForm(formRef);
-
         this.users.push(this.editedUser);
         this.currentUser = this.editedUser;
       } else {
         this.selected = [];
         this.enableEdit = false;
         this.enableDelete = false;
-        this.setIsDirty();
       }
+      this.setIsDirty();
     });
   }
 
@@ -276,9 +275,10 @@ export class UserComponent implements OnInit, DirtyOperations {
         userdomains: this.domains
       }
     });
-    formRef.afterClosed().subscribe(result => {
-      if (result === true) {
+    formRef.afterClosed().subscribe(ok => {
+      if (ok) {
         this.onSaveEditForm(formRef);
+        this.setIsDirty();
       }
     });
   }
@@ -290,7 +290,7 @@ export class UserComponent implements OnInit, DirtyOperations {
 
     user.userName = editForm.userName || user.userName; // only for add
     user.email = editForm.email;
-    user.roles = editForm.role.toString();
+    user.roles = editForm.role;
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
@@ -300,8 +300,6 @@ export class UserComponent implements OnInit, DirtyOperations {
         user.status = UserState[UserState.UPDATED]
       }
     }
-
-    this.setIsDirty();
   }
 
   setIsDirty () {

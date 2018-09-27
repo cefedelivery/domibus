@@ -1,8 +1,5 @@
 package eu.domibus.common.services.impl;
 
-import com.google.common.base.Strings;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
@@ -118,22 +115,8 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUsers(List<eu.domibus.api.user.User> users) {
-        validateUsers(users);
         userPersistenceService.updateUsers(users);
     }
-
-    private void validateUsers(List<eu.domibus.api.user.User> users) {
-        users.forEach(user -> {
-            if (Strings.isNullOrEmpty(user.getUserName())) {
-                throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User name cannot be null.");
-            }
-
-            if (user.getAuthorities() == null || user.getAuthorities().isEmpty()) {
-                throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User role cannot be null.");
-            }
-        });
-    }
-
 
     /**
      * {@inheritDoc}
