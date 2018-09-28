@@ -51,6 +51,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   allProcesses: string[];
 
   pModeExists: boolean;
+  isBusy: boolean;
 
   constructor (public dialog: MdDialog,
                public partyService: PartyService,
@@ -59,6 +60,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   async ngOnInit () {
+    this.isBusy = false;
     this.rows = [];
     this.allRows = [];
     this.selected = [];
@@ -198,7 +200,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canSave () {
-    return this.isDirty();
+    return this.isDirty() && !this.isBusy;
   }
 
   canEdit () {
@@ -218,6 +220,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   save () {
+    if(this.isBusy) return;
+
     try {
       this.partyService.validateParties(this.rows)
     } catch (err) {
@@ -225,12 +229,17 @@ export class PartyComponent implements OnInit, DirtyOperations {
       return;
     }
 
+    this.isBusy = true;
     this.partyService.updateParties(this.rows)
       .then(() => {
         this.resetDirty();
+        this.isBusy = false;
         this.alertService.success('Parties saved successfully.', false);
       })
-      .catch(err => this.alertService.exception('Party update error:', err, false));
+      .catch(err => {
+        this.isBusy = false;
+        this.alertService.exception('Party update error:', err, false);
+      })
   }
 
   async add () {
