@@ -9,7 +9,9 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.web.rest.ro.TestServiceRequestRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -32,11 +34,15 @@ public class TestServiceResource {
     @Autowired
     private PartyService partyService;
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({Exception.class})
-    public ErrorRO handleException(Exception ex) {
+    public ResponseEntity<ErrorRO> handleException(Exception ex) {
         LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        return new ResponseEntity(error, headers, HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping(value = "sender", method = RequestMethod.GET)
