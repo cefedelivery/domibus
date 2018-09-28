@@ -51,6 +51,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   allProcesses: string[];
 
   pModeExists: boolean;
+  isBusy: boolean;
 
   constructor (public dialog: MdDialog,
                public partyService: PartyService,
@@ -59,6 +60,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   async ngOnInit () {
+    this.isBusy = false;
     this.rows = [];
     this.allRows = [];
     this.selected = [];
@@ -194,30 +196,34 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canAdd () {
-    return !!this.pModeExists;
+    return !!this.pModeExists && !this.isBusy;
   }
 
   canSave () {
-    return this.isDirty();
+    return this.isDirty() && !this.isBusy;
   }
 
   canEdit () {
-    return !!this.pModeExists && this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1 && !this.isBusy;
   }
 
   canCancel () {
-    return this.isDirty();
+    return this.isDirty() && !this.isBusy;
   }
 
   canDelete () {
-    return !!this.pModeExists && this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1 && !this.isBusy;
   }
 
   cancel () {
+    if(this.isBusy) return;
+
     this.listPartiesAndProcesses();
   }
 
   save () {
+    if(this.isBusy) return;
+
     try {
       this.partyService.validateParties(this.rows)
     } catch (err) {
@@ -225,15 +231,22 @@ export class PartyComponent implements OnInit, DirtyOperations {
       return;
     }
 
+    this.isBusy = true;
     this.partyService.updateParties(this.rows)
       .then(() => {
         this.resetDirty();
+        this.isBusy = false;
         this.alertService.success('Parties saved successfully.', false);
       })
-      .catch(err => this.alertService.exception('Party update error:', err, false));
+      .catch(err => {
+        this.isBusy = false;
+        this.alertService.exception('Party update error:', err, false);
+      })
   }
 
   async add () {
+    if(this.isBusy) return;
+
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
     this.allRows.push(newParty);
@@ -250,6 +263,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   remove () {
+    if(this.isBusy) return;
+
     const deletedParty = this.selected[0];
     if (!deletedParty) return;
 
