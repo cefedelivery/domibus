@@ -23,7 +23,7 @@
 			<party name="red_gw" endpoint="http://://Ahmed-PC:8180/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-red" partyIdType="partyTypeUrn"/>
 			</party>
-			<party name="blue_gw" endpoint="http://104.40.147.186:7005/domibus-weblogic/services/msh" allowChunking="false">
+			<party name="blue_gw" endpoint="http://104.40.147.186:7005/domibus/services/msh" allowChunking="false">
 				<identifier partyId="domibus-blue" partyIdType="partyTypeUrn"/>
 			</party>
 		</parties>
