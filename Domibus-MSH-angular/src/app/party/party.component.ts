@@ -196,7 +196,7 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canAdd () {
-    return !!this.pModeExists;
+    return !!this.pModeExists && !this.isBusy;
   }
 
   canSave () {
@@ -204,18 +204,20 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   canEdit () {
-    return !!this.pModeExists && this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1 && !this.isBusy;
   }
 
   canCancel () {
-    return this.isDirty();
+    return this.isDirty() && !this.isBusy;
   }
 
   canDelete () {
-    return !!this.pModeExists && this.selected.length === 1;
+    return !!this.pModeExists && this.selected.length === 1 && !this.isBusy;
   }
 
   cancel () {
+    if(this.isBusy) return;
+
     this.listPartiesAndProcesses();
   }
 
@@ -243,6 +245,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   async add () {
+    if(this.isBusy) return;
+
     const newParty = this.partyService.initParty();
     this.rows.push(newParty);
     this.allRows.push(newParty);
@@ -259,6 +263,8 @@ export class PartyComponent implements OnInit, DirtyOperations {
   }
 
   remove () {
+    if(this.isBusy) return;
+
     const deletedParty = this.selected[0];
     if (!deletedParty) return;
 
