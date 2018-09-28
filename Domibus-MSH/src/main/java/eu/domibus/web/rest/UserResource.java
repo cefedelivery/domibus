@@ -1,6 +1,9 @@
 package eu.domibus.web.rest;
 
+import com.google.common.base.Strings;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthUtils;
@@ -98,9 +101,22 @@ public class UserResource {
     @RequestMapping(value = {"/users"}, method = RequestMethod.PUT)
     public void updateUsers(@RequestBody List<UserResponseRO> userROS) {
         LOG.debug("Update Users was called: " + userROS);
+        validateUsers(userROS);
         updateUserRoles(userROS);
         List<User> users = domainConverter.convert(userROS, User.class);
         getUserService().updateUsers(users);
+    }
+
+    private void validateUsers(List<UserResponseRO> users) {
+        users.forEach(user -> {
+            if (Strings.isNullOrEmpty(user.getUserName())) {
+                throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User name cannot be null.");
+            }
+
+            if (Strings.isNullOrEmpty(user.getRoles())) {
+                throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "User role cannot be null.");
+            }
+        });
     }
 
     private void updateUserRoles(List<UserResponseRO> userROS) {

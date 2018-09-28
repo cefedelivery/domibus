@@ -1,3 +1,5 @@
+import {Domain} from '../security/domain';
+
 export enum UserState {
   PERSISTED,
   NEW,
@@ -13,11 +15,12 @@ export class UserResponseRO {
   authorities: Array<string>;
   roles: string = '';
   domain: string = null;
+  domainName: string = null;
   status: string;
   suspended: boolean;
   deleted: boolean;
 
-  constructor (userName: string, domain: string, email: string, password: string, active: boolean, status: string,
+  constructor (userName: string, domain: Domain, email: string, password: string, active: boolean, status: string,
                authorities: Array<string>, suspended: boolean, deleted: boolean) {
     this.userName = userName;
     this.email = email;
@@ -29,7 +32,8 @@ export class UserResponseRO {
     for (let authority in authorities) {
       this.roles = this.roles.concat(authorities[authority]).concat(' ');
     }
-    this.domain = domain;
+    this.domain = domain ? domain.code : null;
     this.deleted = deleted;
+    this.domainName = domain ? domain.name : null;
   }
 }

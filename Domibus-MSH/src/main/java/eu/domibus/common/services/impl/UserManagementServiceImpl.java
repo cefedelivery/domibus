@@ -118,7 +118,6 @@ public class UserManagementServiceImpl implements UserService {
         userPersistenceService.updateUsers(users);
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -137,7 +136,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
         //TODO trigger events for super user in 4.1 EDELIVERY-3768
-        if(domainContextProvider.getCurrentDomainSafely() == null) {
+        if (domainContextProvider.getCurrentDomainSafely() == null) {
             LOG.debug("User alerts disabled for super users");
             return;
         }
@@ -203,7 +202,7 @@ public class UserManagementServiceImpl implements UserService {
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
 
             //TODO trigger events for super user in 4.1 EDELIVERY-3768
-            if(!user.isSuperAdmin()) {
+            if (!user.isSuperAdmin()) {
                 final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
                 if (accountDisabledConfiguration.isActive()) {
                     eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
@@ -234,7 +233,7 @@ public class UserManagementServiceImpl implements UserService {
         int suspensionInterval;
 
         String suspensionIntervalPropValue;
-        if(domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
+        if (domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
             suspensionIntervalPropValue = domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
         } else { //for normal users the domain is set as current Domain
             suspensionIntervalPropValue = domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);

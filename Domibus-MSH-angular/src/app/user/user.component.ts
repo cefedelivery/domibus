@@ -52,7 +52,7 @@ export class UserComponent implements OnInit, DirtyOperations {
   enableDelete: boolean;
   enableEdit: boolean;
 
-  rowNumber: number;
+  currentUser: UserResponseRO;
 
   editedUser: UserResponseRO;
 
@@ -90,7 +90,9 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableSave = false;
     this.enableDelete = false;
     this.enableEdit = false;
-    this.rowNumber = -1;
+    this.currentUser = null;
+    this.editedUser = null;
+
     this.selected = [];
 
     this.columnPicker.allColumns = [
@@ -149,7 +151,7 @@ export class UserComponent implements OnInit, DirtyOperations {
         {
           cellTemplate: this.editableTpl,
           name: 'Domain',
-          prop: 'domain',
+          prop: 'domainName',
           canAutoResize: true
         });
     }
@@ -170,6 +172,14 @@ export class UserComponent implements OnInit, DirtyOperations {
   getUsers (): void {
     this.isBusy = true;
     this.userService.getUsers(this.filter).subscribe(results => {
+      const domains = this.domains;
+      if(domains) {
+        results.forEach(user => {
+          const domain = domains.find(d => d.code == user.domain);
+          if (domain)
+            user.domainName = domain.name;
+        });
+      }
       this.users = results;
       this.isBusy = false;
     }, err => {
@@ -183,8 +193,10 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.userService.getUserRoles().subscribe(userroles => this.userRoles = userroles);
   }
 
-  async getUserDomains () {
-    this.domains = await this.domainService.getDomains();
+  async getUserDomains (): Promise<Domain[]> {
+    var res = await this.domainService.getDomains();
+    this.domains = res;
+    return res;
   }
 
   onSelect ({selected}) {
@@ -197,7 +209,8 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
 
     // select
-    this.rowNumber = this.selected[0].$$index;
+    this.currentUser = this.selected[0];
+    this.editedUser = this.currentUser;
 
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
@@ -215,78 +228,78 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   buttonNew (): void {
-    if(this.isBusy) return;
+    if (this.isBusy) return;
 
-    this.editedUser = new UserResponseRO('', this.currentDomain.code, '', '', true,
-      UserState[UserState.NEW], [], false, false);
-    this.users.push(this.editedUser);
-    this.users = this.users.slice();
-    this.rowNumber = this.users.length - 1;
+    this.setPage(this.getLastPage());
+
+    this.editedUser = new UserResponseRO('', this.currentDomain, '', '', true, UserState[UserState.NEW], [], false, false);
     this.setIsDirty();
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: false,
-        user: this.users[this.rowNumber],
+        user: this.editedUser,
         userroles: this.userRoles,
         userdomains: this.domains
       }
     });
-    formRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.users[this.rowNumber].userName = formRef.componentInstance.userName;
+    formRef.afterClosed().subscribe(ok => {
+      if (ok) {
         this.onSaveEditForm(formRef);
+        this.users.push(this.editedUser);
+        this.currentUser = this.editedUser;
       } else {
-        this.users.pop();
         this.selected = [];
         this.enableEdit = false;
         this.enableDelete = false;
-        this.setIsDirty();
       }
+      this.setIsDirty();
     });
   }
 
   buttonEdit () {
-    if (this.rowNumber >= 0 && this.users[this.rowNumber] && this.users[this.rowNumber].deleted) {
+    if (this.currentUser && this.currentUser.deleted) {
       this.alertService.error('You cannot edit a deleted user.', false, 3000);
       return;
     }
-    this.buttonEditAction(this.rowNumber);
+    this.buttonEditAction(this.currentUser);
   }
 
-  buttonEditAction (rowNumber) {
-    if(this.isBusy) return;
+  buttonEditAction (currentUser) {
+    if (this.isBusy) return;
 
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
       data: {
         edit: true,
-        user: this.users[rowNumber],
+        user: currentUser,
         userroles: this.userRoles,
         userdomains: this.domains
       }
     });
-    formRef.afterClosed().subscribe(result => {
-      if (result === true) {
+    formRef.afterClosed().subscribe(ok => {
+      if (ok) {
         this.onSaveEditForm(formRef);
+        this.setIsDirty();
       }
     });
   }
 
   private onSaveEditForm (formRef: MdDialogRef<EditUserComponent>) {
     const editForm = formRef.componentInstance;
-    const user = this.users[this.rowNumber];
+    const user = this.editedUser;
+    if (!user) return;
 
+    user.userName = editForm.userName || user.userName; // only for add
     user.email = editForm.email;
-    user.roles = editForm.role.toString();
+    user.roles = editForm.role;
     user.domain = editForm.domain;
     user.password = editForm.password;
     user.active = editForm.active;
+
     if (editForm.userForm.dirty) {
       if (UserState[UserState.PERSISTED] === user.status) {
         user.status = UserState[UserState.UPDATED]
       }
     }
-
-    this.setIsDirty();
   }
 
   setIsDirty () {
@@ -405,6 +418,16 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   onChangePage (event: any): void {
-    this.offset = event.offset;
+    this.setPage(event.offset);
+  }
+
+  setPage (offset: number): void {
+    this.offset = offset;
+  }
+
+  getLastPage (): number {
+    if (!this.users || !this.rowLimiter || !this.rowLimiter.pageSize)
+      return 0;
+    return Math.floor(this.users.length / this.rowLimiter.pageSize);
   }
 }
