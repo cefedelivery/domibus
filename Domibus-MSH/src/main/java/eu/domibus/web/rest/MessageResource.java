@@ -104,14 +104,17 @@ public class MessageResource {
         final List<PartInfo> partInfo = userMessage.getPayloadInfo().getPartInfo();
         for (PartInfo info : partInfo) {
             try {
-                ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
+                if (info.getHref() != null && info.getPayloadDatahandler() != null) {
+                    ret.put(info.getHref().replace("cid:", ""), info.getPayloadDatahandler().getInputStream());
+                } else {
+                    LOGGER.warn("Attachment of [{}] is [{}]", info.getHref(), info.getPayloadDatahandler());
+                }
             } catch (IOException e) {
                 LOGGER.error("Error getting input stream for attachment [{}]", info.getHref());
             }
         }
 
         ret.put("message.xml", getMessage(userMessage));
-
 
         return ret;
     }
