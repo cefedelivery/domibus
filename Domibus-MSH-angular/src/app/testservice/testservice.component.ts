@@ -23,26 +23,28 @@ export class TestServiceComponent implements OnInit {
 
   dynamicDiscoveryEnabled: boolean;
 
-  receiverParties: Array<string> = [];
+  receiverParties: Array<string>;
 
-  filter: any = {};
+  filter: any;
 
   messageInfoSent: MessageLogEntry;
   messageInfoReceived: MessageLogEntry;
 
-  buttonDisabled: boolean = true;
+  buttonDisabled: boolean;
 
-  sender: string = '';
+  sender: string;
 
   private headers = new Headers({'Content-Type': 'application/json'});
 
-  constructor (private http: Http,
-               private alertService: AlertService) {
-
-    this.dynamicDiscoveryEnabled = false; // only static is available for now
-  }
+  constructor (private http: Http, private alertService: AlertService) {}
 
   ngOnInit () {
+    this.filter = {};
+    this.receiverParties = [];
+    this.buttonDisabled = true;
+    this.sender = '';
+    this.dynamicDiscoveryEnabled = false; // only static is available for now
+
     this.clearInfo();
     this.getReceiverParties();
     this.getSenderParty();
