@@ -478,4 +478,10 @@ export class MessageFilterComponent implements OnInit, DirtyOperations {
     this.enableSave = this.dirty;
     this.enableCancel = this.dirty;
   }
+
+  onActivate (event) {
+    if ('dblclick' === event.type) {
+      this.buttonEditAction(event.row);
+    }
+  }
 }
