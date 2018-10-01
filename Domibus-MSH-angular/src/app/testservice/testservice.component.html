@@ -26,7 +26,7 @@
             </md-input-container>
           </div>
 
-          <button md-raised-button color="primary" [disabled]="this.buttonDisabled" id="updatebutton_id" (click)="update()">
+          <button md-raised-button color="primary" [disabled]="this.buttonDisabled || !messageInfoSent.messageId" id="updatebutton_id" (click)="update()">
             <md-icon>refresh</md-icon>
             <span>Update</span>
           </button>
