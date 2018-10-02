@@ -10,6 +10,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.common.validators.PasswordValidator;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -57,6 +58,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    private PasswordValidator passwordValidator;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsers(List<eu.domibus.api.user.User> users) {
@@ -83,7 +87,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
             if (withPasswordChange) {
+                passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
+                passwordValidator.validateHistory(user.getUserName(),userEntity.getPassword());
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
@@ -110,7 +116,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
+            passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+
             User userEntity = domainConverter.convert(user, User.class);
+
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
