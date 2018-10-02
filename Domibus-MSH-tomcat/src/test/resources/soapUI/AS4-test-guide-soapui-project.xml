@@ -826,11 +826,11 @@
          </con:properties>
       </con:config>
    </con:testStep>
+   <con:testStep type="groovy" name="InitializeRetryCount" id="d09f2109-e697-4e38-82f8-9f0f8822240b"><con:settings/><con:config><script>testRunner.testCase.setPropertyValue("RetryCountWhileWaitingForMessageAvailability","0");</script></con:config></con:testStep>
    <con:testStep type="delay" name="waitConditional" id="a357409c-309d-4f30-bb64-53917cf27cf4">
       <con:settings/>
       <con:config><delay>15000</delay></con:config>
-   </con:testStep>
-   <con:testStep type="groovy" name="InitializeRetryCount" id="d09f2109-e697-4e38-82f8-9f0f8822240b"><con:settings/><con:config><script>testRunner.testCase.setPropertyValue("RetryCountWhileWaitingForMessageAvailability","0");</script></con:config></con:testStep><con:testStep type="request" name="checkIfMessageIsAvailable" id="0da2589e-1520-4448-87d5-6bca71a09688">
+   </con:testStep><con:testStep type="request" name="checkIfMessageIsAvailable" id="0da2589e-1520-4448-87d5-6bca71a09688">
       <con:settings/>
       <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
          <con:interface>BackendService_1_1SoapBinding</con:interface>
