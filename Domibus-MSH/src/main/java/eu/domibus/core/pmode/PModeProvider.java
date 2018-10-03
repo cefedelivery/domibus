@@ -283,7 +283,7 @@ public abstract class PModeProvider {
             LOG.debug("Found pmodeKey [{}] for message [{}]", messageExchangeConfiguration.getPmodeKey(), userMessage);
             return messageExchangeConfiguration;
         } catch (EbMS3Exception e) {
-            if(userMessage != null && userMessage.getMessageInfo() != null) {
+            if(userMessage.getMessageInfo() != null) {
                 e.setRefToMessageId(userMessage.getMessageInfo().getMessageId());
             }
 
