@@ -40,6 +40,7 @@ public class TestServiceResource {
 
         ErrorRO error = new ErrorRO(ex.getMessage());
         HttpHeaders headers = new HttpHeaders();
+        //We need to send the connection header for the tomcat/chrome combination to be able to read the error messge
         headers.set(HttpHeaders.CONNECTION, "close");
 
         return new ResponseEntity(error, headers, HttpStatus.BAD_REQUEST);
