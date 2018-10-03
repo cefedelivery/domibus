@@ -6,7 +6,7 @@
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
           <!-- Processed -->
-          <md-select placeholder="Processed" [(ngModel)]="filter.processed" name="processed" id="processed_id">
+          <md-select  placeholder="Processed" [(ngModel)]="filter.processed" name="processed" id="processed_id">
             <md-option [value]="''"></md-option>
             <md-option *ngFor="let aprocessed of aProcessedValues" [value]="aprocessed">
               {{aprocessed}}
@@ -61,6 +61,11 @@
                           [type]="'datetime'"
                           #timestampControl="ngModel" id="creationto_id">
           </md2-datepicker>
+          <ng-container *ngIf="displayDomainCheckBox">
+            <input type="checkbox" name="showDomainAlerts" [(ngModel)]="filter.domainAlerts"
+                   id="showDomainAlerts_id">
+            <span>Show domain alerts</span>
+          </ng-container>
           <!-- Reporting From -->
           <md2-datepicker placeholder="Reporting From:" appClearInvalid
                           [(ngModel)]="filter.reportingFrom"

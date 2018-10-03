@@ -62,7 +62,7 @@ public class MailSenderTest {
             result= user;
             domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_PASSWORD);
             result= password;
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE);
+            domibusPropertyProvider.getDomainProperty("domibus.alert.mail.sending.active");
             result= true;
             javaMailSender.getJavaMailProperties();
             result=javaMailProperties;

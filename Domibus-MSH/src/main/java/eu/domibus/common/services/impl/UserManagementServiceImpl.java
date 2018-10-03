@@ -43,7 +43,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
-    protected static final  String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+    protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
 
@@ -196,12 +196,9 @@ public class UserManagementServiceImpl implements UserService {
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
 
-            //TODO trigger events for super user in 4.1 EDELIVERY-3768
-            if(!user.isSuperAdmin()) {
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-                if (accountDisabledConfiguration.isActive()) {
-                    eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
-                }
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            if (accountDisabledConfiguration.isActive()) {
+                eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
             }
 
         }
@@ -228,7 +225,7 @@ public class UserManagementServiceImpl implements UserService {
         int suspensionInterval;
 
         String suspensionIntervalPropValue;
-        if(domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
+        if (domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
             suspensionIntervalPropValue = domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
         } else { //for normal users the domain is set as current Domain
             suspensionIntervalPropValue = domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);

@@ -43,7 +43,7 @@ public interface DomibusPropertyProvider {
 
     /**
      * When actions are executed under a super admin user, not domain is set in the current thread.
-     * Nevertheless we need to retrieve some default properties. So if the no domain is found, this method will retrieve
+     * Nevertheless we need to retrieve some default properties. So if no domain is found, this method will retrieve
      * properties from the default one.
      * @param propertyName the property name.
      * @return the property value.

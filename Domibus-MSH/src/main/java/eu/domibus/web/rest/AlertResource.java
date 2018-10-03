@@ -2,6 +2,8 @@ package eu.domibus.web.rest;
 
 import com.google.common.collect.Lists;
 import eu.domibus.api.csv.CsvException;
+import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.util.DateUtil;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
@@ -33,11 +35,16 @@ public class AlertResource {
     private AlertService alertService;
 
     @Autowired
-    DateUtil dateUtil;
+    private DateUtil dateUtil;
 
     @Autowired
-    CsvServiceImpl csvServiceImpl;
+    private CsvServiceImpl csvServiceImpl;
 
+    @Autowired
+    private AuthUtils authUtils;
+
+    @Autowired
+    protected DomainTaskExecutor domainTaskExecutor;
 
     @GetMapping
     public AlertResult findAlerts(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -55,8 +62,8 @@ public class AlertResource {
                                   @RequestParam(value = "reportingTo", required = false) String reportingTo,
                                   @RequestParam(value = "parameters", required = false) String[] parameters,
                                   @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
-                                  @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
-    ) {
+                                  @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo,
+                                  @RequestParam(value = "domainAlerts", required = false,defaultValue = "false") Boolean domainAlerts) {
         AlertCriteria alertCriteria = getAlertCriteria(
                 page,
                 pageSize,
@@ -75,12 +82,28 @@ public class AlertResource {
                 dynamicaPropertyFrom,
                 dynamicaPropertyTo);
 
-        final Long aLong = alertService.countAlerts(alertCriteria);
-        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
-        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        if (!authUtils.isSuperAdmin() || domainAlerts) {
+            return retrieveDomainAlerts(alertCriteria);
+        }
+
+        final Long superUserAlertCount = domainTaskExecutor.submit(() -> alertService.countAlerts(alertCriteria));
+        final List<Alert> superUserAlerts = domainTaskExecutor.submit(() -> alertService.findAlerts(alertCriteria));
+        final List<AlertRo> superUserAlertRoList = superUserAlerts.stream().map(this::transform).collect(Collectors.toList());
         final AlertResult alertResult = new AlertResult();
-        alertResult.setCount(aLong.intValue());
-        alertResult.setAlertsEntries(alertRoList);
+        alertResult.setAlertsEntries(superUserAlertRoList);
+        alertResult.setCount(superUserAlertCount.intValue());
+        return alertResult;
+
+
+    }
+
+    private AlertResult retrieveDomainAlerts(AlertCriteria alertCriteria) {
+        final Long domainAlertCount = alertService.countAlerts(alertCriteria);
+        final List<Alert> domainAlerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> domainAlertRoList = domainAlerts.stream().map(this::transform).collect(Collectors.toList());
+        final AlertResult alertResult = new AlertResult();
+        alertResult.setAlertsEntries(domainAlertRoList);
+        alertResult.setCount(domainAlertCount.intValue());
         return alertResult;
     }
 
@@ -131,15 +154,19 @@ public class AlertResource {
 
     @PutMapping
     public void processAlerts(@RequestBody List<AlertRo> alertRos) {
-        final List<Alert> alerts = alertRos.stream().filter(Objects::nonNull).map(alertRo -> {
-            final int entityId = alertRo.getEntityId();
-            final boolean processed = alertRo.isProcessed();
-            Alert alert = new Alert();
-            alert.setEntityId(entityId);
-            alert.setProcessed(processed);
-            return alert;
-        }).collect(Collectors.toList());
-        alertService.updateAlertProcessed(alerts);
+        final List<Alert> domainAlerts = alertRos.stream().filter(Objects::nonNull).filter(alertRo -> !alertRo.isSuperAdmin()).map(this::toAlert).collect(Collectors.toList());
+        final List<Alert> superAlerts = alertRos.stream().filter(Objects::nonNull).filter(AlertRo::isSuperAdmin).map(this::toAlert).collect(Collectors.toList());
+        alertService.updateAlertProcessed(domainAlerts);
+        domainTaskExecutor.submit(() -> alertService.updateAlertProcessed(superAlerts));
+    }
+
+    private Alert toAlert(AlertRo alertRo) {
+        final int entityId = alertRo.getEntityId();
+        final boolean processed = alertRo.isProcessed();
+        Alert alert = new Alert();
+        alert.setEntityId(entityId);
+        alert.setProcessed(processed);
+        return alert;
     }
 
     @GetMapping(path = "/csv")
@@ -201,7 +228,10 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, String alertStatus,Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
+    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String
+            processed, String alertType, String alertStatus, Integer alertId, String alertLevel, String creationFrom, String
+                                                   creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String
+                                                   dynamicaPropertyTo) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);

@@ -11,7 +11,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static eu.domibus.core.alerts.MailSender.DOMIBUS_ALERT_MAIL_SENDING_ACTIVE;
 import static eu.domibus.core.alerts.service.MultiDomainAlertConfigurationServiceImpl.*;
 import static org.junit.Assert.*;
 

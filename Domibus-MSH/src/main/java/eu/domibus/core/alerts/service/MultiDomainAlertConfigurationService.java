@@ -64,4 +64,10 @@ public interface MultiDomainAlertConfigurationService {
      * @return whether the module is active or not.
      */
     Boolean isAlertModuleEnabled();
+
+    String getSendEmailActivePropertyName();
+
+    String getAlertRetryMaxAttemptPropertyName();
+
+    String getAlertRetryTimePropertyName();
 }

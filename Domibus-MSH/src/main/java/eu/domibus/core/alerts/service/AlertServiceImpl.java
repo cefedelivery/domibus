@@ -37,15 +37,11 @@ public class AlertServiceImpl implements AlertService {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertServiceImpl.class);
 
-    static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
-
     static final String ALERT_LEVEL = "ALERT_LEVEL";
 
     static final String REPORTING_TIME = "REPORTING_TIME";
 
     static final String ALERT_SELECTOR = "alert";
-
-    static final String DOMIBUS_ALERT_RETRY_TIME = "domibus.alert.retry.time";
 
     @Autowired
     private EventDao eventDao;
@@ -81,7 +77,8 @@ public class AlertServiceImpl implements AlertService {
         alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
         alert.setAttempts(0);
-        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
+        final String alertRetryMaxAttemptPropertyName = multiDomainAlertConfigurationService.getAlertRetryMaxAttemptPropertyName();
+        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertRetryMaxAttemptPropertyName, "1")));
         alert.setAlertStatus(SEND_ENQUEUED);
         alert.setCreationTime(new Date());
 
@@ -143,7 +140,8 @@ public class AlertServiceImpl implements AlertService {
         LOG.debug("Alert[{}]: send unsuccessfully", alert.getEntityId());
         if (attempts < maxAttempts) {
             LOG.debug("Alert[{}]: send attempts[{}], max attempts[{}]", alert.getEntityId(), attempts, maxAttempts);
-            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_TIME));
+            final String alertRetryTimePropertyName = multiDomainAlertConfigurationService.getAlertRetryTimePropertyName();
+            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertRetryTimePropertyName));
             final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
             alertEntity.setAttempts(attempts);
