@@ -8,20 +8,19 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/share';
 import 'rxjs/add/observable/throw';
-import {Observer} from 'rxjs/Observer';
-import {HttpEventService} from "./http.event.service";
+import {HttpEventService} from './http.event.service';
 
 @Injectable()
 export class ExtendedHttpClient extends Http {
   http: Http;
   httpEventService: HttpEventService;
 
-  constructor(_backend: ConnectionBackend, _defaultOptions: RequestOptions, httpEventService: HttpEventService) {
+  constructor (_backend: ConnectionBackend, _defaultOptions: RequestOptions, httpEventService: HttpEventService) {
     super(_backend, _defaultOptions);
     this.httpEventService = httpEventService;
   }
 
-  setOptions(options?: RequestOptionsArgs): RequestOptionsArgs {
+  setOptions (options?: RequestOptionsArgs): RequestOptionsArgs {
     if (!options) {
       options = {};
     }
@@ -31,14 +30,13 @@ export class ExtendedHttpClient extends Http {
     return options;
   }
 
-  request(url: string, options?: RequestOptionsArgs): Observable<Response> {
+  request (url: string, options?: RequestOptionsArgs): Observable<Response> {
     options = this.setOptions(options);
 
     return super.request(url, options).catch((error: Response) => {
       if ((error.status === 403)) {
-        console.log('The authentication session expired or the user is not authorised');
+        console.log('ExtendedHttpClient: received 403');
         this.httpEventService.requestForbiddenEvent(error);
-        // return Observable.empty();
       }
       return Observable.throw(error);
     });
