@@ -51,4 +51,10 @@ public interface UserService {
      * @param username the userName
      */
     void handleCorrectAuthentication(String username);
+
+    /**
+     * Verify if the user's password is expired.
+     * @param username the userName
+     */
+    void handleExpiredPassword(String username);
 }

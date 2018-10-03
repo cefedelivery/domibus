@@ -60,7 +60,8 @@ export class SecurityService {
   }
 
   getCurrentUser (): User {
-    return JSON.parse(localStorage.getItem('currentUser'));
+    let storedUser = localStorage.getItem('currentUser');
+    return storedUser ? JSON.parse(storedUser) : null;
   }
 
   private getCurrentUsernameFromServer (): Observable<string> {

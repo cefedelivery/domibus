@@ -11,6 +11,10 @@ import mockit.Tested;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ @since 4.1
+ */
+
 public class PasswordValidatorTest {
 
     private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";

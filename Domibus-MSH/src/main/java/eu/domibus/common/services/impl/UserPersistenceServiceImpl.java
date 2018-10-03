@@ -6,6 +6,7 @@ import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
@@ -42,6 +43,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     @Autowired
     private UserRoleDao userRoleDao;
+
+    @Autowired
+    private UserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
@@ -89,15 +93,24 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             if (withPasswordChange) {
                 passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
-                passwordValidator.validateHistory(user.getUserName(),userEntity.getPassword());
+                passwordValidator.validateHistory(user.getUserName(), userEntity.getPassword());
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
+            if (withPasswordChange) {
+                savePasswordHistory(userEntity);
+            }
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
             }
         }
+    }
+
+    private void savePasswordHistory(User userEntity) {
+        // TODO
+        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword());
+        this.userPasswordHistoryDao.removePasswords(userEntity, 5);
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
@@ -123,6 +136,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
+            savePasswordHistory(userEntity);
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());

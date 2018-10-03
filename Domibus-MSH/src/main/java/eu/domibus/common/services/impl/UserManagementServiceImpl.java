@@ -5,8 +5,10 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
@@ -20,6 +22,7 @@ import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -45,6 +48,8 @@ public class UserManagementServiceImpl implements UserService {
 
     protected final static String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
+    protected final static String MAXIMUM_PASSWORD_AGE = "domibus.passwordPolicy.expiration";
+
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
 
     private static final String DEFAULT_LOGIN_ATTEMPT = "5";
@@ -54,6 +59,9 @@ public class UserManagementServiceImpl implements UserService {
 
     @Autowired
     private UserRoleDao userRoleDao;
+
+    @Autowired
+    protected UserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -278,4 +286,34 @@ public class UserManagementServiceImpl implements UserService {
         userDao.flush();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleExpiredPassword(final String userName) {
+        User user = userDao.loadActiveUserByUsername(userName);
+        LOG.trace("handleExpiredPassword for user [{}]", userName);
+
+        int maxPasswordAgeInDays;
+        try {
+            final Domain domain = getCurrentOrDefaultDomainForUser(user);
+
+            String maxPasswordAgeInDaysVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_PASSWORD_AGE, "0");
+            maxPasswordAgeInDays = Integer.valueOf(maxPasswordAgeInDaysVal);
+        } catch (NumberFormatException n) {
+            maxPasswordAgeInDays = 0;
+        }
+
+        LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
+        if (maxPasswordAgeInDays == 0) {
+            return;
+        }
+
+        Date minDate = DateUtils.addDays(new Date(), -maxPasswordAgeInDays);
+        Date passwordDate = userPasswordHistoryDao.findPasswordDate(user);
+        if (passwordDate == null || passwordDate.before(minDate)) {
+            LOG.debug("Password expired since [{}] for user [{}]" , minDate,  user.getUserName());
+            throw new AuthenticationException("Password expired");
+        }
+    }
 }

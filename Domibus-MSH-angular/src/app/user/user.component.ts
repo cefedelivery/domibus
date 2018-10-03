@@ -219,8 +219,9 @@ export class UserComponent implements OnInit, DirtyOperations {
   }
 
   private isLoggedInUserSelected (selected): boolean {
+    let currentUser = this.securityService.getCurrentUser();
     for (let entry of selected) {
-      if (this.securityService.getCurrentUser().username === entry.userName) {
+      if (currentUser && currentUser.username === entry.userName) {
         return true;
       }
     }

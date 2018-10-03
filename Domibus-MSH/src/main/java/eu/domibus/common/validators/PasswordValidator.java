@@ -15,6 +15,10 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @since 4.1
+ */
+
 @Service
 public class PasswordValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordValidator.class);

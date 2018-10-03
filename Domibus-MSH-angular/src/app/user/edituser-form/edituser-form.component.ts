@@ -127,7 +127,8 @@ export class EditUserComponent implements OnInit {
   }
 
   isCurrentUser (): boolean {
-    return this.securityService.getCurrentUser().username === this.userName;
+    let currentUser = this.securityService.getCurrentUser();
+    return currentUser && currentUser.username === this.userName;
   }
 
   isSuperAdmin () {
