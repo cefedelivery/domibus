@@ -38,7 +38,7 @@ export class PageHelperComponent implements OnInit {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         let url = event.url.split('?')[0];
-        console.log("Navigation change [" + url + "]");
+        // console.log("Navigation change [" + url + "]");
         let page = this.helpPages.get(url);
         if (isNullOrUndefined(page)) {
           this.activateHelp = false;

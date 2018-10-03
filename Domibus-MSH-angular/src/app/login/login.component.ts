@@ -25,7 +25,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor (private route: ActivatedRoute,
                private router: Router,
                private securityService: SecurityService,
-               private httpEventService: HttpEventService,
                private alertService: AlertService,
                private securityEventService: SecurityEventService,
                private dialog: MdDialog) {
@@ -35,13 +34,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit () {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-
-    this.httpEventService.subscribe((error) => {
-      if (error && (error.status === 403 || error.status === 401)) {
-        console.log('Received forbidden request event');
-        this.securityService.logout();
-      }
-    });
 
     this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
       data => {
