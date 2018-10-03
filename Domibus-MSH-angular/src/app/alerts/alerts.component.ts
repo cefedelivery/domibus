@@ -11,6 +11,7 @@ import {AlertService} from '../alert/alert.service';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {MdDialog} from '@angular/material';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
+import {SecurityService} from "../security/security.service";
 
 @Component({
   moduleId: module.id,
@@ -53,7 +54,7 @@ export class AlertsComponent {
 
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
 
-  filter: any = {};
+  filter: any = {processed:'UNPROCESSED',domainAlerts:false};
 
   dynamicFilters = [];
 
@@ -71,11 +72,15 @@ export class AlertsComponent {
 
   dateFromName: string = '';
   dateToName: string = '';
+  displayDomainCheckBox:boolean=false;
 
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog,private securityService: SecurityService) {
     this.getAlertTypes();
     this.getAlertLevels();
     this.getAlertStatuses();
+    if(this.securityService.isCurrentUserSuperAdmin()){
+      this.displayDomainCheckBox=true;
+    }
   }
 
   getAlertTypes (): void {
@@ -169,6 +174,13 @@ export class AlertsComponent {
     if (this.filter.reportingTo) {
       searchParams.set('reportingTo', this.filter.reportingTo.getTime());
     }
+
+    searchParams.set('domainAlerts',this.filter.domainAlerts);
+    /*if (this.filter.domainAlerts===false) {
+      searchParams.set('domainAlerts', 'false');
+    }else{
+      searchParams.set('domainAlerts', 'true');
+    }*/
 
     if (this.dynamicFilters.length > 0) {
       let d: string[] = [];

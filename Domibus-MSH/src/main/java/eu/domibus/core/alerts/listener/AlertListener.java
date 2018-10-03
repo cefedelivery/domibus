@@ -1,13 +1,12 @@
 package eu.domibus.core.alerts.listener;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.core.alerts.service.AlertDispatcherService;
 import eu.domibus.core.alerts.model.service.Alert;
+import eu.domibus.core.alerts.service.AlertDispatcherService;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlertListener {
 
-    private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertListener.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertListener.class);
 
     @Autowired
     private AlertDispatcherService alertDispatcherService;
@@ -28,8 +27,10 @@ public class AlertListener {
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'alert'")
-    public void onAlert(final Alert alert,@Header(name = "DOMAIN") String domain) {
-        domainContextProvider.setCurrentDomain(domain);
+    public void onAlert(final Alert alert,@Header(name = "DOMAIN",required = false) String domain) {
+        if(StringUtils.isNotEmpty(domain)) {
+            domainContextProvider.setCurrentDomain(domain);
+        }
         LOG.debug("Alert received:[{}]", alert);
         alertDispatcherService.dispatch(alert);
     }
