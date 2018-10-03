@@ -76,7 +76,10 @@ public class AlertServiceImplTest {
             eventDao.read(event.getEntityId());
             result = eventEntity;
 
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1");
+            multiDomainAlertConfigurationService.getAlertRetryMaxAttemptPropertyName();
+            result=DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS;
+
+            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1");
             result = 5;
 
             multiDomainAlertConfigurationService.getAlertLevel(withAny(new Alert()));
@@ -195,7 +198,10 @@ public class AlertServiceImplTest {
             persistedAlert.getMaxAttempts();
             result=2;
 
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_TIME);
+            multiDomainAlertConfigurationService.getAlertRetryTimePropertyName();
+            result=DOMIBUS_ALERT_RETRY_TIME;
+
+            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_RETRY_TIME);
             result = nextAttemptInMinutes;
 
             dateTime.now().plusMinutes(nextAttemptInMinutes).toDate();
