@@ -305,7 +305,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             }
         }
         if (missConfigured) {
-            LOG.error("Alert module can not send email, mail sender:[{}] and receiver:[{}] are mandatory in domain:[{}]", alertEmailSender, alertEmailReceiver, domain);
+            LOG.error("Alert module can not send email, mail sender property name:[{}]/value[{}] and receiver property name:[{}]/value[{}] are mandatory in domain:[{}]",alertSenderPropertyName, alertEmailSender, alertReceiverPropertyName,alertEmailReceiver, domain);
             throw new IllegalArgumentException("Invalid email address configured for the alert module.");
         }
         return new CommonConfiguration(alertLifeTimeInDays, alertEmailSender, alertEmailReceiver);

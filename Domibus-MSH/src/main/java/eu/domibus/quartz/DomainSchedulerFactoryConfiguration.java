@@ -217,11 +217,9 @@ public class DomainSchedulerFactoryConfiguration {
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean alertRetrySuperWorkerTrigger() {
-        if (domainContextProvider.getCurrentDomainSafely() == null)
-            return null;
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(alertRetryJSuperJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.alert.super.retry.cron"));
+        obj.setCronExpression(domibusPropertyProvider.getOptionalDomainProperty("domibus.alert.super.retry.cron"));
         obj.setStartDelay(20000);
         obj.setGroup(GROUP_GENERAL);
         return obj;
@@ -258,11 +256,9 @@ public class DomainSchedulerFactoryConfiguration {
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean alertSuperCleanerTrigger() {
-        if (domainContextProvider.getCurrentDomainSafely() == null)
-            return null;
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(alertCleanerSuperJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.alert.super.cleaner.cron"));
+        obj.setCronExpression(domibusPropertyProvider.getOptionalDomainProperty("domibus.alert.super.cleaner.cron"));
         obj.setStartDelay(20000);
         obj.setGroup(GROUP_GENERAL);
         return obj;
