@@ -6,6 +6,7 @@ import {Title} from '@angular/platform-browser';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
+import {HttpEventService} from './http/http.event.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +26,7 @@ export class AppComponent implements OnInit {
                private router: Router,
                private securityEventService: SecurityEventService,
                private http: Http,
+               private httpEventService: HttpEventService,
                private domainService: DomainService) {
 
     this.domainService.setAppTitle();
@@ -37,6 +39,13 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit () {
+    this.httpEventService.subscribe((error) => {
+      if (error && (error.status === 403 || error.status === 401)) {
+        console.log('Received forbidden request event');
+        this.securityService.logout();
+      }
+    });
+
     this.securityEventService.onLogoutSuccessEvent().subscribe(
       data => {
         this.router.navigate(['/login']);
@@ -49,7 +58,6 @@ export class AppComponent implements OnInit {
           if (!!currentUser) {
             this.router.navigate(['/']);
           }
-
         }
       }
     });

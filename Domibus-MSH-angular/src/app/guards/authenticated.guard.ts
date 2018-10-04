@@ -16,7 +16,7 @@ export class AuthenticatedGuard implements CanActivate {
         subject.next(true);
       } else {
         // not logged in so redirect to login page with the return url
-        console.log('AuthenticatedGuard: not logged in -> redirect to login');
+        // console.log('AuthenticatedGuard: not logged in -> redirect to login');
 
         // todo: the call to clear is not cohesive, should refactor
         this.securityService.clearSession();

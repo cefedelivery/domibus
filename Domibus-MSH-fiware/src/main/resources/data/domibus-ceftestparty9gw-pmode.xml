@@ -11,23 +11,23 @@
 	</mpcs>
 	<businessProcesses>
 		<roles>
-			<role name="defaultInitiatorRole" 
-					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
-			<role name="defaultResponderRole" 
-					value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
+			<role name="defaultInitiatorRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator"/>
+			<role name="defaultResponderRole"
+				  value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder"/>
 		</roles>
 		<parties>
 			<partyIdTypes>
 				<partyIdType name="unregisteredParty" value="urn:oasis:names:tc:ebcore:partyid-type:unregistered"/>
 			</partyIdTypes>
 			<party name="ceftestparty9gw"
-					endpoint="http://localhost:8080/services/msh" 
-					allowChunking="false">
+				   endpoint="http://localhost:8080/domibus/services/msh"
+				   allowChunking="false">
 				<identifier partyId="ceftestparty9gw" partyIdType="unregisteredParty"/>
 			</party>
-			<party name="cefsupportgw" 
-					endpoint="http://40.115.23.114:8080/domibus/services/msh" 
-					allowChunking="false">
+			<party name="cefsupportgw"
+				   endpoint="http://40.115.23.114:8080/domibus/services/msh?domain=static"
+				   allowChunking="false">
 				<identifier partyId="cefsupportgw" partyIdType="unregisteredParty"/>
 			</party>
 		</parties>
@@ -38,45 +38,47 @@
 			<binding name="pushAndPush" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push"/>
 		</meps>
 		<properties>
-			<property name="originalSenderProperty" 
-					key="originalSender" 
-					datatype="string" 
-					required="true"/>
-			<property name="finalRecipientProperty" 
-					key="finalRecipient" 
-					datatype="string" 
-					required="true"/>
-			<propertySet name="edeliveryPropertySet">
+			<property name="originalSenderProperty"
+					  key="originalSender"
+					  datatype="string"
+					  required="true"/>
+			<property name="finalRecipientProperty"
+					  key="finalRecipient"
+					  datatype="string"
+					  required="true"/>
+			<propertySet name="eDeliveryPropertySet">
 				<propertyRef property="finalRecipientProperty"/>
 				<propertyRef property="originalSenderProperty"/>
 			</propertySet>
-		</properties>				
-		
+		</properties>
+
 		<payloadProfiles>
 		</payloadProfiles>
 		<securities>
 			<security name="eDeliveryAS4Policy"
-					policy="eDeliveryAS4Policy.xml"
-					signatureMethod="RSA_SHA256" />	
+					  policy="eDeliveryAS4Policy.xml"
+					  signatureMethod="RSA_SHA256" />
 			<security name="noSigNoEnc"
-					policy="doNothingPolicy.xml"
-					signatureMethod="RSA_SHA256" />	
+					  policy="doNothingPolicy.xml"
+					  signatureMethod="RSA_SHA256" />
 		</securities>
 		<errorHandlings>
-			<errorHandling name="demoErrorHandling" 
-					errorAsResponse="true" 
-					businessErrorNotifyProducer="false"
-					businessErrorNotifyConsumer="false" 
-					deliveryFailureNotifyProducer="false"/>
+			<errorHandling name="demoErrorHandling"
+						   errorAsResponse="true"
+						   businessErrorNotifyProducer="false"
+						   businessErrorNotifyConsumer="false"
+						   deliveryFailureNotifyProducer="false"/>
 		</errorHandlings>
 		<agreements>
 			<agreement name="agreementEmpty" value="" type=""/>
 		</agreements>
 		<services>
 			<service name="connectivityService" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="e-delivery"/>
+			<service name="testService" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service"/>
 		</services>
 		<actions>
 			<action name="submitMessage" value="submitMessage"/>
+			<action name="testAction" value="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/test"/>
 		</actions>
 		<as4>
 			<receptionAwareness name="receptionAwareness" retry="12;4;CONSTANT" duplicateDetection="true"/>
@@ -84,35 +86,47 @@
 			<reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
 		</as4>
 		<legConfigurations>
-			<legConfiguration name="pushTestcase1tc1Action" 
-					service="connectivityService" 
-					action="submitMessage" 
-					defaultMpc="defaultMpc" 
-					reliability="AS4Reliability" 
-					security="eDeliveryAS4Policy"
-					receptionAwareness="receptionAwareness" 
-					propertySet="edeliveryPropertySet"
-					payloadProfile="MessageProfile"
-					errorHandling="demoErrorHandling"
-					compressPayloads="true"/>
+			<legConfiguration name="pushTestcase1tc1Action"
+							  service="connectivityService"
+							  action="submitMessage"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="eDeliveryAS4Policy"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="eDeliveryPropertySet"
+							  payloadProfile="MessageProfile"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true"/>
+			<legConfiguration name="testServiceCase"
+							  service="testService"
+							  action="testAction"
+							  defaultMpc="defaultMpc"
+							  reliability="AS4Reliability"
+							  security="eDeliveryAS4Policy"
+							  receptionAwareness="receptionAwareness"
+							  propertySet="eDeliveryPropertySet"
+							  payloadProfile="MessageProfile"
+							  errorHandling="demoErrorHandling"
+							  compressPayloads="true"/>
 		</legConfigurations>
-<process name="tc1Process" 
-		agreement="agreementEmpty" 
-		mep="oneway" 
-		binding="push" 
-		initiatorRole="defaultInitiatorRole" 
-		responderRole="defaultResponderRole">
-	<initiatorParties>
-		<initiatorParty name="ceftestparty9gw"/>
-		<initiatorParty name="cefsupportgw"/>
-	</initiatorParties>
-	<responderParties>
-		<responderParty name="ceftestparty9gw"/>
-		<responderParty name="cefsupportgw"/>
-	</responderParties>
-	<legs>
-		<leg name="pushTestcase1tc1Action"/>
-	</legs>
-</process>
+		<process name="tc1Process"
+				 agreement="agreementEmpty"
+				 mep="oneway"
+				 binding="push"
+				 initiatorRole="defaultInitiatorRole"
+				 responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="ceftestparty9gw"/>
+				<initiatorParty name="cefsupportgw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="ceftestparty9gw"/>
+				<responderParty name="cefsupportgw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase1tc1Action"/>
+				<leg name="testServiceCase"/>
+			</legs>
+		</process>
 	</businessProcesses>
 </db:configuration>
