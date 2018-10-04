@@ -1,6 +1,6 @@
-Scripts for creation of a Domibus-3.3.2 image on the Fiware Lab.
+Scripts for creation of a Domibus-4.0 image on the Fiware Lab.
 
-Desired name for the new image: Domibus-3.3.2
+Desired name for the new image: Domibus-4.0
 Base image: base_ubuntu_14.04
 Required flavor: m1.medium
 Port 8080 has to be opened externally.
@@ -13,7 +13,7 @@ The creation script:
 	- installs mysql on default port 3306
 	- creates domibus db and edelivery user
 	- creates domibus tables
-	- installs Domibus 3.3.2 on Tomcat 8
+	- installs Domibus 4.0 on Tomcat 8
 	- installs certificates for "ceftestparty9gw" to connect to the Connectivity Test Platform (http://40.115.23.114:8080/domibus/services/msh)
 	- starts Domibus and waits for the service to become available
 	- uploads the pMode with parties "ceftestparty9gw" and "cefsupportgw"

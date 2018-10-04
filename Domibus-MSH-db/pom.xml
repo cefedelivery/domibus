@@ -8,7 +8,7 @@
     <parent>
         <groupId>eu.domibus</groupId>
         <artifactId>domibus</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>4.1-SNAPSHOT</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>domibus-db</artifactId>
@@ -46,110 +46,110 @@
                </configuration>
                <executions>
                    <execution>
-                       <id>generate-mysql-script-data-4.0</id>
+                       <id>generate-mysql-script-data-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-data.xml
+                               src/main/resources/db/changelog-4.1-RC1-data.xml
                            </changeLogFile>
                            <url>
-                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.mysql
+                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-data.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-data.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.1-RC1-data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-mysql-script-multi-tenancy-4.0</id>
+                       <id>generate-mysql-script-multi-tenancy-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-multi-tenancy.xml
+                               src/main/resources/db/changelog-4.1-RC1-multi-tenancy.xml
                            </changeLogFile>
                            <url>
-                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0-multi-tenancy.mysql
+                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-multi-tenancy.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0-multi-tenancy.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.1-RC1-multi-tenancy.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-mysql-script-full-4.0</id>
+                       <id>generate-mysql-script-full-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0.xml
+                               src/main/resources/db/changelog-4.1-RC1.xml
                            </changeLogFile>
                            <url>
-                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.0.mysql
+                               offline:mysql?changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1.mysql
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.0.ddl
+                               ${project.build.directory}/sql-scripts/mysql5innoDb-4.1-RC1.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-oracle-script-data-4.0</id>
+                       <id>generate-oracle-script-data-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-data.xml
+                               src/main/resources/db/changelog-4.1-RC1-data.xml
                            </changeLogFile>
                            <url>
-                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-data.oracle
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-data.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-data.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.1-RC1-data.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-oracle-script-multi-tenancy-4.0</id>
+                       <id>generate-oracle-script-multi-tenancy-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0-multi-tenancy.xml
+                               src/main/resources/db/changelog-4.1-RC1-multi-tenancy.xml
                            </changeLogFile>
                            <url>
-                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0-multi-tenancy.oracle
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-multi-tenancy.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0-multi-tenancy.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.1-RC1-multi-tenancy.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>
                    <execution>
-                       <id>generate-oracle-script-full-4.0</id>
+                       <id>generate-oracle-script-full-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>
                            <goal>updateSQL</goal>
                        </goals>
                        <configuration>
                            <changeLogFile>
-                               src/main/resources/db/changelog-4.0.xml
+                               src/main/resources/db/changelog-4.1-RC1.xml
                            </changeLogFile>
                            <url>
-                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.0.oracle
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1.oracle
                            </url>
                            <migrationSqlOutputFile>
-                               ${project.build.directory}/sql-scripts/oracle10g-4.0.ddl
+                               ${project.build.directory}/sql-scripts/oracle10g-4.1-RC1.ddl
                            </migrationSqlOutputFile>
                        </configuration>
                    </execution>

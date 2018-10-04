@@ -23,26 +23,28 @@ export class TestServiceComponent implements OnInit {
 
   dynamicDiscoveryEnabled: boolean;
 
-  receiverParties: Array<string> = [];
+  receiverParties: Array<string>;
 
-  filter: any = {};
+  filter: any;
 
   messageInfoSent: MessageLogEntry;
   messageInfoReceived: MessageLogEntry;
 
-  buttonDisabled: boolean = true;
+  buttonDisabled: boolean;
 
-  sender: string = '';
+  sender: string;
 
-  private headers = new Headers({'Content-Type': 'application/json'});
-
-  constructor (private http: Http,
-               private alertService: AlertService) {
-
-    this.dynamicDiscoveryEnabled = false; // only static is available for now
+  constructor (private http: Http, private alertService: AlertService) {
   }
 
   ngOnInit () {
+    this.filter = {};
+    this.receiverParties = [];
+    this.buttonDisabled = true;
+    this.sender = '';
+
+    this.dynamicDiscoveryEnabled = false; // only static is available for now
+
     this.clearInfo();
     this.getReceiverParties();
     this.getSenderParty();
@@ -51,32 +53,19 @@ export class TestServiceComponent implements OnInit {
   test () {
     this.clearInfo();
     if (this.isPModeDaoOrCachingPModeProvider()) {
-      this.http.post(TestServiceComponent.TEST_SERVICE_URL,
-        JSON.stringify({
-          sender: this.sender,
-          receiver: this.filter.receiverPartyId
-        }), {
-          headers: this.headers
-        }).subscribe(() => {
-          this.onChangeParties();
-        },
-        () => {
-          this.alertService.error('Problems while submitting test');
-        });
+      const payload = {sender: this.sender, receiver: this.filter.receiverPartyId};
+      this.http.post(TestServiceComponent.TEST_SERVICE_URL, payload)
+        .subscribe(
+          () => this.onChangeParties(),
+          () => this.alertService.error('Problems while submitting test')
+        );
     } else if (this.isDynamicDiscoveryPModeProvider()) {
-      this.http.post(TestServiceComponent.TEST_SERVICE_SUBMIT_DYNAMICDISCOVERY_URL,
-        JSON.stringify({
-          sender: this.sender,
-          receiver: this.filter.finalRecipient,
-          receiverType: this.filter.finalRecipientType
-        }), {
-          headers: this.headers
-        }).subscribe(() => {
-          this.onChangeInfo();
-        },
-        () => {
-          this.alertService.error('Problems while submitting test');
-        });
+      const payload = {sender: this.sender, receiver: this.filter.finalRecipient, receiverType: this.filter.finalRecipientType};
+      this.http.post(TestServiceComponent.TEST_SERVICE_SUBMIT_DYNAMICDISCOVERY_URL, payload)
+        .subscribe(
+          () => this.onChangeInfo(),
+          () => this.alertService.error('Problems while submitting test')
+        );
     }
   }
 
@@ -156,14 +145,15 @@ export class TestServiceComponent implements OnInit {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('partyId', partyId);
     this.http.get(TestServiceComponent.MESSAGE_LOG_LAST_TEST_SENT_URL, {search: searchParams}).subscribe(res => {
-      if (!isNullOrUndefined(res.json())) {
+      const result = res.json();
+      if (!isNullOrUndefined(result)) {
         this.alertService.clearAlert();
-        this.messageInfoSent.toPartyId = res.json().partyId;
-        this.messageInfoSent.finalRecipient = res.json().accessPoint;
-        this.messageInfoSent.receivedTo = new Date(res.json().timeReceived);
-        this.messageInfoSent.messageId = res.json().messageId;
+        this.messageInfoSent.toPartyId = result.partyId;
+        this.messageInfoSent.finalRecipient = result.accessPoint;
+        this.messageInfoSent.receivedTo = new Date(result.timeReceived);
+        this.messageInfoSent.messageId = result.messageId;
 
-        this.getLastReceivedRequest(partyId, res.json().messageId);
+        this.getLastReceivedRequest(partyId, result.messageId);
       }
     }, () => {
       this.alertService.error(`No information found for Test Messages of PartyId '${partyId}'`);
@@ -175,11 +165,12 @@ export class TestServiceComponent implements OnInit {
     searchParams.set('partyId', partyId);
     searchParams.set('userMessageId', userMessageId);
     this.http.get(TestServiceComponent.MESSAGE_LOG_LAST_TEST_RECEIVED_URL, {search: searchParams}).subscribe(res => {
-      if (!isNullOrUndefined(res.json())) {
+      const result = res.json();
+      if (!isNullOrUndefined(result)) {
         this.messageInfoReceived.fromPartyId = partyId;
-        this.messageInfoReceived.originalSender = res.json().accessPoint;
-        this.messageInfoReceived.receivedFrom = new Date(res.json().timeReceived);
-        this.messageInfoReceived.messageId = res.json().messageId;
+        this.messageInfoReceived.originalSender = result.accessPoint;
+        this.messageInfoReceived.receivedFrom = new Date(result.timeReceived);
+        this.messageInfoReceived.messageId = result.messageId;
       }
     });
   }

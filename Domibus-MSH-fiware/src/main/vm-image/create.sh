@@ -6,9 +6,13 @@ sudo apt-get update -q
 sudo apt-get install dialog
 
 ######### Install & configure JRE ########
-sudo apt-get -y install default-jre
+sudo add-apt-repository ppa:webupd8team/java --yes
+sudo apt-get update
+echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+DEBIAN_FRONTEND=noninteractive sudo apt-get install oracle-java8-installer --yes --force-yes --assume-yes
 
-JAVA_HOME=$(sudo update-alternatives --config java | awk '{print $12}')
+JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre
 
 sudo echo >> /home/ubuntu/.bashrc
 sudo echo "JAVA_HOME=$JAVA_HOME" >> /home/ubuntu/.bashrc
@@ -25,9 +29,7 @@ sudo apt-get -y install mysql-server-5.6
 mysql -h localhost -u root --password=root -e "drop schema if exists domibus; create schema domibus; alter database domibus charset=utf8; create user edelivery identified by 'edelivery'; grant all on domibus.* to edelivery;"
 
 ########## Install Domibus ########
-#FROM java:7-jre
-
-export DOMIBUS_VERSION="3.3.2"
+export DOMIBUS_VERSION="4.0"
 
 export TOMCAT_MAJOR="8"
 export TOMCAT_VERSION="8.0.24"
@@ -60,13 +62,19 @@ sudo sed -i 's/\r$//' $CATALINA_HOME/bin/setenv.sh
 sudo sed -i 's/#export CATALINA_HOME=<YOUR_INSTALLATION_PATH>/sleep 300;/g' $CATALINA_HOME/bin/setenv.sh
 sudo sed -i 's/#JAVA_OPTS/JAVA_OPTS/g' $CATALINA_HOME/bin/setenv.sh
 
+sudo tar xzf data.tgz
+
 ########## Create domibus tables ########
-mysql -h localhost -u root --password=root domibus < $TOMCAT_FULL_DISTRIBUTION/sql-scripts/mysql5innoDb-3.3.2.ddl
+#mysql -h localhost -u root --password=root domibus < $TOMCAT_FULL_DISTRIBUTION/sql-scripts/mysql5innoDb-4.0.ddl
+#mysql -h localhost -u root --password=root domibus < $TOMCAT_FULL_DISTRIBUTION/sql-scripts/mysql5innoDb-4.0-data.ddl
+###### TEMPORARY FIX UNTIL THE SCRIPTS WORK WITH MySql 5.6 #####
+mysql -h localhost -u root --password=root domibus < data/mysql5innoDb-4.0.ddl
+mysql -h localhost -u root --password=root domibus < data/mysql5innoDb-4.0-data.ddl
 
 sudo sed -i 's/gateway_truststore.jks/ceftestparty9gwtruststore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
 sudo sed -i 's/gateway_keystore.jks/ceftestparty9gwkeystore.jks/g' $CATALINA_HOME/conf/domibus/domibus.properties
 sudo sed -i 's/blue_gw/ceftestparty9gw/g' $CATALINA_HOME/conf/domibus/domibus.properties
-sudo tar xzf data.tgz
+
 sudo mv data/domibus-ceftestparty9gw-pmode.xml $DOMIBUS_DIST/conf/pmodes/
 sudo mv data/* $CATALINA_HOME/conf/domibus/keystores/
 
@@ -80,7 +88,7 @@ sudo bash -c 'cat << EOF > /etc/init.d/domibus
 # processname: domibus(tomcat)
 # pidfile: /var/run/tomcat.pid
 
-export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/jre
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle/jre
 
 case \$1 in
         start)

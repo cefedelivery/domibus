@@ -109,6 +109,7 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
         try {
             truststore.store(oldTrustStoreBytes, getTrustStorePassword().toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException exc) {
+            closeOutputStream(oldTrustStoreBytes);
             throw new CryptoException("Could not replace truststore", exc);
         }
         try (ByteArrayInputStream newTrustStoreBytes = new ByteArrayInputStream(store)) {
@@ -126,15 +127,19 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
             }
             throw new CryptoException("Could not replace truststore, using old truststore", e);
         } finally {
-            try {
-                LOG.debug("Closing old truststore output stream.");
-                oldTrustStoreBytes.close();
-            } catch (IOException e) {
-                LOG.error("Could not close oldTrustStoreBytes output stream", e);
-            }
+            closeOutputStream(oldTrustStoreBytes);
         }
 
         signalTrustStoreUpdate();
+    }
+
+    private void closeOutputStream(ByteArrayOutputStream outputStream) {
+        try {
+            LOG.debug("Closing output stream [{}].", outputStream);
+            outputStream.close();
+        } catch (IOException e) {
+            LOG.error("Could not close [{}]", outputStream, e);
+        }
     }
 
     private synchronized void persistTrustStore() throws CryptoException {
