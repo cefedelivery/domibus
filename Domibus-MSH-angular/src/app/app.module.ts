@@ -81,6 +81,7 @@ import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-fo
 import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
 import {GlobalErrorHandler} from './common/global.error-handler';
+import {SanitizeHtmlPipe} from "./common/sanitizeHtml.pipe";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -111,6 +112,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     DatePipe,
     CapitalizeFirstPipe,
+    SanitizeHtmlPipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,
