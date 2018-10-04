@@ -53,17 +53,17 @@ public class DomibusLoggerDomainFilter extends Filter<ILoggingEvent> {
         //read the configuration  - markers to check
         List<Marker> markerListToCheck = Arrays.stream(markerName.split(MARKER_SEPARATOR)).map(s -> MarkerFactory.getMarker(s)).collect(Collectors.toList());
 
-        //filter by domain from MDC map
-        if (mdcPropertyMap != null && mdcPropertyMap.get(MDC_DOMAIN_KEY) != null) {
-            if (domainName.equals(mdcPropertyMap.get(MDC_DOMAIN_KEY))) {
 
-                //filter by marker
-                if (markerListToCheck.contains(iLoggingEvent.getMarker())) {
-                    return FilterReply.valueOf(markerMatch);
-                } else {
-                    return FilterReply.valueOf(markerMismatch);
-                }
+        //filter by domain from MDC map
+        if (mdcPropertyMap != null && domainName.equals(mdcPropertyMap.get(MDC_DOMAIN_KEY))) {
+
+            //filter by marker
+            if (markerListToCheck.contains(iLoggingEvent.getMarker())) {
+                return FilterReply.valueOf(markerMatch);
+            } else {
+                return FilterReply.valueOf(markerMismatch);
             }
+
         }
 
         return FilterReply.DENY;
