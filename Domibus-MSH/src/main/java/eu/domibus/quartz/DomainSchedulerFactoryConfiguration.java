@@ -128,7 +128,6 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
-
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean retryWorkerTrigger() {
@@ -172,7 +171,6 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
-
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean pullRequestTrigger() {
@@ -203,7 +201,6 @@ public class DomainSchedulerFactoryConfiguration {
         obj.setDurability(true);
         return obj;
     }
-
 
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
