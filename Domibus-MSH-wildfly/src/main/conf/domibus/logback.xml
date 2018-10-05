@@ -3,6 +3,12 @@
 <configuration>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${JBOSS_HOME}/logs/domibus.log</file>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>SECURITY</marker>
@@ -20,7 +26,7 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
         </encoder>
     </appender>
     <appender name="security_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -28,6 +34,12 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>SECURITY</marker>
@@ -42,7 +54,7 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
         </encoder>
     </appender>
     <appender name="business_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -50,6 +62,12 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>BUSINESS</marker>
@@ -64,13 +82,13 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
         </encoder>
     </appender>
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
         </encoder>
     </appender>
 
