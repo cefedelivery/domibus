@@ -1,7 +1,11 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
@@ -65,6 +69,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     @Autowired
     private PasswordValidator passwordValidator;
 
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    private DomainContextProvider domainContextProvider;
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsers(List<eu.domibus.api.user.User> users) {
@@ -92,8 +102,8 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             User userEntity = prepareUserForUpdate(user);
             if (withPasswordChange) {
                 passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+                passwordValidator.validateHistory(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
-                passwordValidator.validateHistory(user.getUserName(), userEntity.getPassword());
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
@@ -108,9 +118,20 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void savePasswordHistory(User userEntity) {
-        // TODO
         this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword());
-        this.userPasswordHistoryDao.removePasswords(userEntity, 5);
+
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
+        if (domain == null) {
+            domain = DomainService.DEFAULT_DOMAIN;
+        }
+        int passwordsToKeep;
+        try {
+            String oldPasswordsToCheckVal = domibusPropertyProvider.getDomainProperty(domain, PasswordValidator.PASSWORD_HISTORY_POLICY, "5");
+            passwordsToKeep = Integer.valueOf(oldPasswordsToCheckVal);
+        } catch (NumberFormatException n) {
+            passwordsToKeep = 5;
+        }
+        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep);
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {

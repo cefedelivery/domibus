@@ -1,6 +1,7 @@
 package eu.domibus.common.dao.security;
 
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserPasswordHistory;
 
 import java.util.Collection;
 import java.util.Date;
@@ -16,4 +17,7 @@ public interface UserPasswordHistoryDao {
     void savePassword(final User user, String passwordHash);
 
     void removePasswords(final User user, int passwordsToKeep);
+
+    List<UserPasswordHistory> getPasswordHistory(final User user, int entriesNumber);
+
 }

@@ -1,15 +1,12 @@
 package eu.domibus.common.model.security;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-import org.hibernate.envers.NotAudited;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
+ * @author Ion Perpegel
  * @since 4.1
  */
 
@@ -35,19 +32,20 @@ public class UserPasswordHistory extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date passwordChangeDate;
 
+    public String getPasswordHash() {
+        return password;
+    }
+
     public Date getPasswordDate() {
         return passwordChangeDate;
     }
 
-    public UserPasswordHistory() {
-
-    }
+    public UserPasswordHistory() { }
 
     public UserPasswordHistory(User user, String password) {
         this.user = user;
         this.password = password;
         this.passwordChangeDate = new Date();
     }
-
 
 }
