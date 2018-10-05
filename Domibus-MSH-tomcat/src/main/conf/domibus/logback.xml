@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
+    <!-- pattern definition -->
+    <property name="encoderPattern" value="%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n" scope="global"/>
+
     <!-- multitenancy: start include domains config files here -->
     <!--<include optional="true" file="${catalina.home}/conf/domibus/domain_name-logback.xml"/>-->
     <!-- multitenancy: end include domains config files here -->
+
     <appender name="atomikos" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/atomikos.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -43,7 +47,7 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>${encoderPattern}</pattern>
         </encoder>
     </appender>
     <appender name="security_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -73,7 +77,7 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>${encoderPattern}</pattern>
         </encoder>
     </appender>
     <appender name="business_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -103,13 +107,13 @@
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>${encoderPattern}</pattern>
         </encoder>
     </appender>
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <Target>System.out</Target>
         <encoder>
-            <pattern>%d{ISO8601} [%X{d_user}] [%X{d_domain}] [%X{d_messageId}] %5p %c{1}:%L - %m%n</pattern>
+            <pattern>${encoderPattern}</pattern>
         </encoder>
     </appender>
 
