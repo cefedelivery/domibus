@@ -353,4 +353,17 @@ public class AlertServiceImplTest {
             assertEquals(true, processeds.get(1));
         }};
     }
+
+    @Test
+    public void testFindAlerts(final @Mocked  AlertCriteria alertCriteria,final @Mocked  List<Alert> alerts){
+        new Expectations(){{
+            alertDao.filterAlerts(alertCriteria);
+            result=alerts;
+        }};
+        alertService.findAlerts(alertCriteria);
+        new Verifications(){{
+            alertDao.filterAlerts(alertCriteria);times=1;
+            domainConverter.convert(alerts, eu.domibus.core.alerts.model.service.Alert.class);
+        }};
+    }
 }

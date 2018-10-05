@@ -158,8 +158,9 @@ public class JMSManagerImpl implements JMSManager {
             message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
             //that scenario occurs when sending an event with super user... EG:Login failure with super user.
             if(currentDomain!=null){
-                LOG.debug("Sending event with super user, no current domain defined");
                 message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
+            }else{
+                LOG.debug("Sending event for super user, no current domain defined");
             }
             message1.setStringProperty(SELECTOR, selector);
             return message1;

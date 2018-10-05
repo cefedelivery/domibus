@@ -1,3 +1,5 @@
+Domibus 4.0.1
+- Add email alert support for super user login failure and account disabled.
 Domibus 4.0
 - Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException

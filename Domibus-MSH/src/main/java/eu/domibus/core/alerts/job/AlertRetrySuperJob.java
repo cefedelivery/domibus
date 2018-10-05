@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Thomas Dussart
  * @since 4.0
  */
-@DisallowConcurrentExecution //Only one SenderWorker runs at any time
+@DisallowConcurrentExecution
 public class AlertRetrySuperJob extends GeneralQuartzJobBean {
 
     @Autowired

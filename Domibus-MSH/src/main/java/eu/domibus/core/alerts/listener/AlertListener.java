@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -27,11 +28,13 @@ public class AlertListener {
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'alert'")
-    public void onAlert(final Alert alert,@Header(name = "DOMAIN",required = false) String domain) {
-        if(StringUtils.isNotEmpty(domain)) {
+    public void onAlert(final Alert alert, @Header(name = "DOMAIN", required = false) String domain) {
+        if (StringUtils.isNotEmpty(domain)) {
             domainContextProvider.setCurrentDomain(domain);
+            LOG.debug("Alert received:[{}] for domain:[{}]", alert, domain);
+        } else {
+            LOG.debug("Super alert received:[{}]", alert);
         }
-        LOG.debug("Alert received:[{}]", alert);
         alertDispatcherService.dispatch(alert);
     }
 

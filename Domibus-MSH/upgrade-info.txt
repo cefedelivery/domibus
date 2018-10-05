@@ -1,3 +1,6 @@
+Domibus 4.0.1 (from 4.0.0):
+                - Optional changes(only if Domibus is used in multi-tenancy mode):
+                    - Run the appropriate DB migration script(mysql5innoDb-4.0.0-to-4.0.1-multi-tenancy-migration.ddl for MySQL or oracle10g-4.0.0-to-4.0.1-multi-tenancy-migration.ddl for Oracle)
 Domibus 4.0 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
