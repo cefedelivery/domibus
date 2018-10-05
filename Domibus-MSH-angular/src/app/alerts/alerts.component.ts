@@ -176,12 +176,6 @@ export class AlertsComponent {
     }
 
     searchParams.set('domainAlerts',this.filter.domainAlerts);
-    /*if (this.filter.domainAlerts===false) {
-      searchParams.set('domainAlerts', 'false');
-    }else{
-      searchParams.set('domainAlerts', 'true');
-    }*/
-
     if (this.dynamicFilters.length > 0) {
       let d: string[] = [];
       for (let i = 0; i < this.dynamicFilters.length; i++) {

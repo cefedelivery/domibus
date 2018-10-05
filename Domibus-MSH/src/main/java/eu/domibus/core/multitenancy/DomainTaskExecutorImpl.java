@@ -1,9 +1,6 @@
 package eu.domibus.core.multitenancy;
 
-import eu.domibus.api.multitenancy.DomainCallable;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
-import eu.domibus.api.multitenancy.DomainTaskExecutor;
+import eu.domibus.api.multitenancy.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -38,7 +35,8 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
 
     @Override
     public void submit(Runnable task) {
-        final Future<?> utrFuture = schedulingTaskExecutor.submit(task);
+        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, task);
+        final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
         try {
             utrFuture.get(5000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {

@@ -42,7 +42,7 @@ public interface DomibusPropertyProvider {
     String getDomainProperty(String propertyName, String defaultValue);
 
     /**
-     * When actions are executed under a super admin user, not domain is set in the current thread.
+     * When actions are executed under a super admin user, there is no domain set on the current thread.
      * Nevertheless we need to retrieve some default properties. So if no domain is found, this method will retrieve
      * properties from the default one.
      * @param propertyName the property name.

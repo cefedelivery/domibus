@@ -63,7 +63,7 @@ public class AlertResource {
                                   @RequestParam(value = "parameters", required = false) String[] parameters,
                                   @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
                                   @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo,
-                                  @RequestParam(value = "domainAlerts", required = false,defaultValue = "false") Boolean domainAlerts) {
+                                  @RequestParam(value = "domainAlerts", required = false, defaultValue = "false") Boolean domainAlerts) {
         AlertCriteria alertCriteria = getAlertCriteria(
                 page,
                 pageSize,
@@ -83,27 +83,19 @@ public class AlertResource {
                 dynamicaPropertyTo);
 
         if (!authUtils.isSuperAdmin() || domainAlerts) {
-            return retrieveDomainAlerts(alertCriteria);
+            return retrieveAlerts(alertCriteria);
         }
 
-        final Long superUserAlertCount = domainTaskExecutor.submit(() -> alertService.countAlerts(alertCriteria));
-        final List<Alert> superUserAlerts = domainTaskExecutor.submit(() -> alertService.findAlerts(alertCriteria));
-        final List<AlertRo> superUserAlertRoList = superUserAlerts.stream().map(this::transform).collect(Collectors.toList());
-        final AlertResult alertResult = new AlertResult();
-        alertResult.setAlertsEntries(superUserAlertRoList);
-        alertResult.setCount(superUserAlertCount.intValue());
-        return alertResult;
-
-
+        return domainTaskExecutor.submit(() -> retrieveAlerts(alertCriteria));
     }
 
-    private AlertResult retrieveDomainAlerts(AlertCriteria alertCriteria) {
-        final Long domainAlertCount = alertService.countAlerts(alertCriteria);
-        final List<Alert> domainAlerts = alertService.findAlerts(alertCriteria);
-        final List<AlertRo> domainAlertRoList = domainAlerts.stream().map(this::transform).collect(Collectors.toList());
+    private AlertResult retrieveAlerts(AlertCriteria alertCriteria) {
+        final Long alertCount = alertService.countAlerts(alertCriteria);
+        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
         final AlertResult alertResult = new AlertResult();
-        alertResult.setAlertsEntries(domainAlertRoList);
-        alertResult.setCount(domainAlertCount.intValue());
+        alertResult.setAlertsEntries(alertRoList);
+        alertResult.setCount(alertCount.intValue());
         return alertResult;
     }
 
