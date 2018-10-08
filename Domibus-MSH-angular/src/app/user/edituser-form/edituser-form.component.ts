@@ -4,7 +4,6 @@ import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from '../uservalidator.service';
 import {SecurityService} from '../../security/security.service';
 import {UserService} from '../user.service';
-import {Domain} from '../../security/domain';
 import {DomainService} from '../../security/domain.service';
 import {UserState} from '../user';
 
@@ -15,7 +14,6 @@ const EDIT_MODE = 'User Edit';
 @Component({
   selector: 'edituser-form',
   templateUrl: 'edituser-form.component.html',
-  providers: [UserService, UserValidatorService]
 })
 
 export class EditUserComponent implements OnInit {
@@ -32,7 +30,8 @@ export class EditUserComponent implements OnInit {
   domain: string;
 
   public emailPattern = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}';
-  public passwordPattern = '^(?=.*[A-Z])(?=.*[ !#$%&\'()*+,-./:;<=>?@\\[^_`{|}~\\\]"])(?=.*[0-9])(?=.*[a-z]).{8,32}$';
+  public passwordPattern: string;
+  public passwordValidationMessage: string;
 
   editMode: boolean;
   canChangePassword: boolean;
@@ -100,6 +99,10 @@ export class EditUserComponent implements OnInit {
 
   async ngOnInit () {
     this.isDomainVisible = await this.userService.isDomainVisible();
+
+    const passwordPolicy = await this.userService.getPasswordPolicy();
+    this.passwordPattern = passwordPolicy.pattern;
+    this.passwordValidationMessage = passwordPolicy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
   }
 
   updateUserName (event) {

@@ -81,10 +81,26 @@ export class UserService {
     }
   }
 
+  passwordPolicy: Promise<PasswordPolicyRO>;
+
+  getPasswordPolicy (): Promise<PasswordPolicyRO> {
+    if (!this.passwordPolicy) {
+      this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
+        .map(this.extractData)
+        .catch(err => this.alertService.handleError(err))
+        .toPromise();
+    }
+    return this.passwordPolicy;
+  }
 }
 
 export class UserSearchCriteria {
   authRole: string;
   userName: string;
   deleted: boolean;
+}
+
+export class PasswordPolicyRO {
+  pattern: string;
+  validationMessage: string;
 }

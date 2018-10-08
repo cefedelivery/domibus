@@ -81,6 +81,8 @@ import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-fo
 import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
 import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
 import {GlobalErrorHandler} from './common/global.error-handler';
+import {UserService} from './user/user.service';
+import {UserValidatorService} from './user/uservalidator.service';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -202,7 +204,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     {
       provide: ErrorHandler,
       useClass: GlobalErrorHandler
-    }
+    },
+    UserService,
+    UserValidatorService
   ],
   bootstrap: [AppComponent]
 })

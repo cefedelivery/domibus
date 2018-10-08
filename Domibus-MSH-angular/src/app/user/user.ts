@@ -37,3 +37,5 @@ export class UserResponseRO {
     this.domainName = domain ? domain.name : null;
   }
 }
+
+
