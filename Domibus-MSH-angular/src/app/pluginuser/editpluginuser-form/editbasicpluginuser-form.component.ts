@@ -1,10 +1,10 @@
-import {Component, Inject, ChangeDetectorRef, OnInit} from '@angular/core';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {Component, Inject, OnInit} from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from '../../user/uservalidator.service';
-import {SecurityService} from '../../security/security.service';
 import {PluginUserRO} from '../pluginuser';
 import {PluginUserService} from '../pluginuser.service';
+import {UserService} from '../../user/user.service';
 
 const NEW_MODE = 'New User';
 const EDIT_MODE = 'User Edit';
@@ -14,11 +14,13 @@ const EDIT_MODE = 'User Edit';
   templateUrl: './editbasicpluginuser-form.component.html',
   providers: [UserValidatorService]
 })
-export class EditbasicpluginuserFormComponent {
+
+export class EditbasicpluginuserFormComponent implements OnInit {
 
   existingRoles = [];
   confirmation: string;
-  public passwordPattern = PluginUserService.passwordPattern;
+  public passwordPattern: string;
+  public passwordValidationMessage: string;
   editMode: boolean;
   formTitle: string;
   userForm: FormGroup;
@@ -33,6 +35,7 @@ export class EditbasicpluginuserFormComponent {
   constructor (public dialogRef: MdDialogRef<EditbasicpluginuserFormComponent>,
                @Inject(MD_DIALOG_DATA) public data: any,
                fb: FormBuilder,
+               private userService: UserService,
                userValidatorService: UserValidatorService) {
 
     this.existingRoles = data.userroles;
@@ -64,6 +67,12 @@ export class EditbasicpluginuserFormComponent {
         validator: userValidatorService.validateForm()
       });
     }
+  }
+
+  async ngOnInit () {
+    const passwordPolicy = await this.userService.getPasswordPolicy();
+    this.passwordPattern = passwordPolicy.pattern;
+    this.passwordValidationMessage = passwordPolicy.validationMessage;
   }
 
   submitForm () {

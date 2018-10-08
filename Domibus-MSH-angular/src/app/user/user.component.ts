@@ -24,7 +24,6 @@ import {Domain} from '../security/domain';
   styleUrls: ['./user.component.css']
 })
 
-
 export class UserComponent implements OnInit, DirtyOperations {
   static readonly USER_URL: string = 'rest/user';
   static readonly USER_USERS_URL: string = UserComponent.USER_URL + '/users';

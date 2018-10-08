@@ -40,12 +40,6 @@
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')" style="color:red; font-size: 70%">
             Password should follow all of these rules:<br>
             <div [innerHTML]="passwordValidationMessage"></div>
-            <!-- - Minimum length: 8 characters<br>-->
-            <!-- - Maximum length: 32 characters<br>-->
-            <!-- - At least one letter in lowercase<br>-->
-            <!-- - At least one letter in uppercase<br>-->
-            <!-- - At least one digit<br>-->
-            <!-- - At least one special character-->
           </div>
         </md-input-container>
       </div>

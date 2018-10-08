@@ -87,6 +87,10 @@ export class UserService {
     if (!this.passwordPolicy) {
       this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
         .map(this.extractData)
+        .map((policy: PasswordPolicyRO) => {
+          policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
+          return policy;
+        })
         .catch(err => this.alertService.handleError(err))
         .toPromise();
     }

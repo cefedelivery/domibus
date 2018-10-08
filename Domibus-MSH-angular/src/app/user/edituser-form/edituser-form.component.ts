@@ -102,7 +102,7 @@ export class EditUserComponent implements OnInit {
 
     const passwordPolicy = await this.userService.getPasswordPolicy();
     this.passwordPattern = passwordPolicy.pattern;
-    this.passwordValidationMessage = passwordPolicy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
+    this.passwordValidationMessage = passwordPolicy.validationMessage;
   }
 
   updateUserName (event) {
