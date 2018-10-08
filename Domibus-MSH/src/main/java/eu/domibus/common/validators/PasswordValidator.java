@@ -63,11 +63,6 @@ public class PasswordValidator {
             return;
         }
 
-        final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
-
-        LOG.info("pattern key: \"domibus.passwordPolicy.pattern\"");
-        LOG.info("pattern found    value: " + passwordPattern);
-        LOG.info("pattern expected value: " + PASSWORD_COMPLEXITY_PATTERN);
         Pattern patternNoControlChar = Pattern.compile(passwordPattern);
         Matcher m = patternNoControlChar.matcher(password);
         if (!m.matches()) {
@@ -88,8 +83,10 @@ public class PasswordValidator {
             oldPasswordsToCheck = 0;
         }
 
-        //if (oldPasswordsToCheck == domibus.console.login.suspension.time)
-        //String passHash = bcryptEncoder.encode(password);
+        if (oldPasswordsToCheck == 0) {
+            return;
+        }
+
         User user = userDao.loadActiveUserByUsername(userName);
         List<UserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
         if (oldPasswords.stream().anyMatch(el -> bcryptEncoder.matches(password, el.getPasswordHash()))) {

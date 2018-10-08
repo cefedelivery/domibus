@@ -83,4 +83,14 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     public boolean isFourCornerEnabled() {
         return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
     }
+
+    @Override
+    public String getPasswordPattern() {
+        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.pattern", "");
+    }
+
+    @Override
+    public String getPasswordValidationMessage() {
+        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.validationMessage", "");
+    }
 }

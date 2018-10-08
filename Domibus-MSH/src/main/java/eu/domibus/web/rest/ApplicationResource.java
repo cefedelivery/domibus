@@ -11,6 +11,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
+import eu.domibus.web.rest.ro.PasswordPolicyRO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +116,19 @@ public class ApplicationResource {
     public boolean getFourCornerModelEnabled() {
         LOG.debug("Getting four corner enabled");
         return domibusConfigurationService.isFourCornerEnabled();
+    }
+
+    /**
+     * Retrieves the password policy info
+     *
+     * @return password policy info
+     */
+    @RequestMapping(value = "passwordPolicy", method = RequestMethod.GET)
+    public PasswordPolicyRO getPasswordPolicy() {
+        LOG.debug("Getting password policy");
+        String pattern = domibusConfigurationService.getPasswordPattern();
+        String validationMessage = domibusConfigurationService.getPasswordValidationMessage();
+        return new PasswordPolicyRO(pattern, validationMessage);
     }
 
 }
