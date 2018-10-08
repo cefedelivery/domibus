@@ -83,6 +83,7 @@ import { PartyIdentifierDetailsComponent } from './party/party-identifier-detail
 import {GlobalErrorHandler} from './common/global.error-handler';
 import {UserService} from './user/user.service';
 import {UserValidatorService} from './user/uservalidator.service';
+import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -189,6 +190,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuthorizedGuard,
     AuthorizedAdminGuard,
     DirtyGuard,
+    DefaultPasswordGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,

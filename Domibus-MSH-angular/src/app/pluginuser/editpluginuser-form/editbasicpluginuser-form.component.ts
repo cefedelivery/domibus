@@ -4,7 +4,7 @@ import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from '../../user/uservalidator.service';
 import {PluginUserRO} from '../pluginuser';
 import {PluginUserService} from '../pluginuser.service';
-import {UserService} from '../../user/user.service';
+import {SecurityService} from '../../security/security.service';
 
 const NEW_MODE = 'New User';
 const EDIT_MODE = 'User Edit';
@@ -35,7 +35,7 @@ export class EditbasicpluginuserFormComponent implements OnInit {
   constructor (public dialogRef: MdDialogRef<EditbasicpluginuserFormComponent>,
                @Inject(MD_DIALOG_DATA) public data: any,
                fb: FormBuilder,
-               private userService: UserService,
+               private securityService: SecurityService,
                userValidatorService: UserValidatorService) {
 
     this.existingRoles = data.userroles;
@@ -70,7 +70,7 @@ export class EditbasicpluginuserFormComponent implements OnInit {
   }
 
   async ngOnInit () {
-    const passwordPolicy = await this.userService.getPasswordPolicy();
+    const passwordPolicy = await this.securityService.getPasswordPolicy();
     this.passwordPattern = passwordPolicy.pattern;
     this.passwordValidationMessage = passwordPolicy.validationMessage;
   }

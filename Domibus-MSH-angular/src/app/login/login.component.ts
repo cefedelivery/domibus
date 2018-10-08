@@ -1,13 +1,10 @@
 ﻿import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router, ActivatedRoute, NavigationStart} from '@angular/router';
 import {SecurityService} from '../security/security.service';
-import {HttpEventService} from '../http/http.event.service';
 import {AlertService} from '../alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
-import {User} from '../security/user';
-import {MdDialogRef, MdDialog} from '@angular/material';
+import { MdDialog} from '@angular/material';
 import {DefaultPasswordDialogComponent} from 'app/security/default-password-dialog/default-password-dialog.component';
-import {isNullOrUndefined} from 'util';
 
 @Component({
   moduleId: module.id,
@@ -36,11 +33,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
     this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
-      data => {
-        console.log('Authentication successfull');
-        this.verifyDefaultLoginUsed();
-        this.router.navigate([this.returnUrl]);
-      });
+      () => this.onLoginSuccessEvent()
+      // async data => {
+      //   this.verifyDefaultLoginUsed();
+      //   this.router.navigate([this.returnUrl]);
+      // }
+      );
 
     this.securityEventService.onLoginErrorEvent().subscribe(
       error => {
@@ -85,12 +83,22 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.securityService.login(this.model.username, this.model.password);
   }
 
-  verifyDefaultLoginUsed () {
-    let currentUser: User = this.securityService.getCurrentUser();
-    if (currentUser.defaultPasswordUsed) {
+  async onLoginSuccessEvent() {
+    const shouldChangePassword = await this.securityService.shouldChangePassword();
+    if (shouldChangePassword) {
       this.dialog.open(DefaultPasswordDialogComponent);
+      this.router.navigate(['/user']);
+    } else {
+      this.router.navigate([this.returnUrl]);
     }
   }
+
+  // async verifyDefaultLoginUsed () {
+  //   const shouldChangePassword = await this.securityService.shouldChangePassword();
+  //   if (shouldChangePassword) {
+  //     this.dialog.open(DefaultPasswordDialogComponent);
+  //   }
+  // }
 
   ngOnDestroy (): void {
     console.log('Destroying login component');

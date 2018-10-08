@@ -1,12 +1,13 @@
 ﻿import {Injectable} from '@angular/core';
-import {Http, Headers, Response} from '@angular/http';
+import {Headers, Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import {User} from './user';
 import {ReplaySubject} from 'rxjs';
 import {SecurityEventService} from './security.event.service';
 import {DomainService} from './domain.service';
-import {Title} from '@angular/platform-browser';
+import {PasswordPolicyRO} from './passwordPolicyRO';
+import {AlertService} from '../alert/alert.service';
 
 @Injectable()
 export class SecurityService {
@@ -15,6 +16,7 @@ export class SecurityService {
 
   constructor (private http: Http,
                private securityEventService: SecurityEventService,
+               private alertService: AlertService,
                private domainService: DomainService) {
   }
 
@@ -43,7 +45,7 @@ export class SecurityService {
   }
 
   logout () {
-    console.log('Logging out');
+    // console.log('Logging out');
     this.clearSession();
 
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
@@ -128,4 +130,36 @@ export class SecurityService {
     });
     return subject.asObservable();
   }
+
+  passwordPolicy: Promise<PasswordPolicyRO>;
+
+  getPasswordPolicy (): Promise<PasswordPolicyRO> {
+    if (!this.passwordPolicy) {
+      this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
+        .map(this.extractData)
+        .map((policy: PasswordPolicyRO) => {
+          policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
+          return policy;
+        })
+        .catch(err => this.alertService.handleError(err))
+        .toPromise();
+    }
+    return this.passwordPolicy;
+  }
+
+  async shouldChangePassword (): Promise<boolean> {
+    const currentUser: User = this.getCurrentUser();
+    if (!currentUser.defaultPasswordUsed) {
+      return Promise.resolve(false);
+    }
+
+    const policy: PasswordPolicyRO = await this.getPasswordPolicy();
+    return policy.checkDefault;
+  }
+
+  private extractData (res: Response) {
+    const result = res.json() || {};
+    return result;
+  }
 }
+

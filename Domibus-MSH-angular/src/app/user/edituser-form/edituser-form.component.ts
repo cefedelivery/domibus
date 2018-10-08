@@ -100,7 +100,7 @@ export class EditUserComponent implements OnInit {
   async ngOnInit () {
     this.isDomainVisible = await this.userService.isDomainVisible();
 
-    const passwordPolicy = await this.userService.getPasswordPolicy();
+    const passwordPolicy = await this.securityService.getPasswordPolicy();
     this.passwordPattern = passwordPolicy.pattern;
     this.passwordValidationMessage = passwordPolicy.validationMessage;
   }

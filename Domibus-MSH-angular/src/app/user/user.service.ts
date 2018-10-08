@@ -81,21 +81,6 @@ export class UserService {
     }
   }
 
-  passwordPolicy: Promise<PasswordPolicyRO>;
-
-  getPasswordPolicy (): Promise<PasswordPolicyRO> {
-    if (!this.passwordPolicy) {
-      this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
-        .map(this.extractData)
-        .map((policy: PasswordPolicyRO) => {
-          policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
-          return policy;
-        })
-        .catch(err => this.alertService.handleError(err))
-        .toPromise();
-    }
-    return this.passwordPolicy;
-  }
 }
 
 export class UserSearchCriteria {
@@ -104,7 +89,3 @@ export class UserSearchCriteria {
   deleted: boolean;
 }
 
-export class PasswordPolicyRO {
-  pattern: string;
-  validationMessage: string;
-}
