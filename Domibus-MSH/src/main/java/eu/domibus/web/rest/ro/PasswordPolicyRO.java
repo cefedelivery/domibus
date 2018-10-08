@@ -9,24 +9,27 @@ import java.io.Serializable;
 public class PasswordPolicyRO implements Serializable {
 
     private String pattern;
-
     private String validationMessage;
+    private boolean checkDefault;
 
-    public PasswordPolicyRO(String pattern, String validationMessage) {
+    public PasswordPolicyRO(String pattern, String validationMessage, boolean checkDefault) {
         this.pattern = pattern;
         this.validationMessage = validationMessage;
+        this.checkDefault = checkDefault;
     }
 
     public String getPattern() {
         return pattern;
     }
-
-    public void setPattern(String pattern) { this.pattern = pattern; }
-
     public String getValidationMessage() {
         return validationMessage;
     }
+    public boolean getCheckDefault() {
+        return checkDefault;
+    }
 
-    public void setValidationMessage(String validationMessage) { this.validationMessage = validationMessage; }
+
+//    public void setPattern(String pattern) { this.pattern = pattern; }
+//    public void setValidationMessage(String validationMessage) { this.validationMessage = validationMessage; }
 
 }

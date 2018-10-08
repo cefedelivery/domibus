@@ -30,4 +30,6 @@ public interface DomibusConfigurationService {
     String getPasswordPattern();
 
     String getPasswordValidationMessage();
+
+    boolean getCheckDefaultPassword();
 }

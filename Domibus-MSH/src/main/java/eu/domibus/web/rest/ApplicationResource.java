@@ -126,9 +126,13 @@ public class ApplicationResource {
     @RequestMapping(value = "passwordPolicy", method = RequestMethod.GET)
     public PasswordPolicyRO getPasswordPolicy() {
         LOG.debug("Getting password policy");
+
         String pattern = domibusConfigurationService.getPasswordPattern();
         String validationMessage = domibusConfigurationService.getPasswordValidationMessage();
-        return new PasswordPolicyRO(pattern, validationMessage);
+        boolean checkDefaultPassword = domibusConfigurationService.getCheckDefaultPassword();
+
+        LOG.debug("password policy= {} {} {}", pattern, validationMessage, checkDefaultPassword);
+        return new PasswordPolicyRO(pattern, validationMessage, checkDefaultPassword);
     }
 
 }

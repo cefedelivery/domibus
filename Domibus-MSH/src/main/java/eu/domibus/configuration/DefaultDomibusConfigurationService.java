@@ -93,4 +93,9 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     public String getPasswordValidationMessage() {
         return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.validationMessage", "");
     }
+
+    @Override
+    public boolean getCheckDefaultPassword() {
+        return Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.cheeckDefaultPassword", "true"));
+    }
 }
