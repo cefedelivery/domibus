@@ -1,3 +1,7 @@
+Domibus 4.0.1
+- changes in order to improve logging for multitenancy:
+    - domibus.log, business.log and security.log will contains only entries without domain information
+    - a logback.xml file for 'default' domain should be added always apart from the other domains
 Domibus 4.0
 - Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException
