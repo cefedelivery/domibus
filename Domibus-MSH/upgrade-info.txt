@@ -3,7 +3,7 @@ Domibus 4.1 (from 4.0):
                    o in case the probe URL is used, the new probe URL is /domibus/services/msh
                 - [Wildfly only]
                    o in case the probe URL is used, the new probe URL is /domibus/services/msh
-                Logging for multitenancy:
+                In case you are using multitenancy please make the following modifications:
                     - replace old logback.xml with the new version of logback.xml keeping existing packages to be logged
                     and uncomment the proper sections for multitenancy
                     - replace each domain-name_logback.xml file with the newer version and keep existing packages for logging
