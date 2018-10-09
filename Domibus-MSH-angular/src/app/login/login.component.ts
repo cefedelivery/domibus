@@ -3,7 +3,7 @@ import {Router, ActivatedRoute, NavigationStart} from '@angular/router';
 import {SecurityService} from '../security/security.service';
 import {AlertService} from '../alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
-import { MdDialog} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {DefaultPasswordDialogComponent} from 'app/security/default-password-dialog/default-password-dialog.component';
 
 @Component({
@@ -32,12 +32,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
-    this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
-      () => this.onLoginSuccessEvent()
-      // async data => {
-      //   this.verifyDefaultLoginUsed();
-      //   this.router.navigate([this.returnUrl]);
-      // }
+    this.sub = this.securityEventService.onLoginSuccessEvent()
+      .subscribe(
+        () => this.onLoginSuccessEvent()
       );
 
     this.securityEventService.onLoginErrorEvent().subscribe(
@@ -83,8 +80,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.securityService.login(this.model.username, this.model.password);
   }
 
-  async onLoginSuccessEvent() {
-    const shouldChangePassword = await this.securityService.shouldChangePassword();
+  onLoginSuccessEvent () {
+    const shouldChangePassword = this.securityService.shouldChangePassword();
     if (shouldChangePassword) {
       this.dialog.open(DefaultPasswordDialogComponent);
       this.router.navigate(['/user']);
@@ -93,10 +90,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  // async verifyDefaultLoginUsed () {
+  // async onLoginSuccessEvent () {
   //   const shouldChangePassword = await this.securityService.shouldChangePassword();
   //   if (shouldChangePassword) {
   //     this.dialog.open(DefaultPasswordDialogComponent);
+  //     this.router.navigate(['/user']);
+  //   } else {
+  //     this.router.navigate([this.returnUrl]);
   //   }
   // }
 

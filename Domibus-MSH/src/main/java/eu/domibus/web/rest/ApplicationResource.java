@@ -131,7 +131,6 @@ public class ApplicationResource {
         String validationMessage = domibusConfigurationService.getPasswordValidationMessage();
         boolean checkDefaultPassword = domibusConfigurationService.getCheckDefaultPassword();
 
-        LOG.debug("password policy= {} {} {}", pattern, validationMessage, checkDefaultPassword);
         return new PasswordPolicyRO(pattern, validationMessage, checkDefaultPassword);
     }
 

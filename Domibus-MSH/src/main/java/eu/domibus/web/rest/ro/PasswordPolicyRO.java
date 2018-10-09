@@ -28,8 +28,4 @@ public class PasswordPolicyRO implements Serializable {
         return checkDefault;
     }
 
-
-//    public void setPattern(String pattern) { this.pattern = pattern; }
-//    public void setValidationMessage(String validationMessage) { this.validationMessage = validationMessage; }
-
 }

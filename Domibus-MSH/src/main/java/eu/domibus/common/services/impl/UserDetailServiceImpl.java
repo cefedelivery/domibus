@@ -1,11 +1,16 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.security.DefaultCredentials;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,6 +32,11 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    protected DomainContextProvider domainContextProvider;
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = UsernameNotFoundException.class)
@@ -38,16 +48,36 @@ public class UserDetailServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(msg);
         }
         boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
-        return new UserDetail(user,defaultPasswordUsed);
+        return new UserDetail(user, defaultPasswordUsed);
     }
 
 
-    private boolean isDefaultPasswordUsed(final String user, final String password){
-        boolean defaultPassword=false;
+    private boolean isDefaultPasswordUsed(final String user, final String password) {
+        boolean defaultPasswordUsed = false;
         String defaultPasswordForUser = DefaultCredentials.getDefaultPasswordForUser(user);
-        if(defaultPasswordForUser!=null) {
-            defaultPassword = bcryptEncoder.matches(defaultPasswordForUser, password);
+        if (defaultPasswordForUser != null) {
+            defaultPasswordUsed = bcryptEncoder.matches(defaultPasswordForUser, password);
+
+            boolean cheeckDefaultPassword = Boolean.parseBoolean(getOptionalDomainProperty("domibus.passwordPolicy.cheeckDefaultPassword", "true"));
+            defaultPasswordUsed = defaultPasswordUsed && cheeckDefaultPassword;
         }
-        return defaultPassword;
+
+        return defaultPasswordUsed;
+    }
+
+    private String getOptionalDomainProperty(final String propertyName, final String defaultValue) {
+        final String propertyValue = getOptionalDomainProperty(propertyName);
+        if (StringUtils.isNotEmpty(propertyValue)) {
+            return propertyValue;
+        }
+        return defaultValue;
+    }
+
+    private String getOptionalDomainProperty(String propertyName) {
+        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        if (currentDomain == null) {
+            currentDomain = DomainService.DEFAULT_DOMAIN;
+        }
+        return domibusPropertyProvider.getDomainProperty(currentDomain, propertyName);
     }
 }

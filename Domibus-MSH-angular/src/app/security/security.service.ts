@@ -25,23 +25,21 @@ export class SecurityService {
 
     const headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication',
-      JSON.stringify({
+      {
         username: username,
         password: password
-      }),
-      {headers: headers})
-      .subscribe((response: Response) => {
-          console.log('Login success');
-          localStorage.setItem('currentUser', JSON.stringify(response.json()));
+      }).subscribe((response: Response) => {
+        // console.log('Login success');
+        localStorage.setItem('currentUser', JSON.stringify(response.json()));
 
-          this.domainService.setAppTitle();
+        this.domainService.setAppTitle();
 
-          this.securityEventService.notifyLoginSuccessEvent(response);
-        },
-        (error: any) => {
-          console.log('Login error');
-          this.securityEventService.notifyLoginErrorEvent(error);
-        });
+        this.securityEventService.notifyLoginSuccessEvent(response);
+      },
+      (error: any) => {
+        console.log('Login error');
+        this.securityEventService.notifyLoginErrorEvent(error);
+      });
   }
 
   logout () {
@@ -149,13 +147,18 @@ export class SecurityService {
 
   async shouldChangePassword (): Promise<boolean> {
     const currentUser: User = this.getCurrentUser();
-    if (!currentUser.defaultPasswordUsed) {
-      return Promise.resolve(false);
-    }
-
-    const policy: PasswordPolicyRO = await this.getPasswordPolicy();
-    return policy.checkDefault;
+    return currentUser.defaultPasswordUsed;
   }
+
+  // async shouldChangePassword (): Promise<boolean> {
+  //   const currentUser: User = this.getCurrentUser();
+  //   if (!currentUser.defaultPasswordUsed) {
+  //     return Promise.resolve(false);
+  //   }
+  //
+  //   const policy: PasswordPolicyRO = await this.getPasswordPolicy();
+  //   return policy.checkDefault;
+  // }
 
   private extractData (res: Response) {
     const result = res.json() || {};
