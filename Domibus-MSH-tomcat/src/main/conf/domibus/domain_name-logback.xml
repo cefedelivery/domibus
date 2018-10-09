@@ -4,12 +4,19 @@
     <property name="domainName" value="domain_name" scope="local" />
     <appender name="${domainName}-file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.home}/logs/${domainName}-domibus.log</file>
-            <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
-                <domainName>${domainName}</domainName>
-                <markerName>SECURITY,BUSINESS</markerName>
-                <markerMismatch>NEUTRAL</markerMismatch>
-                <markerMatch>DENY</markerMatch>
-            </filter>
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain>${domainName}</domain>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SECURITY</marker>
+                <marker>BUSINESS</marker>
+            </evaluator>
+            <onMismatch>NEUTRAL</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
             <fileNamePattern>${catalina.home}/logs/${domainName}-domibus-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -28,11 +35,17 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
-        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
-                <domainName>${domainName}</domainName>
-                <markerName>SECURITY</markerName>
-                <markerMismatch>DENY</markerMismatch>
-                <markerMatch>NEUTRAL</markerMatch>
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain>${domainName}</domain>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SECURITY</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
@@ -51,11 +64,17 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
-        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">      
-                <domainName>${domainName}</domainName>
-                <markerName>BUSINESS</markerName>
-                <markerMismatch>DENY</markerMismatch>
-                <markerMatch>NEUTRAL</markerMatch>
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain>${domainName}</domain>
+            <OnMismatch>DENY</OnMismatch>
+            <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>BUSINESS</marker>
+            </evaluator>
+            <onMismatch>DENY</onMismatch>
+            <onMatch>NEUTRAL</onMatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
@@ -70,12 +89,12 @@
         </encoder>
     </appender>
 
-    <logger name="eu.domibus" level="INFO" additivity="false">
+    <logger name="eu.domibus" level="INFO">
         <appender-ref ref="${domainName}-security-file"/>
         <appender-ref ref="${domainName}-business-file"/>
     </logger>
 
-    <root level="WARN" additivity="false">
+    <root level="WARN">
         <appender-ref ref="${domainName}-file"/>
     </root>
 

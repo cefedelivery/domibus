@@ -10,6 +10,12 @@
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${JBOSS_HOME}/logs/domibus.log</file>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>SECURITY</marker>
@@ -35,6 +41,12 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>SECURITY</marker>
@@ -57,6 +69,12 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
+        <!-- multitenancy: uncomment this
+        <filter class="eu.domibus.logging.DomibusLoggerDomainFilter">
+            <domain></domain>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+        -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
                 <marker>BUSINESS</marker>
