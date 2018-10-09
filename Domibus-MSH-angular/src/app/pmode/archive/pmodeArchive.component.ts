@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnInit, SecurityContext, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {Http, Headers, Response} from '@angular/http';
@@ -37,6 +37,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
 
   private ERROR_PMODE_EMPTY = 'As PMode is empty, no file was downloaded.';
 
+  @ViewChild('descriptionTpl') public descriptionTpl: TemplateRef<any>;
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
@@ -126,6 +127,7 @@ export class PModeArchiveComponent implements OnInit, DirtyOperations {
         sortable: false
       },
       {
+        cellTemplate: this.descriptionTpl,
         name: 'Description',
         sortable: false
       },

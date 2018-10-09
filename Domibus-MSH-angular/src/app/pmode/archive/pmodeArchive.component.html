@@ -42,6 +42,10 @@
           (select)="onSelect($event)">
         </ngx-datatable>
 
+        <ng-template #descriptionTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+          <span class="text-select">{{value}}</span>
+        </ng-template>
+
         <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
           <span class="text-select">{{value| domibusDate: dateFormat}}</span>
         </ng-template>
