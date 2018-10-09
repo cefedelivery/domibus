@@ -3,8 +3,7 @@ package eu.domibus.common.dao.security;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
 
-import java.util.Collection;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -12,7 +11,7 @@ import java.util.List;
  */
 public interface UserPasswordHistoryDao {
 
-    Date findPasswordDate(final User user);
+    LocalDate findPasswordDate(final User user);
 
     void savePassword(final User user, String passwordHash);
 

@@ -45,7 +45,6 @@ public interface UserService {
      */
     void reactivateSuspendedUsers();
 
-
     /**
      * Verify if user add some incorrect login attempt and reset the attempt counter.
      * @param username the userName
@@ -56,5 +55,12 @@ public interface UserService {
      * Verify if the user's password is expired.
      * @param username the userName
      */
-    void handleExpiredPassword(String username);
+    void validateExpiredPassword(String username);
+
+    /**
+     * Verify if the user's password is "almost" expired
+     * @param username the userName
+     * @return the days till expiration; -1 if it is not to raise a warning
+     */
+    int validateDaysTillExpiration(String username);
 }

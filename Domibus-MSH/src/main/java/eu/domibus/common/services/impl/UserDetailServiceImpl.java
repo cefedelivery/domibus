@@ -7,6 +7,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.security.DefaultCredentials;
@@ -38,6 +39,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     @Transactional(readOnly = true, noRollbackFor = UsernameNotFoundException.class)
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
@@ -48,7 +52,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(msg);
         }
         boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
-        return new UserDetail(user, defaultPasswordUsed);
+        UserDetail userDetail = new UserDetail(user, defaultPasswordUsed);
+
+        userDetail.setDaysTillExpiration(userService.validateDaysTillExpiration(userName));
+        return userDetail;
     }
 
 
@@ -65,6 +72,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         return defaultPasswordUsed;
     }
 
+    //TODO: these methods shuld be deleled as soon as the equivalent ones from Thomas will become availible
     private String getOptionalDomainProperty(final String propertyName, final String defaultValue) {
         final String propertyValue = getOptionalDomainProperty(propertyName);
         if (StringUtils.isNotEmpty(propertyValue)) {

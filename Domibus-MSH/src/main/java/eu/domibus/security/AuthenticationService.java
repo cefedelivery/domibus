@@ -42,7 +42,7 @@ public class AuthenticationService {
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
-            userService.handleExpiredPassword(username);
+            userService.validateExpiredPassword(username);
             userService.handleCorrectAuthentication(username);
         } catch (AuthenticationException ae) {
             UserLoginErrorReason userLoginErrorReason = userService.handleWrongAuthentication(username);

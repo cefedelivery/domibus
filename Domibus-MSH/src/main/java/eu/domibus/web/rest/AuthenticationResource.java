@@ -105,6 +105,7 @@ public class AuthenticationResource {
         userRO.setUsername(loginRO.getUsername());
         userRO.setAuthorities(authorities);
         userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
+        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
         return userRO;
     }
 

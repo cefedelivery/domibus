@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -290,10 +292,72 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public void handleExpiredPassword(final String userName) {
+    public void validateExpiredPassword(final String userName) {
         User user = userDao.loadActiveUserByUsername(userName);
-        LOG.trace("handleExpiredPassword for user [{}]", userName);
+        LOG.trace("validateExpiredPassword for user [{}]", userName);
 
+        int maxPasswordAgeInDays = getMaxPasswordAgeInDays(user);
+        LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
+
+        if (maxPasswordAgeInDays == 0) {
+            return;
+        }
+
+        LocalDate minDate = LocalDate.now().minusDays(maxPasswordAgeInDays);
+        LocalDate passwordDate = userPasswordHistoryDao.findPasswordDate(user);
+        if (passwordDate == null || passwordDate.isBefore(minDate)) {
+            LOG.debug("Password expired since [{}] for user [{}]", minDate, user.getUserName());
+            throw new AuthenticationException("Password expired");
+        }
+    }
+
+    @Override
+    public int validateDaysTillExpiration(String userName) {
+        User user = userDao.loadActiveUserByUsername(userName);
+        LOG.trace("validateDaysTillExpiration for user [{}]", userName);
+
+        int maxPasswordAgeInDays = getMaxPasswordAgeInDays(user);
+        if (maxPasswordAgeInDays == 0) {
+            return -1;
+        }
+
+        int daysBeforeExpiration;
+        try {
+            final Domain domain = getCurrentOrDefaultDomainForUser(user);
+
+            String maxPasswordAgeInDaysVal = domibusPropertyProvider.getDomainProperty(domain, "domibus.passwordPolicy.alert.beforeExpiration", "5");
+            daysBeforeExpiration = Integer.valueOf(maxPasswordAgeInDaysVal);
+        } catch (NumberFormatException n) {
+            daysBeforeExpiration = 5;
+        }
+
+        if (daysBeforeExpiration >= maxPasswordAgeInDays) {
+            LOG.warn("Password policy: days until expiration for user [{}] is greater that max age.", userName);
+            return -1;
+        }
+
+        LocalDate passwordDate = userPasswordHistoryDao.findPasswordDate(user);
+        if (passwordDate == null) {
+            LOG.debug("Password policy: expiration date for user [{}] is not set", userName);
+            return -1;
+        }
+
+        LocalDate expirationDate = passwordDate.plusDays(maxPasswordAgeInDays);
+        LocalDate today = LocalDate.now();
+        LOG.debug("Password policy: passwordDate=[{}],  expirationDate=[{}],  today=[{}]", passwordDate, expirationDate, today);
+
+        int period = Period.between(today, expirationDate).getDays();
+
+        LOG.debug("Password policy: days until expiration for user [{}] : {} days", userName, period);
+
+        if (period > 0 && period < daysBeforeExpiration) {
+            return period;
+        } else {
+            return -1;
+        }
+    }
+
+    private int getMaxPasswordAgeInDays(User user) {
         int maxPasswordAgeInDays;
         try {
             final Domain domain = getCurrentOrDefaultDomainForUser(user);
@@ -303,17 +367,7 @@ public class UserManagementServiceImpl implements UserService {
         } catch (NumberFormatException n) {
             maxPasswordAgeInDays = 0;
         }
-
-        LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
-        if (maxPasswordAgeInDays == 0) {
-            return;
-        }
-
-        Date minDate = DateUtils.addDays(new Date(), -maxPasswordAgeInDays);
-        Date passwordDate = userPasswordHistoryDao.findPasswordDate(user);
-        if (passwordDate == null || passwordDate.before(minDate)) {
-            LOG.debug("Password expired since [{}] for user [{}]" , minDate,  user.getUserName());
-            throw new AuthenticationException("Password expired");
-        }
+        LOG.debug("Password policy: max password age for user [{}] : {} days", user.getUserName(), maxPasswordAgeInDays);
+        return maxPasswordAgeInDays;
     }
 }

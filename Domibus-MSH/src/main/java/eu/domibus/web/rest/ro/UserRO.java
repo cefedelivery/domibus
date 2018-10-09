@@ -13,6 +13,7 @@ public class UserRO implements Serializable {
     private String username;
     private List<String> authorities;
     private boolean defaultPasswordUsed;
+    private Integer daysTillExpiration;
 
     public Integer getId() {
         return id;
@@ -45,4 +46,11 @@ public class UserRO implements Serializable {
     public void setDefaultPasswordUsed(boolean defaultPasswordUsed) {
         this.defaultPasswordUsed = defaultPasswordUsed;
     }
+
+    public int getDaysTillExpiration() {
+        return daysTillExpiration;
+    }
+
+    public void setDaysTillExpiration(int daysTillExpiration) { this.daysTillExpiration = daysTillExpiration; }
+
 }

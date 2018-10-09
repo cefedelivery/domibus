@@ -145,12 +145,23 @@ export class SecurityService {
     return this.passwordPolicy;
   }
 
-  async shouldChangePassword (): Promise<boolean> {
+  mustChangePassword (): boolean {
     const currentUser: User = this.getCurrentUser();
     return currentUser.defaultPasswordUsed;
   }
 
-  // async shouldChangePassword (): Promise<boolean> {
+  shouldChangePassword (): any {
+    if (this.mustChangePassword())
+      return {response: true, reason: 'The user has the default password. Please change it now in order to be able to use the console.'};
+
+    const currentUser = this.getCurrentUser();
+    if (currentUser.daysTillExpiration > 0)
+      return {response: true, reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.'};
+    else
+      return {response: false};
+  }
+
+  // async mustChangePassword (): Promise<boolean> {
   //   const currentUser: User = this.getCurrentUser();
   //   if (!currentUser.defaultPasswordUsed) {
   //     return Promise.resolve(false);

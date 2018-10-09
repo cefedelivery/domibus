@@ -81,9 +81,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onLoginSuccessEvent () {
-    const shouldChangePassword = this.securityService.shouldChangePassword();
-    if (shouldChangePassword) {
-      this.dialog.open(DefaultPasswordDialogComponent);
+    const changePassword = this.securityService.shouldChangePassword();
+    if (changePassword.response) {
+      this.dialog.open(DefaultPasswordDialogComponent, {data: changePassword.reason});
       this.router.navigate(['/user']);
     } else {
       this.router.navigate([this.returnUrl]);
@@ -91,8 +91,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   // async onLoginSuccessEvent () {
-  //   const shouldChangePassword = await this.securityService.shouldChangePassword();
-  //   if (shouldChangePassword) {
+  //   const mustChangePassword = await this.securityService.mustChangePassword();
+  //   if (mustChangePassword) {
   //     this.dialog.open(DefaultPasswordDialogComponent);
   //     this.router.navigate(['/user']);
   //   } else {

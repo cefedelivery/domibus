@@ -6,8 +6,8 @@ import eu.domibus.common.model.security.UserPasswordHistory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,7 +22,7 @@ public class UserPasswordHistoryDaoImpl extends BasicDao<UserPasswordHistory> im
         super(UserPasswordHistory.class);
     }
 
-    public Date findPasswordDate(final User user) {
+    public LocalDate findPasswordDate(final User user) {
         List<UserPasswordHistory> oldEntries = getPasswordHistoryEntries(user, 1);
         return oldEntries.stream().map(h -> h.getPasswordDate()).findFirst().orElse(null);
 
