@@ -5,6 +5,7 @@ import {AlertService} from '../alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
 import {MdDialog} from '@angular/material';
 import {DefaultPasswordDialogComponent} from 'app/security/default-password-dialog/default-password-dialog.component';
+import {Server} from '../security/Server';
 
 @Component({
   moduleId: module.id,
@@ -13,6 +14,7 @@ import {DefaultPasswordDialogComponent} from 'app/security/default-password-dial
 })
 
 export class LoginComponent implements OnInit, OnDestroy {
+
 
   model: any = {};
   loading = false;
@@ -39,38 +41,33 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.securityEventService.onLoginErrorEvent().subscribe(
       error => {
-        console.error('Error authenticating:' + error);
         let message;
-        const HTTP_UNAUTHORIZED = 401;
-        const HTTP_FORBIDDEN = 403;
-        const HTTP_NOTFOUND = 404;
-        const HTTP_GATEWAY_TIMEOUT = 504;
-        const USER_INACTIVE = 'Inactive';
-        const USER_SUSPENDED = 'Suspended';
         switch (error.status) {
-          case HTTP_UNAUTHORIZED:
-          case HTTP_FORBIDDEN:
+          case Server.HTTP_UNAUTHORIZED:
+          case Server.HTTP_FORBIDDEN:
             const forbiddenCode = error.json().message;
-            console.log('User forbidden code ' + forbiddenCode);
             switch (forbiddenCode) {
-              case USER_INACTIVE:
+              case Server.USER_INACTIVE:
                 message = 'The user is inactive. Please contact your administrator.';
                 break;
-              case USER_SUSPENDED:
+              case Server.USER_SUSPENDED:
                 message = 'The user is suspended. Please try again later or contact your administrator.';
+                break;
+              case Server.PASSWORD_EXPIRED:
+                message = 'The user password has expired. Please contact your administrator.';
                 break;
               default:
                 message = 'The username/password combination you provided are not valid. Please try again or contact your administrator.';
                 break;
             }
             break;
-          case HTTP_GATEWAY_TIMEOUT:
-          case HTTP_NOTFOUND:
+          case Server.HTTP_GATEWAY_TIMEOUT:
+          case Server.HTTP_NOTFOUND:
             message = 'Unable to login. Domibus is not running.';
             break;
           default:
-            message = 'Default error (' + error.status + ') occurred during login.';
-            break;
+            this.alertService.exception('Error authenticating:', error);
+            return;
         }
         this.alertService.error(message);
       });

@@ -4,6 +4,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -17,7 +18,10 @@ import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -55,16 +59,41 @@ public class AuthenticationResource {
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
-    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    @ExceptionHandler({AuthenticationException.class})
-    public ErrorRO handleException(Exception ex) {
+//    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+//    @ExceptionHandler({AuthenticationException.class})
+//    public ErrorRO handleException(Exception ex) {
+//        LOG.error(ex.getMessage(), ex);
+//        return new ErrorRO(ex.getMessage());
+//    }
+
+    @ExceptionHandler({AccountStatusException.class})
+    public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
+        LOG.trace("handleAccountStatusException");
         LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
+        LOG.trace("handleAuthenticationException");
+        LOG.error(ex.getMessage(), ex);
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({DomainException.class})
     public ErrorRO handleDomainException(Exception ex) {
+        LOG.trace("handleDomainException");
         LOG.error(ex.getMessage(), ex);
         return new ErrorRO(ex.getMessage());
     }

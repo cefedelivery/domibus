@@ -5,7 +5,6 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.security.AuthenticationException;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
@@ -22,10 +21,11 @@ import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -307,7 +307,7 @@ public class UserManagementServiceImpl implements UserService {
         LocalDate passwordDate = userPasswordHistoryDao.findPasswordDate(user);
         if (passwordDate == null || passwordDate.isBefore(minDate)) {
             LOG.debug("Password expired since [{}] for user [{}]", minDate, user.getUserName());
-            throw new AuthenticationException("Password expired");
+            throw new CredentialsExpiredException("Expired");
         }
     }
 
@@ -355,6 +355,42 @@ public class UserManagementServiceImpl implements UserService {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void sendAlerts() {
+        sendImminentExpirationAlerts();
+        sendExpiredAlerts();
+    }
+
+    private void sendExpiredAlerts() {
+//        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+//        final boolean activeModule = expiredCertificateConfiguration.isActive();
+//        LOG.debug("Certificate expired alert module activated:[{}]", activeModule);
+//        if (!activeModule) {
+//            return;
+//        }
+//        final String accessPoint = getAccessPointName();
+//        final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
+//        final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
+//
+//        Date endNotification = LocalDateTime.now().minusDays(revokedDuration).toDate();
+//        Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
+//
+//        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
+//        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
+//            certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
+//            certificateDao.saveOrUpdate(certificate);
+//            final String alias = certificate.getAlias();
+//            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
+//            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+//        });
+
+    }
+
+    private void sendImminentExpirationAlerts() {
+
     }
 
     private int getMaxPasswordAgeInDays(User user) {

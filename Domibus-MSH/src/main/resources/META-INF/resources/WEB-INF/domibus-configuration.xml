@@ -57,4 +57,10 @@
         <property name="startDelay" value="30000"/>
     </bean>
 
+    <bean id="passwordPolicyAlertJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.security.PasswordPolicyAlertJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
 </beans>

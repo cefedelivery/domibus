@@ -29,7 +29,6 @@ export class SecurityService {
         username: username,
         password: password
       }).subscribe((response: Response) => {
-        // console.log('Login success');
         localStorage.setItem('currentUser', JSON.stringify(response.json()));
 
         this.domainService.setAppTitle();
@@ -43,7 +42,6 @@ export class SecurityService {
   }
 
   logout () {
-    // console.log('Logging out');
     this.clearSession();
 
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {

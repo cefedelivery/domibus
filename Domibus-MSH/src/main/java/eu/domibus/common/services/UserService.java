@@ -3,6 +3,8 @@ package eu.domibus.common.services;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.user.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,4 +65,8 @@ public interface UserService {
      * @return the days till expiration; -1 if it is not to raise a warning
      */
     int validateDaysTillExpiration(String username);
+
+
+    public void sendAlerts();
+
 }
