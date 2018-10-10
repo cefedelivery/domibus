@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
- * @author Cosmin Baciu
- * @since 4.0
+ * @author Thomas Dussart
+ * @since 4.0.1
  */
 public abstract class GeneralQuartzJobBean extends QuartzJobBean {
 
