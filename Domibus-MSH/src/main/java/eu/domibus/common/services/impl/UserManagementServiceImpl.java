@@ -15,6 +15,7 @@ import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
+import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Date;
@@ -365,26 +367,30 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     private void sendExpiredAlerts() {
-//        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
-//        final boolean activeModule = expiredCertificateConfiguration.isActive();
-//        LOG.debug("Certificate expired alert module activated:[{}]", activeModule);
-//        if (!activeModule) {
-//            return;
-//        }
-//        final String accessPoint = getAccessPointName();
-//        final Integer revokedDuration = expiredCertificateConfiguration.getExpiredDuration();
-//        final Integer revokedFrequency = expiredCertificateConfiguration.getExpiredFrequency();
-//
-//        Date endNotification = LocalDateTime.now().minusDays(revokedDuration).toDate();
-//        Date notificationDate = LocalDateTime.now().minusDays(revokedFrequency).toDate();
-//
-//        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
-//        certificateDao.findExpiredToNotifyAsAlert(notificationDate,endNotification).forEach(certificate -> {
-//            certificate.setAlertExpiredNotificationDate(LocalDateTime.now().withTime(0, 0, 0, 0).toDate());
-//            certificateDao.saveOrUpdate(certificate);
-//            final String alias = certificate.getAlias();
+        String property = "domibus.alert.password.imminent_expiration";
+        String title = "Password imminent expiration";
+
+        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getEventConfiguration(property, title);
+        final boolean activeModule = eventConfiguration.isActive();
+        LOG.debug(title + " alert module activated:[{}]", activeModule);
+        if (!activeModule) {
+            return;
+        }
+
+        final String accessPoint = multiDomainAlertConfigurationService.getAccessPointName();
+        final Integer revokedDuration = eventConfiguration.getEventDelay();
+        final Integer revokedFrequency = eventConfiguration.getEventFrequency();
+
+        LocalDateTime endNotification = LocalDateTime.now().minusDays(revokedDuration);
+        LocalDateTime notificationDate = LocalDateTime.now().minusDays(revokedFrequency);
+
+        LOG.debug("Searching for expired certificate with notification date smaller then:[{}] and expiration date > current date - offset[{}]->[{}]", notificationDate, revokedDuration, endNotification);
+//        userDao.findByPasswordDate(notificationDate, endNotification).forEach(user -> {
+//            certificate.setAlertExpiredNotificationDate(LocalDate.now());
+//            userDao.saveOrUpdate(user);
+//            final String alias = user.getAlias();
 //            final String accessPointOrAlias = accessPoint == null ? alias : accessPoint;
-//            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, certificate.getNotAfter());
+//            eventService.enqueueCertificateExpiredEvent(accessPointOrAlias, alias, user.getNotAfter());
 //        });
 
     }
@@ -392,6 +398,7 @@ public class UserManagementServiceImpl implements UserService {
     private void sendImminentExpirationAlerts() {
 
     }
+
 
     private int getMaxPasswordAgeInDays(User user) {
         int maxPasswordAgeInDays;

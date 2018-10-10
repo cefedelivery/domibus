@@ -64,4 +64,14 @@ public interface MultiDomainAlertConfigurationService {
      * @return whether the module is active or not.
      */
     Boolean isAlertModuleEnabled();
+
+
+
+
+    /**
+     * @return alert events module configuration
+     */
+    AlertEventModuleConfiguration getEventConfiguration(String property, String title);
+
+    String getAccessPointName();
 }
