@@ -821,16 +821,16 @@
          <con:properties>
             <con:property>
                <con:name>MessageID</con:name>
-               <con:value>42085478-d735-4d20-aaba-1a671cf70eb4@domibus.eu</con:value>
+               <con:value>bfbf3a0b-d966-4b19-b81d-e2148ebdad4e@domibus.eu</con:value>
             </con:property>
          </con:properties>
       </con:config>
    </con:testStep>
+   <con:testStep type="groovy" name="InitializeRetryCount" id="d09f2109-e697-4e38-82f8-9f0f8822240b"><con:settings/><con:config><script>testRunner.testCase.setPropertyValue("RetryCountWhileWaitingForMessageAvailability","0");</script></con:config></con:testStep>
    <con:testStep type="delay" name="waitConditional" id="a357409c-309d-4f30-bb64-53917cf27cf4">
       <con:settings/>
       <con:config><delay>15000</delay></con:config>
-   </con:testStep>
-   <con:testStep type="request" name="checkIfMessageIsAvailable" id="0da2589e-1520-4448-87d5-6bca71a09688">
+   </con:testStep><con:testStep type="request" name="checkIfMessageIsAvailable" id="0da2589e-1520-4448-87d5-6bca71a09688">
       <con:settings/>
       <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
          <con:interface>BackendService_1_1SoapBinding</con:interface>
@@ -858,27 +858,29 @@
          </con:request>
       </con:config>
    </con:testStep>
-   <con:testStep type="goto" name="waitUntilMessageArrives" id="8a8917ef-e3d0-4315-b995-392d68d66301">
+   <con:testStep type="groovy" name="IncrementCountOfMessageRetry" id="107fd2db-b54d-46e0-9d1a-c2332f6a367a"><con:settings/><con:config><script>// Increment the retry counter (property "RetryCountWhileWaitingForMessageAvailability")  
+def countOfRetriesWhileWaitingForMessage = testRunner.testCase.getPropertyValue("RetryCountWhileWaitingForMessageAvailability")
+countOfRetriesWhileWaitingForMessage = Integer.parseInt(countOfRetriesWhileWaitingForMessage) + 1
+testRunner.testCase.setPropertyValue("RetryCountWhileWaitingForMessageAvailability", countOfRetriesWhileWaitingForMessage.toString())
+
+// Check if the maximal number of retries is reached
+def maxRetryCount = 100//consider for 25 minutes
+//log.info countOfRetriesWhileWaitingForMessage
+assert countOfRetriesWhileWaitingForMessage &lt;= maxRetryCount : "Retries while waiting for message availability exceeded max retry count"</script></con:config></con:testStep><con:testStep type="goto" name="waitUntilMessageArrives" id="8a8917ef-e3d0-4315-b995-392d68d66301">
       <con:settings/>
       <con:config xsi:type="con:GotoStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
          <con:condition>
             <con:name>if_message_arrived</con:name>
             <con:type>XPATH</con:type>
-            <con:expression>declare namespace ns4='http://org.ecodex.backend/1_1/';
-//ns4:listPendingMessagesResponse[1]</con:expression>
+            <con:expression>declare namespace ns2='http://org.ecodex.backend/1_1/';
+exists(//ns2:listPendingMessagesResponse[messageID[text()='${ResponseParameters#MessageID}']])</con:expression>
             <con:targetStep>getStatus</con:targetStep>
          </con:condition>
          <con:condition>
             <con:name>else</con:name>
             <con:type>XPATH</con:type>
-            <con:expression>declare namespace
-               soapenv='http://www.w3.org/2003/05/soap-envelope';
-               declare namespace
-               ns1='http://org.ecodex.backend/1_1/';
-               boolean(not(/soapenv:Envelope/soapenv:Body[1]/*[namespace-uri()='http://org.ecodex.backend/1_1/'
-               and
-               local-name()='listPendingMessagesResponse'][1]/messageID))
-            </con:expression>
+            <con:expression>declare namespace ns2='http://org.ecodex.backend/1_1/';
+count(//ns2:listPendingMessagesResponse[messageID[text()='${ResponseParameters#MessageID}']])=0;</con:expression>
             <con:targetStep>waitConditional</con:targetStep>
          </con:condition>
       </con:config>
@@ -1033,7 +1035,7 @@
          </payload>
       </_1:submitRequest>
    </soap:Body>
-</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="c2c6e82c-7de4-4a8e-87a3-83ea0206b133" name="SOAP Response"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/>
+</soap:Envelope>]]></con:request><con:assertion type="SOAP Response" id="c2c6e82c-7de4-4a8e-87a3-83ea0206b133" name="SOAP Response"/><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://org.ecodex.backend/1_1/BackendInterface/submitMessage"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties><con:property><con:name>RetryCountWhileWaitingForMessageAvailability</con:name><con:value>1</con:value></con:property></con:properties>
    <con:reportParameters/><con:breakPoints><con:testStepId>2eb6a89f-41c9-40f9-9d70-074e25d6ff5a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d1a0cbdd-efe1-412d-aac5-b62315a3ac06</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>25d084a4-60ed-4113-805a-097b538070ab</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f38de8dd-4952-4e39-b676-354fd0fb8cc5</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:testCase id="02c4cb43-d8fd-41e9-a789-78b2eba291ba" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Attachment alternatives" searchProperties="true"><con:settings/><con:testStep type="request" id="2d55601e-3eca-4900-9e01-36dcc02c8e6a" name="message in payload"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>BackendService_1_1SoapBinding</con:interface><con:operation>submitMessage</con:operation><con:request name="message in payload" outgoingWss="" incomingWss="" timeout="" sslKeystore="" useWsAddressing="false" useWsReliableMessaging="false" wssPasswordType="" id="1a6d8b65-49bf-4cd4-8d9c-1c47e4babe41"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>${#Project#localUrl}/domibus/services/backend</con:endpoint><con:request><![CDATA[<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/" xmlns:_1="http://org.ecodex.backend/1_1/">
    <soap:Header>
       <ns:Messaging>
