@@ -84,6 +84,7 @@ import {GlobalErrorHandler} from './common/global.error-handler';
 import {UserService} from './user/user.service';
 import {UserValidatorService} from './user/uservalidator.service';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
+import {SanitizeHtmlPipe} from "./common/sanitizeHtml.pipe";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -114,6 +115,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     MessageDialogComponent,
     DatePipe,
     CapitalizeFirstPipe,
+    SanitizeHtmlPipe,
     DefaultPasswordDialogComponent,
     EditMessageFilterComponent,
     MessagelogDetailsComponent,

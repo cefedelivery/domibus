@@ -3,70 +3,67 @@ package eu.domibus.logging;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Implementation of {@link Filter} for Domain logging
- * If the MDC map is containing the domain key then the filter will proceed to check the markers
+ * If the MDC map is containing the domain key then the filter will proceed based
+ * on {@code OnMatch} and {@code OnMismatch} attributes
  *
  * @author Catalin Enache
  * @since 4.0
  */
 public class DomibusLoggerDomainFilter extends Filter<ILoggingEvent> {
-
+    /** MDC key for domain */
     static final String MDC_DOMAIN_KEY = DomibusLogger.MDC_PROPERTY_PREFIX + DomibusLogger.MDC_DOMAIN;
-    private static final String MARKER_SEPARATOR = ",";
-    private String domainName = "default";
 
-    private String markerName;
-    private String markerMatch;
-    private String markerMismatch;
+    private FilterReply onMatch;
+    private FilterReply onMismatch;
+    private String domain;
 
-    public void setDomainName(String domainName) {
-        this.domainName = domainName;
+
+    public DomibusLoggerDomainFilter() {
+        this.onMatch = FilterReply.NEUTRAL;
+        this.onMismatch = FilterReply.NEUTRAL;
     }
 
-    public void setMarkerName(String markerName) {
-        this.markerName = markerName;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
-    public void setMarkerMatch(String markerMatch) {
-        this.markerMatch = markerMatch;
+    public final void setOnMatch(String action) {
+        if ("NEUTRAL".equals(action)) {
+            this.onMatch = FilterReply.NEUTRAL;
+        } else if ("ACCEPT".equals(action)) {
+            this.onMatch = FilterReply.ACCEPT;
+        } else if ("DENY".equals(action)) {
+            this.onMatch = FilterReply.DENY;
+        }
     }
 
-    public void setMarkerMismatch(String markerMismatch) {
-        this.markerMismatch = markerMismatch;
+    public final void setOnMismatch(String action) {
+        if ("NEUTRAL".equals(action)) {
+            this.onMismatch = FilterReply.NEUTRAL;
+        } else if ("ACCEPT".equals(action)) {
+            this.onMismatch = FilterReply.ACCEPT;
+        } else if ("DENY".equals(action)) {
+            this.onMismatch = FilterReply.DENY;
+        }
     }
+
 
     @Override
-    public FilterReply decide(ILoggingEvent iLoggingEvent) {
+    public FilterReply decide(ILoggingEvent event) {
 
-        //MDC map
-        Map<String, String> mdcPropertyMap = iLoggingEvent.getMDCPropertyMap();
+        //get the domain from MDC map
+        String value = event.getMDCPropertyMap().get(MDC_DOMAIN_KEY);
 
-        //read the configuration  - markers to check
-        List<Marker> markerListToCheck = Arrays.stream(markerName.split(MARKER_SEPARATOR)).map(s -> MarkerFactory.getMarker(s)).collect(Collectors.toList());
-
-        //filter by domain from MDC map
-        if (mdcPropertyMap != null && mdcPropertyMap.get(MDC_DOMAIN_KEY) != null) {
-            if (domainName.equals(mdcPropertyMap.get(MDC_DOMAIN_KEY))) {
-
-                //filter by marker
-                if (markerListToCheck.contains(iLoggingEvent.getMarker())) {
-                    return FilterReply.valueOf(markerMatch);
-                } else {
-                    return FilterReply.valueOf(markerMismatch);
-                }
-            }
+        if (StringUtils.isNotBlank(domain)) { //domain parameter is configured
+            return domain.equals(value) ? this.onMatch : this.onMismatch;
+        } else {
+            return StringUtils.isNotBlank(value) ? this.onMismatch : this.onMatch;
         }
 
-        return FilterReply.DENY;
     }
 
 }
