@@ -39,13 +39,11 @@ public class DomibusDatasourceConfiguration {
         dataSource.setMaxPoolSize(maxPoolSize);
         final Integer maxLifeTime = Integer.parseInt(domibusPropertyProvider.getProperty("domibus.datasource.xa.maxLifetime", "60"));
         dataSource.setMaxLifetime(maxLifeTime);
-
         return dataSource;
     }
 
     @Bean
     public PrefixedProperties xaProperties() {
-        PrefixedProperties result = new PrefixedProperties(domibusProperties, "domibus.datasource.xa.property.");
-        return result;
+        return new PrefixedProperties(domibusProperties, "domibus.datasource.xa.property.");
     }
 }

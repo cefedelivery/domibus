@@ -64,4 +64,28 @@ public interface MultiDomainAlertConfigurationService {
      * @return whether the module is active or not.
      */
     Boolean isAlertModuleEnabled();
+
+    /**
+     * With the introduction of multitenancy, a super user has been created.
+     * It has its own property definition for some of the domibus properties.
+     * The following methods are helper methods to retrieve super or domain alert property name
+     * depending on the context.
+     */
+
+    /**
+     * @return name for the alert email active property.
+     */
+    String getSendEmailActivePropertyName();
+
+    /**
+     *
+     * @return name of the alert retry max attempts property.
+     */
+    String getAlertRetryMaxAttemptPropertyName();
+
+    /**
+     *
+     * @return name of the alert time between retry property.
+     */
+    String getAlertRetryTimePropertyName();
 }

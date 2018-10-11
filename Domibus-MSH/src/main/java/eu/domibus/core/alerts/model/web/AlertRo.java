@@ -34,6 +34,8 @@ public class AlertRo {
 
     private List<String> parameters;
 
+    private boolean superAdmin;
+
     public int getEntityId() {
         return entityId;
     }
@@ -136,5 +138,13 @@ public class AlertRo {
 
     public void setNextAttempt(Date nextAttempt) {
         this.nextAttempt = nextAttempt;
+    }
+
+    public boolean isSuperAdmin() {
+        return superAdmin;
+    }
+
+    public void setSuperAdmin(boolean superAdmin) {
+        this.superAdmin = superAdmin;
     }
 }

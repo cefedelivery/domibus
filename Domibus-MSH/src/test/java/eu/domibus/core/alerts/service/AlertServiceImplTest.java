@@ -29,6 +29,8 @@ import java.util.Map;
 import static eu.domibus.core.alerts.model.common.MessageEvent.MESSAGE_ID;
 import static eu.domibus.core.alerts.model.common.MessageEvent.OLD_STATUS;
 import static eu.domibus.core.alerts.service.AlertServiceImpl.*;
+import static eu.domibus.core.alerts.service.MultiDomainAlertConfigurationServiceImpl.DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS;
+import static eu.domibus.core.alerts.service.MultiDomainAlertConfigurationServiceImpl.DOMIBUS_ALERT_RETRY_TIME;
 import static org.junit.Assert.*;
 
 /**
@@ -74,7 +76,10 @@ public class AlertServiceImplTest {
             eventDao.read(event.getEntityId());
             result = eventEntity;
 
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1");
+            multiDomainAlertConfigurationService.getAlertRetryMaxAttemptPropertyName();
+            result=DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS;
+
+            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1");
             result = 5;
 
             multiDomainAlertConfigurationService.getAlertLevel(withAny(new Alert()));
@@ -193,7 +198,10 @@ public class AlertServiceImplTest {
             persistedAlert.getMaxAttempts();
             result=2;
 
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_TIME);
+            multiDomainAlertConfigurationService.getAlertRetryTimePropertyName();
+            result=DOMIBUS_ALERT_RETRY_TIME;
+
+            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_RETRY_TIME);
             result = nextAttemptInMinutes;
 
             dateTime.now().plusMinutes(nextAttemptInMinutes).toDate();
@@ -343,6 +351,19 @@ public class AlertServiceImplTest {
             assertEquals(secondEntityId, entityIds.get(1), 0);
             assertEquals(false, processeds.get(0));
             assertEquals(true, processeds.get(1));
+        }};
+    }
+
+    @Test
+    public void testFindAlerts(final @Mocked  AlertCriteria alertCriteria,final @Mocked  List<Alert> alerts){
+        new Expectations(){{
+            alertDao.filterAlerts(alertCriteria);
+            result=alerts;
+        }};
+        alertService.findAlerts(alertCriteria);
+        new Verifications(){{
+            alertDao.filterAlerts(alertCriteria);times=1;
+            domainConverter.convert(alerts, eu.domibus.core.alerts.model.service.Alert.class);
         }};
     }
 }
