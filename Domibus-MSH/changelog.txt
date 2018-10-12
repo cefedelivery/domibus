@@ -1,3 +1,5 @@
+Domibus 4.1
+- Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
 Domibus 4.0.1
 - changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
