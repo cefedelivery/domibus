@@ -15,6 +15,8 @@
         <!--You may enter the following 4 items in any order-->
         <!--Optional:-->
         <!-- <AgreementRef type="">A1</AgreementRef> -->
+        <!--Optional:-->
+        <!-- <ConversationId>C1</ConversationId> -->
         <Service type="tc1">bdx:noprocess</Service>
         <Action>TC1Leg1</Action>        
     </CollaborationInfo>
