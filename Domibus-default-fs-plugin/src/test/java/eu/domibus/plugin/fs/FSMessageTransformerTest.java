@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.CollectionUtils;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
@@ -37,6 +38,8 @@ public class FSMessageTransformerTest {
     private static final String APPLICATION_XML = "application/xml";
     private static final String AGREEMENT_REF_A1 = "A1";
     private static final String EMPTY_STR = "";
+    private static final String CONVERSATIONID_STR = "CONV1";
+
 
     @Before
     public void setUp() throws Exception {
@@ -49,7 +52,6 @@ public class FSMessageTransformerTest {
     @Test
     public void testTransformFromSubmission_NormalFlow() throws Exception {
         String messageId = "3c5558e4-7b6d-11e7-bb31-be2e44b06b34@domibus.eu";
-        String conversationId = "ae413adb-920c-4d9c-a5a7-b5b2596eaf1c@domibus.eu";
         String payloadContent = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=";
 
         // Submission
@@ -65,7 +67,7 @@ public class FSMessageTransformerTest {
         submission.setAction(ACTION_TC1LEG1);
         submission.setAgreementRefType(EMPTY_STR);
         submission.setAgreementRef(AGREEMENT_REF_A1);
-        submission.setConversationId(conversationId);
+        submission.setConversationId(CONVERSATIONID_STR);
 
         submission.addMessageProperty(PROPERTY_ORIGINAL_SENDER, ORIGINAL_SENDER);
         submission.addMessageProperty(PROPERTY_FINAL_RECIPIENT, FINAL_RECIPIENT);
@@ -101,6 +103,7 @@ public class FSMessageTransformerTest {
         Assert.assertEquals(ACTION_TC1LEG1, collaborationInfo.getAction());
         Assert.assertEquals(EMPTY_STR, collaborationInfo.getAgreementRef().getType());
         Assert.assertEquals(AGREEMENT_REF_A1, collaborationInfo.getAgreementRef().getValue());
+        Assert.assertEquals(CONVERSATIONID_STR, collaborationInfo.getConversationId());
 
         List<Property> propertyList = userMessage.getMessageProperties().getProperty();
         Assert.assertEquals(2, propertyList.size());

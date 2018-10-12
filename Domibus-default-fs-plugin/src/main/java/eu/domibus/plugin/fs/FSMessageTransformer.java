@@ -120,6 +120,10 @@ public class FSMessageTransformer
     }
 
     private void setMessagePropertiesToSubmission(Submission submission, MessageProperties messageProperties) {
+        if(messageProperties == null) {
+            return;
+        }
+
         for (Property messageProperty : messageProperties.getProperty()) {
             String name = messageProperty.getName();
             String value = messageProperty.getValue();
