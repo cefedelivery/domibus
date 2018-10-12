@@ -157,6 +157,9 @@ public class FSMessageTransformer
         submission.setService(service.getValue());
         submission.setServiceType(service.getType());
         submission.setAction(collaborationInfo.getAction());
+        if(collaborationInfo.getConversationId() != null) {
+            submission.setConversationId(collaborationInfo.getConversationId());
+        }
     }
 
     private CollaborationInfo getCollaborationInfoFromSubmission(Submission submission) {
@@ -172,6 +175,7 @@ public class FSMessageTransformer
         collaborationInfo.setAgreementRef(agreementRef);
         collaborationInfo.setService(service);
         collaborationInfo.setAction(submission.getAction());
+        collaborationInfo.setConversationId(submission.getConversationId());
 
         return collaborationInfo;
     }
