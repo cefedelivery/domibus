@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -28,7 +29,8 @@ import java.util.*;
         @NamedQuery(name = "User.findAll", query = "FROM User u"),
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME and u.deleted=false"),
         @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true and u.deleted=false"),
-        @NamedQuery(name = "User.findSuspendedUsers", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false")
+        @NamedQuery(name = "User.findSuspendedUsers", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false"),
+        @NamedQuery(name = "User.findWithPasswordChangedBetween", query = "FROM User u where u.passwordChangeDate is not null and u.passwordChangeDate>:START_DATE and u.passwordChangeDate<:END_DATE and u.deleted=false")
 })
 
 @Audited(withModifiedFlag = true)
@@ -75,6 +77,11 @@ public class User extends AbstractBaseEntity{
             inverseJoinColumns = @JoinColumn(
                     name = "ROLE_ID", referencedColumnName = "ID_PK"))
     private Set<UserRole> roles=new HashSet<>();
+
+    @Column(name = "PASSWORD_CHANGE_DATE")
+//    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDate passwordChangeDate;
+
 
     @SuppressWarnings("squid:S2637")
     public User(@NotNull final String userName, @NotNull final String password) {
@@ -165,6 +172,12 @@ public class User extends AbstractBaseEntity{
 
     public void setSuspensionDate(Date suspensionDate) {
         this.suspensionDate = suspensionDate;
+    }
+
+    public LocalDate getPasswordChangeDate() { return passwordChangeDate; }
+
+    public void setPasswordChangeDate(LocalDate passwordChangeDate) {
+        this.passwordChangeDate = passwordChangeDate;
     }
 
     public boolean isSuperAdmin() {

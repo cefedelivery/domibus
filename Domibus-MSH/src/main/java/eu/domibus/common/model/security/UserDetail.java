@@ -18,7 +18,7 @@ public class UserDetail implements UserDetails {
     private final UserDetails springUser;
     private boolean defaultPasswordUsed;
     protected String domain;
-    private int daysTillExpiration;
+    private Integer daysTillExpiration;
 
     public UserDetail(final User user, boolean defaultPasswordUsed) {
         this.defaultPasswordUsed = defaultPasswordUsed;
@@ -80,9 +80,9 @@ public class UserDetail implements UserDetails {
 
     public void setDomain(String domain) { this.domain = domain; }
 
-    public int getDaysTillExpiration() {
+    public Integer getDaysTillExpiration() {
         return daysTillExpiration;
     }
 
-    public void setDaysTillExpiration(int daysTillExpiration) { this.daysTillExpiration = daysTillExpiration; }
+    public void setDaysTillExpiration(Integer daysTillExpiration) { this.daysTillExpiration = daysTillExpiration; }
 }

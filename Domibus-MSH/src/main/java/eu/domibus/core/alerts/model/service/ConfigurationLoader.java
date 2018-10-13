@@ -44,25 +44,6 @@ public class ConfigurationLoader<E> {
         return result;
 
     }
-
-
-//    public E getConfiguration(String property, String title, ConfigurationReader2<E> configurationReader) {
-//        final Domain domain = domainContextProvider.getCurrentDomain();
-//        LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
-//        if (this.configuration.get(domain) == null) {
-//            synchronized (this.configuration) {
-//                if (this.configuration.get(domain) == null) {
-//                    this.configuration.computeIfAbsent(domain, this::readConfiguration2);
-//                }
-//            }
-//        }
-//        E result = this.configuration.get(domain);
-//        LOG.debug("Alert messaging configuration:[{}]", result);
-//        return result;
-//
-//    }
-//
-//    private E readConfiguration2(Domain domain) { }
 }
 
 

@@ -9,7 +9,8 @@ public enum AlertType {
     CERT_EXPIRED("cert_expired.ftl"),
     USER_LOGIN_FAILURE("login_failure.ftl"),
     USER_ACCOUNT_DISABLED("account_disabled.ftl"),
-    PASSWORD_IMMINENT_EXPIRATION("password_imminent_expiration.ftl");
+    PASSWORD_IMMINENT_EXPIRATION("password_imminent_expiration.ftl"),
+    PASSWORD_EXPIRED("password_expired.ftl");
 
     //in the future an alert will not have one to one mapping.
     public static AlertType getAlertTypeFromEventType(EventType eventType) {
@@ -26,6 +27,8 @@ public enum AlertType {
                 return USER_ACCOUNT_DISABLED;
             case PASSWORD_IMMINENT_EXPIRATION:
                 return PASSWORD_IMMINENT_EXPIRATION;
+            case PASSWORD_EXPIRED:
+                return PASSWORD_EXPIRED;
 
             default:
                 throw new IllegalStateException("There should be a one to one mapping between alert type and event type.");

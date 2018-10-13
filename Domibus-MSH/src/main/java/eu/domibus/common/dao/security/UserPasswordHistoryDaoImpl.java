@@ -21,15 +21,15 @@ public class UserPasswordHistoryDaoImpl extends BasicDao<UserPasswordHistory> im
     public UserPasswordHistoryDaoImpl() {
         super(UserPasswordHistory.class);
     }
-
-    public LocalDate findPasswordDate(final User user) {
-        List<UserPasswordHistory> oldEntries = getPasswordHistoryEntries(user, 1);
-        return oldEntries.stream().map(h -> h.getPasswordDate()).findFirst().orElse(null);
-
-//        TypedQuery<UserPasswordHistory> namedQuery = em.createNamedQuery("UserPasswordHistory.findPasswords", UserPasswordHistory.class);
-//        namedQuery.setParameter("USER", user);
-//        return namedQuery.setMaxResults(1).getResultList().stream().map(h -> h.getPasswordDate()).findFirst().orElse(null);
-    }
+//
+//    public LocalDate findPasswordDate(final User user) {
+//        List<UserPasswordHistory> oldEntries = getPasswordHistoryEntries(user, 1);
+//        return oldEntries.stream().map(h -> h.getPasswordDate()).findFirst().orElse(null);
+//
+////        TypedQuery<UserPasswordHistory> namedQuery = em.createNamedQuery("UserPasswordHistory.findPasswords", UserPasswordHistory.class);
+////        namedQuery.setParameter("USER", user);
+////        return namedQuery.setMaxResults(1).getResultList().stream().map(h -> h.getPasswordDate()).findFirst().orElse(null);
+//    }
 
     public void savePassword(final User user, String passwordHash) {
         UserPasswordHistory entry = new UserPasswordHistory(user, passwordHash);

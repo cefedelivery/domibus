@@ -76,7 +76,9 @@ public class AlertServiceImpl implements AlertService {
     @Override
     @Transactional
     public eu.domibus.core.alerts.model.service.Alert createAlertOnEvent(eu.domibus.core.alerts.model.service.Event event) {
+        LOG.info("createAlertOnEvent... event=[{}]", event);
         final Event eventEntity = eventDao.read(event.getEntityId());
+        LOG.info("createAlertOnEvent... eventEntity=[{}] event.getEntityId()=[{}]", eventEntity, event.getEntityId());
         Alert alert = new Alert();
         alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
@@ -88,7 +90,7 @@ public class AlertServiceImpl implements AlertService {
         final eu.domibus.core.alerts.model.service.Alert convertedAlert = domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
         final AlertLevel alertLevel = multiDomainAlertConfigurationService.getAlertLevel(convertedAlert);
         alert.setAlertLevel(alertLevel);
-        LOG.debug("Saving new alert:\n[{}]\n", alert);
+        LOG.info("Saving new alert:\n[{}]\n", alert);
         alertDao.create(alert);
         return domainConverter.convert(alert, eu.domibus.core.alerts.model.service.Alert.class);
     }

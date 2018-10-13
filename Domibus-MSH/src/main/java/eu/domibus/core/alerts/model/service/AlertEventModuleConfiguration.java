@@ -57,7 +57,7 @@ public class AlertEventModuleConfiguration implements AlertModuleConfiguration {
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
         if (alertType != alert.getAlertType()) {
-            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), this.alertType);
+            LOG.error("Invalid alert type [{}] for this strategy, it should be [{}]", alert.getAlertType(), this.alertType);
             throw new IllegalArgumentException("Invalid alert type of the strategy.");
         }
         return eventAlertLevel;

@@ -63,4 +63,10 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="passwordPolicyAlertTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="passwordPolicyAlertJob"/>
+        <property name="cronExpression" value="${domibus.passwordPolicies.check.cron}"/>
+    </bean>
+
 </beans>

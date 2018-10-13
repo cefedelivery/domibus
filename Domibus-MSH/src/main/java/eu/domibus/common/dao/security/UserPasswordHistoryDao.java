@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface UserPasswordHistoryDao {
 
-    LocalDate findPasswordDate(final User user);
+//    LocalDate findPasswordDate(final User user);
 
     void savePassword(final User user, String passwordHash);
 

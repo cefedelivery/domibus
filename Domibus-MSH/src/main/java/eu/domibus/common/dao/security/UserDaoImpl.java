@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -72,6 +73,14 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
             u.setDeleted(true);
             super.update(u);
         }
+    }
+
+    @Override
+    public List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end) {
+        TypedQuery<User> namedQuery = em.createNamedQuery("User.findWithPasswordChangedBetween", User.class);
+        namedQuery.setParameter("START_DATE", start);
+        namedQuery.setParameter("END_DATE", end);
+        return namedQuery.getResultList();
     }
 
 }

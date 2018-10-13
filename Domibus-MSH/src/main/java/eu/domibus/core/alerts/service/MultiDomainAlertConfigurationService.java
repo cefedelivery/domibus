@@ -66,12 +66,10 @@ public interface MultiDomainAlertConfigurationService {
     Boolean isAlertModuleEnabled();
 
 
-
-
     /**
      * @return alert events module configuration
      */
-    AlertEventModuleConfiguration getEventConfiguration(String property, String title);
+    AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType);
 
-    String getAccessPointName();
+ //   String getAccessPointName();
 }

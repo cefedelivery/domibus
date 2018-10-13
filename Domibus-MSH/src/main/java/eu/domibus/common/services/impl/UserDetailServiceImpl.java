@@ -65,27 +65,11 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if (defaultPasswordForUser != null) {
             defaultPasswordUsed = bcryptEncoder.matches(defaultPasswordForUser, password);
 
-            boolean cheeckDefaultPassword = Boolean.parseBoolean(getOptionalDomainProperty("domibus.passwordPolicy.cheeckDefaultPassword", "true"));
+            boolean cheeckDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty("domibus.passwordPolicy.cheeckDefaultPassword", "true"));
             defaultPasswordUsed = defaultPasswordUsed && cheeckDefaultPassword;
         }
 
         return defaultPasswordUsed;
     }
 
-    //TODO: these methods shuld be deleled as soon as the equivalent ones from Thomas will become availible
-    private String getOptionalDomainProperty(final String propertyName, final String defaultValue) {
-        final String propertyValue = getOptionalDomainProperty(propertyName);
-        if (StringUtils.isNotEmpty(propertyValue)) {
-            return propertyValue;
-        }
-        return defaultValue;
-    }
-
-    private String getOptionalDomainProperty(String propertyName) {
-        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        if (currentDomain == null) {
-            currentDomain = DomainService.DEFAULT_DOMAIN;
-        }
-        return domibusPropertyProvider.getDomainProperty(currentDomain, propertyName);
-    }
 }

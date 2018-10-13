@@ -46,4 +46,8 @@ public interface DomibusPropertyProvider {
     String getDomainProperty(Domain domain, String propertyName, String defaultValue);
 
     Set<String> filterPropertiesName(Predicate<String> predicate);
+
+    String getOptionalDomainProperty(String propertyName);
+
+    String getOptionalDomainProperty(final String propertyName, final String defaultValue);
 }

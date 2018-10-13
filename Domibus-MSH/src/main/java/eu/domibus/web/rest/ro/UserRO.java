@@ -47,10 +47,10 @@ public class UserRO implements Serializable {
         this.defaultPasswordUsed = defaultPasswordUsed;
     }
 
-    public int getDaysTillExpiration() {
+    public Integer getDaysTillExpiration() {
         return daysTillExpiration;
     }
 
-    public void setDaysTillExpiration(int daysTillExpiration) { this.daysTillExpiration = daysTillExpiration; }
+    public void setDaysTillExpiration(Integer daysTillExpiration) { this.daysTillExpiration = daysTillExpiration; }
 
 }

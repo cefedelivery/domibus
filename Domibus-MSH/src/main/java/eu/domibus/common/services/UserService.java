@@ -62,9 +62,9 @@ public interface UserService {
     /**
      * Verify if the user's password is "almost" expired
      * @param username the userName
-     * @return the days till expiration; -1 if it is not to raise a warning
+     * @return the days till expiration; null if it is not to raise a warning
      */
-    int validateDaysTillExpiration(String username);
+    Integer validateDaysTillExpiration(String username);
 
 
     public void sendAlerts();

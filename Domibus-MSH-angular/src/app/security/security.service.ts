@@ -145,7 +145,7 @@ export class SecurityService {
 
   mustChangePassword (): boolean {
     const currentUser: User = this.getCurrentUser();
-    return currentUser.defaultPasswordUsed;
+    return currentUser && currentUser.defaultPasswordUsed;
   }
 
   shouldChangePassword (): any {
