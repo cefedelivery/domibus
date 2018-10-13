@@ -11,5 +11,28 @@ public enum EventType {
     USER_ACCOUNT_DISABLED,
 
     PASSWORD_EXPIRED,
-    PASSWORD_IMMINENT_EXPIRATION
+    PASSWORD_IMMINENT_EXPIRATION;
+
+
+    public static String getQueueSelectorFromEventType(EventType eventType) {
+        switch (eventType) {
+            case MSG_STATUS_CHANGED:
+                return "message";
+            case CERT_IMMINENT_EXPIRATION:
+                return "certificateImminentExpiration";
+            case CERT_EXPIRED:
+                return "certificateExpired";
+            case USER_LOGIN_FAILURE:
+                return "loginFailure";
+            case USER_ACCOUNT_DISABLED:
+                return "accountDisabled";
+            case PASSWORD_IMMINENT_EXPIRATION:
+                return "userPasswordImminentExpiration";
+            case PASSWORD_EXPIRED:
+                return "userPasswordExpired";
+
+            default:
+                throw new IllegalStateException("Selector for event type " + eventType + " not defined");
+        }
+    }
 }

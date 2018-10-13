@@ -366,8 +366,16 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendAlerts() {
-        sendImminentExpirationAlerts();
-        sendExpiredAlerts();
+        try {
+            sendExpiredAlerts();
+        } catch (Exception ex) {
+            LOG.error("send password expired alerts failed ", ex);
+        }
+        try {
+            sendImminentExpirationAlerts();
+        } catch (Exception ex) {
+            LOG.error("send imminent expiration alerts failed ", ex);
+        }
     }
 
     private void sendImminentExpirationAlerts() {
@@ -386,7 +394,7 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("Searching for users with password change date between [{}]->[{}]", from, to);
 
         List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to);
-        LOG.debug("Found [{}]", eligibleUsers.size());
+        LOG.debug("ImminentExpirationAlerts Found [{}] eligible users", eligibleUsers.size());
 
         eligibleUsers.forEach(user -> {
             eventService.enqueuePasswordImminentExpirationEvent(user, maxPasswordAgeInDays);
@@ -408,38 +416,10 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("Searching for users with password change date between [{}]->[{}]", from, to);
 
         List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to);
-        LOG.debug("Found [{}]", eligibleUsers.size());
-
-//        final Integer frequency = eventConfiguration.getEventFrequency();
-//        List<String> eligibleIds = eligibleUsers.stream().map(user -> "User_" + user.getEntityId()).collect(Collectors.toList());
-//        List<Event> events = eventDao.findWithTypeAndPropertyValueIn(EventType.PASSWORD_EXPIRED, "Source", eligibleIds);
-//        LocalDate notificationDate = LocalDate.now().minusDays(frequency);
-//        List<Event> activeEvents = events.stream().filter(event -> event.getLastAlertDate().isBefore(notificationDate)).collect(Collectors.toList());
+        LOG.debug("PasswordExpiredAlerts Found [{}] eligible users", eligibleUsers.size());
 
         eligibleUsers.forEach(user -> {
             eventService.enqueuePasswordExpiredEvent(user, maxPasswordAgeInDays);
-//            eventService.enqueuePasswordExpiredEvent(user, notificationDate);
-//            //find the coresp event
-//            Event corespondingEvent = events.stream().filter(event -> event.getProperties().get("Source").getValue().toString() == "User_" + user.getEntityId()).findFirst().orElse(null);
-//            if (corespondingEvent == null) { //create the event
-//                corespondingEvent = new Event();
-//                corespondingEvent.setType(EventType.PASSWORD_EXPIRED);
-//                corespondingEvent.setReportingTime(new Date());
-//                corespondingEvent.setLastAlertDate(LocalDate.now());
-//
-//                StringEventProperty prop = new StringEventProperty();
-//                prop.setStringValue("User_" + user.getEntityId());
-//                corespondingEvent.addProperty("Source", prop);
-//
-//                eventDao.create(corespondingEvent);
-//            } else if (corespondingEvent.getLastAlertDate().isBefore(notificationDate)) { //just update the date
-//                corespondingEvent.setLastAlertDate(LocalDate.now());
-//                eventDao.update(corespondingEvent);
-//            } else { //alert already sent, do nothing
-//                return;
-//            }
-            //enqueue the event( newly created or updated) -> we have more than one alert for a repetitive event!
-//            eventService.enqueuePasswordExpiredEvent(corespondingEvent);
         });
     }
 

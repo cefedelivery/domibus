@@ -71,7 +71,7 @@ public interface EventService {
      *
      * @param event the event to save.
      */
-    void persistEvent(Event event);
+    eu.domibus.core.alerts.model.persist.Event persistEvent(Event event);
 
     /**
      * Will enrich a message status change event with potential EBMS error details.
@@ -80,12 +80,8 @@ public interface EventService {
      */
     void enrichMessageEvent(Event event);
 
-//    void enqueuePasswordExpiredEvent(eu.domibus.core.alerts.model.persist.Event corespondingEvent);
 
-    //    void enqueuePasswordExpiredEvent(User user, LocalDate notificationDate);
-    void enqueuePasswordExpiredEvent(User user, Integer expirationPeriod);
+    void enqueuePasswordExpiredEvent(User user, Integer maxPasswordAgeInDays);
 
-    void enqueuePasswordExpiredEvent(Event event);
-
-    void enqueuePasswordImminentExpirationEvent(User user, Integer beforeExpirationPeriod);
+    void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays);
 }

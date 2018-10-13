@@ -10,9 +10,11 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.security.User;
 import eu.domibus.core.alerts.dao.EventDao;
+import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.AuthenticationEvent;
 import eu.domibus.core.alerts.model.common.CertificateEvent;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
@@ -80,6 +82,10 @@ public class EventServiceImpl implements EventService {
     @Autowired
     @Qualifier("alertMessageQueue")
     private Queue alertMessageQueue;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
 
     /**
      * {@inheritDoc}
@@ -151,12 +157,13 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      */
     @Override
-    public void persistEvent(final Event event) {
+    public eu.domibus.core.alerts.model.persist.Event persistEvent(final Event event) {
         final eu.domibus.core.alerts.model.persist.Event eventEntity = domainConverter.convert(event, eu.domibus.core.alerts.model.persist.Event.class);
         LOG.debug("Converting jms event\n[{}] to persistent event\n[{}]", event, eventEntity);
         eventEntity.enrichProperties();
         eventDao.create(eventEntity);
         event.setEntityId(eventEntity.getEntityId());
+        return eventEntity;
     }
 
     /**
@@ -213,54 +220,76 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-
-//    @Override
-//    public void enqueuePasswordExpiredEvent(eu.domibus.core.alerts.model.persist.Event event) {
-//        jmsManager.convertAndSendToQueue(event, alertMessageQueue, CERTIFICATE_EXPIRED);
-//        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
-//    }
+    @Override
+    public void enqueuePasswordExpiredEvent(User user, Integer maxPasswordAgeInDays) {
+        enqueuePasswordEvent(EventType.PASSWORD_EXPIRED, user, maxPasswordAgeInDays);
+    }
 
     @Override
-//    public void enqueuePasswordExpiredEvent(User user, LocalDate notificationDate) {
-    public void enqueuePasswordExpiredEvent(User user, Integer expirationPeriod) {
-        //find the corresponding entity
-        String sourceId = "User_" + user.getEntityId();
-        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(EventType.PASSWORD_EXPIRED, "Source", sourceId);
-        if(entity == null) {
-            Event event = createPasswordEvent(user, EventType.PASSWORD_EXPIRED, expirationPeriod);
-            this.enqueuePasswordExpiredEvent(event);
+    public void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays) {
+        enqueuePasswordEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, user, maxPasswordAgeInDays);
+    }
+
+    protected void enqueuePasswordEvent(EventType eventType, User user, Integer maxPasswordAgeInDays) {
+
+        Event event = preparePasswordEvent(user, eventType, maxPasswordAgeInDays);
+        eu.domibus.core.alerts.model.persist.Event entity = getPersistedEvent(event);
+
+        if (!this.shouldCreateAlert(entity)) {
+            return;
         }
+
+        entity.setLastAlertDate(LocalDate.now());
+        eventDao.update(entity);
+
+        jmsManager.convertAndSendToQueue(event, alertMessageQueue, EventType.getQueueSelectorFromEventType(eventType));
+        LOG.trace(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
-    @Override
-    public void enqueuePasswordExpiredEvent(Event event) {
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, "userPasswordExpired");
-        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
-        this.persistEvent(event);
-    }
+    private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
 
-    @Override
-    public void enqueuePasswordImminentExpirationEvent(User user, Integer beforeExpirationPeriod) {
-        //find the coresp entity
-        String sourceId = "User_" + user.getEntityId();
-        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(EventType.PASSWORD_IMMINENT_EXPIRATION, "Source", sourceId);
-        if(entity == null) {
-            Event event = createPasswordEvent(user, EventType.PASSWORD_IMMINENT_EXPIRATION, beforeExpirationPeriod);
-            this.enqueuePasswordExpiredEvent(event);
+        String sourceId = event.findStringProperty("SOURCE").get();
+        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), "SOURCE", sourceId);
+        if (entity == null) {
+            entity = this.persistEvent(event);
         }
+        return entity;
     }
 
-    private Event createPasswordEvent(User user, EventType eventType, Integer expirationPeriod) {
+    private boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
+
+        AlertType alertType = AlertType.getAlertTypeFromEventType(entity.getType());
+        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(alertType);
+        if (!eventConfiguration.isActive()) {
+            return false;
+        }
+
+        int frequency = eventConfiguration.getEventFrequency();
+
+        LocalDate lastAlertDate = entity.getLastAlertDate();
+        LocalDate notificationDate = LocalDate.now().minusDays(frequency);
+
+        if (lastAlertDate == null) {
+            return true;
+        }
+        if (lastAlertDate.isBefore(notificationDate)) {
+            return true; // last alert is old enough to send another one
+        }
+
+        return false;
+    }
+
+
+    private Event preparePasswordEvent(User user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
-        event.addStringKeyValue("Source", "User_" + user.getEntityId());
-        event.addStringKeyValue("UserName", user.getUserName());
+        event.addStringKeyValue("SOURCE", "User_" + user.getEntityId());
+        event.addStringKeyValue("USER", user.getUserName());
 
-        LocalDate expDate = user.getPasswordChangeDate().plusDays(expirationPeriod);
+        LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays);
         Date date = Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        event.addDateKeyValue("ExpirationDate", date);
+        event.addDateKeyValue("EXPIRATION_DATE", date);
 
-        //event.setLastAlertDate(LocalDate.now()); //set this only when alert is created!!!
         return event;
     }
 

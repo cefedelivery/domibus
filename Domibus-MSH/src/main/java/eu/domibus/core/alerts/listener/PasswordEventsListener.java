@@ -41,73 +41,37 @@ public class PasswordEventsListener {
     @Autowired
     private EventDao eventDao;
 
-    @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
-
-
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'userPasswordImminentExpiration'")
     public void onImminentExpirationEvent(final Event event, @Header(name = "DOMAIN") String domain) {
 
-
         LOG.info("onImminentExpirationEvent... domain= "+domain);
-        domainContextProvider.setCurrentDomain(domain);
 
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION);
-        if (!eventConfiguration.isActive()) {
-            return;
-        }
-
-        saveEventAndTriggerAlert(event, domain, eventConfiguration.getEventFrequency());
+        saveEventAndTriggerAlert(event, domain);
     }
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'userPasswordExpired'")
     public void onExpiredEvent(final Event event, @Header(name = "DOMAIN") String domain) {
 
-
         LOG.info("onExpiredEvent... domain= "+domain);
-        domainContextProvider.setCurrentDomain(domain);
 
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED);
-        if (!eventConfiguration.isActive()) {
-            return;
-        }
-
-        saveEventAndTriggerAlert(event, domain, eventConfiguration.getEventFrequency());
+        saveEventAndTriggerAlert(event, domain);
     }
 
-    private void saveEventAndTriggerAlert(Event event, @Header(name = "DOMAIN") String domain, int frequency) {
+    private void saveEventAndTriggerAlert(Event event , @Header(name = "DOMAIN") String domain ) {
+
+        domainContextProvider.setCurrentDomain(domain);
 
         //find the corresponding event
-        eu.domibus.core.alerts.model.persist.Event entity
-                = eventDao.findWithTypeAndPropertyValue(event.getType(), "Source", event.findStringProperty("Source").get());
+        eu.domibus.core.alerts.model.persist.Event entity = eventDao.read(event.getEntityId());
         if (entity == null) {
             return;
         }
 
-        LOG.info("Event entity found: [{}] ", entity.getEntityId());
-        event.setEntityId(entity.getEntityId());
-
-        LocalDate lastAlertDate = entity.getLastAlertDate();
-        LocalDate notificationDate = LocalDate.now().minusDays(frequency);
-
-        //check if the alert is sent based on frequency
-        if (lastAlertDate != null && !lastAlertDate.isBefore(notificationDate)) {   //alert already sent, do nothing
-            return;
-        }
-
-        entity.setLastAlertDate(LocalDate.now());
-        eventDao.update(entity);
-        eventDao.flush();
-
-
         final Alert alertOnEvent = alertService.createAlertOnEvent(event);
         alertService.enqueueAlert(alertOnEvent);
-
-        //add another instance of event?????
-        eventService.enqueuePasswordExpiredEvent(event);
     }
 
 }

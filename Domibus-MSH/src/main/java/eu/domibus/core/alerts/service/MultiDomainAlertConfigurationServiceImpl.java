@@ -114,6 +114,12 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Autowired
     private ConfigurationLoader<CommonConfiguration> commonConfigurationConfigurationLoader;
 
+    @Autowired
+    private ConfigurationLoader<AlertEventModuleConfiguration> expiredPasswordConfigurationLoader;
+
+    @Autowired
+    private ConfigurationLoader<AlertEventModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
+
     /**
      * {@inheritDoc}
      */
@@ -216,8 +222,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     @Override
     public Boolean isAlertModuleEnabled() {
-        return true; // !!!!!
-        // return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_ACTIVE));
+        return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_ACTIVE));
     }
 
     protected CommonConfiguration readCommonConfiguration(Domain domain) {
@@ -398,30 +403,22 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
 
     @Autowired
-    private ConfigurationLoader<AlertEventModuleConfiguration> alertEventConfigurationLoader;
-
-    @Autowired
     private PModeProvider pModeProvider;
 
     /**
      * {@inheritDoc}
      */
-    //@Override
+    @Override
     public AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType) {
+        ConfigurationLoader<AlertEventModuleConfiguration> alertEventConfigurationLoader = null;
+        if (alertType == AlertType.PASSWORD_IMMINENT_EXPIRATION)
+            alertEventConfigurationLoader = imminentPasswordExpirationConfigurationLoader;
+        else if (alertType == AlertType.PASSWORD_EXPIRED)
+            alertEventConfigurationLoader = expiredPasswordConfigurationLoader;
+
         return alertEventConfigurationLoader.getConfiguration(new ConfigurationReader(alertType)::readAlertConfiguration);
     }
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    //@Override
-//    public String getAccessPointName() {
-//        String partyName = null;
-//        if (pModeProvider.isConfigurationLoaded()) {
-//            partyName = pModeProvider.getGatewayParty().getName();
-//        }
-//        return partyName;
-//    }
 
     class ConfigurationReader {
         AlertType alertType;
@@ -433,7 +430,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             if (alertType.equals(AlertType.PASSWORD_IMMINENT_EXPIRATION)) {
                 this.property = "domibus.alert.password.imminent_expiration";
                 this.defaultSubject = "Password imminent expiration";
-            } else if (alertType.equals(AlertType.PASSWORD_IMMINENT_EXPIRATION)) {
+            } else if (alertType.equals(AlertType.PASSWORD_EXPIRED)) {
                 this.property = "domibus.alert.password.expired";
                 this.defaultSubject = "Password expired";
             }
