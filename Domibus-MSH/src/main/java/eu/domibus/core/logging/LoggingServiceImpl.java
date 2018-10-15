@@ -3,13 +3,15 @@ package eu.domibus.core.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResultRO;
+import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,40 +31,48 @@ import static org.apache.commons.lang3.reflect.FieldUtils.readField;
 public class LoggingServiceImpl implements LoggingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingServiceImpl.class);
 
+    @Autowired
+    DomainCoreConverter domainConverter;
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public LoggingLevelResultRO setLoggingLevel(LoggingLevelRO loggingLevelRO) {
-        final LoggingLevelResultRO loggingLevelResultRO = new LoggingLevelResultRO();
+    public LoggingLevelResponseRO setLoggingLevel(LoggingLevelRO loggingLevelRO) {
+        final LoggingLevelResponseRO resultRO = domainConverter.convert(loggingLevelRO, LoggingLevelResponseRO.class);
+
+        resultRO.setResult(LoggingLevelResponseRO.Result.SUCCESS);
         final String strLevel = loggingLevelRO.getLevel();
         final String name = loggingLevelRO.getName();
+
 
         Level level = toLevel(strLevel);
 
         if (level == null) {
             LOG.error("Not a known log level: {}", strLevel);
-            loggingLevelResultRO.setMessage("Error, not a known log level: " + strLevel);
-            return loggingLevelResultRO;
+            resultRO.setMessage("Error. Not a known log level: " + strLevel);
+            resultRO.setResult(LoggingLevelResponseRO.Result.ERROR);
+            return resultRO;
         }
 
-        String msg = "Setting log level: " + level + " for ";
+        String msg = "Success. Log level set to: " + level + " for ";
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
             loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
-            LOG.info("Setting log level: {} for root}", level);
+            LOG.info("Setting log level: {} for root", level);
             msg += "root";
         } else {
             loggerContext.getLogger(name).setLevel(level);
             LOG.info("Setting log level: {} for package name: {}", level, name);
             msg += "package name: " + name;
         }
-        loggingLevelResultRO.setMessage(msg);
-        loggingLevelResultRO.setLevel(level.toString());
-        loggingLevelResultRO.setName(name);
+        resultRO.setResult(LoggingLevelResponseRO.Result.SUCCESS);
+        resultRO.setMessage(msg);
+        resultRO.setLevel(level.toString());
 
-        return loggingLevelResultRO;
+
+        return resultRO;
     }
 
     /**
@@ -76,10 +86,10 @@ public class LoggingServiceImpl implements LoggingService {
             return resultList;
         }
 
-        LOG.info("showing logging for={} including classes=", name, showClasses);
+        LOG.info("showing logging for name: {} including classes: {}", name, showClasses);
 
+        //getting the logger context and list of loggers
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
         List<Logger> loggerList = loggerContext.getLoggerList();
 
         Predicate<Logger> nameStartsWithPredicate = p -> p.getName().startsWith(name);

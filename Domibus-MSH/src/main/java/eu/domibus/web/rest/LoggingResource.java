@@ -4,7 +4,7 @@ import eu.domibus.core.logging.LoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResultRO;
+import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +27,14 @@ public class LoggingResource {
     LoggingService loggingService;
 
     @PostMapping(value = "/loglevel")
-    public ResponseEntity<List<LoggingLevelResultRO>> setLogLevel(@RequestBody List<LoggingLevelRO> loggingLevelROS) {
+    public ResponseEntity<List<LoggingLevelResponseRO>> setLogLevel(@RequestBody List<LoggingLevelRO> loggingLevelROS) {
 
-        final List<LoggingLevelResultRO> loggingLevelResultROS = loggingLevelROS.stream().map(loggingLevelRO -> loggingService.setLoggingLevel(loggingLevelRO)).
+        final List<LoggingLevelResponseRO> loggingLevelResponseROS = loggingLevelROS.
+                stream().
+                map(loggingLevelRO -> loggingService.setLoggingLevel(loggingLevelRO)).
                 collect(Collectors.toList());
 
-        return ResponseEntity.ok().body(loggingLevelResultROS);
+        return ResponseEntity.ok().body(loggingLevelResponseROS);
 
     }
 

@@ -1,7 +1,7 @@
 package eu.domibus.core.logging;
 
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResultRO;
+import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface LoggingService {
      * @param loggingLevelRO
      * @return
      */
-    LoggingLevelResultRO setLoggingLevel(LoggingLevelRO loggingLevelRO);
+    LoggingLevelResponseRO setLoggingLevel(LoggingLevelRO loggingLevelRO);
 
     /**
      * Get the logging levels for the given packages which starts or contains with {@code name} parameter
