@@ -12,6 +12,7 @@ public class LoggingLevelRO {
 
     private String level;
 
+
     public String getName() {
         return name;
     }
@@ -27,4 +28,5 @@ public class LoggingLevelRO {
     public void setLevel(String level) {
         this.level = level;
     }
+
 }
