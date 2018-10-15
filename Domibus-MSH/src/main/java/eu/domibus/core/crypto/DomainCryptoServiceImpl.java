@@ -6,9 +6,8 @@ import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.clustering.Command;
+import eu.domibus.api.cluster.Command;
 import eu.domibus.common.exception.ConfigurationException;
-import eu.domibus.common.model.certificate.Certificate;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
@@ -21,7 +20,6 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.wss4j.common.crypto.Merlin;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * @author Cosmin Baciu

@@ -192,16 +192,22 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     protected void sendMessageToDestination(JmsMessage message, Destination destination, InternalJmsMessage.MessageType messageType) {
+        InternalJmsMessage internalJmsMessage = getInternalJmsMessage(message, messageType);
+        internalJmsManager.sendMessage(internalJmsMessage, destination);
+    }
+
+    private InternalJmsMessage getInternalJmsMessage(JmsMessage message, InternalJmsMessage.MessageType messageType) {
         final Domain currentDomain = domainContextProvider.getCurrentDomain();
         message.getProperties().put(MessageConstants.DOMAIN, currentDomain.getCode());
         InternalJmsMessage internalJmsMessage = jmsMessageMapper.convert(message);
         internalJmsMessage.setMessageType(messageType);
-        internalJmsManager.sendMessage(internalJmsMessage, destination);
+        return internalJmsMessage;
     }
 
     @Override
     public void sendMessageToTopic(JmsMessage message, Topic destination) {
-        sendMessageToDestination(message, destination, InternalJmsMessage.MessageType.TEXT_MESSAGE);
+        InternalJmsMessage internalJmsMessage = getInternalJmsMessage(message, InternalJmsMessage.MessageType.TEXT_MESSAGE);
+        internalJmsManager.sendMessageToTopic(internalJmsMessage, destination);
     }
 
     @Override

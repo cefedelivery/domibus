@@ -96,6 +96,13 @@ public class InternalJmsMessage {
 		return customProperties;
 	}
 
+	public Object getProperty(String name) {
+		if(properties == null) {
+			return null;
+		}
+		return properties.get(name);
+	}
+
 	public void setProperties(Map<String, Object> properties) {
 		this.properties = properties;
 	}
