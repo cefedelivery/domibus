@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <property name="now" value="systimestamp" dbms="oracle"/>
+    <property name="now" value="now()" dbms="mysql"/>
+
+    <changeSet author="nperpion" id="EDELIVERY-3651">
+
+        <addColumn tableName="TB_USER">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"></column>
+        </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="PASSWORDCHANGEDATE_MOD" type="BOOLEAN"></column>
+        </addColumn>
+
+        <createTable tableName="TB_USER_PASSWORD_HISTORY">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_PASSWORD_HISTORY"
+                                 constraintName="FK_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+
+        <addColumn tableName="TB_EVENT">
+            <column name="LAST_ALERT_DATE" type="TIMESTAMP"/>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>

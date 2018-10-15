@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="nperpion" id="EDELIVERY-3651">
+
+        <addColumn tableName="TB_USER">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"></column>
+        </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="PASSWORDCHANGEDATE_MOD" type="BOOLEAN"></column>
+        </addColumn>
+
+        <createTable tableName="TB_USER_PASSWORD_HISTORY">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="IDX_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_USER_PASSWORD_HISTORY"
+                                 constraintName="FK_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_USER"/>
+
+        <sql dbms="mysql">
+            SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
+            SET SQL_SAFE_UPDATES = 0;
+            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=NOW() WHERE USER_NAME='super';
+            SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
+        </sql>
+        <sql dbms="oracle">
+            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=sysdate WHERE USER_NAME='super';
+        </sql>
+
+        <addColumn tableName="TB_EVENT">
+            <column name="LAST_ALERT_DATE" type="TIMESTAMP"/>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>
