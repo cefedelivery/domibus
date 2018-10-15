@@ -6,7 +6,9 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.core.alerts.job.AlertCleanerJob;
+import eu.domibus.core.alerts.job.AlertCleanerSuperJob;
 import eu.domibus.core.alerts.job.AlertRetryJob;
+import eu.domibus.core.alerts.job.AlertRetrySuperJob;
 import eu.domibus.core.pull.PullRetryWorker;
 import eu.domibus.ebms3.common.quartz.AutowiringSpringBeanJobFactory;
 import eu.domibus.ebms3.puller.MessagePullerJob;
@@ -126,7 +128,6 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
-
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean retryWorkerTrigger() {
@@ -170,7 +171,6 @@ public class DomainSchedulerFactoryConfiguration {
         return obj;
     }
 
-
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean pullRequestTrigger() {
@@ -195,6 +195,14 @@ public class DomainSchedulerFactoryConfiguration {
     }
 
     @Bean
+    public JobDetailFactoryBean alertRetryJSuperJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(AlertRetrySuperJob.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean alertRetryWorkerTrigger() {
         if (domainContextProvider.getCurrentDomainSafely() == null)
@@ -207,9 +215,28 @@ public class DomainSchedulerFactoryConfiguration {
     }
 
     @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean alertRetrySuperWorkerTrigger() {
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(alertRetryJSuperJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getOptionalDomainProperty("domibus.alert.super.retry.cron"));
+        obj.setStartDelay(20000);
+        obj.setGroup(GROUP_GENERAL);
+        return obj;
+    }
+
+    @Bean
     public JobDetailFactoryBean alertCleanerJob() {
         JobDetailFactoryBean obj = new JobDetailFactoryBean();
         obj.setJobClass(AlertCleanerJob.class);
+        obj.setDurability(true);
+        return obj;
+    }
+
+    @Bean
+    public JobDetailFactoryBean alertCleanerSuperJob() {
+        JobDetailFactoryBean obj = new JobDetailFactoryBean();
+        obj.setJobClass(AlertCleanerSuperJob.class);
         obj.setDurability(true);
         return obj;
     }
@@ -223,6 +250,17 @@ public class DomainSchedulerFactoryConfiguration {
         obj.setJobDetail(alertCleanerJob().getObject());
         obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.alert.cleaner.cron"));
         obj.setStartDelay(20000);
+        return obj;
+    }
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean alertSuperCleanerTrigger() {
+        CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
+        obj.setJobDetail(alertCleanerSuperJob().getObject());
+        obj.setCronExpression(domibusPropertyProvider.getOptionalDomainProperty("domibus.alert.super.cleaner.cron"));
+        obj.setStartDelay(20000);
+        obj.setGroup(GROUP_GENERAL);
         return obj;
     }
 

@@ -2,9 +2,9 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.persist.Alert;
@@ -14,7 +14,6 @@ import eu.domibus.core.alerts.model.service.MailModel;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.domibus.core.alerts.model.common.AlertStatus.*;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -37,15 +37,11 @@ public class AlertServiceImpl implements AlertService {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertServiceImpl.class);
 
-    static final String DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS = "domibus.alert.retry.max_attempts";
-
     static final String ALERT_LEVEL = "ALERT_LEVEL";
 
     static final String REPORTING_TIME = "REPORTING_TIME";
 
     static final String ALERT_SELECTOR = "alert";
-
-    static final String DOMIBUS_ALERT_RETRY_TIME = "domibus.alert.retry.time";
 
     @Autowired
     private EventDao eventDao;
@@ -83,7 +79,8 @@ public class AlertServiceImpl implements AlertService {
         alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
         alert.setAttempts(0);
-        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_MAX_ATTEMPTS, "1")));
+        final String alertRetryMaxAttemptPropertyName = multiDomainAlertConfigurationService.getAlertRetryMaxAttemptPropertyName();
+        alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertRetryMaxAttemptPropertyName, "1")));
         alert.setAlertStatus(SEND_ENQUEUED);
         alert.setCreationTime(new Date());
 
@@ -117,7 +114,7 @@ public class AlertServiceImpl implements AlertService {
         mailModel.put(ALERT_LEVEL, read.getAlertLevel().name());
         mailModel.put(REPORTING_TIME, read.getReportingTime().toString());
         if (LOG.isDebugEnabled()) {
-            mailModel.forEach((key,value)-> LOG.debug("Mail template key[{}] value[{}]", key, value));
+            mailModel.forEach((key, value) -> LOG.debug("Mail template key[{}] value[{}]", key, value));
         }
         final AlertType alertType = read.getAlertType();
         final String subject = multiDomainAlertConfigurationService.getMailSubject(alertType);
@@ -136,16 +133,17 @@ public class AlertServiceImpl implements AlertService {
         alertEntity.setNextAttempt(null);
         if (SUCCESS == alertEntity.getAlertStatus()) {
             alertEntity.setReportingTime(new Date());
-            alertEntity.setAttempts(alertEntity.getAttempts()+1);
-            LOG.debug("Alert[{}]: send successfully",alert.getEntityId());
+            alertEntity.setAttempts(alertEntity.getAttempts() + 1);
+            LOG.debug("Alert[{}]: send successfully", alert.getEntityId());
             return;
         }
         final Integer attempts = alertEntity.getAttempts() + 1;
         final Integer maxAttempts = alertEntity.getMaxAttempts();
-        LOG.debug("Alert[{}]: send unsuccessfully",alert.getEntityId());
+        LOG.debug("Alert[{}]: send unsuccessfully", alert.getEntityId());
         if (attempts < maxAttempts) {
-            LOG.debug("Alert[{}]: send attempts[{}], max attempts[{}]",alert.getEntityId(),attempts,maxAttempts);
-            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_RETRY_TIME));
+            LOG.debug("Alert[{}]: send attempts[{}], max attempts[{}]", alert.getEntityId(), attempts, maxAttempts);
+            final String alertRetryTimePropertyName = multiDomainAlertConfigurationService.getAlertRetryTimePropertyName();
+            final Integer minutesBetweenAttempt = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertRetryTimePropertyName));
             final Date nextAttempt = org.joda.time.LocalDateTime.now().plusMinutes(minutesBetweenAttempt).toDate();
             alertEntity.setNextAttempt(nextAttempt);
             alertEntity.setAttempts(attempts);
@@ -156,7 +154,7 @@ public class AlertServiceImpl implements AlertService {
             alertEntity.setReportingTimeFailure(org.joda.time.LocalDateTime.now().toDate());
             alertEntity.setAttempts(alertEntity.getMaxAttempts());
         }
-        LOG.debug("Alert[{}]: change status to:[{}]",alert.getEntityId(),alertEntity.getAlertStatus());
+        LOG.debug("Alert[{}]: change status to:[{}]", alert.getEntityId(), alertEntity.getAlertStatus());
     }
 
     /**
@@ -176,14 +174,14 @@ public class AlertServiceImpl implements AlertService {
     @Transactional
     public List<eu.domibus.core.alerts.model.service.Alert> findAlerts(AlertCriteria alertCriteria) {
         final List<Alert> alerts = alertDao.filterAlerts(alertCriteria);
-        if(LOG.isDebugEnabled()){
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Find alerts:");
             alerts.forEach(alert -> {
-                LOG.debug("Alert[{}]",alert);
+                LOG.debug("Alert[{}]", alert);
                 alert.getEvents().forEach(event -> {
-                    LOG.debug("Event[{}]",event);
+                    LOG.debug("Event[{}]", event);
                     event.getProperties().
-                            forEach((key, value) -> LOG.debug("Event property:[{}]->[{}]",key,value));
+                            forEach((key, value) -> LOG.debug("Event property:[{}]->[{}]", key, value));
                 });
             });
 
@@ -205,10 +203,10 @@ public class AlertServiceImpl implements AlertService {
      */
     @Override
     @Transactional
-    public void cleanAlerts(){
+    public void cleanAlerts() {
         final Integer alertLifeTimeInDays = multiDomainAlertConfigurationService.getCommonConfiguration().getAlertLifeTimeInDays();
-        final Date alertLimitDate = org.joda.time.LocalDateTime.now().minusDays(alertLifeTimeInDays).withTime(0,0,0,0).toDate();
-        LOG.debug("Cleaning alerts with creation time < [{}]",alertLimitDate);
+        final Date alertLimitDate = org.joda.time.LocalDateTime.now().minusDays(alertLifeTimeInDays).withTime(0, 0, 0, 0).toDate();
+        LOG.debug("Cleaning alerts with creation time < [{}]", alertLimitDate);
         final List<Alert> alerts = alertDao.retrieveAlertsWithCreationDateSmallerThen(alertLimitDate);
         alertDao.deleteAll(alerts);
     }
@@ -218,11 +216,11 @@ public class AlertServiceImpl implements AlertService {
      */
     @Override
     @Transactional
-    public void updateAlertProcessed(List<eu.domibus.core.alerts.model.service.Alert> alerts){
+    public void updateAlertProcessed(List<eu.domibus.core.alerts.model.service.Alert> alerts) {
         alerts.forEach(alert -> {
             final int entityId = alert.getEntityId();
             final boolean processed = alert.isProcessed();
-            LOG.debug("Update alert with id[{}] set processed to[{}]",entityId,processed);
+            LOG.debug("Update alert with id[{}] set processed to[{}]", entityId, processed);
             alertDao.updateAlertProcessed(entityId, processed);
         });
 

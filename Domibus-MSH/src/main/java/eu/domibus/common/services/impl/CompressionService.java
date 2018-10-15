@@ -45,8 +45,13 @@ public class CompressionService {
      * @throws EbMS3Exception if an problem occurs during the compression or the mimetype was missing
      */
     public boolean handleCompression(final UserMessage ebmsMessage, final LegConfiguration legConfigForMessage) throws EbMS3Exception {
+
         //if compression is not necessary return false
         if (!legConfigForMessage.isCompressPayloads()) {
+            return false;
+        }
+
+        if(ebmsMessage.getPayloadInfo() == null) {
             return false;
         }
 

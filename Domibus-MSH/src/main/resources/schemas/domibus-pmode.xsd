@@ -89,7 +89,7 @@
                                                             <xs:attribute name="partyId" type="max255-non-empty-string"
                                                                           use="required"/>
                                                             <xs:attribute name="partyIdType" type="max255-non-empty-string"
-                                                                          use="required"/>
+                                                                          use="optional"/>
                                                         </xs:complexType>
                                                     </xs:element>
                                                 </xs:sequence>
