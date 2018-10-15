@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+     <changeSet author="dussath" id="EDELIVERY-3768">
+          <createTable tableName="TB_ALERT">
+               <column autoIncrement="true" name="ID_PK" type="INT">
+                    <constraints primaryKey="true"/>
+               </column>
+               <column name="ALERT_TYPE" type="VARCHAR(50)">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="ATTEMPTS_NUMBER" type="INT"/>
+               <column name="MAX_ATTEMPTS_NUMBER" type="INT">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="PROCESSED" type="BOOLEAN"/>
+               <column name="PROCESSED_TIME" type="TIMESTAMP"/>
+               <column name="CREATION_TIME" type="TIMESTAMP"/>
+               <column name="REPORTING_TIME" type="TIMESTAMP"/>
+               <column name="REPORTING_TIME_FAILURE" type="TIMESTAMP"/>
+               <column name="NEXT_ATTEMPT" type="TIMESTAMP"/>
+               <column name="ALERT_STATUS" type="VARCHAR(50)">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="ALERT_LEVEL" type="VARCHAR(20)">
+                    <constraints nullable="false"/>
+               </column>
+          </createTable>
+
+
+          <createTable tableName="TB_EVENT">
+               <column autoIncrement="true" name="ID_PK" type="INT">
+                    <constraints primaryKey="true"/>
+               </column>
+               <column name="EVENT_TYPE" type="VARCHAR(50)">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="REPORTING_TIME" type="TIMESTAMP"/>
+          </createTable>
+
+          <createTable tableName="TB_EVENT_PROPERTY">
+               <column autoIncrement="true" name="ID_PK" type="INT">
+                    <constraints primaryKey="true"/>
+               </column>
+               <column name="PROPERTY_TYPE" type="VARCHAR(50)">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="FK_EVENT" type="INT">
+                    <constraints nullable="false"/>
+               </column>
+               <column name="DTYPE" type="VARCHAR(31)"/>
+               <column name="STRING_VALUE" type="VARCHAR(255)"/>
+               <column name="DATE_VALUE" type="TIMESTAMP"/>
+          </createTable>
+          <createIndex indexName="IDX_FK_EVENT_PROPERTY" tableName="TB_EVENT_PROPERTY">
+               <column name="FK_EVENT"/>
+          </createIndex>
+
+          <addForeignKeyConstraint baseColumnNames="FK_EVENT" baseTableName="TB_EVENT_PROPERTY"
+                                   constraintName="FK_EVENT_PROPERTY_ID" deferrable="false"
+                                   initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                   referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+          <createTable tableName="TB_EVENT_ALERT">
+               <column name="FK_EVENT" type="INT"/>
+               <column name="FK_ALERT" type="INT"/>
+          </createTable>
+
+          <addPrimaryKey
+                  columnNames="FK_EVENT,FK_ALERT"
+                  constraintName="PK_EVENT_ALERT"
+                  tableName="TB_EVENT_ALERT"/>
+
+          <addForeignKeyConstraint baseColumnNames="FK_EVENT" baseTableName="TB_EVENT_ALERT"
+                                   constraintName="FK_EVENT_ID" deferrable="false"
+                                   initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                   referencedColumnNames="ID_PK" referencedTableName="TB_EVENT"/>
+
+          <createIndex indexName="IDX_FK_EVENT" tableName="TB_EVENT_ALERT">
+               <column name="FK_EVENT"/>
+          </createIndex>
+
+          <addForeignKeyConstraint baseColumnNames="FK_ALERT" baseTableName="TB_EVENT_ALERT"
+                                   constraintName="FK_ALERT_ID" deferrable="false"
+                                   initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                   referencedColumnNames="ID_PK" referencedTableName="TB_ALERT"/>
+
+          <createIndex indexName="IDX_FK_ALERT" tableName="TB_EVENT_ALERT">
+               <column name="FK_ALERT"/>
+          </createIndex>
+     </changeSet>
+</databaseChangeLog>

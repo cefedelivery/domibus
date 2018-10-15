@@ -43,7 +43,6 @@ public class MailSender {
 
     private static final String MAIL = ".mail";
 
-    public static final String DOMIBUS_ALERT_MAIL_SENDING_ACTIVE = "domibus.alert.mail.sending.active";
 
     @Autowired
     private Configuration freemarkerConfig;
@@ -65,7 +64,8 @@ public class MailSender {
     protected void initMailSender() {
         final Boolean alertModuleEnabled = multiDomainAlertConfigurationService.isAlertModuleEnabled();
         LOG.debug("Alert module enabled:[{}]", alertModuleEnabled);
-        final boolean mailActive=Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE));
+        final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
+        final boolean mailActive=Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (alertModuleEnabled && mailActive) {
             //static properties.
             final String url = domibusPropertyProvider.getProperty(DOMIBUS_ALERT_SENDER_SMTP_URL);

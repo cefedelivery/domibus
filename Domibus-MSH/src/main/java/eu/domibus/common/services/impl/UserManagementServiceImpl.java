@@ -43,7 +43,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.console.login.maximum.attempt";
 
-    protected final static String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
+    protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
 
@@ -135,12 +135,6 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
-        //TODO trigger events for super user in 4.1 EDELIVERY-3768
-        if (domainContextProvider.getCurrentDomainSafely() == null) {
-            LOG.debug("User alerts disabled for super users");
-            return;
-        }
-
         final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
@@ -201,12 +195,9 @@ public class UserManagementServiceImpl implements UserService {
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
 
-            //TODO trigger events for super user in 4.1 EDELIVERY-3768
-            if (!user.isSuperAdmin()) {
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-                if (accountDisabledConfiguration.isActive()) {
-                    eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
-                }
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            if (accountDisabledConfiguration.isActive()) {
+                eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
             }
 
         }
@@ -217,7 +208,7 @@ public class UserManagementServiceImpl implements UserService {
         String domainCode;
         boolean isSuperAdmin = user.isSuperAdmin();
         if (isSuperAdmin) {
-            domainCode = domainService.DEFAULT_DOMAIN.getCode();
+            domainCode = DomainService.DEFAULT_DOMAIN.getCode();
         } else {
             domainCode = userDomainService.getDomainForUser(user.getUserName());
         }

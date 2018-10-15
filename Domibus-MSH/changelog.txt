@@ -1,9 +1,10 @@
 Domibus 4.1
 - Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
 Domibus 4.0.1
-- changes in order to improve logging for multitenancy:
+- Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
     - a logback.xml file for 'default' domain should be added always apart from the other domains
+- Add email alert support for super user login failure and account disabled.
 Domibus 4.0
 - Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException

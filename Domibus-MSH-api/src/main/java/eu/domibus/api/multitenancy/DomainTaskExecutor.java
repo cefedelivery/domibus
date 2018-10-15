@@ -11,4 +11,6 @@ import java.util.concurrent.Callable;
 public interface DomainTaskExecutor {
 
     <T extends Object> T submit(Callable<T> task);
+
+    void submit(Runnable task);
 }
