@@ -30,9 +30,6 @@ public class PasswordEventsListener {
     private static final Logger LOG = DomibusLoggerFactory.getLogger(PasswordEventsListener.class);
 
     @Autowired
-    private EventService eventService;
-
-    @Autowired
     private AlertService alertService;
 
     @Autowired
@@ -46,8 +43,6 @@ public class PasswordEventsListener {
             selector = "selector = 'userPasswordImminentExpiration'")
     public void onImminentExpirationEvent(final Event event, @Header(name = "DOMAIN") String domain) {
 
-        LOG.info("onImminentExpirationEvent... domain= "+domain);
-
         saveEventAndTriggerAlert(event, domain);
     }
 
@@ -55,23 +50,19 @@ public class PasswordEventsListener {
             selector = "selector = 'userPasswordExpired'")
     public void onExpiredEvent(final Event event, @Header(name = "DOMAIN") String domain) {
 
-        LOG.info("onExpiredEvent... domain= "+domain);
-
         saveEventAndTriggerAlert(event, domain);
     }
 
-    private void saveEventAndTriggerAlert(Event event , @Header(name = "DOMAIN") String domain ) {
+    private void saveEventAndTriggerAlert(Event event, @Header(name = "DOMAIN") String domain) {
 
         domainContextProvider.setCurrentDomain(domain);
 
-        //find the corresponding event
+        //find the corresponding persisted event
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.read(event.getEntityId());
-        if (entity == null) {
-            return;
+        if (entity != null) {
+            final Alert alertOnEvent = alertService.createAlertOnEvent(event);
+            alertService.enqueueAlert(alertOnEvent);
         }
-
-        final Alert alertOnEvent = alertService.createAlertOnEvent(event);
-        alertService.enqueueAlert(alertOnEvent);
     }
 
 }

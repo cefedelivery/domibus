@@ -141,7 +141,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getLoginFailureConfiguration() {
-        LOG.info("AICI0");
         return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
     }
 
@@ -222,7 +221,10 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     @Override
     public Boolean isAlertModuleEnabled() {
-        return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_ACTIVE));
+        // return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_ACTIVE));
+        boolean active = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_ACTIVE));
+        if (!active) active = true;  // !!! TODO
+        return active;
     }
 
     protected CommonConfiguration readCommonConfiguration(Domain domain) {
@@ -322,13 +324,11 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     protected LoginFailureModuleConfiguration readLoginFailureConfiguration(Domain domain) {
         try {
-            LOG.info("AICI readLoginFailureConfiguration");
             final Boolean alertActive = isAlertModuleEnabled();
             final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, Boolean.FALSE.toString()));
-            LOG.info("AICI2 alertActive = [{}] loginFailureActive = [{}] ", alertActive, loginFailureActive);
 
             if (!alertActive || !loginFailureActive) {
-                LOG.debug("domain:[{}] Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
+                LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
                 return new LoginFailureModuleConfiguration();
             }
             final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, LOW));
@@ -400,10 +400,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             return new ExpiredCertificateModuleConfiguration();
         }
     }
-
-
-    @Autowired
-    private PModeProvider pModeProvider;
 
     /**
      * {@inheritDoc}

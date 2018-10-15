@@ -5,14 +5,23 @@ import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
+import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserPasswordHistory;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.VerificationsInOrder;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
- @since 4.1
+ * @since 4.1
  */
 
 public class PasswordValidatorTest {
@@ -23,7 +32,13 @@ public class PasswordValidatorTest {
     DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    DomainContextProvider domainContextProvider;
+    UserPasswordHistoryDao userPasswordHistoryDao;
+
+    @Injectable
+    UserDao userDao;
+
+    @Injectable
+    BCryptPasswordEncoder bcryptEncoder;
 
     @Tested
     PasswordValidator passwordValidator;
@@ -31,7 +46,7 @@ public class PasswordValidatorTest {
     @Test
     public void checkPasswordComplexity() throws Exception {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain)any, PasswordValidator.PASSWORD_COMPLEXITY_PATTERN);
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_COMPLEXITY_PATTERN);
             result = PASSWORD_COMPLEXITY_PATTERN;
         }};
 
@@ -120,4 +135,37 @@ public class PasswordValidatorTest {
         }
     }
 
+    @Test
+    public void testPasswordHistoryDisabled() throws Exception {
+        String username = "user1";
+        String testPassword = "testPassword123.";
+        new Expectations() {{
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, anyString);
+            result = "0";
+        }};
+
+        passwordValidator.validateHistory(username, testPassword);
+
+        new VerificationsInOrder() {{
+            userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
+            times = 0;
+        }};
+    }
+
+    @Test(expected = DomibusCoreException.class)
+    public void testPasswordHistory() throws Exception {
+        String username = "user1";
+        String testPassword = "testPassword123.";
+        List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory());
+        new Expectations() {{
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, anyString);
+            result = "5";
+            userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
+            result = oldPasswords;
+            bcryptEncoder.matches(anyString, anyString);
+            result = true;
+        }};
+
+        passwordValidator.validateHistory(username, testPassword);
+    }
 }

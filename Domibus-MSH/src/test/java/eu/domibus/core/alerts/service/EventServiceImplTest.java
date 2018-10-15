@@ -8,7 +8,10 @@ import eu.domibus.common.dao.ErrorLogDao;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
+import eu.domibus.common.model.security.User;
 import eu.domibus.core.alerts.dao.EventDao;
+import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.persist.AbstractEventProperty;
 import eu.domibus.core.alerts.model.persist.StringEventProperty;
 import eu.domibus.core.alerts.model.service.Event;
@@ -25,6 +28,7 @@ import org.junit.runner.RunWith;
 import javax.jms.Queue;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.*;
@@ -62,6 +66,9 @@ public class EventServiceImplTest {
     @Injectable
     private Queue alertMessageQueue;
 
+    @Injectable
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
 
     @Test
     public void enqueueMessageEvent() {
@@ -84,7 +91,7 @@ public class EventServiceImplTest {
     @Test
     public void enqueueLoginFailureEvent() throws ParseException {
         final String userName = "thomas";
-        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
         final Date loginTime = parser.parse("25/10/1977 00:00:00");
         final boolean accountDisabled = false;
         eventService.enqueueLoginFailureEvent(userName, loginTime, accountDisabled);
@@ -102,7 +109,7 @@ public class EventServiceImplTest {
     @Test
     public void enqueueAccountDisabledEvent() throws ParseException {
         final String userName = "thomas";
-        SimpleDateFormat parser = new SimpleDateFormat("dd/mm/yyy HH:mm:ss");
+        SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
         final Date loginTime = parser.parse("25/10/1977 00:00:00");
         final boolean accountDisabled = false;
         eventService.enqueueAccountDisabledEvent(userName, loginTime, accountDisabled);
@@ -186,7 +193,7 @@ public class EventServiceImplTest {
         final String messageId = "messageId";
         event.addStringKeyValue(MESSAGE_ID.name(), messageId);
         event.addStringKeyValue(ROLE.name(), "SENDING");
-        final ErrorLogEntry errorLogEntry=new ErrorLogEntry();
+        final ErrorLogEntry errorLogEntry = new ErrorLogEntry();
         final String error_detail = "Error detail";
         errorLogEntry.setErrorDetail(error_detail);
         final String fromParty = "blue_gw";
@@ -197,34 +204,74 @@ public class EventServiceImplTest {
             result = userMessage;
 
             pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
-            result=userMessageExchangeContext;
+            result = userMessageExchangeContext;
 
             userMessageExchangeContext.getPmodeKey();
-            result="pmodekey";
+            result = "pmodekey";
 
             pModeProvider.getSenderParty(userMessageExchangeContext.getPmodeKey()).getName();
 
-            result= fromParty;
+            result = fromParty;
 
             pModeProvider.getReceiverParty(userMessageExchangeContext.getPmodeKey()).getName();
 
-            result= toParty;
+            result = toParty;
 
             errorLogDao.
                     getErrorsForMessage(messageId);
-            result= Lists.newArrayList(errorLogEntry);
+            result = Lists.newArrayList(errorLogEntry);
         }};
         eventService.enrichMessageEvent(event);
-        Assert.assertEquals(fromParty,event.getProperties().get(FROM_PARTY.name()).getValue());
-        Assert.assertEquals(toParty,event.getProperties().get(TO_PARTY.name()).getValue());
-        Assert.assertEquals(error_detail,event.getProperties().get(DESCRIPTION.name()).getValue());
+        Assert.assertEquals(fromParty, event.getProperties().get(FROM_PARTY.name()).getValue());
+        Assert.assertEquals(toParty, event.getProperties().get(TO_PARTY.name()).getValue());
+        Assert.assertEquals(error_detail, event.getProperties().get(DESCRIPTION.name()).getValue());
     }
+
     @Test(expected = IllegalArgumentException.class)
     public void enrichMessageEventWithIllegalArgumentExcption(@Mocked final UserMessage userMessage,
-                                   @Mocked final MessageExchangeConfiguration userMessageExchangeContext) throws EbMS3Exception {
+                                                              @Mocked final MessageExchangeConfiguration userMessageExchangeContext) throws EbMS3Exception {
         final Event event = new Event();
         final String messageId = "messageId";
         event.addStringKeyValue(MESSAGE_ID.name(), messageId);
         eventService.enrichMessageEvent(event);
+    }
+
+    @Test
+    public void enqueuePasswordExpiredEvent() throws ParseException {
+        int maxPasswordAge = 15;
+        LocalDateTime passwordDate = LocalDateTime.of(2018, 10, 01, 21, 58, 59);
+        SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
+        final Date expirationDate = parser.parse("16/10/2018 00:00:00");
+        User user = initPasswordTestUser(passwordDate);
+        eu.domibus.core.alerts.model.persist.Event persistedEvent = new eu.domibus.core.alerts.model.persist.Event();
+        persistedEvent.setEntityId(1);
+        persistedEvent.setType(EventType.PASSWORD_EXPIRED);
+
+        new Expectations() {{
+            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration((AlertType)any).isActive();
+            result = true;
+            eventDao.findWithTypeAndPropertyValue((EventType) any, anyString, anyString);
+            result = null;
+            domainConverter.convert((Event) any, eu.domibus.core.alerts.model.persist.Event.class);
+            result = persistedEvent;
+        }};
+
+        eventService.enqueuePasswordExpiredEvent(user, maxPasswordAge);
+
+        new VerificationsInOrder() {{
+            Event event;
+            jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, anyString);
+            times = 1;
+            Assert.assertEquals(user.getUserName(), event.getProperties().get("USER").getValue());
+            Assert.assertEquals(expirationDate, event.getProperties().get("EXPIRATION_DATE").getValue());
+        }};
+    }
+
+    private User initPasswordTestUser(LocalDateTime passwordDate) {
+        User user = new User();
+        user.setEntityId(1234);
+        user.setUserName("testuser1");
+        user.setPasswordChangeDate(passwordDate);
+        return user;
     }
 }

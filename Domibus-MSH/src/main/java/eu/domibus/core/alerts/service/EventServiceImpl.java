@@ -247,7 +247,6 @@ public class EventServiceImpl implements EventService {
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-
         String sourceId = event.findStringProperty("SOURCE").get();
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), "SOURCE", sourceId);
         if (entity == null) {
@@ -256,7 +255,7 @@ public class EventServiceImpl implements EventService {
         return entity;
     }
 
-    private boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
+    protected boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
 
         AlertType alertType = AlertType.getAlertTypeFromEventType(entity.getType());
         final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(alertType);
@@ -283,10 +282,10 @@ public class EventServiceImpl implements EventService {
     private Event preparePasswordEvent(User user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
-        event.addStringKeyValue("SOURCE", "User_" + user.getEntityId());
         event.addStringKeyValue("USER", user.getUserName());
+        event.addStringKeyValue("SOURCE", "User#" + user.getEntityId() + ":" + user.getPasswordChangeDate().toLocalDate().toString());
 
-        LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays);
+        LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
         Date date = Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         event.addDateKeyValue("EXPIRATION_DATE", date);
 

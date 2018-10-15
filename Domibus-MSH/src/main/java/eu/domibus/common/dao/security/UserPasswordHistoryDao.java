@@ -4,6 +4,7 @@ import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -11,12 +12,10 @@ import java.util.List;
  */
 public interface UserPasswordHistoryDao {
 
-//    LocalDate findPasswordDate(final User user);
+    void savePassword(final User user, String passwordHash, LocalDateTime passwordDate);
 
-    void savePassword(final User user, String passwordHash);
+    void removePasswords(final User user, int oldPasswordsToKeep);
 
-    void removePasswords(final User user, int passwordsToKeep);
-
-    List<UserPasswordHistory> getPasswordHistory(final User user, int entriesNumber);
+    List<UserPasswordHistory> getPasswordHistory(final User user, int entriesCount);
 
 }

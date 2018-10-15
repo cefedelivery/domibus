@@ -37,9 +37,6 @@ public class PasswordValidator {
     private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private DomainContextProvider domainContextProvider;
-
-    @Autowired
     private UserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
@@ -54,11 +51,8 @@ public class PasswordValidator {
         if (StringUtils.isBlank(password)) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, errorMessage);
         }
-        Domain domain = domainContextProvider.getCurrentDomainSafely();
-        if (domain == null) {
-            domain = DomainService.DEFAULT_DOMAIN;
-        }
-        String passwordPattern = domibusPropertyProvider.getDomainProperty(domain, PASSWORD_COMPLEXITY_PATTERN);
+
+        String passwordPattern = domibusPropertyProvider.getOptionalDomainProperty(PASSWORD_COMPLEXITY_PATTERN);
         if (StringUtils.isBlank(passwordPattern)) {
             return;
         }
@@ -71,18 +65,8 @@ public class PasswordValidator {
     }
 
     public void validateHistory(final String userName, final String password) throws DomibusCoreException {
-        Domain domain = domainContextProvider.getCurrentDomainSafely();
-        if (domain == null) {
-            domain = DomainService.DEFAULT_DOMAIN;
-        }
-        int oldPasswordsToCheck;
-        try {
-            String oldPasswordsToCheckVal = domibusPropertyProvider.getDomainProperty(domain, PASSWORD_HISTORY_POLICY, "0");
-            oldPasswordsToCheck = Integer.valueOf(oldPasswordsToCheckVal);
-        } catch (NumberFormatException n) {
-            oldPasswordsToCheck = 0;
-        }
 
+        int oldPasswordsToCheck = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PASSWORD_HISTORY_POLICY, "0"));
         if (oldPasswordsToCheck == 0) {
             return;
         }

@@ -4,18 +4,16 @@ import java.io.Serializable;
 
 /**
  * @author Ion Perpegel
- * @since 4.0
+ * @since 4.1
  */
 public class PasswordPolicyRO implements Serializable {
 
     private String pattern;
     private String validationMessage;
-    private boolean checkDefault;
 
-    public PasswordPolicyRO(String pattern, String validationMessage, boolean checkDefault) {
+    public PasswordPolicyRO(String pattern, String validationMessage) {
         this.pattern = pattern;
         this.validationMessage = validationMessage;
-        this.checkDefault = checkDefault;
     }
 
     public String getPattern() {
@@ -23,9 +21,6 @@ public class PasswordPolicyRO implements Serializable {
     }
     public String getValidationMessage() {
         return validationMessage;
-    }
-    public boolean getCheckDefault() {
-        return checkDefault;
     }
 
 }

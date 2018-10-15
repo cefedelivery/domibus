@@ -27,6 +27,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserDetailServiceImpl.class);
 
+    protected static final String CHECK_DEFAULT_PASSWORD = "domibus.passwordPolicy.checkDefaultPassword";
+
     @Autowired
     private UserDao userDao;
 
@@ -35,9 +37,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
-
-    @Autowired
-    protected DomainContextProvider domainContextProvider;
 
     @Autowired
     private UserService userService;
@@ -58,17 +57,16 @@ public class UserDetailServiceImpl implements UserDetailsService {
         return userDetail;
     }
 
-
     private boolean isDefaultPasswordUsed(final String user, final String password) {
+        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD, "true"));
+        if (!checkDefaultPassword) {
+            return false;
+        }
         boolean defaultPasswordUsed = false;
         String defaultPasswordForUser = DefaultCredentials.getDefaultPasswordForUser(user);
         if (defaultPasswordForUser != null) {
             defaultPasswordUsed = bcryptEncoder.matches(defaultPasswordForUser, password);
-
-            boolean cheeckDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty("domibus.passwordPolicy.cheeckDefaultPassword", "true"));
-            defaultPasswordUsed = defaultPasswordUsed && cheeckDefaultPassword;
         }
-
         return defaultPasswordUsed;
     }
 

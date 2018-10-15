@@ -72,9 +72,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
 
-    @Autowired
-    private DomainContextProvider domainContextProvider;
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsers(List<eu.domibus.api.user.User> users) {
@@ -100,16 +97,15 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
+
             if (withPasswordChange) {
+                savePasswordHistory(userEntity); // save old password in history
                 passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
                 passwordValidator.validateHistory(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
-            if (withPasswordChange) {
-                savePasswordHistory(userEntity);
-            }
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
@@ -118,20 +114,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void savePasswordHistory(User userEntity) {
-        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword());
-
-        Domain domain = domainContextProvider.getCurrentDomainSafely();
-        if (domain == null) {
-            domain = DomainService.DEFAULT_DOMAIN;
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+        if (passwordsToKeep == 0) {
+            return;
         }
-        int passwordsToKeep;
-        try {
-            String oldPasswordsToCheckVal = domibusPropertyProvider.getDomainProperty(domain, PasswordValidator.PASSWORD_HISTORY_POLICY, "5");
-            passwordsToKeep = Integer.valueOf(oldPasswordsToCheckVal);
-        } catch (NumberFormatException n) {
-            passwordsToKeep = 5;
-        }
-        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep);
+        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword(), userEntity.getPasswordChangeDate());
+        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep - 1);
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
@@ -157,7 +145,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
-            savePasswordHistory(userEntity);
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());

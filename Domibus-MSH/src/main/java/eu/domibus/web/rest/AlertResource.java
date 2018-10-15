@@ -123,8 +123,11 @@ public class AlertResource {
             case USER_LOGIN_FAILURE:
                 final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
                 return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
+            case PASSWORD_EXPIRED:
+            case PASSWORD_IMMINENT_EXPIRATION:
+                return Arrays.asList("USER", "EXPIRATION_DATE");
             default:
-                throw new IllegalArgumentException("Unsuported alert type.");
+                throw new IllegalArgumentException("Unsupported alert type.");
         }
 
     }
@@ -201,7 +204,7 @@ public class AlertResource {
 
     }
 
-    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, String alertStatus,Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
+    private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String processed, String alertType, String alertStatus, Integer alertId, String alertLevel, String creationFrom, String creationTo, String reportingFrom, String reportingTo, String[] parameters, String dynamicaPropertyFrom, String dynamicaPropertyTo) {
         AlertCriteria alertCriteria = new AlertCriteria();
         alertCriteria.setPage(page);
         alertCriteria.setPageSize(pageSize);

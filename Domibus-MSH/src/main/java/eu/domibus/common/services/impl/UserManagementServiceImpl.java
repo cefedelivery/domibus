@@ -14,7 +14,6 @@ import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
-import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
@@ -94,9 +93,6 @@ public class UserManagementServiceImpl implements UserService {
 
     @Autowired
     protected DomainService domainService;
-
-    @Autowired
-    private EventDao eventDao;
 
     /**
      * {@inheritDoc}
@@ -317,7 +313,7 @@ public class UserManagementServiceImpl implements UserService {
         User user = userDao.loadActiveUserByUsername(userName);
 
         LocalDate expirationDate = user.getPasswordChangeDate() == null ? LocalDate.now() :
-                user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays);
+                user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
 
         if (expirationDate.isBefore(LocalDate.now())) {
             LOG.debug("Password expired for user [{}]", user.getUserName());
@@ -342,7 +338,7 @@ public class UserManagementServiceImpl implements UserService {
         }
 
         User user = userDao.loadActiveUserByUsername(userName);
-        LocalDate passwordDate = user.getPasswordChangeDate();
+        LocalDate passwordDate = user.getPasswordChangeDate().toLocalDate();
         if (passwordDate == null) {
             LOG.debug("Password policy: expiration date for user [{}] is not set", userName);
             return null;
@@ -350,8 +346,6 @@ public class UserManagementServiceImpl implements UserService {
 
         LocalDate expirationDate = passwordDate.plusDays(maxPasswordAgeInDays);
         LocalDate today = LocalDate.now();
-        //LOG.debug("Password policy: passwordDate=[{}],  expirationDate=[{}],  today=[{}]", passwordDate, expirationDate, today);
-
         int daysUntilExpiration = Period.between(today, expirationDate).getDays();
 
         LOG.debug("Password policy: days until expiration for user [{}] : {} days", userName, daysUntilExpiration);
@@ -369,17 +363,16 @@ public class UserManagementServiceImpl implements UserService {
         try {
             sendExpiredAlerts();
         } catch (Exception ex) {
-            LOG.error("send password expired alerts failed ", ex);
+            LOG.error("Send password expired alerts failed ", ex);
         }
         try {
             sendImminentExpirationAlerts();
         } catch (Exception ex) {
-            LOG.error("send imminent expiration alerts failed ", ex);
+            LOG.error("Send imminent expiration alerts failed ", ex);
         }
     }
 
-    private void sendImminentExpirationAlerts() {
-
+    protected void sendImminentExpirationAlerts() {
         final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION);
         if (!eventConfiguration.isActive()) {
             return;
@@ -401,7 +394,7 @@ public class UserManagementServiceImpl implements UserService {
         });
     }
 
-    private void sendExpiredAlerts() {
+    protected void sendExpiredAlerts() {
         final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED);
         if (!eventConfiguration.isActive()) {
             return;

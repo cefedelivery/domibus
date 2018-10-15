@@ -1,9 +1,11 @@
 package eu.domibus.common.model.security;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+
+import javax.ejb.Local;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author Ion Perpegel
@@ -29,23 +31,22 @@ public class UserPasswordHistory extends AbstractBaseEntity {
     private String password;
 
     @Column(name = "PASSWORD_CHANGE_DATE")
-//    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDate passwordChangeDate;
+    private LocalDateTime passwordChangeDate;
 
     public String getPasswordHash() {
         return password;
     }
 
-    public LocalDate getPasswordDate() {
+    public LocalDateTime getPasswordDate() {
         return passwordChangeDate;
     }
 
     public UserPasswordHistory() { }
 
-    public UserPasswordHistory(User user, String password) {
+    public UserPasswordHistory(User user, String password, LocalDateTime passwordChangeDate) {
         this.user = user;
         this.password = password;
-        this.passwordChangeDate = LocalDate.now();
+        this.passwordChangeDate = passwordChangeDate;
     }
 
 }

@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -79,8 +79,7 @@ public class User extends AbstractBaseEntity{
     private Set<UserRole> roles=new HashSet<>();
 
     @Column(name = "PASSWORD_CHANGE_DATE")
-//    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDate passwordChangeDate;
+    private LocalDateTime passwordChangeDate;
 
 
     @SuppressWarnings("squid:S2637")
@@ -131,6 +130,7 @@ public class User extends AbstractBaseEntity{
 
     public void setPassword(String password) {
         this.password = password;
+        this.passwordChangeDate = LocalDateTime.now();
     }
 
     public void setActive(Boolean enabled) { this.active = enabled; }
@@ -174,9 +174,9 @@ public class User extends AbstractBaseEntity{
         this.suspensionDate = suspensionDate;
     }
 
-    public LocalDate getPasswordChangeDate() { return passwordChangeDate; }
+    public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }
 
-    public void setPasswordChangeDate(LocalDate passwordChangeDate) {
+    public void setPasswordChangeDate(LocalDateTime passwordChangeDate) {
         this.passwordChangeDate = passwordChangeDate;
     }
 

@@ -78,8 +78,8 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     @Override
     public List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findWithPasswordChangedBetween", User.class);
-        namedQuery.setParameter("START_DATE", start);
-        namedQuery.setParameter("END_DATE", end);
+        namedQuery.setParameter("START_DATE", start.atStartOfDay());
+        namedQuery.setParameter("END_DATE", end.atStartOfDay());
         return namedQuery.getResultList();
     }
 
