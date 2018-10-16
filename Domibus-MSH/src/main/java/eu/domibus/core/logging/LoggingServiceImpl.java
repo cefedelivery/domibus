@@ -8,6 +8,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
 import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
+import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -79,27 +80,41 @@ public class LoggingServiceImpl implements LoggingService {
      * {@inheritDoc}
      */
     @Override
-    public List<LoggingLevelRO> getLoggingLevel(String name, boolean showClasses) {
+    public LoggingLevelResultRO getLoggingLevel(String loggerName, boolean showClasses, int page, int pageSize) {
 
-        List<LoggingLevelRO> resultList = new ArrayList<>();
-        if (StringUtils.isBlank(name)) {
-            return resultList;
+        final LoggingLevelResultRO resultRO = new LoggingLevelResultRO();
+
+        List<LoggingLevelRO> loggingEntries = new ArrayList<>();
+        if (StringUtils.isBlank(loggerName)) {
+            resultRO.setLoggingEntries(loggingEntries);
+            return resultRO;
         }
 
-        LOG.info("showing logging for name: {} including classes: {}", name, showClasses);
+        LOG.info("showing logging for name: {} including classes: {}", loggerName, showClasses);
 
         //getting the logger context and list of loggers
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<Logger> loggerList = loggerContext.getLoggerList();
 
-        Predicate<Logger> nameStartsWithPredicate = p -> p.getName().startsWith(name);
-        Predicate<Logger> nameContainsPredicate = p -> p.getName().contains(name);
+        Predicate<Logger> nameStartsWithPredicate = p -> p.getName().startsWith(loggerName);
+        Predicate<Logger> nameContainsPredicate = p -> p.getName().contains(loggerName);
         Predicate<Logger> isLoggerForClassPredicate = p -> addLoggerOfClass(p, showClasses);
         Predicate<Logger> fullPredicate = (nameStartsWithPredicate.or(nameContainsPredicate)).and(isLoggerForClassPredicate);
 
         //filter existing loggers which starts with name
-        return loggerList.stream().filter(fullPredicate).map(this::convertToLoggingLevel).
+        List<LoggingLevelRO> tmp = loggerList.stream().filter(fullPredicate).map(this::convertToLoggingLevel).
                 collect(Collectors.toList());
+        int count = tmp.size();
+        int fromIndex = pageSize * page;
+        int toIndex = fromIndex + pageSize;
+        if (toIndex > count) {
+            toIndex = count;
+        }
+
+        resultRO.setCount(count);
+        resultRO.setLoggingEntries(tmp.subList(fromIndex, toIndex));
+        return resultRO;
+
     }
 
 

@@ -2,8 +2,7 @@ package eu.domibus.core.logging;
 
 import eu.domibus.web.rest.ro.LoggingLevelRO;
 import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
-
-import java.util.List;
+import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 
 /**
  * @author Catalin Enache
@@ -22,9 +21,11 @@ public interface LoggingService {
     /**
      * Get the logging levels for the given packages which starts or contains with {@code name} parameter
      *
-     * @param name
+     * @param loggerName
      * @param showClasses
+     * @param page
+     * @param pageSize
      * @return
      */
-    List<LoggingLevelRO> getLoggingLevel(final String name, final boolean showClasses);
+    LoggingLevelResultRO getLoggingLevel(final String loggerName, final boolean showClasses, int page, int pageSize);
 }

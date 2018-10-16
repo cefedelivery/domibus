@@ -1,17 +1,18 @@
 package eu.domibus.web.rest.ro;
 
+import java.io.Serializable;
+
 /**
  * Encapsulates the package/class name and the level of logging
  *
  * @author Catalin Enache
  * @since 4.1
  */
-public class LoggingLevelRO {
+public class LoggingLevelRO implements Serializable {
 
     private String name;
 
     private String level;
-
 
     public String getName() {
         return name;

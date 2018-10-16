@@ -67,7 +67,7 @@ export class LoggingComponent implements AfterViewInit {
     }
 
     if (this.filter.loggerName) {
-      searchParams.set('name', this.filter.loggerName);
+      searchParams.set('loggerName', this.filter.loggerName);
     }
     if (this.filter.showClasses) {
       searchParams.set('showClasses', this.filter.showClasses);

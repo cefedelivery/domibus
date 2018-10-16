@@ -16,6 +16,7 @@ import {PartyComponent} from './party/party.component';
 import {AlertsComponent} from './alerts/alerts.component';
 import {TestServiceComponent} from './testservice/testservice.component';
 import {PluginUserComponent} from './pluginuser/pluginuser.component';
+import {LoggingComponent} from "./logging/logging.component";
 
 const appRoutes: Routes = [
   {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
@@ -68,6 +69,7 @@ const appRoutes: Routes = [
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
+  {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
 ];
 
