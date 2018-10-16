@@ -59,6 +59,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public void executeCommand(String command, Domain domain) {
+        LOG.debug("Executing command [{}] for domain [{}]", command, domain);
         switch (command) {
             case Command.RELOAD_PMODE:
                 pModeProvider.refresh();
@@ -80,7 +81,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public void deleteCommand(Integer commandId) {
-        final CommandEntity commandEntity = commandDao.findById(CommandEntity.class, String.valueOf(commandId));
+        final CommandEntity commandEntity = commandDao.read(commandId);
         if (commandEntity == null) {
             return;
         }
