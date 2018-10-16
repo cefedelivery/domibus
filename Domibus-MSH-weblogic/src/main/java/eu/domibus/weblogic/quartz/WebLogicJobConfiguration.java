@@ -42,7 +42,7 @@ public class WebLogicJobConfiguration {
 
         CronTriggerFactoryBean obj = new CronTriggerFactoryBean();
         obj.setJobDetail(commandExecutorJob().getObject());
-        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.msh.retry.cron"));//TODO
+        obj.setCronExpression(domibusPropertyProvider.getDomainProperty("domibus.cluster.command.cronExpression"));
         obj.setStartDelay(20000);
         return obj;
     }
