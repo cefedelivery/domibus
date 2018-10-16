@@ -11,6 +11,9 @@
                    [(ngModel)]="filter.loggerName" #loggerName="ngModel" id="loggerName_id"
                    width="40px">
           </md-input-container>
+          <input type="checkbox" name="showClasses" [(ngModel)]="filter.showClasses"
+                 #showClasses="ngModel" id="showClasses_id">
+          <span>Show Classes</span>
 
           <div class="searchArea">
             <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
@@ -61,7 +64,22 @@
     (select)="onSelect($event)">
 </ngx-datatable>
 
-  <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-    <span class="text-select">{{value | domibusDate: dateFormat}}</span>
+  <ng-template #rowWithComboTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <md-select placeholder="Set Level To" [ngModel]="row.level" id="combolevel_id">
+      <md-option *ngFor="let loglevel of possibleLoggingLevels" [value]="loglevel" >
+        {{loglevel}}
+      </md-option>
+    </md-select>
+  </ng-template>
+
+  <ng-template #rowWithToggleTpl let-row="row" let-value="value" ngx-datatable-cell-template>
+    <!--<md-button-toggle-group #group="mdButtonToggleGroup" value="TRACE">-->
+      <!--<md-button-toggle value="INFO">-->
+        <!--<span>INFO</span>-->
+      <!--</md-button-toggle>-->
+      <!--<md-button-toggle value="TRACE">-->
+        <!--<span>TRACE</span>-->
+      <!--</md-button-toggle>-->
+    <!--</md-button-toggle-group>-->
   </ng-template>
 </div>

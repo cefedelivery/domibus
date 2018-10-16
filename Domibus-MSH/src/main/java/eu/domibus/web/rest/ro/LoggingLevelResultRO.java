@@ -1,5 +1,7 @@
 package eu.domibus.web.rest.ro;
 
+import ch.qos.logback.classic.Level;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,16 @@ public class LoggingLevelResultRO implements Serializable {
     private Integer pageSize;
 
     private Map<String, Object> filter; //NOSONAR
+
+    private String[] possibleLoggingLevels = {
+    Level.OFF.toString(),
+            Level.ERROR.toString(),
+            Level.WARN.toString(),
+            Level.INFO.toString(),
+    Level.DEBUG.toString(),
+    Level.TRACE.toString(),
+    Level.ALL.toString()
+    };
 
     public List<LoggingLevelRO> getLoggingEntries() {
         return loggingEntries;
@@ -59,5 +71,9 @@ public class LoggingLevelResultRO implements Serializable {
 
     public void setFilter(Map<String, Object> filter) {
         this.filter = filter;
+    }
+
+    public String[] getPossibleLoggingLevels() {
+        return possibleLoggingLevels;
     }
 }

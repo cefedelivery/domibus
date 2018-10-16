@@ -8,6 +8,7 @@ export class LoggingLevelResult {
               // public orderBy: string,
               // public asc: boolean,
               public count: number,
-              public filter: any) {
+              public filter: any,
+              public possibleLoggingLevels: Array<string>) {
   }
 }

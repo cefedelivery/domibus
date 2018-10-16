@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef} from "@angular/core";
+import {AfterViewInit, Component, ElementRef, TemplateRef, ViewChild} from "@angular/core";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Http, Response, URLSearchParams} from "@angular/http";
@@ -18,6 +18,11 @@ export class LoggingComponent implements AfterViewInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
+
+  @ViewChild('rowWithComboTpl') rowWithComboTpl: TemplateRef<any>;
+  @ViewChild('rowWithToggleTpl') rowWithToggleTpl: TemplateRef<any>;
+
+  possibleLoggingLevels: Array<String>;
 
   filter: any = {};
   loading: boolean = false;
@@ -42,10 +47,19 @@ export class LoggingComponent implements AfterViewInit {
         name: 'Logger Name',
         prop: 'name'
       },
+      // {
+      //   name: 'Logger Level',
+      //   prop: 'level',
+      // },
       {
-        name: 'Logger Level',
-        prop: 'level',
+        cellTemplate: this.rowWithComboTpl,
+        name: 'Logger Level'
       }
+      // ,
+      // {
+      //   cellTemplate: this.rowWithToggleTpl,
+      //   name: 'Logger Level 2'
+      // }
     ];
 
 
@@ -110,7 +124,7 @@ export class LoggingComponent implements AfterViewInit {
 
       this.rows = newRows;
       this.filter = result.filter;
-
+      this.possibleLoggingLevels = result.possibleLoggingLevels;
 
       this.loading = false;
     }, (error: any) => {
