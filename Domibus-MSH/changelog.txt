@@ -1,4 +1,6 @@
 Domibus 4.0.1
+- WebLogic cluster: fixed the PMode and truststore refresh when the WebLogic cluster was composed of more than 2 managed servers
+  The uniform distributed topics do not work correctly in WebLogic 12.1.3. JMS messages are not correctly replicated to all managed servers when the cluster is composed of more than 2 managed servers.
 - changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
     - a logback.xml file for 'default' domain should be added always apart from the other domains
