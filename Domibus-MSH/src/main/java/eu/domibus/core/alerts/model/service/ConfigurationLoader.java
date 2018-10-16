@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.model.service;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.alerts.service.ConfigurationReader;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Scope("prototype")
 public class ConfigurationLoader<E> {
 
-    private final static Logger LOG = DomibusLoggerFactory.getLogger(ConfigurationLoader.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(ConfigurationLoader.class);
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -29,7 +30,8 @@ public class ConfigurationLoader<E> {
     private final Map<Domain, E> configuration = new HashMap<>();
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
-        final Domain domain = domainContextProvider.getCurrentDomain();
+        Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
+        final Domain domain = currentDomain ==null?DomainService.DEFAULT_DOMAIN:currentDomain;
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
         if (this.configuration.get(domain) == null) {
             synchronized (this.configuration) {

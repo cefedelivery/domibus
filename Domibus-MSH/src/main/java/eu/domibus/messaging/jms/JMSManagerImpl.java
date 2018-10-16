@@ -154,9 +154,14 @@ public class JMSManagerImpl implements JMSManager {
     @Override
     public void convertAndSendToQueue(final Object message, final Queue destination, final String selector){
         jmsTemplate.convertAndSend(destination, message, message1 -> {
-            final Domain currentDomain = domainContextProvider.getCurrentDomain();
+            final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
             message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
-            message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
+            //that scenario occurs when sending an event with super user... EG:Login failure with super user.
+            if(currentDomain!=null){
+                message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
+            }else{
+                LOG.debug("Sending event for super user, no current domain defined");
+            }
             message1.setStringProperty(SELECTOR, selector);
             return message1;
         });
