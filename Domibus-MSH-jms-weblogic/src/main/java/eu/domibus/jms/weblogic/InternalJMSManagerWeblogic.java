@@ -1,5 +1,7 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -12,6 +14,7 @@ import eu.domibus.jms.spi.helper.JMSSelectorUtil;
 import eu.domibus.jms.spi.helper.JmsMessageCreator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     protected Map<String, ObjectName> queueMap;
 
+    protected List<String> managedServerNames;
+
     @Autowired
     JMXHelper jmxHelper;
 
@@ -79,6 +84,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    private CommandService commandService;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -133,6 +141,42 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             return destinationMap;
         } catch (Exception e) {
             throw new InternalJMSException(FAILED_TO_BUILD_JMS_DEST_MAP, e);
+        }
+    }
+
+    protected List<String> getManagedServerNames() {
+        if (managedServerNames == null) {
+            managedServerNames = jmxTemplate.query(
+                    new JMXOperation() {
+                        @Override
+                        public List<String> execute(MBeanServerConnection mbsc) {
+                            return getManagedServerNames(mbsc);
+                        }
+                    }
+            );
+            return managedServerNames;
+        }
+        return managedServerNames;
+    }
+
+    protected List<String> getManagedServerNames(MBeanServerConnection mbsc) {
+        List<String> result = new ArrayList<>();
+        try {
+            ObjectName drs = jmxHelper.getDomainRuntimeService();
+            ObjectName[] servers = (ObjectName[]) mbsc.getAttribute(drs, "ServerRuntimes");
+            for (ObjectName server : servers) {
+                final Boolean isAdminServer = (Boolean) mbsc.getAttribute(server, "AdminServer");
+                //we want only the managed server names
+                if (isAdminServer) {
+                    continue;
+                }
+                String serverName = (String) mbsc.getAttribute(server, "Name");
+                LOG.debug("Found managed server [{}]", serverName);
+                result.add(serverName);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new InternalJMSException("Failed getting managed server names", e);
         }
     }
 
@@ -310,6 +354,27 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         jmsOperations.send(destination, new JmsMessageCreator(message));
     }
 
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        final boolean isClusterDeployment = domibusConfigurationService.isClusterDeployment();
+        if (!isClusterDeployment) {
+            LOG.debug("Sending JMS message to topic");
+            sendMessage(internalJmsMessage, destination);
+            return;
+        }
+        //the uniform distributed topics do not work correctly in WebLogic 12.1.3
+        // the JMS message is not correctly replicated to all managed servers when the cluster is composed of more than 2 managed servers
+        LOG.debug("Cluster deployment: using command signaling via database instead of uniform distributed topic");
+        String command = (String) internalJmsMessage.getProperty(Command.COMMAND);
+        String domain = (String) internalJmsMessage.getProperty(MessageConstants.DOMAIN);
+
+        final List<String> managedServerNames = getManagedServerNames();
+        LOG.debug("Found managed servers [{}]", managedServerNames);
+        for (String managedServerName : managedServerNames) {
+            commandService.createClusterCommand(command, domain, managedServerName);
+        }
+    }
+
     protected ObjectName getMessageDestinationName(String source) {
         InternalJMSDestination intJmsDest = getInternalJMSDestination(source);
         return intJmsDest.getProperty(PROPERTY_OBJECT_NAME);
@@ -394,7 +459,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
             Integer maxBrowseSize = new Integer(totalAmountOfMessages.intValue());
             final Integer configuredMaxBrowseCount = NumberUtils.toInt(domibusPropertyProvider.getProperty(PROP_MAX_BROWSE_SIZE));
-            if(configuredMaxBrowseCount > 0) {
+            if (configuredMaxBrowseCount > 0) {
                 LOG.debug("Setting JMS maxBrowse size to [{}]", configuredMaxBrowseCount);
                 maxBrowseSize = configuredMaxBrowseCount;
             }

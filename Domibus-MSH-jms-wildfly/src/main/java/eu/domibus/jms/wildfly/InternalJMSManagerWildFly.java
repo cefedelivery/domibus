@@ -205,6 +205,11 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     }
 
     @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        sendMessage(internalJmsMessage, destination);
+    }
+
+    @Override
     public void deleteMessages(String source, String[] messageIds) {
         JMSQueueControl queue = getQueueControl(source);
         try {
