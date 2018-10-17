@@ -4,22 +4,18 @@ import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.*;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
 @Entity
 @Table(name = "TB_EVENT")
-
-@NamedQueries({
-//        @NamedQuery(name = "Event.findWithTypeAndPropertyValueIn", query = "SELECT e FROM Event e JOIN e.properties p ON key(p) where e.type=:TYPE and p.key=:PROPERTY and ....")
-})
 
 public class Event extends AbstractBaseEntity {
 

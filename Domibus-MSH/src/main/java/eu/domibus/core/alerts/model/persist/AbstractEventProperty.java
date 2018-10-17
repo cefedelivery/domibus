@@ -14,12 +14,10 @@ import javax.validation.constraints.NotNull;
 @Entity
 
 @NamedQueries({
-        //@NamedQuery(name = "AbstractEventProperty.findWithTypeAndPropertyValueIn", query = "SELECT ep FROM AbstractEventProperty ep where ep.event.type=:TYPE and ep.key=:PROPERTY ep.value IN (:PROPERTY_VALUES)"),
         @NamedQuery(name = "AbstractEventProperty.findWithTypeAndPropertyValue", query = "SELECT ep.event FROM AbstractEventProperty ep where ep.event.type=:TYPE and ep.key=:PROPERTY and ep.stringValue=:VALUE")
 })
 
 public abstract class AbstractEventProperty<T> extends AbstractBaseEntity {
-
 
     @NotNull
     @Column(name = "PROPERTY_TYPE")

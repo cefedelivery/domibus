@@ -2,7 +2,6 @@ package eu.domibus.common.model.security;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
-import javax.ejb.Local;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;

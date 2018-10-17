@@ -4,7 +4,6 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
-import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -58,13 +57,6 @@ public class AuthenticationResource {
 
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
-
-//    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-//    @ExceptionHandler({AuthenticationException.class})
-//    public ErrorRO handleException(Exception ex) {
-//        LOG.error(ex.getMessage(), ex);
-//        return new ErrorRO(ex.getMessage());
-//    }
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
