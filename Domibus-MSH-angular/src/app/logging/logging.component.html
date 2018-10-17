@@ -22,6 +22,10 @@
             </button>
           </div>
         </form>
+        <button md-raised-button color="primary" id="resetbutton_id">
+          <md-icon>reset</md-icon>
+          <span>Reset</span>
+        </button>
       </div>
 
     </md-card-content>
@@ -73,13 +77,10 @@
   </ng-template>
 
   <ng-template #rowWithToggleTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-    <!--<md-button-toggle-group #group="mdButtonToggleGroup" value="TRACE">-->
-      <!--<md-button-toggle value="INFO">-->
-        <!--<span>INFO</span>-->
-      <!--</md-button-toggle>-->
-      <!--<md-button-toggle value="TRACE">-->
-        <!--<span>TRACE</span>-->
-      <!--</md-button-toggle>-->
-    <!--</md-button-toggle-group>-->
+    <md-button-toggle-group [name]="row.name" (change)="onLevelChange($event)" [value]="row.level">
+      <md-button-toggle *ngFor="let loglevel of possibleLoggingLevels" [value]="loglevel">
+        {{loglevel}}
+      </md-button-toggle>
+    </md-button-toggle-group>
   </ng-template>
 </div>

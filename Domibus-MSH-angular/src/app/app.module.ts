@@ -4,6 +4,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
   MdButtonModule,
+  MdButtonToggleModule,
   MdCheckboxModule,
   MdDialogModule,
   MdExpansionModule,
@@ -185,7 +186,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     Md2SelectModule,
     SharedModule,
     MdExpansionModule,
-    MdCheckboxModule
+    MdCheckboxModule,
+    MdButtonToggleModule
   ],
   providers: [
     AuthenticatedGuard,

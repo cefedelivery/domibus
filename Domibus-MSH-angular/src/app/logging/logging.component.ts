@@ -6,7 +6,10 @@ import {Observable} from "rxjs";
 import {LoggingLevelResult} from "./logginglevelresult";
 import {AlertService} from "../alert/alert.service";
 
-
+/**
+ * @author Catalin Enache
+ * @since 4.1
+ */
 @Component({
   moduleId: module.id,
   templateUrl: 'logging.component.html',
@@ -48,18 +51,14 @@ export class LoggingComponent implements AfterViewInit {
         prop: 'name'
       },
       // {
-      //   name: 'Logger Level',
-      //   prop: 'level',
-      // },
+      //   cellTemplate: this.rowWithComboTpl,
+      //   name: 'Logger Level'
+      // }
+      // ,
       {
-        cellTemplate: this.rowWithComboTpl,
+        cellTemplate: this.rowWithToggleTpl,
         name: 'Logger Level'
       }
-      // ,
-      // {
-      //   cellTemplate: this.rowWithToggleTpl,
-      //   name: 'Logger Level 2'
-      // }
     ];
 
 
@@ -148,6 +147,11 @@ export class LoggingComponent implements AfterViewInit {
 
   changePageSize (newPageLimit: number) {
     this.page(0, newPageLimit);
+  }
+
+  onLevelChange(event) {
+    console.log('level change event 1:' + event.newValue);
+    console.log('level change event 2 :' + event.target.data);
   }
 
   search () {
