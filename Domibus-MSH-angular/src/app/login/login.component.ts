@@ -1,5 +1,5 @@
 ﻿import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router, ActivatedRoute, NavigationStart} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {SecurityService} from '../security/security.service';
 import {AlertService} from '../alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
@@ -90,16 +90,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.router.navigate([this.returnUrl]);
     }
   }
-
-  // async onLoginSuccessEvent () {
-  //   const mustChangePassword = await this.securityService.mustChangePassword();
-  //   if (mustChangePassword) {
-  //     this.dialog.open(DefaultPasswordDialogComponent);
-  //     this.router.navigate(['/user']);
-  //   } else {
-  //     this.router.navigate([this.returnUrl]);
-  //   }
-  // }
 
   ngOnDestroy (): void {
     console.log('Destroying login component');

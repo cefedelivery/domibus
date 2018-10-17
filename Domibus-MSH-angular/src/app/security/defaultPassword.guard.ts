@@ -14,11 +14,6 @@ export class DefaultPasswordGuard implements CanActivate, CanDeactivate<any> {
                state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
 
     return !this.securityService.mustChangePassword();
-    // return new Promise((resolve, reject) => {
-    //   this.securityService.mustChangePassword().then((res) => {
-    //     resolve(!res);
-    //   });
-    // });
 
   }
 
