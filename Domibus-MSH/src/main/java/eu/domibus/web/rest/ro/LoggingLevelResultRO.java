@@ -23,14 +23,14 @@ public class LoggingLevelResultRO implements Serializable {
 
     private Map<String, Object> filter; //NOSONAR
 
-    private String[] possibleLoggingLevels = {
-    Level.OFF.toString(),
-            Level.ERROR.toString(),
-            Level.WARN.toString(),
+    private String[] levels = {
+            Level.TRACE.toString(),
+            Level.DEBUG.toString(),
             Level.INFO.toString(),
-    Level.DEBUG.toString(),
-    Level.TRACE.toString(),
-    Level.ALL.toString()
+            Level.WARN.toString(),
+            Level.ERROR.toString(),
+            Level.OFF.toString(),
+            Level.ALL.toString()
     };
 
     public List<LoggingLevelRO> getLoggingEntries() {
@@ -73,7 +73,7 @@ public class LoggingLevelResultRO implements Serializable {
         this.filter = filter;
     }
 
-    public String[] getPossibleLoggingLevels() {
-        return possibleLoggingLevels;
+    public String[] getLevels() {
+        return levels;
     }
 }

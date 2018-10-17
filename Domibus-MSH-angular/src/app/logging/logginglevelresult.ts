@@ -9,6 +9,6 @@ export class LoggingLevelResult {
               // public asc: boolean,
               public count: number,
               public filter: any,
-              public possibleLoggingLevels: Array<string>) {
+              public levels: Array<string>) {
   }
 }

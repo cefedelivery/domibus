@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, TemplateRef, ViewChild} from "@angular/core";
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
-import {Http, Response, URLSearchParams} from "@angular/http";
+import {Headers, Http, Response, URLSearchParams} from "@angular/http";
 import {Observable} from "rxjs";
 import {LoggingLevelResult} from "./logginglevelresult";
 import {AlertService} from "../alert/alert.service";
@@ -22,14 +22,14 @@ export class LoggingComponent implements AfterViewInit {
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
 
-  @ViewChild('rowWithComboTpl') rowWithComboTpl: TemplateRef<any>;
   @ViewChild('rowWithToggleTpl') rowWithToggleTpl: TemplateRef<any>;
 
-  possibleLoggingLevels: Array<String>;
+  levels: Array<String>;
 
   filter: any = {};
   loading: boolean = false;
   rows = [];
+  private headers = new Headers({'Content-Type': 'application/json'});
   count: number = 0;
   offset: number = 0;
   //default value
@@ -50,11 +50,6 @@ export class LoggingComponent implements AfterViewInit {
         name: 'Logger Name',
         prop: 'name'
       },
-      // {
-      //   cellTemplate: this.rowWithComboTpl,
-      //   name: 'Logger Level'
-      // }
-      // ,
       {
         cellTemplate: this.rowWithToggleTpl,
         name: 'Logger Level'
@@ -123,7 +118,7 @@ export class LoggingComponent implements AfterViewInit {
 
       this.rows = newRows;
       this.filter = result.filter;
-      this.possibleLoggingLevels = result.possibleLoggingLevels;
+      this.levels = result.levels;
 
       this.loading = false;
     }, (error: any) => {
@@ -149,9 +144,23 @@ export class LoggingComponent implements AfterViewInit {
     this.page(0, newPageLimit);
   }
 
-  onLevelChange(event) {
-    console.log('level change event 1:' + event.newValue);
-    console.log('level change event 2 :' + event.target.data);
+  onLevelChange(newLevel: string, row: any) {
+    console.log('level changed from: ' + row.level + ' to: ' + newLevel + ' for: ' + row.name);
+    if (newLevel !== row.level) {
+      this.http.post(LoggingComponent.LOGGING_URL, {
+        name: row.name,
+        level: newLevel,
+      }, {headers: this.headers}).subscribe(
+        (response: Response) => {
+
+          this.page(this.offset, this.rowLimiter.pageSize);
+        },
+        error => {
+          this.alertService.error('An error occurred while setting logging level (Error Status: ' + error.status + ')');
+          this.loading = false;
+        }
+      );
+    }
   }
 
   search () {

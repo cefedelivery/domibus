@@ -68,18 +68,18 @@
     (select)="onSelect($event)">
 </ngx-datatable>
 
-  <ng-template #rowWithComboTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-    <md-select placeholder="Set Level To" [ngModel]="row.level" id="combolevel_id">
-      <md-option *ngFor="let loglevel of possibleLoggingLevels" [value]="loglevel" >
-        {{loglevel}}
-      </md-option>
-    </md-select>
-  </ng-template>
+  <!--<ng-template #rowWithComboTpl let-row="row" let-value="value" ngx-datatable-cell-template>-->
+    <!--<md-select placeholder="Set Level To" [ngModel]="row.level" id="combolevel_id">-->
+      <!--<md-option *ngFor="let loglevel of levels" [value]="loglevel" >-->
+        <!--{{loglevel}}-->
+      <!--</md-option>-->
+    <!--</md-select>-->
+  <!--</ng-template>-->
 
   <ng-template #rowWithToggleTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-    <md-button-toggle-group [name]="row.name" (change)="onLevelChange($event)" [value]="row.level">
-      <md-button-toggle *ngFor="let loglevel of possibleLoggingLevels" [value]="loglevel">
-        {{loglevel}}
+    <md-button-toggle-group [name]="row.name" (ngModelChange)="onLevelChange($event, row)" [(ngModel)]="row.level">
+      <md-button-toggle *ngFor="let level of levels" [value]="level">
+        {{level}}
       </md-button-toggle>
     </md-button-toggle-group>
   </ng-template>

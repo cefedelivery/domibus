@@ -7,12 +7,11 @@ import eu.domibus.web.rest.ro.LoggingLevelRO;
 import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST resource for setting or retrieving logging levels at runtime
@@ -29,15 +28,13 @@ public class LoggingResource {
     LoggingService loggingService;
 
     @PostMapping(value = "/loglevel")
-    public ResponseEntity<List<LoggingLevelResponseRO>> setLogLevel(@RequestBody List<LoggingLevelRO> loggingLevelROS) {
+    public ResponseEntity<LoggingLevelResponseRO> setLogLevel(@RequestBody LoggingLevelRO request) {
 
-        final List<LoggingLevelResponseRO> loggingLevelResponseROS = loggingLevelROS.
-                stream().
-                map(loggingLevelRO -> loggingService.setLoggingLevel(loggingLevelRO)).
-                collect(Collectors.toList());
+        LoggingLevelResponseRO loggingLevelResponseRO = loggingService.setLoggingLevel(request);
 
-        return ResponseEntity.ok().body(loggingLevelResponseROS);
-
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
+                .body(loggingLevelResponseRO);
     }
 
     @GetMapping(value = "/loglevel")
