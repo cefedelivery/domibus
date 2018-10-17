@@ -4,9 +4,6 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <property name="now" value="systimestamp" dbms="oracle"/>
-    <property name="now" value="now()" dbms="mysql"/>
-
     <changeSet author="nperpion" id="EDELIVERY-3651">
 
         <addColumn tableName="TB_USER">

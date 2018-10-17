@@ -42,11 +42,11 @@
         <sql dbms="mysql">
             SET @OLD_SQL_SAFE_UPDATES = @@SQL_SAFE_UPDATES;
             SET SQL_SAFE_UPDATES = 0;
-            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=NOW() WHERE USER_NAME='super';
+            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=NOW() WHERE PASSWORD_CHANGE_DATE IS NULL;
             SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
         </sql>
         <sql dbms="oracle">
-            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=sysdate WHERE USER_NAME='super';
+            UPDATE TB_USER SET PASSWORD_CHANGE_DATE=systimestamp WHERE PASSWORD_CHANGE_DATE IS NULL;
         </sql>
 
         <addColumn tableName="TB_EVENT">
