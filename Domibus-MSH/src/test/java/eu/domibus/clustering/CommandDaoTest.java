@@ -18,8 +18,7 @@ import java.util.Date;
  * @since 4.0.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
-        OracleDataBaseConfig.class, CommandDaoConfig.class})
+@ContextConfiguration(classes = {InMemoryDataBaseConfig.class, CommandDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 public class CommandDaoTest {
 
