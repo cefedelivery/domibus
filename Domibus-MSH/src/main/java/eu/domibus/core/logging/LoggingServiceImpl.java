@@ -3,9 +3,11 @@ package eu.domibus.core.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import eu.domibus.configuration.DefaultDomibusConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.LogbackLoggingConfigurator;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
 import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import eu.domibus.web.rest.ro.LoggingLevelResultRO;
@@ -34,6 +36,9 @@ public class LoggingServiceImpl implements LoggingService {
 
     @Autowired
     DomainCoreConverter domainConverter;
+
+    @Autowired
+    DefaultDomibusConfigurationService defaultDomibusConfigurationService;
 
     /**
      * {@inheritDoc}
@@ -115,6 +120,28 @@ public class LoggingServiceImpl implements LoggingService {
         resultRO.setLoggingEntries(tmp.subList(fromIndex, toIndex));
         return resultRO;
 
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
+    @Override
+    public boolean resetLogging() {
+        boolean result = true;
+        try {
+            LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
+            //at this stage Spring is not yet initialized so we need to perform manually the injection of the configuration service
+            logbackLoggingConfigurator.setDomibusConfigurationService(defaultDomibusConfigurationService);
+            logbackLoggingConfigurator.configureLogging();
+            LOG.info("Logging was reset");
+        } catch (Exception e) {
+            //logging configuration problems should not prevent the application to startup
+            LOG.warn("Error occurred while configuring logging", e);
+            result = false;
+        }
+        return result;
     }
 
 

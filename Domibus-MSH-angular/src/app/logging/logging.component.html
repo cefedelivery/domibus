@@ -22,10 +22,13 @@
             </button>
           </div>
         </form>
-        <button md-raised-button color="primary" id="resetbutton_id">
-          <md-icon>reset</md-icon>
-          <span>Reset</span>
-        </button>
+        <div layout="row" layout-align="center end">
+          <span flex></span>
+          <button md-raised-button color="primary" id="resetbutton_id" (click)="resetLogging()">
+            <md-icon>reset</md-icon>
+            <span>Reset</span>
+          </button>
+        </div>
       </div>
 
     </md-card-content>

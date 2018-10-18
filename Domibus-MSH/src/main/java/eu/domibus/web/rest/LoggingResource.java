@@ -25,8 +25,14 @@ public class LoggingResource {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingResource.class);
 
     @Autowired
-    LoggingService loggingService;
+    private LoggingService loggingService;
 
+    /**
+     * It will change the logging level for given name and sets to level desired
+     *
+     * @param request it contains logger name and level
+     * @return response of the operation
+     */
     @PostMapping(value = "/loglevel")
     public ResponseEntity<LoggingLevelResponseRO> setLogLevel(@RequestBody LoggingLevelRO request) {
 
@@ -38,7 +44,7 @@ public class LoggingResource {
     }
 
     @GetMapping(value = "/loglevel")
-    public LoggingLevelResultRO getLogLevel(@RequestParam(value = "loggerName", defaultValue = "eu.domibus", required = false) String loggerName,
+    public ResponseEntity<LoggingLevelResultRO> getLogLevel(@RequestParam(value = "loggerName", defaultValue = "eu.domibus", required = false) String loggerName,
                                             @RequestParam(value = "showClasses", defaultValue = "false", required = false) boolean showClasses,
                                             @RequestParam(value = "page", defaultValue = "0") int page,
                                             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
@@ -56,7 +62,31 @@ public class LoggingResource {
 
         resultRO.setPage(page);
         resultRO.setPageSize(pageSize);
-        return resultRO;
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(resultRO);
+
+    }
+
+    /**
+     * Reset the logging configuration to default
+     *
+     * @return string for success or error
+     */
+    @PostMapping(value = "/reset")
+    public ResponseEntity<String> resetLogging(){
+
+        final boolean result = loggingService.resetLogging();
+
+        if (!result) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("Error while resetting the logging configuration.");
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("Logging configuration was successfully reset.");
 
     }
 

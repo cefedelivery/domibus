@@ -39,6 +39,7 @@ export class LoggingComponent implements AfterViewInit {
 
 
   static readonly LOGGING_URL: string = 'rest/logging/loglevel';
+  static readonly RESET_LOGGING_URL: string = 'rest/logging/reset';
 
   constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService) {
   }
@@ -161,6 +162,20 @@ export class LoggingComponent implements AfterViewInit {
         }
       );
     }
+  }
+
+  resetLogging() {
+    console.log('Reset button clicked!');
+    this.http.post(LoggingComponent.RESET_LOGGING_URL, {}, {headers: this.headers}).subscribe(
+      (response: Response) => {
+        this.alertService.success('Logging configuration was successfully reset.', false);
+        this.page(this.offset, this.rowLimiter.pageSize);
+      },
+      error => {
+        this.alertService.error('An error occurred while resetting logging (Error Status: ' + error.status + ')');
+        this.loading = false;
+      }
+    );
   }
 
   search () {

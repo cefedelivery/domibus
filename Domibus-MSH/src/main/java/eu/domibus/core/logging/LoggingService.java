@@ -28,4 +28,10 @@ public interface LoggingService {
      * @return
      */
     LoggingLevelResultRO getLoggingLevel(final String loggerName, final boolean showClasses, int page, int pageSize);
+
+    /**
+     *
+     * @return
+     */
+    boolean resetLogging();
 }
