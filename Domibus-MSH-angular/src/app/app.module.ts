@@ -187,7 +187,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     SharedModule,
     MdExpansionModule,
     MdCheckboxModule,
-    MdButtonToggleModule
+    MdButtonToggleModule,
+    MdTooltipModule
   ],
   providers: [
     AuthenticatedGuard,

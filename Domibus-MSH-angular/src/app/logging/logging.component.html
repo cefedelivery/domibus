@@ -16,19 +16,20 @@
           <span>Show Classes</span>
 
           <div class="searchArea">
-            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id"
+                    type="submit">
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
+
+            <button md-raised-button color="primary" id="resetbutton_id" (click)="resetLogging()" style="float:right" tooltip="Click to reset logging configuration">
+              <md-icon>cached</md-icon>
+              <span>Reset</span>
+            </button>
+
           </div>
         </form>
-        <div layout="row" layout-align="center end">
-          <span flex></span>
-          <button md-raised-button color="primary" id="resetbutton_id" (click)="resetLogging()">
-            <md-icon>reset</md-icon>
-            <span>Reset</span>
-          </button>
-        </div>
+
       </div>
 
     </md-card-content>
@@ -40,10 +41,6 @@
     <span class="row-button">
       <app-row-limiter [pageSizes]="rowLimiter.pageSizes"
                        (onPageSizeChanged)="changePageSize($event.value)"></app-row-limiter>
-    </span>
-    <span class="column-filter-button">
-      <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                         (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
   </div>
 
@@ -70,14 +67,6 @@
     (activate)="onActivate($event)"
     (select)="onSelect($event)">
 </ngx-datatable>
-
-  <!--<ng-template #rowWithComboTpl let-row="row" let-value="value" ngx-datatable-cell-template>-->
-    <!--<md-select placeholder="Set Level To" [ngModel]="row.level" id="combolevel_id">-->
-      <!--<md-option *ngFor="let loglevel of levels" [value]="loglevel" >-->
-        <!--{{loglevel}}-->
-      <!--</md-option>-->
-    <!--</md-select>-->
-  <!--</ng-template>-->
 
   <ng-template #rowWithToggleTpl let-row="row" let-value="value" ngx-datatable-cell-template>
     <md-button-toggle-group [name]="row.name" (ngModelChange)="onLevelChange($event, row)" [(ngModel)]="row.level">
