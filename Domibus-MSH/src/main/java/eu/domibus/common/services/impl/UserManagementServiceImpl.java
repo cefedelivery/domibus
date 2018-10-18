@@ -54,6 +54,8 @@ public class UserManagementServiceImpl implements UserService {
 
     protected final static String MAXIMUM_PASSWORD_AGE = "domibus.passwordPolicy.expiration";
 
+    protected final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.passwordPolicy.defaultPasswordExpiration";
+
     protected final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.passwordPolicy.warning.beforeExpiration";
 
     private static final String DEFAULT_SUSPENSION_TIME = "3600";
@@ -289,9 +291,10 @@ public class UserManagementServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public void validateExpiredPassword(final String userName) {
+    public void validateExpiredPassword(final String userName, boolean isDefaultPassword) {
 
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE, "0"));
+        String expirationProperty = isDefaultPassword ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
+        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty, "0"));
         LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
 
         if (maxPasswordAgeInDays == 0) {

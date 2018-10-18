@@ -39,10 +39,12 @@ public class AuthenticationService {
     @Transactional(noRollbackFor = AuthenticationException.class)
     public UserDetail authenticate(String username, String password, String domain) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+        UserDetail principal = null;
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
-            userService.validateExpiredPassword(username);
+            principal = (UserDetail) authentication.getPrincipal();
+            userService.validateExpiredPassword(username, principal.isDefaultPasswordUsed());
             userService.handleCorrectAuthentication(username);
         } catch (CredentialsExpiredException ex) {
             LOG.trace("Caught CredentialsExpiredException: [{}]", ex);
@@ -59,7 +61,7 @@ public class AuthenticationService {
             throw ae;
         }
 
-        final UserDetail principal = (UserDetail) authentication.getPrincipal();
+        //final UserDetail principal = (UserDetail) authentication.getPrincipal();
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return principal;

@@ -57,7 +57,7 @@ public interface UserService {
      * Verify if the user's password is expired.
      * @param username the userName
      */
-    void validateExpiredPassword(String username);
+    void validateExpiredPassword(String username, boolean isDefaultPassword);
 
     /**
      * Verify if the user's password is "almost" expired

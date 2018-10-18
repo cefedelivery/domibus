@@ -487,7 +487,7 @@ public class UserManagementServiceImplTest {
             result = "0";
         }};
 
-        userManagementService.validateExpiredPassword(username);
+        userManagementService.validateExpiredPassword(username, false);
 
         new VerificationsInOrder() {{
             userDao.loadActiveUserByUsername(anyString);

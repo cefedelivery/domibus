@@ -60,7 +60,6 @@ public class AuthenticationResource {
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
-        LOG.trace("handleAccountStatusException");
         LOG.error(ex.getMessage(), ex);
 
         ErrorRO error = new ErrorRO(ex.getMessage());
@@ -72,7 +71,6 @@ public class AuthenticationResource {
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
-        LOG.trace("handleAuthenticationException");
         LOG.error(ex.getMessage(), ex);
 
         ErrorRO error = new ErrorRO(ex.getMessage());
@@ -85,7 +83,6 @@ public class AuthenticationResource {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({DomainException.class})
     public ErrorRO handleDomainException(Exception ex) {
-        LOG.trace("handleDomainException");
         LOG.error(ex.getMessage(), ex);
         return new ErrorRO(ex.getMessage());
     }
