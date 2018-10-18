@@ -2,12 +2,11 @@ package eu.domibus.weblogic.quartz;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.weblogic.cluster.ClusterDeploymentCondition;
 import eu.domibus.weblogic.cluster.CommandExecutorJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 
@@ -15,6 +14,7 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
  * @author Cosmin Baciu
  * @since 4.0.1
  */
+
 @Configuration("webLogicJobConfiguration")
 public class WebLogicJobConfiguration {
 
@@ -24,6 +24,7 @@ public class WebLogicJobConfiguration {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Conditional(ClusterDeploymentCondition.class)
     @Bean
     public JobDetailFactoryBean commandExecutorJob() {
         JobDetailFactoryBean obj = new JobDetailFactoryBean();
@@ -33,6 +34,7 @@ public class WebLogicJobConfiguration {
     }
 
 
+    @Conditional(ClusterDeploymentCondition.class)
     @Bean
     @Scope(BeanDefinition.SCOPE_PROTOTYPE)
     public CronTriggerFactoryBean commandExecutorTrigger() {

@@ -36,7 +36,7 @@ public class CommandExecutorJobTest {
 
 
     @Test
-    public void name(@Injectable JobExecutionContext jobExecutionContext, @Injectable Command command) {
+    public void testExecuteJob(@Injectable JobExecutionContext jobExecutionContext, @Injectable Command command) {
         final List<Command> commands = Arrays.asList(command);
 
         new MockUp<System>() {
