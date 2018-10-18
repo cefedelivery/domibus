@@ -1,11 +1,10 @@
 package eu.domibus.core.alerts.dao;
 
-import eu.domibus.core.alerts.model.persist.StringEventProperty;
-import eu.domibus.dao.InMemoryDataBaseConfig;
-import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.persist.Alert;
 import eu.domibus.core.alerts.model.persist.Event;
+import eu.domibus.core.alerts.model.persist.StringEventProperty;
+import eu.domibus.dao.InMemoryDataBaseConfig;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +25,7 @@ import static org.junit.Assert.assertEquals;
  * @since 4.0
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
-        OracleDataBaseConfig.class, AlertDaoConfig.class})
+@ContextConfiguration(classes = {InMemoryDataBaseConfig.class, AlertDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 public class AlertDaoTest {
 
