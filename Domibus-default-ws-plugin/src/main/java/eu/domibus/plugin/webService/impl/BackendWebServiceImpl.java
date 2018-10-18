@@ -18,9 +18,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -81,6 +87,14 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.debug("Received message");
 
+        try {
+            validateC3Certificate(ebMSHeaderInfo);
+        } catch (Exception e) {
+            LOG.error("Could not parse C3 certificate", e);
+            throw new SubmitMessageFault(MESSAGE_SUBMISSION_FAILED, generateDefaultFaultDetail("Could not parse C3 certificate"));
+        }
+
+
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
 
         List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
@@ -127,6 +141,26 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         response.getMessageID().add(messageId);
         return response;
     }
+
+    protected void validateC3Certificate(Messaging ebMSHeaderInfo) throws CertificateException {
+        final MessageProperties messageProperties = ebMSHeaderInfo.getUserMessage().getMessageProperties();
+        final List<Property> propertyList = messageProperties.getProperty();
+        if (messageProperties == null || propertyList == null) {
+            return;
+        }
+        for (Property property : propertyList) {
+            if ("C3Certificate".equalsIgnoreCase(property.getName())) {
+                final String value = property.getValue();
+                final byte[] decode = Base64.getDecoder().decode(value);
+
+                InputStream targetStream = new ByteArrayInputStream(decode);
+                CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                X509Certificate cert = (X509Certificate) factory.generateCertificate(targetStream);
+                LOG.info("Successfully parsed certificate for C3" + cert);
+            }
+        }
+    }
+
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
         FaultDetail fd = WEBSERVICE_OF.createFaultDetail();
@@ -197,12 +231,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         UserMessage userMessage;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
 
-        if(!isMessageIdNotEmpty) {
+        if (!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t","");
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t", "");
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);
@@ -242,7 +276,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
-            if(extPartInfo.getPayloadDatahandler() != null) {
+            if (extPartInfo.getPayloadDatahandler() != null) {
                 LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(extPartInfo.getPayloadDatahandler());
             }
@@ -281,7 +315,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public MessageStatus getStatus(final StatusRequest statusRequest) throws StatusFault {
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(statusRequest.getMessageID());
 
-        if(!isMessageIdNotEmpty) {
+        if (!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }

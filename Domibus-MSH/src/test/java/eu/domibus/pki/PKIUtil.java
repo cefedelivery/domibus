@@ -1,17 +1,21 @@
 package eu.domibus.pki;
 
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.CRLReason;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.x509.X509V2CRLGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
+import org.junit.Test;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +34,7 @@ public class PKIUtil {
         crlGen.setNextUpdate(new Date(now.getTime() + 60 * 1000));
         crlGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-        if(revokedSerialNumbers != null) {
+        if (revokedSerialNumbers != null) {
             for (BigInteger revokedSerialNumber : revokedSerialNumbers) {
                 crlGen.addCRLEntry(revokedSerialNumber, now, CRLReason.privilegeWithdrawn);
             }
@@ -61,7 +65,7 @@ public class PKIUtil {
         generator.setPublicKey(key.getPublic());
         generator.setSignatureAlgorithm("SHA256WithRSAEncryption");
 
-        if(crlUrls != null) {
+        if (crlUrls != null) {
             DistributionPoint[] distPoints = createDistributionPoints(crlUrls);
             generator.addExtension(Extension.cRLDistributionPoints, false, new CRLDistPoint(distPoints));
         }
@@ -89,4 +93,32 @@ public class PKIUtil {
         return result.toArray(new DistributionPoint[0]);
     }
 
+    @Test
+    public void name() throws CertificateException {
+        String initialString = "MIIDNzCCAh+gAwIBAgIJAJeSzmm8ifFMMA0GCSqGSIb3DQEBCwUAMDIxDzANBgNVBAMMBnJlZF9n&#xd;\n" +
+                "                dzESMBAGA1UECgwJZURlbGl2ZXJ5MQswCQYDVQQGEwJCRTAeFw0xNzA5MTQwNzI2NDdaFw0yNTEy&#xd;\n" +
+                "                MDEwNzI2NDdaMDIxDzANBgNVBAMMBnJlZF9ndzESMBAGA1UECgwJZURlbGl2ZXJ5MQswCQYDVQQG&#xd;\n" +
+                "                EwJCRTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMqaG7svX3VYSCnI3DL3aOLWCMJj&#xd;\n" +
+                "                jSY9103Z33lUMOc1PCusakhLDQec0WB9MLAxxtf1JNgKBjzjDRod0jsq67ubxKNyn2L6VWEoeUBX&#xd;\n" +
+                "                LbgNypuzZ2czbKyjJ0cMa7TtOyZro06SNcKEVIxWgW8o44tIHKPAtSOxDRriIGPatN+phmBejSCC&#xd;\n" +
+                "                bjZeN5IB5m1n4cQaV5zK7xf/MdRpdikEPqwdD2gCh84Npi6uEnZjXQvIfx5yMBimIbSUWSJ4/bgk&#xd;\n" +
+                "                DcBW1gbljFJcL47F0+agH2aM1xEUh/1bG+XwUMgyt3ekh8OR+9VO58qmA7SrbzrB8MIz6iVmeolZ&#xd;\n" +
+                "                625ZtwjmDwECAwEAAaNQME4wHQYDVR0OBBYEFOwCXgJxC+RBOZd5S3PhKBaTnyQqMB8GA1UdIwQY&#xd;\n" +
+                "                MBaAFOwCXgJxC+RBOZd5S3PhKBaTnyQqMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEB&#xd;\n" +
+                "                ADHgWnjAhWRHpdgla9ajq+ugHNNdZQKWOD7RWjAP6A8TAbf9lJ8kyn3anqrbzotzJT1/L+DF3Wcp&#xd;\n" +
+                "                JS6q779C8XyQUdtdEDNpj+D5JeeAivBat1TmnwY7Ud+Uo3tSeByyDMkFEyYXjRDDa+MpbE/Ya5Mw&#xd;\n" +
+                "                jb2JbWzX1FnoVTkM5rjDrrT+CDFpDij6xQuNbo+BFUXk3M3MTJh0IESn12IDMblnvw3pb8ec+5ol&#xd;\n" +
+                "                hbiZkVe/V43FEMRoIRQHot62qkF1eHsCj75eby5E+sufEQXyY7vSCI8lDCkXn7nYEYKB+oNbg48/&#xd;\n" +
+                "                Rc4oVzEIwS5Le/oxOzT3xOBCbVwtcXI4HW7jUQo=";
+        initialString = initialString.replaceAll("&#xd;\\\n", "");
+        initialString = initialString.replaceAll("                ", "");
+        System.out.println(initialString);
+        final byte[] decode = Base64.getDecoder().decode(initialString);
+
+
+        InputStream targetStream = new ByteArrayInputStream(decode);
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) factory.generateCertificate(targetStream);
+        System.out.println(cert);
+    }
 }

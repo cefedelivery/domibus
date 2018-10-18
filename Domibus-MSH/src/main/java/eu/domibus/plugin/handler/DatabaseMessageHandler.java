@@ -1,6 +1,9 @@
 package eu.domibus.plugin.handler;
 
+
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.pmode.PModeException;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.usermessage.UserMessageService;
@@ -9,9 +12,7 @@ import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.exception.MessagingExceptionFactory;
-import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.common.model.configuration.Mpc;
-import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -21,12 +22,15 @@ import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.ObjectFactory;
+import eu.domibus.ebms3.common.model.Property;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -42,9 +46,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * This class is responsible of handling the plugins requests for all the operations exposed.
@@ -64,6 +74,15 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     private static final String TO_STR = "] to [";
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
+
+    @Autowired
+    protected MultiDomainCryptoService multiDomainCertificateProvider;
+
+    @Autowired
+    protected ConfigurationDAO configurationDAO;
+
+    @Autowired
+    protected DomainContextProvider domainProvider;
 
     @Autowired
     private CompressionService compressionService;
@@ -169,6 +188,77 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             }
         }
         return transformer.transformFromMessaging(userMessage);
+    }
+
+    private void updateC3(UserMessage userMessage, Party to) throws Exception {
+        final MessageProperties messageProperties = userMessage.getMessageProperties();
+        final Set<Property> propertySet = messageProperties.getProperty();
+        if(messageProperties == null || propertySet == null) {
+            return;
+        }
+        final Iterator<Property> iterator = propertySet.iterator();
+        while (iterator.hasNext()) {
+            Property property = iterator.next();
+            if ("C3Certificate".equalsIgnoreCase(property.getName())) {
+                updateC3Certificate(to, iterator, property);
+            }
+            if ("C3URL".equalsIgnoreCase(property.getName())) {
+                updateC3URL(to, property);
+            }
+
+        }
+    }
+
+    private void updateC3Certificate(Party to, Iterator<Property> iterator, Property property) throws CertificateException {
+        final String value = property.getValue();
+        final byte[] decode = Base64.getDecoder().decode(value);
+        InputStream targetStream = new ByteArrayInputStream(decode);
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        X509Certificate certificate = (X509Certificate) factory.generateCertificate(targetStream);
+        LOG.info("Add public certificate to the truststore for party [{}]", to.getName());
+        //add certificate to Truststore
+        multiDomainCertificateProvider.addCertificate(domainProvider.getCurrentDomain(), certificate, to.getName(), true);
+        LOG.info("Certificate added to the truststore for party [{}]", to.getName());
+        iterator.remove();
+    }
+
+    private void updateC3URL(Party to, Property property) {
+        final PModeArchiveInfo pModeArchiveInfo = pModeProvider.getRawConfigurationList().stream().findFirst().orElse(null);
+        if (pModeArchiveInfo == null)
+            throw new IllegalStateException("Could not update PMode parties: PMode not found!");
+
+        ConfigurationRaw rawConfiguration = pModeProvider.getRawConfiguration(pModeArchiveInfo.getId());
+
+        Configuration configuration;
+        try {
+            configuration = pModeProvider.getPModeConfiguration(rawConfiguration.getXml());
+        } catch (XmlProcessingException e) {
+            LOG.error("Error reading current PMode", e);
+            throw new IllegalStateException(e);
+        }
+
+        final Parties partiesXml = configuration.getBusinessProcesses().getPartiesXml();
+        for (Party party : partiesXml.getParty()) {
+            if(party.getName().equalsIgnoreCase(to.getName())) {
+                final String C3NewURL = property.getValue();
+                LOG.info("Updating URL for party [{}] with [{}]", party.getName(), C3NewURL);
+                party.setEndpoint(C3NewURL);
+                break;
+            }
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ssO");
+        ZonedDateTime confDate = ZonedDateTime.ofInstant(rawConfiguration.getConfigurationDate().toInstant(), ZoneId.systemDefault());
+        String updatedDescription = "Updated parties to version of " + confDate.format(formatter);
+
+        byte[] updatedPmode;
+        try {
+            updatedPmode = pModeProvider.serializePModeConfiguration(configuration);
+            pModeProvider.updatePModes(updatedPmode, updatedDescription);
+        } catch (XmlProcessingException e) {
+            LOG.error("Error writing current PMode", e);
+            throw new IllegalStateException(e);
+        }
     }
 
     protected void validateOriginalUser(UserMessage userMessage, String authOriginalUser, List<String> recipients) {
@@ -298,6 +388,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             String pModeKey = userMessageExchangeConfiguration.getPmodeKey();
             Party to = messageValidations(userMessage, pModeKey, backendName);
 
+            updateC3(userMessage, to);
+
             LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
 
             fillMpc(userMessage, legConfiguration, to);
@@ -343,6 +435,10 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         } catch (PModeException p) {
             LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]" + p.getMessage());
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
+            throw new PModeMismatchException(p.getMessage(), p);
+        } catch (Exception p) {
+            LOG.error(ERROR_SUBMITTING_THE_MESSAGE_STR + userMessage.getMessageInfo().getMessageId() + TO_STR + backendName + "]" + p.getMessage());
+            errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0004, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
     }
