@@ -1,10 +1,9 @@
 package eu.domibus.common.dao;
 
-import eu.domibus.dao.InMemoryDataBaseConfig;
-import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.common.model.configuration.Identifier;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.Process;
+import eu.domibus.dao.InMemoryDataBaseConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,9 @@ import java.util.List;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
-        OracleDataBaseConfig.class, PartyDaoConfig.class})
+        PartyDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 public class PartyDaoTest {
-
     @PersistenceContext
     private javax.persistence.EntityManager em;
 
