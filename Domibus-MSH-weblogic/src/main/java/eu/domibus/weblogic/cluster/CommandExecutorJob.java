@@ -9,7 +9,6 @@ import eu.domibus.quartz.DomibusQuartzJobBean;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Conditional;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ import java.util.List;
  * @author Cosmin Baciu
  * @since 4.0.1
  */
-@Conditional(CommandExecutorCondition.class)
 @DisallowConcurrentExecution //Only one worker runs at any time
 public class CommandExecutorJob extends DomibusQuartzJobBean {
 
