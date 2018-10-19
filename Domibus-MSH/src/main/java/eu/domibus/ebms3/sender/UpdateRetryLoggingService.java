@@ -49,9 +49,6 @@ public class UpdateRetryLoggingService {
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
 
-    @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
-
     /**
      * This method is responsible for the handling of retries for a given sent message.
      * In case of failure the message will be put back in waiting_for_retry status, after a certain amount of retry/time
@@ -93,7 +90,6 @@ public class UpdateRetryLoggingService {
         if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
             messagingDao.clearPayloadData(messageId);
         }
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
     }
 
 

@@ -3,6 +3,7 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
@@ -49,6 +50,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private UserMessageLogDao userMessageLogDao;
 
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
     /**
      * {@inheritDoc}
      */
@@ -90,6 +94,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 break;
             case ABORT:
                 updateRetryLoggingService.messageFailed(userMessageLog);
+                rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
                 break;
         }
     }
