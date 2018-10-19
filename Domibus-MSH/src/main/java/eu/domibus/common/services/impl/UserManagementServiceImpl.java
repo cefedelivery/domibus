@@ -62,6 +62,8 @@ public class UserManagementServiceImpl implements UserService {
 
     private static final String DEFAULT_LOGIN_ATTEMPT = "5";
 
+    private static final String CREDENTIALS_EXPIRED = "Expired";
+
     @Autowired
     protected UserDao userDao;
 
@@ -308,13 +310,13 @@ public class UserManagementServiceImpl implements UserService {
 
         if (expirationDate.isBefore(LocalDate.now())) {
             LOG.debug("Password expired for user [{}]", user.getUserName());
-            throw new CredentialsExpiredException("Expired");
+            throw new CredentialsExpiredException(CREDENTIALS_EXPIRED);
         }
     }
 
     @Override
-    public Integer validateDaysTillExpiration(String userName) {
-        LOG.trace("validateDaysTillExpiration for user [{}]", userName);
+    public Integer getDaysTillExpiration(String userName) {
+        LOG.trace("getDaysTillExpiration for user [{}]", userName);
 
         int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE));
         int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(WARNING_DAYS_BEFORE_EXPIRATION));

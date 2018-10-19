@@ -64,7 +64,7 @@ public interface UserService {
      * @param username the userName
      * @return the days till expiration; null if it is not to raise a warning
      */
-    Integer validateDaysTillExpiration(String username);
+    Integer getDaysTillExpiration(String username);
 
 
     public void sendAlerts();

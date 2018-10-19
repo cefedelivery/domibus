@@ -1,8 +1,5 @@
 package eu.domibus.common.services.impl;
 
-import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
@@ -11,7 +8,6 @@ import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.security.DefaultCredentials;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -53,7 +49,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
         UserDetail userDetail = new UserDetail(user, defaultPasswordUsed);
 
-        userDetail.setDaysTillExpiration(userService.validateDaysTillExpiration(userName));
+        userDetail.setDaysTillExpiration(userService.getDaysTillExpiration(userName));
         return userDetail;
     }
 

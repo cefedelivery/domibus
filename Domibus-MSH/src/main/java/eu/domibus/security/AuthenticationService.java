@@ -53,9 +53,9 @@ public class AuthenticationService {
             LOG.trace("Caught AuthenticationException: [{}]", ae.getClass().getName());
             UserLoginErrorReason userLoginErrorReason = userService.handleWrongAuthentication(username);
             if (UserLoginErrorReason.INACTIVE.equals(userLoginErrorReason)) {
-                throw new DisabledException(INACTIVE);
+                throw new DisabledException(INACTIVE, ae);
             } else if (UserLoginErrorReason.SUSPENDED.equals(userLoginErrorReason)) {
-                throw new LockedException(SUSPENDED);
+                throw new LockedException(SUSPENDED, ae);
             }
             LOG.trace("AuthenticationException: {}", ae.getMessage());
             throw ae;
