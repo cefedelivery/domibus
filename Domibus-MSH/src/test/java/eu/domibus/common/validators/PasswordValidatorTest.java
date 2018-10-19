@@ -140,7 +140,7 @@ public class PasswordValidatorTest {
         String username = "user1";
         String testPassword = "testPassword123.";
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY);
             result = "0";
         }};
 
@@ -158,7 +158,7 @@ public class PasswordValidatorTest {
         String testPassword = "testPassword123.";
         List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory());
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY);
             result = "5";
             userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
             result = oldPasswords;

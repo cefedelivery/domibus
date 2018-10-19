@@ -13,9 +13,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
@@ -25,7 +23,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.authentication.CredentialsExpiredException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -415,7 +412,7 @@ public class UserManagementServiceImplTest {
             result = true;
             multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
             result = howManyDaysToGenerateAlertsAfterExpiration;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
             userDao.findWithPasswordChangedBetween(from, to);
             result = users;
@@ -449,7 +446,7 @@ public class UserManagementServiceImplTest {
             result = true;
             multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
             result = howManyDaysBeforeExpirationToGenerateAlerts;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
             userDao.findWithPasswordChangedBetween(from, to);
             result = users;
@@ -483,7 +480,7 @@ public class UserManagementServiceImplTest {
     public void testExpiredPasswordValidationDisabled() {
         final String username = "user1";
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = "0";
         }};
 
@@ -499,13 +496,13 @@ public class UserManagementServiceImplTest {
     public void testValidateDaysTillExpirationDisabled() {
         final String username = "user1";
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = "0";
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
             result = "0";
         }};
 
-        Integer result = userManagementService.validateDaysTillExpiration(username);
+        Integer result = userManagementService.getDaysTillExpiration(username);
         Assert.assertEquals(null, result);
     }
 
@@ -525,15 +522,15 @@ public class UserManagementServiceImplTest {
             result = today;
         }};
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION, anyString);
+            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
             result = "20";
             userDao.loadActiveUserByUsername(username);
             result = user;
         }};
 
-        Integer result = userManagementService.validateDaysTillExpiration(username);
+        Integer result = userManagementService.getDaysTillExpiration(username);
         Assert.assertEquals(remainingDays, result);
     }
 }
