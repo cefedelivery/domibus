@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.core.logging.LoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -26,6 +27,9 @@ public class LoggingResource {
 
     @Autowired
     private LoggingService loggingService;
+
+    @Autowired
+    private DomibusConfigurationService domibusConfigurationService;
 
     /**
      * It will change the logging level for given name and sets to level desired
