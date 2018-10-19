@@ -5,6 +5,7 @@ import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.logging.LoggingService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -40,6 +41,9 @@ public class CommandServiceImpl implements CommandService {
     @Autowired
     protected MultiDomainCryptoService multiDomainCryptoService;
 
+    @Autowired
+    protected LoggingService loggingService;
+
     @Override
     public void createClusterCommand(String command, String domain, String server) {
         LOG.debug("Creating command [{}] for domain [{}] and server [{}]", command, domain, server);
@@ -73,6 +77,13 @@ public class CommandServiceImpl implements CommandService {
                 break;
             case Command.RELOAD_TRUSTSTORE:
                 multiDomainCryptoService.refreshTrustStore(domain);
+                break;
+            case Command.LOGGING_RESET:
+                loggingService.resetLogging();
+                break;
+            case Command.LOGGING_SET_LEVEL:
+                //TODO
+                loggingService.setLoggingLevel(null);
                 break;
             default:
                 LOG.error("Unknown command received: " + command);

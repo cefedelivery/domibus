@@ -19,6 +19,14 @@ public interface LoggingService {
     LoggingLevelResponseRO setLoggingLevel(LoggingLevelRO loggingLevelRO);
 
     /**
+     * Signal the set of logging level for the given package or class
+     *
+     * @param loggingLevelRO
+     * @return
+     */
+    boolean signalSetLoggingLevel(LoggingLevelRO loggingLevelRO);
+
+    /**
      * Get the logging levels for the given packages which starts or contains with {@code name} parameter
      *
      * @param loggerName
@@ -30,8 +38,14 @@ public interface LoggingService {
     LoggingLevelResultRO getLoggingLevel(final String loggerName, final boolean showClasses, int page, int pageSize);
 
     /**
-     *
+     * Reset the logging configuration to default
      * @return
      */
     boolean resetLogging();
+
+    /**
+     * signal the logging reset on a cluster env - send a messaage to command topic
+     * @return
+     */
+    boolean signalResetLogging();
 }
