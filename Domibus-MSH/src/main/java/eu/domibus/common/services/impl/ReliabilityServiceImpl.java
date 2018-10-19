@@ -50,9 +50,6 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private UserMessageLogDao userMessageLogDao;
 
-    @Autowired
-    private RawEnvelopeLogDao rawEnvelopeLogDao;
-
     /**
      * {@inheritDoc}
      */
@@ -62,7 +59,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    private void changeMessageStatusAndNotify(String messageId,  UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+    private void changeMessageStatusAndNotify(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
         final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
 
@@ -93,8 +90,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
             case ABORT:
-                updateRetryLoggingService.messageFailed(userMessageLog);
-                rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+                updateRetryLoggingService.messageFailedInANewTransaction(userMessageLog);
                 break;
         }
     }

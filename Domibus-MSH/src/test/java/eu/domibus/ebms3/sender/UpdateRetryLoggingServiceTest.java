@@ -55,6 +55,9 @@ public class UpdateRetryLoggingServiceTest {
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;
 
+    @Injectable
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
+
     private LegConfiguration legConfiguration = new LegConfiguration();
 
     @Injectable
