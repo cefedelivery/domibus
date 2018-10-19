@@ -58,7 +58,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
     }
 
     private boolean isDefaultPasswordUsed(final String user, final String password) {
-        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD, "true"));
+        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD));
         if (!checkDefaultPassword) {
             return false;
         }

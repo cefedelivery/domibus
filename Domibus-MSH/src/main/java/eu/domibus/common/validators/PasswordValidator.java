@@ -66,7 +66,7 @@ public class PasswordValidator {
 
     public void validateHistory(final String userName, final String password) throws DomibusCoreException {
 
-        int oldPasswordsToCheck = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PASSWORD_HISTORY_POLICY, "0"));
+        int oldPasswordsToCheck = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PASSWORD_HISTORY_POLICY));
         if (oldPasswordsToCheck == 0) {
             return;
         }

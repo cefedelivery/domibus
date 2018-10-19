@@ -294,7 +294,7 @@ public class UserManagementServiceImpl implements UserService {
     public void validateExpiredPassword(final String userName, boolean isDefaultPassword) {
 
         String expirationProperty = isDefaultPassword ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty, "0"));
+        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
         LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
 
         if (maxPasswordAgeInDays == 0) {
@@ -316,8 +316,8 @@ public class UserManagementServiceImpl implements UserService {
     public Integer validateDaysTillExpiration(String userName) {
         LOG.trace("validateDaysTillExpiration for user [{}]", userName);
 
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE, "0"));
-        int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(WARNING_DAYS_BEFORE_EXPIRATION, "0"));
+        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE));
+        int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(WARNING_DAYS_BEFORE_EXPIRATION));
 
         if (maxPasswordAgeInDays == 0 || warningDaysBeforeExpiration == 0) {
             return null;
@@ -371,7 +371,7 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("ImminentExpirationAlerts activated");
 
         final Integer duration = eventConfiguration.getEventDelay();
-        final Integer maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE, "0"));
+        final Integer maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE));
 
         LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays);
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays).plusDays(duration);
@@ -393,7 +393,7 @@ public class UserManagementServiceImpl implements UserService {
         LOG.debug("ExpiredAlerts activated");
 
         final Integer duration = eventConfiguration.getEventDelay();
-        final Integer maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE, "0"));
+        final Integer maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(MAXIMUM_PASSWORD_AGE));
 
         LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays).minusDays(duration);
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays);

@@ -488,42 +488,41 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         return alertEventConfigurationLoader.getConfiguration(new ConfigurationReader(alertType)::readAlertConfiguration);
     }
 
-
     class ConfigurationReader {
         AlertType alertType;
-        String property, defaultSubject;
+        String property, moduleName;
 
         public ConfigurationReader(AlertType alertType) {
             this.alertType = alertType;
 
             if (alertType.equals(AlertType.PASSWORD_IMMINENT_EXPIRATION)) {
                 this.property = "domibus.alert.password.imminent_expiration";
-                this.defaultSubject = "Password imminent expiration";
+                this.moduleName = "Password imminent expiration";
             } else if (alertType.equals(AlertType.PASSWORD_EXPIRED)) {
                 this.property = "domibus.alert.password.expired";
-                this.defaultSubject = "Password expired";
+                this.moduleName = "Password expired";
             }
         }
 
         public <T> AlertEventModuleConfiguration readAlertConfiguration(Domain domain) {
             try {
                 final Boolean alertModuleActive = isAlertModuleEnabled();
-                final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active", Boolean.FALSE.toString()));
+                final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
                 if (!alertModuleActive || !eventActive) {
-                    LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], {} module active[{}]", domain, defaultSubject, alertModuleActive, eventActive);
+                    LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], {} module active[{}]", domain, moduleName, alertModuleActive, eventActive);
                     return new AlertEventModuleConfiguration(alertType);
                 }
 
-                final Integer delay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".delay_days", "61"));
-                final Integer frequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".frequency_days", "14"));
-                final AlertLevel alertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".level", LOW));
-                final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, property + ".mail.subject", defaultSubject);
+                final Integer delay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".delay_days"));
+                final Integer frequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".frequency_days"));
+                final AlertLevel alertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".level"));
+                final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, property + ".mail.subject");
 
-                LOG.info("Alert {} module activated for domain:[{}]", defaultSubject, domain);
+                LOG.info("Alert {} module activated for domain:[{}]", moduleName, domain);
                 return new AlertEventModuleConfiguration(alertType, delay, frequency, alertLevel, mailSubject);
 
             } catch (Exception e) {
-                LOG.warn("An error occurred while reading {} alert module configuration for domain:[{}], ", defaultSubject, domain, e);
+                LOG.warn("An error occurred while reading {} alert module configuration for domain:[{}], ", moduleName, domain, e);
                 return new AlertEventModuleConfiguration(alertType);
             }
 
