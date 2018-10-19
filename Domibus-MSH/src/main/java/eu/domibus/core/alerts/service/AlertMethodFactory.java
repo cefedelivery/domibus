@@ -4,7 +4,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static eu.domibus.core.alerts.MailSender.DOMIBUS_ALERT_MAIL_SENDING_ACTIVE;
+
 
 /**
  * @author Cosmin Baciu
@@ -22,9 +22,13 @@ public class AlertMethodFactory {
     @Autowired
     protected AlertMethodLog alertEmailLog;
 
+    @Autowired
+    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
     public AlertMethod getAlertMethod() {
         AlertMethod result = alertEmailLog;
-        final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE));
+        final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
+        final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (mailActive) {
             result = alertEmailMethod;
         }

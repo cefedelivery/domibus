@@ -40,9 +40,9 @@ import java.util.*;
  * @since 4.0
  */
 @Component
-public class InternalJMSManagerWildFly implements InternalJMSManager {
+public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(InternalJMSManagerWildFly.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(InternalJMSManagerWildFlyArtemis.class);
 
     private static final String PROPERTY_OBJECT_NAME = "ObjectName";
     private static final String PROPERTY_JNDI_NAME = "Jndi";
@@ -215,6 +215,11 @@ public class InternalJMSManagerWildFly implements InternalJMSManager {
     @Override
     public void sendMessage(InternalJmsMessage message, Destination destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
+    }
+
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        sendMessage(internalJmsMessage, destination);
     }
 
     @Override

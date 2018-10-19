@@ -94,8 +94,11 @@ public class PayloadProfileValidator {
         }
 
         modifiableProfileList.addAll(profile.getPayloads());
-        final int size = 0;
-        for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
+        List<PartInfo> partInfos = new ArrayList<>();
+        if(userMessage.getPayloadInfo() != null) {
+            partInfos = userMessage.getPayloadInfo().getPartInfo();
+        }
+        for (final PartInfo partInfo : partInfos) {
             Payload profiled = null;
             final String cid = (partInfo.getHref() == null ? "" : partInfo.getHref());
             for (final Payload p : modifiableProfileList) {
@@ -111,7 +114,7 @@ public class PayloadProfileValidator {
             modifiableProfileList.remove(profiled);
 
             String mime = null;
-            if(partInfo.getPartProperties() != null) {
+            if (partInfo.getPartProperties() != null) {
                 final Collection<Property> partProperties = partInfo.getPartProperties().getProperties();
                 for (final Property partProperty : partProperties) {
                     if (Property.MIME_TYPE.equalsIgnoreCase(partProperty.getName())) {
@@ -127,13 +130,7 @@ public class PayloadProfileValidator {
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error: expected: " + profiled + ", got " + partInfo, userMessage.getMessageInfo().getMessageId(), null);
             }
 
-        } //FIXME: size handling not possible with datahandlers
-           /* size += partInfo.getBinaryData().length;
-            if (profile.getMaxSize() > 0 && size > profile.getMaxSize()) {
-                throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Payload profiling error, max allowed size of combined elements is " + profile.getMaxSize(), null, null);
-            }
-
-    }*/
+        }
         for (final Payload payload : modifiableProfileList) {
             if (payload.isRequired()) {
                 LOG.businessError(DomibusMessageCode.BUS_PAYLOAD_MISSING, payload);
