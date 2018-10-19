@@ -135,7 +135,6 @@ public class MessageSender implements MessageListener {
         LegConfiguration legConfiguration = null;
         final String pModeKey;
 
-        Boolean abortSending = false;
         final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
         try {
             pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
@@ -166,7 +165,9 @@ public class MessageSender implements MessageListener {
                 attemptError = cciEx.getMessage();
                 attemptStatus = MessageAttemptStatus.ABORT;
                 // this flag is used in the finally clause
-                abortSending = true;
+                reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.ABORT;
+                LOG.error("Cannot handle request for message:[{}], Certificate is not valid or it has been revoked ", messageId, cciEx);
+                LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 return;
             }
 
@@ -200,12 +201,7 @@ public class MessageSender implements MessageListener {
             throw t;
         } finally {
             try {
-                if (abortSending) {
-                    LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
-                    retryService.purgeTimedoutMessageInANewTransaction(messageId);
-                } else {
-                    reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
-                }
+                reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));

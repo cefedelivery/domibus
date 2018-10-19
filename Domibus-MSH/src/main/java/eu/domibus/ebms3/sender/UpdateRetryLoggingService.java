@@ -6,6 +6,7 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.logging.MessageLog;
@@ -48,6 +49,8 @@ public class UpdateRetryLoggingService {
     @Autowired
     private UIReplicationSignalService uiReplicationSignalService;
 
+    @Autowired
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     /**
      * This method is responsible for the handling of retries for a given sent message.
@@ -90,6 +93,7 @@ public class UpdateRetryLoggingService {
         if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
             messagingDao.clearPayloadData(messageId);
         }
+        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
     }
 
 
@@ -111,10 +115,6 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating status to [{}]", userMessageLog.getMessageStatus());
         userMessageLogDao.update(userMessageLog);
 
-    }
-
-    public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        userMessageLog.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(userMessageLog.getNextAttempt(), userMessageLog.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
     }
 
     /**
@@ -145,7 +145,24 @@ public class UpdateRetryLoggingService {
         return result.getTime();
     }
 
+    public Date getMessageExpirationDate(final MessageLog userMessageLog,
+                                                final LegConfiguration legConfiguration) {
+        if (legConfiguration.getReceptionAwareness() != null) {
+            final Long scheduledStartTime = getScheduledStartTime(userMessageLog);
+            final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
+            return new Date(scheduledStartTime + timeOut);
+        }
+        return null;
+    }
 
+    public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+        final MessageLog userMessageLog1 = userMessageLog;
+        Date nextAttempt = new Date();
+        if (userMessageLog.getNextAttempt() !=null) {
+            nextAttempt = userMessageLog.getNextAttempt();
+        }
+        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+    }
 }
 
 

@@ -1,4 +1,5 @@
 Domibus 4.1 (from 4.0):
+                - [Recommended] Remove domibus.msh.retry.tolerance from domibus.properties, if set. The property is not used anymore.
                 - [WebLogic only]
                    o in case the probe URL is used, the new probe URL is /domibus/services/msh
                 - [Wildfly only]

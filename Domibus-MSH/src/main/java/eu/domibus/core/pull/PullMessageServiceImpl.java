@@ -226,7 +226,7 @@ public class PullMessageServiceImpl implements PullMessageService {
             throw new PModeException(DomibusCoreErrorCode.DOM_001, "Could not get the PMode key for message [" + messageId + "]", e);
         }
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
-        final Date staledDate = getPullMessageExpirationDate(messageLog, legConfiguration);
+        final Date staledDate = updateRetryLoggingService.getMessageExpirationDate(messageLog, legConfiguration);
 
         return new MessagingLock(
                 messageId,
@@ -259,25 +259,6 @@ public class PullMessageServiceImpl implements PullMessageService {
         return messagingLockDao.getLock(messageId);
     }
 
-    protected Date getPullMessageExpirationDate(final MessageLog userMessageLog,
-                                                final LegConfiguration legConfiguration) {
-        if (legConfiguration.getReceptionAwareness() != null) {
-            final Long scheduledStartTime = updateRetryLoggingService.getScheduledStartTime(userMessageLog);
-            final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
-            return new Date(scheduledStartTime + timeOut);
-        }
-        return null;
-    }
-
-    protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        final MessageLog userMessageLog1 = userMessageLog;
-        Date nextAttempt = new Date();
-        if (userMessageLog.getNextAttempt() !=null) {
-            nextAttempt = userMessageLog.getNextAttempt();
-        }
-        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
-    }
-
     /**
      * This method is called when a message has been pulled successfully.
      * @param legConfiguration processing information for the message
@@ -296,7 +277,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         }
         final MessageStatus waitingForReceipt = MessageStatus.WAITING_FOR_RECEIPT;
         LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] change status to:[{}]", userMessageLog.getMessageId(), waitingForReceipt);
-        updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+        updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
         if (LOG.isDebugEnabled()) {
             if (attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration)) {
                 LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts());
@@ -316,7 +297,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     }
 
     protected boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        return getPullMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
+        return updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
     }
 
     /**
@@ -351,7 +332,7 @@ public class PullMessageServiceImpl implements PullMessageService {
         final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
         if (attemptNumberLeftIsStricltyLowerThenMaxAttemps(userMessageLog, legConfiguration)) {
             LOG.debug("[PULL_REQUEST]:Message:[{}] has been pulled [{}] times", userMessageLog.getMessageId(), userMessageLog.getSendAttempts() + 1);
-            updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
+            updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
             updateRetryLoggingService.saveAndNotify(MessageStatus.READY_TO_PULL, userMessageLog);
             LOG.debug("[pullFailedOnRequest]:Message:[{}] release lock", userMessageLog.getMessageId());
             LOG.debug("[PULL_REQUEST]:Message:[{}] will be available for pull at [{}]", userMessageLog.getMessageId(), userMessageLog.getNextAttempt());
