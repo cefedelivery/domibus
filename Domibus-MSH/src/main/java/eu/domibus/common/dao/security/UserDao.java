@@ -31,5 +31,5 @@ public interface UserDao {
 
     void flush();
 
-    List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end);
+    List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end, Boolean withDefaultPassword);
 }

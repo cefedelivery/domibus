@@ -414,11 +414,11 @@ public class UserManagementServiceImplTest {
             result = howManyDaysToGenerateAlertsAfterExpiration;
             domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to);
+            userDao.findWithPasswordChangedBetween(from, to, false);
             result = users;
         }};
 
-        userManagementService.sendExpiredAlerts();
+        userManagementService.sendExpiredAlerts(false);
 
         new VerificationsInOrder() {{
             eventService.enqueuePasswordExpiredEvent((User) any, maxPasswordAge);
@@ -448,11 +448,11 @@ public class UserManagementServiceImplTest {
             result = howManyDaysBeforeExpirationToGenerateAlerts;
             domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to);
+            userDao.findWithPasswordChangedBetween(from, to, false);
             result = users;
         }};
 
-        userManagementService.sendImminentExpirationAlerts();
+        userManagementService.sendImminentExpirationAlerts(false);
 
         new VerificationsInOrder() {{
             eventService.enqueuePasswordImminentExpirationEvent((User) any, maxPasswordAge);
@@ -467,11 +467,11 @@ public class UserManagementServiceImplTest {
         userManagementService.sendAlerts();
 
         new VerificationsInOrder() {{
-            userManagementService.sendImminentExpirationAlerts();
+            userManagementService.sendImminentExpirationAlerts(false);
             times = 1;
         }};
         new VerificationsInOrder() {{
-            userManagementService.sendExpiredAlerts();
+            userManagementService.sendExpiredAlerts(false);
             times = 1;
         }};
     }
@@ -484,7 +484,7 @@ public class UserManagementServiceImplTest {
             result = "0";
         }};
 
-        userManagementService.validateExpiredPassword(username, false);
+        userManagementService.validateExpiredPassword(username);
 
         new VerificationsInOrder() {{
             userDao.loadActiveUserByUsername(anyString);

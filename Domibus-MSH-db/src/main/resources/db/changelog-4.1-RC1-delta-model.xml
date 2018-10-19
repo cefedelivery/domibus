@@ -9,16 +9,25 @@
         <addColumn tableName="TB_USER">
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </addColumn>
+        <addColumn tableName="TB_USER">
+            <column name="DEFAULT_PASSWORD" type="BOOLEAN" defaultValueBoolean="false" />
+        </addColumn>
         <addColumn tableName="TB_USER_AUD">
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"></column>
         </addColumn>
         <addColumn tableName="TB_USER_AUD">
             <column name="PASSWORDCHANGEDATE_MOD" type="BOOLEAN"></column>
         </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="DEFAULT_PASSWORD" type="BOOLEAN"></column>
+        </addColumn>
+        <addColumn tableName="TB_USER_AUD">
+            <column name="DEFAULTPASSWORD_MOD" type="BOOLEAN"></column>
+        </addColumn>
 
         <createTable tableName="TB_USER_PASSWORD_HISTORY">
-            <column name="ID_PK" type="INT">
-                <constraints nullable="false"/>
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
             </column>
             <column name="USER_ID" type="BIGINT">
                 <constraints nullable="false"/>

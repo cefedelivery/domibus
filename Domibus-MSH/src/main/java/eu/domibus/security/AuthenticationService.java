@@ -44,7 +44,7 @@ public class AuthenticationService {
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
             principal = (UserDetail) authentication.getPrincipal();
-            userService.validateExpiredPassword(username, principal.isDefaultPasswordUsed());
+            userService.validateExpiredPassword(username);
             userService.handleCorrectAuthentication(username);
         } catch (CredentialsExpiredException ex) {
             LOG.trace("Caught CredentialsExpiredException: [{}]", ex);
@@ -61,7 +61,6 @@ public class AuthenticationService {
             throw ae;
         }
 
-        //final UserDetail principal = (UserDetail) authentication.getPrincipal();
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return principal;

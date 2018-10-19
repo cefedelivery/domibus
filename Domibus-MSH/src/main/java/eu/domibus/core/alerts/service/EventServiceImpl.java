@@ -60,6 +60,8 @@ public class EventServiceImpl implements EventService {
 
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
+    public static final String EVENT_ID = "EVENT_ID";
+
     @Autowired
     private EventDao eventDao;
 
@@ -247,11 +249,15 @@ public class EventServiceImpl implements EventService {
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-        String sourceId = event.findStringProperty("SOURCE").get();
-        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), "SOURCE", sourceId);
+//        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndProperties(event.getType(), event.getProperties());
+
+        String id = event.findStringProperty(EVENT_ID).get();
+        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_ID, id);
+
         if (entity == null) {
             entity = this.persistEvent(event);
         }
+
         return entity;
     }
 
@@ -278,16 +284,21 @@ public class EventServiceImpl implements EventService {
         return false;
     }
 
-
     private Event preparePasswordEvent(User user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
+
+        event.addStringKeyValue(EVENT_ID, eventType.name() + ":" + user.getEntityId() + ":" + user.getPasswordChangeDate().toLocalDate());
+
         event.addStringKeyValue("USER", user.getUserName());
-        event.addStringKeyValue("SOURCE", "User#" + user.getEntityId() + ":" + user.getPasswordChangeDate().toLocalDate().toString());
+
+//        event.addStringKeyValue("USER_ID", String.valueOf(user.getEntityId()));
+//
+//        LocalDate changeDate = user.getPasswordChangeDate().toLocalDate();
+//        event.addDateKeyValue("PASSWORD_CHANGE_DATE", Date.from(changeDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
-        Date date = Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        event.addDateKeyValue("EXPIRATION_DATE", date);
+        event.addDateKeyValue("EXPIRATION_DATE", Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         return event;
     }

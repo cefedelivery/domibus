@@ -103,6 +103,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
                 passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
                 passwordValidator.validateHistory(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
+                userEntity.setDefaultPassword(false);
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
