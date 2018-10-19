@@ -1,7 +1,6 @@
 package eu.domibus.clustering;
 
 import eu.domibus.dao.InMemoryDataBaseConfig;
-import eu.domibus.dao.OracleDataBaseConfig;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
