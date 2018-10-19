@@ -1,6 +1,7 @@
 package eu.domibus.jms.spi;
 
 import javax.jms.Destination;
+import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ public interface InternalJMSManager {
     void sendMessage(InternalJmsMessage message, String destination);
 
     void sendMessage(InternalJmsMessage message, Destination destination);
+
+    void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination);
 
     void deleteMessages(String source, String[] messageIds);
 

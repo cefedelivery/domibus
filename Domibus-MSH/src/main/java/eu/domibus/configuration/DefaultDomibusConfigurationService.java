@@ -40,6 +40,11 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
     }
 
     @Override
+    public boolean isClusterDeployment() {
+        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(CLUSTER_DEPLOYMENT, "false"));
+    }
+
+    @Override
     public DataBaseEngine getDataBaseEngine() {
         if (dataBaseEngine == null) {
             final String property = domibusPropertyProvider.getProperty(DATABASE_DIALECT);
