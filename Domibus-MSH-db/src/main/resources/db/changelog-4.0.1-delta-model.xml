@@ -20,6 +20,20 @@
             </column>
             <column name="CREATION_TIME" type="TIMESTAMP"/>
         </createTable>
+    </changeSet>
 
+    <changeSet id="CatalinEnache" author="">
+        <createTable tableName="TB_COMMAND_PROPERTY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="PROPERTY_NAME" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
+            <column name="FK_COMMAND" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
 </databaseChangeLog>

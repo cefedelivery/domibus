@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.logging.LoggingService;
+import eu.domibus.core.logging.LoggingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -45,13 +47,14 @@ public class CommandServiceImpl implements CommandService {
     protected LoggingService loggingService;
 
     @Override
-    public void createClusterCommand(String command, String domain, String server) {
+    public void createClusterCommand(String command, String domain, String server, Map<String, Object> customProperties) {
         LOG.debug("Creating command [{}] for domain [{}] and server [{}]", command, domain, server);
         CommandEntity commandEntity = new CommandEntity();
         commandEntity.setCommandName(command);
         commandEntity.setDomain(domain);
         commandEntity.setServerName(server);
         commandEntity.setCreationTime(new Date());
+        commandEntity.setCommandProperties(ControllerListenerService.getCommandProperties(customProperties));
         commandDao.create(commandEntity);
     }
 
@@ -62,8 +65,8 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public void executeCommand(String command, Domain domain) {
-        LOG.debug("Executing command [{}] for domain [{}]", command, domain);
+    public void executeCommand(String command, Domain domain, Map<String, String> commandProperties) {
+        LOG.debug("Executing command [{}] for domain [{}] having properties [{}]", command, domain, commandProperties);
         switch (command) {
             case Command.RELOAD_PMODE:
                 pModeProvider.refresh();
@@ -82,8 +85,9 @@ public class CommandServiceImpl implements CommandService {
                 loggingService.resetLogging();
                 break;
             case Command.LOGGING_SET_LEVEL:
-                //TODO
-                loggingService.setLoggingLevel(null);
+                final String level = commandProperties.get(LoggingServiceImpl.JMS_LOG_LEVEL);
+                final String name = commandProperties.get(LoggingServiceImpl.JMS_LOG_NAME);
+                loggingService.setLoggingLevel(name, level);
                 break;
             default:
                 LOG.error("Unknown command received: " + command);

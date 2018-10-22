@@ -34,7 +34,7 @@ public class CommandExecutorJob extends DomibusQuartzJobBean {
             return;
         }
         for (Command command : commandsByServerName) {
-            commandService.executeCommand(command.getCommandName(), domain);
+            commandService.executeCommand(command.getCommandName(), domain, command.getCommandProperties());
             commandService.deleteCommand(command.getEntityId());
         }
     }

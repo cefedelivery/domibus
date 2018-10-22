@@ -4,7 +4,6 @@ import eu.domibus.core.logging.LoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -34,13 +33,25 @@ public class LoggingResource {
      * @return response of the operation
      */
     @PostMapping(value = "/loglevel")
-    public ResponseEntity<LoggingLevelResponseRO> setLogLevel(@RequestBody LoggingLevelRO request) {
+    public ResponseEntity<String> setLogLevel(@RequestBody LoggingLevelRO request) {
+        final String name = request.getName();
+        final String level = request.getLevel();
 
-        LoggingLevelResponseRO loggingLevelResponseRO = loggingService.setLoggingLevel(request);
+        //set log level on current server
+        final boolean result = loggingService.setLoggingLevel(name, level);
 
+        //signals to other servers in a cluster environment
+        loggingService.signalSetLoggingLevel(name, level);
+
+        if (!result) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("Error while setting log level to " + level + " for " + name);
+        }
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
-                .body(loggingLevelResponseRO);
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("Success while setting log level "+ level + " for " + name);
+
     }
 
     @GetMapping(value = "/loglevel")
@@ -77,8 +88,11 @@ public class LoggingResource {
     @PostMapping(value = "/reset")
     public ResponseEntity<String> resetLogging(){
 
-        //work in non-cluster and cluster environments
-        final boolean result = loggingService.signalResetLogging();
+        //reset log level on current server
+        final boolean result = loggingService.resetLogging();
+
+        //signals to other servers in a cluster environment
+        loggingService.signalResetLogging();
 
         if (!result) {
             return ResponseEntity.badRequest()

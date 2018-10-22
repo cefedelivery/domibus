@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -60,7 +63,48 @@ public class ControllerListenerService implements MessageListener {
             return;
         }
 
+        commandService.executeCommand(command, domain, getCommandProperties(message));
+    }
 
-        commandService.executeCommand(command, domain);
+    /**
+     * just extract all message properties (of type {@code String}) excepting Command and Domain
+     *
+     * @param msg JMS Message
+     * @return map of properties
+     */
+    public static Map<String, String> getCommandProperties(Message msg) {
+        HashMap<String, String> properties = new HashMap<>();
+        try {
+            Enumeration srcProperties = msg.getPropertyNames();
+            while (srcProperties.hasMoreElements()) {
+                String propertyName = (String) srcProperties.nextElement();
+                if (!Command.COMMAND.equalsIgnoreCase(propertyName) && !MessageConstants.DOMAIN.equalsIgnoreCase(propertyName)
+                        && msg.getObjectProperty(propertyName) instanceof String) {
+                    properties.put(propertyName, msg.getStringProperty(propertyName));
+                }
+            }
+        } catch (JMSException e) {
+            LOG.error("An error occurred while trying to extract message properties: ", e);
+        }
+        return properties;
+    }
+
+    /**
+     * just extract all message properties (of type {@code String}) excepting Command and Domain
+     *
+     * @param messageProperties
+     * @return
+     */
+    public static Map<String, String> getCommandProperties(Map<String, Object> messageProperties) {
+        HashMap<String, String> properties = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : messageProperties.entrySet()) {
+            if (!Command.COMMAND.equalsIgnoreCase(entry.getKey()) && !MessageConstants.DOMAIN.equalsIgnoreCase(entry.getKey())
+                    && messageProperties.get(entry.getKey()) instanceof String) {
+                properties.put(entry.getKey(), (String) messageProperties.get(entry.getKey()));
+            }
+        }
+
+        return properties;
     }
 }

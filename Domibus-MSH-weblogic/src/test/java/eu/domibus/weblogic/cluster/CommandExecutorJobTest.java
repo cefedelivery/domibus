@@ -58,7 +58,7 @@ public class CommandExecutorJobTest {
         commandExecutorJob.executeJob(jobExecutionContext, domain);
 
         new Verifications() {{
-            commandService.executeCommand(Command.RELOAD_PMODE, domain);
+            commandService.executeCommand(Command.RELOAD_PMODE, domain, null);
         }};
     }
 }

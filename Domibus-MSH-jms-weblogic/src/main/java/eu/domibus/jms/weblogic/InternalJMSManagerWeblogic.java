@@ -371,7 +371,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         final List<String> managedServerNames = getManagedServerNames();
         LOG.debug("Found managed servers [{}]", managedServerNames);
         for (String managedServerName : managedServerNames) {
-            commandService.createClusterCommand(command, domain, managedServerName);
+            commandService.createClusterCommand(command, domain, managedServerName, internalJmsMessage.getCustomProperties());
         }
     }
 

@@ -12,7 +12,6 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.LogbackLoggingConfigurator;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,8 +37,8 @@ import static org.apache.commons.lang3.reflect.FieldUtils.readField;
 public class LoggingServiceImpl implements LoggingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingServiceImpl.class);
 
-    public static final String JMS_LOG_LEVEL = "JMS_LOG_LEVEL";
-    public static final String JMS_LOG_NAME = "JMS_LOG_NAME";
+    public static final String JMS_LOG_LEVEL = "LOG_LEVEL";
+    public static final String JMS_LOG_NAME = "LOG_NAME";
 
     @Autowired
     protected DomainCoreConverter domainConverter;
@@ -53,27 +52,17 @@ public class LoggingServiceImpl implements LoggingService {
     @Autowired
     protected JMSManager jmsManager;
 
-
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public LoggingLevelResponseRO setLoggingLevel(LoggingLevelRO loggingLevelRO) {
-        final LoggingLevelResponseRO resultRO = domainConverter.convert(loggingLevelRO, LoggingLevelResponseRO.class);
-
-        resultRO.setResult(LoggingLevelResponseRO.Result.SUCCESS);
-        final String strLevel = loggingLevelRO.getLevel();
-        final String name = loggingLevelRO.getName();
-
+    public boolean setLoggingLevel(final String name, final String strLevel) {
 
         Level level = toLevel(strLevel);
 
         if (level == null) {
             LOG.error("Not a known log level: {}", strLevel);
-            resultRO.setMessage("Error. Not a known log level: " + strLevel);
-            resultRO.setResult(LoggingLevelResponseRO.Result.ERROR);
-            return resultRO;
+            return false;
         }
 
         String msg = "Success. Log level set to: " + level + " for ";
@@ -82,32 +71,26 @@ public class LoggingServiceImpl implements LoggingService {
         if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
             loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
             LOG.info("Setting log level: {} for root", level);
-            msg += "root";
+
         } else {
             loggerContext.getLogger(name).setLevel(level);
             LOG.info("Setting log level: {} for package name: {}", level, name);
-            msg += "package name: " + name;
         }
-        resultRO.setResult(LoggingLevelResponseRO.Result.SUCCESS);
-        resultRO.setMessage(msg);
-        resultRO.setLevel(level.toString());
-
-
-        return resultRO;
+        return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean signalSetLoggingLevel(LoggingLevelRO loggingLevelRO) {
-        try {
+    public void signalSetLoggingLevel(final String name, final String level) {
+
             // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
             jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
                     .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                    .property(JMS_LOG_NAME, loggingLevelRO)
+                    .property(JMS_LOG_NAME, name)
+                    .property(JMS_LOG_LEVEL, level)
                     .build(), clusterCommandTopic);
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -173,17 +156,16 @@ public class LoggingServiceImpl implements LoggingService {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean signalResetLogging() {
-        try {
-            // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                    .property(Command.COMMAND, Command.LOGGING_RESET)
-                    .build(), clusterCommandTopic);
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
+    public void signalResetLogging() {
+
+        // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
+        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                .property(Command.COMMAND, Command.LOGGING_RESET)
+                .build(), clusterCommandTopic);
     }
 
 

@@ -50,7 +50,7 @@ public class CommandServiceImplTest {
         String domain = "domain1";
         String server = "server1";
 
-        commandService.createClusterCommand(command, domain, server);
+        commandService.createClusterCommand(command, domain, server, null);
 
         new Verifications() {{
             CommandEntity entity = null;
@@ -75,7 +75,7 @@ public class CommandServiceImplTest {
 
     @Test
     public void testExecuteReloadPModeCommand() {
-        commandService.executeCommand(Command.RELOAD_PMODE, DomainService.DEFAULT_DOMAIN);
+        commandService.executeCommand(Command.RELOAD_PMODE, DomainService.DEFAULT_DOMAIN, null);
 
         new Verifications() {{
             pModeProvider.refresh();
@@ -85,7 +85,7 @@ public class CommandServiceImplTest {
 
     @Test
     public void testExecuteReloadTruststoreCommand() {
-        commandService.executeCommand(Command.RELOAD_TRUSTSTORE, DomainService.DEFAULT_DOMAIN);
+        commandService.executeCommand(Command.RELOAD_TRUSTSTORE, DomainService.DEFAULT_DOMAIN, null);
 
         new Verifications() {{
             multiDomainCryptoService.refreshTrustStore(DomainService.DEFAULT_DOMAIN);
@@ -100,7 +100,7 @@ public class CommandServiceImplTest {
             result = cacheList;
         }};
 
-        commandService.executeCommand(Command.EVICT_CACHES, DomainService.DEFAULT_DOMAIN);
+        commandService.executeCommand(Command.EVICT_CACHES, DomainService.DEFAULT_DOMAIN, null);
 
         new Verifications() {{
             cacheManager.getCache("cache1").clear();

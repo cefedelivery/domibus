@@ -1,7 +1,5 @@
 package eu.domibus.core.logging;
 
-import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResponseRO;
 import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 
 /**
@@ -13,18 +11,20 @@ public interface LoggingService {
     /**
      * Set the logging level for the given package or class
      *
-     * @param loggingLevelRO
-     * @return
+     *
+     * @param name
+     * @param strLevel
+     * @return true if the operation succed, false otherwise
      */
-    LoggingLevelResponseRO setLoggingLevel(LoggingLevelRO loggingLevelRO);
+    boolean setLoggingLevel(final String name, final String strLevel);
 
     /**
      * Signal the set of logging level for the given package or class
      *
-     * @param loggingLevelRO
-     * @return
+     * @param name
+     * @param level
      */
-    boolean signalSetLoggingLevel(LoggingLevelRO loggingLevelRO);
+    void signalSetLoggingLevel(final String name, final String level);
 
     /**
      * Get the logging levels for the given packages which starts or contains with {@code name} parameter
@@ -47,5 +47,5 @@ public interface LoggingService {
      * signal the logging reset on a cluster env - send a messaage to command topic
      * @return
      */
-    boolean signalResetLogging();
+    void signalResetLogging();
 }
