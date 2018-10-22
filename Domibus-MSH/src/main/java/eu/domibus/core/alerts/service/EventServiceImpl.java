@@ -60,7 +60,9 @@ public class EventServiceImpl implements EventService {
 
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
-    public static final String EVENT_ID = "EVENT_ID";
+    public static final String EVENT_IDENTIFIER = "EVENT_IDENTIFIER";
+    public static final String USER = "USER";
+    public static final String EXPIRATION_DATE = "EXPIRATION_DATE";
 
     @Autowired
     private EventDao eventDao;
@@ -216,7 +218,7 @@ public class EventServiceImpl implements EventService {
             final String accountDisabled,
             final EventType eventType) {
         Event event = new Event(eventType);
-        event.addStringKeyValue(USER.name(), userName);
+        event.addStringKeyValue(AuthenticationEvent.USER.name(), userName);
         event.addDateKeyValue(LOGIN_TIME.name(), loginTime);
         event.addStringKeyValue(AuthenticationEvent.ACCOUNT_DISABLED.name(), accountDisabled);
         return event;
@@ -249,8 +251,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-        String id = event.findStringProperty(EVENT_ID).get();
-        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_ID, id);
+        String id = event.findStringProperty(EVENT_IDENTIFIER).get();
+        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_IDENTIFIER, id);
 
         if (entity == null) {
             entity = this.persistEvent(event);
@@ -286,14 +288,18 @@ public class EventServiceImpl implements EventService {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
 
-        event.addStringKeyValue(EVENT_ID, user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate());
+        event.addStringKeyValue(EVENT_IDENTIFIER, getUniqueIdentifier(user));
 
-        event.addStringKeyValue("USER", user.getUserName());
+        event.addStringKeyValue(USER, user.getUserName());
 
         LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
-        event.addDateKeyValue("EXPIRATION_DATE", Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        event.addDateKeyValue(EXPIRATION_DATE, Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         return event;
+    }
+
+    private String getUniqueIdentifier(User user) {
+        return user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate();
     }
 
 }
