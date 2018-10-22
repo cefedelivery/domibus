@@ -7,14 +7,16 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.model.MessagingLock;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -72,12 +74,42 @@ public class RetryService {
     @Autowired
     private MessagingLockDao messagingLockDao;
 
+    @Autowired
+    PModeProvider pModeProvider;
+
+    @Autowired
+    UpdateRetryLoggingService updateRetryLoggingService;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
-            userMessageService.scheduleSending(messageId);
+            if(!removedIfExpired(messageId)) {
+                userMessageService.scheduleSending(messageId);
+            }
         }
+    }
+
+    protected boolean removedIfExpired(String messageId) {
+        UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        eu.domibus.common.model.configuration.LegConfiguration legConfiguration = null;
+        final String pModeKey;
+
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        try {
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            LOG.debug("PMode key found : " + pModeKey);
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+        } catch (EbMS3Exception exc) {
+            LOG.warn("Could not find LegConfiguration for message [{}]", messageId);
+            return false;
+        }
+        if(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
+            updateRetryLoggingService.messageFailed(userMessageLog);
+            return true;
+        }
+        return false;
     }
 
     protected List<String> getMessagesNotAlreadyQueued() {

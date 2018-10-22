@@ -267,7 +267,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
         final MessagingLock lock = messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
-        if (isExpired(legConfiguration, userMessageLog)) {
+        if (updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
             LOG.debug("[WAITING_FOR_CALLBACK]:Message:[{}] expired]", userMessageLog.getMessageId());
             pullMessageStateService.sendFailed(userMessageLog);
             lock.setNextAttempt(null);
@@ -296,10 +296,6 @@ public class PullMessageServiceImpl implements PullMessageService {
         backendNotificationService.notifyOfMessageStatusChange(userMessageLog, waitingForReceipt, new Timestamp(System.currentTimeMillis()));
     }
 
-    protected boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
-        return updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
-    }
-
     /**
      * Check if the message can be sent again: there is time and attempts left
      * @param userMessageLog the message
@@ -310,7 +306,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                                                                      final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() <= userMessageLog.getSendAttemptsMax()
-                && !isExpired(legConfiguration, userMessageLog)) {
+                && !updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
             return true;
         }
         return false;
@@ -320,7 +316,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected boolean attemptNumberLeftIsStricltyLowerThenMaxAttemps(final MessageLog userMessageLog, final LegConfiguration legConfiguration) {
         // retries start after the first send attempt
         if (legConfiguration.getReceptionAwareness() != null && userMessageLog.getSendAttempts() < userMessageLog.getSendAttemptsMax()
-                && !isExpired(legConfiguration, userMessageLog)) {
+                && !updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
             return true;
         }
         return false;

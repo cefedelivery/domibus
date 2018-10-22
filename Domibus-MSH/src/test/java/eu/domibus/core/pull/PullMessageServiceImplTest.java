@@ -267,7 +267,7 @@ public class PullMessageServiceImplTest {
             messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
             result=lock;
 
-            pullMessageService.isExpired(legConfiguration, userMessageLog);
+            updateRetryLoggingService.isExpired(legConfiguration, userMessageLog);
             result=true;
 
         }};
@@ -291,7 +291,7 @@ public class PullMessageServiceImplTest {
             messagingLockDao.findMessagingLockForMessageId(userMessageLog.getMessageId());
             result=lock;
 
-            pullMessageService.isExpired(legConfiguration, userMessageLog);
+            updateRetryLoggingService.isExpired(legConfiguration, userMessageLog);
             result=false;
 
             updateRetryLoggingService.updateMessageLogNextAttemptDate(legConfiguration, userMessageLog);
@@ -377,8 +377,8 @@ public class PullMessageServiceImplTest {
             userMessageLog.getSendAttemptsMax();
             result = 2;
 
-            updateRetryLoggingService.getScheduledStartTime(userMessageLog);
-            result = System.currentTimeMillis() - 70000;
+            updateRetryLoggingService.isExpired(legConfiguration, userMessageLog);
+            result = true;
         }};
         final boolean actual = pullMessageService.attemptNumberLeftIsLowerOrEqualThenMaxAttempts(userMessageLog, legConfiguration);
         assertEquals(false, actual);

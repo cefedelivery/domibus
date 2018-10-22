@@ -165,6 +165,10 @@ public class UpdateRetryLoggingService {
         return null;
     }
 
+    public boolean isExpired(LegConfiguration legConfiguration, MessageLog userMessageLog) {
+        return getMessageExpirationDate(userMessageLog, legConfiguration).getTime() < System.currentTimeMillis();
+    }
+
     public void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
