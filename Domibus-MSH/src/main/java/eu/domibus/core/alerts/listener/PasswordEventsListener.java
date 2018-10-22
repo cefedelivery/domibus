@@ -41,21 +41,23 @@ public class PasswordEventsListener {
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'userPasswordImminentExpiration'")
-    public void onImminentExpirationEvent(final Event event, @Header(name = "DOMAIN") String domain) {
+    public void onImminentExpirationEvent(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
 
         saveEventAndTriggerAlert(event, domain);
     }
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
             selector = "selector = 'userPasswordExpired'")
-    public void onExpiredEvent(final Event event, @Header(name = "DOMAIN") String domain) {
+    public void onExpiredEvent(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
 
         saveEventAndTriggerAlert(event, domain);
     }
 
-    private void saveEventAndTriggerAlert(Event event, @Header(name = "DOMAIN") String domain) {
-
-        domainContextProvider.setCurrentDomain(domain);
+    private void saveEventAndTriggerAlert(Event event, String domain) {
+        if (domain == null)
+            domainContextProvider.clearCurrentDomain();
+        else
+            domainContextProvider.setCurrentDomain(domain);
 
         //find the corresponding persisted event
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.read(event.getEntityId());

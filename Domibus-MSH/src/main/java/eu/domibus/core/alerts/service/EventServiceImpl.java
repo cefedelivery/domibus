@@ -249,8 +249,6 @@ public class EventServiceImpl implements EventService {
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-//        eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndProperties(event.getType(), event.getProperties());
-
         String id = event.findStringProperty(EVENT_ID).get();
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_ID, id);
 
@@ -288,14 +286,9 @@ public class EventServiceImpl implements EventService {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
 
-        event.addStringKeyValue(EVENT_ID, eventType.name() + ":" + user.getEntityId() + ":" + user.getPasswordChangeDate().toLocalDate());
+        event.addStringKeyValue(EVENT_ID, user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate());
 
         event.addStringKeyValue("USER", user.getUserName());
-
-//        event.addStringKeyValue("USER_ID", String.valueOf(user.getEntityId()));
-//
-//        LocalDate changeDate = user.getPasswordChangeDate().toLocalDate();
-//        event.addDateKeyValue("PASSWORD_CHANGE_DATE", Date.from(changeDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
         event.addDateKeyValue("EXPIRATION_DATE", Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));

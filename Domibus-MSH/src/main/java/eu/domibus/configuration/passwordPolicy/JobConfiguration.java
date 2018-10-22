@@ -21,6 +21,7 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 public class JobConfiguration {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JobConfiguration.class);
+    private static final String GROUP_GENERAL = "GENERAL";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -58,6 +59,7 @@ public class JobConfiguration {
         bean.setJobDetail(superUserPasswordPolicyAlertJob().getObject());
         bean.setCronExpression(domibusPropertyProvider.getProperty("domibus.passwordPolicies.check.cron"));
 
+        bean.setGroup(GROUP_GENERAL);
         return bean;
     }
 

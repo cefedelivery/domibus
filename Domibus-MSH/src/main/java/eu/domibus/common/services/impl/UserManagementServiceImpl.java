@@ -375,7 +375,6 @@ public class UserManagementServiceImpl implements UserService {
         if (!eventConfiguration.isActive()) {
             return;
         }
-        LOG.debug("ImminentExpirationAlerts activated");
 
         final Integer duration = eventConfiguration.getEventDelay();
         String expirationProperty = usersWithDefaultPassword ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
@@ -383,10 +382,10 @@ public class UserManagementServiceImpl implements UserService {
 
         LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays);
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays).plusDays(duration);
-        LOG.debug("Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
+        LOG.debug("ImminentExpirationAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
 
         List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-        LOG.debug("ImminentExpirationAlerts Found [{}] eligible users", eligibleUsers.size());
+        LOG.debug("ImminentExpirationAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
         eligibleUsers.forEach(user -> {
             eventService.enqueuePasswordImminentExpirationEvent(user, maxPasswordAgeInDays);
@@ -404,10 +403,10 @@ public class UserManagementServiceImpl implements UserService {
 
         LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays).minusDays(duration);
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays);
-        LOG.debug("Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
+        LOG.debug("PasswordExpiredAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
 
         List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-        LOG.debug("PasswordExpiredAlerts Found [{}] eligible users", eligibleUsers.size());
+        LOG.debug("PasswordExpiredAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
         eligibleUsers.forEach(user -> {
             eventService.enqueuePasswordExpiredEvent(user, maxPasswordAgeInDays);
