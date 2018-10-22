@@ -23,6 +23,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.security.authentication.CredentialsExpiredException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -477,27 +478,9 @@ public class UserManagementServiceImplTest {
     }
 
     @Test
-    public void testExpiredPasswordValidationDisabled() {
-        final String username = "user1";
-        new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = "0";
-        }};
-
-        userManagementService.validateExpiredPassword(username);
-
-        new VerificationsInOrder() {{
-            userDao.loadActiveUserByUsername(anyString);
-            times = 0;
-        }};
-    }
-
-    @Test
     public void testValidateDaysTillExpirationDisabled() {
         final String username = "user1";
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = "0";
             domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
             result = "0";
         }};
