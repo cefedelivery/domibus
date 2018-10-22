@@ -10,18 +10,18 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author Ion Perpegel
  * @since 4.1
  * <p>
- * Job in charge of sending alerts to users whose passwords expired, are about to expire, have default password??
+ * Job in charge of sending alerts to users whose passwords expired or are about to expire
  */
 @DisallowConcurrentExecution
-public class PasswordPolicyAlertJob extends DomibusQuartzJobBean {
+public class UserPasswordPolicyAlertJob extends DomibusQuartzJobBean {
 
-    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordPolicyAlertJob.class);
+    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserPasswordPolicyAlertJob.class);
 
     @Autowired
     private UserService userService;
@@ -29,10 +29,9 @@ public class PasswordPolicyAlertJob extends DomibusQuartzJobBean {
     @Override
     protected void executeJob(JobExecutionContext context, Domain domain) throws JobExecutionException {
 
-        LOG.debug("Executing job check password expiration at " + new Date());
+        LOG.debug("Executing job 'check password expiration' for users at " + LocalDateTime.now());
 
         userService.sendAlerts();
     }
-
 
 }

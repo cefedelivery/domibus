@@ -57,16 +57,16 @@
         <property name="startDelay" value="30000"/>
     </bean>
 
-    <bean id="passwordPolicyAlertJob"
-          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="eu.domibus.security.PasswordPolicyAlertJob"/>
-        <property name="durability" value="true"/>
-    </bean>
+    <!--<bean id="userPasswordPolicyAlertJob"-->
+          <!--class="org.springframework.scheduling.quartz.JobDetailFactoryBean">-->
+        <!--<property name="jobClass" value="eu.domibus.security.UserPasswordPolicyAlertJobtJob"/>-->
+        <!--<property name="durability" value="true"/>-->
+    <!--</bean>-->
 
-    <bean id="passwordPolicyAlertTrigger"
-          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
-        <property name="jobDetail" ref="passwordPolicyAlertJob"/>
-        <property name="cronExpression" value="${domibus.passwordPolicies.check.cron}"/>
-    </bean>
+    <!--<bean id="userPasswordPolicyAlertTrigger"-->
+          <!--class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">-->
+        <!--<property name="jobDetail" ref="userPasswordPolicyAlertJob"/>-->
+        <!--<property name="cronExpression" value="${domibus.passwordPolicies.check.cron}"/>-->
+    <!--</bean>-->
 
 </beans>
