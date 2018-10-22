@@ -7,7 +7,6 @@ import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.security.DefaultCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,24 +45,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
             LOG.warn(msg);
             throw new UsernameNotFoundException(msg);
         }
-        boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
-        UserDetail userDetail = new UserDetail(user, defaultPasswordUsed);
+        UserDetail userDetail = new UserDetail(user);
 
         userDetail.setDaysTillExpiration(userService.getDaysTillExpiration(userName));
         return userDetail;
-    }
-
-    private boolean isDefaultPasswordUsed(final String user, final String password) {
-        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD));
-        if (!checkDefaultPassword) {
-            return false;
-        }
-        boolean defaultPasswordUsed = false;
-        String defaultPasswordForUser = DefaultCredentials.getDefaultPasswordForUser(user);
-        if (defaultPasswordForUser != null) {
-            defaultPasswordUsed = bcryptEncoder.matches(defaultPasswordForUser, password);
-        }
-        return defaultPasswordUsed;
     }
 
 }

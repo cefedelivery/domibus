@@ -90,6 +90,7 @@ public class User extends AbstractBaseEntity {
         this.userName = userName;
         this.active = Boolean.TRUE;
         this.password = password;
+        this.defaultPassword = false;
     }
 
     @SuppressWarnings("squid:S2637")

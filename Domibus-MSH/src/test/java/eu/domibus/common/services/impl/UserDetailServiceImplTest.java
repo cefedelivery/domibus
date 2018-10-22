@@ -64,7 +64,6 @@ public class UserDetailServiceImplTest {
 
         assertEquals("$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36", admin.getPassword());
         assertEquals("user", admin.getUsername());
-        assertEquals(true, admin.isDefaultPasswordUsed());
     }
 
     @Test
