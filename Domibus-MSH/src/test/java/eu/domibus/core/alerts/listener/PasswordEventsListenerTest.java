@@ -27,16 +27,9 @@ public class PasswordEventsListenerTest {
     private EventDao eventDao;
 
     @Test
-    public void testImminentExpirationEvent() throws Exception {
+    public void testPasswordEvent() throws Exception {
         setExpectations();
-        passwordEventsListener.onImminentExpirationEvent(new Event(), "default");
-        setVerifications();
-    }
-
-    @Test
-    public void testExpiredEvent() throws Exception {
-        setExpectations();
-        passwordEventsListener.onExpiredEvent(new Event(), "default");
+        passwordEventsListener.onPasswordEvent(new Event(), "default");
         setVerifications();
     }
 
