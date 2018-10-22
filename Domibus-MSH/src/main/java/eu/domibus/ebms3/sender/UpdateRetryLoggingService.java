@@ -67,7 +67,7 @@ public class UpdateRetryLoggingService {
         LOG.debug("Updating retry for message");
         UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
-        userMessageLog.setNextAttempt(userMessageLog.getReceived()); // this is needed for the first computation of "next attempt" if receiver is down
+        userMessageLog.setNextAttempt(getScheduledStartDate(userMessageLog)); // this is needed for the first computation of "next attempt" if receiver is down
         LOG.debug("Updating sendAttempts to [{}]", userMessageLog.getSendAttempts());
         userMessageLogDao.update(userMessageLog);
         if (hasAttemptsLeft(userMessageLog, legConfiguration) && !userMessageLog.isTestMessage()) {
@@ -136,16 +136,17 @@ public class UpdateRetryLoggingService {
      * @param userMessageLog the message
      * @return the scheduled start date in milliseconds elapsed since the UNIX epoch
      */
-    public Long getScheduledStartTime(final MessageLog userMessageLog) {
+    public Date getScheduledStartDate(final MessageLog userMessageLog) {
         Date result = userMessageLog.getRestored();
         if (result == null) {
             LOG.debug("Using the received date for scheduled start time [{}]", userMessageLog.getReceived());
-            return userMessageLog.getReceived().getTime();
+            return userMessageLog.getReceived();
         }
-        return result.getTime();
+        return result;
     }
-
-
+    public Long getScheduledStartTime(final MessageLog userMessageLog) {
+        return getScheduledStartDate(userMessageLog).getTime();
+    }
 }
 
 
