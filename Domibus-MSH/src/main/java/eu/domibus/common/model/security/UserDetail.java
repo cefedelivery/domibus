@@ -21,7 +21,6 @@ public class UserDetail implements UserDetails {
     private Integer daysTillExpiration;
 
     public UserDetail(final User user, final Boolean defaultPasswordUsed) {
-//        this.defaultPasswordUsed = user.hasDefaultPassword();
         this.defaultPasswordUsed = defaultPasswordUsed;
         springUser = org.springframework.security.core.userdetails.User
                 .withUsername(user.getUserName())
