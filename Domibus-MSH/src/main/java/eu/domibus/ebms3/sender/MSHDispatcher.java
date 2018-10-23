@@ -60,6 +60,8 @@ public class MSHDispatcher {
             }
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
             ex.setMshRole(MSHRole.SENDING);
+
+            LOG.error("Could not dispatch soap message", ex);
             throw ex;
         }
         return result;
