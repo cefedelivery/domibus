@@ -8,11 +8,4 @@
         <gav regex="true">^eu\.domibus:domibus-ext-services-delegate:.*$</gav>
         <cpe>cpe:/a:delegate:delegate</cpe>
     </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: dozer-5.5.1.jar
-   ]]></notes>
-        <gav regex="true">^net\.sf\.dozer:dozer:.*$</gav>
-        <cve>CVE-2014-9515</cve>
-    </suppress>
 </suppressions>

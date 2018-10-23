@@ -177,6 +177,11 @@
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.internetitem</groupId>
+                <artifactId>logback-elasticsearch-appender</artifactId>
+                <version>${logback.elasticsearch.appender.version}</version>
+            </dependency>
             <!-- End SL4J + Logback -->
 
             <dependency>
