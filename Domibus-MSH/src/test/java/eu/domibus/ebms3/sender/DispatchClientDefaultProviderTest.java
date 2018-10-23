@@ -42,16 +42,16 @@ public class DispatchClientDefaultProviderTest {
 
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT, DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT_DEFAULT);
+            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT);
             result = connectionTimeout;
 
-            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_RECEIVETIMEOUT, DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_RECEIVETIMEOUT_DEFAULT);
+            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_RECEIVETIMEOUT);
             result = receiveTimeout;
 
-            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_ALLOWCHUNKING, DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_ALLOWCHUNKING_DEFAULT);
+            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_ALLOWCHUNKING);
             result = allowChunking;
 
-            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD, (DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD_DEFAULT));
+            domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD);
             result = chunkingThreshold;
 
             domibusPropertyProvider.getDomainProperty(DispatchClientDefaultProvider.DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE);

@@ -40,13 +40,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
     public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT = "domibus.dispatcher.connectionTimeout";
-    public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT_DEFAULT = "120000";
     public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT = "domibus.dispatcher.receiveTimeout";
-    public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT_DEFAULT = "120000";
     public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING = "domibus.dispatcher.allowChunking";
-    public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING_DEFAULT = "true";
     public static final String DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD = "domibus.dispatcher.chunkingThreshold";
-    public static final String DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD_DEFAULT = "104857600";
     public static final String DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE = "domibus.dispatcher.connection.keepAlive";
 
 
@@ -95,13 +91,13 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
     protected void setHttpClientPolicy(HTTPClientPolicy httpClientPolicy) {
         //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
-        int connectionTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT, DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT_DEFAULT));
+        int connectionTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT));
         httpClientPolicy.setConnectionTimeout(connectionTimeout);
         //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
-        int receiveTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_RECEIVETIMEOUT, DOMIBUS_DISPATCHER_RECEIVETIMEOUT_DEFAULT));
+        int receiveTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_RECEIVETIMEOUT));
         httpClientPolicy.setReceiveTimeout(receiveTimeout);
-        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_ALLOWCHUNKING, DOMIBUS_DISPATCHER_ALLOWCHUNKING_DEFAULT)));
-        httpClientPolicy.setChunkingThreshold(Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD, DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD_DEFAULT)));
+        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_ALLOWCHUNKING)));
+        httpClientPolicy.setChunkingThreshold(Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD)));
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
