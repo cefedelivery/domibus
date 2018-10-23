@@ -19,10 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 3.3
  */
 public class UserDetailServiceImpl implements UserDetailsService {
-
+    public static final String CHECK_DEFAULT_PASSWORD = "domibus.passwordPolicy.checkDefaultPassword";
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserDetailServiceImpl.class);
-
-    protected static final String CHECK_DEFAULT_PASSWORD = "domibus.passwordPolicy.checkDefaultPassword";
 
     @Autowired
     private UserDao userDao;
@@ -31,10 +29,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
     private BCryptPasswordEncoder bcryptEncoder;
 
     @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = UsernameNotFoundException.class)
@@ -45,10 +43,17 @@ public class UserDetailServiceImpl implements UserDetailsService {
             LOG.warn(msg);
             throw new UsernameNotFoundException(msg);
         }
-        UserDetail userDetail = new UserDetail(user);
+        UserDetail userDetail = new UserDetail(user, isDefaultPasswordUsed(user));
 
         userDetail.setDaysTillExpiration(userService.getDaysTillExpiration(userName));
         return userDetail;
     }
 
+    private boolean isDefaultPasswordUsed(final User user ) {
+        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD));
+        if (!checkDefaultPassword) {
+            return false;
+        }
+        return user.hasDefaultPassword();
+    }
 }
