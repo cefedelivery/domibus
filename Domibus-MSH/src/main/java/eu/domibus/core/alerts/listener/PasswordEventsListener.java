@@ -12,8 +12,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-
 /**
  * @author Ion Perpegel
  * @since 4.1
