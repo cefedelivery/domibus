@@ -12,7 +12,9 @@ import org.junit.runner.RunWith;
 import org.quartz.JobExecutionContext;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -31,6 +33,9 @@ public class CommandExecutorJobTest {
     @Injectable
     private CommandService commandService;
 
+    @Injectable
+
+
     @Tested
     CommandExecutorJob commandExecutorJob;
 
@@ -38,6 +43,7 @@ public class CommandExecutorJobTest {
     @Test
     public void testExecuteJob(@Injectable JobExecutionContext jobExecutionContext, @Injectable Command command) {
         final List<Command> commands = Arrays.asList(command);
+        final Map<String, String> commandProperties = new HashMap<>();
 
         new MockUp<System>() {
             @Mock
@@ -58,7 +64,7 @@ public class CommandExecutorJobTest {
         commandExecutorJob.executeJob(jobExecutionContext, domain);
 
         new Verifications() {{
-            commandService.executeCommand(Command.RELOAD_PMODE, domain, null);
+            commandService.executeCommand(Command.RELOAD_PMODE, domain, commandProperties);
         }};
     }
 }

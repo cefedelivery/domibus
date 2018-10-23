@@ -4,6 +4,7 @@ import eu.domibus.api.cluster.Command;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
+import eu.domibus.core.logging.LoggingService;
 import eu.domibus.core.pmode.PModeProvider;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -40,6 +41,9 @@ public class CommandServiceImplTest {
 
     @Injectable
     protected MultiDomainCryptoService multiDomainCryptoService;
+
+    @Injectable
+    LoggingService loggingService;
 
     @Tested
     CommandServiceImpl commandService;

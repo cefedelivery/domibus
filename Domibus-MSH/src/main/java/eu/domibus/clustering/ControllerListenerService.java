@@ -8,6 +8,7 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,10 +99,12 @@ public class ControllerListenerService implements MessageListener {
     public static Map<String, String> getCommandProperties(Map<String, Object> messageProperties) {
         HashMap<String, String> properties = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : messageProperties.entrySet()) {
-            if (!Command.COMMAND.equalsIgnoreCase(entry.getKey()) && !MessageConstants.DOMAIN.equalsIgnoreCase(entry.getKey())
-                    && messageProperties.get(entry.getKey()) instanceof String) {
-                properties.put(entry.getKey(), (String) messageProperties.get(entry.getKey()));
+        if (MapUtils.isNotEmpty(messageProperties)) {
+            for (Map.Entry<String, Object> entry : messageProperties.entrySet()) {
+                if (!Command.COMMAND.equalsIgnoreCase(entry.getKey()) && !MessageConstants.DOMAIN.equalsIgnoreCase(entry.getKey())
+                        && messageProperties.get(entry.getKey()) instanceof String) {
+                    properties.put(entry.getKey(), (String) messageProperties.get(entry.getKey()));
+                }
             }
         }
 

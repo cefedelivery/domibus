@@ -58,6 +58,7 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public boolean setLoggingLevel(final String name, final String strLevel) {
 
+        //get the level from the string value
         Level level = toLevel(strLevel);
 
         if (level == null) {
@@ -65,13 +66,12 @@ public class LoggingServiceImpl implements LoggingService {
             return false;
         }
 
-        String msg = "Success. Log level set to: " + level + " for ";
+        //get the logger context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
             loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
             LOG.info("Setting log level: {} for root", level);
-
         } else {
             loggerContext.getLogger(name).setLevel(level);
             LOG.info("Setting log level: {} for package name: {}", level, name);
@@ -85,12 +85,12 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public void signalSetLoggingLevel(final String name, final String level) {
 
-            // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                    .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                    .property(JMS_LOG_NAME, name)
-                    .property(JMS_LOG_LEVEL, level)
-                    .build(), clusterCommandTopic);
+        // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
+        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
+                .property(JMS_LOG_NAME, name)
+                .property(JMS_LOG_LEVEL, level)
+                .build(), clusterCommandTopic);
     }
 
     /**
@@ -172,7 +172,7 @@ public class LoggingServiceImpl implements LoggingService {
     /**
      * returning an object of type {@link Level} or null if the input string is not correct
      *
-     * @param logLevel
+     * @param logLevel String value
      * @return
      */
     private Level toLevel(String logLevel) {
@@ -200,7 +200,7 @@ public class LoggingServiceImpl implements LoggingService {
      * It will check if the logger has children or not.
      * No children means is a logger of a class not package
      *
-     * @param logger
+     * @param logger logger object
      * @param showClasses - true or false to show classes logger too
      * @return true/false if this logger should be added to the list
      */
@@ -221,6 +221,13 @@ public class LoggingServiceImpl implements LoggingService {
         return CollectionUtils.isNotEmpty(childrenList);
     }
 
+    /**
+     * Converts to custom POJO for showing logger levels on GUI
+     * It uses always effectiveLvele as this is always not null
+     *
+     * @param logger
+     * @return {@link LoggingLevelRO}
+     */
     private LoggingLevelRO convertToLoggingLevel(final Logger logger) {
         if (logger == null) {
             return null;
