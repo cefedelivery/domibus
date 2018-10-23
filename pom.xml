@@ -24,8 +24,8 @@
     </modules>
     <properties>
         <cxf.version>3.2.4</cxf.version>
-        <spring.version>4.3.17.RELEASE</spring.version>
-        <spring.security.version>4.2.6.RELEASE</spring.security.version>
+        <spring.version>5.1.1.RELEASE</spring.version>
+        <spring.security.version>5.1.1.RELEASE</spring.security.version>
         <activemq.version>5.15.2</activemq.version>
         <aspectj.version>1.8.13</aspectj.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -780,7 +780,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>3.2.1</version>
+                        <version>3.3.2</version>
                         <inherited>false</inherited>
                         <configuration>
                             <skipProvidedScope>true</skipProvidedScope>
