@@ -175,7 +175,7 @@ public class UpdateRetryLoggingService {
         if (userMessageLog.getNextAttempt() !=null) {
             nextAttempt = userMessageLog.getNextAttempt();
         }
-        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
+        userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, legConfiguration.getReceptionAwareness().getRetryCount(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
     }
 }
 
