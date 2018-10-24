@@ -10,6 +10,7 @@ import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.jaxws.DispatchImpl;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.ConnectionType;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.neethi.Policy;
@@ -39,13 +40,10 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
     public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT = "domibus.dispatcher.connectionTimeout";
-    public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT_DEFAULT = "120000";
     public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT = "domibus.dispatcher.receiveTimeout";
-    public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT_DEFAULT = "120000";
     public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING = "domibus.dispatcher.allowChunking";
-    public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING_DEFAULT = "true";
     public static final String DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD = "domibus.dispatcher.chunkingThreshold";
-    public static final String DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD_DEFAULT = "104857600";
+    public static final String DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE = "domibus.dispatcher.connection.keepAlive";
 
 
     @Autowired
@@ -71,21 +69,14 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
         final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
         final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
+
         httpConduit.setClient(httpClientPolicy);
-        //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
-        int connectionTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT, DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT_DEFAULT));
-        httpClientPolicy.setConnectionTimeout(connectionTimeout);
-        //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
-        int receiveTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_RECEIVETIMEOUT, DOMIBUS_DISPATCHER_RECEIVETIMEOUT_DEFAULT));
-        httpClientPolicy.setReceiveTimeout(receiveTimeout);
-        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_ALLOWCHUNKING, DOMIBUS_DISPATCHER_ALLOWCHUNKING_DEFAULT)));
-        httpClientPolicy.setChunkingThreshold(Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD, DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD_DEFAULT)));
+        setHttpClientPolicy(httpClientPolicy);
 
         final TLSClientParameters params = tlsReader.getTlsClientParameters();
         if (params != null && endpoint.startsWith("https://")) {
             httpConduit.setTlsClientParameters(params);
         }
-        final SOAPMessage result;
 
         String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
         Boolean useProxyBool = Boolean.parseBoolean(useProxy);
@@ -96,6 +87,24 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             LOG.info("No proxy configured");
         }
         return dispatch;
+    }
+
+    protected void setHttpClientPolicy(HTTPClientPolicy httpClientPolicy) {
+        //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
+        int connectionTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT));
+        httpClientPolicy.setConnectionTimeout(connectionTimeout);
+        //ReceiveTimeOut - Specifies the amount of time, in milliseconds, that the consumer will wait for a response before it times out. 0 is infinite.
+        int receiveTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_RECEIVETIMEOUT));
+        httpClientPolicy.setReceiveTimeout(receiveTimeout);
+        httpClientPolicy.setAllowChunking(Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_ALLOWCHUNKING)));
+        httpClientPolicy.setChunkingThreshold(Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CHUNKINGTHRESHOLD)));
+
+        Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
+        ConnectionType connectionType = ConnectionType.CLOSE;
+        if(keepAlive) {
+            connectionType = ConnectionType.KEEP_ALIVE;
+        }
+        httpClientPolicy.setConnection(connectionType);
     }
 
     protected Dispatch<SOAPMessage> createWSServiceDispatcher(String endpoint) {
