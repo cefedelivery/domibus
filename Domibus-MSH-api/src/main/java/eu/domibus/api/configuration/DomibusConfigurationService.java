@@ -16,8 +16,11 @@ public interface DomibusConfigurationService {
     String DOMIBUS_PROXY_NON_PROXY_HOSTS = "domibus.proxy.nonProxyHosts";
 
     String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
+    String CLUSTER_DEPLOYMENT = "domibus.deployment.clustered";
 
     String getConfigLocation();
+
+    boolean isClusterDeployment();
 
     DataBaseEngine getDataBaseEngine();
 

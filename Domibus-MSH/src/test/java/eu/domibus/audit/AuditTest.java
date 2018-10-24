@@ -2,7 +2,6 @@ package eu.domibus.audit;
 
 import eu.domibus.common.model.security.User;
 import eu.domibus.dao.InMemoryDataBaseConfig;
-import eu.domibus.dao.OracleDataBaseConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,8 +16,7 @@ import javax.persistence.PersistenceContext;
  * @since 4.0
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
-        OracleDataBaseConfig.class})
+@ContextConfiguration(classes = {InMemoryDataBaseConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 public class AuditTest {
 

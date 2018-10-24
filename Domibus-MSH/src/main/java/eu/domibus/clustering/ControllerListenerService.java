@@ -1,22 +1,20 @@
 package eu.domibus.clustering;
 
+import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.messaging.MessageConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import java.util.Collection;
 
 
 /**
@@ -29,13 +27,7 @@ public class ControllerListenerService implements MessageListener {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ControllerListenerService.class);
 
     @Autowired
-    private PModeProvider pModeProvider;
-
-    @Autowired
-    private CacheManager cacheManager;
-
-    @Autowired
-    protected MultiDomainCryptoService multiDomainCryptoService;
+    protected CommandService commandService;
 
     @Autowired
     protected DomainService domainService;
@@ -68,22 +60,7 @@ public class ControllerListenerService implements MessageListener {
             return;
         }
 
-        switch (command) {
-            case Command.RELOAD_PMODE:
-                pModeProvider.refresh();
-                multiDomainCryptoService.refreshTrustStore(domain);
-                break;
-            case Command.EVICT_CACHES:
-                Collection<String> cacheNames = cacheManager.getCacheNames();
-                for (String cacheName : cacheNames) {
-                    cacheManager.getCache(cacheName).clear();
-                }
-                break;
-            case Command.RELOAD_TRUSTSTORE:
-                multiDomainCryptoService.refreshTrustStore(domain);
-                break;
-            default:
-                LOG.error("Unknown command received: " + command);
-        }
+
+        commandService.executeCommand(command, domain);
     }
 }

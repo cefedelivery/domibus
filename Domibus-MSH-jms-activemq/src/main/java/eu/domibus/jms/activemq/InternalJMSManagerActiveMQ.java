@@ -21,10 +21,8 @@ import org.springframework.jms.core.JmsOperations;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.jms.Destination;
-import javax.jms.JMSException;
+import javax.jms.*;
 import javax.jms.Queue;
-import javax.jms.TextMessage;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
@@ -129,6 +127,11 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Override
     public void sendMessage(InternalJmsMessage message, Destination destination) {
         jmsOperations.send(destination, new JmsMessageCreator(message));
+    }
+
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        sendMessage(internalJmsMessage, destination);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package eu.domibus.jms.weblogic;
 
+import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -43,6 +44,9 @@ public class JMSManagerWeblogicTest {
 
     @Injectable
     JMXTemplate jmxTemplate;
+
+    @Injectable
+    CommandService commandService;
 
     @Injectable
     private JmsOperations jmsSender;
