@@ -91,7 +91,9 @@ public enum DomibusMessageCode implements MessageCode {
     SEC_CONSOLE_LOGIN_BAD_CREDENTIALS("SEC-016", "The user [{}] is trying to login with bad credentials"),
     SEC_CONSOLE_LOGIN_LOCKED_USER("SEC-017", "The user [{}] is locked after trying to login for [{}] wrong attempts."),
     SEC_CERTIFICATE_SOON_REVOKED("SEC-018", "The certificate with alias [{}] will be revoked on [{}]"),
-    SEC_CERTIFICATE_REVOKED("SEC-019", "The certificate with alias [{}] is revoked since [{}]");
+    SEC_CERTIFICATE_REVOKED("SEC-019", "The certificate with alias [{}] is revoked since [{}]"),
+    SEC_PASSWORD_IMMINENT_EXPIRATION("SEC-020", "The password for user [{}] will expire on [{}]"),
+    SEC_PASSWORD_EXPIRED("SEC-021", "The password for user [{}] expired on [{}]");
 
     String code;
     String message;

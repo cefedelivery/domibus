@@ -1,4 +1,7 @@
 package eu.domibus.core.alerts.model.common;
+
+import eu.domibus.logging.DomibusMessageCode;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -33,6 +36,19 @@ public enum EventType {
 
             default:
                 throw new IllegalStateException("Selector for event type " + eventType + " not defined");
+        }
+    }
+
+    public static DomibusMessageCode getSecurityMessageCode(EventType eventType) {
+        switch (eventType) {
+
+            case PASSWORD_IMMINENT_EXPIRATION:
+                return DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION;
+            case PASSWORD_EXPIRED:
+                return DomibusMessageCode.SEC_PASSWORD_EXPIRED;
+
+            default:
+                throw new IllegalStateException("SecurityMessageCode for event type " + eventType + " not defined");
         }
     }
 }

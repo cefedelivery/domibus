@@ -20,7 +20,10 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ext.delegate.services.security.SecurityDefaultService;
+import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +47,7 @@ import static eu.domibus.core.alerts.model.common.MessageEvent.*;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(EventServiceImpl.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EventServiceImpl.class);
 
     static final String MESSAGE_EVENT_SELECTOR = "message";
 
@@ -89,7 +92,6 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
-
 
     /**
      * {@inheritDoc}
@@ -247,7 +249,8 @@ public class EventServiceImpl implements EventService {
         eventDao.update(entity);
 
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, EventType.getQueueSelectorFromEventType(eventType));
-        LOG.trace(EVENT_ADDED_TO_THE_QUEUE, event);
+
+        LOG.securityInfo(EventType.getSecurityMessageCode(eventType), user.getUserName(), event.findOptionalProperty(EXPIRATION_DATE));
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
