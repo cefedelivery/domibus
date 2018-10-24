@@ -84,14 +84,14 @@ public class RetryService {
     public void enqueueMessages() {
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
-            if(!removedIfExpired(messageId)) {
+            if(!failIfExpired(messageId)) {
                 userMessageService.scheduleSending(messageId);
             }
         }
     }
 
-    protected boolean removedIfExpired(String messageId) {
-        UserMessageLog userMessageLog = this.userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+    protected boolean failIfExpired(String messageId) {
+        UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
         eu.domibus.common.model.configuration.LegConfiguration legConfiguration = null;
         final String pModeKey;
 
