@@ -13,10 +13,10 @@ public interface LoggingService {
      *
      *
      * @param name
-     * @param strLevel
+     * @param level
      * @return true if the operation succed, false otherwise
      */
-    boolean setLoggingLevel(final String name, final String strLevel);
+    void setLoggingLevel(final String name, final String level);
 
     /**
      * Signal the set of logging level for the given package or class
@@ -39,7 +39,7 @@ public interface LoggingService {
      * Reset the logging configuration to default
      * @return
      */
-    boolean resetLogging();
+    void resetLogging();
 
     /**
      * signal the logging reset on a cluster env - send a messaage to command topic

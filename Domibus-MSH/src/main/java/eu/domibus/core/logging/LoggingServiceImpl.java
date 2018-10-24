@@ -15,6 +15,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.JmsException;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Topic;
@@ -51,27 +52,26 @@ public class LoggingServiceImpl implements LoggingService {
      * {@inheritDoc}
      */
     @Override
-    public boolean setLoggingLevel(final String name, final String strLevel) {
+    public void setLoggingLevel(final String name, final String level) {
 
         //get the level from the string value
-        Level level = toLevel(strLevel);
+        Level levelObj = toLevel(level);
 
-        if (level == null) {
-            LOG.error("Not a known log level: [{}]", strLevel);
-            return false;
+        if (levelObj == null) {
+            LOG.error("Not a known log level: [{}]", level);
+            throw new LoggingException("Not a known log level: [" + level + "]");
         }
 
         //get the logger context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
-            loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
+            loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(levelObj);
             LOG.info("Setting log level: [{}] for root", level);
         } else {
-            loggerContext.getLogger(name).setLevel(level);
+            loggerContext.getLogger(name).setLevel(levelObj);
             LOG.info("Setting log level: [{}] for package name: [{}]", level, name);
         }
-        return true;
     }
 
     /**
@@ -80,12 +80,17 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public void signalSetLoggingLevel(final String name, final String level) {
 
-        // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                .property(COMMAND_LOG_NAME, name)
-                .property(COMMAND_LOG_LEVEL, level)
-                .build(), clusterCommandTopic);
+        try {
+            // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
+            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                    .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
+                    .property(COMMAND_LOG_NAME, name)
+                    .property(COMMAND_LOG_LEVEL, level)
+                    .build(), clusterCommandTopic);
+        } catch (JmsException e) {
+            LOG.error("Error while sending topic message for setting logging level: ", e);
+            throw new LoggingException("Error while sending topic message for setting logging level", e);
+        }
     }
 
     /**
@@ -122,20 +127,18 @@ public class LoggingServiceImpl implements LoggingService {
      * @return
      */
     @Override
-    public boolean resetLogging() {
-        boolean result = true;
+    public void resetLogging() {
 
         try {
+            LOG.info("Logging reset - start");
             LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
-            //at this stage Spring is not yet initialized so we need to perform manually the injection of the configuration service
             logbackLoggingConfigurator.setDomibusConfigurationService(domibusConfigurationService);
             logbackLoggingConfigurator.configureLogging();
-            LOG.info("Logging was reset");
+            LOG.info("Logging reset - end");
         } catch (Exception e) {
-            LOG.warn("Error occurred while configuring logging", e);
-            result = false;
+            LOG.error("Error occurred while reset logging: ", e);
+            throw new LoggingException("Error occurred while reset logging", e);
         }
-        return result;
     }
 
     /**
@@ -144,10 +147,15 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public void signalResetLogging() {
 
-        // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.LOGGING_RESET)
-                .build(), clusterCommandTopic);
+        try {
+            // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
+            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                    .property(Command.COMMAND, Command.LOGGING_RESET)
+                    .build(), clusterCommandTopic);
+        } catch (JmsException e) {
+            LOG.error("Error while sending topic message for logging reset: ", e);
+            throw new LoggingException("Error while sending topic message for logging reset", e);
+        }
     }
 
 
@@ -182,7 +190,7 @@ public class LoggingServiceImpl implements LoggingService {
      * It will check if the logger has children or not.
      * No children means is a logger of a class not package
      *
-     * @param logger logger object
+     * @param logger      logger object
      * @param showClasses - true or false to show classes logger too
      * @return true/false if this logger should be added to the list
      */
