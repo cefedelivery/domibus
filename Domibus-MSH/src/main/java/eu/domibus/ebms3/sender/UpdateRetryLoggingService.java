@@ -156,7 +156,7 @@ public class UpdateRetryLoggingService {
     }
 
     public Date getMessageExpirationDate(final MessageLog userMessageLog,
-                                                final LegConfiguration legConfiguration) {
+                                         final LegConfiguration legConfiguration) {
         if (legConfiguration.getReceptionAwareness() != null) {
             final Long scheduledStartTime = getScheduledStartTime(userMessageLog);
             final int timeOut = legConfiguration.getReceptionAwareness().getRetryTimeout() * 60000;
