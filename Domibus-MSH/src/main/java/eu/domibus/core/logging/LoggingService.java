@@ -1,6 +1,6 @@
 package eu.domibus.core.logging;
 
-import eu.domibus.web.rest.ro.LoggingLevelResultRO;
+import java.util.List;
 
 /**
  * @author Catalin Enache
@@ -31,11 +31,9 @@ public interface LoggingService {
      *
      * @param loggerName
      * @param showClasses
-     * @param page
-     * @param pageSize
      * @return
      */
-    LoggingLevelResultRO getLoggingLevel(final String loggerName, final boolean showClasses, int page, int pageSize);
+    List<LoggingEntry> getLoggingLevel(final String loggerName, final boolean showClasses);
 
     /**
      * Reset the logging configuration to default

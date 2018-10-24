@@ -148,12 +148,12 @@ export class LoggingComponent implements AfterViewInit {
   onLevelChange(newLevel: string, row: any) {
     console.log('level changed from: ' + row.level + ' to: ' + newLevel + ' for: ' + row.name);
     if (newLevel !== row.level) {
+      this.alertService.clearAlert();
       this.http.post(LoggingComponent.LOGGING_URL, {
         name: row.name,
         level: newLevel,
       }, {headers: this.headers}).subscribe(
         (response: Response) => {
-
           this.page(this.offset, this.rowLimiter.pageSize);
         },
         error => {

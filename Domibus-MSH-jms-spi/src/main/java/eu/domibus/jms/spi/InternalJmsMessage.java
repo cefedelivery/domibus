@@ -97,9 +97,7 @@ public class InternalJmsMessage {
 		}
 		return customProperties;
 	}
-
-
-
+	
 	public Object getProperty(String name) {
 		if(properties == null) {
 			return null;

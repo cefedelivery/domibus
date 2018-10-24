@@ -1,5 +1,6 @@
 package eu.domibus.web.rest;
 
+import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.logging.LoggingService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -10,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * REST resource for setting or retrieving logging levels at runtime
@@ -22,6 +25,9 @@ import java.util.HashMap;
 @RequestMapping(value = "/rest/logging")
 public class LoggingResource {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingResource.class);
+
+    @Autowired
+    DomainCoreConverter domainConverter;
 
     @Autowired
     private LoggingService loggingService;
@@ -63,7 +69,17 @@ public class LoggingResource {
                                             @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
 
 
-        final LoggingLevelResultRO resultRO  = loggingService.getLoggingLevel(loggerName, showClasses, page, pageSize );
+        final LoggingLevelResultRO resultRO  = new LoggingLevelResultRO();
+        List<LoggingLevelRO> loggingEntries = domainConverter.convert(loggingService.getLoggingLevel(loggerName, showClasses), LoggingLevelRO.class);
+
+        int count = loggingEntries.size();
+        int fromIndex = pageSize * page;
+        int toIndex = fromIndex + pageSize;
+        if (toIndex > count) {
+            toIndex = count;
+        }
+        resultRO.setCount(count);
+        resultRO.setLoggingEntries(new ArrayList<>(loggingEntries.subList(fromIndex, toIndex)));
 
         //add the filter
         HashMap<String, Object> filter = new HashMap<>();

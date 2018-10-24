@@ -1,18 +1,16 @@
-package eu.domibus.web.rest.ro;
+package eu.domibus.core.logging;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
-
 /**
- * Encapsulates the package/class name and the level of logging
+ * Business class for {@link LoggingService}
  *
  * @author Catalin Enache
  * @since 4.1
  */
-public class LoggingLevelRO implements Serializable {
+public class LoggingEntry {
 
     private String name;
 
@@ -46,9 +44,9 @@ public class LoggingLevelRO implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof LoggingLevelRO)) return false;
+        if (!(o instanceof LoggingEntry)) return false;
 
-        LoggingLevelRO that = (LoggingLevelRO) o;
+        LoggingEntry that = (LoggingEntry) o;
 
         return new EqualsBuilder()
                 .append(name, that.name)

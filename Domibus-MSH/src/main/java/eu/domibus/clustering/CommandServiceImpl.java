@@ -85,8 +85,8 @@ public class CommandServiceImpl implements CommandService {
                 loggingService.resetLogging();
                 break;
             case Command.LOGGING_SET_LEVEL:
-                final String level = commandProperties.get(LoggingServiceImpl.JMS_LOG_LEVEL);
-                final String name = commandProperties.get(LoggingServiceImpl.JMS_LOG_NAME);
+                final String level = commandProperties.get(LoggingServiceImpl.COMMAND_LOG_LEVEL);
+                final String name = commandProperties.get(LoggingServiceImpl.COMMAND_LOG_NAME);
                 loggingService.setLoggingLevel(name, level);
                 break;
             default:

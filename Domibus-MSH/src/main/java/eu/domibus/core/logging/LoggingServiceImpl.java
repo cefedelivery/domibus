@@ -4,15 +4,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import eu.domibus.api.cluster.Command;
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
-import eu.domibus.configuration.DefaultDomibusConfigurationService;
-import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.LogbackLoggingConfigurator;
 import eu.domibus.web.rest.ro.LoggingLevelRO;
-import eu.domibus.web.rest.ro.LoggingLevelResultRO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -37,14 +35,11 @@ import static org.apache.commons.lang3.reflect.FieldUtils.readField;
 public class LoggingServiceImpl implements LoggingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingServiceImpl.class);
 
-    public static final String JMS_LOG_LEVEL = "LOG_LEVEL";
-    public static final String JMS_LOG_NAME = "LOG_NAME";
+    public static final String COMMAND_LOG_LEVEL = "LOG_LEVEL";
+    public static final String COMMAND_LOG_NAME = "LOG_NAME";
 
     @Autowired
-    protected DomainCoreConverter domainConverter;
-
-    @Autowired
-    protected DefaultDomibusConfigurationService defaultDomibusConfigurationService;
+    protected DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
     protected Topic clusterCommandTopic;
@@ -62,7 +57,7 @@ public class LoggingServiceImpl implements LoggingService {
         Level level = toLevel(strLevel);
 
         if (level == null) {
-            LOG.error("Not a known log level: {}", strLevel);
+            LOG.error("Not a known log level: [{}]", strLevel);
             return false;
         }
 
@@ -71,10 +66,10 @@ public class LoggingServiceImpl implements LoggingService {
 
         if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
             loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
-            LOG.info("Setting log level: {} for root", level);
+            LOG.info("Setting log level: [{}] for root", level);
         } else {
             loggerContext.getLogger(name).setLevel(level);
-            LOG.info("Setting log level: {} for package name: {}", level, name);
+            LOG.info("Setting log level: [{}] for package name: [{}]", level, name);
         }
         return true;
     }
@@ -88,8 +83,8 @@ public class LoggingServiceImpl implements LoggingService {
         // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
         jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
                 .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                .property(JMS_LOG_NAME, name)
-                .property(JMS_LOG_LEVEL, level)
+                .property(COMMAND_LOG_NAME, name)
+                .property(COMMAND_LOG_LEVEL, level)
                 .build(), clusterCommandTopic);
     }
 
@@ -97,17 +92,14 @@ public class LoggingServiceImpl implements LoggingService {
      * {@inheritDoc}
      */
     @Override
-    public LoggingLevelResultRO getLoggingLevel(String loggerName, boolean showClasses, int page, int pageSize) {
+    public List<LoggingEntry> getLoggingLevel(String loggerName, boolean showClasses) {
 
-        final LoggingLevelResultRO resultRO = new LoggingLevelResultRO();
-
-        List<LoggingLevelRO> loggingEntries = new ArrayList<>();
+        List<LoggingEntry> result = new ArrayList<>();
         if (StringUtils.isBlank(loggerName)) {
-            resultRO.setLoggingEntries(loggingEntries);
-            return resultRO;
+            return result;
         }
 
-        LOG.info("showing logging for name: {} including classes: {}", loggerName, showClasses);
+        LOG.info("showing logging for name: [{}] including classes: [{}]", loggerName, showClasses);
 
         //getting the logger context and list of loggers
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -119,19 +111,9 @@ public class LoggingServiceImpl implements LoggingService {
         Predicate<Logger> fullPredicate = (nameStartsWithPredicate.or(nameContainsPredicate)).and(isLoggerForClassPredicate);
 
         //filter existing loggers which starts with name
-        List<LoggingLevelRO> tmp = loggerList.stream().filter(fullPredicate).map(this::convertToLoggingLevel).
+        result = loggerList.stream().filter(fullPredicate).map(this::convertToLoggingLevel).
                 collect(Collectors.toList());
-        int count = tmp.size();
-        int fromIndex = pageSize * page;
-        int toIndex = fromIndex + pageSize;
-        if (toIndex > count) {
-            toIndex = count;
-        }
-
-        resultRO.setCount(count);
-        resultRO.setLoggingEntries(tmp.subList(fromIndex, toIndex));
-        return resultRO;
-
+        return result;
     }
 
     /**
@@ -142,14 +124,14 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public boolean resetLogging() {
         boolean result = true;
+
         try {
             LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
             //at this stage Spring is not yet initialized so we need to perform manually the injection of the configuration service
-            logbackLoggingConfigurator.setDomibusConfigurationService(defaultDomibusConfigurationService);
+            logbackLoggingConfigurator.setDomibusConfigurationService(domibusConfigurationService);
             logbackLoggingConfigurator.configureLogging();
             LOG.info("Logging was reset");
         } catch (Exception e) {
-            //logging configuration problems should not prevent the application to startup
             LOG.warn("Error occurred while configuring logging", e);
             result = false;
         }
@@ -228,12 +210,12 @@ public class LoggingServiceImpl implements LoggingService {
      * @param logger
      * @return {@link LoggingLevelRO}
      */
-    private LoggingLevelRO convertToLoggingLevel(final Logger logger) {
+    private LoggingEntry convertToLoggingLevel(final Logger logger) {
         if (logger == null) {
             return null;
         }
 
-        LoggingLevelRO result = new LoggingLevelRO();
+        LoggingEntry result = new LoggingEntry();
         result.setName(logger.getName());
         //get effective level always - is never null
         result.setLevel(logger.getEffectiveLevel().toString());
