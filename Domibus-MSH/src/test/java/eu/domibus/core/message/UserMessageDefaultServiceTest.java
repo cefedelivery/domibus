@@ -322,7 +322,7 @@ public class UserMessageDefaultServiceTest {
             userMessageDefaultService.getMaxAttemptsConfiguration(messageId);
             result = pModeMaxAttempts;
 
-            userMessageLog.getSendAttemptsMax();
+            userMessageLog.getSendAttempts();
             result = messageMaxAttempts;
 
         }};
