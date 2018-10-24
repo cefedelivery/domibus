@@ -43,8 +43,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
             LOG.warn(msg);
             throw new UsernameNotFoundException(msg);
         }
-        UserDetail userDetail = new UserDetail(user, isDefaultPasswordUsed(user));
 
+        UserDetail userDetail = new UserDetail(user);
+        userDetail.setDefaultPasswordUsed(isDefaultPasswordUsed(user));
         userDetail.setDaysTillExpiration(userService.getDaysTillExpiration(userName));
         return userDetail;
     }

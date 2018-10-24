@@ -20,8 +20,8 @@ public class UserDetail implements UserDetails {
     protected String domain;
     private Integer daysTillExpiration;
 
-    public UserDetail(final User user, final Boolean defaultPasswordUsed) {
-        this.defaultPasswordUsed = defaultPasswordUsed;
+    public UserDetail(final User user) {
+        this.defaultPasswordUsed = user.hasDefaultPassword();
         springUser = org.springframework.security.core.userdetails.User
                 .withUsername(user.getUserName())
                 .password(user.getPassword())
@@ -72,8 +72,10 @@ public class UserDetail implements UserDetails {
         return springUser.isEnabled();
     }
 
-    public boolean isDefaultPasswordUsed() {
-        return defaultPasswordUsed;
+    public boolean isDefaultPasswordUsed() { return defaultPasswordUsed; }
+
+    public void setDefaultPasswordUsed(boolean defaultPasswordUsed) {
+        this.defaultPasswordUsed = defaultPasswordUsed;
     }
 
     public String getDomain() {
