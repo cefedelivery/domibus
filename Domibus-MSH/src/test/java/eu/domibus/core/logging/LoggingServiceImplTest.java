@@ -191,7 +191,7 @@ public class LoggingServiceImplTest {
             new LogbackLoggingConfigurator(domibusConfigurationService);
             result = logbackLoggingConfigurator;
 
-            logbackLoggingConfigurator.getLogbackConfigurationFile();
+            logbackLoggingConfigurator.getLoggingConfigurationFile();
             result = this.getClass().getResource("/logback.xml").getPath();
         }};
 

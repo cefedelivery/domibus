@@ -125,7 +125,7 @@ public class LoggingServiceImpl implements LoggingService {
     @Override
     public void resetLogging() {
         //we are re-using the same service used at context initialization
-        final String logbackConfigurationFile = new LogbackLoggingConfigurator(domibusConfigurationService).getLogbackConfigurationFile();
+        final String logbackConfigurationFile = new LogbackLoggingConfigurator(domibusConfigurationService).getLoggingConfigurationFile();
 
         // assume SLF4J is bound to logback in the current environment
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();

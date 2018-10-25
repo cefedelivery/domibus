@@ -32,7 +32,7 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
 
     @Override
     public void configureLogging() {
-        String logbackConfigurationFile = getLogbackConfigurationFile();
+        String logbackConfigurationFile = getLoggingConfigurationFile();
         configureLogging(logbackConfigurationFile);
     }
 
@@ -57,7 +57,7 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
      * {@inheritDoc}
      */
     @Override
-    public String getLogbackConfigurationFile() {
+    public String getLoggingConfigurationFile() {
         String logbackConfigurationFile = getDefaultLogbackConfigurationFile();
         String customLogbackConfigurationFile = System.getProperty(LOGBACK_CONFIGURATION_FILE_PARAM);
         if (StringUtils.isNotEmpty(customLogbackConfigurationFile)) {
