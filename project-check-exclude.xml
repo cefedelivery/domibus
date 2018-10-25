@@ -30,7 +30,7 @@
         <notes><![CDATA[
    file name: activemq-jaas-5.15.6.jar
    ]]></notes>
-        <gav regex="true">^org\.apache\.activemq:activemq-jaas:.*$</gav>
+        <gav regex="true">^org\.apache\.activemq:.*$</gav>
         <!-- jolokia API not used -->
         <cve>CVE-2015-5182</cve>
         <!-- Hawtio console not used -->
