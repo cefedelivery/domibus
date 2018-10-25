@@ -59,11 +59,6 @@ public class LoggingServiceImpl implements LoggingService {
         //get the level from the string value
         Level levelObj = toLevel(level);
 
-        if (levelObj == null) {
-            LOG.error("Not a known log level: [{}]", level);
-            throw new LoggingException("Not a known log level: [" + level + "]");
-        }
-
         //get the logger context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -177,24 +172,30 @@ public class LoggingServiceImpl implements LoggingService {
      * @return
      */
     Level toLevel(String logLevel) {
-        Level result = null;
-        if ("ALL".equalsIgnoreCase(logLevel)) {
-            result = Level.ALL;
-        } else if ("TRACE".equalsIgnoreCase(logLevel)) {
-            result = Level.TRACE;
-        } else if ("DEBUG".equalsIgnoreCase(logLevel)) {
-            result = Level.DEBUG;
-        } else if ("INFO".equalsIgnoreCase(logLevel)) {
-            result = Level.INFO;
-        } else if ("WARN".equalsIgnoreCase(logLevel)) {
-            result = Level.WARN;
-        } else if ("ERROR".equalsIgnoreCase(logLevel)) {
-            result = Level.ERROR;
-        } else if ("OFF".equalsIgnoreCase(logLevel)) {
-            result = Level.OFF;
-        }
+        final LoggingException loggingException = new LoggingException("Not a known log level: [" + logLevel + "]");
 
-        return result;
+        if (StringUtils.isBlank(logLevel)) {
+            throw loggingException;
+        }
+        switch (logLevel.toUpperCase()) {
+            case "ALL":
+                return Level.ALL;
+            case "TRACE":
+                return Level.TRACE;
+            case "DEBUG":
+                return Level.DEBUG;
+            case "INFO":
+                return Level.INFO;
+            case "WARN":
+                return Level.WARN;
+            case "ERROR":
+                return Level.ERROR;
+            case "OFF":
+                return Level.OFF;
+
+            default:
+                throw loggingException;
+        }
     }
 
     /**

@@ -33,9 +33,6 @@ public class CommandExecutorJobTest {
     @Injectable
     private CommandService commandService;
 
-    @Injectable
-
-
     @Tested
     CommandExecutorJob commandExecutorJob;
 

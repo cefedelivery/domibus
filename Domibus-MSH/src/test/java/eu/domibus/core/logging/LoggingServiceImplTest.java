@@ -82,14 +82,9 @@ public class LoggingServiceImplTest {
     }
 
     @Test
-    public void testSetLoggingLevel_LevelNull_ExceptionThrown() {
+    public void testSetLoggingLevel_LevelNotRecognized_ExceptionThrown() {
         final String name = "eu.domibus";
         final String level = "BLA";
-
-        new Expectations(loggingService) {{
-            loggingService.toLevel(level);
-            result = null;
-        }};
 
         try {
             //tested method
@@ -280,7 +275,19 @@ public class LoggingServiceImplTest {
         level = "ALL";
         Assert.assertEquals(Level.ALL, loggingService.toLevel(level));
 
-        Assert.assertEquals(null, loggingService.toLevel(null));
+        try {
+            loggingService.toLevel(null);
+            Assert.fail("LoggingException expected");
+        } catch (LoggingException le) {
+            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, le.getError());
+        }
+
+        try {
+            loggingService.toLevel("BLABLA");
+            Assert.fail("LoggingException expected");
+        } catch (LoggingException le) {
+            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, le.getError());
+        }
 
     }
 }
