@@ -7,10 +7,12 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.ReceptionAwareness;
 import eu.domibus.common.model.configuration.RetryStrategy;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
@@ -53,6 +55,9 @@ public class UpdateRetryLoggingServiceTest {
 
     @Injectable
     private UIReplicationSignalService uiReplicationSignalService;
+
+    @Injectable
+    private RawEnvelopeLogDao rawEnvelopeLogDao;
 
     private LegConfiguration legConfiguration = new LegConfiguration();
 
@@ -395,13 +400,28 @@ public class UpdateRetryLoggingServiceTest {
             result = userMessageLog;
         }};
 
-
         updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
-
 
         assertEquals(MessageStatus.WAITING_FOR_RETRY, userMessageLog.getMessageStatus());
         assertEquals(1, userMessageLog.getSendAttempts());
 
+    }
+
+
+    @Test
+    public void testMessageExpirationDate(@Mocked final MessageLog userMessageLog, @Mocked final LegConfiguration legConfiguration) {
+        final long currentTime = System.currentTimeMillis();
+        final int timeOut = 10;
+        final long timeOutInMillis = 60000 * timeOut;
+        final Date expectedDate = new Date(currentTime + timeOutInMillis);
+        new NonStrictExpectations() {{
+            userMessageLog.getRestored();
+            result = currentTime;
+            legConfiguration.getReceptionAwareness().getRetryTimeout();
+            result = timeOut;
+
+        }};
+        assertEquals(expectedDate, updateRetryLoggingService.getMessageExpirationDate(userMessageLog, legConfiguration));
     }
 
     private static class SystemMockFirstOfJanuary2016 extends MockUp<System> {

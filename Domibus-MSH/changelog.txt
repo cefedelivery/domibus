@@ -1,6 +1,7 @@
 Domibus 4.1
 - Password policy enforcement for admin users: check complexity, expiration, reuse. Send Alerts on expiration event. Added coresponding properties in configuration.
 - Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
+- Remove domibus.msh.retry.tolerance from domibus.properties
 - By default close the connection between C2 and C3; do not use Keep-Alive anymore by default
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:

@@ -7,14 +7,16 @@ import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.NotificationStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.RawEnvelopeLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.model.logging.MessageLog;
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.logging.UserMessageLog;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.model.MessagingLock;
+import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -35,8 +37,6 @@ import java.util.List;
  */
 @Service
 public class RetryService {
-
-    public static final String TIMEOUT_TOLERANCE = "domibus.msh.retry.tolerance";
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RetryService.class);
 
@@ -74,19 +74,42 @@ public class RetryService {
     @Autowired
     private MessagingLockDao messagingLockDao;
 
+    @Autowired
+    PModeProvider pModeProvider;
+
+    @Autowired
+    UpdateRetryLoggingService updateRetryLoggingService;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void enqueueMessages() {
-        final List<String> messageIdsToPurge = userMessageLogDao.findTimedoutMessages(
-                Integer.parseInt(domibusPropertyProvider.getDomainProperty(RetryService.TIMEOUT_TOLERANCE)));
-        for (final String messageIdToPurge : messageIdsToPurge) {
-            purgeTimedoutMessage(messageIdToPurge);
-        }
-        LOG.trace(messageIdsToPurge.size() + " messages to purge found");
-
         final List<String> messagesNotAlreadyQueued = getMessagesNotAlreadyQueued();
         for (final String messageId : messagesNotAlreadyQueued) {
-            userMessageService.scheduleSending(messageId);
+            if(!failIfExpired(messageId)) {
+                userMessageService.scheduleSending(messageId);
+            }
         }
+    }
+
+    protected boolean failIfExpired(String messageId) {
+        UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+        eu.domibus.common.model.configuration.LegConfiguration legConfiguration = null;
+        final String pModeKey;
+
+        final UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        try {
+            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            LOG.debug("PMode key found : " + pModeKey);
+            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LOG.debug("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
+        } catch (EbMS3Exception exc) {
+            LOG.warn("Could not find LegConfiguration for message [{}]", messageId);
+            return false;
+        }
+        if(updateRetryLoggingService.isExpired(legConfiguration, userMessageLog)) {
+            updateRetryLoggingService.messageFailed(userMessageLog);
+            return true;
+        }
+        return false;
     }
 
     protected List<String> getMessagesNotAlreadyQueued() {
@@ -116,41 +139,6 @@ public class RetryService {
         } catch (JMSException e) {
             throw new DomibusJMSException(e);
         }
-    }
-
-
-    /**
-     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
-     *
-     * @param messageIdToPurge is the messageId of the expired message
-     */
-    //TODO in Domibus 3.3 extract the logic below into a method of the MessageService and re-use it here and in the UpdateRetryLoggingService
-    private void purgeTimedoutMessage(final String messageIdToPurge) {
-        final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageIdToPurge, MSHRole.SENDING);
-
-        final boolean notify = NotificationStatus.REQUIRED.equals(userMessageLog.getNotificationStatus());
-
-        if (notify) {
-            backendNotificationService.notifyOfSendFailure(messageIdToPurge);
-
-        }
-        userMessageLogService.setMessageAsSendFailure(messageIdToPurge);
-
-        if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE, UpdateRetryLoggingService.DELETE_PAYLOAD_ON_SEND_FAILURE_DEFAULT))) {
-            messagingDao.clearPayloadData(messageIdToPurge);
-        }
-    }
-
-    /**
-     * Notifies send failure, updates the message status and deletes the payload (if required) for messages that failed to be sent and expired
-     * Note: This method creates a new transaction
-     *
-     * @param messageIdToPurge is the messageId of the expired message
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void purgeTimedoutMessageInANewTransaction(final String messageIdToPurge) {
-        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageIdToPurge);
-        purgeTimedoutMessage(messageIdToPurge);
     }
 
     /**

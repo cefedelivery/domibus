@@ -315,7 +315,7 @@ public class UserMessageDefaultServiceTest {
     @Test
     public void testComputeMaxAttempts(@Injectable final UserMessageLog userMessageLog) throws Exception {
         final String messageId = "1";
-        final Integer messageMaxAttempts = 2;
+        final Integer messageAttempts = 2;
         final Integer pModeMaxAttempts = 5;
 
         new Expectations(userMessageDefaultService) {{
@@ -323,7 +323,7 @@ public class UserMessageDefaultServiceTest {
             result = pModeMaxAttempts;
 
             userMessageLog.getSendAttempts();
-            result = messageMaxAttempts;
+            result = messageAttempts;
 
         }};
 

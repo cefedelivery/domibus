@@ -8,8 +8,6 @@ import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +25,6 @@ import java.net.ConnectException;
  */
 @Service
 public class MSHDispatcher {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MSHDispatcher.class);
 
     public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
     public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
