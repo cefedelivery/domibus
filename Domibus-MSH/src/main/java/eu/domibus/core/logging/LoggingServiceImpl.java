@@ -18,7 +18,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.JmsException;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Topic;
@@ -90,7 +89,7 @@ public class LoggingServiceImpl implements LoggingService {
                     .property(COMMAND_LOG_NAME, name)
                     .property(COMMAND_LOG_LEVEL, level)
                     .build(), clusterCommandTopic);
-        } catch (JmsException e) {
+        } catch (Exception e) {
             LOG.error("Error while sending topic message for setting logging level: ", e);
             throw new LoggingException("Error while sending topic message for setting logging level", e);
         }
@@ -164,7 +163,7 @@ public class LoggingServiceImpl implements LoggingService {
             jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
                     .property(Command.COMMAND, Command.LOGGING_RESET)
                     .build(), clusterCommandTopic);
-        } catch (JmsException e) {
+        } catch (Exception e) {
             LOG.error("Error while sending topic message for logging reset: ", e);
             throw new LoggingException("Error while sending topic message for logging reset", e);
         }
@@ -177,7 +176,7 @@ public class LoggingServiceImpl implements LoggingService {
      * @param logLevel String value
      * @return
      */
-    private Level toLevel(String logLevel) {
+    Level toLevel(String logLevel) {
         Level result = null;
         if ("ALL".equalsIgnoreCase(logLevel)) {
             result = Level.ALL;
