@@ -3,6 +3,9 @@ package eu.domibus.core.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
 import eu.domibus.api.cluster.Command;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSManager;
@@ -128,17 +131,26 @@ public class LoggingServiceImpl implements LoggingService {
      */
     @Override
     public void resetLogging() {
+        //we are re-using the same service used at context initialization
+        final String logbackConfigurationFile = new LogbackLoggingConfigurator(domibusConfigurationService).getLogbackConfigurationFile();
+
+        // assume SLF4J is bound to logback in the current environment
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         try {
-            LOG.info("Logging reset - start");
-            LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
-            logbackLoggingConfigurator.setDomibusConfigurationService(domibusConfigurationService);
-            logbackLoggingConfigurator.configureLogging();
-            LOG.info("Logging reset - end");
-        } catch (Exception e) {
-            LOG.error("Error occurred while reset logging: ", e);
-            throw new LoggingException("Error occurred while reset logging", e);
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            // Call context.reset() to clear any previous configuration, e.g. default
+            // configuration. For multi-step configuration, omit calling context.reset().
+            context.reset();
+            configurator.doConfigure(logbackConfigurationFile);
+        } catch (JoranException je) {
+            // StatusPrinter will handle this
+            throw new LoggingException("Error occurred while reset logging", je);
+        } finally {
+            StatusPrinter.printInCaseOfErrorsOrWarnings(context);
         }
+
     }
 
     /**

@@ -9,8 +9,6 @@ import eu.domibus.api.logging.LoggingConfigurator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 
@@ -27,14 +25,14 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
 
     private DomibusConfigurationService domibusConfigurationService;
 
+
+    public LogbackLoggingConfigurator(DomibusConfigurationService domibusConfigurationService) {
+        this.domibusConfigurationService = domibusConfigurationService;
+    }
+
     @Override
     public void configureLogging() {
-        String logbackConfigurationFile = getDefaultLogbackConfigurationFile();
-        String customLogbackConfigurationFile = System.getProperty(LOGBACK_CONFIGURATION_FILE_PARAM);
-        if (StringUtils.isNotEmpty(customLogbackConfigurationFile)) {
-            LOG.info("Found custom logback configuration file: [" + customLogbackConfigurationFile + "]");
-            logbackConfigurationFile = customLogbackConfigurationFile;
-        }
+        String logbackConfigurationFile = getLogbackConfigurationFile();
         configureLogging(logbackConfigurationFile);
     }
 
@@ -53,6 +51,20 @@ public class LogbackLoggingConfigurator implements LoggingConfigurator {
         }
 
         configureLogback(logbackConfigurationFile);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLogbackConfigurationFile() {
+        String logbackConfigurationFile = getDefaultLogbackConfigurationFile();
+        String customLogbackConfigurationFile = System.getProperty(LOGBACK_CONFIGURATION_FILE_PARAM);
+        if (StringUtils.isNotEmpty(customLogbackConfigurationFile)) {
+            LOG.info("Found custom logback configuration file: [" + customLogbackConfigurationFile + "]");
+            logbackConfigurationFile = customLogbackConfigurationFile;
+        }
+        return logbackConfigurationFile;
     }
 
     protected void configureLogback(String logbackConfigurationFile) {

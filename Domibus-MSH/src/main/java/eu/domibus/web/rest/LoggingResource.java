@@ -62,20 +62,20 @@ public class LoggingResource {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body("Success while setting log level "+ level + " for " + name);
+                .body("Success while setting log level " + level + " for " + name);
 
     }
 
     @GetMapping(value = "/loglevel")
     public ResponseEntity<LoggingLevelResultRO> getLogLevel(@RequestParam(value = "loggerName", defaultValue = "eu.domibus", required = false) String loggerName,
-                                            @RequestParam(value = "showClasses", defaultValue = "false", required = false) boolean showClasses,
-                                            @RequestParam(value = "page", defaultValue = "0") int page,
-                                            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-                                            @RequestParam(value = "orderBy", required = false) String column,
-                                            @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+                                                            @RequestParam(value = "showClasses", defaultValue = "false", required = false) boolean showClasses,
+                                                            @RequestParam(value = "page", defaultValue = "0") int page,
+                                                            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+                                                            @RequestParam(value = "orderBy", required = false) String column,
+                                                            @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
 
 
-        final LoggingLevelResultRO resultRO  = new LoggingLevelResultRO();
+        final LoggingLevelResultRO resultRO = new LoggingLevelResultRO();
         List<LoggingLevelRO> loggingEntries = domainConverter.convert(loggingService.getLoggingLevel(loggerName, showClasses), LoggingLevelRO.class);
 
         int count = loggingEntries.size();
@@ -108,12 +108,13 @@ public class LoggingResource {
      * @return string for success or error
      */
     @PostMapping(value = "/reset")
-    public ResponseEntity<String> resetLogging(){
+    public ResponseEntity<String> resetLogging() {
 
         //reset log level on current server
         loggingService.resetLogging();
 
-        //signals to other servers in a cluster environment
+        //TODO EDELIVERY-4043 uncomment after implementing this task
+        // signals to other servers in a cluster environment
         //loggingService.signalResetLogging();
 
         return ResponseEntity.ok()
