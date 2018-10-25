@@ -65,4 +65,15 @@
         <!-- Apache ActiveMQ before 5.13.0 -->
         <cve>CVE-2016-3088</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: activemq-client-5.15.6.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.activemq:activemq-client:.*$</gav>
+        <!-- jolokia API not used -->
+        <cve>CVE-2015-5182</cve>
+        <!-- Hawtio console not used -->
+        <cve>CVE-2015-5183</cve>
+        <cve>CVE-2015-5184</cve>
+    </suppress>
 </suppressions>
