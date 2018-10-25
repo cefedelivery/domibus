@@ -22,7 +22,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="CatalinEnache" author="">
+    <changeSet id="EDELIVERY-1206" author="CatalinEnache">
         <createTable tableName="TB_COMMAND_PROPERTY">
             <column name="PROPERTY_NAME" type="VARCHAR(50)">
                 <constraints nullable="false"/>

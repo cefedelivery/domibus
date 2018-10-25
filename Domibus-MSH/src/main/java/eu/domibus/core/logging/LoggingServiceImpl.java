@@ -85,7 +85,6 @@ public class LoggingServiceImpl implements LoggingService {
                     .property(COMMAND_LOG_LEVEL, level)
                     .build(), clusterCommandTopic);
         } catch (Exception e) {
-            LOG.error("Error while sending topic message for setting logging level: ", e);
             throw new LoggingException("Error while sending topic message for setting logging level", e);
         }
     }
@@ -159,7 +158,6 @@ public class LoggingServiceImpl implements LoggingService {
                     .property(Command.COMMAND, Command.LOGGING_RESET)
                     .build(), clusterCommandTopic);
         } catch (Exception e) {
-            LOG.error("Error while sending topic message for logging reset: ", e);
             throw new LoggingException("Error while sending topic message for logging reset", e);
         }
     }

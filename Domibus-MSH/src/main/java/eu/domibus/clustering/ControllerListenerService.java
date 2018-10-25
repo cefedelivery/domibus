@@ -8,7 +8,6 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +72,7 @@ public class ControllerListenerService implements MessageListener {
      * @param msg JMS Message
      * @return map of properties
      */
-    public static Map<String, String> getCommandProperties(Message msg) {
+    protected Map<String, String> getCommandProperties(Message msg) {
         HashMap<String, String> properties = new HashMap<>();
         try {
             Enumeration srcProperties = msg.getPropertyNames();
@@ -90,24 +89,5 @@ public class ControllerListenerService implements MessageListener {
         return properties;
     }
 
-    /**
-     * just extract all message properties (of type {@code String}) excepting Command and Domain
-     *
-     * @param messageProperties
-     * @return
-     */
-    public static Map<String, String> getCommandProperties(Map<String, Object> messageProperties) {
-        HashMap<String, String> properties = new HashMap<>();
 
-        if (MapUtils.isNotEmpty(messageProperties)) {
-            for (Map.Entry<String, Object> entry : messageProperties.entrySet()) {
-                if (!Command.COMMAND.equalsIgnoreCase(entry.getKey()) && !MessageConstants.DOMAIN.equalsIgnoreCase(entry.getKey())
-                        && messageProperties.get(entry.getKey()) instanceof String) {
-                    properties.put(entry.getKey(), (String) messageProperties.get(entry.getKey()));
-                }
-            }
-        }
-
-        return properties;
-    }
 }

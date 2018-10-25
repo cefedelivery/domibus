@@ -38,7 +38,7 @@ public class CommandEntity extends AbstractBaseEntity {
     protected Date creationTime;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "TB_COMMAND_PROPERTY", joinColumns = @JoinColumn(name =     "FK_COMMAND"))
+    @CollectionTable(name = "TB_COMMAND_PROPERTY", joinColumns = @JoinColumn(name = "FK_COMMAND"))
     @MapKeyColumn(name = "PROPERTY_NAME", length = 50)
     @Column(name = "PROPERTY_VALUE", length = 100)
     @BatchSize(size = 20)

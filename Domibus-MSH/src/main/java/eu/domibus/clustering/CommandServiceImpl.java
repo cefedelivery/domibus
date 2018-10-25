@@ -10,14 +10,13 @@ import eu.domibus.core.logging.LoggingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.messaging.MessageConstants;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Cosmin Baciu
@@ -47,14 +46,14 @@ public class CommandServiceImpl implements CommandService {
     protected LoggingService loggingService;
 
     @Override
-    public void createClusterCommand(String command, String domain, String server, Map<String, Object> customProperties) {
+    public void createClusterCommand(String command, String domain, String server, Map<String, Object> commandProperties) {
         LOG.debug("Creating command [{}] for domain [{}] and server [{}]", command, domain, server);
         CommandEntity commandEntity = new CommandEntity();
         commandEntity.setCommandName(command);
         commandEntity.setDomain(domain);
         commandEntity.setServerName(server);
         commandEntity.setCreationTime(new Date());
-        commandEntity.setCommandProperties(ControllerListenerService.getCommandProperties(customProperties));
+        commandEntity.setCommandProperties(getCommandProperties(commandProperties));
         commandDao.create(commandEntity);
     }
 
@@ -101,5 +100,26 @@ public class CommandServiceImpl implements CommandService {
             return;
         }
         commandDao.delete(commandEntity);
+    }
+
+    /**
+     * just extract all message properties (of type {@code String})
+     * excepting Command and Domain
+     *
+     * @param messageProperties
+     * @return
+     */
+    protected Map<String, String> getCommandProperties(Map<String, Object> messageProperties) {
+        HashMap<String, String> properties = new HashMap<>();
+
+        if (MapUtils.isNotEmpty(messageProperties)) {
+            for (Map.Entry<String, Object> entry : messageProperties.entrySet()) {
+                if (!Command.COMMAND.equalsIgnoreCase(entry.getKey()) && !MessageConstants.DOMAIN.equalsIgnoreCase(entry.getKey())
+                        && messageProperties.get(entry.getKey()) instanceof String) {
+                    properties.put(entry.getKey(), (String) messageProperties.get(entry.getKey()));
+                }
+            }
+        }
+        return properties;
     }
 }

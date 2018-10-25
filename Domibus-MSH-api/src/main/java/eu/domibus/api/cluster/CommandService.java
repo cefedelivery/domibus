@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public interface CommandService {
 
-    void createClusterCommand(String command, String domain, String server, Map<String, Object> jmsCustomProperties);
+    void createClusterCommand(String command, String domain, String server, Map<String, Object> commandProperties);
 
     List<Command> findCommandsByServerName(String serverName);
 
