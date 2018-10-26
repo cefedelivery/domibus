@@ -344,6 +344,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         LOG.debug("Preparing to submit message");
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
+        } else {
+            authUtils.setAuthenticationToSecurityContext("submit_user", "submit_user");
         }
 
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
