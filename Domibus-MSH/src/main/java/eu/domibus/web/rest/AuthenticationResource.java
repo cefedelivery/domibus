@@ -60,17 +60,15 @@ public class AuthenticationResource {
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
-        LOG.error(ex.getMessage(), ex);
-
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
+        return handleException(ex);
     }
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
+        return handleException(ex);
+    }
+
+    private ResponseEntity<ErrorRO> handleException(AuthenticationException ex) {
         LOG.error(ex.getMessage(), ex);
 
         ErrorRO error = new ErrorRO(ex.getMessage());
