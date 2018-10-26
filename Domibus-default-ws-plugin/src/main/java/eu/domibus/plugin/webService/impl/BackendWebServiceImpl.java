@@ -183,6 +183,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 300) // 5 minutes
     public ListPendingMessagesResponse listPendingMessages(final Object listPendingMessagesRequest) {
         final ListPendingMessagesResponse response = WEBSERVICE_OF.createListPendingMessagesResponse();
         final Collection<String> pending = this.listPendingMessages();
