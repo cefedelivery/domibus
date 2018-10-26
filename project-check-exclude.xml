@@ -8,4 +8,72 @@
         <gav regex="true">^eu\.domibus:domibus-ext-services-delegate:.*$</gav>
         <cpe>cpe:/a:delegate:delegate</cpe>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: geronimo-javamail_1.4_mail-1.8.4.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.geronimo\.javamail:geronimo-javamail_1\.4_mail:.*$</gav>
+        <!-- Local users obtain access to unspecified files or directories -->
+        <cve>CVE-2008-0732</cve>
+        <!-- Hash values for form parameters, we don't have user input on javamail -->
+        <cve>CVE-2011-5034</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: xbean-spring-4.2.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.xbean:xbean-spring:.*$</gav>
+        <!-- Local users obtain access to unspecified files or directories -->
+        <cve>CVE-2008-0732</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: activemq-jaas-5.15.6.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.activemq:.*$</gav>
+        <!-- jolokia API not used -->
+        <cve>CVE-2015-5182</cve>
+        <!-- Hawtio console not used -->
+        <cve>CVE-2015-5183</cve>
+        <cve>CVE-2015-5184</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: activemq-protobuf-1.1.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.activemq\.protobuf:activemq-protobuf:.*$</gav>
+        <!-- Apache ActiveMQ before 5.3.1 -->
+        <cve>CVE-2010-0684</cve>
+        <cve>CVE-2010-1244</cve>
+        <!-- Apache ActiveMQ before 5.6.0 -->
+        <cve>CVE-2011-4905</cve>
+        <!-- Apache ActiveMQ before 5.7.0 -->
+        <cve>CVE-2012-5784</cve>
+        <!-- Apache ActiveMQ before 5.8.0 -->
+        <cve>CVE-2012-6092</cve>
+        <cve>CVE-2012-6551</cve>
+        <cve>CVE-2013-1879</cve>
+        <cve>CVE-2013-1880</cve>
+        <cve>CVE-2013-3060</cve>
+        <!-- Apache ActiveMQ before 5.11.0 -->
+        <cve>CVE-2014-3576</cve>
+        <!-- jolokia API not used -->
+        <cve>CVE-2015-5182</cve>
+        <!-- Hawtio console not used -->
+        <cve>CVE-2015-5183</cve>
+        <cve>CVE-2015-5184</cve>
+        <!-- Apache ActiveMQ before 5.13.0 -->
+        <cve>CVE-2016-3088</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: activemq-client-5.15.6.jar
+   ]]></notes>
+        <gav regex="true">^org\.apache\.activemq:activemq-client:.*$</gav>
+        <!-- jolokia API not used -->
+        <cve>CVE-2015-5182</cve>
+        <!-- Hawtio console not used -->
+        <cve>CVE-2015-5183</cve>
+        <cve>CVE-2015-5184</cve>
+    </suppress>
 </suppressions>
