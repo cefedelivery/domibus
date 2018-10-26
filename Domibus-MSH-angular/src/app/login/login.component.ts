@@ -57,7 +57,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                 message = 'The user password has expired. Please contact your administrator.';
                 break;
               default:
-                message = 'The username/password combination you provided are not valid. Please try again or contact your administrator.';
+                message = 'The username/password combination you provided is not valid. Please try again or contact your administrator.';
                 break;
             }
             break;

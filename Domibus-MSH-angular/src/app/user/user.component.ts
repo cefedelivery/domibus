@@ -63,16 +63,16 @@ export class UserComponent implements OnInit, DirtyOperations {
 
   isBusy = false;
 
-  constructor (private http: Http,
-               private userService: UserService,
-               public dialog: MdDialog,
-               private userValidatorService: UserValidatorService,
-               private alertService: AlertService,
-               private securityService: SecurityService,
-               private domainService: DomainService) {
+  constructor(private http: Http,
+              private userService: UserService,
+              public dialog: MdDialog,
+              private userValidatorService: UserValidatorService,
+              private alertService: AlertService,
+              private securityService: SecurityService,
+              private domainService: DomainService) {
   }
 
-  async ngOnInit () {
+  async ngOnInit() {
     this.isBusy = true;
     this.offset = 0;
     this.filter = new UserSearchCriteria();
@@ -167,11 +167,11 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.areRowsDeleted = false;
   }
 
-  getUsers (): void {
+  getUsers(): void {
     this.isBusy = true;
     this.userService.getUsers(this.filter).subscribe(results => {
       const domains = this.domains;
-      if(domains) {
+      if (domains) {
         results.forEach(user => {
           const domain = domains.find(d => d.code == user.domain);
           if (domain)
@@ -187,17 +187,17 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.areRowsDeleted = false;
   }
 
-  getUserRoles (): void {
+  getUserRoles(): void {
     this.userService.getUserRoles().subscribe(userroles => this.userRoles = userroles);
   }
 
-  async getUserDomains (): Promise<Domain[]> {
+  async getUserDomains(): Promise<Domain[]> {
     var res = await this.domainService.getDomains();
     this.domains = res;
     return res;
   }
 
-  onSelect ({selected}) {
+  onSelect({selected}) {
     if (isNullOrUndefined(selected) || selected.length == 0) {
       // unselect
       this.enableDelete = false;
@@ -216,7 +216,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableEdit = selected.length == 1 && !selected[0].deleted;
   }
 
-  private isLoggedInUserSelected (selected): boolean {
+  private isLoggedInUserSelected(selected): boolean {
     let currentUser = this.securityService.getCurrentUser();
     for (let entry of selected) {
       if (currentUser && currentUser.username === entry.userName) {
@@ -226,7 +226,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     return false;
   }
 
-  buttonNew (): void {
+  buttonNew(): void {
     if (this.isBusy) return;
 
     this.setPage(this.getLastPage());
@@ -255,7 +255,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  buttonEdit () {
+  buttonEdit() {
     if (this.currentUser && this.currentUser.deleted) {
       this.alertService.error('You cannot edit a deleted user.', false, 3000);
       return;
@@ -263,7 +263,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.buttonEditAction(this.currentUser);
   }
 
-  buttonEditAction (currentUser) {
+  buttonEditAction(currentUser) {
     if (this.isBusy) return;
 
     const formRef: MdDialogRef<EditUserComponent> = this.dialog.open(EditUserComponent, {
@@ -282,7 +282,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  private onSaveEditForm (formRef: MdDialogRef<EditUserComponent>) {
+  private onSaveEditForm(formRef: MdDialogRef<EditUserComponent>) {
     const editForm = formRef.componentInstance;
     const user = this.editedUser;
     if (!user) return;
@@ -301,22 +301,22 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  setIsDirty () {
+  setIsDirty() {
     this.dirty = this.areRowsDeleted || this.users.filter(el => el.status !== UserState[UserState.PERSISTED]).length > 0;
 
     this.enableSave = this.dirty;
     this.enableCancel = this.dirty;
   }
 
-  buttonDelete () {
+  buttonDelete() {
     this.deleteUsers(this.selected);
   }
 
-  buttonDeleteAction (row) {
+  buttonDeleteAction(row) {
     this.deleteUsers([row]);
   }
 
-  private deleteUsers (users: UserResponseRO[]) {
+  private deleteUsers(users: UserResponseRO[]) {
     if (this.isLoggedInUserSelected(users)) {
       this.alertService.error('You cannot delete the logged in user: ' + this.securityService.getCurrentUser().username);
       return;
@@ -339,7 +339,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.setIsDirty();
   }
 
-  private disableSelectionAndButtons () {
+  private disableSelectionAndButtons() {
     this.selected = [];
     this.enableCancel = false;
     this.enableSave = false;
@@ -347,7 +347,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     this.enableDelete = false;
   }
 
-  cancelDialog () {
+  cancelDialog() {
     this.dialog.open(CancelDialogComponent).afterClosed().subscribe(result => {
       if (result) {
         this.disableSelectionAndButtons();
@@ -357,7 +357,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  save (withDownloadCSV: boolean) {
+  save(withDownloadCSV: boolean) {
     try {
       const isValid = this.userValidatorService.validateUsers(this.users);
       if (!isValid) return;
@@ -368,6 +368,7 @@ export class UserComponent implements OnInit, DirtyOperations {
           const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
           this.isBusy = true;
           this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
+            this.handleLoggedUserChanged(modifiedUsers);
             this.isBusy = false;
             this.getUsers();
             this.alertService.success('The operation \'update users\' completed successfully.', false);
@@ -391,10 +392,19 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
+  private handleLoggedUserChanged(modifiedUsers: UserResponseRO[]) {
+    const currentUser = this.securityService.getCurrentUser();
+    const user = modifiedUsers.find(u => u.userName == currentUser.username);
+    if (user == null || user.password == null) return;
+
+    currentUser.defaultPasswordUsed = false;
+    this.securityService.updateCurrentUser(currentUser);
+  }
+
   /**
    * Saves the content of the datatable into a CSV file
    */
-  saveAsCSV () {
+  saveAsCSV() {
     if (this.isDirty()) {
       this.save(true);
     } else {
@@ -407,24 +417,24 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  isDirty (): boolean {
+  isDirty(): boolean {
     return this.enableCancel;
   }
 
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
     this.rowLimiter.pageSize = newPageLimit;
     this.getUsers();
   }
 
-  onChangePage (event: any): void {
+  onChangePage(event: any): void {
     this.setPage(event.offset);
   }
 
-  setPage (offset: number): void {
+  setPage(offset: number): void {
     this.offset = offset;
   }
 
-  getLastPage (): number {
+  getLastPage(): number {
     if (!this.users || !this.rowLimiter || !this.rowLimiter.pageSize)
       return 0;
     return Math.floor(this.users.length / this.rowLimiter.pageSize);
