@@ -62,13 +62,9 @@ public class LoggingServiceImpl implements LoggingService {
         //get the logger context
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-        if (name.equalsIgnoreCase(Logger.ROOT_LOGGER_NAME)) {
-            loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(levelObj);
-            LOG.info("Setting log level: [{}] for root", level);
-        } else {
-            loggerContext.getLogger(name).setLevel(levelObj);
-            LOG.info("Setting log level: [{}] for package name: [{}]", level, name);
-        }
+        loggerContext.getLogger(name).setLevel(levelObj);
+        LOG.info("Setting log level: [{}] for name: [{}]", level, name);
+
     }
 
     /**
@@ -169,7 +165,7 @@ public class LoggingServiceImpl implements LoggingService {
      * @param logLevel String value
      * @return
      */
-    Level toLevel(String logLevel) {
+    protected Level toLevel(String logLevel) {
         final LoggingException loggingException = new LoggingException("Not a known log level: [" + logLevel + "]");
 
         if (StringUtils.isBlank(logLevel)) {
