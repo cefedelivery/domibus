@@ -20,6 +20,6 @@
             </column>
             <column name="CREATION_TIME" type="TIMESTAMP"/>
         </createTable>
-
     </changeSet>
+
 </databaseChangeLog>

@@ -4,15 +4,17 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Http, HttpModule, RequestOptions, XHRBackend} from "@angular/http";
 import {
   MdButtonModule,
+  MdButtonToggleModule,
+  MdCheckboxModule,
   MdDialogModule,
+  MdExpansionModule,
   MdIconModule,
   MdInputModule,
   MdListModule,
   MdMenuModule,
   MdSelectModule,
   MdSidenavModule,
-  MdTooltipModule,
-  MdExpansionModule, MdCheckboxModule
+  MdTooltipModule
 } from '@angular/material';
 import "hammerjs";
 
@@ -76,15 +78,16 @@ import {DomainSelectorComponent} from "./common/domain-selector/domain-selector.
 import {PmodeViewComponent} from './pmode/archive/pmode-view/pmode-view.component';
 import {AlertsComponent} from "./alerts/alerts.component";
 import {TestServiceComponent} from "./testservice/testservice.component";
-import { PluginUserComponent } from './pluginuser/pluginuser.component';
-import { EditbasicpluginuserFormComponent } from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
-import { EditcertificatepluginuserFormComponent } from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
-import { PartyIdentifierDetailsComponent } from './party/party-identifier-details/party-identifier-details.component';
+import {PluginUserComponent} from './pluginuser/pluginuser.component';
+import {EditbasicpluginuserFormComponent} from './pluginuser/editpluginuser-form/editbasicpluginuser-form.component';
+import {EditcertificatepluginuserFormComponent} from './pluginuser/editpluginuser-form/editcertificatepluginuser-form.component';
+import {PartyIdentifierDetailsComponent} from './party/party-identifier-details/party-identifier-details.component';
 import {GlobalErrorHandler} from './common/global.error-handler';
 import {UserService} from './user/user.service';
 import {UserValidatorService} from './user/uservalidator.service';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {SanitizeHtmlPipe} from "./common/sanitizeHtml.pipe";
+import {LoggingComponent} from "./logging/logging.component";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -139,7 +142,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PluginUserComponent,
     EditbasicpluginuserFormComponent,
     EditcertificatepluginuserFormComponent,
-    PartyIdentifierDetailsComponent
+    PartyIdentifierDetailsComponent,
+    LoggingComponent
   ],
   entryComponents: [
     AppComponent,
@@ -185,7 +189,9 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     Md2SelectModule,
     SharedModule,
     MdExpansionModule,
-    MdCheckboxModule
+    MdCheckboxModule,
+    MdButtonToggleModule,
+    MdTooltipModule
   ],
   providers: [
     AuthenticatedGuard,

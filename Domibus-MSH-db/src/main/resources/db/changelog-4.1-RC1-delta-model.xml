@@ -53,4 +53,18 @@
 
     </changeSet>
 
+    <changeSet id="EDELIVERY-1206" author="CatalinEnache">
+        <createTable tableName="TB_COMMAND_PROPERTY">
+            <column name="PROPERTY_NAME" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROPERTY_VALUE" type="VARCHAR(255)"/>
+            <column name="FK_COMMAND" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="FK_COMMAND, PROPERTY_NAME" constraintName="UNI_COMMAND_PROP_NAME"
+                             tableName="TB_COMMAND_PROPERTY"/>
+    </changeSet>
+
 </databaseChangeLog>

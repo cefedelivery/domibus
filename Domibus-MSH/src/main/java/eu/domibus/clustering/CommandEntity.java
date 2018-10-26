@@ -1,10 +1,13 @@
 package eu.domibus.clustering;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -33,6 +36,13 @@ public class CommandEntity extends AbstractBaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     protected Date creationTime;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "TB_COMMAND_PROPERTY", joinColumns = @JoinColumn(name = "FK_COMMAND"))
+    @MapKeyColumn(name = "PROPERTY_NAME", length = 50)
+    @Column(name = "PROPERTY_VALUE", length = 100)
+    @BatchSize(size = 20)
+    private Map<String, String> commandProperties = new HashMap<>();
 
     public String getCommandName() {
         return commandName;
@@ -64,5 +74,13 @@ public class CommandEntity extends AbstractBaseEntity {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public Map<String, String> getCommandProperties() {
+        return commandProperties;
+    }
+
+    public void setCommandProperties(Map<String, String> commandProperties) {
+        this.commandProperties = commandProperties;
     }
 }

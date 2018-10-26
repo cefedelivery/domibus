@@ -18,9 +18,8 @@ public class DomibusLoggingConfiguratorListener implements ServletContextListene
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator();
             //at this stage Spring is not yet initialized so we need to perform manually the injection of the configuration service
-            logbackLoggingConfigurator.setDomibusConfigurationService(new DefaultDomibusConfigurationService());
+            LogbackLoggingConfigurator logbackLoggingConfigurator = new LogbackLoggingConfigurator(new DefaultDomibusConfigurationService());
             logbackLoggingConfigurator.configureLogging();
         } catch (Exception e) {
             //logging configuration problems should not prevent the application to startup

@@ -4,6 +4,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author kochc01
@@ -15,12 +17,16 @@ public class Command {
     public static final String RELOAD_PMODE = "RELOAD_PMODE";
     public static final String EVICT_CACHES = "EVICT_CACHES";
     public static final String RELOAD_TRUSTSTORE = "RELOAD_TRUSTSTORE";
+    public static final String LOGGING_RESET = "LOGGING_RESET";
+    public static final String LOGGING_SET_LEVEL = "LOGGING_SET_LEVEL";
 
     private int entityId;
     protected String commandName;
     protected String serverName;
     protected String domain;
     protected Date creationTime;
+
+    private Map<String, String> commandProperties = new HashMap<>();
 
     public String getCommandName() {
         return commandName;
@@ -62,6 +68,14 @@ public class Command {
         this.entityId = entityId;
     }
 
+    public Map<String, String> getCommandProperties() {
+        return commandProperties;
+    }
+
+    public void setCommandProperties(Map<String, String> commandProperties) {
+        this.commandProperties = commandProperties;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,6 +88,7 @@ public class Command {
                 .append(commandName, command.commandName)
                 .append(serverName, command.serverName)
                 .append(domain, command.domain)
+                .append(commandProperties, command.commandProperties)
                 .isEquals();
     }
 
@@ -83,6 +98,7 @@ public class Command {
                 .append(commandName)
                 .append(serverName)
                 .append(domain)
+                .append(commandProperties)
                 .toHashCode();
     }
 }

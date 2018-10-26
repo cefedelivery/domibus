@@ -3,6 +3,7 @@ package eu.domibus.api.cluster;
 import eu.domibus.api.multitenancy.Domain;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Cosmin Baciu
@@ -10,11 +11,11 @@ import java.util.List;
  */
 public interface CommandService {
 
-    void createClusterCommand(String command, String domain, String server);
+    void createClusterCommand(String command, String domain, String server, Map<String, Object> commandProperties);
 
     List<Command> findCommandsByServerName(String serverName);
 
-    void executeCommand(String command, Domain domain);
+    void executeCommand(String command, Domain domain, Map<String, String> commandProperties);
 
     void deleteCommand(Integer commandId);
 }
