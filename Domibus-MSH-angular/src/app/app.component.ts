@@ -7,6 +7,8 @@ import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
 import {HttpEventService} from './http/http.event.service';
+import {UserService} from './user/user.service';
+import {UserValidatorService} from './user/uservalidator.service';
 
 @Component({
   selector: 'app-root',

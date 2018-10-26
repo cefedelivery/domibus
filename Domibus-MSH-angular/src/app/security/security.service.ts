@@ -1,49 +1,48 @@
 ﻿import {Injectable} from '@angular/core';
-import {Http, Headers, Response} from '@angular/http';
+import {Headers, Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import {User} from './user';
 import {ReplaySubject} from 'rxjs';
 import {SecurityEventService} from './security.event.service';
 import {DomainService} from './domain.service';
-import {Title} from '@angular/platform-browser';
+import {PasswordPolicyRO} from './passwordPolicyRO';
+import {AlertService} from '../alert/alert.service';
 
 @Injectable()
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
+  passwordPolicy: Promise<PasswordPolicyRO>;
 
-  constructor (private http: Http,
-               private securityEventService: SecurityEventService,
-               private domainService: DomainService) {
+  constructor(private http: Http,
+              private securityEventService: SecurityEventService,
+              private alertService: AlertService,
+              private domainService: DomainService) {
   }
 
-  login (username: string, password: string) {
+  login(username: string, password: string) {
     this.domainService.resetDomain();
 
     const headers = new Headers({'Content-Type': 'application/json'});
     return this.http.post('rest/security/authentication',
-      JSON.stringify({
+      {
         username: username,
         password: password
-      }),
-      {headers: headers})
-      .subscribe((response: Response) => {
-          console.log('Login success');
-          localStorage.setItem('currentUser', JSON.stringify(response.json()));
+      }).subscribe((response: Response) => {
+        localStorage.setItem('currentUser', JSON.stringify(response.json()));
 
-          this.domainService.setAppTitle();
+        this.domainService.setAppTitle();
 
-          this.securityEventService.notifyLoginSuccessEvent(response);
-        },
-        (error: any) => {
-          console.log('Login error');
-          this.securityEventService.notifyLoginErrorEvent(error);
-        });
+        this.securityEventService.notifyLoginSuccessEvent(response);
+      },
+      (error: any) => {
+        console.log('Login error');
+        this.securityEventService.notifyLoginErrorEvent(error);
+      });
   }
 
-  logout () {
-    console.log('Logging out');
+  logout() {
     this.clearSession();
 
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
@@ -54,31 +53,35 @@ export class SecurityService {
       });
   }
 
-  clearSession () {
+  clearSession() {
     this.domainService.resetDomain();
     localStorage.removeItem('currentUser');
   }
 
-  getCurrentUser (): User {
-    return JSON.parse(localStorage.getItem('currentUser'));
+  getCurrentUser(): User {
+    const storedUser = localStorage.getItem('currentUser');
+    return storedUser ? JSON.parse(storedUser) : null;
   }
 
-  private getCurrentUsernameFromServer (): Observable<string> {
-    let subject = new ReplaySubject();
+  updateCurrentUser(user: User): void {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  private getCurrentUsernameFromServer(): Observable<string> {
+    const subject = new ReplaySubject();
     this.http.get('rest/security/user')
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
-        //console.log('getCurrentUsernameFromServer:' + error);
         subject.next(null);
       });
     return subject.asObservable();
   }
 
-  isAuthenticated (callServer: boolean = false): Observable<boolean> {
-    let subject = new ReplaySubject();
+  isAuthenticated(callServer: boolean = false): Observable<boolean> {
+    const subject = new ReplaySubject();
     if (callServer) {
-      //we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
+      // we get the username from the server to trigger the redirection to the login screen in case the user is not authenticated
       this.getCurrentUsernameFromServer()
         .subscribe((user: string) => {
           // console.log('isAuthenticated: getCurrentUsernameFromServer [' + user + ']');
@@ -89,21 +92,21 @@ export class SecurityService {
         });
 
     } else {
-      let currentUser = this.getCurrentUser();
+      const currentUser = this.getCurrentUser();
       subject.next(currentUser !== null);
     }
     return subject.asObservable();
   }
 
-  isCurrentUserSuperAdmin (): boolean {
+  isCurrentUserSuperAdmin(): boolean {
     return this.isCurrentUserInRole([SecurityService.ROLE_AP_ADMIN]);
   }
 
-  isCurrentUserAdmin (): boolean {
+  isCurrentUserAdmin(): boolean {
     return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
   }
 
-  isCurrentUserInRole (roles: Array<string>): boolean {
+  isCurrentUserInRole(roles: Array<string>): boolean {
     let hasRole = false;
     const currentUser = this.getCurrentUser();
     if (currentUser && currentUser.authorities) {
@@ -116,15 +119,59 @@ export class SecurityService {
     return hasRole;
   }
 
-  isAuthorized (roles: Array<string>): Observable<boolean> {
-    let subject = new ReplaySubject();
+  isAuthorized(roles: Array<string>): Observable<boolean> {
+    const subject = new ReplaySubject();
 
     this.isAuthenticated(false).subscribe((isAuthenticated: boolean) => {
       if (isAuthenticated && roles) {
-        let hasRole = this.isCurrentUserInRole(roles);
+        const hasRole = this.isCurrentUserInRole(roles);
         subject.next(hasRole);
       }
     });
     return subject.asObservable();
   }
+
+  getPasswordPolicy(): Promise<PasswordPolicyRO> {
+    if (!this.passwordPolicy) {
+      this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
+        .map(this.extractData)
+        .map((policy: PasswordPolicyRO) => {
+          policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
+          return policy;
+        })
+        .catch(err => this.alertService.handleError(err))
+        .toPromise();
+    }
+    return this.passwordPolicy;
+  }
+
+  mustChangePassword(): boolean {
+    const currentUser: User = this.getCurrentUser();
+    return currentUser && currentUser.defaultPasswordUsed;
+  }
+
+  shouldChangePassword(): any {
+    if (this.mustChangePassword()) {
+      return {
+        response: true,
+        reason: 'The user has the default password. Please change it now in order to be able to use the console.'
+      };
+    }
+
+    const currentUser = this.getCurrentUser();
+    if (currentUser && currentUser.daysTillExpiration > 0) {
+      return {
+        response: true,
+        reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.'
+      };
+    } else {
+      return {response: false};
+    }
+  }
+
+  private extractData(res: Response) {
+    const result = res.json() || {};
+    return result;
+  }
 }
+

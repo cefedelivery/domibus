@@ -4,17 +4,19 @@ import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.*;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
 @Entity
 @Table(name = "TB_EVENT")
+
 public class Event extends AbstractBaseEntity {
 
     private final static Logger LOG = DomibusLoggerFactory.getLogger(Event.class);
@@ -41,6 +43,10 @@ public class Event extends AbstractBaseEntity {
             inverseJoinColumns = {@JoinColumn(name = "FK_ALERT")}
     )
     private Set<Alert> alerts = new HashSet<>();
+
+    @Column(name = "LAST_ALERT_DATE")
+    private LocalDate lastAlertDate;
+
 
     public void addAlert(Alert alert) {
         alerts.add(alert);
@@ -83,6 +89,13 @@ public class Event extends AbstractBaseEntity {
     public void setProperties(Map<String, AbstractEventProperty> properties) {
         this.properties = properties;
     }
+
+    public LocalDate getLastAlertDate() { return lastAlertDate; }
+
+    public void setLastAlertDate(LocalDate lastAlertDate) {
+        this.lastAlertDate = lastAlertDate;
+    }
+
 
     @Override
     public String toString() {

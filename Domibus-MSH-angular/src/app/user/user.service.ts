@@ -43,22 +43,6 @@ export class UserService {
     });
   }
 
-  saveUsers (users: Array<UserResponseRO>): void {
-    this.http.post('rest/user/save', users).subscribe(res => {
-      this.changeUserStatus(users);
-      this.alertService.success('User saved', false);
-    }, err => {
-      this.alertService.error(err, false);
-    });
-  }
-
-  changeUserStatus (users: Array<UserResponseRO>) {
-    for (let u in users) {
-      users[u].status = 'PERSISTED';
-      users[u].password = '';
-    }
-  }
-
   async isDomainVisible (): Promise<boolean> {
     const isMultiDomain = await this.domainService.isMultiDomain().toPromise();
     return isMultiDomain && this.securityService.isCurrentUserSuperAdmin();
@@ -88,3 +72,4 @@ export class UserSearchCriteria {
   userName: string;
   deleted: boolean;
 }
+

@@ -17,7 +17,10 @@ import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -55,11 +58,26 @@ public class AuthenticationResource {
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
-    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    @ExceptionHandler({AuthenticationException.class})
-    public ErrorRO handleException(Exception ex) {
+    @ExceptionHandler({AccountStatusException.class})
+    public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
         LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
+        LOG.error(ex.getMessage(), ex);
+
+        ErrorRO error = new ErrorRO(ex.getMessage());
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONNECTION, "close");
+
+        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
@@ -105,6 +123,7 @@ public class AuthenticationResource {
         userRO.setUsername(loginRO.getUsername());
         userRO.setAuthorities(authorities);
         userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
+        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
         return userRO;
     }
 

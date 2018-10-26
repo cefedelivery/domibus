@@ -1,11 +1,12 @@
 package eu.domibus.common.services.impl;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.security.DefaultCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 3.3
  */
 public class UserDetailServiceImpl implements UserDetailsService {
-
+    public static final String CHECK_DEFAULT_PASSWORD = "domibus.passwordPolicy.checkDefaultPassword";
     private final static DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserDetailServiceImpl.class);
 
     @Autowired
@@ -27,6 +28,11 @@ public class UserDetailServiceImpl implements UserDetailsService {
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     @Transactional(readOnly = true, noRollbackFor = UsernameNotFoundException.class)
@@ -37,17 +43,18 @@ public class UserDetailServiceImpl implements UserDetailsService {
             LOG.warn(msg);
             throw new UsernameNotFoundException(msg);
         }
-        boolean defaultPasswordUsed = isDefaultPasswordUsed(userName, user.getPassword());
-        return new UserDetail(user,defaultPasswordUsed);
+
+        UserDetail userDetail = new UserDetail(user);
+        userDetail.setDefaultPasswordUsed(isDefaultPasswordUsed(user));
+        userDetail.setDaysTillExpiration(userService.getDaysTillExpiration(userName));
+        return userDetail;
     }
 
-
-    private boolean isDefaultPasswordUsed(final String user, final String password){
-        boolean defaultPassword=false;
-        String defaultPasswordForUser = DefaultCredentials.getDefaultPasswordForUser(user);
-        if(defaultPasswordForUser!=null) {
-            defaultPassword = bcryptEncoder.matches(defaultPasswordForUser, password);
+    private boolean isDefaultPasswordUsed(final User user ) {
+        boolean checkDefaultPassword = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(CHECK_DEFAULT_PASSWORD));
+        if (!checkDefaultPassword) {
+            return false;
         }
-        return defaultPassword;
+        return user.hasDefaultPassword();
     }
 }

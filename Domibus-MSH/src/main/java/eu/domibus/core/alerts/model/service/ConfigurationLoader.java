@@ -45,7 +45,6 @@ public class ConfigurationLoader<E> {
         return result;
 
     }
-
 }
 
 

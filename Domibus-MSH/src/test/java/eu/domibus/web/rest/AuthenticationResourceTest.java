@@ -60,10 +60,11 @@ public class AuthenticationResourceTest {
     @Test
     public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil) throws Exception {
         User user = new User("user", "user");
+        user.setDefaultPassword(true);
         LoginRO loginRO = new LoginRO();
         loginRO.setUsername("user");
         loginRO.setPassword("user");
-        final UserDetail userDetail = new UserDetail(user, true);
+        final UserDetail userDetail = new UserDetail(user);
         new Expectations() {{
             userDomainService.getDomainForUser(loginRO.getUsername());
             result = DomainService.DEFAULT_DOMAIN.getCode();

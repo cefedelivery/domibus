@@ -22,8 +22,7 @@ export class DomibusInfoService {
       .subscribe((res: DomibusInfo) => {
         subject.next(res);
       }, (error: any) => {
-        console.log("getDomibusInfo:" + error);
-        // subject.next(null);
+        // console.log("getDomibusInfo:" + error);
       });
     return subject.asObservable();
   }

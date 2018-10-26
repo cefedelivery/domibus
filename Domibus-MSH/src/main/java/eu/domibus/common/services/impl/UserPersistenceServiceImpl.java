@@ -1,15 +1,21 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Collections2;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.common.validators.PasswordValidator;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -43,6 +49,9 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private UserRoleDao userRoleDao;
 
     @Autowired
+    private UserPasswordHistoryDao userPasswordHistoryDao;
+
+    @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
     @Autowired
@@ -56,6 +65,12 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     @Autowired
     private EventService eventService;
+
+    @Autowired
+    private PasswordValidator passwordValidator;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -82,8 +97,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
+
             if (withPasswordChange) {
+                savePasswordHistory(userEntity); // save old password in history
+                passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+                passwordValidator.validateHistory(user.getUserName(), user.getPassword());
                 userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
+                userEntity.setDefaultPassword(false);
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
@@ -92,6 +112,15 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
             }
         }
+    }
+
+    private void savePasswordHistory(User userEntity) {
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+        if (passwordsToKeep == 0) {
+            return;
+        }
+        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword(), userEntity.getPasswordChangeDate());
+        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep - 1);
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
@@ -110,7 +139,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
+            passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+
             User userEntity = domainConverter.convert(user, User.class);
+
             userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);

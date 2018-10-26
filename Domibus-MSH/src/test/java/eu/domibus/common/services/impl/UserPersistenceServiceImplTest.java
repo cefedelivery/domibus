@@ -1,9 +1,12 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.validators.PasswordValidator;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -32,6 +35,9 @@ public class UserPersistenceServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
+    private UserPasswordHistoryDao userPasswordHistoryDao;
+
+    @Injectable
     private BCryptPasswordEncoder bcryptEncoder;
 
     @Injectable
@@ -39,6 +45,12 @@ public class UserPersistenceServiceImplTest {
 
     @Injectable
     private UserDomainService userDomainService;
+
+    @Injectable
+    private PasswordValidator passwordValidator;
+
+    @Injectable
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;

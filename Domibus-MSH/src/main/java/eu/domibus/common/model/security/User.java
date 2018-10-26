@@ -9,31 +9,32 @@ import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
  * @author Thomas Dussart
  * @since 3.3
- *
  */
 @Entity
 @Table(name = "TB_USER",
         uniqueConstraints = {
-        @UniqueConstraint(
-                columnNames = {"USER_NAME"}
-        )
-}
+                @UniqueConstraint(
+                        columnNames = {"USER_NAME"}
+                )
+        }
 )
 @NamedQueries({
         @NamedQuery(name = "User.findAll", query = "FROM User u"),
         @NamedQuery(name = "User.findByUserName", query = "FROM User u where u.userName=:USER_NAME and u.deleted=false"),
         @NamedQuery(name = "User.findActiveByUserName", query = "FROM User u where u.userName=:USER_NAME and u.active=true and u.deleted=false"),
-        @NamedQuery(name = "User.findSuspendedUsers", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false")
+        @NamedQuery(name = "User.findSuspendedUsers", query = "FROM User u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL and u.deleted=false"),
+        @NamedQuery(name = "User.findWithPasswordChangedBetween", query = "FROM User u where u.passwordChangeDate is not null and u.passwordChangeDate>:START_DATE and u.passwordChangeDate<:END_DATE and u.defaultPassword=:DEFAULT_PASSWORD and u.deleted=false")
 })
 
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName("User")
-public class User extends AbstractBaseEntity{
+public class User extends AbstractBaseEntity {
 
     @NotNull
     @Column(name = "USER_NAME")
@@ -51,7 +52,7 @@ public class User extends AbstractBaseEntity{
     @Column(name = "USER_ENABLED")
     private Boolean active;
 
-    @Column(name="OPTLOCK")
+    @Column(name = "OPTLOCK")
     public Integer version;
 
     @Column(name = "ATTEMPT_COUNT")
@@ -67,6 +68,10 @@ public class User extends AbstractBaseEntity{
     @Column(name = "USER_DELETED")
     private Boolean deleted = false;
 
+    @NotNull
+    @Column(name = "DEFAULT_PASSWORD")
+    private Boolean defaultPassword = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "TB_USER_ROLES",
@@ -74,13 +79,18 @@ public class User extends AbstractBaseEntity{
                     name = "USER_ID", referencedColumnName = "ID_PK"),
             inverseJoinColumns = @JoinColumn(
                     name = "ROLE_ID", referencedColumnName = "ID_PK"))
-    private Set<UserRole> roles=new HashSet<>();
+    private Set<UserRole> roles = new HashSet<>();
+
+    @Column(name = "PASSWORD_CHANGE_DATE")
+    private LocalDateTime passwordChangeDate;
+
 
     @SuppressWarnings("squid:S2637")
     public User(@NotNull final String userName, @NotNull final String password) {
         this.userName = userName;
         this.active = Boolean.TRUE;
         this.password = password;
+        this.defaultPassword = false;
     }
 
     @SuppressWarnings("squid:S2637")
@@ -103,12 +113,12 @@ public class User extends AbstractBaseEntity{
         return Collections.unmodifiableSet(roles);
     }
 
-    public void addRole(UserRole userRole){
+    public void addRole(UserRole userRole) {
         roles.add(userRole);
         userRole.addUser(this);
     }
 
-    public void clearRoles(){
+    public void clearRoles() {
         roles.clear();
     }
 
@@ -124,6 +134,7 @@ public class User extends AbstractBaseEntity{
 
     public void setPassword(String password) {
         this.password = password;
+        this.passwordChangeDate = LocalDateTime.now();
     }
 
     public void setActive(Boolean enabled) { this.active = enabled; }
@@ -167,11 +178,24 @@ public class User extends AbstractBaseEntity{
         this.suspensionDate = suspensionDate;
     }
 
+    public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }
+
+    public void setPasswordChangeDate(LocalDateTime passwordChangeDate) {
+        this.passwordChangeDate = passwordChangeDate;
+    }
+
     public boolean isSuperAdmin() {
-        if(roles == null) {
+        if (roles == null) {
             return false;
         }
         return roles.stream().anyMatch(role -> AuthRole.ROLE_AP_ADMIN.name().equals(role.getName()));
     }
 
+    public Boolean hasDefaultPassword() {
+        return this.defaultPassword;
+    }
+
+    public void setDefaultPassword(Boolean defaultPassword) {
+        this.defaultPassword = defaultPassword;
+    }
 }
