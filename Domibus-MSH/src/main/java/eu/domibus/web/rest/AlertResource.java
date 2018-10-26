@@ -138,8 +138,11 @@ public class AlertResource {
             case USER_LOGIN_FAILURE:
                 final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
                 return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
+            case PASSWORD_EXPIRED:
+            case PASSWORD_IMMINENT_EXPIRATION:
+                return Arrays.asList("USER", "EXPIRATION_DATE");
             default:
-                throw new IllegalArgumentException("Unsuported alert type.");
+                throw new IllegalArgumentException("Unsupported alert type.");
         }
 
     }

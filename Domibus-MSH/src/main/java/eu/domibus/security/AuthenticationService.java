@@ -39,22 +39,28 @@ public class AuthenticationService {
     @Transactional(noRollbackFor = AuthenticationException.class)
     public UserDetail authenticate(String username, String password, String domain) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
+        UserDetail principal = null;
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
+            principal = (UserDetail) authentication.getPrincipal();
+            userService.validateExpiredPassword(username);
             userService.handleCorrectAuthentication(username);
+        } catch (CredentialsExpiredException ex) {
+            LOG.trace("Caught CredentialsExpiredException: [{}]", ex);
+            throw ex;
         } catch (AuthenticationException ae) {
+            LOG.trace("Caught AuthenticationException: [{}]", ae.getClass().getName());
             UserLoginErrorReason userLoginErrorReason = userService.handleWrongAuthentication(username);
-            if(UserLoginErrorReason.INACTIVE.equals(userLoginErrorReason)){
-                throw new DisabledException(INACTIVE);
+            if (UserLoginErrorReason.INACTIVE.equals(userLoginErrorReason)) {
+                throw new DisabledException(INACTIVE, ae);
+            } else if (UserLoginErrorReason.SUSPENDED.equals(userLoginErrorReason)) {
+                throw new LockedException(SUSPENDED, ae);
             }
-            else if(UserLoginErrorReason.SUSPENDED.equals(userLoginErrorReason)){
-                throw new LockedException(SUSPENDED);
-            }
+            LOG.trace("AuthenticationException: {}", ae.getMessage());
             throw ae;
         }
-        
-        final UserDetail principal = (UserDetail) authentication.getPrincipal();
+
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return principal;
@@ -63,6 +69,7 @@ public class AuthenticationService {
 
     /**
      * Set the domain in the current security context
+     *
      * @param domainCode the code of the new current domain
      */
     public void changeDomain(String domainCode) {

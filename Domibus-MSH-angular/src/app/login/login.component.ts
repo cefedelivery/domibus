@@ -1,13 +1,11 @@
 ﻿import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router, ActivatedRoute, NavigationStart} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {SecurityService} from '../security/security.service';
-import {HttpEventService} from '../http/http.event.service';
 import {AlertService} from '../alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
-import {User} from '../security/user';
-import {MdDialogRef, MdDialog} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {DefaultPasswordDialogComponent} from 'app/security/default-password-dialog/default-password-dialog.component';
-import {isNullOrUndefined} from 'util';
+import {Server} from '../security/Server';
 
 @Component({
   moduleId: module.id,
@@ -16,6 +14,7 @@ import {isNullOrUndefined} from 'util';
 })
 
 export class LoginComponent implements OnInit, OnDestroy {
+
 
   model: any = {};
   loading = false;
@@ -35,47 +34,40 @@ export class LoginComponent implements OnInit, OnDestroy {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
-    this.sub = this.securityEventService.onLoginSuccessEvent().subscribe(
-      data => {
-        console.log('Authentication successfull');
-        this.verifyDefaultLoginUsed();
-        this.router.navigate([this.returnUrl]);
-      });
+    this.sub = this.securityEventService.onLoginSuccessEvent()
+      .subscribe(
+        () => this.onLoginSuccessEvent()
+      );
 
     this.securityEventService.onLoginErrorEvent().subscribe(
       error => {
-        console.error('Error authenticating:' + error);
         let message;
-        const HTTP_UNAUTHORIZED = 401;
-        const HTTP_FORBIDDEN = 403;
-        const HTTP_NOTFOUND = 404;
-        const HTTP_GATEWAY_TIMEOUT = 504;
-        const USER_INACTIVE = 'Inactive';
-        const USER_SUSPENDED = 'Suspended';
         switch (error.status) {
-          case HTTP_UNAUTHORIZED:
-          case HTTP_FORBIDDEN:
+          case Server.HTTP_UNAUTHORIZED:
+          case Server.HTTP_FORBIDDEN:
             const forbiddenCode = error.json().message;
-            console.log('User forbidden code ' + forbiddenCode);
             switch (forbiddenCode) {
-              case USER_INACTIVE:
+              case Server.USER_INACTIVE:
                 message = 'The user is inactive. Please contact your administrator.';
                 break;
-              case USER_SUSPENDED:
+              case Server.USER_SUSPENDED:
                 message = 'The user is suspended. Please try again later or contact your administrator.';
                 break;
+              case Server.PASSWORD_EXPIRED:
+                message = 'The user password has expired. Please contact your administrator.';
+                break;
               default:
-                message = 'The username/password combination you provided are not valid. Please try again or contact your administrator.';
+                message = 'The username/password combination you provided is not valid. Please try again or contact your administrator.';
                 break;
             }
             break;
-          case HTTP_GATEWAY_TIMEOUT:
-          case HTTP_NOTFOUND:
+          case Server.HTTP_GATEWAY_TIMEOUT:
+          case Server.HTTP_NOTFOUND:
             message = 'Unable to login. Domibus is not running.';
             break;
           default:
-            message = 'Default error (' + error.status + ') occurred during login.';
-            break;
+            this.alertService.exception('Error authenticating:', error);
+            return;
         }
         this.alertService.error(message);
       });
@@ -85,10 +77,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.securityService.login(this.model.username, this.model.password);
   }
 
-  verifyDefaultLoginUsed () {
-    let currentUser: User = this.securityService.getCurrentUser();
-    if (currentUser.defaultPasswordUsed) {
-      this.dialog.open(DefaultPasswordDialogComponent);
+  onLoginSuccessEvent () {
+    const changePassword = this.securityService.shouldChangePassword();
+    if (changePassword.response) {
+      this.dialog.open(DefaultPasswordDialogComponent, {data: changePassword.reason});
+      if (this.securityService.isCurrentUserAdmin()) {
+        this.router.navigate(['/user']);
+      } else {
+        this.router.navigate([this.returnUrl]);
+      }
+    } else {
+      this.router.navigate([this.returnUrl]);
     }
   }
 

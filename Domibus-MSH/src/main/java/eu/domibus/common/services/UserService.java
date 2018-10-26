@@ -3,6 +3,8 @@ package eu.domibus.common.services;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.user.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,10 +47,26 @@ public interface UserService {
      */
     void reactivateSuspendedUsers();
 
-
     /**
      * Verify if user add some incorrect login attempt and reset the attempt counter.
      * @param username the userName
      */
     void handleCorrectAuthentication(String username);
+
+    /**
+     * Verify if the user's password is expired.
+     * @param username the userName
+     */
+    void validateExpiredPassword(String username);
+
+    /**
+     * Verify if the user's password is "almost" expired
+     * @param username the userName
+     * @return the days till expiration; null if it is not to raise a warning
+     */
+    Integer getDaysTillExpiration(String username);
+
+
+    public void sendAlerts();
+
 }

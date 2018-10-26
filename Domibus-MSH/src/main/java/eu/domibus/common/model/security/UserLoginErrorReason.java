@@ -8,5 +8,6 @@ public enum UserLoginErrorReason {
     UNKNOWN,
     INACTIVE,
     SUSPENDED,
-    BAD_CREDENTIALS
+    BAD_CREDENTIALS,
+    PASSWORD_EXPIRED,
 }

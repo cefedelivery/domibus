@@ -16,42 +16,55 @@ import {PartyComponent} from './party/party.component';
 import {AlertsComponent} from './alerts/alerts.component';
 import {TestServiceComponent} from './testservice/testservice.component';
 import {PluginUserComponent} from './pluginuser/pluginuser.component';
+import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {LoggingComponent} from "./logging/logging.component";
 
 const appRoutes: Routes = [
-  {path: '', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
+  {
+    path: '',
+    component: MessageLogComponent,
+    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+  },
   {
     path: 'pmode-current',
     component: CurrentPModeComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
   {
     path: 'pmode-archive',
     component: PModeArchiveComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
   {
     path: 'pmode-party',
     component: PartyComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
   {
     path: 'jms',
     component: JmsComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
   {
     path: 'messagefilter',
     component: MessageFilterComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
-  {path: 'truststore', component: TruststoreComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'messagelog', component: MessageLogComponent, canActivate: [AuthenticatedGuard]},
+  {
+    path: 'truststore',
+    component: TruststoreComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]
+  },
+  {
+    path: 'messagelog',
+    component: MessageLogComponent,
+    canActivate: [AuthenticatedGuard, DefaultPasswordGuard]
+  },
   {
     path: 'user',
     component: UserComponent,
@@ -61,16 +74,16 @@ const appRoutes: Routes = [
   {
     path: 'pluginuser',
     component: PluginUserComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
-  {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard]},
+  {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
   {path: 'login', component: LoginComponent},
-  {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard]},
-  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard]}
+  {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
+  {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
+  {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
+  {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
+  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]}
 ];
 
 export const routing = RouterModule.forRoot(appRoutes);

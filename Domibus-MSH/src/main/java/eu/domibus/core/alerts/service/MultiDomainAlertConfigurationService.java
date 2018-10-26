@@ -66,6 +66,11 @@ public interface MultiDomainAlertConfigurationService {
     Boolean isAlertModuleEnabled();
 
     /**
+     * @return alert events module configuration
+     */
+    AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType);
+
+    /**
      * With the introduction of multitenancy, a super user has been created.
      * It has its own property definition for some of the domibus properties.
      * The following methods are helper methods to retrieve super or domain alert property name
@@ -88,4 +93,5 @@ public interface MultiDomainAlertConfigurationService {
      * @return name of the alert time between retry property.
      */
     String getAlertRetryTimePropertyName();
+
 }

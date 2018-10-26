@@ -39,14 +39,12 @@ public class CertificateListenerTest {
             alertService.createAlertOnEvent(event);
             result=alert;
         }};
-        certificateListener.onImminentRevocationCertificateEvent(event, null);new Verifications(){{
+        certificateListener.onCertificateEvent(event, null);new Verifications(){{
             domainContextProvider.setCurrentDomain(withAny(new Domain()));times=0;
             eventService.persistEvent(event);
             alertService.createAlertOnEvent(event);
             alertService.enqueueAlert(alert);
         }};
-
-
     }
 
     @Test
@@ -56,7 +54,7 @@ public class CertificateListenerTest {
             alertService.createAlertOnEvent(event);
             result=alert;
         }};
-        certificateListener.onRevokedCertificateEvent(event, domain);
+        certificateListener.onCertificateEvent(event, domain);
         new Verifications(){{
             domainContextProvider.setCurrentDomain(domain);times=1;
             eventService.persistEvent(event);

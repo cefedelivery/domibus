@@ -1,8 +1,12 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.message.UserMessageLogService;
+import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
+import eu.domibus.common.dao.RawEnvelopeLogDao;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.common.model.logging.MessageLog;
 import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.ebms3.common.model.PartyInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
@@ -43,6 +47,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
 
+    @Autowired
+    private UserMessageLogDao userMessageLogDao;
+
     /**
      * {@inheritDoc}
      */
@@ -52,8 +59,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
         changeMessageStatusAndNotify(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
     }
 
-    private void changeMessageStatusAndNotify(String messageId,  UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
+    private void changeMessageStatusAndNotify(String messageId, UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
+        final MessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId, MSHRole.SENDING);
 
         switch (reliabilityCheckSuccessful) {
             case OK:
@@ -70,7 +78,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 if (!isTestMessage) {
                     backendNotificationService.notifyOfSendSuccess(messageId);
                 }
-
+                userMessageLog.setSendAttempts(userMessageLog.getSendAttempts() + 1);
                 messagingDao.clearPayloadData(messageId);
                 final PartyInfo partyInfo = userMessage.getPartyInfo();
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_SUCCESS, messageId, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
@@ -80,6 +88,9 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 break;
             case SEND_FAIL:
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
+                break;
+            case ABORT:
+                updateRetryLoggingService.messageFailedInANewTransaction(userMessageLog);
                 break;
         }
     }

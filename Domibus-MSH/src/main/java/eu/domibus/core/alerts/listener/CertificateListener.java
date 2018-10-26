@@ -31,15 +31,8 @@ public class CertificateListener {
     private DomainContextProvider domainContextProvider;
 
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
-            selector = "selector = 'certificateImminentExpiration'")
-    public void onImminentRevocationCertificateEvent(final Event event, @Header(name = "DOMAIN") String domain) {
-        saveEventAndTriggerAlert(event, domain);
-
-    }
-
-    @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
-            selector = "selector = 'certificateExpired'")
-    public void onRevokedCertificateEvent(final Event event, @Header(name = "DOMAIN") String domain) {
+            selector = "selector = 'certificateImminentExpiration' or selector = 'certificateExpired'")
+    public void onCertificateEvent(final Event event, @Header(name = "DOMAIN") String domain) {
         saveEventAndTriggerAlert(event, domain);
 
     }
