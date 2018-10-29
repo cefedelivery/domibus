@@ -120,6 +120,7 @@ public class LoggingServiceImpl implements LoggingService {
      */
     @Override
     public void resetLogging() {
+        LOG.info("reset logging - start");
         //we are re-using the same service used at context initialization
         final String logbackConfigurationFile = new LogbackLoggingConfigurator(domibusConfigurationService).getLoggingConfigurationFile();
 
@@ -139,7 +140,7 @@ public class LoggingServiceImpl implements LoggingService {
         } finally {
             StatusPrinter.printInCaseOfErrorsOrWarnings(context);
         }
-
+        LOG.info("reset logging - end");
     }
 
     /**
