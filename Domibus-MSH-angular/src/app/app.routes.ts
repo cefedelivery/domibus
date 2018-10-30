@@ -17,7 +17,8 @@ import {AlertsComponent} from './alerts/alerts.component';
 import {TestServiceComponent} from './testservice/testservice.component';
 import {PluginUserComponent} from './pluginuser/pluginuser.component';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
-import {LoggingComponent} from "./logging/logging.component";
+import {LoggingComponent} from './logging/logging.component';
+import {BlankComponent} from './security/blank.component';
 
 const appRoutes: Routes = [
   {
@@ -83,7 +84,9 @@ const appRoutes: Routes = [
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
-  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]}
+  {path: 'blank', component: BlankComponent},
+  {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
+
 ];
 
 export const routing = RouterModule.forRoot(appRoutes);

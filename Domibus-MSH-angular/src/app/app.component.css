@@ -91,3 +91,8 @@ html, body, material-app, .my-content {
 .menu-collapsed .sideNavButton span {
   display: none;
 }
+
+router-outlet {
+  min-height: 100px;
+  display: block;
+}

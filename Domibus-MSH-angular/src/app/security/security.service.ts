@@ -43,6 +43,8 @@ export class SecurityService {
   }
 
   logout() {
+    this.alertService.clearAlert();
+
     this.clearSession();
 
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
@@ -152,9 +154,19 @@ export class SecurityService {
 
   shouldChangePassword(): any {
     if (this.mustChangePassword()) {
+      let message = 'You are using the default password. ';
+      let redirectUrl;
+      if (this.isCurrentUserAdmin()) {
+        message = message + 'Please change it now in order to be able to use the console.';
+        redirectUrl = '/user';
+      } else {
+        message = message + 'Please contact your administrator to change it in order to be able to use the console.';
+        redirectUrl = '/blank';
+      }
       return {
         response: true,
-        reason: 'The user has the default password. Please change it now in order to be able to use the console.'
+        reason: message,
+        redirectUrl: redirectUrl
       };
     }
 
