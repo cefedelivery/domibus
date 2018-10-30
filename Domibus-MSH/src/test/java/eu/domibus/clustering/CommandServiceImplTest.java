@@ -1,11 +1,11 @@
 package eu.domibus.clustering;
 
 import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.logging.LoggingService;
-import eu.domibus.core.logging.LoggingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -120,8 +120,8 @@ public class CommandServiceImplTest {
         final Map<String, String> commandProperties = new HashMap<>();
         final String level = "DEBUG";
         final String name = "eu.domibus";
-        commandProperties.put(LoggingServiceImpl.COMMAND_LOG_LEVEL, level);
-        commandProperties.put(LoggingServiceImpl.COMMAND_LOG_NAME, name);
+        commandProperties.put(CommandProperty.LOG_LEVEL, level);
+        commandProperties.put(CommandProperty.LOG_NAME, name);
         commandService.executeCommand(Command.LOGGING_SET_LEVEL, DomainService.DEFAULT_DOMAIN, commandProperties);
 
         new Verifications() {{

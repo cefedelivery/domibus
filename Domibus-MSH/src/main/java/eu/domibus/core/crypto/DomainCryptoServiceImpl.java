@@ -1,18 +1,15 @@
 package eu.domibus.core.crypto;
 
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.crypto.CryptoException;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.api.cluster.Command;
 import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.core.crypto.api.CertificateEntry;
 import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import eu.domibus.messaging.MessageConstants;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
 import org.apache.commons.io.FileUtils;
@@ -24,14 +21,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.jms.Topic;
 import java.io.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Cosmin Baciu
@@ -56,11 +53,14 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Autowired
     protected CertificateService certificateService;
 
-    @Autowired
-    protected JMSManager jmsManager;
+//    @Autowired
+//    protected JMSManager jmsManager;
+//
+//    @Autowired
+//    protected Topic clusterCommandTopic;
 
     @Autowired
-    protected Topic clusterCommandTopic;
+    protected SignalService signalService;
 
     @PostConstruct
     public void init() {
@@ -285,10 +285,11 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     protected void signalTrustStoreUpdate() {
         // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
-                .property(MessageConstants.DOMAIN, domain.getCode())
-                .build(), clusterCommandTopic);
+//        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+//                .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
+//                .property(MessageConstants.DOMAIN, domain.getCode())
+//                .build(), clusterCommandTopic);
+        signalService.signalTrustStoreUpdate(domain);
     }
 
     @Override

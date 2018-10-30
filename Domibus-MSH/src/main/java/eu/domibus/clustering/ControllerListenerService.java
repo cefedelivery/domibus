@@ -41,7 +41,7 @@ public class ControllerListenerService implements MessageListener {
     @Override
     @Transactional
     public void onMessage(Message message) {
-        String command = null;
+        String command;
         try {
             command = message.getStringProperty(Command.COMMAND);
         } catch (JMSException e) {

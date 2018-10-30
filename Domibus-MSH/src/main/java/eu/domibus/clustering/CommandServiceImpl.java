@@ -1,12 +1,12 @@
 package eu.domibus.clustering;
 
 import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.logging.LoggingService;
-import eu.domibus.core.logging.LoggingServiceImpl;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -84,8 +84,8 @@ public class CommandServiceImpl implements CommandService {
                 loggingService.resetLogging();
                 break;
             case Command.LOGGING_SET_LEVEL:
-                final String level = commandProperties.get(LoggingServiceImpl.COMMAND_LOG_LEVEL);
-                final String name = commandProperties.get(LoggingServiceImpl.COMMAND_LOG_NAME);
+                final String level = commandProperties.get(CommandProperty.LOG_LEVEL);
+                final String name = commandProperties.get(CommandProperty.LOG_NAME);
                 loggingService.setLoggingLevel(name, level);
                 break;
             default:

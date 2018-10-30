@@ -6,10 +6,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
-import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.LogbackLoggingConfigurator;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.jms.Topic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -38,17 +35,20 @@ import static org.apache.commons.lang3.reflect.FieldUtils.readField;
 public class LoggingServiceImpl implements LoggingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingServiceImpl.class);
 
-    public static final String COMMAND_LOG_LEVEL = "LOG_LEVEL";
-    public static final String COMMAND_LOG_NAME = "LOG_NAME";
+//    public static final String COMMAND_LOG_LEVEL = "LOG_LEVEL";
+//    public static final String COMMAND_LOG_NAME = "LOG_NAME";
 
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
 
-    @Autowired
-    protected Topic clusterCommandTopic;
+//    @Autowired
+//    protected Topic clusterCommandTopic;
+//
+//    @Autowired
+//    protected JMSManager jmsManager;
 
     @Autowired
-    protected JMSManager jmsManager;
+    protected SignalService signalService;
 
     /**
      * {@inheritDoc}
@@ -75,11 +75,13 @@ public class LoggingServiceImpl implements LoggingService {
 
         try {
             // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                    .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                    .property(COMMAND_LOG_NAME, name)
-                    .property(COMMAND_LOG_LEVEL, level)
-                    .build(), clusterCommandTopic);
+//            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+//                    .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
+//                    .property(COMMAND_LOG_NAME, name)
+//                    .property(COMMAND_LOG_LEVEL, level)
+//                    .build(), clusterCommandTopic);
+            signalService.signalLoggingSetLevel(name, level);
+
         } catch (Exception e) {
             throw new LoggingException("Error while sending topic message for setting logging level", e);
         }
@@ -150,9 +152,10 @@ public class LoggingServiceImpl implements LoggingService {
 
         try {
             // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                    .property(Command.COMMAND, Command.LOGGING_RESET)
-                    .build(), clusterCommandTopic);
+//            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+//                    .property(Command.COMMAND, Command.LOGGING_RESET)
+//                    .build(), clusterCommandTopic);
+            signalService.signalLoggingReset();
         } catch (Exception e) {
             throw new LoggingException("Error while sending topic message for logging reset", e);
         }

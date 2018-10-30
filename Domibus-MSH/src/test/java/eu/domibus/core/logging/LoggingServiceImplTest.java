@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
@@ -108,9 +109,9 @@ public class LoggingServiceImplTest {
 
             messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
             result = messageBuilder;
-            messageBuilder.property(LoggingServiceImpl.COMMAND_LOG_NAME, name);
+            messageBuilder.property(CommandProperty.LOG_NAME, name);
             result = messageBuilder;
-            messageBuilder.property(LoggingServiceImpl.COMMAND_LOG_LEVEL, level);
+            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
             result = messageBuilder;
 
             messageBuilder.build();
@@ -136,9 +137,9 @@ public class LoggingServiceImplTest {
 
             messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
             result = messageBuilder;
-            messageBuilder.property(LoggingServiceImpl.COMMAND_LOG_NAME, name);
+            messageBuilder.property(CommandProperty.LOG_NAME, name);
             result = messageBuilder;
-            messageBuilder.property(LoggingServiceImpl.COMMAND_LOG_LEVEL, level);
+            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
             result = messageBuilder;
 
             messageBuilder.build();
