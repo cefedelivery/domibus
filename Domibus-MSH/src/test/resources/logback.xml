@@ -10,7 +10,7 @@
     </appender>
     <logger name="eu.domibus" level="INFO"/>
     <logger name="com.atomikos" level="ERROR"/>
-    <root level="INFO">
+    <root level="ALL">
         <appender-ref ref="stdout"/>
     </root>
 </configuration>

@@ -41,6 +41,7 @@ public class HttpUtilImpl implements HttpUtil {
 
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
+        LOG.info("downloadURL " + url);
         if (domibusConfigurationService.useProxy()) {
             String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
@@ -54,6 +55,7 @@ public class HttpUtilImpl implements HttpUtil {
 
     @Override
     public ByteArrayInputStream downloadURLDirect(String url) throws IOException {
+        LOG.info("download direct CRL " + url);
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
 
@@ -68,12 +70,14 @@ public class HttpUtilImpl implements HttpUtil {
                 }
             }
         } finally {
+            LOG.info("downloaded direct CRL " + url);
             httpclient.close();
         }
     }
 
     @Override
     public ByteArrayInputStream downloadURLViaProxy(String url, String proxyHost, Integer proxyPort, String proxyUser, String proxyPassword) throws IOException {
+        LOG.info("download CRL  via proxy" + url);
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
                 new AuthScope(proxyHost, proxyPort),
@@ -89,18 +93,22 @@ public class HttpUtilImpl implements HttpUtil {
             HttpGet httpget = new HttpGet(url);
             httpget.setConfig(config);
 
-            LOG.debug("Executing request " + httpget.getRequestLine() + " via " + proxy);
+            LOG.info("Executing request downloadURLViaProxy " + httpget.getRequestLine() + " via " + proxy);
 
             CloseableHttpResponse response = null;
             try {
+                LOG.info("downloadURLViaProxy execute GET request [{}]", httpget);
                 response = httpclient.execute(httpget);
+                LOG.info("Finished downloadURLViaProxy execute GET request [{}]", httpget);
                 return new ByteArrayInputStream(IOUtils.toByteArray(response.getEntity().getContent()));
             } finally {
                 if (response != null) {
+                    LOG.info("Closing response");
                     response.close();
                 }
             }
         } finally {
+            LOG.info("Closing httpclient");
             httpclient.close();
         }
     }

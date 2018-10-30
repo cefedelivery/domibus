@@ -23,7 +23,9 @@ public class CRLServiceImpl implements CRLService {
 
     @Override
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
+        LOG.info("Checking if certificate is revoked");
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
+        LOG.info("Found CRL [{}]", crlDistributionPoints);
 
         if (crlDistributionPoints == null || crlDistributionPoints.isEmpty()) {
             LOG.debug("No CRL distribution points found for certificate: [" + getSubjectDN(cert) + "]");
@@ -31,6 +33,7 @@ public class CRLServiceImpl implements CRLService {
         }
 
         List<String> supportedCrlDistributionPoints = getSupportedCrlDistributionPoints(crlDistributionPoints);
+        LOG.info("supportedCrlDistributionPoints [{}]", supportedCrlDistributionPoints);
         if (supportedCrlDistributionPoints.isEmpty()) {
             throw new DomibusCRLException("No supported CRL distribution point found for certificate " + getSubjectDN(cert));
         }
@@ -40,6 +43,7 @@ public class CRLServiceImpl implements CRLService {
                 return true;
             }
         }
+        LOG.info("Checked if certificate is revoked");
 
         return false;
     }
@@ -69,11 +73,14 @@ public class CRLServiceImpl implements CRLService {
     }
 
     protected boolean isCertificateRevoked(X509Certificate cert, String crlDistributionPointURL) {
+        LOG.info("Checking if certificate is revoked using CRL [{}]", crlDistributionPointURL);
         X509CRL crl = crlUtil.downloadCRL(crlDistributionPointURL);
+        LOG.info("Downloaded CRL[{}]", crlDistributionPointURL);
         if (crl.isRevoked(cert)) {
             LOG.warn("The certificate is revoked by CRL: " + crlDistributionPointURL);
             return true;
         }
+        LOG.info("Checked if certificate is revoked using CRL [{}]", crlDistributionPointURL);
         return false;
     }
 

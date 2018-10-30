@@ -130,7 +130,9 @@ public class CertificateServiceImpl implements CertificateService {
     protected boolean checkValidity(X509Certificate cert) {
         boolean result = false;
         try {
+            LOG.info("Checking validity");
             cert.checkValidity();
+            LOG.info("Checked validity");
             result = true;
         } catch (Exception e) {
             LOG.warn("Certificate is not valid " + cert, e);

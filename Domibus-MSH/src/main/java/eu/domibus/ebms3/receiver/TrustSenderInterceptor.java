@@ -122,8 +122,16 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);
         }
+        LOG.info("Got sender certificate [{}]", certificate);
 
-        if (!checkCertificateValidity(certificate, senderPartyName, isPullMessage)) {
+        boolean notValid = true;
+        try {
+            notValid = !checkCertificateValidity(certificate, senderPartyName, isPullMessage);
+        } catch (Throwable e) {
+            LOG.error("Error checking certificate validity", e);
+        }
+
+        if (notValid) {
             EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0101, "Sender [" + senderPartyName + "] certificate is not valid or has been revoked", messageId, null);
             ebMS3Ex.setMshRole(MSHRole.RECEIVING);
             throw new Fault(ebMS3Ex);

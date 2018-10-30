@@ -1,6 +1,8 @@
 package eu.domibus.pki;
 
 import eu.domibus.api.util.HttpUtil;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -34,7 +36,11 @@ import java.util.List;
 @Service
 public class CRLUtil {
 
-    /** LDAP attribute for CRL */
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CRLUtil.class);
+
+    /**
+     * LDAP attribute for CRL
+     */
     private static final String LDAP_CRL_ATTRIBUTE = "certificateRevocationList;binary";
 
     @Autowired
@@ -43,14 +49,14 @@ public class CRLUtil {
     /**
      * Entry point for downloading certificates from either http(s), classpath source or LDAP
      *
-     * @see CRLUtil#downloadCRLFromWebOrClasspath(String)
-     * @see CRLUtil#downloadCRLfromLDAP(String)
-     *
      * @param crlURL the CRL url
      * @return {@link X509CRL} certificate to download
      * @throws DomibusCRLException runtime exception in case of error
+     * @see CRLUtil#downloadCRLFromWebOrClasspath(String)
+     * @see CRLUtil#downloadCRLfromLDAP(String)
      */
     public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
+        LOG.info("Downloading CRL [{}]", crlURL);
         if (CRLUrlType.LDAP.canHandleURL(crlURL)) {
             return downloadCRLfromLDAP(crlURL);
         } else {
@@ -90,12 +96,11 @@ public class CRLUtil {
      * Downloads CRL from an ldap:// address e.g. ldap://ldap.example.com/dc=identity-ca,dc=example,dc=com
      *
      * @param ldapURL ldap url address to download from
-     *
      * @return {@link X509CRL} the certificate
      * @throws DomibusCRLException runtime exception in case of error
-
      */
     X509CRL downloadCRLfromLDAP(String ldapURL) throws DomibusCRLException {
+        LOG.info("Downloading CRL from LDAP [{}]", ldapURL);
         Hashtable<String, String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapURL);
@@ -116,6 +121,7 @@ public class CRLUtil {
         } catch (NamingException | CertificateException | CRLException e) {
             throw new DomibusCRLException("Cannot download CRL from '" + ldapURL + "'", e);
         } finally {
+            LOG.info("Downloaded CRL from LDAP [{}]", ldapURL);
             IOUtils.closeQuietly(inStream);
         }
     }
@@ -126,11 +132,15 @@ public class CRLUtil {
 
     protected InputStream getCrlInputStream(URL crlURL) throws IOException {
         InputStream result;
+        LOG.info("getCrlInputStream [{}]", crlURL);
         if (CRLUrlType.HTTP.canHandleURL(crlURL.toString()) || CRLUrlType.HTTPS.canHandleURL(crlURL.toString())) {
+            LOG.info("getCrlInputStream for http(s) [{}]", crlURL);
             result = httpUtil.downloadURL(crlURL.toString());
         } else {
+            LOG.info("open stream for CRL [{}]", crlURL);
             result = crlURL.openStream();
         }
+        LOG.info("finished getCrlInputStream [{}]", crlURL);
         return result;
     }
 
@@ -147,7 +157,6 @@ public class CRLUtil {
      * If the CRL distribution point extension is unavailable, returns an empty list.
      *
      * @param cert a X509 certificate
-     *
      * @return the list of CRL urls of this certificate
      */
     public List<String> getCrlDistributionPoints(X509Certificate cert) {
