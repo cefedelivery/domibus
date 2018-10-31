@@ -216,6 +216,12 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
+    public void sendMessageToTopic(JmsMessage message, Topic destination, boolean excludeOrigin) {
+        InternalJmsMessage internalJmsMessage = getInternalJmsMessage(message, InternalJmsMessage.MessageType.TEXT_MESSAGE);
+        internalJmsManager.sendMessageToTopic(internalJmsMessage, destination, excludeOrigin);
+    }
+
+    @Override
     public void deleteMessages(String source, String[] messageIds) {
         internalJmsManager.deleteMessages(source, messageIds);
         Arrays.asList(messageIds).forEach(m -> auditService.addJmsMessageDeletedAudit(m, source));

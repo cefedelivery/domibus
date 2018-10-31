@@ -16,7 +16,6 @@ import javax.jms.Topic;
 /**
  * @author Catalin Enache
  * @since 4.1
- *
  */
 @Service
 public class SignalServiceImpl implements SignalService {
@@ -55,11 +54,15 @@ public class SignalServiceImpl implements SignalService {
                 .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
                 .property(CommandProperty.LOG_NAME, name)
                 .property(CommandProperty.LOG_LEVEL, level)
-                .build(), clusterCommandTopic);
+                .build(), clusterCommandTopic, true);
     }
 
     @Override
     public void signalLoggingReset() {
+        //Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
+        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
+                .property(Command.COMMAND, Command.LOGGING_RESET)
+                .build(), clusterCommandTopic, true);
 
     }
 }

@@ -1,6 +1,7 @@
 package eu.domibus.jms.weblogic;
 
 import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
@@ -356,6 +357,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Override
     public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+       sendMessageToTopic(internalJmsMessage, destination, false);
+    }
+
+    protected void sendMessage(InternalJmsMessage internalJmsMessage, Topic destination) {
         final boolean isClusterDeployment = domibusConfigurationService.isClusterDeployment();
         if (!isClusterDeployment) {
             LOG.debug("Sending JMS message to topic");
@@ -373,6 +378,14 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         for (String managedServerName : managedServerNames) {
             commandService.createClusterCommand(command, domain, managedServerName, internalJmsMessage.getCustomProperties());
         }
+    }
+
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin) {
+        if (excludeOrigin) {
+            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, getUniqueServerName());
+        }
+        sendMessage(internalJmsMessage, destination);
     }
 
     protected ObjectName getMessageDestinationName(String source) {
@@ -782,5 +795,10 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getUniqueServerName() {
+        return System.getProperty("weblogic.Name");
     }
 }

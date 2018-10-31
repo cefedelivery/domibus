@@ -66,6 +66,7 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public void executeCommand(String command, Domain domain, Map<String, String> commandProperties) {
         LOG.debug("Executing command [{}] for domain [{}] having properties [{}]", command, domain, commandProperties);
+
         switch (command) {
             case Command.RELOAD_PMODE:
                 pModeProvider.refresh();
@@ -89,7 +90,7 @@ public class CommandServiceImpl implements CommandService {
                 loggingService.setLoggingLevel(name, level);
                 break;
             default:
-                LOG.error("Unknown command received: " + command);
+                LOG.error("Unknown command received: {}", command);
         }
     }
 

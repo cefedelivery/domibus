@@ -1,5 +1,6 @@
 package eu.domibus.jms.wildfly;
 
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -31,6 +32,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 
 /**
@@ -193,13 +195,13 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
     protected Queue lookupQueue(String destName) throws NamingException {
         String destinationJndi = getJndiName(getQueueControl(destName).getAddress());
-        LOG.debug("Found JNDI [" + destinationJndi + "] for queue [" + destName + "]");
+        LOG.debug("Found JNDI [{}] for queue [{}]", destinationJndi, destName);
         return InitialContext.doLookup(destinationJndi);
     }
 
     protected Topic lookupTopic(String destName) throws NamingException {
         String destinationJndi = getJndiName(getTopicControl(destName).getAddress());
-        LOG.debug("Found JNDI [" + destinationJndi + "] for topic [" + destName + "]");
+        LOG.debug("Found JNDI [{}] for topic [{}]", destinationJndi, destName);
         return InitialContext.doLookup(destinationJndi);
     }
 
@@ -219,6 +221,14 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
     @Override
     public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        sendMessageToTopic(internalJmsMessage, destination, false);
+    }
+
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin) {
+        if (excludeOrigin) {
+            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, getUniqueServerName());
+        }
         sendMessage(internalJmsMessage, destination);
     }
 
@@ -383,5 +393,10 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
             throw new InternalJMSException("Failed to consume message [" + customMessageId + "] from source [" + source + "]", ex);
         }
         return intJmsMsg;
+    }
+
+    @Override
+    public String getUniqueServerName() {
+        return ManagementFactory.getRuntimeMXBean().getName();
     }
 }
