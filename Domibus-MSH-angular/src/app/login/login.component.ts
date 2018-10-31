@@ -21,16 +21,16 @@ export class LoginComponent implements OnInit, OnDestroy {
   returnUrl: string;
   sub: any;
 
-  constructor (private route: ActivatedRoute,
-               private router: Router,
-               private securityService: SecurityService,
-               private alertService: AlertService,
-               private securityEventService: SecurityEventService,
-               private dialog: MdDialog) {
+  constructor(private route: ActivatedRoute,
+              private router: Router,
+              private securityService: SecurityService,
+              private alertService: AlertService,
+              private securityEventService: SecurityEventService,
+              private dialog: MdDialog) {
 
   }
 
-  ngOnInit () {
+  ngOnInit() {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
@@ -73,26 +73,22 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
-  login () {
+  login() {
     this.securityService.login(this.model.username, this.model.password);
   }
 
-  onLoginSuccessEvent () {
+  onLoginSuccessEvent() {
     const changePassword = this.securityService.shouldChangePassword();
     if (changePassword.response) {
       this.dialog.open(DefaultPasswordDialogComponent, {data: changePassword.reason});
-      if (this.securityService.isCurrentUserAdmin()) {
-        this.router.navigate(['/user']);
-      } else {
-        this.router.navigate([this.returnUrl]);
-      }
+      this.router.navigate([changePassword.redirectUrl]);
+      this.alertService.error(changePassword.reason, true);
     } else {
       this.router.navigate([this.returnUrl]);
     }
   }
 
-  ngOnDestroy (): void {
-    console.log('Destroying login component');
+  ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
 }

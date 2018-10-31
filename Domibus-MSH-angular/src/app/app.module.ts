@@ -88,6 +88,7 @@ import {UserValidatorService} from './user/uservalidator.service';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {SanitizeHtmlPipe} from "./common/sanitizeHtml.pipe";
 import {LoggingComponent} from "./logging/logging.component";
+import {BlankComponent} from './security/blank.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -143,7 +144,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditbasicpluginuserFormComponent,
     EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent,
-    LoggingComponent
+    LoggingComponent,
+    BlankComponent
   ],
   entryComponents: [
     AppComponent,
