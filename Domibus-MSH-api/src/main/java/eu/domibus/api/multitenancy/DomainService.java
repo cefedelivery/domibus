@@ -10,6 +10,8 @@ public interface DomainService {
 
     Domain DEFAULT_DOMAIN = new Domain("default", "Default");
 
+    Domain NULL_DOMAIN = new Domain("null", "Null"); // this is the crippled domain used only by super users
+
     String GENERAL_SCHEMA_PROPERTY = "domibus.database.general.schema";
 
     List<Domain> getDomains();

@@ -31,7 +31,7 @@ public class ConfigurationLoader<E> {
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        final Domain domain = currentDomain ==null?DomainService.DEFAULT_DOMAIN:currentDomain;
+        final Domain domain = currentDomain == null ? DomainService.NULL_DOMAIN : currentDomain;
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
         if (this.configuration.get(domain) == null) {
             synchronized (this.configuration) {
