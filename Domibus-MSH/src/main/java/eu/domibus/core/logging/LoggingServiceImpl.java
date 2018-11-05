@@ -75,11 +75,6 @@ public class LoggingServiceImpl implements LoggingService {
 
         try {
             // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-//            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-//                    .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-//                    .property(COMMAND_LOG_NAME, name)
-//                    .property(COMMAND_LOG_LEVEL, level)
-//                    .build(), clusterCommandTopic);
             signalService.signalLoggingSetLevel(name, level);
 
         } catch (Exception e) {
@@ -152,9 +147,6 @@ public class LoggingServiceImpl implements LoggingService {
 
         try {
             // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-//            jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-//                    .property(Command.COMMAND, Command.LOGGING_RESET)
-//                    .build(), clusterCommandTopic);
             signalService.signalLoggingReset();
         } catch (Exception e) {
             throw new LoggingException("Error while sending topic message for logging reset", e);

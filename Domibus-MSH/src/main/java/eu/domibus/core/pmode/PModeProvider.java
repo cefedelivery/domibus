@@ -194,10 +194,6 @@ public abstract class PModeProvider {
         LOG.info("Configuration successfully updated");
 
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
-//        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-//                .property(Command.COMMAND, Command.RELOAD_PMODE)
-//                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-//                .build(), clusterCommandTopic);
         signalService.signalPModeUpdate();
 
         return resultMessage;

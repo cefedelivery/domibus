@@ -285,10 +285,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
 
     protected void signalTrustStoreUpdate() {
         // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
-//        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-//                .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
-//                .property(MessageConstants.DOMAIN, domain.getCode())
-//                .build(), clusterCommandTopic);
         signalService.signalTrustStoreUpdate(domain);
     }
 
