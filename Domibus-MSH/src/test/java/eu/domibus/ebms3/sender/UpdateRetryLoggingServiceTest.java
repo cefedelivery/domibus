@@ -28,7 +28,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JMockit.class)
 public class UpdateRetryLoggingServiceTest {
 
-    private static final int RETRY_TIMEOUT_IN_MINUTES = 10;
+    private static final int RETRY_TIMEOUT_IN_MINUTES = 60;
+    private static final int RETRY_COUNT = 4;
     private static final long SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 = 1451602800000L; //This is the reference time returned by System.correntTImeMillis() mock
     private static final long FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016 = SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 - (60 * 5 * 1000);
     private static final long ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016 = SYSTEM_DATE_IN_MILLIS_FIRST_OF_JANUARY_2016 - (60 * 60 * 1000);
@@ -67,6 +68,8 @@ public class UpdateRetryLoggingServiceTest {
             result = RetryStrategy.CONSTANT.getAlgorithm();
             legConfiguration.getReceptionAwareness().getRetryTimeout();
             result = RETRY_TIMEOUT_IN_MINUTES;
+            legConfiguration.getReceptionAwareness().getRetryCount();
+            result = RETRY_COUNT;
         }};
     }
 
@@ -116,6 +119,86 @@ public class UpdateRetryLoggingServiceTest {
 
     }
 
+    /**
+     * Message was restored
+     * Max retries limit reached
+     * Expected result: MessageLogDao#setAsNotified() is called
+     *                  MessageLogDao#setMessageAsSendFailure is called
+     *                  MessagingDao#clearPayloadData() is called
+     *
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateRetryLogging_Restored_maxRetriesReached() throws Exception {
+        new SystemMockFirstOfJanuary2016(); //current timestamp
+
+        final String messageId = UUID.randomUUID().toString();
+        final long receivedTime = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; //Received one hour ago
+        final long restoredTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Restored 5 min ago
+
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(4);
+        userMessageLog.setSendAttemptsMax(5);
+        userMessageLog.setReceived(new Date(receivedTime));
+        userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setRestored(new Date(restoredTime));
+
+        new Expectations() {{
+            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE, "false");
+            result = true;
+
+            messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+            result = userMessageLog;
+        }};
+
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
+
+        assertEquals(5, userMessageLog.getSendAttempts());
+        assertEquals(new Date(FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016), userMessageLog.getNextAttempt());
+
+        new Verifications() {{
+            messageLogService.setMessageAsSendFailure(messageId);
+            messagingDao.clearPayloadData(messageId);
+        }};
+
+    }
+
+    /**
+     * Message was restored
+     * NextAttempt is set correctly
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUpdateRetryLogging_Restored() throws Exception {
+        new SystemMockFirstOfJanuary2016(); //current timestamp
+
+        final String messageId = UUID.randomUUID().toString();
+        final long receivedTime = ONE_HOUR_BEFORE_FIRST_OF_JANUARY_2016; //Received one hour ago
+        final long restoredTime = FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016; //Restored 5 min ago
+
+        final UserMessageLog userMessageLog = new UserMessageLog();
+        userMessageLog.setSendAttempts(2);
+        userMessageLog.setSendAttemptsMax(6);
+        userMessageLog.setReceived(new Date(receivedTime));
+        userMessageLog.setNotificationStatus(NotificationStatus.REQUIRED);
+        userMessageLog.setMessageId(messageId);
+        userMessageLog.setRestored(new Date(restoredTime));
+
+        new Expectations() {{
+            messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
+            result = userMessageLog;
+        }};
+
+
+        updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
+
+        assertEquals(3, userMessageLog.getSendAttempts());
+        assertEquals(new Date(FIVE_MINUTES_BEFORE_FIRST_OF_JANUARY_2016 + (RETRY_TIMEOUT_IN_MINUTES / RETRY_COUNT * 60 * 1000)), userMessageLog.getNextAttempt());
+
+    }
 
     /**
      * Max retries limit reached
