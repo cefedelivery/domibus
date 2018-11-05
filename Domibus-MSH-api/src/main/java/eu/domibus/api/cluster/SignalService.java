@@ -4,7 +4,6 @@ import eu.domibus.api.multitenancy.Domain;
 
 /**
  * Interface for signal commands into a cluster configuration
- * We are using a {@JMS topic} implementation
  *
  * @author Catalin Enache
  * @since 4.1

@@ -3,6 +3,7 @@ package eu.domibus.clustering;
 import eu.domibus.api.cluster.Command;
 import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.cluster.CommandService;
+import eu.domibus.api.cluster.CommandSkipService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
@@ -28,7 +29,7 @@ import java.util.Map;
  */
 
 @Service(value = "controllerListenerService")
-public class ControllerListenerService implements MessageListener {
+public class ControllerListenerService implements MessageListener, CommandSkipService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ControllerListenerService.class);
 
@@ -106,7 +107,8 @@ public class ControllerListenerService implements MessageListener {
      * @param commandProperties
      * @return
      */
-    protected boolean skipCommandSameServer(final String command, final Domain domain, Map<String, String> commandProperties) {
+    @Override
+    public boolean skipCommandSameServer(final String command, final Domain domain, Map<String, String> commandProperties) {
         String originServerName = commandProperties.get(CommandProperty.ORIGIN_SERVER);
 
         //execute the command

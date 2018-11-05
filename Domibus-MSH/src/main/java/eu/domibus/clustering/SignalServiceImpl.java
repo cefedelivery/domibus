@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import javax.jms.Topic;
 
 /**
+ * Implementation for {@link SignalService}
+ * We are using a {@JMS topic} implementation
+ *
  * @author Catalin Enache
  * @since 4.1
  */
