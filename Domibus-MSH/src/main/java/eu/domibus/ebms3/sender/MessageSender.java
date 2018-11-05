@@ -174,43 +174,25 @@ public class MessageSender implements MessageListener {
             LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
-            isOk = responseHandler.handle(response);
+            /*isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
                 e.setMshRole(MSHRole.SENDING);
                 throw e;
             }
-            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);
+            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);*/
         } catch (final SOAPFaultException soapFEx) {
-            if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
-                reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
-            } else {
-                LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
-            }
-            attemptError = soapFEx.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
+            LOG.warn("Error for message with ID [" + messageId + "]", soapFEx);
         } catch (final EbMS3Exception e) {
-            reliabilityChecker.handleEbms3Exception(e, messageId);
-            attemptError = e.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
+            LOG.warn("Error for message with ID EbMS3Exception [" + messageId + "]", e);
         } catch (Throwable t) {
-            //NOSONAR: Catching Throwable is done on purpose in order to even catch out of memory exceptions in case large files are sent.
             LOG.error("Error sending message [{}]", messageId, t);
-            attemptError = t.getMessage();
-            attemptStatus = MessageAttemptStatus.ERROR;
             throw t;
         } finally {
-            try {
-                reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
-                attempt.setError(attemptError);
-                attempt.setStatus(attemptStatus);
-                attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
-                messageAttemptService.create(attempt);
-            } catch (Exception ex) {
-                LOG.error("Finally: ", ex);
-            }
+
+            LOG.info("-----------Finally: ");
         }
-    }
+}
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)

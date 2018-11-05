@@ -13,6 +13,8 @@
     <bean id="mshWebservice" class="eu.domibus.ebms3.receiver.MSHWebservice">
         <property name="jaxbContext" ref="jaxbContextEBMS"/>
     </bean>
+    <bean id="mshWebserviceSerializer" class="eu.domibus.ebms3.receiver.MSHWebserviceSerializerImpl"/>
+
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -62,12 +64,14 @@
     <bean id="setPolicyInInterceptorClient" class="eu.domibus.ebms3.receiver.SetPolicyInInterceptor">
         <property name="messageLegConfigurationFactory" ref="userMessageLegConfigurationFactory"/>
     </bean>
+    <bean id="domibusPrepareAttachmentInInterceptor" class="eu.domibus.ebms3.receiver.DomibusPrepareAttachmentInInterceptor"/>
 
     <bean id="setSignatureAlgorithmInInterceptor"
           class="eu.domibus.ebms3.sender.SetSignatureAlgorithmInInterceptor"/>
 
     <bean id="propertyValueExchangeInterceptor" class="eu.domibus.ebms3.receiver.PropertyValueExchangeInterceptor"/>
     <bean id="setPolicyOutInterceptor" class="eu.domibus.ebms3.sender.SetPolicyOutInterceptor"/>
+    <bean id="domibusPrepareAttachmentInterceptor" class="eu.domibus.ebms3.sender.DomibusPrepareAttachmentInterceptor"/>
 
     <bean id="setPolicyOutInterceptorServer" class="eu.domibus.ebms3.receiver.SetPolicyOutInterceptorServer"/>
     <bean id="saveRawPulledMessageInterceptor" class="eu.domibus.ebms3.sender.SaveRawPulledMessageInterceptor"/>
@@ -143,6 +147,22 @@
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
             <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+    </jaxws:client>
+    <jaxws:client id="{http://domibus.eu}local-msh-dispatch" name="{http://domibus.eu}local-msh-dispatch" createdFromAPI="true">
+        <jaxws:outInterceptors>
+            <ref bean="domibusPrepareAttachmentInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:inInterceptors>
+            <ref bean="domibusPrepareAttachmentInInterceptor"/>
+        </jaxws:inInterceptors>
+        <jaxws:handlers>
+            <bean class="eu.domibus.ebms3.sender.FaultOutHandler"/>
+        </jaxws:handlers>
+
+        <jaxws:properties>
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

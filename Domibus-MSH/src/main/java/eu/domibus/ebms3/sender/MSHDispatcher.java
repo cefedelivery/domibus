@@ -44,7 +44,7 @@ public class MSHDispatcher {
     public SOAPMessage dispatch(final SOAPMessage soapMessage, String endpoint, final Policy policy, final LegConfiguration legConfiguration, final String pModeKey) throws EbMS3Exception {
         boolean cacheable = isDispatchClientCacheActivated();
         Domain domain = domainContextProvider.getCurrentDomain();
-        final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getClient(domain.getCode(), endpoint, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm(), policy, pModeKey, cacheable);
+        final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getLocalClient(domain.getCode(), endpoint);
 
         final SOAPMessage result;
         try {
@@ -58,7 +58,7 @@ public class MSHDispatcher {
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }
-        return result;
+        return null;
     }
 
     protected boolean isDispatchClientCacheActivated() {

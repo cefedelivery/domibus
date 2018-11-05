@@ -5,11 +5,14 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.ClientImpl;
 import org.apache.cxf.jaxws.DispatchImpl;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transport.local.LocalConduit;
 import org.apache.cxf.transports.http.configuration.ConnectionType;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.policy.PolicyConstants;
@@ -38,7 +41,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
+    public static final QName LOCAL_SERVICE_NAME = new QName("http://domibus.eu", "local-msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
+    public static final QName LOCAL_PORT_NAME = new QName("http://domibus.eu", "local-msh-dispatch");
     public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT = "domibus.dispatcher.connectionTimeout";
     public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT = "domibus.dispatcher.receiveTimeout";
     public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING = "domibus.dispatcher.allowChunking";
@@ -67,8 +72,14 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         dispatch.getRequestContext().put(ASYMMETRIC_SIG_ALGO_PROPERTY, algorithm);
         dispatch.getRequestContext().put(PMODE_KEY_CONTEXT_PROPERTY, pModeKey);
         final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
-        final HTTPConduit httpConduit = (HTTPConduit) client.getConduit();
-        final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
+        final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+        httpConduit.setMessageObserver(new MessageObserver() {
+            @Override
+            public void onMessage(Message message) {
+                LOG.info("----------------------on message");
+            }
+        });
+        /*final HTTPClientPolicy httpClientPolicy = httpConduit.getClient();
 
         httpConduit.setClient(httpClientPolicy);
         setHttpClientPolicy(httpClientPolicy);
@@ -85,9 +96,70 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             configureProxy(httpClientPolicy, httpConduit);
         } else {
             LOG.info("No proxy configured");
-        }
+        }*/
         return dispatch;
     }
+
+        protected Dispatch<SOAPMessage> dispatch = null;
+//    protected MSHWebserviceSerializer dispatch = null;
+
+    @Override
+    public Dispatch<SOAPMessage> getLocalClient(String domain, String endpoint) {
+//        LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+//        Dispatch<SOAPMessage> dispatch = createLocalWSServiceDispatcher(endpoint);
+////        dispatch.getRequestContext().put(LocalConduit.DIRECT_DISPATCH, "true");
+//        final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
+//        final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+//        httpConduit.setMessageObserver(new MessageObserver() {
+//            @Override
+//            public void onMessage(Message message) {
+//                message.getExchange().put(ClientImpl.SYNC_TIMEOUT, 0);
+//                message.getExchange().put(ClientImpl.FINISHED, Boolean.TRUE);
+//                LOG.info("----------------------on message");
+//            }
+//        });
+
+
+        LOG.debug("Getting the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+        if(dispatch == null) {
+            synchronized (this) {
+                if(dispatch == null) {
+                    LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+                    dispatch = createLocalWSServiceDispatcher(endpoint);
+                    final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
+                    final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+                    httpConduit.setMessageObserver(new MessageObserver() {
+                        @Override
+                        public void onMessage(Message message) {
+                            message.getExchange().getOutMessage().put(ClientImpl.SYNC_TIMEOUT, 0);
+                            message.getExchange().put(ClientImpl.FINISHED, Boolean.TRUE);
+                            LOG.info("----------------------on message");
+                        }
+                    });
+                }
+            }
+        }
+
+        return dispatch;
+    }
+
+
+/*    @Override
+    public MSHWebserviceSerializer getLocalClient(String domain, String endpoint) {
+        LOG.debug("Getting the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+
+
+        LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+        JaxWsProxyFactoryBean proxyFac = new JaxWsProxyFactoryBean();
+        proxyFac.setServiceClass(MSHWebserviceSerializer.class);
+        proxyFac.setAddress("local://hello");
+
+        proxyFac.getClientFactoryBean().setTransportId(LocalTransportFactory.TRANSPORT_ID);
+        MSHWebserviceSerializer dispatch = (MSHWebserviceSerializer) proxyFac.create();
+
+
+        return dispatch;
+    }*/
 
     protected void setHttpClientPolicy(HTTPClientPolicy httpClientPolicy) {
         //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
@@ -101,10 +173,18 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
-        if(keepAlive) {
+        if (keepAlive) {
             connectionType = ConnectionType.KEEP_ALIVE;
         }
         httpClientPolicy.setConnection(connectionType);
+    }
+
+    protected Dispatch<SOAPMessage> createLocalWSServiceDispatcher(String endpoint) {
+        final javax.xml.ws.Service service = javax.xml.ws.Service.create(LOCAL_SERVICE_NAME);
+        service.setExecutor(executor);
+        service.addPort(LOCAL_PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
+        final Dispatch<SOAPMessage> dispatch = service.createDispatch(LOCAL_PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        return dispatch;
     }
 
     protected Dispatch<SOAPMessage> createWSServiceDispatcher(String endpoint) {

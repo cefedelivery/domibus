@@ -27,6 +27,7 @@ import org.apache.cxf.phase.Phase;
 import org.apache.cxf.service.model.BindingInfo;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.service.model.EndpointInfo;
+import org.apache.cxf.transport.local.LocalConduit;
 import org.apache.cxf.ws.policy.PolicyConstants;
 import org.apache.cxf.ws.policy.PolicyInInterceptor;
 import org.apache.cxf.ws.security.SecurityConstants;
@@ -176,6 +177,8 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
 
         @Override
         public void handleMessage(final SoapMessage message) {
+            message.getExchange().put(LocalConduit.DIRECT_DISPATCH, "true");
+            message.put(LocalConduit.DIRECT_DISPATCH, "true");
             HeaderUtil.getHeaderQNameInOperationParam(message).add(ObjectFactory._Messaging_QNAME);
         }
 
