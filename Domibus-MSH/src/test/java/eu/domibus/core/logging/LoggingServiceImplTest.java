@@ -3,8 +3,7 @@ package eu.domibus.core.logging;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import eu.domibus.api.cluster.Command;
-import eu.domibus.api.cluster.CommandProperty;
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.jms.JMSManager;
@@ -19,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.core.DestinationResolutionException;
 
 import javax.jms.Topic;
 import java.util.List;
@@ -42,6 +40,9 @@ public class LoggingServiceImplTest {
 
     @Injectable
     protected JMSManager jmsManager;
+
+    @Injectable
+    protected SignalService signalService;
 
     @Tested
     LoggingServiceImpl loggingService;
@@ -97,56 +98,109 @@ public class LoggingServiceImplTest {
         }
     }
 
+//    @Test
+//    public void testSignalSetLoggingLevel_NoException_MessageSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+//        final String name = "eu.domibus";
+//        final String level = "INFO";
+//
+//        new Expectations(loggingService) {{
+//
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_NAME, name);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
+//            result = messageBuilder;
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//        }};
+//
+//        //tested method
+//        loggingService.signalSetLoggingLevel(name, level);
+//
+//        new Verifications() {{
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//        }};
+//    }
+
     @Test
-    public void testSignalSetLoggingLevel_NoException_MessageSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+    public void testSignalSetLoggingLevel_NoException_MessageSent() {
         final String name = "eu.domibus";
         final String level = "INFO";
 
-        new Expectations(loggingService) {{
-
-            JMSMessageBuilder.create();
-            result = messageBuilder;
-
-            messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
-            result = messageBuilder;
-            messageBuilder.property(CommandProperty.LOG_NAME, name);
-            result = messageBuilder;
-            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
-            result = messageBuilder;
-
-            messageBuilder.build();
-            result = jmsMessage;
-            }};
 
         //tested method
         loggingService.signalSetLoggingLevel(name, level);
 
         new Verifications() {{
-            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+            String actualName, actualLevel;
+            signalService.signalLoggingSetLevel(actualName = withCapture(), actualLevel = withCapture());
+            Assert.assertEquals(name, actualName);
+            Assert.assertEquals(level, actualLevel);
         }};
     }
 
+//    @Test
+//    public void testSignalSetLoggingLevel_ExceptionThrown_MessageNotSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+//        final String name = "eu.domibus";
+//        final String level = "INFO";
+//
+//        new Expectations(loggingService) {{
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_NAME, name);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
+//            result = messageBuilder;
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//            result = new DestinationResolutionException("error while sending JMS message");
+//        }};
+//
+//        try {
+//            //tested method
+//            loggingService.signalSetLoggingLevel(name, level);
+//            Assert.fail("LoggingException expected");
+//        } catch (LoggingException le) {
+//            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, le.getError());
+//            Assert.assertTrue(le.getMessage().contains("Error while sending topic message for setting logging level"));
+//        }
+//    }
+
     @Test
-    public void testSignalSetLoggingLevel_ExceptionThrown_MessageNotSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+    public void testSignalSetLoggingLevel_ExceptionThrown_MessageNotSent() {
         final String name = "eu.domibus";
         final String level = "INFO";
 
         new Expectations(loggingService) {{
-            JMSMessageBuilder.create();
-            result = messageBuilder;
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_NAME, name);
+//            result = messageBuilder;
+//            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
+//            result = messageBuilder;
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//            result = new DestinationResolutionException("error while sending JMS message");
 
-            messageBuilder.property(Command.COMMAND, Command.LOGGING_SET_LEVEL);
-            result = messageBuilder;
-            messageBuilder.property(CommandProperty.LOG_NAME, name);
-            result = messageBuilder;
-            messageBuilder.property(CommandProperty.LOG_LEVEL, level);
-            result = messageBuilder;
-
-            messageBuilder.build();
-            result = jmsMessage;
-
-            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
-            result = new DestinationResolutionException("error while sending JMS message");
+            signalService.signalLoggingSetLevel(name, level);
+            result = new LoggingException("Error while sending topic message for setting logging level");
         }};
 
         try {
@@ -202,30 +256,69 @@ public class LoggingServiceImplTest {
 
     }
 
+//    @Test
+//    public void testSignalResetLogging_NoException_MessageSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+//
+//        new Expectations(loggingService) {{
+//
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_RESET);
+//            result = messageBuilder;
+//
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//        }};
+//
+//        //tested method
+//        loggingService.signalResetLogging();
+//
+//        new Verifications() {{
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//        }};
+//    }
+
     @Test
-    public void testSignalResetLogging_NoException_MessageSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
-
-        new Expectations(loggingService) {{
-
-            JMSMessageBuilder.create();
-            result = messageBuilder;
-
-            messageBuilder.property(Command.COMMAND, Command.LOGGING_RESET);
-            result = messageBuilder;
-
-
-            messageBuilder.build();
-            result = jmsMessage;
-        }};
+    public void testSignalResetLogging_NoException_MessageSent() {
 
         //tested method
         loggingService.signalResetLogging();
 
         new Verifications() {{
-            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+            signalService.signalLoggingReset();
         }};
     }
 
+//    @Test
+//    public void testSignalLoggingReset_ExceptionThrown_MessageNotSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
+//        final String name = "eu.domibus";
+//        final String level = "INFO";
+//
+//        new Expectations(loggingService) {{
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_RESET);
+//            result = messageBuilder;
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//            result = new DestinationResolutionException("error while sending JMS message");
+//        }};
+//
+//        try {
+//            //tested method
+//            loggingService.signalResetLogging();
+//            Assert.fail("LoggingException expected");
+//        } catch (LoggingException le) {
+//            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, le.getError());
+//            Assert.assertTrue(le.getMessage().contains("Error while sending topic message for logging reset"));
+//        }
+//    }
 
     @Test
     public void testSignalLoggingReset_ExceptionThrown_MessageNotSent(final @Mocked JmsMessage jmsMessage, final @Mocked JMSMessageBuilder messageBuilder) {
@@ -233,17 +326,19 @@ public class LoggingServiceImplTest {
         final String level = "INFO";
 
         new Expectations(loggingService) {{
-            JMSMessageBuilder.create();
-            result = messageBuilder;
-
-            messageBuilder.property(Command.COMMAND, Command.LOGGING_RESET);
-            result = messageBuilder;
-
-            messageBuilder.build();
-            result = jmsMessage;
-
-            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
-            result = new DestinationResolutionException("error while sending JMS message");
+//            JMSMessageBuilder.create();
+//            result = messageBuilder;
+//
+//            messageBuilder.property(Command.COMMAND, Command.LOGGING_RESET);
+//            result = messageBuilder;
+//
+//            messageBuilder.build();
+//            result = jmsMessage;
+//
+//            jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic);
+//            result = new DestinationResolutionException("error while sending JMS message");
+            signalService.signalLoggingReset();
+            result = new LoggingException("Error while sending topic message for logging reset");
         }};
 
         try {
