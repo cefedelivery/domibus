@@ -50,7 +50,10 @@ public class SubmissionAS4Transformer {
 
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
-        collaborationInfo.setConversationId((submission.getConversationId() != null && submission.getConversationId().trim().length() > 0) ? submission.getConversationId() : this.generateConversationId());
+//        collaborationInfo.setConversationId((submission.getConversationId() != null && submission.getConversationId().trim().length() > 0)
+//                ? submission.getConversationId() : this.generateConversationId());
+        // TODO: clarify if "    " should be trimmed and thus considered empty 
+        collaborationInfo.setConversationId(submission.getConversationId() == null ? this.generateConversationId() : submission.getConversationId());
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
@@ -127,7 +130,7 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
-        if(messaging == null) {
+        if (messaging == null) {
             return result;
         }
 
