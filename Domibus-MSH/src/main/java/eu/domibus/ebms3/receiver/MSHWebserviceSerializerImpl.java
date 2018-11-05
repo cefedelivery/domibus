@@ -1,15 +1,11 @@
 package eu.domibus.ebms3.receiver;
 
-import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.jws.WebMethod;
 import javax.jws.WebResult;
-import javax.jws.WebService;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPFactory;

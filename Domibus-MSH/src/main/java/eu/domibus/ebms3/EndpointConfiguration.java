@@ -3,21 +3,14 @@ package eu.domibus.ebms3;
 import eu.domibus.ebms3.receiver.MSHWebserviceSerializerImpl;
 import eu.domibus.ebms3.receiver.SetPolicyInInterceptor;
 import org.apache.cxf.Bus;
-import org.apache.cxf.endpoint.ClientImpl;
 import org.apache.cxf.jaxws.EndpointImpl;
-import org.apache.cxf.message.Message;
-import org.apache.cxf.service.model.EndpointInfo;
 import org.apache.cxf.transport.ConduitInitiatorManager;
-import org.apache.cxf.transport.Destination;
 import org.apache.cxf.transport.DestinationFactoryManager;
-import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.transport.local.LocalTransportFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.xml.ws.Endpoint;
 import java.io.IOException;
 
@@ -55,6 +48,7 @@ public class EndpointConfiguration {
 
         EndpointImpl endpoint = new EndpointImpl(bus, MSHWebserviceSerializer);
         endpoint.setTransportId(LocalTransportFactory.TRANSPORT_ID);
+        endpoint.getInInterceptors().add(new SaveRequestToFileInInterceptor());
         endpoint.getInInterceptors().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
         endpoint.setAddress("local://hello");
         endpoint.publish();
