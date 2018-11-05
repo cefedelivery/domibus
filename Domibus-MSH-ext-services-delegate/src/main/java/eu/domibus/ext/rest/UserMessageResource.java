@@ -24,11 +24,11 @@ public class UserMessageResource {
     @Autowired
     UserMessageExtService userMessageExtService;
 
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({Exception.class})
-    public ErrorRO handleException(Exception ex) {
-        return new ErrorRO(ex.getMessage());
-    }
+//    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ExceptionHandler({Exception.class})
+//    public ErrorRO handleException(Exception ex) {
+//        return new ErrorRO(ex.getMessage());
+//    }
 
     /**
      * Gets the User Message by messageId

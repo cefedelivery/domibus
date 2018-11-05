@@ -27,11 +27,11 @@ public class MessageMonitoringResource {
     @Autowired
     MessageMonitorExtService messageMonitorExtService;
 
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({Exception.class})
-    public ErrorRO handleException(Exception ex) {
-        return new ErrorRO(ex.getMessage());
-    }
+//    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ExceptionHandler({Exception.class})
+//    public ErrorRO handleException(Exception ex) {
+//        return new ErrorRO(ex.getMessage());
+//    }
 
     @ApiOperation(value = "Get failed messages", notes = "Retrieve all the messages with the specified finalRecipient(if provided) that are currently in a SEND_FAILURE status",
             authorizations = @Authorization(value = "basicAuth"), tags = "monitoring")

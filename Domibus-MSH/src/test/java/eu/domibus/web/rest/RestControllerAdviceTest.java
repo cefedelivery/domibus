@@ -1,6 +1,7 @@
 package eu.domibus.web.rest;
 
 import eu.domibus.api.multitenancy.DomainException;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.error.RestControllerAdvice;
 import org.junit.Before;
 import org.junit.Rule;
@@ -10,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestControllerAdviceTest {
-    
+
     private MockMvc mockMvc;
 
     @InjectMocks
@@ -34,6 +36,9 @@ public class RestControllerAdviceTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
+    @Spy
+    private ErrorHandlerService errorHandlerService;
 
     @Before
     public void setup() {

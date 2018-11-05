@@ -12,6 +12,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
@@ -58,32 +59,40 @@ public class AuthenticationResource {
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
+    @Autowired
+    ErrorHandlerService errorHandlerService;
+
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
-        return handleException(ex);
+
+        return errorHandlerService.createException(ex, HttpStatus.FORBIDDEN);
+
+//        return handleException(ex);
     }
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
-        return handleException(ex);
+
+        return errorHandlerService.createException(ex, HttpStatus.FORBIDDEN);
+
+//        return handleException(ex);
     }
 
-    private ResponseEntity<ErrorRO> handleException(AuthenticationException ex) {
-        LOG.error(ex.getMessage(), ex);
+//    private ResponseEntity<ErrorRO> handleException(AuthenticationException ex) {
+//        LOG.error(ex.getMessage(), ex);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set(HttpHeaders.CONNECTION, "close");
+//
+//        return new ResponseEntity(new ErrorRO(ex.getMessage()), headers, HttpStatus.FORBIDDEN);
+//    }
 
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
-    }
-
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({DomainException.class})
-    public ErrorRO handleDomainException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
-    }
+//    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+//    @ExceptionHandler({DomainException.class})
+//    public ErrorRO handleDomainException(Exception ex) {
+//        LOG.error(ex.getMessage(), ex);
+//        return new ErrorRO(ex.getMessage());
+//    }
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @Transactional(noRollbackFor = BadCredentialsException.class)

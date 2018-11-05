@@ -7,6 +7,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.UserService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.csv.CsvServiceImpl;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import mockit.Expectations;
 import mockit.Injectable;
@@ -46,6 +47,9 @@ public class UserResourceTest {
 
     @Injectable
     private AuthUtils authUtils;
+
+    @Injectable
+    ErrorHandlerService errorHandlerService;
 
     private List<UserResponseRO> getUserResponseList() {
         final List<UserResponseRO> userResponseROList = new ArrayList<>();

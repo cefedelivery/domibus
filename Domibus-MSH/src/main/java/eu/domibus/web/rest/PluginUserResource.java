@@ -15,6 +15,7 @@ import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.PluginUserRO;
 import eu.domibus.web.rest.ro.PluginUserResultRO;
 import org.apache.cxf.common.util.StringUtils;
@@ -48,15 +49,19 @@ public class PluginUserResource {
     @Autowired
     private CsvServiceImpl csvServiceImpl;
 
+    @Autowired
+    ErrorHandlerService errorHandlerService;
+
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
-        LOG.error(ex.getMessage(), ex);
+        return errorHandlerService.createException(ex, HttpStatus.CONFLICT);
 
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.CONFLICT);
+//        LOG.error(ex.getMessage(), ex);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set(HttpHeaders.CONNECTION, "close");
+//
+//        return new ResponseEntity(new ErrorRO(ex.getMessage()), headers, HttpStatus.CONFLICT);
     }
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)

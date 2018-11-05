@@ -34,18 +34,6 @@ public class TestServiceResource {
     @Autowired
     private PartyService partyService;
 
-    @ExceptionHandler({Exception.class})
-    public ResponseEntity<ErrorRO> handleException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        //We need to send the connection header for the tomcat/chrome combination to be able to read the error messge
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.BAD_REQUEST);
-    }
-
     @RequestMapping(value = "sender", method = RequestMethod.GET)
     public String getSenderParty() {
         return partyService.getGatewayPartyIdentifier();

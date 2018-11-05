@@ -5,6 +5,7 @@ import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +21,9 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(RestControllerAdvice.class);
 
+    @Autowired
+    private ErrorHandlerService errorHandlerService;
+
     @ExceptionHandler({DomainException.class})
     public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
         return handleWrappedException(ex);
@@ -32,14 +36,24 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorRO> handleException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+//        LOG.error(ex.getMessage(), ex);
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        //We need to send the connection header for the tomcat/chrome combination to be able to read the error message
+//        headers.set(HttpHeaders.CONNECTION, "close");
+//
+//        return new ResponseEntity(new ErrorRO(ex.getMessage()), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorRO> handleWrappedException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
 
         Throwable rootCause = ExceptionUtils.getRootCause(ex) == null ? ex : ExceptionUtils.getRootCause(ex);
-        return new ResponseEntity(new ErrorRO(rootCause.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createException(rootCause, HttpStatus.INTERNAL_SERVER_ERROR);
+
+//        LOG.error(ex.getMessage(), ex);
+//
+//        Throwable rootCause = ExceptionUtils.getRootCause(ex) == null ? ex : ExceptionUtils.getRootCause(ex);
+//        return new ResponseEntity(new ErrorRO(rootCause.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
