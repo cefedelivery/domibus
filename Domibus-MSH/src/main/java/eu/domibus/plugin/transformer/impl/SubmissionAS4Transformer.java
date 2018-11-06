@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -19,6 +18,8 @@ public class SubmissionAS4Transformer {
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
+    // TODO: at least the following 2 methods have duplicate code with the one in StubDtoTransformer class.
+    // Also, the method names look similar or the same but not under the same interface; Maybe we should refactor and eliminate the duplication
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
         this.generateCollaborationInfo(submission, result);
@@ -36,7 +37,6 @@ public class SubmissionAS4Transformer {
 
         final MessageProperties messageProperties = new MessageProperties();
 
-
         for (Submission.TypedProperty propertyEntry : submission.getMessageProperties()) {
             final Property prop = new Property();
             prop.setName(propertyEntry.getKey());
@@ -50,10 +50,8 @@ public class SubmissionAS4Transformer {
 
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
-//        collaborationInfo.setConversationId((submission.getConversationId() != null && submission.getConversationId().trim().length() > 0)
-//                ? submission.getConversationId() : this.generateConversationId());
-        // TODO: clarify if "    " should be trimmed and thus considered empty 
-        collaborationInfo.setConversationId(submission.getConversationId() == null ? this.generateConversationId() : submission.getConversationId());
+        // if the conversation id is null, we generate one; otherwise we trim it and pass it forward
+        collaborationInfo.setConversationId(submission.getConversationId() == null ? this.generateConversationId() : submission.getConversationId().trim());
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
