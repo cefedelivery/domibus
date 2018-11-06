@@ -23,7 +23,7 @@ import java.util.Map;
 public class ConfigurationLoader<E> {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ConfigurationLoader.class);
-    private static final Domain NULL_DOMAIN = new Domain("null", "Null"); // this is the placeholder domain used only as a caching key for super users
+    public static final Domain NULL_DOMAIN = new Domain("null", "Null"); // this is the placeholder domain used only as a caching key for super users
 
     @Autowired
     private DomainContextProvider domainContextProvider;
