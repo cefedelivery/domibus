@@ -23,6 +23,7 @@ import java.util.Map;
 public class ConfigurationLoader<E> {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ConfigurationLoader.class);
+    private static final Domain NULL_DOMAIN = new Domain("null", "Null"); // this is the placeholder domain used only as a caching key for super users
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -31,7 +32,7 @@ public class ConfigurationLoader<E> {
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        final Domain domain = currentDomain == null ? DomainService.NULL_DOMAIN : currentDomain;
+        final Domain domain = currentDomain == null ? NULL_DOMAIN : currentDomain;
         LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
         if (this.configuration.get(domain) == null) {
             synchronized (this.configuration) {
