@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Topic;
 import java.util.List;
 
 /**
@@ -34,9 +33,6 @@ public class LoggingServiceImplTest {
 
     @Injectable
     protected DomibusConfigurationService domibusConfigurationService;
-
-    @Injectable
-    protected Topic clusterCommandTopic;
 
     @Injectable
     protected JMSManager jmsManager;
