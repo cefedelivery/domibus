@@ -19,7 +19,7 @@ public class SubmissionAS4Transformer {
     private MessageIdGenerator messageIdGenerator;
 
     // TODO: at least the following 2 methods have duplicate code with the one in StubDtoTransformer class.
-    // Also, the method names look similar or the same but not under the same interface; Maybe we should refactor and eliminate the duplication
+    // Also, the method names look similar but they are not under the same interface; Maybe we should refactor and eliminate the duplication
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
         this.generateCollaborationInfo(submission, result);
