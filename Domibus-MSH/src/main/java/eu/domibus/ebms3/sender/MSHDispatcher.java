@@ -58,7 +58,7 @@ public class MSHDispatcher {
             ex.setMshRole(MSHRole.SENDING);
             throw ex;
         }
-        return null;
+        return result;
     }
 
     protected boolean isDispatchClientCacheActivated() {

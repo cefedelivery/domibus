@@ -27,6 +27,9 @@ public class EndpointConfiguration {
     @Autowired
     MSHWebserviceSerializerImpl MSHWebserviceSerializer;
 
+    @Autowired
+    SaveRequestToFileInInterceptor saveRequestToFileInInterceptor;
+
     @Bean(name = "localMSH")
     public Endpoint createMSHEndpoint() throws IOException {
         DestinationFactoryManager dfm = bus.getExtension(DestinationFactoryManager.class);
@@ -48,7 +51,7 @@ public class EndpointConfiguration {
 
         EndpointImpl endpoint = new EndpointImpl(bus, MSHWebserviceSerializer);
         endpoint.setTransportId(LocalTransportFactory.TRANSPORT_ID);
-        endpoint.getInInterceptors().add(new SaveRequestToFileInInterceptor());
+        endpoint.getInInterceptors().add(saveRequestToFileInInterceptor);
         endpoint.getInInterceptors().add(new SetPolicyInInterceptor.CheckEBMSHeaderInterceptor());
         endpoint.setAddress("local://hello");
         endpoint.publish();

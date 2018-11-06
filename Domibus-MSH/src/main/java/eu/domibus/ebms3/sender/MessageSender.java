@@ -174,6 +174,7 @@ public class MessageSender implements MessageListener {
             LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
+            System.out.println(response);
             /*isOk = responseHandler.handle(response);
             if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
                 EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
