@@ -37,23 +37,13 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorRO> handleException(Exception ex) {
         return errorHandlerService.createException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
-//        LOG.error(ex.getMessage(), ex);
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        //We need to send the connection header for the tomcat/chrome combination to be able to read the error message
-//        headers.set(HttpHeaders.CONNECTION, "close");
-//
-//        return new ResponseEntity(new ErrorRO(ex.getMessage()), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorRO> handleWrappedException(Exception ex) {
 
         Throwable rootCause = ExceptionUtils.getRootCause(ex) == null ? ex : ExceptionUtils.getRootCause(ex);
+
         return errorHandlerService.createException(rootCause, HttpStatus.INTERNAL_SERVER_ERROR);
 
-//        LOG.error(ex.getMessage(), ex);
-//
-//        Throwable rootCause = ExceptionUtils.getRootCause(ex) == null ? ex : ExceptionUtils.getRootCause(ex);
-//        return new ResponseEntity(new ErrorRO(rootCause.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

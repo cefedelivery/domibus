@@ -3,17 +3,12 @@ package eu.domibus.web.rest;
 import eu.domibus.api.party.PartyService;
 import eu.domibus.core.message.testservice.TestService;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
-import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.web.rest.ro.TestServiceRequestRO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.List;
 

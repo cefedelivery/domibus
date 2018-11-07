@@ -77,23 +77,17 @@ public class UserResource {
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
         return errorHandlerService.createException(ex, HttpStatus.CONFLICT);
-
-//        LOG.error(ex.getMessage(), ex);
-//        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({DomainException.class})
     public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
+        //We caught it here just to check for UserManagementException and put HttpStatus.CONFLICT;  otherwise we would have delegated to general error handler
         Throwable rootException = ExceptionUtils.getRootCause(ex);
-
         if (rootException instanceof UserManagementException) {
-            return handleUserManagementException((UserManagementException) rootException);
+            return errorHandlerService.createException(rootException, HttpStatus.CONFLICT);
         }
 
         return errorHandlerService.createException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
-
-//        LOG.error(ex.getMessage(), ex);
-//        return new ResponseEntity(new ErrorRO(rootException.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

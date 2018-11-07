@@ -8,7 +8,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,12 +22,6 @@ public class UserMessageResource {
 
     @Autowired
     UserMessageExtService userMessageExtService;
-
-//    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-//    @ExceptionHandler({Exception.class})
-//    public ErrorRO handleException(Exception ex) {
-//        return new ErrorRO(ex.getMessage());
-//    }
 
     /**
      * Gets the User Message by messageId
