@@ -8,7 +8,6 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,37 +28,28 @@ public class SubmissionAS4TransformerTest {
     SubmissionAS4Transformer submissionAS4Transformer;
 
     @Test
-    public void testTransformFromSubmissionNullConversationId(final @Mocked Submission submission) {
+    public void testTransformFromSubmission(final @Mocked Submission submission) {
+        String submittedConvId = "submittedConvId";
+        String generatedConvId = "guid";
+
         new Expectations() {{
+            messageIdGenerator.generateMessageId();
+            result = generatedConvId;
+
             submission.getConversationId();
             result = null;
-        }};
-
-        String conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
-        Assert.assertTrue(conversationId == null);
-
-    }
-
-    @Test
-    public void testTransformFromSubmissionEmptyConversationId(final @Mocked Submission submission) {
-        new Expectations() {{
-            submission.getConversationId();
             result = "   ";
-        }};
-
-        String conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
-        Assert.assertTrue(StringUtils.isEmpty(conversationId));
-    }
-
-    @Test
-    public void testTransformFromSubmissionNonEmptyConversationId(final @Mocked Submission submission) {
-        String submittedConvId = "submittedConvId";
-        new Expectations() {{
-            submission.getConversationId();
             result = submittedConvId;
         }};
 
         String conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
-        Assert.assertTrue(conversationId.equals(submittedConvId));
+        Assert.assertEquals(generatedConvId, conversationId);
+
+        conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
+        Assert.assertEquals("", conversationId);
+
+        conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
+        Assert.assertEquals(submittedConvId, conversationId);
     }
+
 }
