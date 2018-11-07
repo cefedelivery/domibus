@@ -36,14 +36,14 @@ public class RestControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({Exception.class})
     public ResponseEntity<ErrorRO> handleException(Exception ex) {
-        return errorHandlerService.createException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createResponse(ex);
     }
 
     private ResponseEntity<ErrorRO> handleWrappedException(Exception ex) {
 
         Throwable rootCause = ExceptionUtils.getRootCause(ex) == null ? ex : ExceptionUtils.getRootCause(ex);
 
-        return errorHandlerService.createException(rootCause, HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createResponse(rootCause);
 
     }
 }

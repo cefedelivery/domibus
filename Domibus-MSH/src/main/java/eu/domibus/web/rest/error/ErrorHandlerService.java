@@ -8,13 +8,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-
 @Service
-public class ErrorHandlerService  {
+public class ErrorHandlerService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorHandlerService.class);
 
-    public ResponseEntity<ErrorRO> createException(Throwable ex, HttpStatus  status) {
+    public ResponseEntity<ErrorRO> createResponse(Throwable ex) {
+        return this.createResponse(ex);
+    }
+
+    public ResponseEntity<ErrorRO> createResponse(Throwable ex, HttpStatus status) {
         LOG.error(ex.getMessage(), ex);
 
         HttpHeaders headers = new HttpHeaders();

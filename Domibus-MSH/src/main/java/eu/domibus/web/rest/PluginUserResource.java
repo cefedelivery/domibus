@@ -49,11 +49,11 @@ public class PluginUserResource {
     private CsvServiceImpl csvServiceImpl;
 
     @Autowired
-    ErrorHandlerService errorHandlerService;
+    private ErrorHandlerService errorHandlerService;
 
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
-        return errorHandlerService.createException(ex, HttpStatus.CONFLICT);
+        return errorHandlerService.createResponse(ex, HttpStatus.CONFLICT);
     }
 
     @RequestMapping(value = {"/users"}, method = RequestMethod.GET)

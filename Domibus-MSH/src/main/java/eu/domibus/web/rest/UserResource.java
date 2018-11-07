@@ -64,7 +64,7 @@ public class UserResource {
     private AuthUtils authUtils;
 
     @Autowired
-    ErrorHandlerService errorHandlerService;
+    private ErrorHandlerService errorHandlerService;
 
     private UserService getUserService() {
         if (authUtils.isSuperAdmin()) {
@@ -76,7 +76,7 @@ public class UserResource {
 
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
-        return errorHandlerService.createException(ex, HttpStatus.CONFLICT);
+        return errorHandlerService.createResponse(ex, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({DomainException.class})
@@ -84,10 +84,10 @@ public class UserResource {
         //We caught it here just to check for UserManagementException and put HttpStatus.CONFLICT;  otherwise we would have delegated to general error handler
         Throwable rootException = ExceptionUtils.getRootCause(ex);
         if (rootException instanceof UserManagementException) {
-            return errorHandlerService.createException(rootException, HttpStatus.CONFLICT);
+            return errorHandlerService.createResponse(rootException, HttpStatus.CONFLICT);
         }
 
-        return errorHandlerService.createException(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createResponse(ex);
     }
 
     /**

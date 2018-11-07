@@ -57,16 +57,16 @@ public class AuthenticationResource {
     protected DomainCoreConverter domainCoreConverter;
 
     @Autowired
-    ErrorHandlerService errorHandlerService;
+    protected ErrorHandlerService errorHandlerService;
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
-        return errorHandlerService.createException(ex, HttpStatus.FORBIDDEN);
+        return errorHandlerService.createResponse(ex, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
-        return errorHandlerService.createException(ex, HttpStatus.FORBIDDEN);
+        return errorHandlerService.createResponse(ex, HttpStatus.FORBIDDEN);
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
