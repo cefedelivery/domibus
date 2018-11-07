@@ -14,6 +14,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.persistence.RollbackException;
 
+/**
+ * @author Ion Perpegel
+ * @since 4.0
+ * <p>
+ * A global error handler for REST interfaces;
+ * the last resort if the error is not caught in the controller where it originated
+ */
+
 @ControllerAdvice
 @RequestMapping(produces = "application/vnd.error+json")
 public class RestControllerAdvice extends ResponseEntityExceptionHandler {

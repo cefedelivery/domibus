@@ -1,9 +1,13 @@
-package eu.domibus.pki;
+package eu.domibus.common.exception;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.common.exception.ConfigurationException;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
+import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.PolicyServiceImpl;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -13,63 +17,45 @@ import org.apache.neethi.Policy;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- * @author Arun Raj
- * @since 3.3
+ * @author Ion Perpegel
+ * @since 4.1
  */
 @RunWith(JMockit.class)
-public class PolicyServiceImplTest {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PolicyServiceImplTest.class);
-    private static final String TEST_RESOURCES_DIR = "./src/test/resources";
-    @Injectable
-    DomibusConfigurationService domibusConfigurationService;
-
-    @Injectable
-    Bus bus;
+public class RestErrorHandlerServiceTest {
 
     @Tested
-    PolicyServiceImpl policyService;
+    ErrorHandlerService errorHandlerService;
 
     @Test
-    public void testIsNoSecurityPolicy_NullPolicy() {
-        //when null policy is specified
-        boolean result1 = policyService.isNoSecurityPolicy(null);
-        Assert.assertTrue("Expected NoSecurityPolicy as true when null input provided", result1 == true);
+    public void testCreateResponseWithStatus() {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String errorMessage = "Error occurred";
+        Exception ex = new Exception(errorMessage);
+
+        ResponseEntity<ErrorRO> result = errorHandlerService.createResponse(ex, status);
+
+        assertEquals(status, result.getStatusCode());
+        assertEquals("close", result.getHeaders().get(HttpHeaders.CONNECTION).get(0));
+        assertEquals(errorMessage, result.getBody().getMessage());
     }
 
     @Test
-    public void testIsNoSecurityPolicy_DoNothingPolicy(@Injectable final Policy doNothingPolicy) {
-        //when doNothingPolicy.xml is specified
-        new Expectations() {{
-            doNothingPolicy.isEmpty();
-            result = true;
-        }};
+    public void testCreateResponse() {
+        String errorMessage = "Error occurred";
+        Exception ex = new Exception(errorMessage);
 
-        boolean result2 = policyService.isNoSecurityPolicy(doNothingPolicy);
-        Assert.assertTrue(result2 == true);
+        ResponseEntity<ErrorRO> result = errorHandlerService.createResponse(ex);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+        assertEquals("close", result.getHeaders().get(HttpHeaders.CONNECTION).get(0));
+        assertEquals(errorMessage, result.getBody().getMessage());
     }
-
-    @Test
-    public void testIsNoSecurityPolicy_SignOnPolicy(@Injectable final Policy signOnlyPolicy) {
-        new Expectations() {{
-            signOnlyPolicy.isEmpty();
-            result = false;
-        }};
-
-        boolean result3 = policyService.isNoSecurityPolicy(signOnlyPolicy);
-        Assert.assertTrue(result3 == false);
-    }
-
-    @Test
-    public void testParsePolicyException() {
-
-        try {
-            policyService.parsePolicy("NonExistentFileLocation");
-        } catch (Exception e) {
-            Assert.assertTrue("Expecting ConfigurationException", e instanceof ConfigurationException);
-        }
-    }
-
 }

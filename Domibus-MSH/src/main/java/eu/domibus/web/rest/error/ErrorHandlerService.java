@@ -8,6 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author Ion Perpegel
+ * @since 4.1
+ * <p>
+ * A service for packaging errors as REST Responses
+ * It is called from the global error handler as well as from custom error handlers
+ * It closes the connection in order to avoid a chrome-tomcat combination error
+ */
+
 @Service
 public class ErrorHandlerService {
 
