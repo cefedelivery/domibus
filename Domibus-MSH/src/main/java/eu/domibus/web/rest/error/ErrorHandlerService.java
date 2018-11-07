@@ -14,7 +14,7 @@ public class ErrorHandlerService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ErrorHandlerService.class);
 
     public ResponseEntity<ErrorRO> createResponse(Throwable ex) {
-        return this.createResponse(ex);
+        return this.createResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public ResponseEntity<ErrorRO> createResponse(Throwable ex, HttpStatus status) {
