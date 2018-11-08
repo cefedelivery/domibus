@@ -35,17 +35,9 @@ import static org.apache.commons.lang3.reflect.FieldUtils.readField;
 public class LoggingServiceImpl implements LoggingService {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(LoggingServiceImpl.class);
 
-//    public static final String COMMAND_LOG_LEVEL = "LOG_LEVEL";
-//    public static final String COMMAND_LOG_NAME = "LOG_NAME";
-
     @Autowired
     protected DomibusConfigurationService domibusConfigurationService;
 
-//    @Autowired
-//    protected Topic clusterCommandTopic;
-//
-//    @Autowired
-//    protected JMSManager jmsManager;
 
     @Autowired
     protected SignalService signalService;

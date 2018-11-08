@@ -27,7 +27,6 @@ import java.util.Map;
 /**
  * Created by kochc01 on 02.03.2016.
  */
-
 @Service(value = "controllerListenerService")
 public class ControllerListenerService implements MessageListener, CommandSkipService {
 

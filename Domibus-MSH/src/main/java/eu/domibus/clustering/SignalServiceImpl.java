@@ -49,7 +49,7 @@ public class SignalServiceImpl implements SignalService {
         jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
                 .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
                 .property(MessageConstants.DOMAIN, domain.getCode())
-                .build(), clusterCommandTopic);
+                .build(), clusterCommandTopic, true);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SignalServiceImpl implements SignalService {
         jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
                 .property(Command.COMMAND, Command.RELOAD_PMODE)
                 .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build(), clusterCommandTopic);
+                .build(), clusterCommandTopic, true);
     }
 
     @Override
