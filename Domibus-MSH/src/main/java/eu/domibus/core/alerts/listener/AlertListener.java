@@ -33,10 +33,10 @@ public class AlertListener {
             domainContextProvider.setCurrentDomain(domain);
             LOG.debug("Alert received:[{}] for domain:[{}]", alert, domain);
         } else {
+            domainContextProvider.clearCurrentDomain();
             LOG.debug("Super alert received:[{}]", alert);
         }
         alertDispatcherService.dispatch(alert);
     }
-
 
 }
