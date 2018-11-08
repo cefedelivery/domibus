@@ -41,15 +41,15 @@ public class AuthenticatorListener {
             selector = "selector = 'accountDisabled'")
     public void onAccountDisabled(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
         saveEventAndTriggerAlert(event, domain);
-
     }
 
     private void saveEventAndTriggerAlert(Event event, final String domain) {
         if (StringUtils.isNotEmpty(domain)) {
             domainContextProvider.setCurrentDomain(domain);
-            LOG.debug("Authentication event:[{}] for domain:[{}].",event,domain);
-        }else{
-            LOG.debug("Authentication event:[{}] for super user.",event);
+            LOG.debug("Authentication event:[{}] for domain:[{}].", event, domain);
+        } else {
+            domainContextProvider.clearCurrentDomain();
+            LOG.debug("Authentication event:[{}] for super user.", event);
         }
         eventService.persistEvent(event);
         final Alert alertOnEvent = alertService.createAlertOnEvent(event);
