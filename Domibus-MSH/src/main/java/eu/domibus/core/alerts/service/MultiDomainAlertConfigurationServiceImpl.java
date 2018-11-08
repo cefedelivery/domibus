@@ -480,10 +480,14 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType) {
         ConfigurationLoader<AlertEventModuleConfiguration> alertEventConfigurationLoader = null;
-        if (alertType == AlertType.PASSWORD_IMMINENT_EXPIRATION)
+        if (alertType == AlertType.PASSWORD_IMMINENT_EXPIRATION) {
             alertEventConfigurationLoader = imminentPasswordExpirationConfigurationLoader;
-        else if (alertType == AlertType.PASSWORD_EXPIRED)
+        }
+        else if (alertType == AlertType.PASSWORD_EXPIRED) {
             alertEventConfigurationLoader = expiredPasswordConfigurationLoader;
+        } else {
+            throw new IllegalArgumentException("Invalid alert type");
+        }
 
         return alertEventConfigurationLoader.getConfiguration(new ConfigurationReader(alertType)::readAlertConfiguration);
     }
