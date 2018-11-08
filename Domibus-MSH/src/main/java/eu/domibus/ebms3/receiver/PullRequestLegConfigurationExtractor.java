@@ -47,7 +47,7 @@ public class PullRequestLegConfigurationExtractor extends AbstractSignalLegConfi
             setUpMessage(messageExchangeConfiguration.getPmodeKey());
             return legConfiguration;
         } catch (PModeException p) {
-            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, 
+            EbMS3Exception ebMS3Exception = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010,
                     "Error for pullrequest with mpc:" + pullRequest.getMpc() + " " + p.getMessage(), null, p);
             LOG.warn("Could not extract pull request leg configuration from pMode", ebMS3Exception);
             throw ebMS3Exception;
