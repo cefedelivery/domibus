@@ -30,7 +30,7 @@ public class UserPasswordHistoryDaoImpl extends BasicDao<UserPasswordHistory> im
     public void removePasswords(final User user, int oldPasswordsToKeep) {
         UserPasswordHistory[] oldEntries = getPasswordHistory(user, 0).toArray(new UserPasswordHistory[]{});
         if (oldEntries.length > oldPasswordsToKeep) {
-            Arrays.stream(oldEntries).skip(oldPasswordsToKeep).forEach(entry -> this.delete(entry));
+            Arrays.stream(oldEntries).skip(oldPasswordsToKeep).forEach(entry -> this.delete(entry)); // NOSONAR
         }
     }
 

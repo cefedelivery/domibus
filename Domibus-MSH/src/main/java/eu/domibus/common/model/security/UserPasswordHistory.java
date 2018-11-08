@@ -27,7 +27,7 @@ public class UserPasswordHistory extends AbstractBaseEntity {
 
     @NotNull
     @Column(name = "USER_PASSWORD")
-    private String password;
+    private String password; //NOSONAR
 
     @Column(name = "PASSWORD_CHANGE_DATE")
     private LocalDateTime passwordChangeDate;
