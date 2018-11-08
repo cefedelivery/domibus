@@ -72,9 +72,7 @@ public class AlertServiceImpl implements AlertService {
     @Override
     @Transactional
     public eu.domibus.core.alerts.model.service.Alert createAlertOnEvent(eu.domibus.core.alerts.model.service.Event event) {
-        LOG.info("createAlertOnEvent... event=[{}]", event);
         final Event eventEntity = eventDao.read(event.getEntityId());
-        LOG.info("createAlertOnEvent... eventEntity=[{}] event.getEntityId()=[{}]", eventEntity, event.getEntityId());
         Alert alert = new Alert();
         alert.addEvent(eventEntity);
         alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));

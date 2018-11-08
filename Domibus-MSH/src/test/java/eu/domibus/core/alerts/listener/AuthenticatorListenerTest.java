@@ -8,6 +8,7 @@ import eu.domibus.core.alerts.service.AlertService;
 import eu.domibus.core.alerts.service.EventService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,7 +36,10 @@ public class AuthenticatorListenerTest {
     public void onLoginFailure(@Mocked final Event event, @Mocked final Alert alert) {
         authenticatorListener.onLoginFailure(event, null);
         new Verifications() {{
-            domainContextProvider.setCurrentDomain(withAny(new Domain()));times=0;
+            domainContextProvider.setCurrentDomain(withAny(new Domain()));
+            times = 0;
+            domainContextProvider.clearCurrentDomain();
+            times = 1;
             eventService.persistEvent(event);
             alertService.createAlertOnEvent(event);
             alertService.enqueueAlert(alert);
@@ -58,5 +62,6 @@ public class AuthenticatorListenerTest {
             alertService.enqueueAlert(alert);
         }};
     }
+
 
 }
