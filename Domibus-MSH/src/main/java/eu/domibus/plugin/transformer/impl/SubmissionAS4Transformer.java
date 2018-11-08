@@ -3,6 +3,7 @@ package eu.domibus.plugin.transformer.impl;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -176,7 +177,8 @@ public class SubmissionAS4Transformer {
             }
         }
         if (partInfo.getFileName() != null) {
-            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), null));
+            final String fileNameWithoutPath = FilenameUtils.getName(partInfo.getFileName());
+            properties.add(new Submission.TypedProperty("FileName",  fileNameWithoutPath, null));
         }
         result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), null, null);
     }
