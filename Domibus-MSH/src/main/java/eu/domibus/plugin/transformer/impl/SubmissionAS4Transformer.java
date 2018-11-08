@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -36,7 +35,6 @@ public class SubmissionAS4Transformer {
 
         final MessageProperties messageProperties = new MessageProperties();
 
-
         for (Submission.TypedProperty propertyEntry : submission.getMessageProperties()) {
             final Property prop = new Property();
             prop.setName(propertyEntry.getKey());
@@ -50,7 +48,9 @@ public class SubmissionAS4Transformer {
 
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
-        collaborationInfo.setConversationId((submission.getConversationId() != null && submission.getConversationId().trim().length() > 0) ? submission.getConversationId() : this.generateConversationId());
+        // if the conversation id is null, we generate one; otherwise we trim it and pass it forward
+        String conversationId = submission.getConversationId();
+        collaborationInfo.setConversationId(conversationId == null ? this.generateConversationId() : conversationId.trim());
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
@@ -127,7 +127,7 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
-        if(messaging == null) {
+        if (messaging == null) {
             return result;
         }
 
