@@ -170,14 +170,9 @@ export class UserComponent implements OnInit, DirtyOperations {
   getUsers(): void {
     this.isBusy = true;
     this.userService.getUsers(this.filter).subscribe(results => {
-      const domains = this.domains;
-      if (domains) {
-        results.forEach(user => {
-          const domain = domains.find(d => d.code == user.domain);
-          if (domain)
-            user.domainName = domain.name;
-        });
-      }
+      results.forEach(user => {
+        this.setDomainName(user);
+      });
       this.users = results;
       this.isBusy = false;
     }, err => {
@@ -185,6 +180,16 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
     this.dirty = false;
     this.areRowsDeleted = false;
+  }
+
+  private setDomainName(user) {
+    const domains = this.domains;
+    if (domains) {
+      const domain = domains.find(d => d.code == user.domain);
+      if (domain) {
+        user.domainName = domain.name;
+      }
+    }
   }
 
   getUserRoles(): void {
@@ -291,6 +296,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     user.email = editForm.email;
     user.roles = editForm.role;
     user.domain = editForm.domain;
+    this.setDomainName(user);
     user.password = editForm.password;
     user.active = editForm.active;
 
