@@ -1,4 +1,4 @@
-package eu.domibus.common.exception;
+package eu.domibus.web.rest.error;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  * @since 4.1
  */
 @RunWith(JMockit.class)
-public class RestErrorHandlerServiceTest {
+public class ErrorHandlerServiceTest {
 
     @Tested
     ErrorHandlerService errorHandlerService;
