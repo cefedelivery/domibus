@@ -5,7 +5,6 @@ import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -101,6 +100,62 @@ public class CRLServiceImplTest {
         }};
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertFalse(certificateRevoked);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testIsCertificateRevokedWithAllProtocolsExcluded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl"; // excluded
+        final String crlUrl2 = "ldap2://domain2.crl"; // unknown
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            domibusPropertyProvider.getProperty(CRLServiceImpl.CRL_EXCLUDED_PROTOCOLS);
+            returns("ftp,http");
+        }};
+        crlService.isCertificateRevoked(certificate);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testIsCertificateRevokedWithCRLNotDownloaded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl";
+        final List<String> crlUrlList = Arrays.asList(crlUrl1);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            crlUtil.downloadCRL(crlUrl1);
+            result = new DomibusCRLException();
+        }};
+        crlService.isCertificateRevoked(certificate);
+    }
+
+    @Test
+    public void testIsCertificateRevokedWithSomeProtocolsExcluded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl";
+        final String crlUrl2 = "http://domain2.crl";
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            domibusPropertyProvider.getProperty(CRLServiceImpl.CRL_EXCLUDED_PROTOCOLS);
+            returns("ftp");
+        }};
+
+        crlService.isCertificateRevoked(certificate);
+
+        new Verifications() {{
+            crlService.isCertificateRevoked(certificate, crlUrl1);
+            times = 0;
+
+            crlService.isCertificateRevoked(certificate, crlUrl2);
+            times = 1;
+        }};
     }
 
     @Test
