@@ -1,16 +1,13 @@
 package eu.domibus.clustering;
 
 import eu.domibus.api.cluster.Command;
-import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.cluster.CommandService;
-import eu.domibus.api.cluster.CommandSkipService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.MessageConstants;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import java.lang.management.ManagementFactory;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +24,7 @@ import java.util.Map;
  * Created by kochc01 on 02.03.2016.
  */
 @Service(value = "controllerListenerService")
-public class ControllerListenerService implements MessageListener, CommandSkipService {
+public class ControllerListenerService implements MessageListener {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ControllerListenerService.class);
 
@@ -66,11 +62,7 @@ public class ControllerListenerService implements MessageListener, CommandSkipSe
             return;
         }
 
-        Map<String, String> commandProperties = getCommandProperties(message);
-
-        if (!skipCommandSameServer(command, domain, commandProperties)) {
-            commandService.executeCommand(command, domain, commandProperties);
-        }
+        commandService.executeCommand(command, domain,  getCommandProperties(message));
 
     }
 
@@ -95,33 +87,6 @@ public class ControllerListenerService implements MessageListener, CommandSkipSe
             LOG.error("An error occurred while trying to extract message properties: ", e);
         }
         return properties;
-    }
-
-
-
-    /**
-     * Returns true if the commands is send to same server
-     * @param command
-     * @param domain
-     * @param commandProperties
-     * @return
-     */
-    @Override
-    public boolean skipCommandSameServer(final String command, final Domain domain, Map<String, String> commandProperties) {
-        String originServerName = commandProperties.get(CommandProperty.ORIGIN_SERVER);
-
-        //execute the command
-        if (StringUtils.isBlank(originServerName)) {
-            return false;
-        }
-
-        final String serverName = ManagementFactory.getRuntimeMXBean().getName();
-
-        if (serverName.equalsIgnoreCase(originServerName)) {
-            LOG.info("Command [{}] for domain [{}] not executed as origin and actual server signature is the same [{}]", command, domain, serverName);
-            return true;
-        }
-        return false;
     }
 
 

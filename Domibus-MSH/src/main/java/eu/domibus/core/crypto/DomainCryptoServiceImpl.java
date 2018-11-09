@@ -53,12 +53,6 @@ public class DomainCryptoServiceImpl extends Merlin implements DomainCryptoServi
     @Autowired
     protected CertificateService certificateService;
 
-//    @Autowired
-//    protected JMSManager jmsManager;
-//
-//    @Autowired
-//    protected Topic clusterCommandTopic;
-
     @Autowired
     protected SignalService signalService;
 

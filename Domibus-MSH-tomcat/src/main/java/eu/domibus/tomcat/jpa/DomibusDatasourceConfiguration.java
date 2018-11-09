@@ -46,4 +46,5 @@ public class DomibusDatasourceConfiguration {
     public PrefixedProperties xaProperties() {
         return new PrefixedProperties(domibusProperties, "domibus.datasource.xa.property.");
     }
+
 }
