@@ -78,7 +78,7 @@ public class CRLServiceImplTest {
             returns(crlUrlList, crlUrlList);
 
             crlService.isCertificateRevoked(certificate, crlUrl1);
-            returns(false, true, false);
+            returns(false, true);
         }};
         //certificate is valid
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);

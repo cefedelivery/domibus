@@ -31,6 +31,8 @@ public class CRLServiceImpl implements CRLService {
 
     private List<String> supportedCrlProtocols;
 
+    private Object supportedCrlProtocolsLock = new Object();
+
     @Override
     public boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException {
         List<String> crlDistributionPoints = crlUtil.getCrlDistributionPoints(cert);
@@ -131,7 +133,7 @@ public class CRLServiceImpl implements CRLService {
 
     private List<String> getSupportedCrlProtocols() {
         if (supportedCrlProtocols == null) {
-            synchronized(supportedCrlProtocols) {
+            synchronized (supportedCrlProtocolsLock) {
                 List<String> list = Arrays.stream(CRLUrlType.values()).map(c -> c.getPrefix()).collect(Collectors.toList());
                 final String excludedProtocolsList = domibusPropertyProvider.getProperty(CRL_EXCLUDED_PROTOCOLS);
                 if (!StringUtils.isEmpty(excludedProtocolsList)) {
