@@ -64,8 +64,8 @@ public class SubmissionAS4TransformerTest {
 
 
         final PartInfo partInfo = objectFactory.createPartInfo();
-        final String fileNameWithoutPath = UUID.randomUUID() + ".payload";
-        partInfo.setFileName(File.separator + "domibus" + File.separator + "payloads" + File.separator + fileNameWithoutPath);
+        final String fileNameWithoutPath = createFileName();
+        partInfo.setFileName(createFileNameWithFullPath(fileNameWithoutPath));
         final List<PartInfo> partInfoList = Collections.singletonList(partInfo);
 
         final Set<PartyId> fromPartyIdSet = createPartyId(objectFactory, "domibus-blue");
@@ -115,17 +115,12 @@ public class SubmissionAS4TransformerTest {
         }};
     }
 
-    private Set<PartyId> createPartyId(ObjectFactory objectFactory, String partyIdValue) {
-        final PartyId partyId = objectFactory.createPartyId();
-        partyId.setValue(partyIdValue);
-        partyId.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
-        return Collections.singleton(partyId);
-    }
+
 
     @Test
     public void testAddPayload() {
-        final String fileNameWithoutPath = UUID.randomUUID() + ".payload";
-        final String fileNameFull = File.separator + "domibus" + File.separator + "payloads" + File.separator + fileNameWithoutPath;
+        final String fileNameWithoutPath = createFileName();
+        final String fileNameFull = createFileNameWithFullPath(fileNameWithoutPath);
 
         final Submission submission = new Submission();
         final PartInfo partInfo = objectFactory.createPartInfo();
@@ -157,6 +152,8 @@ public class SubmissionAS4TransformerTest {
 
     }
 
+
+
     @Test
     public void testTransformFromMessaging_NullUserMessage_TransformationNOK() {
 
@@ -164,5 +161,20 @@ public class SubmissionAS4TransformerTest {
 
         final Submission submission = submissionAS4Transformer.transformFromMessaging(userMessage);
         Assert.assertNotNull(submission);
+    }
+
+    private String createFileName() {
+        return UUID.randomUUID() + ".payload";
+    }
+
+    private String createFileNameWithFullPath(String fileNameWithoutPath) {
+        return File.separator + "domibus" + File.separator + "payloads" + File.separator + fileNameWithoutPath;
+    }
+
+    private Set<PartyId> createPartyId(ObjectFactory objectFactory, String partyIdValue) {
+        final PartyId partyId = objectFactory.createPartyId();
+        partyId.setValue(partyIdValue);
+        partyId.setType("urn:oasis:names:tc:ebcore:partyid-type:unregistered");
+        return Collections.singleton(partyId);
     }
 }
