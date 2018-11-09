@@ -171,7 +171,7 @@ public class SubmissionAS4Transformer {
         return result;
     }
 
-    private void addPayload(Submission result, PartInfo partInfo) {
+    protected void addPayload(Submission result, PartInfo partInfo) {
         final Collection<Submission.TypedProperty> properties = new ArrayList<>();
         if (partInfo.getPartProperties() != null) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
