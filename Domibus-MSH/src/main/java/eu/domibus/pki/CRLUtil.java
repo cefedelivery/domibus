@@ -1,6 +1,8 @@
 package eu.domibus.pki;
 
 import eu.domibus.api.util.HttpUtil;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -34,6 +36,8 @@ import java.util.List;
 @Service
 public class CRLUtil {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CRLUtil.class);
+
     /** LDAP attribute for CRL */
     private static final String LDAP_CRL_ATTRIBUTE = "certificateRevocationList;binary";
 
@@ -62,6 +66,8 @@ public class CRLUtil {
      * Downloads CRL from the given URL. Supports loading the crl using http, https, ftp based,  classpath
      */
     X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
+        LOG.debug("Downloading CRL from url [{}]", crlURL);
+
         URL url;
         try {
             url = getCrlURL(crlURL);
@@ -96,6 +102,8 @@ public class CRLUtil {
 
      */
     X509CRL downloadCRLfromLDAP(String ldapURL) throws DomibusCRLException {
+        LOG.debug("Downloading CRL from LDAP url [{}]", ldapURL);
+
         Hashtable<String, String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, ldapURL);

@@ -1,9 +1,11 @@
 package eu.domibus.pki;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,6 +31,9 @@ public class CRLServiceImplTest {
 
     @Injectable
     CRLUtil crlUtil;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
     X509CRL x509CRL;
@@ -58,8 +63,7 @@ public class CRLServiceImplTest {
     public void testIsCertificateRevoked(@Injectable final X509Certificate certificate) throws Exception {
         BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
         final String crlUrl1 = "http://domain1.crl";
-        final String crlUrl2 = "http://domain2.crl";
-        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+        final List<String> crlUrlList = Arrays.asList(crlUrl1);
 
         //stubbing static method
         new MockUp<CRLUrlType>() {
@@ -75,19 +79,12 @@ public class CRLServiceImplTest {
 
             crlService.isCertificateRevoked(certificate, crlUrl1);
             returns(false, true, false);
-
-            crlService.isCertificateRevoked(certificate, crlUrl2);
-            returns(false, true, true);
         }};
-        //certificate is valid in both CRLs
+        //certificate is valid
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertFalse(certificateRevoked);
 
-        //certificate is revoked in both CRLs
-        certificateRevoked = crlService.isCertificateRevoked(certificate);
-        assertTrue(certificateRevoked);
-
-        //certificate is revoked in the second CRL
+        //certificate is revoked
         certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertTrue(certificateRevoked);
     }
