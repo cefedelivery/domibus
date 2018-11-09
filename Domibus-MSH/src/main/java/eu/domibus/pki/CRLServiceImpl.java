@@ -49,12 +49,6 @@ public class CRLServiceImpl implements CRLService {
             try {
                 // once checked, stop checking, no matter if the outcome was true or false
                 return isCertificateRevoked(cert, crlDistributionPointUrl);
-
-//                if (isCertificateRevoked(cert, crlDistributionPointUrl)) {
-//                    return true;
-//                } else {
-//                    return false;
-//                }
             } catch (DomibusCRLException ex) {
                 LOG.warn("Could not check certificate against CRL url [{}]", crlDistributionPointUrl, ex);
                 continue; // for clarity: continue with the next CRL url, until one usable is found
@@ -135,15 +129,17 @@ public class CRLServiceImpl implements CRLService {
         return false;
     }
 
-    private List<String> getSupportedCrlProtocols() { //TODO synchronized
+    private List<String> getSupportedCrlProtocols() {
         if (supportedCrlProtocols == null) {
-            List<String> list = Arrays.stream(CRLUrlType.values()).map(c -> c.getPrefix()).collect(Collectors.toList());
-            final String excludedProtocolsList = domibusPropertyProvider.getProperty(CRL_EXCLUDED_PROTOCOLS);
-            if (!StringUtils.isEmpty(excludedProtocolsList)) {
-                List<String> excluded = Arrays.stream(excludedProtocolsList.split(",")).map(p -> p.trim() + "://").collect(Collectors.toList());
-                list.removeAll(excluded);
+            synchronized(supportedCrlProtocols) {
+                List<String> list = Arrays.stream(CRLUrlType.values()).map(c -> c.getPrefix()).collect(Collectors.toList());
+                final String excludedProtocolsList = domibusPropertyProvider.getProperty(CRL_EXCLUDED_PROTOCOLS);
+                if (!StringUtils.isEmpty(excludedProtocolsList)) {
+                    List<String> excluded = Arrays.stream(excludedProtocolsList.split(",")).map(p -> p.trim() + "://").collect(Collectors.toList());
+                    list.removeAll(excluded);
+                }
+                supportedCrlProtocols = list;
             }
-            supportedCrlProtocols = list;
         }
         return supportedCrlProtocols;
     }
