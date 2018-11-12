@@ -47,9 +47,10 @@ public class AuthenticatorListener {
     private void saveEventAndTriggerAlert(Event event, final String domain) {
         if (StringUtils.isNotEmpty(domain)) {
             domainContextProvider.setCurrentDomain(domain);
-            LOG.debug("Authentication event:[{}] for domain:[{}].",event,domain);
-        }else{
-            LOG.debug("Authentication event:[{}] for super user.",event);
+            LOG.debug("Authentication event:[{}] for domain:[{}].", event, domain);
+        } else {
+            domainContextProvider.clearCurrentDomain();
+            LOG.debug("Authentication event:[{}] for super user.", event);
         }
         eventService.persistEvent(event);
         final Alert alertOnEvent = alertService.createAlertOnEvent(event);

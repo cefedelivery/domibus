@@ -2,7 +2,6 @@ package eu.domibus.web.rest;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.util.WarningUtil;
@@ -12,12 +11,12 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
@@ -30,7 +29,6 @@ import org.springframework.security.web.authentication.logout.CookieClearingLogo
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -58,33 +56,17 @@ public class AuthenticationResource {
     @Autowired
     protected DomainCoreConverter domainCoreConverter;
 
+    @Autowired
+    protected ErrorHandlerService errorHandlerService;
+
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
-        LOG.error(ex.getMessage(), ex);
-
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
+        return errorHandlerService.createResponse(ex, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorRO> handleAuthenticationException(AuthenticationException ex) {
-        LOG.error(ex.getMessage(), ex);
-
-        ErrorRO error = new ErrorRO(ex.getMessage());
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONNECTION, "close");
-
-        return new ResponseEntity(error, headers, HttpStatus.FORBIDDEN);
-    }
-
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({DomainException.class})
-    public ErrorRO handleDomainException(Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ErrorRO(ex.getMessage());
+        return errorHandlerService.createResponse(ex, HttpStatus.FORBIDDEN);
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)

@@ -12,6 +12,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.security.AuthenticationService;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import mockit.*;
@@ -52,6 +53,9 @@ public class AuthenticationResourceTest {
 
     @Injectable
     DomainCoreConverter domainCoreConverter;
+
+    @Injectable
+    ErrorHandlerService errorHandlerService;
 
     @Mocked
     Logger LOG;

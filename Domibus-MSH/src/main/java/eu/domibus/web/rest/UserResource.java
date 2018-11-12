@@ -20,6 +20,7 @@ import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.ext.rest.ErrorRO;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.UserResponseRO;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class UserResource {
     @Autowired
     private AuthUtils authUtils;
 
+    @Autowired
+    private ErrorHandlerService errorHandlerService;
+
     private UserService getUserService() {
         if (authUtils.isSuperAdmin()) {
             return superUserManagementService;
@@ -72,18 +76,18 @@ public class UserResource {
 
     @ExceptionHandler({UserManagementException.class})
     public ResponseEntity<ErrorRO> handleUserManagementException(UserManagementException ex) {
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ex.getMessage()), HttpStatus.CONFLICT);
+        return errorHandlerService.createResponse(ex, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({DomainException.class})
     public ResponseEntity<ErrorRO> handleDomainException(DomainException ex) {
-        if (ExceptionUtils.getRootCause(ex) instanceof UserManagementException) {
-            return handleUserManagementException((UserManagementException) ExceptionUtils.getRootCause(ex));
+        //We caught it here just to check for UserManagementException and put HttpStatus.CONFLICT;  otherwise we would have delegated to general error handler
+        Throwable rootException = ExceptionUtils.getRootCause(ex);
+        if (rootException instanceof UserManagementException) {
+            return errorHandlerService.createResponse(rootException, HttpStatus.CONFLICT);
         }
 
-        LOG.error(ex.getMessage(), ex);
-        return new ResponseEntity(new ErrorRO(ExceptionUtils.getRootCause(ex).getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return errorHandlerService.createResponse(ex);
     }
 
     /**

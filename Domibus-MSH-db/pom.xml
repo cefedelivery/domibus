@@ -136,6 +136,42 @@
                        </configuration>
                    </execution>
                    <execution>
+                       <id>generate-oracle-script-delta-4.1-RC1</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>updateSQL</goal>
+                       </goals>
+                       <configuration>
+                           <changeLogFile>
+                               src/main/resources/db/changelog-4.1-RC1-delta.xml
+                           </changeLogFile>
+                           <url>
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-delta.oracle
+                           </url>
+                           <migrationSqlOutputFile>
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0.1-to-4.1-RC1-migration.ddl
+                           </migrationSqlOutputFile>
+                       </configuration>
+                   </execution>
+                   <execution>
+                       <id>generate-oracle-script-delta-multi-tenancy-4.1-RC1</id>
+                       <phase>generate-resources</phase>
+                       <goals>
+                           <goal>updateSQL</goal>
+                       </goals>
+                       <configuration>
+                           <changeLogFile>
+                               src/main/resources/db/changelog-4.1-RC1-multi-tenancy-delta.xml
+                           </changeLogFile>
+                           <url>
+                               offline:oracle?version=11.2.0&amp;changeLogFile=${project.build.directory}/liquibase/changelog-4.1-RC1-multi-tenancy-delta.oracle
+                           </url>
+                           <migrationSqlOutputFile>
+                               ${project.build.directory}/sql-scripts/oracle10g-4.0.1-to-4.1-RC1-multi-tenancy-migration.ddl
+                           </migrationSqlOutputFile>
+                       </configuration>
+                   </execution>
+                   <execution>
                        <id>generate-oracle-script-data-4.1-RC1</id>
                        <phase>generate-resources</phase>
                        <goals>

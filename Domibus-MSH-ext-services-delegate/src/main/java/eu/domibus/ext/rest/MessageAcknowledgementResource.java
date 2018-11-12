@@ -22,12 +22,6 @@ public class MessageAcknowledgementResource {
     @Autowired
     MessageAcknowledgeExtService messageAcknowledgeService;
 
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({Exception.class})
-    public ErrorRO handleException(Exception ex) {
-        return new ErrorRO(ex.getMessage());
-    }
-
     /**
      * Acknowledges that a message has been delivered to the backend
      *

@@ -3,12 +3,12 @@ package eu.domibus.plugin.transformer.impl;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -19,6 +19,8 @@ public class SubmissionAS4Transformer {
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
+    // TODO: at least the following 2 methods have duplicate code with the one in StubDtoTransformer class.
+    // Also, the method names look similar but they are not under the same interface; Maybe we should refactor and eliminate the duplication
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
         this.generateCollaborationInfo(submission, result);
@@ -36,7 +38,6 @@ public class SubmissionAS4Transformer {
 
         final MessageProperties messageProperties = new MessageProperties();
 
-
         for (Submission.TypedProperty propertyEntry : submission.getMessageProperties()) {
             final Property prop = new Property();
             prop.setName(propertyEntry.getKey());
@@ -50,7 +51,9 @@ public class SubmissionAS4Transformer {
 
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
-        collaborationInfo.setConversationId((submission.getConversationId() != null && submission.getConversationId().trim().length() > 0) ? submission.getConversationId() : this.generateConversationId());
+        // if the conversation id is null, we generate one; otherwise we trim it and pass it forward
+        String conversationId = submission.getConversationId();
+        collaborationInfo.setConversationId(conversationId == null ? this.generateConversationId() : conversationId.trim());
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());
@@ -127,7 +130,7 @@ public class SubmissionAS4Transformer {
     public Submission transformFromMessaging(final UserMessage messaging) {
         final Submission result = new Submission();
 
-        if(messaging == null) {
+        if (messaging == null) {
             return result;
         }
 
@@ -168,7 +171,7 @@ public class SubmissionAS4Transformer {
         return result;
     }
 
-    private void addPayload(Submission result, PartInfo partInfo) {
+    protected void addPayload(Submission result, PartInfo partInfo) {
         final Collection<Submission.TypedProperty> properties = new ArrayList<>();
         if (partInfo.getPartProperties() != null) {
             for (final Property property : partInfo.getPartProperties().getProperties()) {
@@ -176,7 +179,8 @@ public class SubmissionAS4Transformer {
             }
         }
         if (partInfo.getFileName() != null) {
-            properties.add(new Submission.TypedProperty("FileName", partInfo.getFileName(), null));
+            final String fileNameWithoutPath = FilenameUtils.getName(partInfo.getFileName());
+            properties.add(new Submission.TypedProperty("FileName",  fileNameWithoutPath, null));
         }
         result.addPayload(partInfo.getHref(), partInfo.getPayloadDatahandler(), properties, partInfo.isInBody(), null, null);
     }
