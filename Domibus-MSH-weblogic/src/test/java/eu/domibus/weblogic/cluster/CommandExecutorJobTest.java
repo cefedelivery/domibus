@@ -5,6 +5,7 @@ import eu.domibus.api.cluster.CommandService;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.server.ServerInfoService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Cosmin Baciu
+ * @author Cosmin Baciu, Catalin Enache
  * @since 4.0.1
  */
 @RunWith(JMockit.class)
@@ -33,6 +34,9 @@ public class CommandExecutorJobTest {
     @Injectable
     private CommandService commandService;
 
+    @Injectable
+    private ServerInfoService serverInfoService;
+
     @Tested
     CommandExecutorJob commandExecutorJob;
 
@@ -42,26 +46,27 @@ public class CommandExecutorJobTest {
         final List<Command> commands = Arrays.asList(command);
         final Map<String, String> commandProperties = new HashMap<>();
 
-        new MockUp<System>() {
-            @Mock
-            public String getProperty(String value) {
-                return "ms1";
-            }
-        };
-
         new Expectations() {{
+            serverInfoService.getUniqueServerName();
+            result = "msl";
+
+            commandService.findCommandsByServerName(anyString);
+            result = commands;
+
             command.getCommandName();
             result = Command.RELOAD_PMODE;
 
-            commandService.findCommandsByServerName("ms1");
-            result = commands;
+            command.getCommandProperties();
+            result = commandProperties;
         }};
 
         Domain domain = DomainService.DEFAULT_DOMAIN;
         commandExecutorJob.executeJob(jobExecutionContext, domain);
 
-        new Verifications() {{
+        new FullVerifications() {{
             commandService.executeCommand(Command.RELOAD_PMODE, domain, commandProperties);
+
+            commandService.deleteCommand(command.getEntityId());
         }};
     }
 }
