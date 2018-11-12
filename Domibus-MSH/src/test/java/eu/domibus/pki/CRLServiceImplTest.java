@@ -1,5 +1,6 @@
 package eu.domibus.pki;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.io.FileUtils;
@@ -31,6 +32,9 @@ public class CRLServiceImplTest {
     CRLUtil crlUtil;
 
     @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
     X509CRL x509CRL;
 
     PKIUtil pkiUtil = new PKIUtil();
@@ -58,8 +62,7 @@ public class CRLServiceImplTest {
     public void testIsCertificateRevoked(@Injectable final X509Certificate certificate) throws Exception {
         BigInteger serial = new BigInteger("0400000000011E44A5E404", 16);
         final String crlUrl1 = "http://domain1.crl";
-        final String crlUrl2 = "http://domain2.crl";
-        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+        final List<String> crlUrlList = Arrays.asList(crlUrl1);
 
         //stubbing static method
         new MockUp<CRLUrlType>() {
@@ -74,20 +77,13 @@ public class CRLServiceImplTest {
             returns(crlUrlList, crlUrlList);
 
             crlService.isCertificateRevoked(certificate, crlUrl1);
-            returns(false, true, false);
-
-            crlService.isCertificateRevoked(certificate, crlUrl2);
-            returns(false, true, true);
+            returns(false, true);
         }};
-        //certificate is valid in both CRLs
+        //certificate is valid
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertFalse(certificateRevoked);
 
-        //certificate is revoked in both CRLs
-        certificateRevoked = crlService.isCertificateRevoked(certificate);
-        assertTrue(certificateRevoked);
-
-        //certificate is revoked in the second CRL
+        //certificate is revoked
         certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertTrue(certificateRevoked);
     }
@@ -104,6 +100,62 @@ public class CRLServiceImplTest {
         }};
         boolean certificateRevoked = crlService.isCertificateRevoked(certificate);
         assertFalse(certificateRevoked);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testIsCertificateRevokedWithAllProtocolsExcluded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl"; // excluded
+        final String crlUrl2 = "ldap2://domain2.crl"; // unknown
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            domibusPropertyProvider.getProperty(CRLServiceImpl.CRL_EXCLUDED_PROTOCOLS);
+            returns("ftp,http");
+        }};
+        crlService.isCertificateRevoked(certificate);
+    }
+
+    @Test(expected = DomibusCRLException.class)
+    public void testIsCertificateRevokedWithCRLNotDownloaded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl";
+        final List<String> crlUrlList = Arrays.asList(crlUrl1);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            crlUtil.downloadCRL(crlUrl1);
+            result = new DomibusCRLException();
+        }};
+        crlService.isCertificateRevoked(certificate);
+    }
+
+    @Test
+    public void testIsCertificateRevokedWithSomeProtocolsExcluded(@Injectable final X509Certificate certificate) throws Exception {
+        final String crlUrl1 = "ftp://domain1.crl";
+        final String crlUrl2 = "http://domain2.crl";
+        final List<String> crlUrlList = Arrays.asList(crlUrl1, crlUrl2);
+
+        new Expectations(crlService) {{
+            crlUtil.getCrlDistributionPoints(certificate);
+            returns(crlUrlList);
+
+            domibusPropertyProvider.getProperty(CRLServiceImpl.CRL_EXCLUDED_PROTOCOLS);
+            returns("ftp");
+        }};
+
+        crlService.isCertificateRevoked(certificate);
+
+        new Verifications() {{
+            crlService.isCertificateRevoked(certificate, crlUrl1);
+            times = 0;
+
+            crlService.isCertificateRevoked(certificate, crlUrl2);
+            times = 1;
+        }};
     }
 
     @Test
