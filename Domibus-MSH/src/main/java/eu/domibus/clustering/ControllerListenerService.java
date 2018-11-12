@@ -63,7 +63,6 @@ public class ControllerListenerService implements MessageListener {
         }
 
         commandService.executeCommand(command, domain,  getCommandProperties(message));
-
     }
 
     /**
@@ -88,6 +87,5 @@ public class ControllerListenerService implements MessageListener {
         }
         return properties;
     }
-
 
 }

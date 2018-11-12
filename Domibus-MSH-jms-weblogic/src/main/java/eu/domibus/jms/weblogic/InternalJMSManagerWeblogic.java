@@ -7,6 +7,7 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -88,6 +89,9 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
 
     @Autowired
     private CommandService commandService;
+
+    @Autowired
+    private ServerInfoService serverInfoService;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -383,7 +387,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
     @Override
     public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin) {
         if (excludeOrigin) {
-            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, getUniqueServerName());
+            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, serverInfoService.getUniqueServerName());
         }
         sendMessage(internalJmsMessage, destination);
     }
@@ -797,8 +801,4 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return null;
     }
 
-    @Override
-    public String getUniqueServerName() {
-        return System.getProperty("weblogic.Name");
-    }
 }

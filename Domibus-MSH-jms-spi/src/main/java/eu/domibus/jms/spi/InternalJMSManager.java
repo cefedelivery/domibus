@@ -43,10 +43,4 @@ public interface InternalJMSManager {
 
     InternalJmsMessage consumeMessage(String source, String customMessageId);
 
-    /**
-     * Returns an unique identifier per server
-     * To be used when sending messages to a Topic in a cluster configuration
-     * @return
-     */
-    String getUniqueServerName();
 }

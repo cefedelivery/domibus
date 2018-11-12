@@ -4,6 +4,7 @@ import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -30,7 +31,6 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.OpenDataException;
-import java.lang.management.ManagementFactory;
 import java.util.*;
 
 /**
@@ -67,6 +67,9 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private ServerInfoService serverInfoService;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -139,7 +142,7 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
     @Override
     public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin) {
         if (excludeOrigin) {
-            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, getUniqueServerName());
+            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, serverInfoService.getUniqueServerName());
         }
         sendMessage(internalJmsMessage, destination);
     }
@@ -364,8 +367,4 @@ public class InternalJMSManagerActiveMQ implements InternalJMSManager {
         return new ActiveMQQueue(internalJMSDestination.getName());
     }
 
-    @Override
-    public String getUniqueServerName() {
-        return ManagementFactory.getRuntimeMXBean().getName();
-    }
 }
