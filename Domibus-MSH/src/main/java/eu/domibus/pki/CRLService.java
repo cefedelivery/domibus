@@ -1,7 +1,5 @@
 package eu.domibus.pki;
 
-import org.springframework.cache.annotation.Cacheable;
-
 import java.security.cert.X509Certificate;
 
 /**
