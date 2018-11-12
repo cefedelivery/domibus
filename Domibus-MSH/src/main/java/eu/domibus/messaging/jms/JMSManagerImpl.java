@@ -211,8 +211,7 @@ public class JMSManagerImpl implements JMSManager {
 
     @Override
     public void sendMessageToTopic(JmsMessage message, Topic destination) {
-        InternalJmsMessage internalJmsMessage = getInternalJmsMessage(message, InternalJmsMessage.MessageType.TEXT_MESSAGE);
-        internalJmsManager.sendMessageToTopic(internalJmsMessage, destination);
+        sendMessageToTopic(message, destination, false);
     }
 
     @Override
