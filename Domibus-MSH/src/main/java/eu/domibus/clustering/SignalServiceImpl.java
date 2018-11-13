@@ -6,6 +6,7 @@ import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.jms.Topic;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation for {@link SignalService}
@@ -41,59 +44,54 @@ public class SignalServiceImpl implements SignalService {
 
     @Override
     public void signalTrustStoreUpdate(Domain domain) {
-        if (!isClusterConfiguration()) {
-            LOG.debug("not cluster deployment: no need to signal TrustStore Update");
-            return;
-        }
-        // Sends a signal to all the servers from the cluster in order to trigger the refresh of the trust store
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.RELOAD_TRUSTSTORE)
-                .property(MessageConstants.DOMAIN, domain.getCode())
-                .build(), clusterCommandTopic, true);
+
+        Map<String, Object> commandProperties = new HashMap<>();
+        commandProperties.put(Command.COMMAND, Command.RELOAD_TRUSTSTORE);
+        commandProperties.put(MessageConstants.DOMAIN, domain.getCode());
+
+        sendMessage(commandProperties);
     }
 
     @Override
     public void signalPModeUpdate() {
-        if (!isClusterConfiguration()) {
-            LOG.debug("not cluster deployment: no need to signal PMode Update");
-            return;
-        }
-        // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.RELOAD_PMODE)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build(), clusterCommandTopic, true);
+
+        Map<String, Object> commandProperties = new HashMap<>();
+        commandProperties.put(Command.COMMAND, Command.RELOAD_PMODE);
+        commandProperties.put(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode());
+
+        sendMessage(commandProperties);
     }
 
     @Override
     public void signalLoggingSetLevel(String name, String level) {
-        if (!isClusterConfiguration()) {
-            LOG.debug("not cluster deployment: no need to signal Logging Set Level");
-            return;
-        }
 
-        // Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.LOGGING_SET_LEVEL)
-                .property(CommandProperty.LOG_NAME, name)
-                .property(CommandProperty.LOG_LEVEL, level)
-                .build(), clusterCommandTopic, true);
+        Map<String, Object> commandProperties = new HashMap<>();
+        commandProperties.put(Command.COMMAND, Command.LOGGING_SET_LEVEL);
+        commandProperties.put(CommandProperty.LOG_NAME, name);
+        commandProperties.put(CommandProperty.LOG_LEVEL, level);
+
+        sendMessage(commandProperties);
     }
 
     @Override
     public void signalLoggingReset() {
-        if (!isClusterConfiguration()) {
-            LOG.debug("not cluster deployment: no need to signal Logging Reset");
+
+        Map<String, Object> commandProperties = new HashMap<>();
+        commandProperties.put(Command.COMMAND, Command.LOGGING_RESET);
+
+        sendMessage(commandProperties);
+    }
+
+    protected void sendMessage(Map<String, Object> commandProperties){
+        if (!domibusConfigurationService.isClusterDeployment()) {
+            LOG.debug("not cluster deployment: no need to {}", commandProperties.get(Command.COMMAND));
             return;
         }
-        //Sends a signal to all the servers from the cluster in order to trigger the reset of the logging config
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.LOGGING_RESET)
-                .build(), clusterCommandTopic, true);
 
+        JmsMessage jmsMessage = JMSMessageBuilder.create().properties(commandProperties).build();
+
+        // Sends a command message to topic cluster
+        jmsManager.sendMessageToTopic(jmsMessage, clusterCommandTopic, true);
     }
 
-    protected boolean isClusterConfiguration() {
-        return domibusConfigurationService.isClusterDeployment();
-    }
 }
