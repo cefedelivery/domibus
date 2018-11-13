@@ -1,13 +1,12 @@
 
 package eu.domibus.core.pmode;
 
-import eu.domibus.api.jms.JMSManager;
-import eu.domibus.api.jms.JMSMessageBuilder;
+import eu.domibus.api.cluster.Command;
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
-import eu.domibus.api.cluster.Command;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.ConfigurationDAO;
@@ -40,7 +39,6 @@ import org.xml.sax.SAXException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.xml.bind.JAXBContext;
@@ -79,12 +77,15 @@ public abstract class PModeProvider {
     @Qualifier("jaxbContextConfig")
     private JAXBContext jaxbContext;
 
-    @Autowired
-    protected JMSManager jmsManager;
+//    @Autowired
+//    protected JMSManager jmsManager;
+//
+//    @Qualifier("clusterCommandTopic")
+//    @Autowired
+//    protected Topic clusterCommandTopic;
 
-    @Qualifier("clusterCommandTopic")
     @Autowired
-    protected Topic clusterCommandTopic;
+    protected SignalService signalService;
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -193,10 +194,7 @@ public abstract class PModeProvider {
         LOG.info("Configuration successfully updated");
 
         // Sends a message into the topic queue in order to refresh all the singleton instances of the PModeProvider.
-        jmsManager.sendMessageToTopic(JMSMessageBuilder.create()
-                .property(Command.COMMAND, Command.RELOAD_PMODE)
-                .property(MessageConstants.DOMAIN, domainContextProvider.getCurrentDomain().getCode())
-                .build(), clusterCommandTopic);
+        signalService.signalPModeUpdate();
 
         return resultMessage;
     }

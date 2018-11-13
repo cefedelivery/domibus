@@ -113,9 +113,8 @@ public class LoggingResource {
         //reset log level on current server
         loggingService.resetLogging();
 
-        //TODO EDELIVERY-4043 uncomment after implementing this task
         // signals to other servers in a cluster environment
-        //loggingService.signalResetLogging();
+        loggingService.signalResetLogging();
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)

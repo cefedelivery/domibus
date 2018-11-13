@@ -29,6 +29,8 @@ public interface InternalJMSManager {
 
     void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination);
 
+    void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin);
+
     void deleteMessages(String source, String[] messageIds);
 
     void moveMessages(String source, String destination, String[] messageIds);
@@ -40,4 +42,5 @@ public interface InternalJMSManager {
     List<InternalJmsMessage> browseClusterMessages(String source, String selector);
 
     InternalJmsMessage consumeMessage(String source, String customMessageId);
+
 }

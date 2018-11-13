@@ -1,7 +1,7 @@
 package eu.domibus.core.pmode;
 
 import com.google.common.collect.Lists;
-import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.pmode.PModeArchiveInfo;
 import eu.domibus.api.property.DomibusPropertyProvider;
@@ -11,7 +11,6 @@ import eu.domibus.common.dao.ProcessDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
-import eu.domibus.core.pmode.PModeDao;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
 import eu.domibus.ebms3.common.validators.ConfigurationValidator;
 import mockit.Expectations;
@@ -24,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.jms.core.JmsOperations;
 
-import javax.jms.Topic;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.xml.bind.JAXBContext;
@@ -50,12 +48,6 @@ public class PModeDaoTest {
     private JmsOperations jmsTemplateCommand;
 
     @Injectable
-    private JMSManager jmsManager;
-
-    @Injectable
-    private Topic clusterCommandTopic;
-
-    @Injectable
     XMLUtil xmlUtil;
 
     @Injectable
@@ -72,6 +64,9 @@ public class PModeDaoTest {
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    protected SignalService signalService;
 
     @Mocked
     TypedQuery<LegConfiguration> queryLegConfiguration;

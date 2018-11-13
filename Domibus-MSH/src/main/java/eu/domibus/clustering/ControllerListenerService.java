@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * Created by kochc01 on 02.03.2016.
  */
-
 @Service(value = "controllerListenerService")
 public class ControllerListenerService implements MessageListener {
 
@@ -41,7 +40,7 @@ public class ControllerListenerService implements MessageListener {
     @Override
     @Transactional
     public void onMessage(Message message) {
-        String command = null;
+        String command;
         try {
             command = message.getStringProperty(Command.COMMAND);
         } catch (JMSException e) {
@@ -53,7 +52,7 @@ public class ControllerListenerService implements MessageListener {
             return;
         }
 
-        Domain domain = null;
+        Domain domain;
         try {
             String domainCode = message.getStringProperty(MessageConstants.DOMAIN);
             domain = domainService.getDomain(domainCode);
@@ -63,7 +62,7 @@ public class ControllerListenerService implements MessageListener {
             return;
         }
 
-        commandService.executeCommand(command, domain, getCommandProperties(message));
+        commandService.executeCommand(command, domain,  getCommandProperties(message));
     }
 
     /**
@@ -88,6 +87,5 @@ public class ControllerListenerService implements MessageListener {
         }
         return properties;
     }
-
 
 }

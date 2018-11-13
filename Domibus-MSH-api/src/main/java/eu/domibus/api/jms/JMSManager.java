@@ -80,6 +80,14 @@ public interface JMSManager {
 
     void sendMessageToTopic(JmsMessage message, Topic destination);
 
+    /**
+     * It sends a JMS message to {@code destination} topic but it marks to not be executed by origin server
+     * @param message JMS message
+     * @param destination JMS topic
+     * @param excludeOrigin default to false
+     */
+    void sendMessageToTopic(JmsMessage message, Topic destination, boolean excludeOrigin);
+
     void deleteMessages(String source, String[] messageIds);
 
     void moveMessages(String source, String destination, String[] messageIds);

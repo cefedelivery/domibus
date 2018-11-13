@@ -3,8 +3,9 @@ package eu.domibus.core.pmode;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.cluster.SignalService;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.util.xml.XMLUtil;
@@ -30,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.jms.core.JmsOperations;
 
 import javax.jms.Topic;
 import javax.persistence.EntityManager;
@@ -96,11 +96,16 @@ public class CachingPModeProviderTest {
     @Injectable
     Topic clusterCommandTopic;
 
+    @Injectable
+    Domain domain = DomainService.DEFAULT_DOMAIN;
+
+    @Injectable
+    SignalService signalService;
+
     @Tested
     CachingPModeProvider cachingPModeProvider;
 
-    @Injectable
-    Domain domain = DomainService.DEFAULT_DOMAIN;
+
 
 
     public Configuration loadSamplePModeConfiguration(String samplePModeFileRelativeURI) throws JAXBException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

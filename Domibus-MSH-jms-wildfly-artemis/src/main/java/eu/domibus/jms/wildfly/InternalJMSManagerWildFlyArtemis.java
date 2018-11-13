@@ -1,9 +1,11 @@
 package eu.domibus.jms.wildfly;
 
+import eu.domibus.api.cluster.CommandProperty;
 import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.jms.JMSDestinationHelper;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthUtils;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.jms.spi.InternalJMSDestination;
 import eu.domibus.jms.spi.InternalJMSException;
 import eu.domibus.jms.spi.InternalJMSManager;
@@ -81,6 +83,9 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
+
+    @Autowired
+    private ServerInfoService serverInfoService;
 
     @Override
     public Map<String, InternalJMSDestination> findDestinationsGroupedByFQName() {
@@ -193,13 +198,13 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
     protected Queue lookupQueue(String destName) throws NamingException {
         String destinationJndi = getJndiName(getQueueControl(destName).getAddress());
-        LOG.debug("Found JNDI [" + destinationJndi + "] for queue [" + destName + "]");
+        LOG.debug("Found JNDI [{}] for queue [{}]", destinationJndi, destName);
         return InitialContext.doLookup(destinationJndi);
     }
 
     protected Topic lookupTopic(String destName) throws NamingException {
         String destinationJndi = getJndiName(getTopicControl(destName).getAddress());
-        LOG.debug("Found JNDI [" + destinationJndi + "] for topic [" + destName + "]");
+        LOG.debug("Found JNDI [{}] for topic [{}]", destinationJndi, destName);
         return InitialContext.doLookup(destinationJndi);
     }
 
@@ -219,6 +224,14 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
 
     @Override
     public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination) {
+        sendMessageToTopic(internalJmsMessage, destination, false);
+    }
+
+    @Override
+    public void sendMessageToTopic(InternalJmsMessage internalJmsMessage, Topic destination, boolean excludeOrigin) {
+        if (excludeOrigin) {
+            internalJmsMessage.setProperty(CommandProperty.ORIGIN_SERVER, serverInfoService.getUniqueServerName());
+        }
         sendMessage(internalJmsMessage, destination);
     }
 
@@ -384,4 +397,5 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
         }
         return intJmsMsg;
     }
+
 }

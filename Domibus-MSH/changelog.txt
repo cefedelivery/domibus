@@ -3,6 +3,9 @@ Domibus 4.1
 - Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
 - Remove domibus.msh.retry.tolerance from domibus.properties
 - By default close the connection between C2 and C3; do not use Keep-Alive anymore by default
+- Increase timeout of ListPendingMessages transaction to 5 minutes
+- Added a new Logging page into Admin console  - user can change and reset logging levels at runtime
+- Cluster configuration: reload truststore, PMode and logging set adn reset will be executed on all cluster servers excepting the current one
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
