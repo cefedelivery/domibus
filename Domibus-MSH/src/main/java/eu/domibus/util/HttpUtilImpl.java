@@ -58,15 +58,8 @@ public class HttpUtilImpl implements HttpUtil {
         HttpGet httpGet = new HttpGet(url);
 
         try {
-            CloseableHttpResponse response = null;
-            try {
-                response = httpclient.execute(httpGet);
-                return new ByteArrayInputStream(IOUtils.toByteArray(response.getEntity().getContent()));
-            } finally {
-                if (response != null) {
-                    response.close();
-                }
-            }
+            LOG.debug("Executing request " + httpGet.getRequestLine() + " directly");
+            return getByteArrayInputStream(httpclient, httpGet);
         } finally {
             httpclient.close();
         }
@@ -86,24 +79,26 @@ public class HttpUtilImpl implements HttpUtil {
             RequestConfig config = RequestConfig.custom()
                     .setProxy(proxy)
                     .build();
-            HttpGet httpget = new HttpGet(url);
-            httpget.setConfig(config);
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setConfig(config);
 
-            LOG.debug("Executing request " + httpget.getRequestLine() + " via " + proxy);
-
-            CloseableHttpResponse response = null;
-            try {
-                response = httpclient.execute(httpget);
-                return new ByteArrayInputStream(IOUtils.toByteArray(response.getEntity().getContent()));
-            } finally {
-                if (response != null) {
-                    response.close();
-                }
-            }
+            LOG.debug("Executing request " + httpGet.getRequestLine() + " via " + proxy);
+            return getByteArrayInputStream(httpclient, httpGet);
         } finally {
             httpclient.close();
         }
     }
 
+    private ByteArrayInputStream getByteArrayInputStream(CloseableHttpClient httpclient, HttpGet httpGet) throws IOException {
+        CloseableHttpResponse response = null;
+        try {
+            response = httpclient.execute(httpGet);
+            return new ByteArrayInputStream(IOUtils.toByteArray(response.getEntity().getContent()));
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+    }
 
 }
