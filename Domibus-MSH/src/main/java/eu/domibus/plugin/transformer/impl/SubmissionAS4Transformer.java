@@ -51,7 +51,7 @@ public class SubmissionAS4Transformer {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
         // if the conversation id is null, we generate one; otherwise we pass it forward
         String conversationId = submission.getConversationId();
-        collaborationInfo.setConversationId(conversationId == null ? this.generateConversationId() : conversationId);
+        collaborationInfo.setConversationId(conversationId == null ? this.generateConversationId() : conversationId.trim());
         collaborationInfo.setAction(submission.getAction());
         final AgreementRef agreementRef = new AgreementRef();
         agreementRef.setValue(submission.getAgreementRef());

@@ -148,7 +148,7 @@ public class CollaborationInfo {
     public String getConversationId() {
         // this is because Oracle treats empty string as null
         // if we get space, we transform it as an empty string
-        return this.conversationId.equals(StringUtils.SPACE) ? StringUtils.EMPTY : this.conversationId;
+        return StringUtils.SPACE.equals(this.conversationId) ? StringUtils.EMPTY : this.conversationId;
     }
 
     /**
@@ -167,11 +167,11 @@ public class CollaborationInfo {
      * @param value allowed object is {@link String }
      */
     //TODO: check for conversationId uniqueness within a msh
-    //TODO: allow conversationid specification within a msh (regex?)
+    //TODO: allow conversationId specification within a msh (regex?)
     public void setConversationId(final String value) {
-        // this is because Oracle treats empty string as null
+        // this is because Oracle treats empty strings as null
         // if we receive an empty string, we transform it to space
-        this.conversationId = value.isEmpty() ? StringUtils.SPACE : value;
+        this.conversationId = StringUtils.EMPTY.equals(value) ? StringUtils.SPACE : value;
     }
 
     @Override
