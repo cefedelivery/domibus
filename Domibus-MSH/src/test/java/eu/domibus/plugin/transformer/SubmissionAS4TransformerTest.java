@@ -8,6 +8,7 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,7 @@ public class SubmissionAS4TransformerTest {
 
             submission.getConversationId();
             result = null;
-            result = "   ";
+            result = StringUtils.EMPTY;
             result = submittedConvId;
         }};
 
@@ -46,7 +47,7 @@ public class SubmissionAS4TransformerTest {
         Assert.assertEquals(generatedConvId, conversationId);
 
         conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
-        Assert.assertEquals("", conversationId);
+        Assert.assertEquals(StringUtils.EMPTY, conversationId);
 
         conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
         Assert.assertEquals(submittedConvId, conversationId);
