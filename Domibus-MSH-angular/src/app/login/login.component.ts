@@ -81,7 +81,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     const changePassword = this.securityService.shouldChangePassword();
     if (changePassword.response) {
       this.dialog.open(DefaultPasswordDialogComponent, {data: changePassword.reason});
-      this.router.navigate([changePassword.redirectUrl]);
+      this.router.navigate([changePassword.redirectUrl || this.returnUrl]);
       this.alertService.error(changePassword.reason, true);
     } else {
       this.router.navigate([this.returnUrl]);
