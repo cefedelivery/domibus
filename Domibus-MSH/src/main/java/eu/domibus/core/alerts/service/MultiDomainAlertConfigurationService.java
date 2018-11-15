@@ -88,4 +88,11 @@ public interface MultiDomainAlertConfigurationService {
      * @return name of the alert time between retry property.
      */
     String getAlertRetryTimePropertyName();
+
+    /**
+     *
+     * @return name of the property for adding Domibus instance name to email subject
+     */
+    String getAlertSuperInstanceNameSubject();
+
 }

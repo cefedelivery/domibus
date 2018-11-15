@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.AlertCriteria;
@@ -41,6 +42,9 @@ public class AlertServiceImpl implements AlertService {
 
     static final String REPORTING_TIME = "REPORTING_TIME";
 
+    /** server name on which Domibus is running */
+    static final String SERVER_NAME = "SERVER_NAME";
+
     static final String ALERT_SELECTOR = "alert";
 
     @Autowired
@@ -65,6 +69,9 @@ public class AlertServiceImpl implements AlertService {
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Autowired
+    private ServerInfoService serverInfoService;
 
     /**
      * {@inheritDoc}
@@ -111,11 +118,18 @@ public class AlertServiceImpl implements AlertService {
         next.getProperties().forEach((key, value) -> mailModel.put(key, value.getValue().toString()));
         mailModel.put(ALERT_LEVEL, read.getAlertLevel().name());
         mailModel.put(REPORTING_TIME, read.getReportingTime().toString());
+        mailModel.put(SERVER_NAME, serverInfoService.getServerName());
         if (LOG.isDebugEnabled()) {
             mailModel.forEach((key, value) -> LOG.debug("Mail template key[{}] value[{}]", key, value));
         }
         final AlertType alertType = read.getAlertType();
-        final String subject = multiDomainAlertConfigurationService.getMailSubject(alertType);
+        String subject = multiDomainAlertConfigurationService.getMailSubject(alertType);
+
+        final String alertSuperInstanceNameSubjectProperty = multiDomainAlertConfigurationService.getAlertSuperInstanceNameSubject();
+        //always set at super level
+        final String domibusInstance = domibusPropertyProvider.getProperty(alertSuperInstanceNameSubjectProperty);
+        subject += "[" + domibusInstance + "]";
+
         final String template = alertType.getTemplate();
         return new DefaultMailModel(mailModel, template, subject);
     }
