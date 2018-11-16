@@ -128,6 +128,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private static final String DOMIBUS_ALERT_SUPER_RETRY_TIME = "domibus.alert.super.retry.time";
 
+    static final String DOMIBUS_ALERT_SUPER_INSTANCE_NAME_SUBJECT = "domibus.instance.name";
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -276,6 +278,11 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public String getAlertRetryTimePropertyName() {
         return getDomainOrSuperProperty(DOMIBUS_ALERT_RETRY_TIME, DOMIBUS_ALERT_SUPER_RETRY_TIME);
+    }
+
+    @Override
+    public String getAlertSuperServerNameSubjectPropertyName() {
+        return DOMIBUS_ALERT_SUPER_INSTANCE_NAME_SUBJECT;
     }
 
 

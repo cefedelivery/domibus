@@ -3,6 +3,7 @@ package eu.domibus.core.alerts.service;
 import com.google.common.collect.Lists;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
@@ -65,6 +66,9 @@ public class AlertServiceImplTest {
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
+    @Injectable
+    private ServerInfoService serverInfoService;
+
     @Test
     public void createAlertOnEvent() {
         final Event event = new Event();
@@ -115,6 +119,8 @@ public class AlertServiceImplTest {
     @Test
     public void getMailModelForAlert() throws ParseException {
         final String mailSubjet = "Message failure";
+        final String mailSubjectServerName = "localhost";
+        final String alertSuperInstanceNameSubjectProperty = MultiDomainAlertConfigurationServiceImpl.DOMIBUS_ALERT_SUPER_INSTANCE_NAME_SUBJECT;
         final String messageId = "messageId";
         final int entityId = 1;
         final AlertType alertType = AlertType.MSG_STATUS_CHANGED;
@@ -144,8 +150,16 @@ public class AlertServiceImplTest {
             result = persistedAlert;
             multiDomainAlertConfigurationService.getMailSubject(alertType);
             result = mailSubjet;
+
+            multiDomainAlertConfigurationService.getAlertSuperServerNameSubjectPropertyName();
+            result = alertSuperInstanceNameSubjectProperty;
+
+            domibusPropertyProvider.getProperty(alertSuperInstanceNameSubjectProperty);
+            result = mailSubjectServerName;
         }};
+
         final MailModel mailModelForAlert = alertService.getMailModelForAlert(alert);
+
         assertEquals(mailSubjet, mailModelForAlert.getSubject());
         assertEquals(alertType.getTemplate(), mailModelForAlert.getTemplatePath());
         final Map<String, String> model = (Map<String, String>) mailModelForAlert.getModel();
