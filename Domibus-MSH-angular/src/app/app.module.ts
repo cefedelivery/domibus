@@ -86,9 +86,9 @@ import {GlobalErrorHandler} from './common/global.error-handler';
 import {UserService} from './user/user.service';
 import {UserValidatorService} from './user/uservalidator.service';
 import {DefaultPasswordGuard} from './security/defaultPassword.guard';
-import {SanitizeHtmlPipe} from "./common/sanitizeHtml.pipe";
-import {LoggingComponent} from "./logging/logging.component";
-import {BlankComponent} from './security/blank.component';
+import {SanitizeHtmlPipe} from './common/sanitizeHtml.pipe';
+import {LoggingComponent} from './logging/logging.component';
+import {ChangePasswordComponent} from './security/change-password/change-password.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -145,7 +145,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent,
     LoggingComponent,
-    BlankComponent
+    ChangePasswordComponent
   ],
   entryComponents: [
     AppComponent,

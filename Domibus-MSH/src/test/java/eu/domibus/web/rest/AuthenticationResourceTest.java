@@ -7,10 +7,10 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
-import eu.domibus.logging.DomibusLogger;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.error.ErrorHandlerService;
 import eu.domibus.web.rest.ro.DomainRO;
@@ -57,9 +57,11 @@ public class AuthenticationResourceTest {
     @Injectable
     ErrorHandlerService errorHandlerService;
 
+    @Injectable
+    protected UserPersistenceService userPersistenceService;
+
     @Mocked
     Logger LOG;
-
 
     @Test
     public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil) throws Exception {

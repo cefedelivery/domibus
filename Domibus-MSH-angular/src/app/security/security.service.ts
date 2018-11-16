@@ -155,18 +155,19 @@ export class SecurityService {
   shouldChangePassword(): any {
     if (this.mustChangePassword()) {
       let message = 'You are using the default password. ';
-      let redirectUrl;
+      // let redirectUrl;
       if (this.isCurrentUserAdmin()) {
         message = message + 'Please change it now in order to be able to use the console.';
-        redirectUrl = '/user';
+        // redirectUrl = '/user';
       } else {
         message = message + 'Please contact your administrator to change it in order to be able to use the console.';
-        redirectUrl = '/blank';
+        // redirectUrl = '/blank';
       }
       return {
         response: true,
         reason: message,
-        redirectUrl: redirectUrl
+        redirectUrl: 'changePassword'
+        // redirectUrl: redirectUrl
       };
     }
 
