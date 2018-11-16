@@ -91,8 +91,8 @@ public interface MultiDomainAlertConfigurationService {
 
     /**
      *
-     * @return name of the property for adding Domibus instance name to email subject
+     * @return name of the property for adding Domibus instance/server name to email subject
      */
-    String getAlertSuperInstanceNameSubject();
+    String getAlertSuperServerNameSubjectPropertyName();
 
 }

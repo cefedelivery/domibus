@@ -1,4 +1,4 @@
-package eu.domibus.tomcat;
+package eu.domibus.tomcat.server;
 
 import eu.domibus.api.server.ServerInfoService;
 import org.springframework.stereotype.Service;

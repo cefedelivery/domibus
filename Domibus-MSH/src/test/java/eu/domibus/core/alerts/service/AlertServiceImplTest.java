@@ -3,6 +3,7 @@ package eu.domibus.core.alerts.service;
 import com.google.common.collect.Lists;
 import eu.domibus.api.jms.JMSManager;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.server.ServerInfoService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.dao.AlertDao;
 import eu.domibus.core.alerts.dao.EventDao;
@@ -18,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.jms.Queue;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,6 +64,9 @@ public class AlertServiceImplTest {
 
     @Injectable
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+
+    @Injectable
+    private ServerInfoService serverInfoService;
 
     @Test
     public void createAlertOnEvent() {
@@ -114,7 +117,9 @@ public class AlertServiceImplTest {
 
     @Test
     public void getMailModelForAlert() throws ParseException {
-        final String mailSubjet = "Message failure";
+        final String mailSubject = "Message failure";
+        final String mailSubjectServerName = "localhost";
+        final String alertSuperInstanceNameSubjectProperty = MultiDomainAlertConfigurationServiceImpl.DOMIBUS_ALERT_SUPER_INSTANCE_NAME_SUBJECT;
         final String messageId = "messageId";
         final int entityId = 1;
         final AlertType alertType = AlertType.MSG_STATUS_CHANGED;
@@ -143,10 +148,19 @@ public class AlertServiceImplTest {
             alertDao.read(entityId);
             result = persistedAlert;
             multiDomainAlertConfigurationService.getMailSubject(alertType);
-            result = mailSubjet;
+            result = mailSubject;
+
+            multiDomainAlertConfigurationService.getAlertSuperServerNameSubjectPropertyName();
+            result = alertSuperInstanceNameSubjectProperty;
+
+            domibusPropertyProvider.getProperty(alertSuperInstanceNameSubjectProperty);
+            result = mailSubjectServerName;
+
         }};
+
         final MailModel mailModelForAlert = alertService.getMailModelForAlert(alert);
-        assertEquals(mailSubjet, mailModelForAlert.getSubject());
+
+        assertEquals(mailSubject + "[" + mailSubjectServerName + "]", mailModelForAlert.getSubject());
         assertEquals(alertType.getTemplate(), mailModelForAlert.getTemplatePath());
         final Map<String, String> model = (Map<String, String>) mailModelForAlert.getModel();
         assertEquals(messageId, model.get(MESSAGE_ID.name()));

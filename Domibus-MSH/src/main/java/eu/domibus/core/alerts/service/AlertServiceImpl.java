@@ -125,10 +125,10 @@ public class AlertServiceImpl implements AlertService {
         final AlertType alertType = read.getAlertType();
         String subject = multiDomainAlertConfigurationService.getMailSubject(alertType);
 
-        final String alertSuperInstanceNameSubjectProperty = multiDomainAlertConfigurationService.getAlertSuperInstanceNameSubject();
+        final String alertSuperInstanceNameSubjectProperty = multiDomainAlertConfigurationService.getAlertSuperServerNameSubjectPropertyName();
         //always set at super level
-        final String domibusInstance = domibusPropertyProvider.getProperty(alertSuperInstanceNameSubjectProperty);
-        subject += "[" + domibusInstance + "]";
+        final String serverName = domibusPropertyProvider.getProperty(alertSuperInstanceNameSubjectProperty);
+        subject += "[" + serverName + "]";
 
         final String template = alertType.getTemplate();
         return new DefaultMailModel(mailModel, template, subject);
