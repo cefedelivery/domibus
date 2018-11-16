@@ -15,7 +15,7 @@ import java.util.*;
 
 /**
  * @author Ion Perpegel, Catalin Enache
- * @since 4.1
+ * @since 4.0.1
  */
 @RunWith(JMockit.class)
 public class SubmissionAS4TransformerTest {
