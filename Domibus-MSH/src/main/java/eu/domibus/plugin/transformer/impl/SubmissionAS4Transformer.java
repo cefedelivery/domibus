@@ -19,8 +19,6 @@ public class SubmissionAS4Transformer {
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
-    // TODO: at least the following 2 methods have duplicate code with the one in StubDtoTransformer class.
-    // Also, the method names look similar but they are not under the same interface; Maybe we should refactor and eliminate the duplication
     public UserMessage transformFromSubmission(final Submission submission) {
         final UserMessage result = new UserMessage();
         this.generateCollaborationInfo(submission, result);
@@ -51,7 +49,7 @@ public class SubmissionAS4Transformer {
 
     private void generateCollaborationInfo(final Submission submission, final UserMessage result) {
         final CollaborationInfo collaborationInfo = new CollaborationInfo();
-        // if the conversation id is null, we generate one; otherwise we trim it and pass it forward
+        // if the conversation id is null, we generate one; otherwise we pass it forward
         String conversationId = submission.getConversationId();
         collaborationInfo.setConversationId(conversationId == null ? this.generateConversationId() : conversationId.trim());
         collaborationInfo.setAction(submission.getAction());
