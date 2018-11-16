@@ -39,6 +39,7 @@
         <intercept-url pattern="/rest/audit/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/alerts/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/testservice/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
+        <intercept-url pattern="/rest/logging/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_AP_ADMIN')"/>
 
         <!-- Enable CSRF protection -->

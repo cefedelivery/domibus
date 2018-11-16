@@ -5,6 +5,7 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.plugin.Submission;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +15,7 @@ import java.util.*;
 
 /**
  * @author Ion Perpegel, Catalin Enache
- * @since 4.1
+ * @since 4.0.1
  */
 @RunWith(JMockit.class)
 public class SubmissionAS4TransformerTest {
@@ -38,7 +39,7 @@ public class SubmissionAS4TransformerTest {
 
             submission.getConversationId();
             result = null;
-            result = "   ";
+            result = StringUtils.EMPTY;
             result = submittedConvId;
         }};
 
@@ -46,7 +47,7 @@ public class SubmissionAS4TransformerTest {
         Assert.assertEquals(generatedConvId, conversationId);
 
         conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
-        Assert.assertEquals("", conversationId);
+        Assert.assertEquals(StringUtils.EMPTY, conversationId);
 
         conversationId = submissionAS4Transformer.transformFromSubmission(submission).getCollaborationInfo().getConversationId();
         Assert.assertEquals(submittedConvId, conversationId);
