@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.model;
 
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -145,7 +146,9 @@ public class CollaborationInfo {
      * @return possible object is {@link String }
      */
     public String getConversationId() {
-        return this.conversationId;
+        // this is because Oracle treats empty string as null
+        // if we get space, we transform it as an empty string
+        return StringUtils.SPACE.equals(this.conversationId) ? StringUtils.EMPTY : this.conversationId;
     }
 
     /**
@@ -164,9 +167,11 @@ public class CollaborationInfo {
      * @param value allowed object is {@link String }
      */
     //TODO: check for conversationId uniqueness within a msh
-    //TODO: allow conversationid specification within a msh (regex?)
+    //TODO: allow conversationId specification within a msh (regex?)
     public void setConversationId(final String value) {
-        this.conversationId = value;
+        // this is because Oracle treats empty strings as null
+        // if we receive an empty string, we transform it to space
+        this.conversationId = StringUtils.EMPTY.equals(value) ? StringUtils.SPACE : value;
     }
 
     @Override
