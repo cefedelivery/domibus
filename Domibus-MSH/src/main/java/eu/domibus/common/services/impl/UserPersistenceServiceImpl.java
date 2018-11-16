@@ -96,6 +96,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     public void changePassword(String userName, String currentPassword, String newPassword) {
         User userEntity = userDao.loadUserByUsername(userName);
         changePassword(userEntity, currentPassword, newPassword);
+        userDao.update(userEntity);
     }
 
     private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
@@ -128,8 +129,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
         userEntity.setPassword(bcryptEncoder.encode(newPassword));
         userEntity.setDefaultPassword(false);
-
-        userDao.update(userEntity);
     }
 
     private void savePasswordHistory(User userEntity) {

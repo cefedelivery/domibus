@@ -14,7 +14,7 @@ import java.net.HttpURLConnection;
 
 /**
  * @author Ion Perpegel
- * @since 4.0.1
+ * @since 4.1
  */
 public class DefaultPasswordInterceptor extends HandlerInterceptorAdapter {
 
@@ -22,7 +22,7 @@ public class DefaultPasswordInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//        LOG.debug("Intercepted request for " + request.getRequestURI());
+        LOG.debug("Intercepted request for [{}]", request.getRequestURI());
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated() && (authentication.getPrincipal() instanceof UserDetail)) {
