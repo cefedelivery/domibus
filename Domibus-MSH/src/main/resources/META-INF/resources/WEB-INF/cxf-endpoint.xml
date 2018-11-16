@@ -47,9 +47,9 @@
         <property name="after" value="org.apache.cxf.ws.policy.PolicyVerificationOutInterceptor.class"/>
     </bean>
 
-    <bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
+    <!--<bean id="trustSenderInterceptor" class="eu.domibus.ebms3.receiver.TrustSenderInterceptor">
         <property name="crypto" ref="Wss4JMultiDomainCryptoProvider"/>
-    </bean>
+    </bean>-->
 
     <bean id="setDomainInInterceptor" class="eu.domibus.ebms3.receiver.SetDomainInInterceptor">
 
@@ -103,7 +103,7 @@
             <!--<ref bean="logInbound"/>-->
             <ref bean="domibusReadyInterceptor"/>
             <ref bean="setDomainInInterceptor"/>
-            <ref bean="trustSenderInterceptor"/>
+            <!--<ref bean="trustSenderInterceptor"/>-->
             <ref bean="setPolicyInInterceptorServer"/>
             <ref bean="propertyValueExchangeInterceptor"/>
         </jaxws:inInterceptors>

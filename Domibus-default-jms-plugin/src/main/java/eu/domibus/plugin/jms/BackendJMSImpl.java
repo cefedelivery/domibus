@@ -1,6 +1,8 @@
 package eu.domibus.plugin.jms;
 
 import com.google.common.collect.Lists;
+import eu.domibus.api.multitenancy.Domain;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
 import eu.domibus.common.NotificationType;
@@ -8,6 +10,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.DomainCryptoService;
+import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.MultiDomainPModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
 import eu.domibus.ext.domain.DomainDTO;
@@ -150,7 +153,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private CertificateLogging certificateLogging;
 
     @Autowired
-    private DomainCryptoService cryptoService;
+    protected MultiDomainCryptoService cryptoService;
 
     @Autowired
     private MultiDomainPModeProvider pModeProvider;
@@ -395,7 +398,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private byte[] encodeCertificate(String senderAlias) {
         try {
             Certificate certificate;
-            certificate = cryptoService.getTrustStore().getCertificate(senderAlias);
+            certificate = cryptoService.getTrustStore(DomainService.DEFAULT_DOMAIN).getCertificate(senderAlias);
             byte[] encodedCertificate = certificate.getEncoded();
             certificateLogging.log(encodedCertificate);
             return Base64.encodeBase64(encodedCertificate);
