@@ -4,6 +4,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.common.model.security.UserDetail;
+import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
@@ -58,6 +59,9 @@ public class AuthenticationResource {
 
     @Autowired
     protected ErrorHandlerService errorHandlerService;
+
+    @Autowired
+    protected UserPersistenceService userPersistenceService;
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
@@ -126,8 +130,7 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
     public String getUser() {
-        UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return securityUser.getUsername();
+        return getLoggedUserName();
     }
 
     /**
@@ -154,4 +157,23 @@ public class AuthenticationResource {
         authenticationService.changeDomain(domainCode);
     }
 
+    /**
+     * Set the password of the current user
+     *
+     * @param currentPassword the current password of the current user
+     * @param newPassword the new password of the current user
+     *
+     * */
+    @RequestMapping(value = "user/password", method = RequestMethod.PUT)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setPassword(@RequestBody String currentPassword, @RequestBody String newPassword) {
+        String userName = this.getLoggedUserName();
+        LOG.debug("Changing password for user [{}]", userName);
+        userPersistenceService.changePassword(userName, currentPassword, newPassword);
+    }
+
+    private String getLoggedUserName() {
+        UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return securityUser.getUsername();
+    }
 }
