@@ -13,6 +13,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.error.ErrorHandlerService;
+import eu.domibus.web.rest.ro.ChangePasswordRO;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
@@ -130,7 +131,7 @@ public class AuthenticationResource {
 
     @RequestMapping(value = "user", method = RequestMethod.GET)
     public String getUser() {
-        return getLoggedUserName();
+        return getLoggedUser().getUsername();
     }
 
     /**
@@ -160,20 +161,20 @@ public class AuthenticationResource {
     /**
      * Set the password of the current user
      *
-     * @param currentPassword the current password of the current user
-     * @param newPassword the new password of the current user
+     * @param param the object holding the current and new passwords of the current user
      *
      * */
     @RequestMapping(value = "user/password", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void setPassword(@RequestBody String currentPassword, @RequestBody String newPassword) {
-        String userName = this.getLoggedUserName();
-        LOG.debug("Changing password for user [{}]", userName);
-        userPersistenceService.changePassword(userName, currentPassword, newPassword);
+    public void changePasswordPassword(@RequestBody ChangePasswordRO param) {
+        UserDetail loggedUser = this.getLoggedUser();
+        LOG.debug("Changing password for user [{}]", loggedUser.getUsername());
+        userPersistenceService.changePassword(loggedUser.getUsername(), param.getCurrentPassword(), param.getNewPassword());
+        loggedUser.setDefaultPasswordUsed(false);
     }
 
-    private String getLoggedUserName() {
+    private UserDetail getLoggedUser() {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return securityUser.getUsername();
+        return securityUser;
     }
 }

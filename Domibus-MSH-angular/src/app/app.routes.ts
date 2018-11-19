@@ -69,7 +69,7 @@ const appRoutes: Routes = [
   {
     path: 'user',
     component: UserComponent,
-    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard],
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
     canDeactivate: [DirtyGuard]
   },
   {
@@ -84,8 +84,7 @@ const appRoutes: Routes = [
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
-  {path: 'changePassword', component: ChangePasswordComponent},
-  // {path: 'blank', component: BlankComponent},
+  {path: 'changePassword', component: ChangePasswordComponent, canActivate: [AuthenticatedGuard]},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

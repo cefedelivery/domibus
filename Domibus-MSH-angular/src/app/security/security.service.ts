@@ -148,26 +148,21 @@ export class SecurityService {
   }
 
   mustChangePassword(): boolean {
+    return this.isDefaultPasswordUsed();
+  }
+
+  private isDefaultPasswordUsed(): boolean {
     const currentUser: User = this.getCurrentUser();
     return currentUser && currentUser.defaultPasswordUsed;
   }
 
   shouldChangePassword(): any {
-    if (this.mustChangePassword()) {
-      let message = 'You are using the default password. ';
-      // let redirectUrl;
-      if (this.isCurrentUserAdmin()) {
-        message = message + 'Please change it now in order to be able to use the console.';
-        // redirectUrl = '/user';
-      } else {
-        message = message + 'Please contact your administrator to change it in order to be able to use the console.';
-        // redirectUrl = '/blank';
-      }
+    if (this.isDefaultPasswordUsed()) {
+      const message = 'You are using the default password. Please change it now in order to be able to use the console.';
       return {
         response: true,
         reason: message,
         redirectUrl: 'changePassword'
-        // redirectUrl: redirectUrl
       };
     }
 
@@ -175,7 +170,8 @@ export class SecurityService {
     if (currentUser && currentUser.daysTillExpiration > 0) {
       return {
         response: true,
-        reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.'
+        reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.',
+        redirectUrl: 'changePassword'
       };
     } else {
       return {response: false};

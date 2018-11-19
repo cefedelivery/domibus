@@ -51,7 +51,7 @@ export class EditbasicpluginuserFormComponent implements OnInit {
         'userName': new FormControl({value: this.user.username, disabled: true}, Validators.nullValidator),
         'originalUser': new FormControl(this.user.originalUser, null),
         'role': new FormControl(this.user.authRoles, Validators.required),
-        'password': [null, Validators.pattern],
+        'password': [null],
         'confirmation': [null],
       }, {
         validator: userValidatorService.validateForm()

@@ -168,7 +168,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     PartyDetailsComponent,
     EditbasicpluginuserFormComponent,
     EditcertificatepluginuserFormComponent,
-    PartyIdentifierDetailsComponent
+    PartyIdentifierDetailsComponent,
+    ChangePasswordComponent
   ],
   imports: [
     BrowserModule,

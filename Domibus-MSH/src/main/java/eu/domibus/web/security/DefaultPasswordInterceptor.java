@@ -28,7 +28,7 @@ public class DefaultPasswordInterceptor extends HandlerInterceptorAdapter {
         if (authentication != null && authentication.isAuthenticated() && (authentication.getPrincipal() instanceof UserDetail)) {
             UserDetail securityUser = (UserDetail) authentication.getPrincipal();
             if (securityUser.isDefaultPasswordUsed()) {
-                response.setHeader(HttpHeaders.CONNECTION, "close");
+//                response.setHeader(HttpHeaders.CONNECTION, "close");
                 response.setStatus(HttpURLConnection.HTTP_FORBIDDEN);
                 return false;
             }
