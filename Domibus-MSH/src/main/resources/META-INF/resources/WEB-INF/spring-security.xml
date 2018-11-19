@@ -41,7 +41,6 @@
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_AP_ADMIN')"/>
 
         <!-- Enable CSRF protection -->
-        <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
 
         <headers>
             <frame-options policy="DENY"/>
