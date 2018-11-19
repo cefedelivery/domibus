@@ -43,8 +43,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -79,21 +82,29 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     private CertificateService certificateService;
 
+    @Autowired
+    private TokenReferenceExtractor tokenReferenceExtractor;
+
     public TrustSenderInterceptor() {
         super(false);
     }
 
     /**
      * Intercepts a message to verify that the sender is trusted.
-     *
+     * <p>
      * There will be two validations:
-     *      a) the sender certificate is valid and not revoked and
-     *      b) the sender party name is included in the CN of the certificate
+     * a) the sender certificate is valid and not revoked and
+     * b) the sender party name is included in the CN of the certificate
      *
      * @param message the incoming CXF soap message to handle
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false")) &&
+                !Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+            LOG.debug("No trust verificate of sending certificate");
+            return;
+        }
 
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
@@ -157,7 +168,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
 
         LOG.info("Verifying sender trust");
-        if(certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
+        if (certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender)) {
             if (isPullMessage) {
                 LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
             } else {
@@ -201,7 +212,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return contents.get(1);
     }
 
-    protected X509Certificate getSenderCertificate(SoapMessage msg)  {
+    protected X509Certificate getSenderCertificate(SoapMessage msg) {
         boolean utWithCallbacks = MessageUtils.getContextualBoolean(msg, "ws-security.validate.token", true);
         super.translateProperties(msg);
         CXFRequestData requestData = new CXFRequestData();
@@ -228,13 +239,20 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             decodeAlgorithmSuite(requestData);
             requestData.setDecCrypto(crypto);
             // extract certificate from KeyInfo
-            X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
-
-            if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
-                LOG.info("Checking for message embedded certificate in the BinarySecurityToken tag");
-                cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
+            final Element securityHeader = getSecurityHeader(msg);
+            final TokenReference tokenReference = tokenReferenceExtractor.extractTokenReference(securityHeader);
+            X509Certificate cert;
+            if(tokenReference==null){
+                cert=getCertificateFromKeyInfo(requestData, securityHeader);
             }
-            if(cert == null) {
+            else {
+
+                BinarySecurityTokenReference binarySecurityTokenReference= (BinarySecurityTokenReference) tokenReference;
+                cert = getCertificateFromBinarySecurityToken(securityHeader,binarySecurityTokenReference);
+
+            }
+
+            if (cert == null) {
                 throw new SoapFault("CertificateException: Could not extract the certificate for validation", version.getSender());
             }
             return cert;
@@ -244,6 +262,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             throw new SoapFault("WSSecurityException", wssEx, version.getSender());
         } catch (SOAPException soapEx) {
             throw new SoapFault("SOAPException", soapEx, version.getSender());
+        } catch (URISyntaxException uriEx) {
+            throw new SoapFault("SOAPException", uriEx, version.getSender());
         }
     }
 
@@ -258,28 +278,37 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 found = true;
             }
         }
-        return found? buf.toString():null;
+        return found ? buf.toString() : null;
     }
 
-    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader,BinarySecurityTokenReference tokenReference) throws WSSecurityException, CertificateException, URISyntaxException {
 
+        URI uri=new URI(tokenReference.getUri());
+        final String uriValue = uri.getFragment();
+        LOG.debug("Signing binary token uri:[{}] ", uriValue);
         NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
-        if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
+        if (binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
             return null;
 
-        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
-        String certString = getTextFromElement(binarySecurityTokenTag);
+        for(int i=0;i<binarySecurityTokenElement.getLength();i++){
+            final Node item = binarySecurityTokenElement.item(i);
+            final Node id = item.getAttributes().getNamedItem("wsu:Id");
+            if(id!=null && uriValue.equalsIgnoreCase(id.getNodeValue())){
+                String certString = getTextFromElement((Element) item);
 
-        if(certString==null ||  certString.isEmpty() ) {
-            return null;
+                if (certString == null || certString.isEmpty()) {
+                    return null;
+                }
+
+                String certStr = ("-----BEGIN CERTIFICATE-----\n" + certString + "\n-----END CERTIFICATE-----\n");
+                InputStream in = new ByteArrayInputStream(certStr.getBytes());
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
+
+                return cert;
+            }
         }
-
-        String certStr = ( "-----BEGIN CERTIFICATE-----\n" +  certString + "\n-----END CERTIFICATE-----\n" );
-        InputStream in = new ByteArrayInputStream(certStr.getBytes());
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
-
-        return cert;
+        return null;
     }
 
 
@@ -288,7 +317,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         X509Certificate[] certs;
 
         EncryptedKeySTRParser decryptedBytes;
-        Element secTokenRef = getSecTokenRef(securityHeader);
+        Element secTokenRef = tokenReferenceExtractor.getSecTokenRef(securityHeader);
         /* CXF class which has to be initialized in order to parse the Security token reference */
         STRParserParameters encryptedEphemeralKey1 = new STRParserParameters();
         data.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
@@ -306,20 +335,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return certs[0];
     }
 
-    private static Element getSecTokenRef(Element soapSecurityHeader) throws WSSecurityException {
-
-        for (Node currentChild = soapSecurityHeader.getFirstChild(); currentChild != null; currentChild = currentChild.getNextSibling()) {
-            if (WSConstants.SIGNATURE.getLocalPart().equals(currentChild.getLocalName()) && WSConstants.SIGNATURE.getNamespaceURI().equals(currentChild.getNamespaceURI())) {
-                Element signatureEl = (Element) currentChild;
-                for (Node innerCurrentChild = signatureEl.getFirstChild(); innerCurrentChild != null; innerCurrentChild = innerCurrentChild.getNextSibling()) {
-                    if (KEYINFO.getLocalPart().equals(innerCurrentChild.getLocalName()) && KEYINFO.getNamespaceURI().equals(innerCurrentChild.getNamespaceURI())) {
-                        return (Element) innerCurrentChild.getFirstChild();
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
     public void setCrypto(Crypto crypto) {
         this.crypto = crypto;

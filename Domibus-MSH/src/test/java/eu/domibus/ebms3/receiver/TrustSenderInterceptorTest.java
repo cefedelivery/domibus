@@ -28,6 +28,7 @@ import javax.xml.soap.SOAPException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -106,9 +107,9 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     }
 
     @Test
-    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException {
+    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException, URISyntaxException {
         Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
-        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement());
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),null);
         Assert.assertNotNull(xc);
         Assert.assertNotNull(xc.getIssuerDN());
     }
