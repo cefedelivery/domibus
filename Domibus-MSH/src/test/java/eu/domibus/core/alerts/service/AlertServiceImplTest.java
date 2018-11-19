@@ -118,7 +118,7 @@ public class AlertServiceImplTest {
 
     @Test
     public void getMailModelForAlert() throws ParseException {
-        final String mailSubjet = "Message failure";
+        final String mailSubject = "Message failure";
         final String mailSubjectServerName = "localhost";
         final String alertSuperInstanceNameSubjectProperty = MultiDomainAlertConfigurationServiceImpl.DOMIBUS_ALERT_SUPER_INSTANCE_NAME_SUBJECT;
         final String messageId = "messageId";
@@ -149,7 +149,7 @@ public class AlertServiceImplTest {
             alertDao.read(entityId);
             result = persistedAlert;
             multiDomainAlertConfigurationService.getMailSubject(alertType);
-            result = mailSubjet;
+            result = mailSubject;
 
             multiDomainAlertConfigurationService.getAlertSuperServerNameSubjectPropertyName();
             result = alertSuperInstanceNameSubjectProperty;
@@ -160,7 +160,7 @@ public class AlertServiceImplTest {
 
         final MailModel mailModelForAlert = alertService.getMailModelForAlert(alert);
 
-        assertEquals(mailSubjet, mailModelForAlert.getSubject());
+        assertEquals(mailSubject + "[" + mailSubjectServerName + "]", mailModelForAlert.getSubject());
         assertEquals(alertType.getTemplate(), mailModelForAlert.getTemplatePath());
         final Map<String, String> model = (Map<String, String>) mailModelForAlert.getModel();
         assertEquals(messageId, model.get(MESSAGE_ID.name()));
