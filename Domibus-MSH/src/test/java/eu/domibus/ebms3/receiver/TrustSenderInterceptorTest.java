@@ -49,6 +49,8 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/receiver/";
 
+    private static final String X_509_V_3 = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+
     @Injectable
     CertificateService certificateService;
 
@@ -84,7 +86,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             binarySecurityTokenReference.getUri();
             result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
             binarySecurityTokenReference.getValueType();
-            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+            result= X_509_V_3;
         }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
     }
@@ -101,7 +103,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             binarySecurityTokenReference.getUri();
             result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
             binarySecurityTokenReference.getValueType();
-            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+            result=X_509_V_3;
             certificateService.isCertificateValid((X509Certificate) any);
             result = false;
             domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
@@ -122,7 +124,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             binarySecurityTokenReference.getUri();
             result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
             binarySecurityTokenReference.getValueType();
-            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+            result=X_509_V_3;
             domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = false;
         }};
@@ -139,7 +141,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             binarySecurityTokenReference.getUri();
             result="#X509-9973d6a2-7819-4de2-a3d2-1bbdb2506df8";
             binarySecurityTokenReference.getValueType();
-            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+            result=X_509_V_3;
         }};
         Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
         X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),binarySecurityTokenReference);

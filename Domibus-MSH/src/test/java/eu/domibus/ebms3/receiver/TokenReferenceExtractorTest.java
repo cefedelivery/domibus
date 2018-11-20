@@ -17,7 +17,7 @@ import org.w3c.dom.Node;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class TokenReferenceMethodExtractorTest {
+public class TokenReferenceExtractorTest {
 
 
     @Tested
