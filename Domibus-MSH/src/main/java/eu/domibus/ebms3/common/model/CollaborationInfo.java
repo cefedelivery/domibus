@@ -25,7 +25,7 @@ import java.util.UUID;
 public class CollaborationInfo {
 
     @XmlElement(name = "ConversationId", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlJavaTypeAdapter(EmptyStringAdapter.class)
     @XmlSchemaType(name = "token")
     @Column(name = "COLL_INFO_CONVERS_ID", nullable = false)
     @NotNull
