@@ -13,6 +13,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.pki.DomibusCertificateException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.binding.soap.SoapVersion;
@@ -25,7 +26,6 @@ import org.apache.cxf.ws.security.wss4j.StaxSerializer;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSSecurityException;
-import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDocInfo;
 import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.engine.WSSecurityEngine;
@@ -45,10 +45,13 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.List;
+import java.util.*;
 
 /**
  * This interceptor is responsible of the trust of an incoming messages.
@@ -67,6 +70,10 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
 
+    public static final String X_509_V_3 = "X509v3";
+
+    public static final String X_509_PKIPATHV_1 = "X509PKIPathv1";
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -79,21 +86,29 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     @Autowired
     private CertificateService certificateService;
 
+    @Autowired
+    private TokenReferenceExtractor tokenReferenceExtractor;
+
     public TrustSenderInterceptor() {
         super(false);
     }
 
     /**
      * Intercepts a message to verify that the sender is trusted.
-     *
+     * <p>
      * There will be two validations:
-     *      a) the sender certificate is valid and not revoked and
-     *      b) the sender party name is included in the CN of the certificate
+     * a) the sender certificate is valid and not revoked and
+     * b) the sender party name is included in the CN of the certificate
      *
      * @param message the incoming CXF soap message to handle
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
+        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false")) &&
+                !Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+            LOG.debug("No trust verification of sending certificate");
+            return;
+        }
 
         String messageId = (String) message.getExchange().get(MessageInfo.MESSAGE_ID_CONTEXT_PROPERTY);
         if (!isMessageSecured(message)) {
@@ -157,7 +172,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         }
 
         LOG.info("Verifying sender trust");
-        if(certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender) ) {
+        if (certificate != null && org.apache.commons.lang3.StringUtils.containsIgnoreCase(certificate.getSubjectDN().getName(), sender)) {
             if (isPullMessage) {
                 LOG.info("[Pulling] - Sender [" + sender + "] is trusted.");
             } else {
@@ -201,7 +216,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return contents.get(1);
     }
 
-    protected X509Certificate getSenderCertificate(SoapMessage msg)  {
+    protected X509Certificate getSenderCertificate(SoapMessage msg) {
         boolean utWithCallbacks = MessageUtils.getContextualBoolean(msg, "ws-security.validate.token", true);
         super.translateProperties(msg);
         CXFRequestData requestData = new CXFRequestData();
@@ -228,13 +243,17 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             decodeAlgorithmSuite(requestData);
             requestData.setDecCrypto(crypto);
             // extract certificate from KeyInfo
-            X509Certificate cert = getCertificateFromKeyInfo(requestData, getSecurityHeader(msg));
-
-            if (cert == null) { // check for certificate embedded in the message under BinarySecurityToken tag
-                LOG.info("Checking for message embedded certificate in the BinarySecurityToken tag");
-                cert = getCertificateFromBinarySecurityToken(getSecurityHeader(msg));
+            final Element securityHeader = getSecurityHeader(msg);
+            final TokenReference tokenReference = tokenReferenceExtractor.extractTokenReference(securityHeader);
+            X509Certificate cert;
+            if (tokenReference == null) {
+                cert = getCertificateFromKeyInfo(requestData, securityHeader);
+            } else {
+                BinarySecurityTokenReference binarySecurityTokenReference = (BinarySecurityTokenReference) tokenReference;
+                cert = getCertificateFromBinarySecurityToken(securityHeader, binarySecurityTokenReference);
             }
-            if(cert == null) {
+
+            if (cert == null) {
                 throw new SoapFault("CertificateException: Could not extract the certificate for validation", version.getSender());
             }
             return cert;
@@ -244,6 +263,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
             throw new SoapFault("WSSecurityException", wssEx, version.getSender());
         } catch (SOAPException soapEx) {
             throw new SoapFault("SOAPException", soapEx, version.getSender());
+        } catch (URISyntaxException uriEx) {
+            throw new SoapFault("SOAPException", uriEx, version.getSender());
         }
     }
 
@@ -258,28 +279,69 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                 found = true;
             }
         }
-        return found? buf.toString():null;
+        return found ? buf.toString() : null;
     }
 
-    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader) throws WSSecurityException, CertificateException {
+    protected X509Certificate getCertificateFromBinarySecurityToken(Element securityHeader, BinarySecurityTokenReference tokenReference) throws WSSecurityException, CertificateException, URISyntaxException {
 
+        URI uri = new URI(tokenReference.getUri());
+        URI valueTypeUri = new URI(tokenReference.getValueType());
+        final String uriFragment = uri.getFragment();
+        final String valueType = valueTypeUri.getFragment();
+        LOG.debug("Signing binary token uri:[{}] and ValueType:[{}]", uriFragment, uriFragment);
         NodeList binarySecurityTokenElement = securityHeader.getElementsByTagName("wsse:BinarySecurityToken");
-        if(binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
+        if (binarySecurityTokenElement == null || binarySecurityTokenElement.item(0) == null)
             return null;
 
-        Element binarySecurityTokenTag = (Element)binarySecurityTokenElement.item(0);
-        String certString = getTextFromElement(binarySecurityTokenTag);
+        for (int i = 0; i < binarySecurityTokenElement.getLength(); i++) {
+            final Node item = binarySecurityTokenElement.item(i);
+            final Node id = item.getAttributes().getNamedItem("wsu:Id");
+            if (id != null && uriFragment.equalsIgnoreCase(id.getNodeValue())) {
+                String certString = getTextFromElement((Element) item);
 
-        if(certString==null ||  certString.isEmpty() ) {
-            return null;
+                if (certString == null || certString.isEmpty()) {
+                    return null;
+                }
+                if (X_509_V_3.equalsIgnoreCase(valueType)) {
+                    String certStr = ("-----BEGIN CERTIFICATE-----\n" + certString + "\n-----END CERTIFICATE-----\n");
+                    InputStream in = new ByteArrayInputStream(certStr.getBytes());
+                    CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                    return (X509Certificate) certFactory.generateCertificate(in);
+                } else if (X_509_PKIPATHV_1.equalsIgnoreCase(valueType)) {
+                    final byte[] bytes = Base64.decodeBase64(certString);
+                    org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory certificateFactory = new org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory();
+                    final List<? extends Certificate> certificates = certificateFactory.engineGenerateCertPath(new ByteArrayInputStream(bytes)).getCertificates();
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Signing chain received");
+                        for (Certificate certificate : certificates) {
+                            LOG.trace(certificate.toString());
+                        }
+                    }
+                    Set<String> issuerSet = new HashSet<>();
+                    Map<String, X509Certificate> subjectMap = new HashMap<>();
+                    for (Certificate certificate : certificates) {
+                        X509Certificate x509Certificate = (X509Certificate) certificate;
+                        final String subjectName = x509Certificate.getSubjectDN().getName();
+                        subjectMap.put(subjectName, x509Certificate);
+                        final String issuerName = x509Certificate.getIssuerDN().getName();
+                        issuerSet.add(issuerName);
+                        LOG.debug("Certificate subject:[{}] issuer:[{}]", subjectName, issuerName);
+                    }
+
+                    final Set<String> allSubject = subjectMap.keySet();
+                    //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
+                    allSubject.removeAll(issuerSet);
+                    //the unique entry in the set is the leaf.
+                    if (allSubject.size() == 1) {
+                        final String leafSubjet = allSubject.iterator().next();
+                        LOG.debug("Not an issuer:[{}]", leafSubjet);
+                        return subjectMap.get(leafSubjet);
+                    }
+                    return null;
+                }
+            }
         }
-
-        String certStr = ( "-----BEGIN CERTIFICATE-----\n" +  certString + "\n-----END CERTIFICATE-----\n" );
-        InputStream in = new ByteArrayInputStream(certStr.getBytes());
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        X509Certificate cert = (X509Certificate)certFactory.generateCertificate(in);
-
-        return cert;
+        return null;
     }
 
 
@@ -288,7 +350,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         X509Certificate[] certs;
 
         EncryptedKeySTRParser decryptedBytes;
-        Element secTokenRef = getSecTokenRef(securityHeader);
+        Element secTokenRef = tokenReferenceExtractor.getSecTokenRef(securityHeader);
         /* CXF class which has to be initialized in order to parse the Security token reference */
         STRParserParameters encryptedEphemeralKey1 = new STRParserParameters();
         data.setWsDocInfo(new WSDocInfo(securityHeader.getOwnerDocument()));
@@ -306,20 +368,6 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
         return certs[0];
     }
 
-    private static Element getSecTokenRef(Element soapSecurityHeader) throws WSSecurityException {
-
-        for (Node currentChild = soapSecurityHeader.getFirstChild(); currentChild != null; currentChild = currentChild.getNextSibling()) {
-            if (WSConstants.SIGNATURE.getLocalPart().equals(currentChild.getLocalName()) && WSConstants.SIGNATURE.getNamespaceURI().equals(currentChild.getNamespaceURI())) {
-                Element signatureEl = (Element) currentChild;
-                for (Node innerCurrentChild = signatureEl.getFirstChild(); innerCurrentChild != null; innerCurrentChild = innerCurrentChild.getNextSibling()) {
-                    if (KEYINFO.getLocalPart().equals(innerCurrentChild.getLocalName()) && KEYINFO.getNamespaceURI().equals(innerCurrentChild.getNamespaceURI())) {
-                        return (Element) innerCurrentChild.getFirstChild();
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
     public void setCrypto(Crypto crypto) {
         this.crypto = crypto;
