@@ -370,6 +370,12 @@ public class UserManagementServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        userPersistenceService.changePassword(username, currentPassword, newPassword);
+    }
+
     protected void sendImminentExpirationAlerts(boolean usersWithDefaultPassword) {
         final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION);
         if (!eventConfiguration.isActive()) {

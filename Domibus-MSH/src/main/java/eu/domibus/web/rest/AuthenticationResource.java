@@ -3,8 +3,10 @@ package eu.domibus.web.rest;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.ext.rest.ErrorRO;
@@ -19,6 +21,8 @@ import eu.domibus.web.rest.ro.LoginRO;
 import eu.domibus.web.rest.ro.UserRO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
@@ -62,7 +66,17 @@ public class AuthenticationResource {
     protected ErrorHandlerService errorHandlerService;
 
     @Autowired
-    protected UserPersistenceService userPersistenceService;
+    @Lazy
+    @Qualifier("superUserManagementService")
+    private UserService superUserManagementService;
+
+    @Autowired
+    @Lazy
+    @Qualifier("userManagementService")
+    private UserService userManagementService;
+
+    @Autowired
+    private AuthUtils authUtils;
 
     @ExceptionHandler({AccountStatusException.class})
     public ResponseEntity<ErrorRO> handleAccountStatusException(AccountStatusException ex) {
@@ -169,7 +183,7 @@ public class AuthenticationResource {
     public void changePasswordPassword(@RequestBody ChangePasswordRO param) {
         UserDetail loggedUser = this.getLoggedUser();
         LOG.debug("Changing password for user [{}]", loggedUser.getUsername());
-        userPersistenceService.changePassword(loggedUser.getUsername(), param.getCurrentPassword(), param.getNewPassword());
+        getUserService().changePassword(loggedUser.getUsername(), param.getCurrentPassword(), param.getNewPassword());
         loggedUser.setDefaultPasswordUsed(false);
     }
 
@@ -177,4 +191,13 @@ public class AuthenticationResource {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser;
     }
+
+    private UserService getUserService() {
+        if (authUtils.isSuperAdmin()) {
+            return superUserManagementService;
+        } else {
+            return userManagementService;
+        }
+    }
+
 }
