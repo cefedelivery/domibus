@@ -27,6 +27,8 @@ public class TokenReferenceExtractor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenReferenceExtractor.class);
     public static final String REFERENCE = "Reference";
+    public static final String URI = "URI";
+    public static final String VALUE_TYPE = "ValueType";
 
     private static XPathFactory xpathFactory;
     private static XPath xPath;
@@ -48,8 +50,8 @@ public class TokenReferenceExtractor {
             LOG.debug("Child name:[{}]", itemLocalName);
             if(REFERENCE.equalsIgnoreCase(itemLocalName)){
                 final NamedNodeMap attributes = item.getAttributes();
-                final Node uri = attributes.getNamedItem("URI");
-                final Node valueType = attributes.getNamedItem("ValueType");
+                final Node uri = attributes.getNamedItem(URI);
+                final Node valueType = attributes.getNamedItem(VALUE_TYPE);
                 if(uri==null || valueType==null){
                     return null;
                 }
@@ -59,20 +61,6 @@ public class TokenReferenceExtractor {
                 return new BinarySecurityTokenReference(valueTypeValue,uriValue);
             }
         }
-
-        /* //Node securityTokenReference = (Node) xPath.evaluate("/Signature/KeyInfo/SecurityTokenReference", securityHeader, XPathConstants.NODE);
-        *//**NodeList securityTokenReference = (NodeList) xPath.evaluate("/*//**[local-name()='Signature']", test, XPathConstants.NODESET);
-        if (securityTokenReference == null) return null;
-        Node keyIdentifier = (Node) xPath.evaluate("KeyIdentifier", securityTokenReference, XPathConstants.NODE);
-        if (keyIdentifier != null) {
-            return new KeyIdentifierTokenReference();
-        }
-        Node binarySecurityToken = (Node) xPath.evaluate("Reference", securityTokenReference, XPathConstants.NODE);
-        if (binarySecurityToken != null) {
-            return new BinarySecurityTokenReference();
-        }
-        Node isToken = (Node) xPath.evaluate("X509Data", securityTokenReference, XPathConstants.NODE);
-        return new IssuerSerialTokenReference();*/
         return null;
     }
 

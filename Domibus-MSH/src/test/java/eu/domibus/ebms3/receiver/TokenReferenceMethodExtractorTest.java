@@ -1,20 +1,16 @@
 package eu.domibus.ebms3.receiver;
 
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.Tested;
 import mockit.integration.junit4.JMockit;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.WSConstants;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
 
 /**
  * @author Thomas Dussart
@@ -23,92 +19,89 @@ import java.io.IOException;
 @RunWith(JMockit.class)
 public class TokenReferenceMethodExtractorTest {
 
-   /* @Test
-    public void testX509PKIPathv1TokenReference() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
 
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    @Tested
+    private TokenReferenceExtractor tokenReferenceExtractor;
 
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(this.getClass().getResourceAsStream("/bst_X509PKIPathv1_incoming_message.xml"));
+    @Test
+    public void testX509PKIPathv1TokenReference(@Mocked final Element securityHeader,
+                                                @Mocked final Element signature,
+                                                @Mocked final Element keyInfo,
+                                                @Mocked final Element securityTokenrRefecence,
+                                                @Mocked final Node uriNode,
+                                                @Mocked final Node valueTypeNode) throws WSSecurityException {
 
-        System.out.println(xmlDocument.getDocumentElement());
+        final String uri = "#X509-5f905b9f-f1e2-4f05-8369-123f330455d1";
+        final String valueType = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509PKIPathv1";
 
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
+        new Expectations() {{
+            securityHeader.getFirstChild();
+            result = signature;
+            signature.getLocalName();
+            result = WSConstants.SIGNATURE.getLocalPart();
+            signature.getNamespaceURI();
+            result = WSConstants.SIGNATURE.getNamespaceURI();
+            signature.getFirstChild();
+            result = keyInfo;
+            keyInfo.getLocalName();
+            result = TrustSenderInterceptor.KEYINFO.getLocalPart();
+            keyInfo.getNamespaceURI();
+            result = TrustSenderInterceptor.KEYINFO.getNamespaceURI();
+            keyInfo.getFirstChild();
+            result = securityTokenrRefecence;
+            securityTokenrRefecence.getChildNodes().getLength();
+            result = 1;
+            securityTokenrRefecence.getChildNodes().item(0).getLocalName();
+            result = TokenReferenceExtractor.REFERENCE;
+            securityTokenrRefecence.getChildNodes().item(0).getAttributes().getNamedItem(TokenReferenceExtractor.URI);
+            result = uriNode;
+            uriNode.getNodeValue();
+            result = uri;
+            securityTokenrRefecence.getChildNodes().item(0).getAttributes().getNamedItem(TokenReferenceExtractor.VALUE_TYPE);
+            result = valueTypeNode;
+            valueTypeNode.getNodeValue();
+            result = valueType;
 
-
-        Node securityHeader = (Node) xPath.evaluate("/Envelope/Header/Security", xmlDocument, XPathConstants.NODE);
-        System.out.println("Security header "+securityHeader);
-
-        final TokenReferenceExtractor tokenReferenceExtractor = new TokenReferenceExtractor();
+        }};
         final BinarySecurityTokenReference tokenReference = (BinarySecurityTokenReference) tokenReferenceExtractor.extractTokenReference(securityHeader);
+        Assert.assertEquals(uri, tokenReference.getUri());
+        Assert.assertEquals(valueType, tokenReference.getValueType());
 
     }
 
     @Test
-    public void testx509v3TokenReference() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+    public void testKeySubjectIdendtifier(@Mocked final Element securityHeader,
+                                          @Mocked final Element signature,
+                                          @Mocked final Element keyInfo,
+                                          @Mocked final Element securityTokenrRefecence) throws WSSecurityException {
 
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        final String uri = "#X509-5f905b9f-f1e2-4f05-8369-123f330455d1";
+        final String valueType = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509PKIPathv1";
 
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(this.getClass().getResourceAsStream("/bst_x509v3_incoming_message.xml"));
+        new Expectations() {{
+            securityHeader.getFirstChild();
+            result = signature;
+            signature.getLocalName();
+            result = WSConstants.SIGNATURE.getLocalPart();
+            signature.getNamespaceURI();
+            result = WSConstants.SIGNATURE.getNamespaceURI();
+            signature.getFirstChild();
+            result = keyInfo;
+            keyInfo.getLocalName();
+            result = TrustSenderInterceptor.KEYINFO.getLocalPart();
+            keyInfo.getNamespaceURI();
+            result = TrustSenderInterceptor.KEYINFO.getNamespaceURI();
+            keyInfo.getFirstChild();
+            result = securityTokenrRefecence;
+            securityTokenrRefecence.getChildNodes().getLength();
+            result = 1;
+            securityTokenrRefecence.getChildNodes().item(0).getLocalName();
+            result = "KeyIdentifier";
 
-        System.out.println(xmlDocument.getDocumentElement());
-
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-
-
-        Node securityHeader = (Node) xPath.evaluate("/Envelope/Header/Security", xmlDocument, XPathConstants.NODE);
-        System.out.println("Security header "+securityHeader);
-
-        final TokenReferenceExtractor tokenReferenceExtractor = new TokenReferenceExtractor();
+        }};
         final BinarySecurityTokenReference tokenReference = (BinarySecurityTokenReference) tokenReferenceExtractor.extractTokenReference(securityHeader);
+        Assert.assertNull(tokenReference);
 
     }
-
-    @Test
-    public void testSubjectKeyIdentifierTokenReference() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
-
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(this.getClass().getResourceAsStream("/ski_incoming_message.xml"));
-
-        System.out.println(xmlDocument.getDocumentElement());
-
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-
-
-        Node securityHeader = (Node) xPath.evaluate("/Envelope/Header/Security", xmlDocument, XPathConstants.NODE);
-        System.out.println("Security header "+securityHeader);
-
-        final TokenReferenceExtractor tokenReferenceExtractor = new TokenReferenceExtractor();
-        final KeyIdentifierTokenReference tokenReference = (KeyIdentifierTokenReference) tokenReferenceExtractor.extractTokenReference(securityHeader);
-
-    }
-
-    @Test
-    public void testIssuerSerialTokenReference() throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
-
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(this.getClass().getResourceAsStream("/is_incoming_message.xml"));
-
-        System.out.println(xmlDocument.getDocumentElement());
-
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xPath = factory.newXPath();
-
-
-        Node securityHeader = (Node) xPath.evaluate("/Envelope/Header/Security", xmlDocument, XPathConstants.NODE);
-        System.out.println("Security header "+securityHeader);
-
-        final TokenReferenceExtractor tokenReferenceExtractor = new TokenReferenceExtractor();
-        final IssuerSerialTokenReference tokenReference = (IssuerSerialTokenReference) tokenReferenceExtractor.extractTokenReference(securityHeader);
-
-    }*/
 
 }

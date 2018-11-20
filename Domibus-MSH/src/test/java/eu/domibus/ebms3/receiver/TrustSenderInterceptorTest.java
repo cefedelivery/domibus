@@ -2,6 +2,7 @@ package eu.domibus.ebms3.receiver;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.SoapInterceptorTest;
+import eu.domibus.ebms3.common.model.MessageInfo;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.core.JmsOperations;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -33,6 +35,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
+import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING;
 
 /**
  * @author idragusa
@@ -54,6 +58,9 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     @Injectable
     protected JAXBContext jaxbContextEBMS;
 
+    @Injectable
+    TokenReferenceExtractor tokenReferenceExtractor;
+
     @Tested
     TrustSenderInterceptor trustSenderInterceptor;
 
@@ -66,21 +73,35 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     PKIUtil pkiUtil = new PKIUtil();
 
     @Test
-    public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+    public void testHandleMessageBinaryToken(@Mocked SpringContextProvider springContextProvider,@Mocked final Element securityHeader,@Mocked final BinarySecurityTokenReference binarySecurityTokenReference) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException, WSSecurityException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
         String trustorePassword = "1234";
 
+        new Expectations(){{
+            tokenReferenceExtractor.extractTokenReference(withAny(securityHeader));
+            result=binarySecurityTokenReference;
+            binarySecurityTokenReference.getUri();
+            result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
+            binarySecurityTokenReference.getValueType();
+            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+        }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
     }
 
     @Test(expected = org.apache.cxf.interceptor.Fault.class)
-    public void testSenderTrustFault(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+    public void testSenderTrustFault(@Mocked SpringContextProvider springContextProvider,@Mocked final Element securityHeader,@Mocked final BinarySecurityTokenReference binarySecurityTokenReference) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException, WSSecurityException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
         String trustorePassword = "1234";
 
         new Expectations() {{
+            tokenReferenceExtractor.extractTokenReference(withAny(securityHeader));
+            result=binarySecurityTokenReference;
+            binarySecurityTokenReference.getUri();
+            result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
+            binarySecurityTokenReference.getValueType();
+            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
             certificateService.isCertificateValid((X509Certificate) any);
             result = false;
             domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
@@ -90,13 +111,19 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     }
 
     @Test
-    public void testSenderTrustNoSenderVerification(@Mocked SpringContextProvider springContextProvider) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
+    public void testSenderTrustNoSenderVerification(@Mocked SpringContextProvider springContextProvider,@Mocked final Element securityHeader,@Mocked BinarySecurityTokenReference binarySecurityTokenReference) throws XMLStreamException, ParserConfigurationException, JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException, WSSecurityException {
         Document doc = readDocument("dataset/as4/SoapRequestBinaryToken.xml");
         String trustoreFilename = RESOURCE_PATH + "nonEmptySource.jks";
         String trustorePassword = "1234";
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            tokenReferenceExtractor.extractTokenReference(withAny(securityHeader));
+            result=binarySecurityTokenReference;
+            binarySecurityTokenReference.getUri();
+            result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
+            binarySecurityTokenReference.getValueType();
+            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = false;
         }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
@@ -107,18 +134,40 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     }
 
     @Test
-    public void testGetCertificateFromBinarySecurityToken() throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException, URISyntaxException {
+    public void testGetCertificateFromBinarySecurityTokenX509v3(@Mocked final BinarySecurityTokenReference binarySecurityTokenReference) throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException, URISyntaxException {
+        new Expectations(){{
+            binarySecurityTokenReference.getUri();
+            result="#X509-9973d6a2-7819-4de2-a3d2-1bbdb2506df8";
+            binarySecurityTokenReference.getValueType();
+            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3";
+        }};
         Document doc = readDocument("dataset/as4/RawXMLMessageWithSpaces.xml");
-        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),null);
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),binarySecurityTokenReference);
         Assert.assertNotNull(xc);
         Assert.assertNotNull(xc.getIssuerDN());
     }
+
+    @Test
+    public void testGetCertificateFromBinarySecurityTokenX509PKIPathv1(@Mocked final BinarySecurityTokenReference binarySecurityTokenReference) throws XMLStreamException, ParserConfigurationException, WSSecurityException, CertificateException, URISyntaxException {
+        new Expectations(){{
+            binarySecurityTokenReference.getUri();
+            result="#X509-9973d6a2-7819-4de2-a3d2-1bbdb2506df8";
+            binarySecurityTokenReference.getValueType();
+            result="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509PKIPathv1";
+        }};
+        Document doc = readDocument("dataset/as4/RawXMLMessageWithSpacesAndPkiPath.xml");
+        X509Certificate xc = trustSenderInterceptor.getCertificateFromBinarySecurityToken(doc.getDocumentElement(),binarySecurityTokenReference);
+        Assert.assertNotNull(xc);
+        Assert.assertNotNull(xc.getIssuerDN());
+    }
+
+
 
     protected void testHandleMessage(Document doc, String trustoreFilename,  String trustorePassword) throws JAXBException, IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, SOAPException {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = true;
         }};
         trustSenderInterceptor.handleMessage(soapMessage);
@@ -159,7 +208,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "true";
         }};
 
@@ -172,10 +221,24 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
             result = "false";
         }};
 
         Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
+    }
+
+    @Test
+    public void testHandleOneTestActivated(@Mocked final SoapMessage message){
+        new Expectations(){{
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result="false";
+            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            result="false";
+        }};
+        trustSenderInterceptor.handleMessage(message);
+        new Verifications(){{
+           message.getExchange();times=0;
+        }};
     }
 }
