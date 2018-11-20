@@ -99,7 +99,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         userDao.update(userEntity);
     }
 
-    private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
+    void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
 
@@ -115,7 +115,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private void changePassword(User userEntity, String currentPassword, String newPassword) {
+    void changePassword(User userEntity, String currentPassword, String newPassword) {
         //check if old password matches the persisted one
         if (!bcryptEncoder.matches(currentPassword, userEntity.getPassword())) {
             throw new UserManagementException("The current password does not match the provided one.");
@@ -131,7 +131,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         userEntity.setDefaultPassword(false);
     }
 
-    private void savePasswordHistory(User userEntity) {
+    void savePasswordHistory(User userEntity) {
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
         if (passwordsToKeep == 0) {
             return;

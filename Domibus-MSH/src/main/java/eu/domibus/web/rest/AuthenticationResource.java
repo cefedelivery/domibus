@@ -187,12 +187,12 @@ public class AuthenticationResource {
         loggedUser.setDefaultPasswordUsed(false);
     }
 
-    private UserDetail getLoggedUser() {
+    UserDetail getLoggedUser() {
         UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return securityUser;
     }
 
-    private UserService getUserService() {
+    UserService getUserService() {
         if (authUtils.isSuperAdmin()) {
             return superUserManagementService;
         } else {

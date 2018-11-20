@@ -5,14 +5,17 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.multitenancy.dao.UserDomainDao;
 import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.rest.error.ErrorHandlerService;
+import eu.domibus.web.rest.ro.ChangePasswordRO;
 import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.LoginRO;
 import mockit.*;
@@ -59,6 +62,15 @@ public class AuthenticationResourceTest {
 
     @Injectable
     protected UserPersistenceService userPersistenceService;
+
+    @Injectable
+    private UserService superUserManagementService;
+
+    @Injectable
+    private UserService userManagementService;
+
+    @Injectable
+    private AuthUtils authUtils;
 
     @Mocked
     Logger LOG;
@@ -119,5 +131,29 @@ public class AuthenticationResourceTest {
         authenticationResource.setCurrentDomain("");
         // Then
         // expect DomainException
+    }
+
+    @Test
+    public void testChangePassword(@Mocked UserDetail loggedUser, @Mocked ChangePasswordRO changePasswordRO) {
+
+        new Expectations(authenticationResource) {{
+            authenticationResource.getLoggedUser();
+            result = loggedUser;
+
+            authUtils.isSuperAdmin();
+            result = false;
+        }};
+
+        authenticationResource.changePasswordPassword(changePasswordRO);
+
+        new Verifications() {{
+            userManagementService.changePassword(loggedUser.getUsername(), changePasswordRO.getCurrentPassword(), changePasswordRO.getNewPassword());
+            times = 1;
+            superUserManagementService.changePassword(loggedUser.getUsername(), changePasswordRO.getCurrentPassword(), changePasswordRO.getNewPassword());
+            times = 0;
+        }};
+
+        assertEquals(loggedUser.isDefaultPasswordUsed(), false);
+
     }
 }
