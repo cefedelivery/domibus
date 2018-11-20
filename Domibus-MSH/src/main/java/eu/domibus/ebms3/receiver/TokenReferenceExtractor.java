@@ -10,9 +10,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
-
 import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.KEYINFO;
 
 /**
@@ -26,17 +23,12 @@ import static eu.domibus.ebms3.receiver.TrustSenderInterceptor.KEYINFO;
 public class TokenReferenceExtractor {
 
     private static final Logger LOG = LoggerFactory.getLogger(TokenReferenceExtractor.class);
+
     public static final String REFERENCE = "Reference";
+
     public static final String URI = "URI";
+
     public static final String VALUE_TYPE = "ValueType";
-
-    private static XPathFactory xpathFactory;
-    private static XPath xPath;
-
-    static {
-        xpathFactory = XPathFactory.newInstance();
-        xPath = xpathFactory.newXPath();
-    }
 
 
     public TokenReference extractTokenReference(Element securityHeader) throws WSSecurityException {
@@ -44,27 +36,27 @@ public class TokenReferenceExtractor {
 
         final NodeList childNodes = secTokenRef.getChildNodes();
         LOG.debug("Security token reference content");
-        for(int i=0;i<childNodes.getLength();i++){
+        for (int i = 0; i < childNodes.getLength(); i++) {
             final Node item = childNodes.item(i);
             final String itemLocalName = item.getLocalName();
             LOG.debug("Child name:[{}]", itemLocalName);
-            if(REFERENCE.equalsIgnoreCase(itemLocalName)){
+            if (REFERENCE.equalsIgnoreCase(itemLocalName)) {
                 final NamedNodeMap attributes = item.getAttributes();
                 final Node uri = attributes.getNamedItem(URI);
                 final Node valueType = attributes.getNamedItem(VALUE_TYPE);
-                if(uri==null || valueType==null){
+                if (uri == null || valueType == null) {
                     return null;
                 }
                 final String uriValue = uri.getNodeValue();
                 final String valueTypeValue = valueType.getNodeValue();
                 LOG.debug("Binary security token URI:[{}], ValueType:[{}] ", uriValue, valueTypeValue);
-                return new BinarySecurityTokenReference(valueTypeValue,uriValue);
+                return new BinarySecurityTokenReference(valueTypeValue, uriValue);
             }
         }
         return null;
     }
 
-    public Element getSecTokenRef(Element soapSecurityHeader) throws WSSecurityException {
+    public Element getSecTokenRef(Element soapSecurityHeader) {
 
         for (Node currentChild = soapSecurityHeader.getFirstChild(); currentChild != null; currentChild = currentChild.getNextSibling()) {
             if (WSConstants.SIGNATURE.getLocalPart().equals(currentChild.getLocalName()) && WSConstants.SIGNATURE.getNamespaceURI().equals(currentChild.getNamespaceURI())) {

@@ -26,7 +26,6 @@ import org.apache.cxf.ws.security.wss4j.StaxSerializer;
 import org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSSecurityException;
-import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.WSDocInfo;
 import org.apache.wss4j.dom.engine.WSSConfig;
 import org.apache.wss4j.dom.engine.WSSecurityEngine;
@@ -44,7 +43,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
@@ -71,7 +69,9 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TrustSenderInterceptor.class);
 
     public static final QName KEYINFO = new QName("http://www.w3.org/2000/09/xmldsig#", "KeyInfo");
+
     public static final String X_509_V_3 = "X509v3";
+
     public static final String X_509_PKIPATHV_1 = "X509PKIPathv1";
 
     @Autowired
@@ -328,11 +328,13 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
                         LOG.debug("Certificate subject:[{}] issuer:[{}]", subjectName, issuerName);
                     }
 
-                    final Set<String> leafKey = subjectMap.keySet();
-                    leafKey.removeAll(issuerSet);
-                    if (leafKey.size() == 1) {
-                        final String leafSubjet = leafKey.iterator().next();
-                        LOG.debug("Not an issuer:[{}]",leafSubjet);
+                    final Set<String> allSubject = subjectMap.keySet();
+                    //There should always be one more subject more than issuers. Indeed the root CA has the same value as issuer and subject.
+                    allSubject.removeAll(issuerSet);
+                    //the unique entry in the set is the leaf.
+                    if (allSubject.size() == 1) {
+                        final String leafSubjet = allSubject.iterator().next();
+                        LOG.debug("Not an issuer:[{}]", leafSubjet);
                         return subjectMap.get(leafSubjet);
                     }
                     return null;
