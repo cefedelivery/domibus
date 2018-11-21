@@ -114,7 +114,6 @@ public class UIMessageEntity extends AbstractBaseEntity {
     @Column(name = "REF_TO_MESSAGE_ID")
     private String refToMessageId;
 
-    //@Version
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_MODIFIED")
     private Date lastModified;
