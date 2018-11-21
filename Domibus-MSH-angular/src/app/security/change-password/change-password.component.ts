@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {UserValidatorService} from '../../user/uservalidator.service';
 import {SecurityService} from '../../security/security.service';
 import {Http, Response} from '@angular/http';
@@ -24,13 +24,16 @@ export class ChangePasswordComponent implements OnInit {
               private userValidatorService: UserValidatorService, private http: Http,
               private alertService: AlertService, private router: Router) {
 
+    this.currentPassword = this.securityService.password;
     this.userForm = fb.group({
-      'currentPassword': [null],
+      'currentPassword':  [null],
       'password': [null],
       'confirmation': [null]
     }, {
       validator: userValidatorService.matchPassword
     });
+
+    this.securityService.password = null;
   }
 
   async ngOnInit() {
@@ -39,24 +42,19 @@ export class ChangePasswordComponent implements OnInit {
     this.passwordValidationMessage = passwordPolicy.validationMessage;
   }
 
-  submitForm() {
-    return this.http.put('rest/security/user/password',
-      {
-        currentPassword: this.currentPassword,
-        newPassword: this.password
-      }).subscribe((response: Response) => {
-        this.handleLoggedUserChanged();
-        this.alertService.success('Password successfully changed.')
-        this.router.navigate(['/']);
-      },
-      (error: any) => {
-        this.alertService.exception('Password could not be changed.', error);
-      });
+  async submitForm() {
+    const params = {
+      currentPassword: this.currentPassword,
+      newPassword: this.password
+    };
+
+    try {
+      await this.securityService.changePassword(params);
+      this.alertService.success('Password successfully changed.');
+      this.router.navigate(['/']);
+    } catch (error) {
+      this.alertService.exception('Password could not be changed.', error);
+    }
   }
 
-  private handleLoggedUserChanged() {
-    const currentUser = this.securityService.getCurrentUser();
-    currentUser.defaultPasswordUsed = false;
-    this.securityService.updateCurrentUser(currentUser);
-  }
 }

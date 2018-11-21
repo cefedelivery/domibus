@@ -13,7 +13,9 @@ import {AlertService} from '../alert/alert.service';
 export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
+
   passwordPolicy: Promise<PasswordPolicyRO>;
+  public password: string;
 
   constructor(private http: Http,
               private securityEventService: SecurityEventService,
@@ -158,10 +160,9 @@ export class SecurityService {
 
   shouldChangePassword(): any {
     if (this.isDefaultPasswordUsed()) {
-      const message = 'You are using the default password. Please change it now in order to be able to use the console.';
       return {
         response: true,
-        reason: message,
+        reason: 'You are using the default password. Please change it now in order to be able to use the console.',
         redirectUrl: 'changePassword'
       };
     }
@@ -173,14 +174,27 @@ export class SecurityService {
         reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.',
         redirectUrl: 'changePassword'
       };
-    } else {
-      return {response: false};
     }
+
+    return {response: false};
+
   }
 
   private extractData(res: Response) {
     const result = res.json() || {};
     return result;
   }
+
+  async changePassword(params): Promise<any> {
+    const res = this.http.put('rest/security/user/password', params).toPromise();
+    await res;
+
+    const currentUser = this.getCurrentUser();
+    currentUser.defaultPasswordUsed = false;
+    this.updateCurrentUser(currentUser);
+
+    return res;
+  }
+
 }
 
