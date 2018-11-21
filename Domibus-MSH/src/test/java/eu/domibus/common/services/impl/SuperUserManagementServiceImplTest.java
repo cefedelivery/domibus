@@ -121,23 +121,17 @@ public class SuperUserManagementServiceImplTest {
         }};
     }
 
-//    @Test
-//    public void changePassword() {
-//        String username = "u1", currentPassword = "pass1", newPassword = "newPass1";
-//        Runnable r = () -> {
-//            userManagementService.changePassword(username, currentPassword, newPassword);
-//        };
-//        new Expectations() {{
-//            domainTaskExecutor.submit(r);
-//
-//        }};
-//
-//        superUserManagementService.changePassword(username, currentPassword, newPassword);
-//
-//        new Verifications() {{
-//            userManagementService.changePassword(username, currentPassword, newPassword);
-//            times = 1;
-//        }};
-//    }
+    @Test
+    public void changePassword(@Mocked UserManagementServiceImpl userManagementService) {
+        String username = "u1", currentPassword = "pass1", newPassword = "newPass1";
+
+        superUserManagementService.changePassword(username, currentPassword, newPassword);
+
+        new Verifications() {{
+            domainTaskExecutor.submit((Runnable)any);
+            times = 1;
+        }};
+    }
+
 
 }
