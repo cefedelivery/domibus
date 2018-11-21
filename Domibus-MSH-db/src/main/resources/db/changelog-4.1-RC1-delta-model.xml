@@ -67,4 +67,37 @@
                              tableName="TB_COMMAND_PROPERTY"/>
     </changeSet>
 
+    <changeSet author="nperpion" id="EDELIVERY-3979">
+
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </addColumn>
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="DEFAULT_PASSWORD" type="BOOLEAN" defaultValueBoolean="false" />
+        </addColumn>
+
+        <createTable tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_PASSWORD" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWORD_HISTORY"
+                                 constraintName="FK_PLUGIN_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_AUTHENTICATION_ENTRY"/>
+
+    </changeSet>
+
 </databaseChangeLog>
