@@ -17,6 +17,7 @@ public class IdentifierHelper {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(IdentifierHelper.class);
 
     public Umds buildUmdsFromOriginalSender(final String originalSender){
+        LOG.debug("Build uumds, split original sender:[{}]");
         String[] split = splitIdentifier(originalSender);
         Umds umds = new Umds();
         umds.setUser_typeOfIdentifier(split[0]);

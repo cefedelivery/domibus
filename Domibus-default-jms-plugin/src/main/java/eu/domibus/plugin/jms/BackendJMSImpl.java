@@ -1,7 +1,6 @@
 package eu.domibus.plugin.jms;
 
 import com.google.common.collect.Lists;
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
@@ -9,7 +8,6 @@ import eu.domibus.common.NotificationType;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.core.converter.DomainCoreConverter;
-import eu.domibus.core.crypto.api.DomainCryptoService;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.MultiDomainPModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
@@ -175,17 +173,17 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @PostConstruct
     protected void init() {
-        int timeout = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT,"10000"));
-        int connections = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL,"100"));
-        doNotSendToC4 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "true"));
-        doNotPushToC3 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "true"));
-        LOG.warn("Do not send to c4:[{}]",doNotSendToC4);
-        LOG.warn("Do not push to c3:[{}]",doNotPushToC3);
+        int timeout = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT, "10000"));
+        int connections = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL, "100"));
+        doNotSendToC4 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "false"));
+        doNotPushToC3 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "false"));
+        LOG.warn("Do not send to c4:[{}]", doNotSendToC4);
+        LOG.warn("Do not push to c3:[{}]", doNotPushToC3);
 
         umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-        istTemplate=new RestTemplate(getClientHttpRequestFactory(timeout, connections));
+        istTemplate = new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         istTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
     }
 
@@ -367,7 +365,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         String authenticationUrl = domibusPropertyExtService.getProperty(AUTHENTICATION_ENDPOINT_PROPERTY_NAME);
 
-        LOG.trace("authenticating to:[{}] ", authenticationUrl);
+        LOG.debug("authenticating to:[{}] ", authenticationUrl);
         Boolean aBoolean = umdsTemplate.postForObject(authenticationUrl, umds, Boolean.class);
         if (!aBoolean) {
             LOG.warn("UMDS rejected authentication for message with id[{}]", submission.getMessageId());
