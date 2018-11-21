@@ -41,7 +41,6 @@ public class AuthenticatorListener {
             selector = "selector = 'accountDisabled'")
     public void onAccountDisabled(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
         saveEventAndTriggerAlert(event, domain);
-
     }
 
     private void saveEventAndTriggerAlert(Event event, final String domain) {
