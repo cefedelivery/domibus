@@ -443,7 +443,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
-        TransportProfile transportProfile = new TransportProfile(DynamicDiscoveryService.transportProfileAS4);
+        TransportProfile transportProfile = new TransportProfile(DynamicDiscoveryService.DEFAULT_TRANSPORTPROFILEAS4);
         X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);
