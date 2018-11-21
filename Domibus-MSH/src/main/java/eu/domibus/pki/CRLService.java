@@ -1,7 +1,5 @@
 package eu.domibus.pki;
 
-import org.springframework.cache.annotation.Cacheable;
-
 import java.security.cert.X509Certificate;
 
 /**
@@ -20,13 +18,4 @@ public interface CRLService {
      */
     boolean isCertificateRevoked(X509Certificate cert) throws DomibusCRLException;
 
-    /**
-     * Checks the pki revocation status against the provided distribution point.
-     * Supports HTTP, HTTPS, FTP, File based URLs.
-     * @param serialString the pki serial number
-     * @param crlDistributionPointURL the certificate revocation list url
-     * @return true if the pki is revoked
-     * @throws DomibusCRLException if an error occurs while downloading the certificate revocation list
-     */
-    boolean isCertificateRevoked(String serialString, String crlDistributionPointURL) throws DomibusCRLException;
 }

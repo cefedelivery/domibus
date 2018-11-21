@@ -1,9 +1,9 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.AuthenticationException;
-import eu.domibus.api.security.ICRLVerifierService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.pki.CRLService;
 import eu.domibus.pki.CertificateServiceImpl;
 import mockit.Injectable;
 import mockit.Tested;
@@ -11,6 +11,7 @@ import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import java.security.cert.X509Certificate;
 
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +41,7 @@ public class X509CertificateServiceImplTest {
     X509CertificateServiceImpl securityX509CertificateServiceImpl;
 
     @Injectable
-    ICRLVerifierService securityCRLVerifierServiceImpl;
+    CRLService crlService;
 
     @Test
     public void verifyCertificateTest() {
@@ -48,7 +49,7 @@ public class X509CertificateServiceImplTest {
         securityX509CertificateServiceImpl.isClientX509CertificateValid(certificates);
 
         new Verifications() {{
-            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificates[0]);
+            crlService.isCertificateRevoked(certificates[0]);
             times = 1;
         }};
     }
@@ -59,7 +60,7 @@ public class X509CertificateServiceImplTest {
         securityX509CertificateServiceImpl.isClientX509CertificateValid(certificates);
 
         new Verifications() {{
-            securityCRLVerifierServiceImpl.verifyCertificateCRLs(certificates[0]);
+            crlService.isCertificateRevoked(certificates[0]);
             times = 0;
         }};
     }
