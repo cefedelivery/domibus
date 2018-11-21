@@ -133,4 +133,18 @@ public class ApplicationResource {
         return new PasswordPolicyRO(pattern, validationMessage);
     }
 
+    /**
+     * Retrieves the password policy info for plugin users
+     *
+     * @return password policy info
+     */
+    @RequestMapping(value = "pluginPasswordPolicy", method = RequestMethod.GET)
+    public PasswordPolicyRO getPluginUsersPasswordPolicy() {
+        LOG.debug("Getting plugin password policy");
+
+        String pattern = domibusConfigurationService.getPluginPasswordPattern();
+        String validationMessage = domibusConfigurationService.getPluginPasswordValidationMessage();
+
+        return new PasswordPolicyRO(pattern, validationMessage);
+    }
 }

@@ -14,6 +14,7 @@ export class SecurityService {
   static ROLE_AP_ADMIN = 'ROLE_AP_ADMIN';
   static ROLE_DOMAIN_ADMIN = 'ROLE_ADMIN';
   passwordPolicy: Promise<PasswordPolicyRO>;
+  pluginPasswordPolicy: Promise<PasswordPolicyRO>;
 
   constructor(private http: Http,
               private securityEventService: SecurityEventService,
@@ -53,6 +54,22 @@ export class SecurityService {
       (error: any) => {
         this.securityEventService.notifyLogoutErrorEvent(error);
       });
+  }
+
+  getPluginPasswordPolicy(): Promise<PasswordPolicyRO> {
+    if (!this.pluginPasswordPolicy) {
+      this.pluginPasswordPolicy = this.http.get('rest/application/pluginPasswordPolicy')
+        .map(this.extractData)
+        .map(this.formatValidationMessage)
+        .catch(err => this.alertService.handleError(err))
+        .toPromise();
+    }
+    return this.pluginPasswordPolicy;
+  }
+
+  private formatValidationMessage(policy: PasswordPolicyRO) {
+    policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
+    return policy;
   }
 
   clearSession() {

@@ -18,6 +18,11 @@ public interface DomibusConfigurationService {
     String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
     String CLUSTER_DEPLOYMENT = "domibus.deployment.clustered";
 
+    static final String PASSWORD_POLICY_PATTERN = "domibus.passwordPolicy.pattern";
+    static final String PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.passwordPolicy.validationMessage";
+    static final String PLUGIN_PASSWORD_POLICY_PATTERN = "domibus.pluginPasswordPolicy.pattern";
+    static final String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.pluginPasswordPolicy.validationMessage";
+
     String getConfigLocation();
 
     boolean isClusterDeployment();
@@ -34,4 +39,7 @@ public interface DomibusConfigurationService {
 
     String getPasswordValidationMessage();
 
+    String getPluginPasswordPattern();
+
+    String getPluginPasswordValidationMessage();
 }
