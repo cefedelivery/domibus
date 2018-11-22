@@ -3,6 +3,8 @@ package eu.domibus.core.security;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_AUTHENTICATION_ENTRY")
@@ -27,6 +29,12 @@ public class AuthenticationEntity extends AbstractBaseEntity {
     @Column(name = "BACKEND")
     private String backend;
 
+    @Column(name = "PASSWORD_CHANGE_DATE")
+    private LocalDateTime passwordChangeDate;
+    @NotNull
+    @Column(name = "DEFAULT_PASSWORD")
+    private Boolean defaultPassword = false;
+
     public String getCertificateId() {
         return certificateId;
     }
@@ -49,6 +57,7 @@ public class AuthenticationEntity extends AbstractBaseEntity {
 
     public void setPasswd(String passwd) {
         this.passwd = passwd;
+        this.passwordChangeDate = LocalDateTime.now();
     }
 
     public String getAuthRoles() {
@@ -73,5 +82,19 @@ public class AuthenticationEntity extends AbstractBaseEntity {
 
     public void setBackend(String backend) {
         this.backend = backend;
+    }
+
+    public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }
+
+    public void setPasswordChangeDate(LocalDateTime passwordChangeDate) {
+        this.passwordChangeDate = passwordChangeDate;
+    }
+
+    public Boolean hasDefaultPassword() {
+        return this.defaultPassword;
+    }
+
+    public void setDefaultPassword(Boolean defaultPassword) {
+        this.defaultPassword = defaultPassword;
     }
 }

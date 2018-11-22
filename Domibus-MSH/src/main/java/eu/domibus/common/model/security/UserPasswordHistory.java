@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "TB_USER_PASSWORD_HISTORY")
 @NamedQueries({
-        @NamedQuery(name = "UserPasswordHistory.findPasswordDate",
-                query = "SELECT passwordChangeDate FROM UserPasswordHistory WHERE user=:USER order by passwordChangeDate DESC"),
         @NamedQuery(name = "UserPasswordHistory.findPasswords",
                 query = "from UserPasswordHistory where user=:USER order by passwordChangeDate DESC"),
 })
@@ -34,10 +32,6 @@ public class UserPasswordHistory extends AbstractBaseEntity {
 
     public String getPasswordHash() {
         return password;
-    }
-
-    public LocalDateTime getPasswordDate() {
-        return passwordChangeDate;
     }
 
     public UserPasswordHistory() { }
