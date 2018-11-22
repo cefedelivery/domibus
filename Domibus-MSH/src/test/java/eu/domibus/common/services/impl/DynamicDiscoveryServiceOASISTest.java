@@ -82,6 +82,9 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            result = DynamicDiscoveryService.DEFAULT_TRANSPORTPROFILEAS4;
+
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentIdentifier) any);
             result = sm;
@@ -102,6 +105,9 @@ public class DynamicDiscoveryServiceOASISTest {
         new NonStrictExpectations() {{
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
+
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            result = DynamicDiscoveryService.DEFAULT_TRANSPORTPROFILEAS4;
 
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);
             result = "^.*EHEALTH_SMP.*$";

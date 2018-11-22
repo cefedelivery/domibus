@@ -86,6 +86,7 @@ public class DynamicDiscoveryServiceOASIS implements DynamicDiscoveryService {
             final ProcessIdentifier processIdentifier = new ProcessIdentifier(processId, processIdScheme);
             ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
 
+            String transportProfileAS4 = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, DEFAULT_TRANSPORTPROFILEAS4);
             LOG.debug("Get the endpoint for " + transportProfileAS4);
             final Endpoint endpoint = sm.getEndpoint(processIdentifier, new TransportProfile(transportProfileAS4));
             if (endpoint == null || endpoint.getAddress() == null || endpoint.getProcessIdentifier() == null) {
