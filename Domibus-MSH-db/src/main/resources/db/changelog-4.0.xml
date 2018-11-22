@@ -287,7 +287,6 @@
             <column name="FK_RELIABILITY" type="INT"/>
             <column name="FK_SECURITY" type="INT"/>
             <column name="FK_SERVICE" type="INT"/>
-            <column name="FK_SPLITTING" type="INT"/>
             <column name="FK_BUSINESSPROCESS" type="INT"/>
         </createTable>
 

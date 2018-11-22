@@ -78,6 +78,19 @@
             <column name="JOIN_INTERVAL" type="INT"/>
             <column name="FK_BUSINESSPROCESS" type="INT"/>
         </createTable>
+
+        <addColumn tableName="TB_LEG">
+            <column name="FK_SPLITTING" type="INT"/>
+        </addColumn>
+        <createIndex indexName="FK_LEG_SPLT" tableName="TB_LEG">
+            <column name="FK_SPLITTING"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="FK_SPLITTING" baseTableName="TB_LEG"
+                                 constraintName="UK_LEG_SPLT" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_SPLITTING"/>
+
+
     </changeSet>
 
 
