@@ -46,7 +46,7 @@ public class PasswordValidatorTest {
     @Test
     public void checkPasswordComplexity() throws Exception {
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_COMPLEXITY_PATTERN);
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordComplexityPatternProperty());
             result = PASSWORD_COMPLEXITY_PATTERN;
         }};
 
@@ -140,7 +140,7 @@ public class PasswordValidatorTest {
         String username = "user1";
         String testPassword = "testPassword123.";
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY);
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty());
             result = "0";
         }};
 
@@ -156,11 +156,13 @@ public class PasswordValidatorTest {
     public void testPasswordHistory() throws Exception {
         String username = "user1";
         String testPassword = "testPassword123.";
-        List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory());
+        //List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory());
+        List<String> oldPasswords = Arrays.asList("testPassword123");
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY);
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty());
             result = "5";
-            userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
+            //userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
+            passwordValidator.getPasswordHistory(anyString, anyInt);
             result = oldPasswords;
             bcryptEncoder.matches(anyString, anyString);
             result = true;

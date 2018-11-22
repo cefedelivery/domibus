@@ -1,6 +1,8 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
+import eu.domibus.common.model.security.User;
+import eu.domibus.common.validators.PluginUserPasswordValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +43,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
 
+    @Autowired
+    PluginUserPasswordValidator pluginUserPasswordValidator;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         try {
@@ -61,21 +67,30 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
-                Boolean res = false;
-                AuthenticationEntity basicAuthenticationEntity = securityAuthenticationDAO.findByUser(authentication.getName());
-                res = bcryptEncoder.matches((String) authentication.getCredentials(), basicAuthenticationEntity.getPasswd());
 
-                authentication.setAuthenticated(res);
+                AuthenticationEntity userEntity = securityAuthenticationDAO.findByUser(authentication.getName());
+                //check if password is correct
+                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), userEntity.getPasswd());
+                //check if password expired
+                validateExpiredPassword(userEntity);
 
-                ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());
+                authentication.setAuthenticated(isPasswordCorrect);
+
+                ((BasicAuthentication) authentication).setOriginalUser(userEntity.getOriginalUser());
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
         } catch (final Exception exception)  {
             throw new AuthenticationServiceException("Couldn't authenticate the principal " + authentication.getPrincipal(), exception);
-
         }
         return authentication;
+    }
+
+    public void validateExpiredPassword(AuthenticationEntity user) {
+        boolean isDefaultPassword = user.hasDefaultPassword();
+        LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
+
+        pluginUserPasswordValidator.validatePasswordExpired(user.getUsername(), isDefaultPassword, passwordChangeDate);
     }
 
     @Override

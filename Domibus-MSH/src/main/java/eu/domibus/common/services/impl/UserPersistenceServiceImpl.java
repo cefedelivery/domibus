@@ -1,9 +1,6 @@
 package eu.domibus.common.services.impl;
 
 import com.google.common.collect.Collections2;
-import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.api.multitenancy.DomainContextProvider;
-import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
@@ -15,7 +12,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.validators.PasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordValidator;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -67,7 +64,8 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private EventService eventService;
 
     @Autowired
-    private PasswordValidator passwordValidator;
+    //@Qualifier("UserPasswordValidator")
+    private ConsoleUserPasswordValidator passwordValidator;
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
@@ -115,7 +113,8 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     private void savePasswordHistory(User userEntity) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+//        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;
         }

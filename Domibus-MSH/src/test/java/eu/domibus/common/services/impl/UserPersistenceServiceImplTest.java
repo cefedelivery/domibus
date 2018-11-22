@@ -6,7 +6,7 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
-import eu.domibus.common.validators.PasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordValidator;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -47,7 +47,7 @@ public class UserPersistenceServiceImplTest {
     private UserDomainService userDomainService;
 
     @Injectable
-    private PasswordValidator passwordValidator;
+    private ConsoleUserPasswordValidator passwordValidator;
 
     @Injectable
     private DomibusPropertyProvider domibusPropertyProvider;
@@ -60,8 +60,6 @@ public class UserPersistenceServiceImplTest {
 
     @Tested
     private UserPersistenceServiceImpl userPersistenceService;
-
-
 
     @Test
     public void prepareUserForUpdate() {
