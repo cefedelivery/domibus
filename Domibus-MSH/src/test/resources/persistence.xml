@@ -30,6 +30,7 @@
         <class>eu.domibus.common.model.configuration.Reliability</class>
         <class>eu.domibus.common.model.configuration.Role</class>
         <class>eu.domibus.common.model.configuration.Security</class>
+        <class>eu.domibus.common.model.configuration.Splitting</class>
         <class>eu.domibus.common.model.configuration.Service</class>
         <class>eu.domibus.common.model.logging.ErrorLogEntry</class>
         <class>eu.domibus.common.model.logging.UserMessageLog</class>

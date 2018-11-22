@@ -66,5 +66,19 @@
         <addUniqueConstraint columnNames="FK_COMMAND, PROPERTY_NAME" constraintName="UNI_COMMAND_PROP_NAME"
                              tableName="TB_COMMAND_PROPERTY"/>
     </changeSet>
+    <changeSet id="EDELIVERY-4088" author="Cosmin Baciu">
+        <createTable tableName="TB_SPLITTING">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FRAGMENT_SIZE" type="INT"/>
+            <column name="COMPRESSION" type="BOOLEAN"/>
+            <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)"/>
+            <column name="JOIN_INTERVAL" type="INT"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+    </changeSet>
+
 
 </databaseChangeLog>

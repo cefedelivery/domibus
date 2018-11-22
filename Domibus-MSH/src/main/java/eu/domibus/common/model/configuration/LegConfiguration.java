@@ -109,6 +109,15 @@ public class LegConfiguration extends AbstractBaseEntity {
     @Column(name = "COMPRESS_PAYLOADS")
     private boolean compressPayloads;
 
+    @XmlAttribute(name = "splitting")
+    @Transient
+    protected String splittingXml;
+
+    @XmlTransient
+    @ManyToOne
+    @JoinColumn(name = "FK_SPLITTING")
+    private Splitting splitting;
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -207,6 +216,10 @@ public class LegConfiguration extends AbstractBaseEntity {
         this.compressPayloads = compressPayloads;
     }
 
+    public Splitting getSplitting() {
+        return splitting;
+    }
+
     public void init(final Configuration configuration) {
         for (final Reliability rel : configuration.getBusinessProcesses().getAs4Reliability()) {
             if (rel.getName().equalsIgnoreCase(this.reliabilityXml)) {
@@ -231,6 +244,13 @@ public class LegConfiguration extends AbstractBaseEntity {
         for (final Security sec : configuration.getBusinessProcesses().getSecurities()) {
             if (sec.getName().equalsIgnoreCase(this.securityXml)) {
                 this.security = sec;
+                break;
+            }
+        }
+
+        for (final Splitting splitting : configuration.getBusinessProcesses().getSplittings()) {
+            if (splitting.getName().equalsIgnoreCase(this.splittingXml)) {
+                this.splitting = splitting;
                 break;
             }
         }
