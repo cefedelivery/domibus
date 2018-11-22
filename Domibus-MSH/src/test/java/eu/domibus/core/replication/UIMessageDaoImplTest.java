@@ -28,7 +28,7 @@ import java.util.*;
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class, UIReplicationConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 @Transactional
-public class UIMessageDaoTest {
+public class UIMessageDaoImplTest {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(UIReplicationConfig.class);
 
