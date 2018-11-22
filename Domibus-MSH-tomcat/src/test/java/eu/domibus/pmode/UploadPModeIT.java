@@ -4,19 +4,18 @@ import eu.domibus.AbstractIT;
 import eu.domibus.api.util.xml.UnmarshallerResult;
 import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.dao.ConfigurationDAO;
+import eu.domibus.common.dao.ConfigurationRawDAO;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.web.rest.PModeResource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -57,6 +58,9 @@ public class UploadPModeIT extends AbstractIT {
 
     @Autowired
     XMLUtil xmlUtil;
+
+    @Autowired
+    ConfigurationRawDAO configurationRawDAO;
 
     /**
      * Tests that the PMODE is correctly saved in the DB.
@@ -92,14 +96,13 @@ public class UploadPModeIT extends AbstractIT {
 
             MultipartFile pModeContent = new MockMultipartFile("wrong-domibus-configuration", pmodeName, "text/xml", IOUtils.toByteArray(is));
             ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
-            Assert.assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
+            assertTrue(response.getBody().contains("Failed to upload the PMode file due to"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     private Configuration testUpdatePModes(final byte[] bytes) throws JAXBException {
         final Configuration configuration = (Configuration) this.jaxbContext.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
         configurationDAO.updateConfiguration(configuration);
@@ -132,7 +135,7 @@ public class UploadPModeIT extends AbstractIT {
                 Party party = partyIterator.next();
                 partyFound = parties.contains(party.getName());
             }
-            Assert.assertTrue(partyFound);
+            assertTrue(partyFound);
 
             Action savedAction = pModeProvider.getAction(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean actionFound = false;
@@ -143,7 +146,7 @@ public class UploadPModeIT extends AbstractIT {
                     actionFound = true;
                 }
             }
-            Assert.assertTrue(actionFound);
+            assertTrue(actionFound);
 
             Service savedService = pModeProvider.getService(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean serviceFound = false;
@@ -154,7 +157,7 @@ public class UploadPModeIT extends AbstractIT {
                     serviceFound = true;
                 }
             }
-            Assert.assertTrue(serviceFound);
+            assertTrue(serviceFound);
 
             LegConfiguration savedLegConf = pModeProvider.getLegConfiguration(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean legConfFound = false;
@@ -165,7 +168,7 @@ public class UploadPModeIT extends AbstractIT {
                     legConfFound = true;
                 }
             }
-            Assert.assertTrue(legConfFound);
+            assertTrue(legConfFound);
 
             Agreement savedAgreement = pModeProvider.getAgreement(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);
             boolean agreementFound = false;
@@ -176,7 +179,7 @@ public class UploadPModeIT extends AbstractIT {
                     agreementFound = true;
                 }
             }
-            Assert.assertTrue(agreementFound);
+            assertTrue(agreementFound);
 
             List<String> mpcNames = pModeProvider.getMpcList();
             Map<String, Mpc> savedMpcs = new HashMap<>();
@@ -193,11 +196,11 @@ public class UploadPModeIT extends AbstractIT {
 
             for (Mpc mpc : configuration.getMpcs()) {
                 Mpc savedMpc = savedMpcs.get(mpc.getName());
-                Assert.assertNotNull(savedMpc);
-                Assert.assertEquals(mpc.getName(), savedMpc.getName());
-                Assert.assertEquals(mpc.getQualifiedName(), savedMpc.getQualifiedName());
-                Assert.assertEquals(mpc.getRetentionDownloaded(), savedMpc.getRetentionDownloaded());
-                Assert.assertEquals(mpc.getRetentionUndownloaded(), savedMpc.getRetentionUndownloaded());
+                assertNotNull(savedMpc);
+                assertEquals(mpc.getName(), savedMpc.getName());
+                assertEquals(mpc.getQualifiedName(), savedMpc.getQualifiedName());
+                assertEquals(mpc.getRetentionDownloaded(), savedMpc.getRetentionDownloaded());
+                assertEquals(mpc.getRetentionUndownloaded(), savedMpc.getRetentionUndownloaded());
             }
 
         } catch (IOException ioEx) {
@@ -207,6 +210,29 @@ public class UploadPModeIT extends AbstractIT {
             System.out.println("JAXB error: " + jEx.getMessage());
             throw jEx;
         }
+    }
+
+
+    @Test
+    public void testUpdatePmodeContainingSplittingConfigurations() throws Exception {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-splitting-valid.xml");
+        pModeProvider.updatePModes(IOUtils.toByteArray(is), "description");
+
+        final Configuration configuration = configurationDAO.readEager();
+        final Set<Splitting> splittings = configuration.getBusinessProcesses().getSplittings();
+        assertNotNull(splittings);
+        assertEquals(splittings.size(), 1);
+        final Splitting splitting = splittings.iterator().next();
+
+        assertEquals(splitting.getName(), "default");
+        assertEquals(splitting.getFragmentSize(), 500);
+        assertTrue(splitting.getCompression());
+        assertEquals(splitting.getCompressionAlgorithm(), "br");
+        assertEquals(splitting.getJoinInterval(), 24);
+
+        final ConfigurationRaw currentRawConfiguration = configurationRawDAO.getCurrentRawConfiguration();
+        assertTrue(IOUtils.toString(currentRawConfiguration.getXml(), "UTF-8").contains("splittingConfigurations"));
+
     }
 
 
@@ -221,7 +247,7 @@ public class UploadPModeIT extends AbstractIT {
             InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/" + pmodeName);
             MultipartFile pModeContent = new MockMultipartFile("domibus-configuration-long-names", pmodeName, "text/xml", IOUtils.toByteArray(is));
             ResponseEntity<String> response = adminGui.uploadPmodes(pModeContent, "description");
-            Assert.assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
+            assertTrue(response.getBody().contains("is not facet-valid with respect to maxLength"));
         } catch (IOException ioEx) {
             System.out.println("Error: " + ioEx.getMessage());
             throw ioEx;

@@ -146,6 +146,7 @@
             <splitting name="default"
                        fragmentSize="500"
                        compression="true"
+                       compressionAlgorithm="br"
                        joinInterval="24"/>
         </splittingConfigurations>
         <legConfigurations>
