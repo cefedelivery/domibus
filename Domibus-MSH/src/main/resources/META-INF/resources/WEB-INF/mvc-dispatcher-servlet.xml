@@ -23,6 +23,14 @@
             <mvc:mapping path="/ext/**" />
             <bean class="eu.domibus.ext.web.interceptor.AuthenticationInterceptor"/>
         </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/rest/**"/>
+            <mvc:exclude-mapping path="/rest/security/user"/>
+            <mvc:exclude-mapping path="/rest/security/authentication"/>
+            <mvc:exclude-mapping path="/rest/security/user/password"/>
+            <mvc:exclude-mapping path="/rest/application/**"/>
+            <bean class="eu.domibus.web.security.DefaultPasswordInterceptor" />
+        </mvc:interceptor>
     </mvc:interceptors>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
