@@ -4,10 +4,7 @@ import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -248,10 +245,13 @@ public class LegConfiguration extends AbstractBaseEntity {
             }
         }
 
-        for (final Splitting splitting : configuration.getBusinessProcesses().getSplittings()) {
-            if (splitting.getName().equalsIgnoreCase(this.splittingXml)) {
-                this.splitting = splitting;
-                break;
+        final Set<Splitting> splittings = configuration.getBusinessProcesses().getSplittings();
+        if(splittings != null) {
+            for (final Splitting splitting : splittings) {
+                if (splitting.getName().equalsIgnoreCase(this.splittingXml)) {
+                    this.splitting = splitting;
+                    break;
+                }
             }
         }
 
