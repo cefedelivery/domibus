@@ -144,7 +144,7 @@ public class AuthenticationResourceTest {
             result = false;
         }};
 
-        authenticationResource.changePasswordPassword(changePasswordRO);
+        authenticationResource.changePassword(changePasswordRO);
 
         new Verifications() {{
             userManagementService.changePassword(loggedUser.getUsername(), changePasswordRO.getCurrentPassword(), changePasswordRO.getNewPassword());

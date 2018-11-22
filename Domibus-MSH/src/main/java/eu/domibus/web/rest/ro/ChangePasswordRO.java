@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * @author Ion Perpegel
- * @since 4.0
+ * @since 4.1
  */
 public class ChangePasswordRO implements Serializable {
 

@@ -180,7 +180,7 @@ public class AuthenticationResource {
      * */
     @RequestMapping(value = "user/password", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changePasswordPassword(@RequestBody ChangePasswordRO param) {
+    public void changePassword(@RequestBody ChangePasswordRO param) {
         UserDetail loggedUser = this.getLoggedUser();
         LOG.debug("Changing password for user [{}]", loggedUser.getUsername());
         getUserService().changePassword(loggedUser.getUsername(), param.getCurrentPassword(), param.getNewPassword());
