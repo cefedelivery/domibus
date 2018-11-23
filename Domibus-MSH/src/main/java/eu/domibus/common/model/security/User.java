@@ -34,7 +34,7 @@ import java.util.*;
 
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName("User")
-public class User extends AbstractBaseEntity {
+public class User extends AbstractBaseEntity implements IUser {
 
     @NotNull
     @Column(name = "USER_NAME")
@@ -120,6 +120,11 @@ public class User extends AbstractBaseEntity {
 
     public void clearRoles() {
         roles.clear();
+    }
+
+    @Override
+    public IUser.Type getType() {
+        return Type.CONSOLE;
     }
 
     public String getUserName() {

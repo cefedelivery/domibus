@@ -1,5 +1,6 @@
 package eu.domibus.common.dao.security;
 
+import eu.domibus.common.model.security.IUser;
 import eu.domibus.common.model.security.User;
 
 import java.time.LocalDate;
@@ -31,5 +32,5 @@ public interface UserDao {
 
     void flush();
 
-    List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end, Boolean withDefaultPassword);
+    List<IUser> findWithPasswordChangedBetween(LocalDate start, LocalDate end, Boolean withDefaultPassword);
 }

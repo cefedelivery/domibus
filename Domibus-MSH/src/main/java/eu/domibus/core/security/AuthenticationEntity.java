@@ -1,5 +1,6 @@
 package eu.domibus.core.security;
 
+import eu.domibus.common.model.security.IUser;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
@@ -13,8 +14,9 @@ import java.time.LocalDateTime;
         @NamedQuery(name = "AuthenticationEntity.findByCertificateId", query = "select bae from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
         @NamedQuery(name = "AuthenticationEntity.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.username=:USERNAME"),
         @NamedQuery(name = "AuthenticationEntity.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
-
-public class AuthenticationEntity extends AbstractBaseEntity {
+        @NamedQuery(name = "AuthenticationEntity.findWithPasswordChangedBetween", query = "FROM AuthenticationEntity ae where ae.passwordChangeDate is not null " +
+                "and ae.passwordChangeDate>:START_DATE and ae.passwordChangeDate<:END_DATE " + "and ae.defaultPassword=:DEFAULT_PASSWORD")
+public class AuthenticationEntity extends AbstractBaseEntity implements IUser {
 
     @Column(name = "CERTIFICATE_ID")
     private String certificateId;
@@ -82,6 +84,16 @@ public class AuthenticationEntity extends AbstractBaseEntity {
 
     public void setBackend(String backend) {
         this.backend = backend;
+    }
+
+    @Override
+    public IUser.Type getType() {
+        return Type.PLUGIN;
+    }
+
+    @Override
+    public String getUserName() {
+        return this.getUsername();
     }
 
     public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }

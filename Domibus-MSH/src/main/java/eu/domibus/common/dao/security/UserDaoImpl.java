@@ -2,6 +2,7 @@ package eu.domibus.common.dao.security;
 
 
 import eu.domibus.common.dao.BasicDao;
+import eu.domibus.common.model.security.IUser;
 import eu.domibus.common.model.security.User;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Thomas Dussart
@@ -76,12 +78,12 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     }
 
     @Override
-    public List<User> findWithPasswordChangedBetween(LocalDate start, LocalDate end, Boolean withDefaultPassword) {
+    public List<IUser> findWithPasswordChangedBetween(LocalDate start, LocalDate end, Boolean withDefaultPassword) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findWithPasswordChangedBetween", User.class);
         namedQuery.setParameter("START_DATE", start.atStartOfDay());
         namedQuery.setParameter("END_DATE", end.atStartOfDay());
         namedQuery.setParameter("DEFAULT_PASSWORD", withDefaultPassword);
-        return namedQuery.getResultList();
+        return namedQuery.getResultList().stream().collect(Collectors.toList());
     }
 
 }
