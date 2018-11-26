@@ -17,19 +17,22 @@ import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.MessagingLockDao;
 import eu.domibus.core.pull.PullMessageService;
+import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.messaging.MessageConstants;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.jms.Queue;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(JMockit.class)
 public class RetryServiceTest {
@@ -147,6 +150,50 @@ public class RetryServiceTest {
         }
         new Verifications() {{
             updateRetryLoggingService.messageFailed(userMessageLog); times = 2; // one outside for and one in for
+        }};
+    }
+
+    @Test
+    public void testResetWaitingForReceiptPullMessages(final @Mocked MessagingLock messagingLock) {
+        final List<MessagingLock> messagingLocks = Collections.singletonList(messagingLock);
+
+        new Expectations() {{
+            messagingLock.getMessageId();
+            result = RETRY_MESSAGEIDS.get(0);
+
+            messagingLockDao.findWaitingForReceipt();
+            result = messagingLocks;
+        }};
+
+        retryService.resetWaitingForReceiptPullMessages();
+
+        new FullVerifications(retryService) {{
+            String messageIdActual;
+            pullMessageService.resetMessageInWaitingForReceiptState(messageIdActual = withCapture());
+            times = 1;
+            Assert.assertEquals(RETRY_MESSAGEIDS.get(0), messageIdActual);
+        }};
+    }
+
+    @Test
+    public void testBulkExpirePullMessages(final @Mocked MessagingLock messagingLock) {
+        final List<MessagingLock> messagingLocks = Collections.singletonList(messagingLock);
+
+        new Expectations() {{
+            messagingLock.getMessageId();
+            result = RETRY_MESSAGEIDS.get(1);
+
+            messagingLockDao.findStaledMessages();
+            result = messagingLocks;
+        }};
+
+        retryService.bulkExpirePullMessages();
+
+        new Verifications() {{
+            String messageIdActual;
+            pullMessageService.expireMessage(messageIdActual = withCapture());
+            times = 1;
+            Assert.assertEquals(RETRY_MESSAGEIDS.get(1), messageIdActual);
         }};
     }
 }
