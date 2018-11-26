@@ -83,7 +83,7 @@ public class UIMessageServiceImpl implements UIMessageService {
      * @param uiMessageEntity
      * @return an {@link MessageLogRO} object
      */
-    private MessageLogRO convertUIMessageEntity(UIMessageEntity uiMessageEntity) {
+    protected MessageLogRO convertUIMessageEntity(UIMessageEntity uiMessageEntity) {
         if (uiMessageEntity == null) {
             return null;
         }
@@ -97,7 +97,7 @@ public class UIMessageServiceImpl implements UIMessageService {
      * @param uiMessageEntity
      * @return
      */
-    private MessageLogInfo convertToMessageLogInfo(UIMessageEntity uiMessageEntity) {
+    protected MessageLogInfo convertToMessageLogInfo(UIMessageEntity uiMessageEntity) {
         if (uiMessageEntity == null) {
             return null;
         }

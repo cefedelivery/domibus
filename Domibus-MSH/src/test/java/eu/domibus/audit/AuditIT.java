@@ -18,7 +18,7 @@ import javax.persistence.PersistenceContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
-public class AuditTest {
+public class AuditIT {
 
     @PersistenceContext
     private javax.persistence.EntityManager em;

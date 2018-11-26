@@ -30,7 +30,7 @@ public class UIReplicationSignalService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UIReplicationSignalService.class);
 
-    private static final String UI_REPLICATION_ENABLED = "domibus.ui.replication.enabled";
+    static final String UI_REPLICATION_ENABLED = "domibus.ui.replication.enabled";
 
     @Autowired
     @Qualifier("uiReplicationQueue")
@@ -91,7 +91,7 @@ public class UIReplicationSignalService {
         if (!isReplicationEnabled()) {
             return;
         }
-        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE,notificationStatus);
+        final JmsMessage message = createJMSMessage(messageId, UIJMSType.MESSAGE_NOTIFICATION_STATUS_CHANGE, notificationStatus);
 
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
@@ -123,7 +123,7 @@ public class UIReplicationSignalService {
         jmsManager.sendMapMessageToQueue(message, uiReplicationQueue);
     }
 
-    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType) {
+    protected JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType) {
         return JMSMessageBuilder.create()
                 .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
@@ -131,7 +131,7 @@ public class UIReplicationSignalService {
                 .build();
     }
 
-    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, MessageStatus messageStatus) {
+    protected JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, MessageStatus messageStatus) {
         return JMSMessageBuilder.create()
                 .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)
@@ -140,7 +140,7 @@ public class UIReplicationSignalService {
                 .build();
     }
 
-    private JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, NotificationStatus notificationStatus) {
+    protected JmsMessage createJMSMessage(String messageId, UIJMSType uiJMSType, NotificationStatus notificationStatus) {
         return JMSMessageBuilder.create()
                 .type(uiJMSType.name())
                 .property(MessageConstants.MESSAGE_ID, messageId)

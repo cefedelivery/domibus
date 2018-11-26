@@ -61,16 +61,37 @@ public class UIMessageDiffServiceImplTest {
 
         new Expectations() {{
             uiMessageDiffDao.findAllNative();
-            result = uiMessageDiffEntity;
+            result = uiMessageDiffEntityList;
 
         }};
 
         //tested method
         List<UIMessageDiffEntity> result = uiMessageDiffService.findAll();
-
+        Assert.assertEquals(uiMessageDiffEntityList.size(), result.size());
 
         new FullVerifications() {{
             uiMessageDiffDao.findAllNative();
+        }};
+    }
+
+    @Test
+    public void testFindAll_WithLimit(final @Mocked UIMessageDiffEntity uiMessageDiffEntity) {
+        final List<UIMessageDiffEntity> uiMessageDiffEntityList = Collections.singletonList(uiMessageDiffEntity);
+        final int limit = 2000;
+
+        new Expectations() {{
+            uiMessageDiffDao.findAllNative(limit);
+            result = uiMessageDiffEntityList;
+
+        }};
+
+        //tested method
+        List<UIMessageDiffEntity> result = uiMessageDiffService.findAll(limit);
+        Assert.assertEquals(uiMessageDiffEntityList.size(), result.size());
+
+
+        new FullVerifications() {{
+            uiMessageDiffDao.findAllNative(limit);
         }};
     }
 
