@@ -330,6 +330,26 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
+                            <xs:element name="splittingConfigurations" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element maxOccurs="unbounded" name="splitting">
+                                            <xs:complexType>
+                                                <!-- The name of the splitting configuration -->
+                                                <xs:attribute name="name" type="max255-non-empty-string" use="required"/>
+                                                <!-- The maximum size of the fragments (in MB) -->
+                                                <xs:attribute name="fragmentSize" type="xs:integer" use="required"/>
+                                                <!-- If true, indicates that the message must be compressed before splitting -->
+                                                <xs:attribute name="compression" type="xs:string" use="required"/>
+                                                <!-- Indicates which compression algorithm to use. Fixed value “br” indicating the use of Brotli compression. -->
+                                                <xs:attribute name="compressionAlgorithm" type="max255-non-empty-string" use="optional"/>
+                                                <!-- Specifies the maximum time to expect and process additional fragments after the first fragment is received (in hours) -->
+                                                <xs:attribute name="joinInterval" type="xs:integer" use="required"/>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
                             <xs:element name="legConfigurations">
                                 <xs:complexType>
                                     <xs:sequence>
@@ -357,6 +377,7 @@
                                                         name="compressPayloads"
                                                         type="xs:string"
                                                         use="required"/>
+                                                <xs:attribute name="splitting" type="max255-non-empty-string" use="optional"/>
                                             </xs:complexType>
                                         </xs:element>
                                     </xs:sequence>

@@ -66,5 +66,35 @@
         <addUniqueConstraint columnNames="FK_COMMAND, PROPERTY_NAME" constraintName="UNI_COMMAND_PROP_NAME"
                              tableName="TB_COMMAND_PROPERTY"/>
     </changeSet>
+    <changeSet id="EDELIVERY-4088" author="Cosmin Baciu">
+        <createTable tableName="TB_SPLITTING">
+            <column autoIncrement="true" name="ID_PK" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="FRAGMENT_SIZE" type="INT"/>
+            <column name="COMPRESSION" type="BOOLEAN"/>
+            <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)"/>
+            <column name="JOIN_INTERVAL" type="INT"/>
+            <column name="FK_BUSINESSPROCESS" type="INT"/>
+        </createTable>
+
+        <addColumn tableName="TB_LEG">
+            <column name="FK_SPLITTING" type="INT"/>
+        </addColumn>
+        <createIndex indexName="FK_LEG_SPLT" tableName="TB_LEG">
+            <column name="FK_SPLITTING"/>
+        </createIndex>
+        <createIndex indexName="FK_SPLT_BP" tableName="TB_SPLITTING">
+            <column name="FK_BUSINESSPROCESS"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="FK_SPLITTING" baseTableName="TB_LEG"
+                                 constraintName="UK_LEG_SPLT" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID_PK" referencedTableName="TB_SPLITTING"/>
+
+
+    </changeSet>
+
 
 </databaseChangeLog>
