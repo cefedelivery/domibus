@@ -25,59 +25,15 @@
             <partyIdTypes>
                 <partyIdType name="partyTypeEmpty" value=""/>
             </partyIdTypes>
-            <party name="ibmgw"
-                   endpoint="http://5.153.46.53:29001/AS4"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:IBMgw"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
-            <party name="domibus_de"
-                   endpoint="http://test.edelivery.it.nrw.de/domibus-msh"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-de"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
-            <party name="flame"
-                   endpoint="http://fmstest.flame.co.za:8080/AS4"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:flame"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
-            <party name="holodeck"
-                   endpoint="http://msh.holodeck-b2b.org:8080/msh"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:holodeck-b2b"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
-            <party name="axway"
-                   endpoint="http://208.67.130.9/exchange/axwayas4"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:axway"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
-            <party name="cefgw"
-                   endpoint="https://secure.gateway.eu/as4"
-                   allowChunking="false"
-            >
-                <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:CEF"
-                            partyIdType="partyTypeEmpty"/>
-            </party>
             <party name="red_gw"
                    endpoint="http://localhost:8180/domibus/services/msh"
-                   allowChunking="false"
-            >
+                   allowChunking="false">
                 <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red"
                             partyIdType="partyTypeEmpty"/>
             </party>
             <party name="blue_gw"
                    endpoint="http://localhost:8080/domibus/services/msh"
-                   allowChunking="false"
-            >
+                   allowChunking="false">
                 <identifier partyId="urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue"
                             partyIdType="partyTypeEmpty"/>
             </party>

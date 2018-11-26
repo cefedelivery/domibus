@@ -51,6 +51,7 @@ public class UploadPModeIT extends AbstractIT {
             "agreement1110" + MessageExchangeConfiguration.PMODEKEY_SEPARATOR + "pushTestcase1tc1Action";
 
     private static final String PREFIX_MPC_URI = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/";
+    public static final String SAMPLE_PMODES_DOMIBUS_CONFIGURATION_VALID_XML = "samplePModes/domibus-configuration-valid.xml";
 
 
     @Autowired
@@ -107,7 +108,7 @@ public class UploadPModeIT extends AbstractIT {
      */
     @Test
     public void testVerifyPModeContent() throws IOException, JAXBException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("samplePModes/domibus-configuration-valid.xml");
+        InputStream is = getClass().getClassLoader().getResourceAsStream(SAMPLE_PMODES_DOMIBUS_CONFIGURATION_VALID_XML);
         Configuration configuration = testUpdatePModes(IOUtils.toByteArray(is));
         // Starts to check that the content of the XML file has actually been saved!
         Party receiverParty = pModeProvider.getReceiverParty(BLUE_2_RED_SERVICE1_ACTION1_PMODE_KEY);

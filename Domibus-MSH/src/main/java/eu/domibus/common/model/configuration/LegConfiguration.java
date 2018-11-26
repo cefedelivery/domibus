@@ -247,12 +247,11 @@ public class LegConfiguration extends AbstractBaseEntity {
 
         final Set<Splitting> splittings = configuration.getBusinessProcesses().getSplittings();
         if(splittings != null) {
-            for (final Splitting splitting : splittings) {
-                if (splitting.getName().equalsIgnoreCase(this.splittingXml)) {
-                    this.splitting = splitting;
-                    break;
-                }
-            }
+            this.splitting = splittings
+                    .stream()
+                    .filter(splitting1 -> splitting.getName().equalsIgnoreCase(this.splittingXml))
+                    .findFirst()
+                    .orElse(null);
         }
 
         for (final Action a : configuration.getBusinessProcesses().getActions()) {
