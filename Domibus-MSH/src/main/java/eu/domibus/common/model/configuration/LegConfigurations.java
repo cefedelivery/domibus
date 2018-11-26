@@ -33,6 +33,8 @@ import java.util.List;
  *                 &lt;attribute name="propertySet" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
  *                 &lt;attribute name="payloadProfile" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
  *                 &lt;attribute name="errorHandling" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;attribute name="compressPayloads" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;attribute name="splitting" type="{http://domibus.eu/configuration}max255-non-empty-string" /&gt;
  *               &lt;/restriction&gt;
  *             &lt;/complexContent&gt;
  *           &lt;/complexType&gt;
@@ -44,6 +46,7 @@ import java.util.List;
  * </pre>
  *
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = "legConfiguration")

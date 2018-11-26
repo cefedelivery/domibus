@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -25,6 +26,7 @@ import java.util.List;
         "servicesXml",
         "actionsXml",
         "as4Xml",
+        "splittingConfigurationsXml",
         "legConfigurationsXml",
         "processes"
 })
@@ -65,7 +67,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @XmlElement(required = true, name = "securities")
     @Transient
     protected Securities securitiesXml; //NOSONAR
-    @XmlElement(required = true, name = "legConfigurations")
+
+    @XmlElement(required = true, name = "splittingConfigurations")
+    @Transient
+    protected SplittingConfigurations splittingConfigurationsXml; //NOSONAR
+
+    @XmlElement(name = "legConfigurations")
     @Transient
     protected LegConfigurations legConfigurationsXml; //NOSONAR
 
@@ -135,6 +142,12 @@ public class BusinessProcesses extends AbstractBaseEntity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
     private Set<Reliability> as4Reliability;
+
+    @XmlTransient
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_BUSINESSPROCESS")
+    private Set<Splitting> splittings;
+
     @XmlTransient
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_BUSINESSPROCESS")
@@ -291,6 +304,11 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.securities = new HashSet<>();
         this.securities.addAll(this.securitiesXml.getSecurity());
 
+        if(splittingConfigurationsXml != null) {
+            this.splittings = new HashSet<>();
+            this.splittings.addAll(this.splittingConfigurationsXml.getSplitting());
+        }
+
         for (final LegConfiguration legConfiguration : this.legConfigurationsXml.getLegConfiguration()) {
             legConfiguration.init(configuration);
         }
@@ -370,6 +388,8 @@ public class BusinessProcesses extends AbstractBaseEntity {
             return false;
         if (errorHandlings != null ? !errorHandlings.equals(that.errorHandlings) : that.errorHandlings != null)
             return false;
+        if (splittings != null ? !splittings.equals(that.splittings) : that.splittings != null)
+            return false;
         if (legConfigurations != null ? !legConfigurations.equals(that.legConfigurations) : that.legConfigurations != null)
             return false;
         if (mepBindings != null ? !mepBindings.equals(that.mepBindings) : that.mepBindings != null) return false;
@@ -408,6 +428,7 @@ public class BusinessProcesses extends AbstractBaseEntity {
         result = 31 * result + (actions != null ? actions.hashCode() : 0);
         result = 31 * result + (as4ConfigReceptionAwareness != null ? as4ConfigReceptionAwareness.hashCode() : 0);
         result = 31 * result + (as4Reliability != null ? as4Reliability.hashCode() : 0);
+        result = 31 * result + (splittings != null ? splittings.hashCode() : 0);
         result = 31 * result + (legConfigurations != null ? legConfigurations.hashCode() : 0);
         result = 31 * result + (securities != null ? securities.hashCode() : 0);
         return result;
@@ -429,6 +450,13 @@ public class BusinessProcesses extends AbstractBaseEntity {
         this.actions = actions;
     }
 
+    public Set<Splitting> getSplittings() {
+        return splittings;
+    }
+
+    public void setSplittings(Set<Splitting> splittings) {
+        this.splittings = splittings;
+    }
 
     public Set<LegConfiguration> getLegConfigurations() {
         return this.legConfigurations;
