@@ -44,7 +44,7 @@ public class ConfigurationLoaderTest {
         configurationLoader.getConfiguration(configurationReader);
         configurationLoader.getConfiguration(configurationReader);
         new Verifications() {{
-            configurationReader.readConfiguration(ConfigurationLoader.NULL_DOMAIN);
+            configurationReader.readConfiguration(ConfigurationLoader.SUPER_DOMAIN);
             times = 1;
         }};
     }

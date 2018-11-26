@@ -107,7 +107,7 @@ public class EventServiceImpl implements EventService {
         Event event = prepareAuthenticatorEvent(userName, loginTime, Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
-    }
+}
 
     /**
      * {@inheritDoc}
