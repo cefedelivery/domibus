@@ -1,42 +1,26 @@
-package eu.domibus.core.message.fragment;
+package eu.domibus.api.message.fragment;
 
-import eu.domibus.ebms3.common.model.AbstractBaseEntity;
-
-import javax.persistence.*;
 import java.math.BigInteger;
 
 /**
  * @author Cosmin Baciu
  * @since 4.1
  */
-@Entity
-@Table(name = "TB_MESSAGE_GROUP")
-public class MessageGroupEntity extends AbstractBaseEntity {
+public class MessageGroup {
 
-    @Column(name = "GROUP_ID")
     protected String groupId;
 
-    @Column(name = "SOURCE_MESSAGE_ID")
-    protected String sourceMessageId;
-
-    @Column(name = "MESSAGE_SIZE")
     protected BigInteger messageSize;
 
-    @Column(name = "FRAGMENT_COUNT")
     protected Integer fragmentCount;
 
-    @Column(name = "COMPRESSION_ALGORITHM")
     protected String compressionAlgorithm;
 
-    @Column(name = "COMPRESSED_MESSAGE_SIZE")
     protected BigInteger compressedMessageSize;
 
-    @Column(name = "SOAP_ACTION")
     protected String soapAction;
 
-    @JoinColumn(name = "FK_MESSAGE_HEADER_ID")
-    @OneToOne(cascade = CascadeType.ALL)
-    protected MessageHeaderEntity messageHeaderEntity;
+    protected MessageHeader messageHeaderEntity;
 
     public String getGroupId() {
         return groupId;
@@ -86,11 +70,11 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.soapAction = soapAction;
     }
 
-    public MessageHeaderEntity getMessageHeaderEntity() {
+    public MessageHeader getMessageHeaderEntity() {
         return messageHeaderEntity;
     }
 
-    public void setMessageHeaderEntity(MessageHeaderEntity messageHeaderEntity) {
+    public void setMessageHeaderEntity(MessageHeader messageHeaderEntity) {
         this.messageHeaderEntity = messageHeaderEntity;
     }
 }

@@ -1,5 +1,6 @@
 package eu.domibus.ebms3.common.model;
 
+import eu.domibus.core.message.fragment.MessageFragmentEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -47,22 +48,40 @@ public class UserMessage extends AbstractBaseEntity {
     @XmlElement(name = "MessageInfo", required = true)
     @OneToOne(cascade = CascadeType.ALL)
     protected MessageInfo messageInfo;
+
     @XmlElement(name = "PartyInfo", required = true)
     @Embedded
     protected PartyInfo partyInfo; //NOSONAR
+
     @XmlElement(name = "CollaborationInfo", required = true)
     @Embedded
     protected CollaborationInfo collaborationInfo; //NOSONAR
+
     @XmlElement(name = "MessageProperties")
     @Embedded
     protected MessageProperties messageProperties; //NOSONAR
+
     @XmlElement(name = "PayloadInfo")
     @Embedded
     protected PayloadInfo payloadInfo; //NOSONAR
+
     @XmlAttribute(name = "mpc")
     @XmlSchemaType(name = "anyURI")
     @Column(name = "MPC")
     protected String mpc = Ebms3Constants.DEFAULT_MPC;
+
+    @XmlTransient
+    @JoinColumn(name = "FK_MESSAGE_FRAGMENT_ID")
+    @OneToOne(cascade = CascadeType.ALL)
+    protected MessageFragmentEntity messageFragment;
+
+    public MessageFragmentEntity getMessageFragment() {
+        return messageFragment;
+    }
+
+    public void setMessageFragment(MessageFragmentEntity messageFragment) {
+        this.messageFragment = messageFragment;
+    }
 
     /**
      * This REQUIRED element occurs once,
