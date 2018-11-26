@@ -25,7 +25,7 @@ import java.util.List;
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
         PartyDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
-public class PartyDaoTest {
+public class PartyDaoIT {
     @PersistenceContext
     private javax.persistence.EntityManager em;
 

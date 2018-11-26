@@ -13,6 +13,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,10 +28,10 @@ import java.util.*;
  * @since 4.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {InMemoryDataBaseConfig.class, UIReplicationConfig.class})
+@ContextConfiguration(classes = {InMemoryDataBaseConfig.class, UIMessageDaoImplIT.UIReplicationConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
 @Transactional
-public class UIMessageDaoImplTest {
+public class UIMessageDaoImplIT {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(UIReplicationConfig.class);
 
@@ -41,6 +44,18 @@ public class UIMessageDaoImplTest {
     private final String conversationId = UUID.randomUUID().toString();
 
     private UIMessageEntity uiMessageEntity1, uiMessageEntity2, uiMessageEntity3;
+
+
+    @EnableAspectJAutoProxy(proxyTargetClass = true)
+    @Configuration
+    static public class UIReplicationConfig {
+
+        @Bean
+        public UIMessageDaoImpl uiMessageDao() {
+            return new UIMessageDaoImpl();
+        }
+    }
+
 
     @Before
     public void setUp() throws Exception {
