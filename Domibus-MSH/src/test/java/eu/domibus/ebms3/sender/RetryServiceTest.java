@@ -196,4 +196,36 @@ public class RetryServiceTest {
             Assert.assertEquals(RETRY_MESSAGEIDS.get(1), messageIdActual);
         }};
     }
+
+    @Test
+    public void testBulkDeletePullMessages(final @Mocked MessagingLock messagingLock) {
+        final List<MessagingLock> messagingLocks = Collections.singletonList(messagingLock);
+
+        new Expectations() {{
+            messagingLock.getMessageId();
+            result =  RETRY_MESSAGEIDS.get(1);
+
+            messagingLockDao.findDeletedMessages();
+            result = messagingLocks;
+        }};
+
+        retryService.bulkDeletePullMessages();
+
+        new Verifications() {{
+            String messageIdActual;
+            pullMessageService.deleteInNewTransaction(messageIdActual = withCapture());
+            times = 1;
+            Assert.assertEquals(RETRY_MESSAGEIDS.get(1), messageIdActual);
+        }};
+    }
+
+    @Test
+    public void testEnqueueMessages() {
+        new Expectations() {{
+
+        }};
+
+        retryService.enqueueMessages();
+
+    }
 }
