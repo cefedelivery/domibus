@@ -287,7 +287,7 @@ public class UserMessageHandlerService {
         }
 
         try {
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
         } catch (CompressionException exc) {
             EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, "Could not persist message" + exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);
             ex.setMshRole(MSHRole.RECEIVING);

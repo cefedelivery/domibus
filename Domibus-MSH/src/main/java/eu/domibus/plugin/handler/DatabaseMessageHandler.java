@@ -16,16 +16,16 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
 import eu.domibus.common.services.MessagingService;
-import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessageIdGenerator;
 import eu.domibus.common.validators.BackendMessageValidator;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PartyExtractor;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -65,8 +65,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
-    @Autowired
-    private CompressionService compressionService;
+
 
     @Autowired
     private SubmissionAS4Transformer transformer;
@@ -121,6 +120,9 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
     @Autowired
     UIReplicationSignalService uiReplicationSignalService;
+
+    @Autowired
+    SplitAndJoinService splitAndJoinService;
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -305,11 +307,8 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             payloadProfileValidator.validate(message, pModeKey);
             propertyProfileValidator.validate(message, pModeKey);
 
-            boolean compressed = compressionService.handleCompression(userMessage, legConfiguration);
-            LOG.debug("Compression for message with id: [{}] applied: [{}]", messageId, compressed);
-
             try {
-                messagingService.storeMessage(message, MSHRole.SENDING);
+                messagingService.storeMessage(message, MSHRole.SENDING, legConfiguration);
             } catch (CompressionException exc) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_PAYLOAD_COMPRESSION_FAILURE, userMessage.getMessageInfo().getMessageId());
                 EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0303, exc.getMessage(), userMessage.getMessageInfo().getMessageId(), exc);

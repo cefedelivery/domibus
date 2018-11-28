@@ -440,7 +440,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
             uiReplicationSignalService.userMessageReceived(messageId);
         }};
     }
@@ -527,7 +527,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
             times = 0;
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
@@ -723,7 +723,7 @@ public class UserMessageHandlerServiceTest {
             compressionService.handleDecompression(userMessage, legConfiguration);
             result = true;
 
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
             result = new CompressionException("Could not store binary data for message ", null);
 
             userMessage.getMessageInfo().getMessageId();
@@ -740,7 +740,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
             payloadProfileValidator.validate(messaging, pmodeKey);
             propertyProfileValidator.validate(messaging, pmodeKey);
-            messagingService.storeMessage(messaging, MSHRole.RECEIVING);
+            messagingService.storeMessage(messaging, MSHRole.RECEIVING, legConfiguration);
             userMessageLogDao.create(withAny(userMessageLog));
             times = 0;
         }};

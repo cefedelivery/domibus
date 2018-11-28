@@ -6,6 +6,7 @@ import eu.domibus.api.util.xml.XMLUtil;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.CompressionException;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.CompressionService;
 import eu.domibus.common.services.impl.MessagingServiceImpl;
 import eu.domibus.configuration.storage.Storage;
@@ -64,9 +65,12 @@ public class MessagingServiceTest {
     @Injectable
     private DomainContextProvider domainContextProvider;
 
+    @Injectable
+    LegConfiguration legConfiguration;
+
     @Test
     public void testStoreMessageCalls(@Injectable final Messaging messaging) throws IOException, JAXBException, XMLStreamException {
-        messagingService.storeMessage(messaging, MSHRole.SENDING);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
 
         new Verifications() {{
             messagingDao.create(messaging);
@@ -150,7 +154,7 @@ public class MessagingServiceTest {
             partInfo.getPartProperties().getProperties().add(property);
         }
 
-        messagingService.storeMessage(validMessaging, MSHRole.SENDING);
+        messagingService.storeMessage(validMessaging, MSHRole.SENDING, legConfiguration);
         partInfo = getOnePartInfo(validMessaging);
 
         return partInfo;
@@ -163,7 +167,7 @@ public class MessagingServiceTest {
         PartInfo partInfo = getOnePartInfo(messaging);
         partInfo.setPayloadDatahandler(dh);
 
-        messagingService.storeMessage(messaging, MSHRole.SENDING);
+        messagingService.storeMessage(messaging, MSHRole.SENDING, legConfiguration);
         partInfo = getOnePartInfo(messaging);
 
         return partInfo;
