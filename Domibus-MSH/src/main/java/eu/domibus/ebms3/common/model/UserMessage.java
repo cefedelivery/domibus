@@ -71,6 +71,10 @@ public class UserMessage extends AbstractBaseEntity {
     protected String mpc = Ebms3Constants.DEFAULT_MPC;
 
     @XmlTransient
+    @Column(name = "SPLIT_AND_JOIN")
+    protected boolean splitAndJoin;
+
+    @XmlTransient
     @JoinColumn(name = "FK_MESSAGE_FRAGMENT_ID")
     @OneToOne(cascade = CascadeType.ALL)
     protected MessageFragmentEntity messageFragment;
@@ -235,6 +239,14 @@ public class UserMessage extends AbstractBaseEntity {
                 return true;
         }
         return false;
+    }
+
+    public boolean isSplitAndJoin() {
+        return splitAndJoin;
+    }
+
+    public void setSplitAndJoin(boolean splitAndJoin) {
+        this.splitAndJoin = splitAndJoin;
     }
 
     @Override

@@ -14,5 +14,4 @@ import eu.domibus.ebms3.common.model.Messaging;
 public interface MessagingService {
 
     void storeMessage(Messaging messaging, MSHRole mshRole, final LegConfiguration legConfiguration) throws CompressionException;
-
 }

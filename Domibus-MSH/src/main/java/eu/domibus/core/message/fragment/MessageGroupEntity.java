@@ -93,4 +93,12 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     public void setMessageHeaderEntity(MessageHeaderEntity messageHeaderEntity) {
         this.messageHeaderEntity = messageHeaderEntity;
     }
+
+    public String getSourceMessageId() {
+        return sourceMessageId;
+    }
+
+    public void setSourceMessageId(String sourceMessageId) {
+        this.sourceMessageId = sourceMessageId;
+    }
 }

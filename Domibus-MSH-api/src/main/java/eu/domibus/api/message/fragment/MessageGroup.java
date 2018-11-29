@@ -10,6 +10,8 @@ public class MessageGroup {
 
     protected String groupId;
 
+    protected String sourceMessageId;
+
     protected BigInteger messageSize;
 
     protected Integer fragmentCount;
@@ -76,5 +78,13 @@ public class MessageGroup {
 
     public void setMessageHeaderEntity(MessageHeader messageHeaderEntity) {
         this.messageHeaderEntity = messageHeaderEntity;
+    }
+
+    public String getSourceMessageId() {
+        return sourceMessageId;
+    }
+
+    public void setSourceMessageId(String sourceMessageId) {
+        this.sourceMessageId = sourceMessageId;
     }
 }

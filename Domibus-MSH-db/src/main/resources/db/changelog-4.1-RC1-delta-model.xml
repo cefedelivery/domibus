@@ -125,6 +125,7 @@
 
         <addColumn tableName="TB_USER_MESSAGE">
             <column name="FK_MESSAGE_FRAGMENT_ID" type="INT"/>
+            <column name="SPLIT_AND_JOIN" type="BOOLEAN"/>
         </addColumn>
         <createIndex indexName="FK_UM_MF" tableName="TB_USER_MESSAGE">
             <column name="FK_MESSAGE_FRAGMENT_ID"/>

@@ -37,6 +37,8 @@
         <destinations>
             <queue id="sendMessageQueue"
                    physicalName="domibus.internal.dispatch.queue"/>
+            <queue id="sendLargeMessageQueue"
+                   physicalName="domibus.internal.largeMessage.queue"/>
             <queue id="pullMessageQueue"
                    physicalName="domibus.internal.pull.queue"/>
             <queue id="alertMessageQueue"
@@ -125,6 +127,7 @@
                         </defaultEntry>
                         <redeliveryPolicyEntries>
                             <redeliveryPolicy queue="domibus.internal.dispatch.queue" maximumRedeliveries="0"/>
+                            <redeliveryPolicy queue="domibus.internal.largeMessage.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.pull.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.alert.queue" maximumRedeliveries="0"/>
                             <redeliveryPolicy queue="domibus.internal.ui.replication.queue" maximumRedeliveries="1" redeliveryDelay="10000"/>
@@ -133,7 +136,7 @@
                 </redeliveryPolicyMap>
             </redeliveryPlugin>
 
-            <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue domibus.internal.alert.queue" reportInterval="10000"/>
+            <discardingDLQBrokerPlugin dropAll="false" dropOnly="domibus.internal.dispatch.queue domibus.internal.pull.queue domibus.internal.alert.queue domibus.internal.largeMessage.queue" reportInterval="10000"/>
         </plugins>
     </broker>
 

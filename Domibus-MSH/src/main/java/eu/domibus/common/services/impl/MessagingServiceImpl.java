@@ -153,29 +153,27 @@ public class MessagingServiceImpl implements MessagingService {
 
     protected byte[] getOutgoingBinaryData(PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
         byte[] binaryData = IOUtils.toByteArray(is);
-        final boolean useSplitAndJoin = splitAndJoinService.useSplitAndJoin(legConfiguration, binaryData.length);
-        LOG.debug("SplitAndJoin will be used for sending payload");
 
-        //do not compress the source message if split and join is used
-        if (!useSplitAndJoin) {
+        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
+        if (!mayUseSplitAndJoin) {
             boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
             LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
 
             if (useCompression) {
                 binaryData = compress(binaryData);
             }
+        } else {
+            userMessage.setSplitAndJoin(true);
         }
 
         return binaryData;
     }
 
     protected long saveOutgoingFileToDisk(File file, PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
-        final boolean useSplitAndJoin = splitAndJoinService.useSplitAndJoin(legConfiguration, file.length());
-
         OutputStream fileOutputStream = new FileOutputStream(file);
 
-        //do not compress the source message if split and join is used
-        if (!useSplitAndJoin) {
+        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
+        if (!mayUseSplitAndJoin) {
             boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
             LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
 
@@ -183,6 +181,8 @@ public class MessagingServiceImpl implements MessagingService {
                 LOG.debug("Using compression for storing the file [{}]", file);
                 fileOutputStream = new GZIPOutputStream(fileOutputStream);
             }
+        } else {
+            userMessage.setSplitAndJoin(true);
         }
 
         final long total = IOUtils.copyLarge(is, fileOutputStream);
