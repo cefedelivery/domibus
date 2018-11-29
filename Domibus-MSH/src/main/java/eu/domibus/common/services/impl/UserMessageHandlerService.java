@@ -1,6 +1,7 @@
 package eu.domibus.common.services.impl;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.routing.BackendFilter;
@@ -11,7 +12,6 @@ import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.ErrorHandling;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;

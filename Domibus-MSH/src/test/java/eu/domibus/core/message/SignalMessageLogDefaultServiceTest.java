@@ -3,7 +3,7 @@ package eu.domibus.core.message;
 import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.ebms3.common.model.Ebms3Constants;
-import eu.domibus.ebms3.common.model.MessageSubtype;
+import eu.domibus.api.message.MessageSubtype;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;

@@ -10,6 +10,8 @@ public interface UserMessageLogService {
 
     void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service);
 
+    void save(String messageId, String messageStatus, String notificationStatus, String mshRole, Integer maxAttempts, String mpc, String backendName, String endpoint, String action, String service, boolean splitAndJoin);
+
     void setMessageAsDeleted(String messageId);
 
     void setMessageAsDownloaded(String messageId);
