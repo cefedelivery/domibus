@@ -43,6 +43,7 @@
         <dozer.version>5.5.1</dozer.version>
         <jackson.version>2.9.5</jackson.version>
         <commons-test.version>4.2</commons-test.version>
+        <metrics.version>4.0.2</metrics.version>
 
         <!-- Sonar properties -->
         <sonar.binaries>target/classes</sonar.binaries>
@@ -414,6 +415,19 @@
                 <version>3.0.0</version>
             </dependency>
 
+            <!-- Dropwizard -->
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
+            <!-- End Dropwizard -->
+
             <!-- Test dependencies -->
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -745,7 +759,7 @@
             <modules>
                 <module>Domibus-ws-stubs</module>
                 <module>Domibus-default-ws-plugin</module>
-                <module>Domibus-default-jms-plugin</module>
+                <!--<module>Domibus-default-jms-plugin</module>-->
                 <module>Domibus-default-fs-plugin</module>
             </modules>
         </profile>

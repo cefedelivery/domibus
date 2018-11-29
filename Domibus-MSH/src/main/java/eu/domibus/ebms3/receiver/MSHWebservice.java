@@ -1,8 +1,12 @@
 package eu.domibus.ebms3.receiver;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.messaging.MessagingException;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.reliability.ReliabilityException;
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
@@ -47,6 +51,8 @@ import javax.xml.ws.Service;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * This method is responsible for the receiving of ebMS3 messages and the sending of signal messages like receipts or ebMS3 errors in return
@@ -105,58 +111,72 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         this.jaxbContext = jaxbContext;
     }
 
+    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "mshRequestsMeter"));
+    private static final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "mshRequestsCounter"));
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SOAPMessage invoke(final SOAPMessage request) {
+        requestsPerSecond.mark();
+        pendingRequests.inc();
 
-        SOAPMessage responseMessage = null;
-        Messaging messaging;
-        messaging = getMessage(request);
-        UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
-        LOG.trace("Message received");
-        if (messaging.getSignalMessage() != null) {
-            if (messaging.getSignalMessage().getPullRequest() != null) {
-                LOG.trace("before pull request.");
-                final SOAPMessage soapMessage = handlePullRequest(messaging);
-                LOG.trace("returning pull request message.");
-                return soapMessage;
-            } else if (messaging.getSignalMessage().getReceipt() != null) {
-                LOG.trace("before pull receipt.");
-                final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
-                LOG.trace("returning pull receipt.");
-                return soapMessage;
-            }
-        } else {
-            String pmodeKey = null;
-            try {
-                //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
-                pmodeKey = (String) request.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
-            } catch (final SOAPException soapEx) {
-                //this error should never occur because pmode handling is done inside the in-interceptorchain
-                LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
-                assert false;
-            }
-            try {
-                LOG.info("Using pmodeKey {}", pmodeKey);
-                responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
-                final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
-                LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
-            } catch (TransformerException | SOAPException | JAXBException | IOException e) {
-                throw new UserMessageException(e);
-            } catch (final EbMS3Exception e) {
-                try {
-                    if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
-                        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
-                    }
-                } catch (Exception ex) {
-                    LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
+
+        Timer mshWebservice = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "invoke"));
+        final Timer.Context mshWebserviceContext = mshWebservice.time();
+        try {
+            SOAPMessage responseMessage = null;
+            Messaging messaging;
+            messaging = getMessage(request);
+            UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+            LOG.trace("Message received");
+            if (messaging.getSignalMessage() != null) {
+                if (messaging.getSignalMessage().getPullRequest() != null) {
+                    LOG.trace("before pull request.");
+                    final SOAPMessage soapMessage = handlePullRequest(messaging);
+                    LOG.trace("returning pull request message.");
+                    return soapMessage;
+                } else if (messaging.getSignalMessage().getReceipt() != null) {
+                    LOG.trace("before pull receipt.");
+                    final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
+                    LOG.trace("returning pull receipt.");
+                    return soapMessage;
                 }
-                throw new WebServiceException(e);
+            } else {
+                String pmodeKey = null;
+                try {
+                    //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
+                    pmodeKey = (String) request.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+                } catch (final SOAPException soapEx) {
+                    //this error should never occur because pmode handling is done inside the in-interceptorchain
+                    LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
+                    assert false;
+                }
+                try {
+                    LOG.info("Using pmodeKey {}", pmodeKey);
+                    responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
+                    final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
+                    LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
+                    LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
+                } catch (TransformerException | SOAPException | JAXBException | IOException e) {
+                    throw new UserMessageException(e);
+                } catch (final EbMS3Exception e) {
+                    try {
+                        if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
+                            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
+                        }
+                    } catch (Exception ex) {
+                        LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
+                    }
+                    throw new WebServiceException(e);
+                }
             }
-        }
 
-        return responseMessage;
+
+            return responseMessage;
+        } finally {
+            mshWebserviceContext.stop();
+            pendingRequests.dec();
+        }
     }
 
     UserMessageHandlerContext getMessageHandler() {
