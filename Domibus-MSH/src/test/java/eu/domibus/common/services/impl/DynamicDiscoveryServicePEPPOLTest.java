@@ -77,6 +77,8 @@ public class DynamicDiscoveryServicePEPPOLTest {
     @Tested
     private DynamicDiscoveryServicePEPPOL dynamicDiscoveryServicePEPPOL;
 
+    private String transportProfileAS4;
+
     @Test
     public void testLookupInformationMock(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
@@ -86,10 +88,13 @@ public class DynamicDiscoveryServicePEPPOLTest {
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
+            transportProfileAS4 = TransportProfile.AS4.getIdentifier();
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            result = transportProfileAS4;
         }};
 
         EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
@@ -101,6 +106,34 @@ public class DynamicDiscoveryServicePEPPOLTest {
         }};
     }
 
+    @Test
+    public void testLookupInformationMockOtherTransportProfile(final @Capturing LookupClient smpClient) throws Exception {
+        new NonStrictExpectations() {{
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
+            result = TEST_SML_ZONE;
+
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
+            result = Mode.TEST;
+
+            transportProfileAS4 = "AS4_other_transport_profile";
+            ServiceMetadata sm = buildServiceMetadata();
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
+            result = sm;
+
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            result = transportProfileAS4;
+        }};
+
+        EndpointInfo endpoint = dynamicDiscoveryServicePEPPOL.lookupInformation(DOMAIN, TEST_RECEIVER_ID, TEST_RECEIVER_ID_TYPE, TEST_ACTION_VALUE, TEST_SERVICE_VALUE, TEST_SERVICE_TYPE);
+        assertNotNull(endpoint);
+        assertEquals(ADDRESS, endpoint.getAddress());
+
+        new Verifications() {{
+            smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
+        }};
+    }
+
+
     @Test(expected = ConfigurationException.class)
     public void testLookupInformationNotFound(final @Capturing LookupClient smpClient) throws Exception {
         new NonStrictExpectations() {{
@@ -110,6 +143,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_MODE, (String) any);
             result = Mode.TEST;
 
+            transportProfileAS4 = TransportProfile.AS4.getIdentifier();
             ServiceMetadata sm = buildServiceMetadata();
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
@@ -130,7 +164,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             return null;
         }
 
-        Endpoint endpoint = Endpoint.of(TransportProfile.AS4, URI.create(ADDRESS), testData);
+        Endpoint endpoint = Endpoint.of(TransportProfile.of(transportProfileAS4), URI.create(ADDRESS), testData);
 
         List<ProcessMetadata<Endpoint>> processes = new ArrayList<>();
         ProcessMetadata<Endpoint> process = ProcessMetadata.of(processIdentifier, endpoint);
