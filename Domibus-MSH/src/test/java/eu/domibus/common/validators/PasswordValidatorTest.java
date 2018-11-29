@@ -9,18 +9,19 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.VerificationsInOrder;
+import mockit.*;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 /**
+ * @author Ion Perpegel
  * @since 4.1
  */
 
@@ -41,7 +42,7 @@ public class PasswordValidatorTest {
     BCryptPasswordEncoder bcryptEncoder;
 
     @Tested
-    PasswordValidator passwordValidator;
+    ConsoleUserPasswordValidator passwordValidator;
 
     @Test
     public void checkPasswordComplexity() throws Exception {
@@ -153,21 +154,76 @@ public class PasswordValidatorTest {
     }
 
     @Test(expected = DomibusCoreException.class)
-    public void testPasswordHistory() throws Exception {
-        String username = "user1";
-        String testPassword = "testPassword123.";
-        //List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory());
-        List<String> oldPasswords = Arrays.asList("testPassword123");
+    public void testPasswordHistory( ) throws Exception {
+        String username = "anyname";
+        String testPassword = "anypassword";
+        int oldPasswordsToCheck = 5;
+        final User user = new User(username, testPassword);
+        user.setDefaultPassword(true);
+        List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory(user, testPassword, LocalDateTime.now()));
+
         new Expectations() {{
             domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty());
-            result = "5";
-            //userPasswordHistoryDao.getPasswordHistory((User) any, anyInt);
-            passwordValidator.getPasswordHistory(anyString, anyInt);
+            result = oldPasswordsToCheck;
+            userDao.loadActiveUserByUsername(username);
+            result = user;
+            userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
             result = oldPasswords;
-            bcryptEncoder.matches(anyString, anyString);
+            bcryptEncoder.matches((CharSequence)any, anyString);
             result = true;
         }};
 
         passwordValidator.validateHistory(username, testPassword);
     }
+
+    @Test
+    public void testValidateDaysTillExpiration() {
+        final LocalDate today = LocalDate.of(2018, 10, 15);
+        final LocalDateTime passwordChangeDate = LocalDateTime.of(2018, 9, 15, 15, 58, 59);
+        final Integer maxPasswordAge = 45;
+        final Integer remainingDays = 15;
+        final String username = "user1";
+
+        new Expectations(LocalDate.class) {{
+            LocalDate.now();
+            result = today;
+        }};
+        new Expectations() {{
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getWarningDaysBeforeExpiration());
+            result = "20";
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getMaximumDefaultPasswordAgeProperty());
+            result = maxPasswordAge.toString();
+        }};
+
+        Integer result = passwordValidator.getDaysTillExpiration(username, true, passwordChangeDate);
+
+        Assert.assertEquals(remainingDays, result);
+    }
+
+    @Test
+    public void testValidateDaysTillExpirationDisabled() {
+        final String username = "user1";
+        new Expectations() {{
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getWarningDaysBeforeExpiration());
+            result = "0";
+        }};
+
+        Integer result = passwordValidator.getDaysTillExpiration(username, true, LocalDateTime.now());
+        Assert.assertEquals(null, result);
+    }
+
+    @Test(expected = CredentialsExpiredException.class)
+    public void testValidatePasswordExpired() {
+        final String username = "user1";
+        final Integer defaultAge = 5;
+
+        new Expectations() {{
+            domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getMaximumDefaultPasswordAgeProperty());
+            result = defaultAge.toString();
+        }};
+
+        passwordValidator.validatePasswordExpired(username, true, LocalDateTime.now().minusDays(defaultAge + 1));
+
+    }
+
 }

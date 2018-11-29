@@ -1,6 +1,7 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
+import eu.domibus.common.validators.PluginUserPasswordValidator;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
@@ -53,6 +54,9 @@ public class CustomAuthenticationProviderTest {
 
     @Injectable
     BCryptPasswordEncoder bcryptEncoder;
+
+    @Injectable
+    PluginUserPasswordValidator passwordValidator;
 
     @Test
     public void authenticateX509Test() {

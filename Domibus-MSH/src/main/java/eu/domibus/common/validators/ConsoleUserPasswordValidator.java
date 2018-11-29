@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ConsoleUserPasswordValidator extends PasswordValidator {
+    final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.passwordPolicy.warning.beforeExpiration";
 
     static final String PASSWORD_COMPLEXITY_PATTERN = "domibus.passwordPolicy.pattern";
     static final String PASSWORD_HISTORY_POLICY = "domibus.passwordPolicy.dontReuseLast";
@@ -41,10 +42,15 @@ public class ConsoleUserPasswordValidator extends PasswordValidator {
     }
 
     @Override
-    protected String getMaximumDefaultPasswordAgeProperty() { return MAXIMUM_DEFAULT_PASSWORD_AGE; }
+    public String getMaximumDefaultPasswordAgeProperty() { return MAXIMUM_DEFAULT_PASSWORD_AGE; }
 
     @Override
     protected String getMaximumPasswordAgeProperty() { return MAXIMUM_PASSWORD_AGE; }
+
+    @Override
+    public String getWarningDaysBeforeExpiration() {
+        return WARNING_DAYS_BEFORE_EXPIRATION;
+    }
 
     protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
         User user = userDao.loadActiveUserByUsername(userName);

@@ -2,10 +2,16 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.dao.security.UserRoleDao;
+import eu.domibus.common.validators.PasswordValidator;
+import eu.domibus.common.validators.PluginUserPasswordValidator;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
+import eu.domibus.core.alerts.service.UserAlertsService;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
+import eu.domibus.core.security.PluginUserPasswordHistoryDao;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -19,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * @author Ion Perpegel
  * @since 4.0
  */
 @RunWith(JMockit.class)
@@ -42,6 +49,15 @@ public class PluginUserServiceImplTest {
 
     @Injectable
     private DomainContextProvider domainProvider;
+
+    @Injectable
+    private PluginUserPasswordValidator passwordValidator;
+
+    @Injectable
+    DomibusPropertyProvider domibusPropertyProvider;
+
+    @Injectable
+    PluginUserPasswordHistoryDao pluginUserPasswordHistoryDao;
 
     @Test(expected = UserManagementException.class)
     public void testUpdateUsersWithDuplicateName() {

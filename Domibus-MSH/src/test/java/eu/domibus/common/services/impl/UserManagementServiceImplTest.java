@@ -13,21 +13,18 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.service.EventService;
-import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
+import eu.domibus.common.validators.ConsoleUserPasswordValidator;
+import eu.domibus.common.validators.PasswordValidator;
+import eu.domibus.core.alerts.service.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.authentication.CredentialsExpiredException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -74,6 +71,9 @@ public class UserManagementServiceImplTest {
 
     @Injectable
     protected DomainService domainService;
+
+    @Injectable
+    ConsoleUserPasswordValidator passwordValidator;
 
     @Tested
     private UserManagementServiceImpl userManagementService;
@@ -394,126 +394,26 @@ public class UserManagementServiceImplTest {
     }
 
     @Test
-    public void testSendPasswordExpiredAlerts() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
-        final Integer maxPasswordAge = 10;
-        final Integer howManyDaysToGenerateAlertsAfterExpiration = 3;
-        final LocalDate from = LocalDate.of(2018, 10, 2);
-        final LocalDate to = LocalDate.of(2018, 10, 5);
-        final User user1 = new User("user1", "anypassword");
-        final User user2 = new User("user2", "anypassword");
-        final List<User> users = Arrays.asList(user1, user2);
-
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
-        new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
-            result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
-            result = howManyDaysToGenerateAlertsAfterExpiration;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to, false);
-            result = users;
-        }};
-
-        userManagementService.sendExpiredAlerts(false);
-
-        new VerificationsInOrder() {{
-            eventService.enqueuePasswordExpiredEvent((User) any, maxPasswordAge);
-            times = 2;
-        }};
-    }
-
-    @Test
-    public void testSendPasswordImminentExpirationAlerts() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
-        final Integer maxPasswordAge = 10;
-        final Integer howManyDaysBeforeExpirationToGenerateAlerts = 4;
-        final LocalDate from = LocalDate.of(2018, 10, 5);
-        final LocalDate to = LocalDate.of(2018, 10, 9);
-        final User user1 = new User("user1", "anypassword");
-        final User user2 = new User("user2", "anypassword");
-        final List<User> users = Arrays.asList(user1, user2);
-
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
-        new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
-            result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
-            result = howManyDaysBeforeExpirationToGenerateAlerts;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to, false);
-            result = users;
-        }};
-
-        userManagementService.sendImminentExpirationAlerts(false);
-
-        new VerificationsInOrder() {{
-            eventService.enqueuePasswordImminentExpirationEvent((User) any, maxPasswordAge);
-            times = 2;
-        }};
-    }
-
-
-    @Test
-    public void testSendPasswordAlerts() {
-
-        userManagementService.sendAlerts();
-
-        new VerificationsInOrder() {{
-            userManagementService.sendImminentExpirationAlerts(false);
-            times = 1;
-        }};
-        new VerificationsInOrder() {{
-            userManagementService.sendExpiredAlerts(false);
-            times = 1;
-        }};
-    }
-
-    @Test
-    public void testValidateDaysTillExpirationDisabled() {
-        final String username = "user1";
-        new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
-            result = "0";
-        }};
-
-        Integer result = userManagementService.getDaysTillExpiration(username);
-        Assert.assertEquals(null, result);
-    }
-
-    @Test
     public void testValidateDaysTillExpiration() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
         final LocalDateTime passwordChangeDate = LocalDateTime.of(2018, 9, 15, 15, 58, 59);
         final Integer maxPasswordAge = 45;
-        final Integer remainingDays = 15;
 
         final String username = "user1";
         final User user = new User(username, "anypassword");
         user.setPasswordChangeDate(passwordChangeDate);
+        user.setDefaultPassword(true);
 
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
-            result = "20";
             userDao.loadActiveUserByUsername(username);
             result = user;
         }};
 
         Integer result = userManagementService.getDaysTillExpiration(username);
-        Assert.assertEquals(remainingDays, result);
+
+        new Verifications() {{
+            passwordValidator.getDaysTillExpiration(username, true, passwordChangeDate);
+            times = 1;
+        }};
     }
+
 }
