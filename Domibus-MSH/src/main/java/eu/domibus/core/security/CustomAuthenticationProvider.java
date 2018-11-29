@@ -1,8 +1,7 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
-import eu.domibus.common.model.security.User;
-import eu.domibus.common.validators.PluginUserPasswordValidator;
+import eu.domibus.common.validators.PluginUserPasswordManager;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,7 +41,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private BCryptPasswordEncoder bcryptEncoder;
 
     @Autowired
-    PluginUserPasswordValidator pluginUserPasswordValidator;
+    PluginUserPasswordManager pluginUserPasswordValidator;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -70,7 +67,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
                 AuthenticationEntity userEntity = securityAuthenticationDAO.findByUser(authentication.getName());
                 //check if password is correct
-                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), userEntity.getPasswd());
+                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), userEntity.getPassword());
                 //check if password expired
                 validateExpiredPassword(userEntity);
 

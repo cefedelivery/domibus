@@ -13,8 +13,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.validators.ConsoleUserPasswordValidator;
-import eu.domibus.common.validators.PasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
 import eu.domibus.core.alerts.service.*;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
@@ -23,7 +22,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -73,7 +71,8 @@ public class UserManagementServiceImplTest {
     protected DomainService domainService;
 
     @Injectable
-    ConsoleUserPasswordValidator passwordValidator;
+    ConsoleUserPasswordManager passwordValidator;
+
 
     @Tested
     private UserManagementServiceImpl userManagementService;

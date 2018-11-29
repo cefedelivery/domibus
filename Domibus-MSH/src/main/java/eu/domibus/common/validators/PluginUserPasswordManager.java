@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class PluginUserPasswordValidator extends PasswordValidator {
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordValidator.class);
+public class PluginUserPasswordManager extends PasswordManager {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordManager.class);
 
     final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin_passwordPolicy.warning.beforeExpiration";
 

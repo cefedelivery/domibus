@@ -7,15 +7,10 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
 import eu.domibus.api.user.UserManagementException;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.model.security.User;
 import eu.domibus.common.services.PluginUserService;
-import eu.domibus.common.validators.PasswordValidator;
-import eu.domibus.common.validators.PluginUserPasswordValidator;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
-import eu.domibus.core.alerts.service.UserAlertsService;
+import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
@@ -29,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +53,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     private DomainContextProvider domainProvider;
 
     @Autowired
-    private PluginUserPasswordValidator passwordValidator;
+    private PluginUserPasswordManager passwordManager;
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
@@ -150,8 +144,8 @@ public class PluginUserServiceImpl implements PluginUserService {
     }
 
     private void insertNewUser(AuthenticationEntity u, Domain domain) {
-        if (u.getPasswd() != null) {
-            u.setPasswd(bcryptEncoder.encode(u.getPasswd()));
+        if (u.getPassword() != null) {
+            u.setPassword(bcryptEncoder.encode(u.getPassword()));
         }
         securityAuthenticationDAO.create(u);
 
@@ -159,32 +153,36 @@ public class PluginUserServiceImpl implements PluginUserService {
         userDomainService.setDomainForUser(userIdentifier, domain.getCode());
     }
 
-    private void updateUser(AuthenticationEntity userEntity) {
-        AuthenticationEntity entity = securityAuthenticationDAO.read(userEntity.getEntityId());
-        if (userEntity.getPasswd() != null) {
-            changePassword(entity, userEntity);
+    private void updateUser(AuthenticationEntity modified) {
+        AuthenticationEntity existing = securityAuthenticationDAO.read(modified.getEntityId());
+        if (modified.getPassword() != null) {
+            changePassword(existing, modified.getPassword());
         }
-        entity.setAuthRoles(userEntity.getAuthRoles());
-        entity.setOriginalUser(userEntity.getOriginalUser());
-        securityAuthenticationDAO.update(entity);
+        existing.setAuthRoles(modified.getAuthRoles());
+        existing.setOriginalUser(modified.getOriginalUser());
+        securityAuthenticationDAO.update(existing);
     }
 
-    //TODO: try to merge this code with the similar one found in user.changePassword
-    private void changePassword(AuthenticationEntity entity , AuthenticationEntity userEntity) {
-        savePasswordHistory(userEntity); // save old password in history
-        passwordValidator.validateComplexity(userEntity.getUsername(), userEntity.getPasswd());
-        passwordValidator.validateHistory(userEntity.getUsername(), userEntity.getPasswd());
-        entity.setPasswd(bcryptEncoder.encode(userEntity.getPasswd()));
-        entity.setDefaultPassword(false);
+    //TODO: try to merge this code with the similar one found in UserPersistenceServiceImpl
+    private void changePassword(AuthenticationEntity user, String newPassword) {
+
+        savePasswordHistory(user); // save old password in history
+
+        String userName = user.getUserName();
+        passwordManager.validateComplexity(userName, newPassword);
+        passwordManager.validateHistory(userName, newPassword);
+
+        user.setPassword(bcryptEncoder.encode(newPassword));
+        user.setDefaultPassword(false);
     }
 
-    private void savePasswordHistory(AuthenticationEntity userEntity) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty(), "0"));
+    private void savePasswordHistory(AuthenticationEntity user) {
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;
         }
-        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPasswd(), userEntity.getPasswordChangeDate());
-        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep - 1);
+        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
     }
 
     private void deleteUser(AuthenticationEntity u) {

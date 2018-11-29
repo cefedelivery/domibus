@@ -12,7 +12,7 @@ import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.validators.ConsoleUserPasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -65,7 +65,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     @Autowired
     //@Qualifier("UserPasswordValidator")
-    private ConsoleUserPasswordValidator passwordValidator;
+    private ConsoleUserPasswordManager passwordManager;
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
@@ -116,29 +116,30 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    void changePassword(User userEntity, String currentPassword, String newPassword) {
+    //TODO: try to merge this code with the similar one found in PluginUserServiceImpl
+    void changePassword(User user, String currentPassword, String newPassword) {
         //check if old password matches the persisted one
-        if (!bcryptEncoder.matches(currentPassword, userEntity.getPassword())) {
+        if (currentPassword != null && !bcryptEncoder.matches(currentPassword, user.getPassword())) {
             throw new UserManagementException("The current password does not match the provided one.");
         }
 
-        savePasswordHistory(userEntity); // save old password in history
+        savePasswordHistory(user); // save old password in history
 
-        String userName = userEntity.getUserName();
-        passwordValidator.validateComplexity(userName, newPassword);
-        passwordValidator.validateHistory(userName, newPassword);
+        String userName = user.getUserName();
+        passwordManager.validateComplexity(userName, newPassword);
+        passwordManager.validateHistory(userName, newPassword);
 
-        userEntity.setPassword(bcryptEncoder.encode(newPassword));
-        userEntity.setDefaultPassword(false);
+        user.setPassword(bcryptEncoder.encode(newPassword));
+        user.setDefaultPassword(false);
     }
 
-    void savePasswordHistory(User userEntity) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty(), "0"));
+    void savePasswordHistory(User user) {
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;
         }
-        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword(), userEntity.getPasswordChangeDate());
-        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep - 1);
+        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
     }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
@@ -157,7 +158,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
-            passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+            passwordManager.validateComplexity(user.getUserName(), user.getPassword());
 
             User userEntity = domainConverter.convert(user, User.class);
 

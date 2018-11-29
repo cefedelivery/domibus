@@ -2,8 +2,6 @@ package eu.domibus.common.validators;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.multitenancy.Domain;
-import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
@@ -25,7 +23,7 @@ import java.util.List;
  * @since 4.1
  */
 
-public class PasswordValidatorTest {
+public class PasswordManagerTest {
 
     private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
 
@@ -42,7 +40,7 @@ public class PasswordValidatorTest {
     BCryptPasswordEncoder bcryptEncoder;
 
     @Tested
-    ConsoleUserPasswordValidator passwordValidator;
+    ConsoleUserPasswordManager passwordValidator;
 
     @Test
     public void checkPasswordComplexity() throws Exception {

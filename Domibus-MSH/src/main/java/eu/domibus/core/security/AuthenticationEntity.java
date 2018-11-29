@@ -53,11 +53,11 @@ public class AuthenticationEntity extends AbstractBaseEntity implements IUser {
         this.username = username;
     }
 
-    public String getPasswd() {
+    public String getPassword() {
         return passwd;
     }
 
-    public void setPasswd(String passwd) {
+    public void setPassword(String passwd) {
         this.passwd = passwd;
         this.passwordChangeDate = LocalDateTime.now();
     }

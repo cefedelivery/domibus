@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
  */
 
 @Service
-public abstract class PasswordValidator {
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordValidator.class);
+public abstract class PasswordManager {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordManager.class);
 
     private static final String CREDENTIALS_EXPIRED = "Expired";
 

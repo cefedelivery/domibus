@@ -12,7 +12,7 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.validators.ConsoleUserPasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
 import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
@@ -74,7 +74,8 @@ public class SuperUserManagementServiceImplTest {
     private UserManagementServiceImpl userManagementService;
 
     @Injectable
-    ConsoleUserPasswordValidator userPasswordValidator;
+    ConsoleUserPasswordManager userPasswordValidator;
+
 
     @Tested
     private SuperUserManagementServiceImpl superUserManagementService;

@@ -5,10 +5,8 @@ import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.validators.PasswordValidator;
-import eu.domibus.common.validators.PluginUserPasswordValidator;
+import eu.domibus.common.validators.PluginUserPasswordManager;
 import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
-import eu.domibus.core.alerts.service.UserAlertsService;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
@@ -51,7 +49,7 @@ public class PluginUserServiceImplTest {
     private DomainContextProvider domainProvider;
 
     @Injectable
-    private PluginUserPasswordValidator passwordValidator;
+    private PluginUserPasswordManager passwordValidator;
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;

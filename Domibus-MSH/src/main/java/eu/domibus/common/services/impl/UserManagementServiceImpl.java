@@ -14,13 +14,12 @@ import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
-import eu.domibus.common.validators.ConsoleUserPasswordValidator;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
-import eu.domibus.core.alerts.service.UserAlertsService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -89,7 +88,8 @@ public class UserManagementServiceImpl implements UserService {
     protected DomainService domainService;
 
     @Autowired
-    ConsoleUserPasswordValidator userPasswordValidator;
+    ConsoleUserPasswordManager userPasswordValidator;
+
 
     /**
      * {@inheritDoc}

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Ion Perpegel
+ * @author Ion Perpegel
  *
  * @since 4.1
  */
@@ -16,5 +16,4 @@ public interface PluginUserPasswordHistoryDao {
 
     List<PluginUserPasswordHistory> getPasswordHistory(final AuthenticationEntity user, int entriesCount);
 
-    //List<String> getPasswordHistory2(String userName, int entriesCount);
 }

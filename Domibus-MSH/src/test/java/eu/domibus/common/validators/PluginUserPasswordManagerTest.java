@@ -1,7 +1,6 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.common.model.security.User;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistory;
@@ -9,7 +8,6 @@ import eu.domibus.core.security.PluginUserPasswordHistoryDao;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
-import mockit.VerificationsInOrder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
  * @since 4.1
  */
 
-public class PluginUserPasswordValidatorTest {
+public class PluginUserPasswordManagerTest {
 
     private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
 
@@ -41,7 +39,7 @@ public class PluginUserPasswordValidatorTest {
     BCryptPasswordEncoder bcryptEncoder;
 
     @Tested
-    PluginUserPasswordValidator passwordValidator;
+    PluginUserPasswordManager passwordValidator;
 
     @Test
     public void testGetPasswordHistory() {
@@ -69,28 +67,28 @@ public class PluginUserPasswordValidatorTest {
     @Test
     public void testGetPasswordComplexityPatternProperty() {
         String result = passwordValidator.getPasswordComplexityPatternProperty();
-        Assert.assertEquals(PluginUserPasswordValidator.PASSWORD_COMPLEXITY_PATTERN, result);
+        Assert.assertEquals(PluginUserPasswordManager.PASSWORD_COMPLEXITY_PATTERN, result);
     }
 
     @Test
     public void testGetPasswordHistoryPolicyProperty() {
         String result = passwordValidator.getPasswordHistoryPolicyProperty();
-        Assert.assertEquals(PluginUserPasswordValidator.PASSWORD_HISTORY_POLICY, result);
+        Assert.assertEquals(PluginUserPasswordManager.PASSWORD_HISTORY_POLICY, result);
     }
 
     @Test
     public void testGetMaximumDefaultPasswordAgeProperty() {
         String result = passwordValidator.getMaximumDefaultPasswordAgeProperty();
-        Assert.assertEquals(PluginUserPasswordValidator.MAXIMUM_DEFAULT_PASSWORD_AGE, result);
+        Assert.assertEquals(PluginUserPasswordManager.MAXIMUM_DEFAULT_PASSWORD_AGE, result);
     }
     @Test
     public void testGetMaximumPasswordAgeProperty() {
         String result = passwordValidator.getMaximumPasswordAgeProperty();
-        Assert.assertEquals(PluginUserPasswordValidator.MAXIMUM_PASSWORD_AGE, result);
+        Assert.assertEquals(PluginUserPasswordManager.MAXIMUM_PASSWORD_AGE, result);
     }
     @Test
     public void testGetWarningDaysBeforeExpiration() {
         String result = passwordValidator.getWarningDaysBeforeExpiration();
-        Assert.assertEquals(PluginUserPasswordValidator.WARNING_DAYS_BEFORE_EXPIRATION, result);
+        Assert.assertEquals(PluginUserPasswordManager.WARNING_DAYS_BEFORE_EXPIRATION, result);
     }
 }
