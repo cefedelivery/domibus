@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.model.service;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
+import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.core.alerts.service.ConfigurationReader;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -41,10 +42,12 @@ public class ConfigurationLoaderTest {
             domainContextProvider.getCurrentDomainSafely();
             result = null;
         }};
+
         configurationLoader.getConfiguration(configurationReader);
         configurationLoader.getConfiguration(configurationReader);
+        
         new Verifications() {{
-            configurationReader.readConfiguration(ConfigurationLoader.NULL_DOMAIN);
+            configurationReader.readConfiguration(DomainService.DEFAULT_DOMAIN);
             times = 1;
         }};
     }

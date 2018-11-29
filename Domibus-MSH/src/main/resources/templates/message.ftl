@@ -85,7 +85,9 @@
                                 <p><strong>New status:</strong> ${NEW_STATUS}</p>
                                 <p><strong>Alert level:</strong> ${ALERT_LEVEL}</p>
                                 <p><strong>Reporting time:</strong> ${REPORTING_TIME}</p>
-                                <p><strong>Description:</strong> ${($DESCRIPTION)!""}</p></td>
+                                <p><strong>Description:</strong> ${($DESCRIPTION)!""}</p>
+								<p><strong>Server name:</strong> ${SERVER_NAME}</p>
+								</td>
                             </tr>
                             <!-- / MAIN CONTENT -->
                             

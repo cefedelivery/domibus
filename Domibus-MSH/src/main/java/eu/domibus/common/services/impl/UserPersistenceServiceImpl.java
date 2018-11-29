@@ -92,16 +92,20 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         deleteUsers(deletedUsers);
     }
 
-    private void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void changePassword(String userName, String currentPassword, String newPassword) {
+        User userEntity = userDao.loadUserByUsername(userName);
+        changePassword(userEntity, currentPassword, newPassword);
+        userDao.update(userEntity);
+    }
+
+    void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User userEntity = prepareUserForUpdate(user);
 
             if (withPasswordChange) {
-                savePasswordHistory(userEntity); // save old password in history
-                passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
-                passwordValidator.validateHistory(user.getUserName(), user.getPassword());
-                userEntity.setPassword(bcryptEncoder.encode(user.getPassword()));
-                userEntity.setDefaultPassword(false);
+                changePassword(userEntity, userEntity.getPassword(), user.getPassword());
             }
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.update(userEntity);
@@ -112,8 +116,23 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private void savePasswordHistory(User userEntity) {
-//        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+    void changePassword(User userEntity, String currentPassword, String newPassword) {
+        //check if old password matches the persisted one
+        if (!bcryptEncoder.matches(currentPassword, userEntity.getPassword())) {
+            throw new UserManagementException("The current password does not match the provided one.");
+        }
+
+        savePasswordHistory(userEntity); // save old password in history
+
+        String userName = userEntity.getUserName();
+        passwordValidator.validateComplexity(userName, newPassword);
+        passwordValidator.validateHistory(userName, newPassword);
+
+        userEntity.setPassword(bcryptEncoder.encode(newPassword));
+        userEntity.setDefaultPassword(false);
+    }
+
+    void savePasswordHistory(User userEntity) {
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;

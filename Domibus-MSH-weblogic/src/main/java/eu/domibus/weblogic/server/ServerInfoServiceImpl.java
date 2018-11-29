@@ -15,4 +15,9 @@ public class ServerInfoServiceImpl implements ServerInfoService {
     public String getUniqueServerName() {
         return System.getProperty(WEBLOGIC_NAME);
     }
+
+    @Override
+    public String getServerName() {
+        return getUniqueServerName();
+    }
 }

@@ -2,13 +2,10 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
-import {Title} from '@angular/platform-browser';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
 import {HttpEventService} from './http/http.event.service';
-import {UserService} from './user/user.service';
-import {UserValidatorService} from './user/uservalidator.service';
 
 @Component({
   selector: 'app-root',
@@ -100,4 +97,7 @@ export class AppComponent implements OnInit {
     //containing a ng-datatable and it only works after one clicks inside the table
   }
 
+  changePassword() {
+    this.router.navigate(['changePassword']);
+  }
 }
