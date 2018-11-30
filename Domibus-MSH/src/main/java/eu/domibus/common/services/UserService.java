@@ -69,4 +69,5 @@ public interface UserService {
 
     public void sendAlerts();
 
+    void changePassword(String username, String currentPassword, String newPassword);
 }

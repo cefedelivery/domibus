@@ -374,7 +374,6 @@ export class UserComponent implements OnInit, DirtyOperations {
           const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
           this.isBusy = true;
           this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
-            this.handleLoggedUserChanged(modifiedUsers);
             this.isBusy = false;
             this.getUsers();
             this.alertService.success('The operation \'update users\' completed successfully.', false);
@@ -398,16 +397,7 @@ export class UserComponent implements OnInit, DirtyOperations {
     }
   }
 
-  private handleLoggedUserChanged(modifiedUsers: UserResponseRO[]) {
-    const currentUser = this.securityService.getCurrentUser();
-    const user = modifiedUsers.find(u => u.userName == currentUser.username);
-    if (user == null || user.password == null) return;
-
-    currentUser.defaultPasswordUsed = false;
-    this.securityService.updateCurrentUser(currentUser);
-  }
-
-  /**
+   /**
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV() {

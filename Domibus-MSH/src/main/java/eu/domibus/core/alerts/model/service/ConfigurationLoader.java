@@ -23,7 +23,7 @@ import java.util.Map;
 public class ConfigurationLoader<E> {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ConfigurationLoader.class);
-    public static final Domain NULL_DOMAIN = new Domain("null", "Null"); // this is the placeholder domain used only as a caching key for super users
+    public static final Domain SUPER_DOMAIN = new Domain("super_domain", "Super Domain"); // this is the placeholder domain used only as a caching key for super users
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -32,19 +32,19 @@ public class ConfigurationLoader<E> {
 
     public E getConfiguration(ConfigurationReader<E> configurationReader) {
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
-        final Domain domain = currentDomain == null ? NULL_DOMAIN : currentDomain;
-        LOG.debug("Retrieving alert messaging configuration for domain:[{}]", domain);
-        if (this.configuration.get(domain) == null) {
+        final Domain key = currentDomain == null ? SUPER_DOMAIN : currentDomain;
+        final Domain domain = currentDomain == null ? DomainService.DEFAULT_DOMAIN : currentDomain;
+        LOG.debug("Retrieving alert messaging configuration for domain:[{}]", currentDomain);
+        if (this.configuration.get(key) == null) {
             synchronized (this.configuration) {
-                if (this.configuration.get(domain) == null) {
-                    this.configuration.computeIfAbsent(domain, configurationReader::readConfiguration);
+                if (this.configuration.get(key) == null) {
+                    this.configuration.put(key, configurationReader.readConfiguration(domain));
                 }
             }
         }
-        E result = this.configuration.get(domain);
+        E result = this.configuration.get(key);
         LOG.debug("Alert messaging configuration:[{}]", result);
         return result;
-
     }
 }
 

@@ -1,31 +1,23 @@
-
-
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:sec="http://www.springframework.org/schema/security"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/util
-    http://www.springframework.org/schema/util/spring-util.xsd
     http://www.springframework.org/schema/security
     http://www.springframework.org/schema/security/spring-security.xsd">
 
     <!-- Administration GUI user credentials-->
-    <bean name="bcryptEncoder"
-          class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
-    <bean name="userDetailService"  
+    <bean name="userDetailService"
           class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>
     <sec:authentication-manager>
         <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
     </sec:authentication-manager>
 
     <sec:authentication-manager id="authenticationManagerForAdminConsole">
-        <sec:authentication-provider
-                user-service-ref="userDetailService" >
+        <sec:authentication-provider user-service-ref="userDetailService">
             <sec:password-encoder ref="bcryptEncoder"/>
-
         </sec:authentication-provider>
     </sec:authentication-manager>
 

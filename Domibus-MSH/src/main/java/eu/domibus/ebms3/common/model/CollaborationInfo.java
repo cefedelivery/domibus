@@ -25,7 +25,7 @@ import java.util.UUID;
 public class CollaborationInfo {
 
     @XmlElement(name = "ConversationId", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlJavaTypeAdapter(EmptyStringAdapter.class)
     @XmlSchemaType(name = "token")
     @Column(name = "COLL_INFO_CONVERS_ID", nullable = false)
     @NotNull
@@ -147,7 +147,7 @@ public class CollaborationInfo {
      */
     public String getConversationId() {
         // this is because Oracle treats empty string as null
-        // if we get space, we transform it as an empty string
+        // if we get space, we transform it to an empty string
         return StringUtils.SPACE.equals(this.conversationId) ? StringUtils.EMPTY : this.conversationId;
     }
 

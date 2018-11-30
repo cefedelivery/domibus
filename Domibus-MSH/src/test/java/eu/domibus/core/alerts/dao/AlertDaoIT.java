@@ -27,9 +27,9 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class, AlertDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
-public class AlertDaoTest {
+public class AlertDaoIT {
 
-    private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertDaoTest.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(AlertDaoIT.class);
 
     @Autowired
     private AlertDao alertDao;
