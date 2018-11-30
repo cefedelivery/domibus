@@ -1,11 +1,11 @@
 package eu.domibus.core.security;
 
 import eu.domibus.common.dao.BasicDao;
+import eu.domibus.common.model.security.UserPasswordHistory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.TypedQuery;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,15 +26,15 @@ public class PluginUserPasswordHistoryDaoImpl extends BasicDao<PluginUserPasswor
     }
 
     public void removePasswords(final AuthenticationEntity user, int oldPasswordsToKeep) {
-        PluginUserPasswordHistory[] oldEntries = getPasswordHistory(user, 0).toArray(new PluginUserPasswordHistory[]{});
-        if (oldEntries.length > oldPasswordsToKeep) {
-            Arrays.stream(oldEntries).skip(oldPasswordsToKeep).forEach(entry -> this.delete(entry)); // NOSONAR
+        List<UserPasswordHistory> oldEntries = getPasswordHistory(user, 0);
+        if (oldEntries.size() > oldPasswordsToKeep) {
+            oldEntries.stream().skip(oldPasswordsToKeep).forEach(entry -> this.delete((PluginUserPasswordHistory) entry)); // NOSONAR
         }
     }
 
     @Override
-    public List<PluginUserPasswordHistory> getPasswordHistory(AuthenticationEntity user, int entriesCount) {
-        TypedQuery<PluginUserPasswordHistory> namedQuery = em.createNamedQuery("PluginUserPasswordHistory.findPasswords", PluginUserPasswordHistory.class);
+    public List<UserPasswordHistory> getPasswordHistory(AuthenticationEntity user, int entriesCount) {
+        TypedQuery<UserPasswordHistory> namedQuery = em.createNamedQuery("PluginUserPasswordHistory.findPasswords", UserPasswordHistory.class);
         namedQuery.setParameter("USER", user);
         if (entriesCount > 0) {
             namedQuery = namedQuery.setMaxResults(entriesCount);

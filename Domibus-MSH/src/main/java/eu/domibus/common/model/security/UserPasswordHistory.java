@@ -11,17 +11,12 @@ import java.time.LocalDateTime;
  * @since 4.1
  */
 
-@Entity
-@Table(name = "TB_USER_PASSWORD_HISTORY")
-@NamedQueries({
-        @NamedQuery(name = "UserPasswordHistory.findPasswords",
-                query = "from UserPasswordHistory where user=:USER order by passwordChangeDate DESC"),
-})
-public class UserPasswordHistory extends AbstractBaseEntity {
+@MappedSuperclass
+public class UserPasswordHistory<UE> extends AbstractBaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
-    private User user;
+    private UE user;
 
     @NotNull
     @Column(name = "USER_PASSWORD")
@@ -34,9 +29,10 @@ public class UserPasswordHistory extends AbstractBaseEntity {
         return password;
     }
 
-    public UserPasswordHistory() { }
+    public UserPasswordHistory() {
+    }
 
-    public UserPasswordHistory(User user, String password, LocalDateTime passwordChangeDate) {
+    public UserPasswordHistory(UE user, String password, LocalDateTime passwordChangeDate) {
         this.user = user;
         this.password = password;
         this.passwordChangeDate = passwordChangeDate;

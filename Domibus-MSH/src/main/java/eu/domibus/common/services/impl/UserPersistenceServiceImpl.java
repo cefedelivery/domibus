@@ -102,13 +102,13 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
 
     void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
-            User userEntity = prepareUserForUpdate(user);
+            User existing = prepareUserForUpdate(user);
 
             if (withPasswordChange) {
-                changePassword(userEntity, userEntity.getPassword(), user.getPassword());
+                changePassword(existing, user.getPassword());
             }
-            addRoleToUser(user.getAuthorities(), userEntity);
-            userDao.update(userEntity);
+            addRoleToUser(user.getAuthorities(), existing);
+            userDao.update(existing);
 
             if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
@@ -119,7 +119,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     //TODO: try to merge this code with the similar one found in PluginUserServiceImpl
     void changePassword(User user, String currentPassword, String newPassword) {
         //check if old password matches the persisted one
-        if (currentPassword != null && !bcryptEncoder.matches(currentPassword, user.getPassword())) {
+        if (!bcryptEncoder.matches(currentPassword, user.getPassword())) {
             throw new UserManagementException("The current password does not match the provided one.");
         }
 
@@ -127,28 +127,8 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     void changePassword(User user, String newPassword) {
-
         passwordManager.changePassword(user, newPassword);
-
-//        savePasswordHistory(user); // save old password in history
-//
-//        String userName = user.getUserName();
-//        passwordManager.validateComplexity(userName, newPassword);
-//        passwordManager.validateHistory(userName, newPassword);
-//
-//        user.setPassword(bcryptEncoder.encode(newPassword));
-//        user.setDefaultPassword(false);
     }
-
-
-//    void savePasswordHistory(User user) {
-//        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
-//        if (passwordsToKeep == 0) {
-//            return;
-//        }
-//        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-//        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
-//    }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
         // validate user not already in general schema

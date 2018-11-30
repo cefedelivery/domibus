@@ -1,6 +1,7 @@
 package eu.domibus.common.validators;
 
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserPasswordHistory;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistory;
@@ -56,7 +57,7 @@ public class PluginUserPasswordManager extends PasswordManager<AuthenticationEnt
     @Override
     protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
         AuthenticationEntity user = userDao.findByUser(userName);
-        List<PluginUserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
+        List<UserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
         return oldPasswords.stream().map(el -> el.getPasswordHash()).collect(Collectors.toList());
     }
 

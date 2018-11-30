@@ -23,7 +23,7 @@ public class AuthenticationEntity extends AbstractBaseEntity implements IUser {
     @Column(name = "USERNAME")
     private String username;
     @Column(name = "PASSWD")
-    private String passwd;
+    private String password;
     @Column(name = "AUTH_ROLES")
     private String authRoles; // semicolon separated roles
     @Column(name = "ORIGINAL_USER")
@@ -54,11 +54,11 @@ public class AuthenticationEntity extends AbstractBaseEntity implements IUser {
     }
 
     public String getPassword() {
-        return passwd;
+        return password;
     }
 
-    public void setPassword(String passwd) {
-        this.passwd = passwd;
+    public void setPassword(String password) {
+        this.password = password;
         this.passwordChangeDate = LocalDateTime.now();
     }
 

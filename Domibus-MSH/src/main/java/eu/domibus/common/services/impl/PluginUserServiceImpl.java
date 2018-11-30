@@ -165,24 +165,7 @@ public class PluginUserServiceImpl implements PluginUserService {
 
     //TODO: try to merge this code with the similar one found in UserPersistenceServiceImpl
     private void changePassword(AuthenticationEntity user, String newPassword) {
-
-        savePasswordHistory(user); // save old password in history
-
-        String userName = user.getUserName();
-        passwordManager.validateComplexity(userName, newPassword);
-        passwordManager.validateHistory(userName, newPassword);
-
-        user.setPassword(bcryptEncoder.encode(newPassword));
-        user.setDefaultPassword(false);
-    }
-
-    private void savePasswordHistory(AuthenticationEntity user) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
-        if (passwordsToKeep == 0) {
-            return;
-        }
-        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
+        passwordManager.changePassword(user, newPassword);
     }
 
     private void deleteUser(AuthenticationEntity u) {

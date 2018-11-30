@@ -16,6 +16,7 @@ export class SecurityService {
 
   passwordPolicy: Promise<PasswordPolicyRO>;
   pluginPasswordPolicy: Promise<PasswordPolicyRO>;
+  public password: string;
 
   constructor(private http: Http,
               private securityEventService: SecurityEventService,
@@ -155,10 +156,7 @@ export class SecurityService {
     if (!this.passwordPolicy) {
       this.passwordPolicy = this.http.get('rest/application/passwordPolicy')
         .map(this.extractData)
-        .map((policy: PasswordPolicyRO) => {
-          policy.validationMessage = policy.validationMessage.split(';').map(el => '- ' + el + '<br>').join('');
-          return policy;
-        })
+        .map(this.formatValidationMessage)
         .catch(err => this.alertService.handleError(err))
         .toPromise();
     }
