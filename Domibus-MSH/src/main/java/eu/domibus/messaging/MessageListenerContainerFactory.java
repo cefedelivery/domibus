@@ -9,6 +9,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
  */
 public interface MessageListenerContainerFactory {
 
-    MessageListenerContainer createMessageListenerContainer(Domain domain);
+    MessageListenerContainer createSendMessageListenerContainer(Domain domain);
 
+    MessageListenerContainer createSendLargeMessageListenerContainer(Domain domain);
 }

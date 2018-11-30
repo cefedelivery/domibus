@@ -66,7 +66,6 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
 
-
     @Autowired
     private SubmissionAS4Transformer transformer;
 
@@ -178,14 +177,14 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             LOG.debug("OriginalUser is [{}]", authOriginalUser);
             /* check the message belongs to the authenticated user */
             boolean found = false;
-            for(String recipient : recipients) {
+            for (String recipient : recipients) {
                 String originalUser = getOriginalUser(userMessage, recipient);
                 if (originalUser != null && originalUser.equalsIgnoreCase(authOriginalUser)) {
                     found = true;
                     break;
                 }
             }
-            if(!found) {
+            if (!found) {
                 LOG.debug("User [{}] is trying to submit/access a message having as final recipients: [{}]", authOriginalUser, recipients);
                 throw new AccessDeniedException("You are not allowed to handle this message. You are authorized as [" + authOriginalUser + "]");
             }
@@ -264,7 +263,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
 
         UserMessage userMessage = transformer.transformFromSubmission(messageData);
 
-        if(userMessage == null) {
+        if (userMessage == null) {
             LOG.warn("UserMessage is null");
             throw new MessageNotFoundException("UserMessage is null");
         }
@@ -321,11 +320,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
                     backendName, to.getEndpoint(), messageData.getService(), messageData.getAction());
             if (MessageStatus.READY_TO_PULL != messageStatus) {
                 // Sends message to the proper queue if not a message to be pulled.
-                if(userMessage.isSplitAndJoin()) {
-
-                } else {
-                    userMessageService.scheduleSending(messageId);
-                }
+                userMessageService.scheduleSending(messageId);
             } else {
                 final UserMessageLog userMessageLog = userMessageLogDao.findByMessageId(messageId);
                 LOG.debug("[submit]:Message:[{}] add lock", userMessageLog.getMessageId());
@@ -373,7 +368,7 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
     }
 
     private int getMaxAttempts(LegConfiguration legConfiguration) {
-        return ( legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount() ) + 1; // counting retries after the first send attempt
+        return (legConfiguration.getReceptionAwareness() == null ? 1 : legConfiguration.getReceptionAwareness().getRetryCount()) + 1; // counting retries after the first send attempt
     }
 
     private void fillMpc(UserMessage userMessage, LegConfiguration legConfiguration, Party to) {

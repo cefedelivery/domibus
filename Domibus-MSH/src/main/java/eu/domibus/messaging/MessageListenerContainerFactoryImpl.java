@@ -22,9 +22,14 @@ public class MessageListenerContainerFactoryImpl implements MessageListenerConta
     protected ApplicationContext applicationContext;
 
     @Override
-    public MessageListenerContainer createMessageListenerContainer(Domain domain) {
-        LOG.debug("Creating the MessageListenerContainer for domain [{}]", domain);
-        return (DefaultMessageListenerContainer)applicationContext.getBean("dispatchContainer", domain);
+    public MessageListenerContainer createSendMessageListenerContainer(Domain domain) {
+        LOG.debug("Creating the SendMessageListenerContainer for domain [{}]", domain);
+        return (DefaultMessageListenerContainer) applicationContext.getBean("dispatchContainer", domain);
     }
 
+    @Override
+    public MessageListenerContainer createSendLargeMessageListenerContainer(Domain domain) {
+        LOG.debug("Creating the SendLargeMessageListenerContainer for domain [{}]", domain);
+        return (DefaultMessageListenerContainer) applicationContext.getBean("sendLargeMessageContainer", domain);
+    }
 }

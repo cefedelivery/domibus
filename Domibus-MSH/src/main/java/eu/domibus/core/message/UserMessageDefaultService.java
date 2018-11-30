@@ -59,6 +59,10 @@ public class UserMessageDefaultService implements UserMessageService {
     private Queue sendMessageQueue;
 
     @Autowired
+    @Qualifier("sendLargeMessageQueue")
+    private Queue sendLargeMessageQueue;
+
+    @Autowired
     private UserMessageLogDao userMessageLogDao;
 
     @Autowired
@@ -72,9 +76,6 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Autowired
     private SignalMessageDao signalMessageDao;
-
-    @Autowired
-    private SignalMessageLogDao signalMessageLogDao;
 
     @Autowired
     private BackendNotificationService backendNotificationService;
@@ -199,17 +200,28 @@ public class UserMessageDefaultService implements UserMessageService {
 
     @Override
     public void scheduleSending(String messageId, int retryCount) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(retryCount), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage(retryCount));
     }
 
     @Override
     public void scheduleSending(String messageId) {
-        jmsManager.sendMessageToQueue(new DispatchMessageCreator(messageId).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DispatchMessageCreator(messageId).createMessage());
     }
 
     @Override
     public void scheduleSending(String messageId, Long delay) {
-        jmsManager.sendMessageToQueue(new DelayedDispatchMessageCreator(messageId, delay).createMessage(), sendMessageQueue);
+        scheduleSending(messageId, new DelayedDispatchMessageCreator(messageId, delay).createMessage());
+    }
+
+    protected void scheduleSending(String messageId, JmsMessage jmsMessage) {
+        UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
+        if(userMessage.isSplitAndJoin()) {
+            LOG.debug("Sending message to sendLargeMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+        } else {
+            LOG.debug("Sending message to sendMessageQueue");
+            jmsManager.sendMessageToQueue(jmsMessage, sendMessageQueue);
+        }
     }
 
     @Override
