@@ -56,6 +56,9 @@ public class UserMessageDefaultServiceTest {
     private Queue sendMessageQueue;
 
     @Injectable
+    private Queue sendLargeMessageQueue;
+
+    @Injectable
     private UserMessageLogDao userMessageLogDao;
 
     @Injectable
