@@ -123,24 +123,32 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
             throw new UserManagementException("The current password does not match the provided one.");
         }
 
-        savePasswordHistory(user); // save old password in history
-
-        String userName = user.getUserName();
-        passwordManager.validateComplexity(userName, newPassword);
-        passwordManager.validateHistory(userName, newPassword);
-
-        user.setPassword(bcryptEncoder.encode(newPassword));
-        user.setDefaultPassword(false);
+        changePassword(user, newPassword);
     }
 
-    void savePasswordHistory(User user) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
-        if (passwordsToKeep == 0) {
-            return;
-        }
-        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
+    void changePassword(User user, String newPassword) {
+
+        passwordManager.changePassword(user, newPassword);
+
+//        savePasswordHistory(user); // save old password in history
+//
+//        String userName = user.getUserName();
+//        passwordManager.validateComplexity(userName, newPassword);
+//        passwordManager.validateHistory(userName, newPassword);
+//
+//        user.setPassword(bcryptEncoder.encode(newPassword));
+//        user.setDefaultPassword(false);
     }
+
+
+//    void savePasswordHistory(User user) {
+//        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(passwordManager.getPasswordHistoryPolicyProperty(), "0"));
+//        if (passwordsToKeep == 0) {
+//            return;
+//        }
+//        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+//        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
+//    }
 
     private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
         // validate user not already in general schema

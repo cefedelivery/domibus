@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.common.model.security.User;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistory;
@@ -18,7 +19,8 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class PluginUserPasswordManager extends PasswordManager {
+public class PluginUserPasswordManager extends PasswordManager<AuthenticationEntity> {
+
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordManager.class);
 
     final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin_passwordPolicy.warning.beforeExpiration";
@@ -51,6 +53,7 @@ public class PluginUserPasswordManager extends PasswordManager {
     @Override
     protected String getMaximumPasswordAgeProperty() { return MAXIMUM_PASSWORD_AGE; }
 
+    @Override
     protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
         AuthenticationEntity user = userDao.findByUser(userName);
         List<PluginUserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
@@ -62,4 +65,9 @@ public class PluginUserPasswordManager extends PasswordManager {
         return WARNING_DAYS_BEFORE_EXPIRATION;
     }
 
+    @Override
+    protected void savePasswordHistory(AuthenticationEntity user, int passwordsToKeep) {
+        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
+    }
 }

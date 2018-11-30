@@ -3,6 +3,7 @@ package eu.domibus.common.validators;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.model.security.IUser;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
  */
 
 @Service
-public abstract class PasswordManager {
+public abstract class PasswordManager<T extends IUser> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordManager.class);
 
     private static final String CREDENTIALS_EXPIRED = "Expired";
@@ -45,7 +46,7 @@ public abstract class PasswordManager {
 
     protected abstract String getMaximumPasswordAgeProperty();
 
-    protected abstract String getWarningDaysBeforeExpiration() ;
+    protected abstract String getWarningDaysBeforeExpiration();
 
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
@@ -135,4 +136,25 @@ public abstract class PasswordManager {
         }
     }
 
+    public void changePassword(T user, String newPassword) {
+
+        savePasswordHistory(user); // save old password in history
+
+        String userName = user.getUserName();
+        validateComplexity(userName, newPassword);
+        validateHistory(userName, newPassword);
+
+        user.setPassword(bcryptEncoder.encode(newPassword));
+        user.setDefaultPassword(false);
+    }
+
+    private void savePasswordHistory(T user) {
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
+        if (passwordsToKeep == 0) {
+            return;
+        }
+        savePasswordHistory(user, passwordsToKeep);
+    }
+
+    protected abstract void savePasswordHistory(T user, int passwordsToKeep);
 }

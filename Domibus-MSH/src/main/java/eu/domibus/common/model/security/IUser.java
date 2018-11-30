@@ -33,4 +33,8 @@ public interface IUser {
     String getUserName();
 
     LocalDateTime getPasswordChangeDate();
+
+    void setPassword(String password);
+
+    void setDefaultPassword(Boolean defaultPassword);
 }
