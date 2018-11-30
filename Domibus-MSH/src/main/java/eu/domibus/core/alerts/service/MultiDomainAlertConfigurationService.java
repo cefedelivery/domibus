@@ -94,4 +94,10 @@ public interface MultiDomainAlertConfigurationService {
      */
     String getAlertRetryTimePropertyName();
 
+    /**
+     *
+     * @return name of the property for adding Domibus instance/server name to email subject
+     */
+    String getAlertSuperServerNameSubjectPropertyName();
+
 }

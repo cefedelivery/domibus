@@ -1,6 +1,6 @@
 package eu.domibus.dao;
 
-import eu.domibus.audit.AuditTest;
+import eu.domibus.audit.AuditIT;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * Utility class that allows to run some test directly on you local database while developing you tests, instead of using
  * H2 brower utility. When your test is working switch the profile to @ActiveProfiles("IN_MEMORY_DATABASE")
- * lik in {@link AuditTest}
+ * lik in {@link AuditIT}
  */
 
 @EnableTransactionManagement

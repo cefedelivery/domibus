@@ -83,6 +83,7 @@
 								<p><strong>Expiration date: </strong> ${EXPIRATION_DATE}</p>
                                 <p><strong>Reporting time:</strong> ${REPORTING_TIME}</p>
                                 <p><strong>Alert level:</strong> ${ALERT_LEVEL}</p>
+								<p><strong>Server name:</strong> ${SERVER_NAME}</p>
 								</td>
                             </tr>
                             <!-- / MAIN CONTENT -->

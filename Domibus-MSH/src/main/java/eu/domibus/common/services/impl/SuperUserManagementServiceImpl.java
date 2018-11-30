@@ -60,7 +60,14 @@ public class SuperUserManagementServiceImpl extends UserManagementServiceImpl {
             // this block needs to called inside a transaction;
             // for this the whole code inside the block needs to reside into a Spring bean service marked with transaction REQUIRED
             super.updateUsers(superUsers);
-            return null;
+        });
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        domainTaskExecutor.submit(() -> {
+            super.changePassword(username, currentPassword, newPassword);
         });
     }
 

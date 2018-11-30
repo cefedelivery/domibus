@@ -76,8 +76,10 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
             final ProcessIdentifier processIdentifier = ProcessIdentifier.parse(processId);
             LOG.debug("Getting the ServiceMetadata");
             final ServiceMetadata sm = smpClient.getServiceMetadata(participantIdentifier, documentIdentifier);
-            LOG.debug("Getting the Endpoint from ServiceMetadata");
-            final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.AS4);
+
+            String transportProfileAS4 = domibusPropertyProvider.getDomainProperty(DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, TransportProfile.AS4.getIdentifier());
+            LOG.debug("Getting the Endpoint from ServiceMetadata with transportprofile [{}]", transportProfileAS4);
+            final Endpoint endpoint = sm.getEndpoint(processIdentifier, TransportProfile.of(transportProfileAS4));
 
             if (endpoint == null || endpoint.getAddress() == null) {
                 throw new ConfigurationException("Could not fetch metadata from SMP for documentId " + documentId + " processId " + processId);

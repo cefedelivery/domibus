@@ -30,9 +30,9 @@ import static org.junit.Assert.assertNull;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class,
-         CertificateDaoImplTest.CertificateDaoConfig.class})
+         CertificateDaoImplIT.CertificateDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
-public class CertificateDaoImplTest {
+public class CertificateDaoImplIT {
 
 
     //needed because CertificateDaoImpl implements an interface, so spring tries to convert it to interface based

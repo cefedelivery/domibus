@@ -19,9 +19,9 @@ import java.util.Date;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {InMemoryDataBaseConfig.class, CommandDaoConfig.class})
 @ActiveProfiles("IN_MEMORY_DATABASE")
-public class CommandDaoTest {
+public class CommandDaoIT {
 
-    private final static Logger LOG = DomibusLoggerFactory.getLogger(CommandDaoTest.class);
+    private final static Logger LOG = DomibusLoggerFactory.getLogger(CommandDaoIT.class);
 
     @Autowired
     private CommandDao commandDao;
