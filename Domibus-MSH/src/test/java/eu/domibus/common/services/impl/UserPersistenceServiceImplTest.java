@@ -2,8 +2,8 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.validators.ConsoleUserPasswordManager;
@@ -19,7 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Thomas Dussart
@@ -35,7 +36,7 @@ public class UserPersistenceServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    private UserPasswordHistoryDao userPasswordHistoryDao;
+    private ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Injectable
     private BCryptPasswordEncoder bcryptEncoder;

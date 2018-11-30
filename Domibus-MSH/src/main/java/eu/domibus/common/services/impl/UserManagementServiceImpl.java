@@ -6,8 +6,8 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
@@ -61,7 +61,7 @@ public class UserManagementServiceImpl implements UserService {
     private UserRoleDao userRoleDao;
 
     @Autowired
-    protected UserPasswordHistoryDao userPasswordHistoryDao;
+    protected ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -307,7 +307,7 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendAlerts() {
-        userAlertsService.sendAlerts();
+        //userAlertsService.sendAlerts();
     }
 
     @Override

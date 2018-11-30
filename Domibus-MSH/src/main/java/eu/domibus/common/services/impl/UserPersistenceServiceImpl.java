@@ -6,6 +6,7 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
@@ -46,7 +47,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private UserRoleDao userRoleDao;
 
     @Autowired
-    private UserPasswordHistoryDao userPasswordHistoryDao;
+    private ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;

@@ -7,14 +7,16 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.validators.ConsoleUserPasswordManager;
-import eu.domibus.core.alerts.service.*;
+import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
+import eu.domibus.core.alerts.service.EventService;
+import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
@@ -47,7 +49,7 @@ public class UserManagementServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    protected UserPasswordHistoryDao userPasswordHistoryDao;
+    protected ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Injectable
     private UserPersistenceService userPersistenceService;
@@ -73,6 +75,8 @@ public class UserManagementServiceImplTest {
     @Injectable
     ConsoleUserPasswordManager passwordValidator;
 
+    @Injectable
+    ConsoleUserAlertsServiceImpl userAlertsService;
 
     @Tested
     private UserManagementServiceImpl userManagementService;
