@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class PluginUserPasswordManager extends PasswordManager<AuthenticationEntity> {
+public class PluginUserPasswordManager extends UserPasswordManager<AuthenticationEntity> {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordManager.class);
 

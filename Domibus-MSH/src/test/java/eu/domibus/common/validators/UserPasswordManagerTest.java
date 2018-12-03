@@ -3,11 +3,14 @@ package eu.domibus.common.validators;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Tested;
+import mockit.VerificationsInOrder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -23,7 +26,7 @@ import java.util.List;
  * @since 4.1
  */
 
-public class PasswordManagerTest {
+public class UserPasswordManagerTest {
 
     private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
 
@@ -31,7 +34,7 @@ public class PasswordManagerTest {
     DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    UserPasswordHistoryDao userPasswordHistoryDao;
+    ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Injectable
     UserDao userDao;
@@ -152,7 +155,7 @@ public class PasswordManagerTest {
     }
 
     @Test(expected = DomibusCoreException.class)
-    public void testPasswordHistory( ) throws Exception {
+    public void testPasswordHistory() throws Exception {
         String username = "anyname";
         String testPassword = "anypassword";
         int oldPasswordsToCheck = 5;
@@ -167,7 +170,7 @@ public class PasswordManagerTest {
             result = user;
             userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
             result = oldPasswords;
-            bcryptEncoder.matches((CharSequence)any, anyString);
+            bcryptEncoder.matches((CharSequence) any, anyString);
             result = true;
         }};
 

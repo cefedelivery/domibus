@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class ConsoleUserPasswordManager extends PasswordManager<User> {
+public class ConsoleUserPasswordManager extends UserPasswordManager<User> {
     final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.passwordPolicy.warning.beforeExpiration";
 
     static final String PASSWORD_COMPLEXITY_PATTERN = "domibus.passwordPolicy.pattern";
