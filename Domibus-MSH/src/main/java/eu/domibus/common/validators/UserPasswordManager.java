@@ -153,19 +153,12 @@ public abstract class UserPasswordManager<T extends IUser> {
     }
 
     private void savePasswordHistory(T user) {
+
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;
         }
 
-        UserPasswordHistoryDao dao = getUserHistoryDao();
-        dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        dao.removePasswords(user, passwordsToKeep - 1);
-
-        //savePasswordHistory(user, passwordsToKeep);
-    }
-
-    protected void savePasswordHistory(T user, int passwordsToKeep) {
         UserPasswordHistoryDao dao = getUserHistoryDao();
         dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
         dao.removePasswords(user, passwordsToKeep - 1);

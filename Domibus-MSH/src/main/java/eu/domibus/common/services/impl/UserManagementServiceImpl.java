@@ -88,7 +88,7 @@ public class UserManagementServiceImpl implements UserService {
     protected DomainService domainService;
 
     @Autowired
-    ConsoleUserPasswordManager userPasswordValidator;
+    ConsoleUserPasswordManager userPasswordManager;
 
     @Autowired
     ConsoleUserAlertsServiceImpl userAlertsService;
@@ -295,7 +295,7 @@ public class UserManagementServiceImpl implements UserService {
         boolean isDefaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
-        userPasswordValidator.validatePasswordExpired(userName, isDefaultPassword, passwordChangeDate);
+        userPasswordManager.validatePasswordExpired(userName, isDefaultPassword, passwordChangeDate);
     }
 
     @Override
@@ -304,7 +304,7 @@ public class UserManagementServiceImpl implements UserService {
         boolean isDefaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
-        return userPasswordValidator.getDaysTillExpiration(userName, isDefaultPassword, passwordChangeDate);
+        return userPasswordManager.getDaysTillExpiration(userName, isDefaultPassword, passwordChangeDate);
     }
 
     @Override

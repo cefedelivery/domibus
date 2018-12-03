@@ -9,6 +9,7 @@ import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
+import eu.domibus.core.alerts.service.EventServiceImpl;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
@@ -138,9 +139,11 @@ public class AlertResource {
             case USER_LOGIN_FAILURE:
                 final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
                 return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case PASSWORD_EXPIRED:
             case PASSWORD_IMMINENT_EXPIRATION:
-                return Arrays.asList("USER", "EXPIRATION_DATE");
+            case PASSWORD_EXPIRED:
+            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
+            case PLUGIN_PASSWORD_EXPIRED:
+                return Arrays.asList(EventServiceImpl.USER_TYPE, EventServiceImpl.USER, EventServiceImpl.EXPIRATION_DATE);
             default:
                 throw new IllegalArgumentException("Unsupported alert type.");
         }
