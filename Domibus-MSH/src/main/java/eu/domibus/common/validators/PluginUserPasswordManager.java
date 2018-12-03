@@ -1,10 +1,9 @@
 package eu.domibus.common.validators;
 
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.UserPasswordHistory;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
-import eu.domibus.core.security.PluginUserPasswordHistory;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -49,10 +48,19 @@ public class PluginUserPasswordManager extends PasswordManager<AuthenticationEnt
     }
 
     @Override
-    protected String getMaximumDefaultPasswordAgeProperty() { return MAXIMUM_DEFAULT_PASSWORD_AGE; }
+    protected String getMaximumDefaultPasswordAgeProperty() {
+        return MAXIMUM_DEFAULT_PASSWORD_AGE;
+    }
 
     @Override
-    protected String getMaximumPasswordAgeProperty() { return MAXIMUM_PASSWORD_AGE; }
+    protected String getMaximumPasswordAgeProperty() {
+        return MAXIMUM_PASSWORD_AGE;
+    }
+
+    @Override
+    protected String getWarningDaysBeforeExpiration() {
+        return WARNING_DAYS_BEFORE_EXPIRATION;
+    }
 
     @Override
     protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
@@ -62,13 +70,8 @@ public class PluginUserPasswordManager extends PasswordManager<AuthenticationEnt
     }
 
     @Override
-    protected String getWarningDaysBeforeExpiration() {
-        return WARNING_DAYS_BEFORE_EXPIRATION;
+    protected UserPasswordHistoryDao getUserHistoryDao() {
+        return userPasswordHistoryDao;
     }
 
-    @Override
-    protected void savePasswordHistory(AuthenticationEntity user, int passwordsToKeep) {
-        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
-    }
 }

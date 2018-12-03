@@ -1,5 +1,6 @@
 package eu.domibus.common.validators;
 
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.User;
@@ -29,7 +30,7 @@ public class ConsoleUserPasswordManager extends PasswordManager<User> {
     protected UserDao userDao;
 
     @Autowired
-    private UserPasswordHistoryDao userPasswordHistoryDao;
+    private ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Override
     protected String getPasswordComplexityPatternProperty() {
@@ -60,8 +61,8 @@ public class ConsoleUserPasswordManager extends PasswordManager<User> {
     }
 
     @Override
-    protected void savePasswordHistory(User user, int passwordsToKeep) {
-        userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
-        userPasswordHistoryDao.removePasswords(user, passwordsToKeep - 1);
+    protected UserPasswordHistoryDao getUserHistoryDao() {
+        return userPasswordHistoryDao;
     }
+
 }

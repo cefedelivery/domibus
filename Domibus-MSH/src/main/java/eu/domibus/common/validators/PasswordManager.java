@@ -3,6 +3,7 @@ package eu.domibus.common.validators;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.IUser;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -47,6 +48,9 @@ public abstract class PasswordManager<T extends IUser> {
     protected abstract String getMaximumPasswordAgeProperty();
 
     protected abstract String getWarningDaysBeforeExpiration();
+
+    protected abstract UserPasswordHistoryDao getUserHistoryDao();
+
 
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
@@ -153,8 +157,18 @@ public abstract class PasswordManager<T extends IUser> {
         if (passwordsToKeep == 0) {
             return;
         }
-        savePasswordHistory(user, passwordsToKeep);
+
+        UserPasswordHistoryDao dao = getUserHistoryDao();
+        dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+        dao.removePasswords(user, passwordsToKeep - 1);
+
+        //savePasswordHistory(user, passwordsToKeep);
     }
 
-    protected abstract void savePasswordHistory(T user, int passwordsToKeep);
+    protected void savePasswordHistory(T user, int passwordsToKeep) {
+        UserPasswordHistoryDao dao = getUserHistoryDao();
+        dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+        dao.removePasswords(user, passwordsToKeep - 1);
+    }
+
 }

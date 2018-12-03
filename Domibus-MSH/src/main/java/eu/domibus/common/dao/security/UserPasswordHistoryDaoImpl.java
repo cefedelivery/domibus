@@ -21,6 +21,8 @@ public abstract class UserPasswordHistoryDaoImpl<U extends IUser, E extends User
     private final Class<E> typeOfE;
     private String passwordHistoryQueryName;
 
+    protected abstract E createNew(final U user, String passwordHash, LocalDateTime passwordDate);
+
     public UserPasswordHistoryDaoImpl(Class<E> typeOfE, String passwordHistoryQueryName) {
         super(typeOfE);
         this.typeOfE = typeOfE;
@@ -32,8 +34,6 @@ public abstract class UserPasswordHistoryDaoImpl<U extends IUser, E extends User
         E entry = createNew(user, passwordHash, passwordDate);
         this.update(entry);
     }
-
-    protected abstract E createNew(final U user, String passwordHash, LocalDateTime passwordDate);
 
     @Override
     public void removePasswords(final U user, int oldPasswordsToKeep) {
