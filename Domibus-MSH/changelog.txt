@@ -1,11 +1,13 @@
 Domibus 4.1
-- Password policy enforcement for admin users: check complexity, expiration, reuse. Send Alerts on expiration event. Added coresponding properties in configuration.
+- Password policy enforcement for admin users: check complexity, expiration, reuse. Send Alerts on expiration event. Added corresponding properties in configuration.
 - Align the WS Plugin/FS Plugin XSDs with the ebMS3 XSD
 - Remove domibus.msh.retry.tolerance from domibus.properties
 - By default close the connection between C2 and C3; do not use Keep-Alive anymore by default
 - Increase timeout of ListPendingMessages transaction to 5 minutes
 - Added a new Logging page into Admin console  - user can change and reset logging levels at runtime
 - Cluster configuration: reload truststore, PMode and logging set adn reset will be executed on all cluster servers excepting the current one
+- Default password policy enforcement for all users at the back-end level;
+- Added route and component for changing password when default used or about to expire for all users.
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
