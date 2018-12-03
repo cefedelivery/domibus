@@ -11,7 +11,7 @@ Domibus 4.1 (from 4.0):
                     - add a configuration file of type domain_name-logback.xml for domain 'default' - it's mandatory
 Domibus 4.0.1 (from 4.0.0):
                 - Run the appropriate DB migration script(mysql5innoDb-4.0-to-4.0.1-migration.ddl for MySQL or oracle10g-4.0-to-4.0.1-migration.ddl for Oracle)
-                - (Optional) Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
+                - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"
                 - In case you are using multitenancy please make the following modifications::
                     - replace old logback.xml with the new version of logback.xml keeping existing packages to be logged and uncomment the proper sections for multitenancy
                     - replace each domain-name_logback.xml file with the newer version and keep existing packages for logging

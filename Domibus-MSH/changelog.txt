@@ -17,6 +17,7 @@ Domibus 4.0.1
 - Fixed submitting of messages via the Default JMS Plugin in in multi-tenancy mode
 - Increase to 5 minutes the transaction timeout of ListPendingMessages operation in the Default WS Plugin
 - Add configurable property for AS4 transport profile in the dynamic discovery process
+- Fixed the parsing of service and action values in case of Peppol dynamic discovery
 Domibus 4.0
 - Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException
