@@ -43,6 +43,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     private static final String RESPONDER_ROLE = "urn:fdc:peppol.eu:2017:roles:ap:as4";
     private static final String PARTYID_TYPE = "urn:fdc:peppol.eu:2017:identifiers:ap";
+    public static final String SCHEME_DELIMITER = "::";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -93,7 +94,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     protected DocumentTypeIdentifier getDocumentTypeIdentifier(String documentId) throws PeppolParsingException {
         DocumentTypeIdentifier result = null;
-        if(StringUtils.contains(documentId, "busdox-docid-qns")) {
+        if(StringUtils.contains(documentId, DocumentTypeIdentifier.DEFAULT_SCHEME.getIdentifier())) {
             LOG.debug("Getting DocumentTypeIdentifier by parsing the document Id [{}]", documentId);
             result = DocumentTypeIdentifier.parse(documentId);
         } else {
@@ -105,7 +106,7 @@ public class DynamicDiscoveryServicePEPPOL implements DynamicDiscoveryService {
 
     protected ProcessIdentifier getProcessIdentifier(String processId) throws PeppolParsingException {
         ProcessIdentifier result = null;
-        if(StringUtils.contains(processId, "::")) {
+        if(StringUtils.contains(processId, SCHEME_DELIMITER)) {
             LOG.debug("Getting ProcessIdentifier by parsing the process Id [{}]", processId);
             result = ProcessIdentifier.parse(processId);
         } else {
