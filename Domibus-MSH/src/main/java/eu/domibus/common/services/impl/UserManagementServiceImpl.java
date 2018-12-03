@@ -90,6 +90,9 @@ public class UserManagementServiceImpl implements UserService {
     @Autowired
     ConsoleUserPasswordManager userPasswordValidator;
 
+    @Autowired
+    ConsoleUserAlertsServiceImpl userAlertsService;
+
 
     /**
      * {@inheritDoc}
@@ -307,7 +310,7 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendAlerts() {
-        //userAlertsService.sendAlerts();
+        userAlertsService.sendAlerts();
     }
 
     @Override

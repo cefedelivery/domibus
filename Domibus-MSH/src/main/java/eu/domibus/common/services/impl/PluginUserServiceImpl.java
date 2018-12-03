@@ -62,8 +62,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     private PluginUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
-    UserAlertsService userAlertsService;
-
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Override
     public List<AuthenticationEntity> findUsers(AuthType authType, AuthRole authRole, String originalUser, String userName, int page, int pageSize) {
