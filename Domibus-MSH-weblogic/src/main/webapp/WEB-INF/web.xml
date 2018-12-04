@@ -17,4 +17,24 @@
         <res-auth>Container</res-auth>
         <res-sharing-scope>Unshareable</res-sharing-scope>
     </resource-ref>
+
+    <!-- ECAS security -->
+    <!-- Here we specify which URLs are protected by ECAS and which application server role is used. -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Domibus</web-resource-name>
+            <description>Require users to authenticate</description>
+            <url-pattern>/logging/*</url-pattern>
+            <url-pattern>/rest/*</url-pattern>
+            <http-method-omission>OPTIONS</http-method-omission>
+        </web-resource-collection>
+        <auth-constraint>
+            <description>Ensures that the principal is authenticated</description>
+            <role-name>*</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <description>Encryption is not required for the application in general.</description>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 </web-app>

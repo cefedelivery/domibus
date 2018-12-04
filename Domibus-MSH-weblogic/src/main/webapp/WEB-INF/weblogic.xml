@@ -4,6 +4,24 @@
                   xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app"
                   xsi:schemaLocation="http://xmlns.oracle.com/weblogic/weblogic-web-app http://xmlns.oracle.com/weblogic/weblogic-web-app/1.4/weblogic-web-app.xsd">
     <context-root>/domibus</context-root>
+
+
+
+
+    <!-- ECAS ?
+    <security-role-assignment>
+        <role-name>myRole</role-name>
+        <! insert your own role or CUD group here ->
+        <principal-name>MY_GROUP</principal-name>
+    </security-role-assignment>-->
+
+
+    <session-descriptor>
+        <cookie-path>/domibus</cookie-path>
+    </session-descriptor>
+
+
+
     <container-descriptor>
         <prefer-application-packages>
             <package-name>com.google.*</package-name>

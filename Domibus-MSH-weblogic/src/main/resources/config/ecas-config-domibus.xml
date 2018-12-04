@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ ECAS Software
+  ~ Copyright (c) 2014 European Commission
+  ~ Licensed under the EUPL
+  ~ You may not use this work except in compliance with the Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl
+  ~
+  ~ This product includes the CAS software developed by Yale University,
+  ~ Copyright (c) 2000-2004 Yale University. All rights reserved.
+  ~ THE CAS SOFTWARE IS PROVIDED "AS IS," AND ANY EXPRESS OR IMPLIED
+  ~ WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  ~ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ARE EXPRESSLY
+  ~ DISCLAIMED. IN NO EVENT SHALL YALE UNIVERSITY OR ITS EMPLOYEES BE
+  ~ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  ~ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED, THE COSTS OF
+  ~ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA OR
+  ~ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  ~ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  ~ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ~ SOFTWARE, EVEN IF ADVISED IN ADVANCE OF THE POSSIBILITY OF SUCH
+  ~ DAMAGE.
+  -->
+
+<client-config xmlns="https://ecas.ec.europa.eu/cas/schemas/client-config/ecas/"
+               xmlns:cas="https://ecas.ec.europa.eu/cas/schemas/client-config/cas/">
+
+    <configurationId>eu.europa.ec.digit.domibus</configurationId>
+
+
+    <trustedCertificates>
+        <trustedCertificate>
+        MIIDezCCAmOgAwIBAgIEViuZKzANBgkqhkiG9w0BAQsFADBuMRAwDgYDVQQGEwdV
+        bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD
+        VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRIwEAYDVQQDEwlsb2NhbGhv
+        c3QwHhcNMTgxMjAzMTUyOTA5WhcNMjgxMjAyMTUyOTA5WjBuMRAwDgYDVQQGEwdV
+        bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD
+        VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRIwEAYDVQQDEwlsb2NhbGhv
+        c3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC6VmVRgZDlY3wEPP5v
+        xEg2YsNSB7gatyAIobF+fbpHl6VDA5oaiEwy9PCviTsh0WC/4tD9o0UM0e5RFq4t
+        goJ1XOCY2Zz6DhfdxVvqvgSLFedT1q0RodxBWVxftIJiz5YSoHI525ljmSROdKZY
+        OnIuoxjkdkYaPgmeSR6Rz0ECP0lW0zriuBh9Fw8HaPDZVpMj48tr66Uwhlzo9gTR
+        YeiilPQJOwvH6vRoF7VSsBuNZ57clgccz0tPUYs50uReT7aQLyuiqR1oWQc2SItg
+        H8wv9q+5XGYXg57XDBrrUwb5/D3NnnGvmhx9C8rp6ffVStuYLuCaJ6gPjb0ZvgW/
+        QgiTAgMBAAGjITAfMB0GA1UdDgQWBBSUQdKrErlzcu8Bz6AzqN2p8zSnyzANBgkq
+        hkiG9w0BAQsFAAOCAQEADtB50VhRqifJUKsel0WR8wip3+PmAvtFrZVmsE3+XZuq
+        I5wSUZt3ZS549EvIYm353bpIuacT45yJ+D2sKY7QXFtbQbBd9e+KeK6bVkZCFqG3
+        U9d+adJw/LufpQ/d+YbIP/kSjohFxqz+7FMHIj32J6sRrM8/zh2cAgV2jTWWn37k
+        6X/A4ZxVIM/tcnXAcQ2Omrn5y/exLwgN/A6LJ6DwYwEf/nNPS6Vb3ADNxf0YMHu3
+        AhWdCxI/sUNBsr/tKqaTXhaoTlqIGfacIOTRJ/IgPivtJpsoBT+29vQKPfsJ8rcf
+        nECTRX+dRFhRAXS+/Rm6DhrLbEyNaoQqJZRWYLYsxA==
+       </trustedCertificate>
+    </trustedCertificates>
+
+    <!-- allow specific configuration for the Web Services that must be accessible through proxy -->
+<!--    <serviceResolver>eu.europa.ec.digit.iam.xenos.webservices.utils.WebServiceResolver</serviceResolver>
+
+    <cas:serverName>digiamxena.cc.cec.eu.int</cas:serverName>
+
+    <ecasBaseUrl>https://ecasa.cc.cec.eu.int:7002</ecasBaseUrl>-->
+
+   <!--<groups>
+        <group>AIDA_ADMIN</group>
+        <group>AIDA_INV_WS</group>
+        <group>AIDA_REG_WS</group>
+        <group>AIDA_SELFRG</group>
+    </groups>-->
+
+    <acceptStrengths>
+        <strength>STRONG</strength>
+        <strength>STRONG_SMS</strength>
+        <strength>CLIENT_CERT</strength>
+    </acceptStrengths>
+
+    <assuranceLevel>LOW</assuranceLevel>
+
+    <cas:renew>true</cas:renew>
+
+    <requestingUserDetails>true</requestingUserDetails>
+
+</client-config>
