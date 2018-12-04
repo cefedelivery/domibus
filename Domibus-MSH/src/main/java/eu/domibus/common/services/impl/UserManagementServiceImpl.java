@@ -150,7 +150,6 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
-
         final LoginFailureModuleConfiguration loginFailureConfiguration = alertConfiguration.getLoginFailureConfiguration();
         LOG.debug("loginFailureConfiguration.isActive() : [{}]", loginFailureConfiguration.isActive());
         switch (userLoginErrorReason) {

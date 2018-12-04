@@ -3,21 +3,20 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.model.security.IUser;
-import eu.domibus.common.model.security.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
@@ -26,7 +25,6 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
     public AuthenticationDAO() {
         super(AuthenticationEntity.class);
     }
-
 
     public AuthenticationEntity findByUser(final String username) {
         final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByUsername", AuthenticationEntity.class);

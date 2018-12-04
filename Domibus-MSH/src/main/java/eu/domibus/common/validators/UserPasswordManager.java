@@ -79,6 +79,7 @@ public abstract class UserPasswordManager<T extends IUser> {
         }
 
         List<String> oldPasswords = getPasswordHistory(userName, oldPasswordsToCheck);
+
         if (oldPasswords.stream().anyMatch(pass -> bcryptEncoder.matches(password, pass))) {
             String errorMessage = "The password of " + userName + " user cannot be the same as the last " + oldPasswordsToCheck;
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, errorMessage);

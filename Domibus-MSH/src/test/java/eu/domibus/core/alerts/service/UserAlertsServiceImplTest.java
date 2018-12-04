@@ -95,8 +95,9 @@ public class UserAlertsServiceImplTest {
             domibusPropertyProvider.getOptionalDomainProperty(ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
             userAlertsService.getUsersWithPasswordChangedBetween(false, from, to);
-//            userDao.findWithPasswordChangedBetween(from, to, false);
             result = users;
+            userAlertsService.getEventTypeForPasswordExpired();
+            result = EventType.PASSWORD_EXPIRED;
         }};
 
         userAlertsService.triggerExpiredEvents(false);
@@ -135,6 +136,8 @@ public class UserAlertsServiceImplTest {
             result = maxPasswordAge.toString();
             userAlertsService.getUsersWithPasswordChangedBetween(false, from, to);
             result = users;
+            userAlertsService.getEventTypeForPasswordImminentExpiration();
+            result = EventType.PASSWORD_IMMINENT_EXPIRATION;
         }};
 
         userAlertsService.triggerImminentExpirationEvents(false);

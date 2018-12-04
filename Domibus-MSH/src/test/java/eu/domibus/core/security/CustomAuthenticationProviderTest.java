@@ -2,6 +2,7 @@ package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
 import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
@@ -49,14 +50,17 @@ public class CustomAuthenticationProviderTest {
     @Injectable
     private X509CertificateService securityX509CertificateServiceImpl;
 
-    @Tested
-    CustomAuthenticationProvider securityCustomAuthenticationProvider;
+    @Injectable
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Injectable
     BCryptPasswordEncoder bcryptEncoder;
 
     @Injectable
     PluginUserPasswordManager passwordValidator;
+
+    @Tested
+    CustomAuthenticationProvider securityCustomAuthenticationProvider;
 
     @Test
     public void authenticateX509Test() {

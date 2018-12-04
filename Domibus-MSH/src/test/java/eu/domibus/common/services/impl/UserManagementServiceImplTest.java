@@ -61,7 +61,7 @@ public class UserManagementServiceImplTest {
     private UserConverter userConverter;
 
     @Injectable
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
 
     @Injectable
     private EventService eventService;
@@ -326,7 +326,7 @@ public class UserManagementServiceImplTest {
     public void triggerAlertBadCredential() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.BAD_CREDENTIALS);
@@ -340,7 +340,9 @@ public class UserManagementServiceImplTest {
     public void triggerAlertInactiveDisableEventOnEachLogin() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.INACTIVE);
@@ -354,7 +356,9 @@ public class UserManagementServiceImplTest {
     public void triggerAlertSuspendedDisableEventOnEachLogin() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.SUSPENDED);
@@ -368,9 +372,11 @@ public class UserManagementServiceImplTest {
     public void triggerAlertInactiveDisableEventOnlyAtTheMoment() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
             result = false;
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.INACTIVE);
@@ -384,11 +390,13 @@ public class UserManagementServiceImplTest {
     public void triggerAlertSuspendedDisableEventOnlyAtTheMoment() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
             result = false;
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
             result = true;
-        }};
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
+            result = true;
+         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.SUSPENDED);
         new VerificationsInOrder() {{
             eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);

@@ -36,6 +36,9 @@ public class PluginUserAlertsServiceImplTest {
     @Injectable
     private EventService eventService;
 
+    @Injectable
+    MultiDomainAlertConfigurationService alertConfiguration;
+
     @Tested
     private PluginUserAlertsServiceImpl userAlertsService;
 
