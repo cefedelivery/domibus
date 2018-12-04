@@ -56,6 +56,9 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     @Injectable
     private DomainContextProvider domainContextProvider;
 
+    @Injectable
+    RepetitiveAlertConfigurationHolder alertConfigurationHolder;
+
     @Test
     public void getAlertLevelForMessage(final @Mocked MessagingModuleConfiguration messagingConfiguration) {
         final Alert alert = new Alert();

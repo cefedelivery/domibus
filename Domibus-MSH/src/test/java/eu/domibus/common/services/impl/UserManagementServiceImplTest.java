@@ -101,7 +101,7 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.canApplyAccountLockingPolicy(anyString, user);
+            userManagementService.getUserLoginFailureReason(anyString, user);
             result = UserLoginErrorReason.UNKNOWN;
         }};
         userManagementService.handleWrongAuthentication("");
@@ -117,7 +117,7 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.canApplyAccountLockingPolicy(anyString, user);
+            userManagementService.getUserLoginFailureReason(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
         final String userName = "test";
@@ -196,7 +196,7 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void logOnlyUserNull(@Mocked final DomibusLogger LOG, final @Mocked User user) {
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", null);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", null);
         assertEquals(UserLoginErrorReason.UNKNOWN, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
@@ -213,7 +213,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = null;
         }};
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.INACTIVE, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
@@ -229,7 +229,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = new Date();
         }};
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.SUSPENDED, userLoginErrorReason);
         new Verifications() {{
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
@@ -243,7 +243,7 @@ public class UserManagementServiceImplTest {
             user.isEnabled();
             result = true;
         }};
-        UserLoginErrorReason test = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason test = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.BAD_CREDENTIALS, test);
     }
 

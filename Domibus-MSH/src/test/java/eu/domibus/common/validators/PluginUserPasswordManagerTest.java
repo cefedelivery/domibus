@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 public class PluginUserPasswordManagerTest {
 
-    private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
-
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
 
