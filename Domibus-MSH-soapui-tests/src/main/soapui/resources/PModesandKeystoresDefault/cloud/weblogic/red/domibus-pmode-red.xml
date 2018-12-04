@@ -13,6 +13,7 @@
 		<mpc name="defaultMpcFour" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFour" enabled="true" default="true" retention_downloaded="2" retention_undownloaded="600"/>
 		<mpc name="defaultMpcFive" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCFive" enabled="true" default="true" retention_downloaded="5" retention_undownloaded="600"/>
 		<mpc name="defaultMpcSeven" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPCSeven" enabled="true" default="true" retention_downloaded="15" retention_undownloaded="600"/>
+		<mpc name="defaultMpcEight" qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMpcEight" enabled="true" default="true" retention_downloaded="15" retention_undownloaded="600"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -72,7 +73,7 @@
 		<securities>
 			<security name="eDeliveryAS4Policy" policy="eDeliveryAS4Policy.xml" signatureMethod="RSA_SHA256"/>
 			<security name="noSigNoEnc" policy="doNothingPolicy.xml" signatureMethod="RSA_SHA256"/>
-			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>		
+			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>	
 			<security name="eDeliveryAS4Policy_BST" policy="eDeliveryAS4Policy_BST.xml" signatureMethod="RSA_SHA256"/>
 			<security name="eDeliveryAS4Policy_IS" policy="eDeliveryAS4Policy_IS.xml" signatureMethod="RSA_SHA256"/>			
 		</securities>
@@ -169,7 +170,7 @@
 			<legConfiguration name="pushTestcase19tc19Action" service="testService19" action="tc19Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			<legConfiguration name="pushTestcase20tc20Action" service="testService20" action="tc20Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			<legConfiguration name="pushTestcase21tc21Action" service="testService21" action="tc21Action" defaultMpc="defaultMpcSeven" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
-			<legConfiguration name="pushTestcase22tc22Action" service="testService22" action="tc22Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
+			<legConfiguration name="pullTestcase22tc22Action" service="testService22" action="tc22Action" defaultMpc="defaultMpcEight" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			<legConfiguration name="pushTestcase23tc23Action" service="testService23" action="tc23Action" defaultMpc="defaultMpcSeven" reliability="AS4Reliability" security="eDeliveryAS4Policy_IS" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
@@ -432,7 +433,7 @@
 				<leg name="pushTestcase19tc19Action"/>
 			</legs>
 		</process>
-		<process name="tc20Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc20Process" agreement="agreementDummy" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="blue_gw"/>
 				<initiatorParty name="red_gw"/>
@@ -460,7 +461,7 @@
 				<leg name="pushTestcase21tc21Action"/>
 			</legs>
 		</process>
-		<process name="tc22Process" agreement="" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+		<process name="tc22Process" agreement="agreementDummy" mep="oneway" binding="pull" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
 				<initiatorParty name="red_gw"/>
 			</initiatorParties>

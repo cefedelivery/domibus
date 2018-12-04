@@ -824,7 +824,7 @@ class Domibus
 		
 			commandString="curl "+urlToDomibus(side, log, context)+"/rest/pmode -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -F \"description="+pmDescription+"\" -F  file=@"+pmodeFile ;
 			commandResult = runCurlCommand(commandString,log);
-			assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
+			assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to upload the PMode: response doesn't contain the expected outcome \""+outcome+"\"."
 			if(outcome.toLowerCase()=="successfully"){
 				log.info commandResult[0]+" Domibus: \""+side+"\".";
 				if(message!=null){
