@@ -527,4 +527,40 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoginFailureModuleConfiguration getPluginLoginFailureConfiguration() {
+        return loginFailureConfigurationLoader.getConfiguration(this::readPluginLoginFailureConfiguration);
+    }
+
+    // TODO: merge this code with login failure of console users
+    protected LoginFailureModuleConfiguration readPluginLoginFailureConfiguration(Domain domain) {
+        final String alertActivePropertyName = "domibus.alert.plugin.user.login_failure.active";
+        final String alertLevelPropertyName = "domibus.alert.plugin.user.login_failure.level";
+        final String alertEmailSubjectPropertyName = "domibus.alert.plugin.user.login_failure.mail.subject";
+
+        try {
+            final Boolean alertActive = isAlertModuleEnabled();
+
+            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
+
+            if (!alertActive || !loginFailureActive) {
+                LOG.debug("Alert Plugin Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
+                return new LoginFailureModuleConfiguration();
+            }
+
+            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
+
+            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
+
+            LOG.info("Alert plugin login failure module activated for domain:[{}]", domain);
+            return new LoginFailureModuleConfiguration(loginFailureAlertLevel, loginFailureMailSubject);
+
+        } catch (Exception e) {
+            LOG.warn("An error occurred while reading plugin authenticator alert module configuration for domain:[{}], ", domain, e);
+            return new LoginFailureModuleConfiguration();
+        }
+    }
 }

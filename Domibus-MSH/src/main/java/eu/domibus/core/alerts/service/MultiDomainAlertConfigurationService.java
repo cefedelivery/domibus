@@ -100,4 +100,9 @@ public interface MultiDomainAlertConfigurationService {
      */
     String getAlertSuperServerNameSubjectPropertyName();
 
+    /**
+     * @return login failure module configuration for plugin users
+     */
+    LoginFailureModuleConfiguration getPluginLoginFailureConfiguration();
+
 }

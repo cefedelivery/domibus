@@ -76,7 +76,7 @@ public class UserManagementServiceImpl implements UserService {
     protected UserPersistenceService userPersistenceService;
 
     @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
 
     @Autowired
     private EventService eventService;
@@ -140,7 +140,7 @@ public class UserManagementServiceImpl implements UserService {
     @Transactional
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
         User user = userDao.loadUserByUsername(userName);
-        UserLoginErrorReason userLoginErrorReason = canApplyAccountLockingPolicy(userName, user);
+        UserLoginErrorReason userLoginErrorReason = getUserLoginFailureReason(userName, user);
         if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
@@ -151,7 +151,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
 
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
+        final LoginFailureModuleConfiguration loginFailureConfiguration = alertConfiguration.getLoginFailureConfiguration();
         LOG.debug("loginFailureConfiguration.isActive() : [{}]", loginFailureConfiguration.isActive());
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
@@ -159,21 +159,23 @@ public class UserManagementServiceImpl implements UserService {
                     eventService.enqueueLoginFailureEvent(userName, new Date(), false);
                 }
                 break;
-            case UNKNOWN:
-                break;
             case INACTIVE:
             case SUSPENDED:
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-                if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
-                    eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
-                } else if (loginFailureConfiguration.isActive()) {
-                    eventService.enqueueLoginFailureEvent(userName, new Date(), true);
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
+                if(accountDisabledConfiguration.isActive()) {
+                    if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
+                        eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
+                    } else if (loginFailureConfiguration.isActive()) {
+                        eventService.enqueueLoginFailureEvent(userName, new Date(), true);
+                    }
                 }
+                break;
+            case UNKNOWN:
                 break;
         }
     }
 
-    UserLoginErrorReason canApplyAccountLockingPolicy(String userName, User user) {
+    UserLoginErrorReason getUserLoginFailureReason(String userName, User user) {
 
         if (user == null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
@@ -212,7 +214,7 @@ public class UserManagementServiceImpl implements UserService {
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
 
-            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
             }
@@ -310,7 +312,7 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendAlerts() {
-        userAlertsService.sendAlerts();
+        userAlertsService.triggetPasswordExpirationEvents();
     }
 
     @Override

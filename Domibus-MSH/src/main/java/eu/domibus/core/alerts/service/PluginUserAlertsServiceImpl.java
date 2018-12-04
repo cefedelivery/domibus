@@ -3,11 +3,17 @@ package eu.domibus.core.alerts.service;
 import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.core.security.AuthenticationDAO;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,11 +23,20 @@ import java.util.List;
 @Service
 public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
 
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserAlertsServiceImpl.class);
+
     protected final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin_passwordPolicy.expiration";
     protected final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin_passwordPolicy.defaultPasswordExpiration";
 
     @Autowired
     protected AuthenticationDAO userDao;
+
+    @Autowired
+    private MultiDomainAlertConfigurationService alertConfiguration;
+
+    @Autowired
+    private EventService eventService;
+
 
     @Override
     protected String getMaximumDefaultPasswordAgeProperty() {
@@ -56,5 +71,18 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     @Override
     protected EventType getEventTypeForPasswordExpired() {
         return EventType.PLUGIN_PASSWORD_EXPIRED;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    // TODO: move this code to base class to use the same code for console and plugin users
+    public void triggerLoginFailureEvent(IUser user) {
+        final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
+        LOG.debug("Plugin login Failure Configuration isActive() : [{}]", configuration.isActive());
+
+        if (configuration.isActive()) {
+            eventService.enqueuePluginLoginFailureEvent(user.getUserName(), new Date());
+        }
+
     }
 }

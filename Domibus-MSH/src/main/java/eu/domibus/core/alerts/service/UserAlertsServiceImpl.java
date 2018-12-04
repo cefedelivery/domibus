@@ -5,7 +5,6 @@ import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
-import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,15 +47,12 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
 
     protected abstract EventType getEventTypeForPasswordExpired();
 
-    public void triggerLoginFailureEvent(String userName) {
+//    protected abstract LoginFailureModuleConfiguration getPluginLoginFailureConfiguration();
 
-        final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
-        LOG.debug("Plugin login Failure Configuration isActive() : [{}]", configuration.isActive());
-
-        if (configuration.isActive()) {
-            eventService.enqueuePluginLoginFailureEvent(userName, new Date());
-        }
-
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void triggerLoginFailureEvent(IUser user) {
+        //nothing for now
     }
 
     @Override
@@ -96,7 +91,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
 
         EventType eventType = getEventTypeForPasswordImminentExpiration();
         eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordImminentExpirationEvent(eventType, user, maxPasswordAgeInDays);
+            eventService.enqueuePasswordExpirationEvent(eventType, user, maxPasswordAgeInDays);
         });
     }
 
@@ -118,7 +113,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
 
         EventType eventType = getEventTypeForPasswordExpired();
         eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordExpiredEvent(eventType, user, maxPasswordAgeInDays);
+            eventService.enqueuePasswordExpirationEvent(eventType, user, maxPasswordAgeInDays);
         });
     }
 

@@ -90,4 +90,11 @@ public interface EventService {
      */
     void enqueuePasswordExpirationEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays);
 
+    /**
+     * Will create login failure event for plugin user and enqueue it to the alert/event monitoring queue.
+     *
+     * @param userName        the user name that had a failure login
+     * @param loginTime       the login failure time.
+     */
+    void enqueuePluginLoginFailureEvent(String userName, Date loginTime);
 }

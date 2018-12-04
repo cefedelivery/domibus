@@ -14,6 +14,8 @@ public enum EventType {
     USER_LOGIN_FAILURE(AlertType.USER_LOGIN_FAILURE, "loginFailure"),
     USER_ACCOUNT_DISABLED(AlertType.USER_ACCOUNT_DISABLED, "accountDisabled"),
 
+    PLUGIN_USER_LOGIN_FAILURE(AlertType.PLUGIN_USER_LOGIN_FAILURE, "loginFailure"),
+
     //TODO: maybe we should get rid of the plugin variant of the Event types
     PASSWORD_EXPIRED(AlertType.PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_EXPIRED),
     PASSWORD_IMMINENT_EXPIRATION(AlertType.PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION),

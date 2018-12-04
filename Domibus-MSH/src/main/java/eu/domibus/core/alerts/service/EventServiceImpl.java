@@ -112,25 +112,29 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      */
     @Override
-    public void enqueueLoginFailureEvent(
-            final String userName,
-            final Date loginTime,
-            final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, loginTime, Boolean.toString(accountDisabled), EventType.USER_LOGIN_FAILURE);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, LOGIN_FAILURE);
-        LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
-}
+    public void enqueueLoginFailureEvent(final String userName, final Date loginTime, final boolean accountDisabled) {
+        enqueueLoginFailure(userName, IUser.Type.CONSOLE.getName(), loginTime, accountDisabled, EventType.USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void enqueueAccountDisabledEvent(
-            final String userName,
-            final Date accountDisabledTime,
-            final boolean accountDisabled) {
-        Event event = prepareAuthenticatorEvent(userName, accountDisabledTime, Boolean.toString(accountDisabled), EventType.USER_ACCOUNT_DISABLED);
-        jmsManager.convertAndSendToQueue(event, alertMessageQueue, ACCOUNT_DISABLED);
+    public void enqueueAccountDisabledEvent(final String userName, final Date accountDisabledTime, final boolean accountDisabled) {
+        enqueueLoginFailure(userName, IUser.Type.CONSOLE.getName(), accountDisabledTime, accountDisabled, EventType.USER_ACCOUNT_DISABLED, ACCOUNT_DISABLED);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void enqueuePluginLoginFailureEvent(String userName, Date loginTime) {
+        enqueueLoginFailure(userName, IUser.Type.PLUGIN.getName(), loginTime, false, EventType.PLUGIN_USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    }
+
+    private void enqueueLoginFailure(String userName, String userType, Date loginTime, boolean accountDisabled, EventType eventType, String selector) {
+        Event event = prepareAuthenticatorEvent(userName, userType, loginTime, Boolean.toString(accountDisabled), eventType);
+        jmsManager.convertAndSendToQueue(event, alertMessageQueue, selector);
         LOG.debug(EVENT_ADDED_TO_THE_QUEUE, event);
     }
 
@@ -211,13 +215,10 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-    private Event prepareAuthenticatorEvent(
-            final String userName,
-            final Date loginTime,
-            final String accountDisabled,
-            final EventType eventType) {
+    private Event prepareAuthenticatorEvent(final String userName, final String userType, final Date loginTime, final String accountDisabled, final EventType eventType) {
         Event event = new Event(eventType);
         event.addStringKeyValue(AuthenticationEvent.USER.name(), userName);
+        event.addStringKeyValue(AuthenticationEvent.USER_TYPE.name(), userType);
         event.addDateKeyValue(LOGIN_TIME.name(), loginTime);
         event.addStringKeyValue(AuthenticationEvent.ACCOUNT_DISABLED.name(), accountDisabled);
         return event;
@@ -226,11 +227,6 @@ public class EventServiceImpl implements EventService {
     @Override
     public void enqueuePasswordExpirationEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays) {
         enqueuePasswordEvent(eventType, user, maxPasswordAgeInDays);
-    }
-
-    @Override
-    public void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays) {
-        enqueuePasswordEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, user, maxPasswordAgeInDays);
     }
 
     protected void enqueuePasswordEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays) {

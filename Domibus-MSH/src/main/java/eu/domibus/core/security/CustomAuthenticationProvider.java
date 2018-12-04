@@ -2,6 +2,7 @@ package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
 import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     PluginUserPasswordManager pluginUserPasswordValidator;
 
+    @Autowired
+    PluginUserAlertsServiceImpl userAlertsService;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         try {
@@ -66,15 +70,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
 
-                AuthenticationEntity userEntity = securityAuthenticationDAO.findByUser(authentication.getName());
+                AuthenticationEntity user = securityAuthenticationDAO.findByUser(authentication.getName());
                 //check if password is correct
-                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), userEntity.getPassword());
+                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), user.getPassword());
+                if(!isPasswordCorrect) {
+                    userAlertsService.triggerLoginFailureEvent(user);
+                }
                 //check if password expired
-                boolean isPasswordExpired = isPasswordExpired(userEntity);
+                boolean isPasswordExpired = isPasswordExpired(user);
 
                 authentication.setAuthenticated(isPasswordCorrect && !isPasswordExpired);
 
-                ((BasicAuthentication) authentication).setOriginalUser(userEntity.getOriginalUser());
+                ((BasicAuthentication) authentication).setOriginalUser(user.getOriginalUser());
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }

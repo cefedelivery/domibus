@@ -5,6 +5,7 @@ package eu.domibus.core.alerts.model.common;
  */
 public enum AuthenticationEvent {
     USER,
+    USER_TYPE,
     LOGIN_TIME,
     ACCOUNT_DISABLED
 }

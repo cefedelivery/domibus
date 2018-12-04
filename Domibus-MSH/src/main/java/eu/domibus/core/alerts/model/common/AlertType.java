@@ -11,6 +11,8 @@ public enum AlertType {
     USER_LOGIN_FAILURE("login_failure.ftl"),
     USER_ACCOUNT_DISABLED("account_disabled.ftl"),
 
+    PLUGIN_USER_LOGIN_FAILURE("login_failure.ftl"),
+
     PASSWORD_IMMINENT_EXPIRATION("password_imminent_expiration.ftl", "domibus.alert.password.imminent_expiration", "Password imminent expiration"),
     PASSWORD_EXPIRED("password_expired.ftl", "domibus.alert.password.expired", "Password expired"),
     PLUGIN_PASSWORD_IMMINENT_EXPIRATION("password_imminent_expiration.ftl", "domibus.alert.plugin_password.imminent_expiration", "Plugin password imminent expiration"),

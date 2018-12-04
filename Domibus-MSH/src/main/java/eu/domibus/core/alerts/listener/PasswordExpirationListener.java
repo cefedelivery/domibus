@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
  * @since 4.1
  */
 @Component
-public class PasswordEventsListener {
+public class PasswordExpirationListener {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(PasswordEventsListener.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(PasswordExpirationListener.class);
 
     @Autowired
     private AlertService alertService;
