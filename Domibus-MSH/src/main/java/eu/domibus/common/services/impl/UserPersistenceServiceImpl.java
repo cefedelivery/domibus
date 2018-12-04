@@ -132,7 +132,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     }
 
     void savePasswordHistory(User userEntity) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
+        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY));
         if (passwordsToKeep == 0) {
             return;
         }

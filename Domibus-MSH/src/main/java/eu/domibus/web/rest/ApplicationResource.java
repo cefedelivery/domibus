@@ -13,7 +13,6 @@ import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import eu.domibus.web.rest.ro.PasswordPolicyRO;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,8 +33,6 @@ public class ApplicationResource {
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ApplicationResource.class);
 
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
-
-    protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
 
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
@@ -87,7 +84,7 @@ public class ApplicationResource {
         if (domain == null) {
             domain = DomainService.DEFAULT_DOMAIN;
         }
-        return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
+        return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME);
     }
 
     /**

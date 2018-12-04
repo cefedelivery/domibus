@@ -2,7 +2,6 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
-import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLogger;
@@ -29,14 +28,9 @@ public class MessageRetentionService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageRetentionService.class);
 
-    public static final Integer DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
-    public static final Integer DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT = 50;
-    public static final String DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.downloaded.max.delete";
-    public static final String NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY = "message.retention.not_downloaded.max.delete";
+    public static final String DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_DOWNLOADED_MAX_DELETE = "domibus.retentionWorker.message.retention.downloaded.max.delete";
+    public static final String DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_NOT_DOWNLOADED_MAX_DELETE = "domibus.retentionWorker.message.retention.not_downloaded.max.delete";
     public static final String DOMIBUS_ATTACHMENT_STORAGE_LOCATION = "domibus.attachment.storage.location";
-
-    @Autowired
-    private CollectionUtil collectionUtil;
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -57,8 +51,8 @@ public class MessageRetentionService {
     @Transactional
     public void deleteExpiredMessages() {
         final List<String> mpcs = pModeProvider.getMpcURIList();
-        final Integer expiredDownloadedMessagesLimit = getRetentionValue(DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
-        final Integer expiredNotDownloadedMessagesLimit = getRetentionValue(NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+        final Integer expiredDownloadedMessagesLimit = getRetentionValue(DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_DOWNLOADED_MAX_DELETE);
+        final Integer expiredNotDownloadedMessagesLimit = getRetentionValue(DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_NOT_DOWNLOADED_MAX_DELETE);
         for (final String mpc : mpcs) {
             deleteExpiredMessages(mpc, expiredDownloadedMessagesLimit, expiredNotDownloadedMessagesLimit);
         }
@@ -118,18 +112,9 @@ public class MessageRetentionService {
         }
     }
 
-    protected Integer getRetentionValue(String propertyName, Integer defaultValue) {
+    protected Integer getRetentionValue(String propertyName) {
         final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
-        if (propertyValueString == null) {
-            LOG.debug("Could not find property [{}]. Using the default value [{}]", propertyName, defaultValue);
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(propertyValueString);
-        } catch (NumberFormatException e) {
-            LOG.warn("Could not parse value [{}] for property [{}]. Using default value [{}]", propertyValueString, propertyName, defaultValue);
-        }
-        return defaultValue;
+        return Integer.parseInt(propertyValueString);
     }
 
 }

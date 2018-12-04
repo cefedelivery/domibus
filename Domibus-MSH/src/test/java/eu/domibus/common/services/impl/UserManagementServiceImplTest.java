@@ -23,7 +23,6 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.authentication.CredentialsExpiredException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -116,6 +115,8 @@ public class UserManagementServiceImplTest {
             result = user;
             userManagementService.canApplyAccountLockingPolicy(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
+            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
+            result = 5;
         }};
         final String userName = "test";
         userManagementService.handleWrongAuthentication(userName);
@@ -130,7 +131,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -148,31 +149,20 @@ public class UserManagementServiceImplTest {
         }};
     }
 
-    @Test
-    public void applyAccountLockingPolicyNotNumberProperty(final @Mocked User user) {
+    @Test(expected = NumberFormatException.class)
+    public void throwsNumberFormatExceptionPolicyNotNumberProperty(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             times = 1;
             result = "a";
-            user.getAttemptCount();
-            times = 2;
-            result = 0;
         }};
         userManagementService.applyAccountLockingPolicy(user);
-        new Verifications() {{
-            user.setActive(withAny(true));
-            times = 0;
-            user.setSuspensionDate(withAny(new Date()));
-            times = 0;
-            userDao.update(user);
-            times = 1;
-        }};
     }
 
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT, "5");
+            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -259,7 +249,7 @@ public class UserManagementServiceImplTest {
         final List<User> users = Lists.newArrayList(user);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, "3600");
+            domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME);
             times = 1;
             result = suspensionInterval;
             System.currentTimeMillis();

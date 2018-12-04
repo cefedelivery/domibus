@@ -355,7 +355,7 @@ public class BackendNotificationService {
     }
 
     protected boolean isPluginNotificationDisabled() {
-        String pluginNotificationEnabled = domibusPropertyProvider.getProperty("domibus.plugin.notification.active", "true");
+        String pluginNotificationEnabled = domibusPropertyProvider.getProperty("domibus.plugin.notification.active");
         return !Boolean.valueOf(pluginNotificationEnabled);
     }
 }

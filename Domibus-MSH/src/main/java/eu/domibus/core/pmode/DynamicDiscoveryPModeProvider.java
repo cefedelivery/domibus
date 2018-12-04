@@ -139,7 +139,7 @@ public class DynamicDiscoveryPModeProvider extends CachingPModeProvider {
      * @return true if domibus.dynamicdiscovery.useDynamicDiscovery is enabled for the current domain.
      */
     protected boolean useDynamicDiscovery() {
-        String val = domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY, "false");
+        String val = domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY);
         return Boolean.valueOf(val);
     }
 

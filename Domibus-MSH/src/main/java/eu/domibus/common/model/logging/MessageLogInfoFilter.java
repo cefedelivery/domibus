@@ -144,6 +144,6 @@ public class MessageLogInfoFilter {
      * @return true by default
      */
     protected boolean isFourCornerModel() {
-        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled", true);
+        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled");
     }
 }

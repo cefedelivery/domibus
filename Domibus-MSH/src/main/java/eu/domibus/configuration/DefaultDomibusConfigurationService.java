@@ -41,7 +41,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     @Override
     public boolean isClusterDeployment() {
-        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(CLUSTER_DEPLOYMENT, "false"));
+        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(CLUSTER_DEPLOYMENT));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     @Override
     public boolean useProxy() {
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
+        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED);
         if (StringUtils.isEmpty(useProxy) || !Boolean.parseBoolean(useProxy)) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;
@@ -86,17 +86,17 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     @Override
     public boolean isFourCornerEnabled() {
-        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
+        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY));
     }
 
     @Override
     public String getPasswordPattern() {
-        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.pattern", "");
+        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.pattern");
     }
 
     @Override
     public String getPasswordValidationMessage() {
-        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.validationMessage", "");
+        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.validationMessage");
     }
 
 }

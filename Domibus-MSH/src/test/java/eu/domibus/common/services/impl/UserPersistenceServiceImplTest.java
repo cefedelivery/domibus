@@ -142,7 +142,7 @@ public class UserPersistenceServiceImplTest {
             bcryptEncoder.matches(anyString, anyString);
             result = true;
 
-            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0");
+            domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY);
             result = "0";
         }};
 

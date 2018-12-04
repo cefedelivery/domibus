@@ -2,7 +2,6 @@ package eu.domibus.common.services.impl;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.usermessage.UserMessageService;
-import eu.domibus.api.util.CollectionUtil;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.core.pmode.PModeProvider;
 import mockit.Expectations;
@@ -24,9 +23,6 @@ import java.util.List;
  */
 @RunWith(JMockit.class)
 public class MessageRetentionServiceTest {
-
-    @Injectable
-    private CollectionUtil collectionUtil;
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
@@ -53,10 +49,10 @@ public class MessageRetentionServiceTest {
             pModeProvider.getMpcURIList();
             result = mpcs;
 
-            messageRetentionService.getRetentionValue(MessageRetentionService.DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, MessageRetentionService.DEFAULT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+            messageRetentionService.getRetentionValue(MessageRetentionService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_DOWNLOADED_MAX_DELETE);
             result = 10;
 
-            messageRetentionService.getRetentionValue(MessageRetentionService.NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT_PROPERTY, MessageRetentionService.DEFAULT_NOT_DOWNLOADED_MESSAGES_DELETE_LIMIT);
+            messageRetentionService.getRetentionValue(MessageRetentionService.DOMIBUS_RETENTION_WORKER_MESSAGE_RETENTION_NOT_DOWNLOADED_MAX_DELETE);
             result = 20;
         }};
 
@@ -165,45 +161,40 @@ public class MessageRetentionServiceTest {
         }};
     }
 
-    @Test
+    @Test(expected = NumberFormatException.class)
     public void testGetRetentionValueWithUndefinedRetentionValue() throws Exception {
         final String propertyName = "retentionLimitProperty";
-        Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
             domibusPropertyProvider.getDomainProperty(propertyName);
             result = null;
         }};
 
-        final Integer retentionValue = messageRetentionService.getRetentionValue(propertyName, defaultValue);
-        Assert.assertEquals(retentionValue, defaultValue);
+        messageRetentionService.getRetentionValue(propertyName);
     }
 
-    @Test
+    @Test(expected = NumberFormatException.class)
     public void testGetRetentionValueWithInvalidRetentionValue() throws Exception {
         final String propertyName = "retentionLimitProperty";
-        Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
             domibusPropertyProvider.getDomainProperty(propertyName);
             result = "a2";
         }};
 
-        final Integer retentionValue = messageRetentionService.getRetentionValue(propertyName, defaultValue);
-        Assert.assertEquals(retentionValue, defaultValue);
+        messageRetentionService.getRetentionValue(propertyName);
     }
 
     @Test
     public void testGetRetentionValueWithValidRetentionValue() throws Exception {
         final String propertyName = "retentionLimitProperty";
-        Integer defaultValue = 3;
 
         new Expectations(messageRetentionService) {{
             domibusPropertyProvider.getDomainProperty(propertyName);
             result = "5";
         }};
 
-        final Integer retentionValue = messageRetentionService.getRetentionValue(propertyName, defaultValue);
+        final Integer retentionValue = messageRetentionService.getRetentionValue(propertyName);
         Assert.assertEquals(retentionValue, Integer.valueOf(5));
     }
 }

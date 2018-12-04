@@ -53,8 +53,6 @@ public class CertificateServiceImpl implements CertificateService {
 
     public static final String REVOCATION_TRIGGER_OFFSET_PROPERTY = "domibus.certificate.revocation.offset";
 
-    public static final String REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE = "15";
-
     @Autowired
     CRLService crlService;
 
@@ -360,13 +358,8 @@ public class CertificateServiceImpl implements CertificateService {
      * @return the certificate status.
      */
     protected CertificateStatus getCertificateStatus(Date notAfter) {
-        int revocationOffsetInDays = Integer.parseInt(REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE);
-        try {
-            revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY, REVOCATION_TRIGGER_OFFSET_DEFAULT_VALUE));
-        } catch (NumberFormatException n) {
-            LOG.trace("Property:[{}] is invalid, should be a number.",REVOCATION_TRIGGER_OFFSET_PROPERTY,n);
-
-        }
+        int revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY));
+        LOG.debug("Property [{}], value [{}]", REVOCATION_TRIGGER_OFFSET_PROPERTY, revocationOffsetInDays);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);
         LocalDateTime certificateEnd = LocalDateTime.fromDateFields(notAfter);

@@ -10,7 +10,6 @@ import eu.domibus.common.util.EndpointInfo;
 public interface DynamicDiscoveryService {
     String SMLZONE_KEY = "domibus.smlzone";
     String DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4 = "domibus.dynamicdiscovery.transportprofileas4";
-    String DEFAULT_TRANSPORTPROFILEAS4 = "bdxr-transport-ebms3-as4-v1p0";
     String DYNAMIC_DISCOVERY_MODE = "domibus.dynamicdiscovery.peppolclient.mode";
     String DYNAMIC_DISCOVERY_CERT_REGEX = "domibus.dynamicdiscovery.oasisclient.regexCertificateSubjectValidation";
     String DYNAMIC_DISCOVERY_PARTYID_RESPONDER_ROLE = "domibus.dynamicdiscovery.partyid.responder.role";
