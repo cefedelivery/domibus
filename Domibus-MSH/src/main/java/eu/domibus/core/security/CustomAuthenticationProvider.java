@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -69,9 +70,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 //check if password is correct
                 boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), userEntity.getPassword());
                 //check if password expired
-                validateExpiredPassword(userEntity);
+                boolean isPasswordExpired = isPasswordExpired(userEntity);
 
-                authentication.setAuthenticated(isPasswordCorrect);
+                authentication.setAuthenticated(isPasswordCorrect && !isPasswordExpired);
 
                 ((BasicAuthentication) authentication).setOriginalUser(userEntity.getOriginalUser());
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
@@ -83,11 +84,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return authentication;
     }
 
-    public void validateExpiredPassword(AuthenticationEntity user) {
+    public boolean isPasswordExpired(AuthenticationEntity user) {
         boolean isDefaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
-
-        pluginUserPasswordValidator.validatePasswordExpired(user.getUsername(), isDefaultPassword, passwordChangeDate);
+        try {
+            pluginUserPasswordValidator.validatePasswordExpired(user.getUsername(), isDefaultPassword, passwordChangeDate);
+            return false;
+        } catch (CredentialsExpiredException ex) {
+            return true;
+        }
     }
 
     @Override

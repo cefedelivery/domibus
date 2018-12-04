@@ -3,6 +3,7 @@ package eu.domibus.configuration.passwordPolicy;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.security.PluginUserPasswordPolicyAlertJob;
 import eu.domibus.security.SuperUserPasswordPolicyAlertJob;
 import eu.domibus.security.UserPasswordPolicyAlertJob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,4 +75,26 @@ public class JobConfiguration {
         return bean;
     }
 
+    @Bean
+    @Scope(BeanDefinition.SCOPE_PROTOTYPE)
+    public CronTriggerFactoryBean pluginUserPasswordPolicyAlertTrigger() {
+
+        CronTriggerFactoryBean bean = new CronTriggerFactoryBean();
+
+        bean.setJobDetail(pluginUserPasswordPolicyAlertJob().getObject());
+        bean.setCronExpression(domibusPropertyProvider.getProperty("domibus.pluginPasswordPolicies.check.cron"));
+
+        return bean;
+    }
+
+    @Bean
+    public JobDetailFactoryBean pluginUserPasswordPolicyAlertJob() {
+
+        JobDetailFactoryBean bean = new JobDetailFactoryBean();
+
+        bean.setJobClass(PluginUserPasswordPolicyAlertJob.class);
+        bean.setDurability(true);
+
+        return bean;
+    }
 }

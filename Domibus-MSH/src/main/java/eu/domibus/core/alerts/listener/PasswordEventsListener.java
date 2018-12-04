@@ -30,16 +30,17 @@ public class PasswordEventsListener {
     @Autowired
     private EventDao eventDao;
 
-
     @JmsListener(containerFactory = "alertJmsListenerContainerFactory", destination = "${domibus.jms.queue.alert}",
-            selector = "selector = 'userPasswordImminentExpiration' or selector = 'userPasswordExpired'")
+            selector = "selector = 'PASSWORD_EXPIRATION'")
+    //TODO it would be nice to use here eventType.getQueueSelector() instead of hardcoded string
+    // Intentionally used just one selector value for all 4 types of events
     public void onPasswordEvent(final Event event, @Header(name = "DOMAIN", required = false) String domain) {
 
-        saveEventAndTriggerAlert(event, domain);
+        triggerAlert(event, domain);
 
     }
 
-    private void saveEventAndTriggerAlert(Event event, String domain) {
+    private void triggerAlert(Event event, String domain) {
         if (domain == null)
             domainContextProvider.clearCurrentDomain();
         else

@@ -5,5 +5,5 @@ package eu.domibus.core.alerts.service;
  * @since 4.1
  */
 public interface UserAlertsService {
-    void sendAlerts();
+    void triggetPasswordExpirationEvents();
 }

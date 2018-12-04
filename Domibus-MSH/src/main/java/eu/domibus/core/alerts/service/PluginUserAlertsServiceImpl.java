@@ -2,6 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.security.AuthenticationDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,15 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     @Override
     protected AlertType getAlertTypeForPasswordExpired() {
         return AlertType.PLUGIN_PASSWORD_EXPIRED;
+    }
+
+    @Override
+    protected EventType getEventTypeForPasswordImminentExpiration() {
+        return EventType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION;
+    }
+
+    @Override
+    protected EventType getEventTypeForPasswordExpired() {
+        return EventType.PLUGIN_PASSWORD_EXPIRED;
     }
 }

@@ -3,7 +3,9 @@ package eu.domibus.core.alerts.service;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,7 +30,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
 
     @Autowired
     private EventService eventService;
@@ -42,25 +45,40 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
 
     protected abstract AlertType getAlertTypeForPasswordExpired();
 
+    protected abstract EventType getEventTypeForPasswordImminentExpiration();
+
+    protected abstract EventType getEventTypeForPasswordExpired();
+
+    public void triggerLoginFailureEvent(String userName) {
+
+        final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
+        LOG.debug("Plugin login Failure Configuration isActive() : [{}]", configuration.isActive());
+
+        if (configuration.isActive()) {
+            eventService.enqueuePluginLoginFailureEvent(userName, new Date());
+        }
+
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendAlerts() {
+    public void triggetPasswordExpirationEvents() {
         try {
-            sendExpiredAlerts(true);
-            sendExpiredAlerts(false);
+            triggerExpiredEvents(true);
+            triggerExpiredEvents(false);
         } catch (Exception ex) {
             LOG.error("Send password expired alerts failed ", ex);
         }
         try {
-            sendImminentExpirationAlerts(true);
-            sendImminentExpirationAlerts(false);
+            triggerImminentExpirationEvents(true);
+            triggerImminentExpirationEvents(false);
         } catch (Exception ex) {
             LOG.error("Send imminent expiration alerts failed ", ex);
         }
     }
 
-    protected void sendImminentExpirationAlerts(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(getAlertTypeForPasswordImminentExpiration());
+    void triggerImminentExpirationEvents(boolean usersWithDefaultPassword) {
+        final AlertEventModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveEventConfiguration(getAlertTypeForPasswordImminentExpiration());
         if (!eventConfiguration.isActive()) {
             return;
         }
@@ -76,13 +94,14 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         List<IUser> eligibleUsers = getUsersWithPasswordChangedBetween(usersWithDefaultPassword, from, to);
         LOG.debug("ImminentExpirationAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
+        EventType eventType = getEventTypeForPasswordImminentExpiration();
         eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordImminentExpirationEvent(user, maxPasswordAgeInDays);
+            eventService.enqueuePasswordImminentExpirationEvent(eventType, user, maxPasswordAgeInDays);
         });
     }
 
-    protected void sendExpiredAlerts(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(getAlertTypeForPasswordExpired());
+    void triggerExpiredEvents(boolean usersWithDefaultPassword) {
+        final AlertEventModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveEventConfiguration(getAlertTypeForPasswordExpired());
         if (!eventConfiguration.isActive()) {
             return;
         }
@@ -97,8 +116,9 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         List<IUser> eligibleUsers = getUsersWithPasswordChangedBetween(usersWithDefaultPassword, from, to);
         LOG.debug("PasswordExpiredAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
+        EventType eventType = getEventTypeForPasswordExpired();
         eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordExpiredEvent(user, maxPasswordAgeInDays);
+            eventService.enqueuePasswordExpiredEvent(eventType, user, maxPasswordAgeInDays);
         });
     }
 
