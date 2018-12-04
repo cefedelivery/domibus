@@ -12,6 +12,7 @@ import eu.domibus.common.model.security.IUser;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.EventType;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -101,7 +102,7 @@ public class UserAlertsServiceImplTest {
         userAlertsService.triggerExpiredEvents(false);
 
         new VerificationsInOrder() {{
-            eventService.enqueuePasswordExpiredEvent((User) any, maxPasswordAge);
+            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_EXPIRED, (User) any, maxPasswordAge);
             times = 2;
         }};
     }
@@ -139,7 +140,7 @@ public class UserAlertsServiceImplTest {
         userAlertsService.triggerImminentExpirationEvents(false);
 
         new VerificationsInOrder() {{
-            eventService.enqueuePasswordImminentExpirationEvent((IUser) any, maxPasswordAge);
+            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, (IUser) any, maxPasswordAge);
             times = 2;
         }};
     }

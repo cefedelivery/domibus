@@ -30,6 +30,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.*;
 import static eu.domibus.core.alerts.model.common.CertificateEvent.*;
