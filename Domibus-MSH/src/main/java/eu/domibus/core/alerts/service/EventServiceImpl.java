@@ -10,10 +10,7 @@ import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.dao.EventDao;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.common.AuthenticationEvent;
-import eu.domibus.core.alerts.model.common.CertificateEvent;
-import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -60,9 +57,6 @@ public class EventServiceImpl implements EventService {
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
     public static final String EVENT_IDENTIFIER = "EVENT_IDENTIFIER";
-    public static final String USER_TYPE = "USER_TYPE";
-    public static final String USER = "USER";
-    public static final String EXPIRATION_DATE = "EXPIRATION_DATE";
 
     @Autowired
     private EventDao eventDao;
@@ -243,7 +237,7 @@ public class EventServiceImpl implements EventService {
 
         jmsManager.convertAndSendToQueue(event, alertMessageQueue, eventType.getQueueSelector());
 
-        LOG.securityInfo(eventType.getSecurityMessageCode(), user.getUserName(), event.findOptionalProperty(EXPIRATION_DATE));
+        LOG.securityInfo(eventType.getSecurityMessageCode(), user.getUserName(), event.findOptionalProperty(PasswordExpirationEventProperties.EXPIRATION_DATE.name()));
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
@@ -259,7 +253,7 @@ public class EventServiceImpl implements EventService {
 
     protected boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
 
-        AlertType alertType = AlertType.getAlertType(entity.getType());
+        AlertType alertType = AlertType.getByEventType(entity.getType());
         final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(alertType);
         if (!eventConfiguration.isActive()) {
             return false;
@@ -285,11 +279,11 @@ public class EventServiceImpl implements EventService {
         event.setReportingTime(new Date());
 
         event.addStringKeyValue(EVENT_IDENTIFIER, getUniqueIdentifier(user));
-        event.addStringKeyValue(USER_TYPE, user.getType().getName());
-        event.addStringKeyValue(USER, user.getUserName());
+        event.addStringKeyValue(PasswordExpirationEventProperties.USER_TYPE.name(), user.getType().getName());
+        event.addStringKeyValue(PasswordExpirationEventProperties.USER.name(), user.getUserName());
 
         LocalDate expDate = user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
-        event.addDateKeyValue(EXPIRATION_DATE, Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        event.addDateKeyValue(PasswordExpirationEventProperties.EXPIRATION_DATE.name(), Date.from(expDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
         return event;
     }

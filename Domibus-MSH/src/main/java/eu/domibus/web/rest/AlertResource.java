@@ -5,11 +5,13 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.core.alerts.model.common.*;
+import eu.domibus.core.alerts.model.common.AlertCriteria;
+import eu.domibus.core.alerts.model.common.AlertLevel;
+import eu.domibus.core.alerts.model.common.AlertStatus;
+import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
-import eu.domibus.core.alerts.service.EventServiceImpl;
 import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
@@ -127,27 +129,28 @@ public class AlertResource {
             LOG.trace("Invalid or empty alert type:[{}] sent from the gui ", aType, e);
             return Lists.newArrayList();
         }
-        switch (alertType) {
-            case MSG_STATUS_CHANGED:
-                final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
-                return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case CERT_EXPIRED:
-            case CERT_IMMINENT_EXPIRATION:
-                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
-                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case USER_ACCOUNT_DISABLED:
-            case USER_LOGIN_FAILURE:
-                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
-                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case PASSWORD_IMMINENT_EXPIRATION:
-            case PASSWORD_EXPIRED:
-            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
-            case PLUGIN_PASSWORD_EXPIRED:
-                return Arrays.asList(EventServiceImpl.USER_TYPE, EventServiceImpl.USER, EventServiceImpl.EXPIRATION_DATE);
-            default:
-                throw new IllegalArgumentException("Unsupported alert type.");
-        }
+        return alertType.getSourceEvents().get(0).getProperties();
 
+//        switch (alertType) {
+//            case MSG_STATUS_CHANGED:
+//                final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
+//                return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
+//            case CERT_EXPIRED:
+//            case CERT_IMMINENT_EXPIRATION:
+//                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
+//                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
+//            case USER_ACCOUNT_DISABLED:
+//            case USER_LOGIN_FAILURE:
+//                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
+//                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
+//            case PASSWORD_IMMINENT_EXPIRATION:
+//            case PASSWORD_EXPIRED:
+//            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
+//            case PLUGIN_PASSWORD_EXPIRED:
+//                return Arrays.stream(PasswordExpirationEventProperties.values()).map(Enum::name).collect(Collectors.toList());
+//            default:
+//                throw new IllegalArgumentException("Unsupported alert type.");
+//        }
     }
 
     @PutMapping
