@@ -2,6 +2,7 @@ package eu.domibus.common.validators;
 
 import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
@@ -54,15 +55,13 @@ public class ConsoleUserPasswordManager extends UserPasswordManager<User> {
     }
 
     @Override
-    protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
-        User user = userDao.loadActiveUserByUsername(userName);
-        List<UserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
-        return oldPasswords.stream().map(el -> el.getPasswordHash()).collect(Collectors.toList());
+    protected UserPasswordHistoryDao getUserHistoryDao() {
+        return userPasswordHistoryDao;
     }
 
     @Override
-    protected UserPasswordHistoryDao getUserHistoryDao() {
-        return userPasswordHistoryDao;
+    protected UserDaoBase getUserDao() {
+        return userDao;
     }
 
 }

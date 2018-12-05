@@ -3,8 +3,10 @@ package eu.domibus.common.validators;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserPasswordHistory;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,7 @@ import java.util.regex.Pattern;
  */
 
 @Service
-public abstract class UserPasswordManager<T extends IUser> {
+public abstract class UserPasswordManager<T extends UserBase> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserPasswordManager.class);
 
     private static final String CREDENTIALS_EXPIRED = "Expired";
@@ -41,8 +43,6 @@ public abstract class UserPasswordManager<T extends IUser> {
 
     public abstract String getPasswordHistoryPolicyProperty();
 
-    protected abstract List<String> getPasswordHistory(String userName, int oldPasswordsToCheck);
-
     protected abstract String getMaximumDefaultPasswordAgeProperty();
 
     protected abstract String getMaximumPasswordAgeProperty();
@@ -51,6 +51,7 @@ public abstract class UserPasswordManager<T extends IUser> {
 
     protected abstract UserPasswordHistoryDao getUserHistoryDao();
 
+    protected abstract UserDaoBase getUserDao();
 
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
@@ -78,9 +79,9 @@ public abstract class UserPasswordManager<T extends IUser> {
             return;
         }
 
-        List<String> oldPasswords = getPasswordHistory(userName, oldPasswordsToCheck);
-
-        if (oldPasswords.stream().anyMatch(pass -> bcryptEncoder.matches(password, pass))) {
+        UserBase user = getUserDao().findByUserName(userName);
+        List<UserPasswordHistory> oldPasswords = getUserHistoryDao().getPasswordHistory(user, oldPasswordsToCheck);
+        if (oldPasswords.stream().anyMatch(userHistoryEntry -> bcryptEncoder.matches(password, userHistoryEntry.getPasswordHash()))) {
             String errorMessage = "The password of " + userName + " user cannot be the same as the last " + oldPasswordsToCheck;
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, errorMessage);
         }
@@ -142,7 +143,6 @@ public abstract class UserPasswordManager<T extends IUser> {
     }
 
     public void changePassword(T user, String newPassword) {
-
         savePasswordHistory(user); // save old password in history
 
         String userName = user.getUserName();
@@ -154,7 +154,6 @@ public abstract class UserPasswordManager<T extends IUser> {
     }
 
     private void savePasswordHistory(T user) {
-
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;

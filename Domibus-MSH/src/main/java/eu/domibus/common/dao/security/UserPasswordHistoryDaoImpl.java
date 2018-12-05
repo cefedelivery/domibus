@@ -1,7 +1,7 @@
 package eu.domibus.common.dao.security;
 
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.common.model.security.UserPasswordHistory;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 @Repository
-public abstract class UserPasswordHistoryDaoImpl<U extends IUser, E extends UserPasswordHistory> extends BasicDao<E>
+public abstract class UserPasswordHistoryDaoImpl<U extends UserBase, E extends UserPasswordHistory> extends BasicDao<E>
         implements UserPasswordHistoryDao<U> {
 
     private final Class<E> typeOfE;

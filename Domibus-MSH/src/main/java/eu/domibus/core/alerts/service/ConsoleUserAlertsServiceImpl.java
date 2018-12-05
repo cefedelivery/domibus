@@ -1,7 +1,7 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ConsoleUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected List<IUser> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
+    protected List<UserBase> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
         return userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
     }
 

@@ -1,6 +1,6 @@
 package eu.domibus.core.alerts.service;
 
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
@@ -49,7 +49,7 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected List<IUser> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
+    protected List<UserBase> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
         return userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
     }
 
@@ -76,7 +76,7 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     // TODO: move this code to base class to use the same code for console and plugin users
-    public void triggerLoginFailureEvent(IUser user) {
+    public void triggerLoginFailureEvent(UserBase user) {
         final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
         LOG.debug("Plugin login Failure Configuration isActive() : [{}]", configuration.isActive());
 

@@ -2,7 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.Event;
 
@@ -88,7 +88,7 @@ public interface EventService {
      * @param user          the user for which the event is triggered
      * @param maxPasswordAgeInDays the number of days the password is not expired
      */
-    void enqueuePasswordExpirationEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays);
+    void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays);
 
     /**
      * Will create login failure event for plugin user and enqueue it to the alert/event monitoring queue.

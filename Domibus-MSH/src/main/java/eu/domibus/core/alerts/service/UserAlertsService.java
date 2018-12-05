@@ -1,6 +1,6 @@
 package eu.domibus.core.alerts.service;
 
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 
 /**
  * @author Ion Perpegel
@@ -8,5 +8,5 @@ import eu.domibus.common.model.security.IUser;
  */
 public interface UserAlertsService {
     void triggetPasswordExpirationEvents();
-    void triggerLoginFailureEvent(IUser user);
+    void triggerLoginFailureEvent(UserBase user);
 }

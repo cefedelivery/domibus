@@ -2,7 +2,8 @@ package eu.domibus.core.security;
 
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.dao.security.UserDaoBase;
+import eu.domibus.common.model.security.UserBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
-public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
+public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase {
 
     public AuthenticationDAO() {
         super(AuthenticationEntity.class);
@@ -133,11 +134,17 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
         return predicates;
     }
 
-    public List<IUser> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
+    public List<UserBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
         TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findWithPasswordChangedBetween", AuthenticationEntity.class);
         namedQuery.setParameter("START_DATE", from.atStartOfDay());
         namedQuery.setParameter("END_DATE", to.atStartOfDay());
         namedQuery.setParameter("DEFAULT_PASSWORD", withDefaultPassword);
         return namedQuery.getResultList().stream().collect(Collectors.toList());
     }
+
+    @Override
+    public UserBase findByUserName(String userName) {
+        return findByUser(userName);
+    }
+
 }

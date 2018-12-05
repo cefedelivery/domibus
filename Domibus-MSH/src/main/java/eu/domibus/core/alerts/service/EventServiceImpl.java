@@ -8,7 +8,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
@@ -107,7 +107,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public void enqueueLoginFailureEvent(final String userName, final Date loginTime, final boolean accountDisabled) {
-        enqueueLoginFailure(userName, IUser.Type.CONSOLE.getName(), loginTime, accountDisabled, EventType.USER_LOGIN_FAILURE, LOGIN_FAILURE);
+        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), loginTime, accountDisabled, EventType.USER_LOGIN_FAILURE, LOGIN_FAILURE);
     }
 
     /**
@@ -115,7 +115,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public void enqueueAccountDisabledEvent(final String userName, final Date accountDisabledTime, final boolean accountDisabled) {
-        enqueueLoginFailure(userName, IUser.Type.CONSOLE.getName(), accountDisabledTime, accountDisabled, EventType.USER_ACCOUNT_DISABLED, ACCOUNT_DISABLED);
+        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), accountDisabledTime, accountDisabled, EventType.USER_ACCOUNT_DISABLED, ACCOUNT_DISABLED);
     }
 
     /**
@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public void enqueuePluginLoginFailureEvent(String userName, Date loginTime) {
-        enqueueLoginFailure(userName, IUser.Type.PLUGIN.getName(), loginTime, false, EventType.PLUGIN_USER_LOGIN_FAILURE, LOGIN_FAILURE);
+        enqueueLoginFailure(userName, UserBase.Type.PLUGIN.getName(), loginTime, false, EventType.PLUGIN_USER_LOGIN_FAILURE, LOGIN_FAILURE);
     }
 
     private void enqueueLoginFailure(String userName, String userType, Date loginTime, boolean accountDisabled, EventType eventType, String selector) {
@@ -219,11 +219,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void enqueuePasswordExpirationEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays) {
+    public void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
         enqueuePasswordEvent(eventType, user, maxPasswordAgeInDays);
     }
 
-    protected void enqueuePasswordEvent(EventType eventType, IUser user, Integer maxPasswordAgeInDays) {
+    protected void enqueuePasswordEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
 
         Event event = preparePasswordEvent(user, eventType, maxPasswordAgeInDays);
         eu.domibus.core.alerts.model.persist.Event entity = getPersistedEvent(event);
@@ -274,7 +274,7 @@ public class EventServiceImpl implements EventService {
         return false;
     }
 
-    private Event preparePasswordEvent(IUser user, EventType eventType, Integer maxPasswordAgeInDays) {
+    private Event preparePasswordEvent(UserBase user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
 
@@ -288,7 +288,7 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-    private String getUniqueIdentifier(IUser user) {
+    private String getUniqueIdentifier(UserBase user) {
         return user.getType().getCode() + "/" + user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate();
     }
 
