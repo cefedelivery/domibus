@@ -400,35 +400,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     }
 
-//    protected LoginFailureModuleConfiguration readLoginFailureConfiguration(Domain domain) {
-//        try {
-//            final Boolean alertActive = isAlertModuleEnabled();
-//
-//            final String alertActivePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
-//            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
-//
-//            if (!alertActive || !loginFailureActive) {
-//                LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
-//                return new LoginFailureModuleConfiguration();
-//            }
-//            final String alertLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
-//            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
-//
-//            final String alertEmailSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
-//            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
-//
-//            LOG.info("Alert login failure module activated for domain:[{}]", domain);
-//            return new LoginFailureModuleConfiguration(
-//                    loginFailureAlertLevel,
-//                    loginFailureMailSubject);
-//
-//        } catch (Exception e) {
-//            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
-//            return new LoginFailureModuleConfiguration();
-//        }
-//
-//    }
-
     class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
         @Override
         protected String getModuleName() {
