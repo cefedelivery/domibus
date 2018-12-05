@@ -39,29 +39,6 @@ public class PluginUserPasswordManagerTest {
     @Tested
     PluginUserPasswordManager passwordManager;
 
-//    @Test
-//    public void testGetPasswordHistory() {
-//        final String username = "user1";
-//        final String password = "123456";
-//        final int oldPasswordsToCheck = 5;
-//        AuthenticationEntity user = new AuthenticationEntity() {{
-//            setUsername(username);
-//        }};
-//        List<PluginUserPasswordHistory> oldPasswords = Arrays.asList(
-//                new PluginUserPasswordHistory(user, password, LocalDateTime.now().minusDays(5)));
-//
-//        new Expectations() {{
-//            userDao.findByUser(username);
-//            result = user;
-//            userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
-//            result = oldPasswords;
-//        }};
-//
-//        List<String> result = passwordManager.getPasswordHistory(username, oldPasswordsToCheck);
-//        List<String> expected = oldPasswords.stream().map(el -> el.getPasswordHash()).collect(Collectors.toList());
-//        Assert.assertEquals(expected, result);
-//    }
-
     @Test
     public void testGetPasswordComplexityPatternProperty() {
         String result = passwordManager.getPasswordComplexityPatternProperty();

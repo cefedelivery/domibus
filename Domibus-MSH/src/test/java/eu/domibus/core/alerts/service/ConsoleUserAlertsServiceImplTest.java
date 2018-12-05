@@ -39,24 +39,6 @@ public class ConsoleUserAlertsServiceImplTest {
     @Tested
     private ConsoleUserAlertsServiceImpl userAlertsService;
 
-//    @Test
-//    public void testGetUsersWithPasswordChangedBetween() {
-//        final LocalDate from = LocalDate.of(2018, 10, 2);
-//        final LocalDate to = LocalDate.of(2018, 10, 5);
-//        final User user1 = new User("user1", "anypassword");
-//        final User user2 = new User("user2", "anypassword");
-//        final List<User> users = Arrays.asList(user1, user2);
-//
-//        new Expectations() {{
-//            userDao.findWithPasswordChangedBetween(from, to, false);
-//            result = users;
-//        }};
-//
-//        List<UserBase> users2 = userAlertsService.getUsersWithPasswordChangedBetween(false, from, to);
-//
-//        Assert.assertEquals(users, users2);
-//    }
-
     @Test
     public void testGetMaximumDefaultPasswordAgeProperty() {
         String prop = userAlertsService.getMaximumDefaultPasswordAgeProperty();
