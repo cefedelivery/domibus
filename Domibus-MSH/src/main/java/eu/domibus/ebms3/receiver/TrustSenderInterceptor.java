@@ -36,6 +36,7 @@ import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -73,6 +74,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     public static final String X_509_V_3 = "X509v3";
 
     public static final String X_509_PKIPATHV_1 = "X509PKIPathv1";
+
+    public static final String ID = "Id";
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -294,10 +297,18 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         for (int i = 0; i < binarySecurityTokenElement.getLength(); i++) {
             final Node item = binarySecurityTokenElement.item(i);
-            final Node id = item.getAttributes().getNamedItem("wsu:Id");
+            final NamedNodeMap attributes = item.getAttributes();
+            final int length = attributes.getLength();
+            Node id =null;
+            for (int j=0;j<length;j++){
+                final Node bstAttribute = attributes.item(j);
+                if(ID.equalsIgnoreCase(bstAttribute.getLocalName())){
+                    id=bstAttribute;
+                    break;
+                }
+            }
             if (id != null && uriFragment.equalsIgnoreCase(id.getNodeValue())) {
                 String certString = getTextFromElement((Element) item);
-
                 if (certString == null || certString.isEmpty()) {
                     return null;
                 }
