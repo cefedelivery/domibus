@@ -130,27 +130,6 @@ public class AlertResource {
             return Lists.newArrayList();
         }
         return alertType.getSourceEvents().get(0).getProperties();
-
-//        switch (alertType) {
-//            case MSG_STATUS_CHANGED:
-//                final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
-//                return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
-//            case CERT_EXPIRED:
-//            case CERT_IMMINENT_EXPIRATION:
-//                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
-//                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
-//            case USER_ACCOUNT_DISABLED:
-//            case USER_LOGIN_FAILURE:
-//                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
-//                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
-//            case PASSWORD_IMMINENT_EXPIRATION:
-//            case PASSWORD_EXPIRED:
-//            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
-//            case PLUGIN_PASSWORD_EXPIRED:
-//                return Arrays.stream(PasswordExpirationEventProperties.values()).map(Enum::name).collect(Collectors.toList());
-//            default:
-//                throw new IllegalArgumentException("Unsupported alert type.");
-//        }
     }
 
     @PutMapping
