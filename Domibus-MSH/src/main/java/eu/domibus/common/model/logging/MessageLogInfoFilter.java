@@ -1,5 +1,6 @@
 package eu.domibus.common.model.logging;
 
+import eu.domibus.api.configuration.DomibusConfigurationService;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -144,6 +145,6 @@ public class MessageLogInfoFilter {
      * @return true by default
      */
     protected boolean isFourCornerModel() {
-        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled");
+        return MapUtils.getBooleanValue(domibusProperties, DomibusConfigurationService.FOURCORNERMODEL_ENABLED_KEY);
     }
 }
