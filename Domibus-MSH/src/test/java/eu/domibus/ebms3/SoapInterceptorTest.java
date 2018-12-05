@@ -2,34 +2,50 @@ package eu.domibus.ebms3;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.ebms3.common.model.MessageType;
+import eu.domibus.ebms3.common.model.ObjectFactory;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.util.SoapUtil;
 import mockit.Injectable;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.Bus;
+import org.apache.cxf.attachment.AttachmentDeserializer;
+import org.apache.cxf.binding.soap.Soap12;
 import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.binding.soap.saaj.SAAJStreamWriter;
 import org.apache.cxf.bus.extension.ExtensionManagerBus;
 import org.apache.cxf.bus.managers.PhaseManagerImpl;
 import org.apache.cxf.interceptor.InterceptorChain;
-import org.apache.cxf.message.Exchange;
-import org.apache.cxf.message.ExchangeImpl;
-import org.apache.cxf.message.MessageImpl;
+import org.apache.cxf.message.*;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.cxf.staxutils.PartialXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
+import org.apache.cxf.staxutils.W3CDOMStreamWriter;
 import org.apache.cxf.ws.policy.PolicyBuilder;
 import org.apache.cxf.ws.policy.PolicyBuilderImpl;
 import org.apache.wss4j.policy.SPConstants;
 import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.Security;
+import java.util.Collection;
 
 /**
  * @author idragusa
@@ -43,6 +59,102 @@ public class SoapInterceptorTest {
 
     @Injectable
     protected DomibusPropertyProvider domibusPropertyProvider;
+
+    @Test
+    public void testDeserialize() throws Exception {
+
+
+    }
+
+    protected SOAPMessage createSoapMessage(MessageImpl messageImpl) throws SOAPException, IOException, ParserConfigurationException, SAXException, TransformerException {
+        SOAPMessage message = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createMessage();
+
+        final Collection<Attachment> attachments = messageImpl.getAttachments();
+        for (Attachment attachment : attachments) {
+            final AttachmentPart attachmentPart = message.createAttachmentPart(attachment.getDataHandler());
+
+            attachmentPart.setContentId(attachment.getId());
+            attachmentPart.setContentType(attachment.getDataHandler().getContentType());//to check
+            message.addAttachmentPart(attachmentPart);
+        }
+
+        final String soapEnvelopeString = IOUtils.toString(messageImpl.getContent(InputStream.class));
+        final SOAPMessage soapMessage = SoapUtil.createSOAPMessage(soapEnvelopeString);
+        final SOAPElement next = (SOAPElement) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+        message.getSOAPHeader().addChildElement(next);
+
+        message.saveChanges();
+
+        final String rawXMLMessage = SoapUtil.getRawXMLMessage(message);
+        System.out.println(rawXMLMessage);
+
+        return message;
+    }
+
+    @Test
+    public void testCreateSoapEnvelope() throws Exception {
+        InputStream rawInputStream = new FileInputStream(new File("c:/DEV/_work/test-e38f79d9-e3c9-4639-a08a-b8f782c99d44"));
+        MessageImpl messageImpl = new MessageImpl();//"org.apache.cxf.binding.soap.SoapVersion" ->
+        messageImpl.setContent(InputStream.class, rawInputStream);
+        messageImpl.put(Message.CONTENT_TYPE,
+                "multipart/related; type=\"application/soap+xml\"; boundary=\"uuid:b5efe608-fa17-48cf-9ddd-e19022a3c3fc\"; start=\"<split.root.message@cxf.apache.org>\"; start-info=\"application/soap+xml\"");
+        new AttachmentDeserializer(messageImpl).initializeAttachments();
+        createSoapMessage(messageImpl);
+
+    }
+
+    @Test
+    public void testCXF2542() throws Exception {
+        InputStream rawInputStream = new FileInputStream(new File("c:/DEV/_work/test-e38f79d9-e3c9-4639-a08a-b8f782c99d44"));
+        MessageImpl messageImpl = new MessageImpl();//"org.apache.cxf.binding.soap.SoapVersion" ->
+        messageImpl.setContent(InputStream.class, rawInputStream);
+        messageImpl.put(Message.CONTENT_TYPE,
+                "multipart/related; type=\"application/soap+xml\"; boundary=\"uuid:b5efe608-fa17-48cf-9ddd-e19022a3c3fc\"; start=\"<split.root.message@cxf.apache.org>\"; start-info=\"application/soap+xml\"");
+        new AttachmentDeserializer(messageImpl).initializeAttachments();
+        System.out.println("Finished deserializing");
+
+        final Collection<Attachment> attachments = messageImpl.getAttachments();
+        for (Attachment attachment : attachments) {
+            System.out.println("CID:" + attachment.getId());
+            System.out.println(attachment.getDataHandler().getDataSource().getInputStream());
+            Files.copy(attachment.getDataHandler().getDataSource().getInputStream(), Paths.get("c:/DEV/_work/mytest"));
+
+        }
+    }
+
+    protected void testSoapHeader( MessageImpl messageImpl) throws XMLStreamException, SOAPException {
+        final SoapMessage soapMessage = new SoapMessage(messageImpl);
+        final Soap12 soapVersion = Soap12.getInstance();
+        soapMessage.setVersion(soapVersion);
+
+        InputStream is = messageImpl.getContent(InputStream.class);
+
+        messageImpl.getAttachments();
+
+        XMLStreamReader xreader = StaxUtils.createXMLStreamReader(is, "UTF-8");
+        xreader = StaxUtils.configureReader(xreader, messageImpl);
+        messageImpl.setContent(XMLStreamReader.class, xreader);
+
+        XMLStreamReader filteredReader = new PartialXMLStreamReader(xreader, soapVersion.getBody());
+        HeadersProcessor processor = new HeadersProcessor(soapVersion);
+        Document doc =  processor.process(filteredReader);
+
+        messageImpl.setContent(Node.class, doc);
+
+
+        SOAPMessage finalSoapMessage =  MessageFactory.newInstance().createMessage();
+        messageImpl.setContent(SOAPMessage.class, finalSoapMessage);
+
+        SOAPPart part = finalSoapMessage.getSOAPPart();
+        messageImpl.setContent(Node.class, part);
+        messageImpl.put(W3CDOMStreamWriter.class, new SAAJStreamWriter(part));
+//        message.put(BODY_FILLED_IN, Boolean.FALSE);
+        System.out.println(finalSoapMessage.getSOAPHeader());
+
+//        final String rawXMLMessage = SoapUtil.getRawXMLMessage(finalSoapMessage);
+//        System.out.println(rawXMLMessage);
+
+    }
 
     @Before
     public void init() {

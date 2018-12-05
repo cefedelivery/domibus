@@ -13,6 +13,7 @@
     <bean id="mshWebservice" class="eu.domibus.ebms3.receiver.MSHWebservice">
         <property name="jaxbContext" ref="jaxbContextEBMS"/>
     </bean>
+    <bean id="mshWebserviceSerializer" class="eu.domibus.ebms3.receiver.MSHSourceMessageWebservice"/>
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -143,6 +144,27 @@
             <entry key="ws-security.callback-handler" value-ref="keystorePasswordCallback"/>
             <entry key="ws-security.encryption.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
             <entry key="ws-security.signature.crypto" value-ref="Wss4JMultiDomainCryptoProvider"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+    </jaxws:client>
+
+    <bean id="domibusPrepareAttachmentInInterceptor" class="eu.domibus.ebms3.receiver.DomibusPrepareAttachmentInInterceptor"/>
+    <bean id="domibusPrepareAttachmentInterceptor" class="eu.domibus.ebms3.sender.DomibusPrepareAttachmentInterceptor"/>
+    <jaxws:client id="{http://domibus.eu}local-msh-dispatch" name="{http://domibus.eu}local-msh-dispatch" createdFromAPI="true">
+        <jaxws:outInterceptors>
+            <ref bean="domibusPrepareAttachmentInterceptor"/>
+            <bean id="domibusAttachmentOutInterceptorRemoval" class="eu.domibus.ebms3.sender.DomibusAttachmentOutInterceptorRemoval"/>
+            <bean id="domibusAttachmentOutInterceptor" class="eu.domibus.ebms3.sender.DomibusAttachmentOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:inInterceptors>
+            <ref bean="domibusPrepareAttachmentInInterceptor"/>
+        </jaxws:inInterceptors>
+        <jaxws:handlers>
+            <bean class="eu.domibus.ebms3.sender.FaultOutHandler"/>
+        </jaxws:handlers>
+
+        <jaxws:properties>
             <entry key="faultStackTraceEnabled" value="false"/>
             <entry key="exceptionMessageCauseEnabled" value="false"/>
         </jaxws:properties>

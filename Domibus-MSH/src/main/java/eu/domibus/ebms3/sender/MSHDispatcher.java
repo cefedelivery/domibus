@@ -30,6 +30,7 @@ public class MSHDispatcher {
     public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
     public static final String DOMIBUS_DISPATCHER_CACHEABLE = "domibus.dispatcher.cacheable";
     public static final String DOMIBUS_DISPATCHER_CACHEABLE_DEFAULT = "false";
+    public static final String LOCAL_MSH_ENDPOINT = "local://localMSH";
 
     @Autowired
     private DispatchClientProvider dispatchClientProvider;
@@ -45,6 +46,27 @@ public class MSHDispatcher {
         boolean cacheable = isDispatchClientCacheActivated();
         Domain domain = domainContextProvider.getCurrentDomain();
         final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getClient(domain.getCode(), endpoint, legConfiguration.getSecurity().getSignatureMethod().getAlgorithm(), policy, pModeKey, cacheable);
+
+        final SOAPMessage result;
+        try {
+            result = dispatch.invoke(soapMessage);
+        } catch (final WebServiceException e) {
+            Exception exception = e;
+            if(e.getCause() instanceof ConnectException) {
+                exception = new WebServiceException("Error dispatching message to [" + endpoint + "]: possible reason is that the receiver is not available", e);
+            }
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0005, "Error dispatching message to " + endpoint, null, exception);
+            ex.setMshRole(MSHRole.SENDING);
+            throw ex;
+        }
+        return result;
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public SOAPMessage dispatchLocal(final SOAPMessage soapMessage) throws EbMS3Exception {
+        Domain domain = domainContextProvider.getCurrentDomain();
+        String endpoint = LOCAL_MSH_ENDPOINT;
+        final Dispatch<SOAPMessage> dispatch = dispatchClientProvider.getLocalClient(domain.getCode(), endpoint);
 
         final SOAPMessage result;
         try {

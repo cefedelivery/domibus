@@ -8,8 +8,12 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.ClientImpl;
 import org.apache.cxf.jaxws.DispatchImpl;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.transport.MessageObserver;
 import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transport.local.LocalConduit;
 import org.apache.cxf.transports.http.configuration.ConnectionType;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.ws.policy.PolicyConstants;
@@ -38,7 +42,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     public static final String ASYMMETRIC_SIG_ALGO_PROPERTY = "ASYMMETRIC_SIG_ALGO_PROPERTY";
     public static final String MESSAGE_ID = "MESSAGE_ID";
     public static final QName SERVICE_NAME = new QName("http://domibus.eu", "msh-dispatch-service");
+    public static final QName LOCAL_SERVICE_NAME = new QName("http://domibus.eu", "local-msh-dispatch-service");
     public static final QName PORT_NAME = new QName("http://domibus.eu", "msh-dispatch");
+    public static final QName LOCAL_PORT_NAME = new QName("http://domibus.eu", "local-msh-dispatch");
     public static final String DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT = "domibus.dispatcher.connectionTimeout";
     public static final String DOMIBUS_DISPATCHER_RECEIVETIMEOUT = "domibus.dispatcher.receiveTimeout";
     public static final String DOMIBUS_DISPATCHER_ALLOWCHUNKING = "domibus.dispatcher.allowChunking";
@@ -89,6 +95,29 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         return dispatch;
     }
 
+
+
+
+    @Override
+    public Dispatch<SOAPMessage> getLocalClient(String domain, String endpoint) {
+        LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
+        Dispatch<SOAPMessage> dispatch = dispatch = createLocalWSServiceDispatcher(endpoint);
+
+        final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
+        final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+        httpConduit.setMessageObserver(new MessageObserver() {
+            @Override
+            public void onMessage(Message message) {
+                message.getExchange().getOutMessage().put(ClientImpl.SYNC_TIMEOUT, 0);
+                message.getExchange().put(ClientImpl.FINISHED, Boolean.TRUE);
+                LOG.info("----------------------on message");
+            }
+        });
+
+
+        return dispatch;
+    }
+
     protected void setHttpClientPolicy(HTTPClientPolicy httpClientPolicy) {
         //ConnectionTimeOut - Specifies the amount of time, in milliseconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite.
         int connectionTimeout = Integer.parseInt(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTIONTIMEOUT));
@@ -101,7 +130,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
 
         Boolean keepAlive = Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CONNECTION_KEEP_ALIVE));
         ConnectionType connectionType = ConnectionType.CLOSE;
-        if(keepAlive) {
+        if (keepAlive) {
             connectionType = ConnectionType.KEEP_ALIVE;
         }
         httpClientPolicy.setConnection(connectionType);
@@ -135,6 +164,14 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             policy.setPassword(httpProxyPassword);
             httpConduit.setProxyAuthorization(policy);
         }
+    }
+
+    protected Dispatch<SOAPMessage> createLocalWSServiceDispatcher(String endpoint) {
+        final javax.xml.ws.Service service = javax.xml.ws.Service.create(LOCAL_SERVICE_NAME);
+        service.setExecutor(executor);
+        service.addPort(LOCAL_PORT_NAME, SOAPBinding.SOAP12HTTP_BINDING, endpoint);
+        final Dispatch<SOAPMessage> dispatch = service.createDispatch(LOCAL_PORT_NAME, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
+        return dispatch;
     }
 
 

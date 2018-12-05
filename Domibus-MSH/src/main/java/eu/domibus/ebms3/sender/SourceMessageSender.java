@@ -4,10 +4,8 @@ import eu.domibus.api.message.attempt.MessageAttempt;
 import eu.domibus.api.message.attempt.MessageAttemptService;
 import eu.domibus.api.message.attempt.MessageAttemptStatus;
 import eu.domibus.api.security.ChainCertificateInvalidException;
-import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.dao.UserMessageLogDao;
-import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
@@ -21,7 +19,6 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.pki.PolicyService;
 import org.apache.commons.lang3.Validate;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,15 +90,6 @@ public class SourceMessageSender implements MessageSender {
             legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
-            Policy policy;
-            try {
-                policy = policyService.parsePolicy("policies/" + legConfiguration.getSecurity().getPolicy());
-            } catch (final ConfigurationException e) {
-                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0010, "Policy configuration invalid", null, e);
-                ex.setMshRole(MSHRole.SENDING);
-                throw ex;
-            }
-
             Party sendingParty = pModeProvider.getSenderParty(pModeKey);
             Validate.notNull(sendingParty, "Initiator party was not found");
             Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
@@ -123,14 +111,8 @@ public class SourceMessageSender implements MessageSender {
 
             LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
-            isOk = responseHandler.handle(response);
-            if (ResponseHandler.CheckResult.UNMARSHALL_ERROR.equals(isOk)) {
-                EbMS3Exception e = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, "Problem occurred during marshalling", messageId, null);
-                e.setMshRole(MSHRole.SENDING);
-                throw e;
-            }
-            reliabilityCheckSuccessful = reliabilityChecker.check(soapMessage, response, pModeKey);
+            final SOAPMessage response = mshDispatcher.dispatchLocal(soapMessage);
+
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);
@@ -151,7 +133,6 @@ public class SourceMessageSender implements MessageSender {
             throw t;
         } finally {
             try {
-                reliabilityService.handleReliability(messageId, userMessage, reliabilityCheckSuccessful, isOk, legConfiguration);
                 attempt.setError(attemptError);
                 attempt.setStatus(attemptStatus);
                 attempt.setEndDate(new Timestamp(System.currentTimeMillis()));
