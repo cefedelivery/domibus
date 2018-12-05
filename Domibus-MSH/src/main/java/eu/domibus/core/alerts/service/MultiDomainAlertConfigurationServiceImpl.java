@@ -177,7 +177,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getLoginFailureConfiguration() {
-        return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
+        //return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
+        return loginFailureConfigurationLoader.getConfiguration(new ConsoleLoginFailConfigurationReader()::readConfiguration);
     }
 
     /**
@@ -399,33 +400,54 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     }
 
-    protected LoginFailureModuleConfiguration readLoginFailureConfiguration(Domain domain) {
-        try {
-            final Boolean alertActive = isAlertModuleEnabled();
+//    protected LoginFailureModuleConfiguration readLoginFailureConfiguration(Domain domain) {
+//        try {
+//            final Boolean alertActive = isAlertModuleEnabled();
+//
+//            final String alertActivePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
+//            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
+//
+//            if (!alertActive || !loginFailureActive) {
+//                LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
+//                return new LoginFailureModuleConfiguration();
+//            }
+//            final String alertLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
+//            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
+//
+//            final String alertEmailSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
+//            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
+//
+//            LOG.info("Alert login failure module activated for domain:[{}]", domain);
+//            return new LoginFailureModuleConfiguration(
+//                    loginFailureAlertLevel,
+//                    loginFailureMailSubject);
+//
+//        } catch (Exception e) {
+//            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
+//            return new LoginFailureModuleConfiguration();
+//        }
+//
+//    }
 
-            final String alertActivePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
-            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
-
-            if (!alertActive || !loginFailureActive) {
-                LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
-                return new LoginFailureModuleConfiguration();
-            }
-            final String alertLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
-            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
-
-            final String alertEmailSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
-            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
-
-            LOG.info("Alert login failure module activated for domain:[{}]", domain);
-            return new LoginFailureModuleConfiguration(
-                    loginFailureAlertLevel,
-                    loginFailureMailSubject);
-
-        } catch (Exception e) {
-            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
-            return new LoginFailureModuleConfiguration();
+    class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
+        @Override
+        protected String getModuleName() {
+            return "Alert Login failure";
+        }
+        @Override
+        protected String getAlertActivePropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
         }
 
+        @Override
+        protected String getAlertLevelPropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
+        }
+
+        @Override
+        protected String getAlertEmailSubjectPropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
+        }
     }
 
     protected ImminentExpirationCertificateModuleConfiguration readImminentExpirationCertificateConfiguration(Domain domain) {
@@ -489,20 +511,20 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType) {
         ConfigurationLoader<AlertEventModuleConfiguration> configurationLoader = repetitiveAlertsConfigurationLoader.get(alertType);
-        return configurationLoader.getConfiguration(new ConfigurationReader(alertType)::readAlertConfiguration);
+        return configurationLoader.getConfiguration(new RepetitiveEventConfigurationReader(alertType)::readConfiguration);
     }
 
-    class ConfigurationReader {
+    class RepetitiveEventConfigurationReader {
         AlertType alertType;
         String property, moduleName;
 
-        public ConfigurationReader(AlertType alertType) {
+        public RepetitiveEventConfigurationReader(AlertType alertType) {
             this.alertType = alertType;
             this.property = alertType.getConfigurationProperty();
             this.moduleName = alertType.getTitle();
         }
 
-        public <T> AlertEventModuleConfiguration readAlertConfiguration(Domain domain) {
+        public <T> AlertEventModuleConfiguration readConfiguration(Domain domain) {
             try {
                 final Boolean alertModuleActive = isAlertModuleEnabled();
                 final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
@@ -522,9 +544,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 LOG.warn("An error occurred while reading {} alert module configuration for domain:[{}], ", moduleName, domain, e);
                 return new AlertEventModuleConfiguration(alertType);
             }
-
         }
-
     }
 
     /**
@@ -532,35 +552,90 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getPluginLoginFailureConfiguration() {
-        return loginFailureConfigurationLoader.getConfiguration(this::readPluginLoginFailureConfiguration);
+        //return loginFailureConfigurationLoader.getConfiguration(this::readConfiguration);
+        return loginFailureConfigurationLoader.getConfiguration(new PluginLoginFailConfigurationReader()::readConfiguration);
     }
 
-    // TODO: merge this code with login failure of console users
-    protected LoginFailureModuleConfiguration readPluginLoginFailureConfiguration(Domain domain) {
-        final String alertActivePropertyName = "domibus.alert.plugin.user.login_failure.active";
-        final String alertLevelPropertyName = "domibus.alert.plugin.user.login_failure.level";
-        final String alertEmailSubjectPropertyName = "domibus.alert.plugin.user.login_failure.mail.subject";
+    abstract class LoginFailConfigurationReader {
+        protected abstract String getModuleName();
+        protected abstract String getAlertActivePropertyName();
+        protected abstract String getAlertLevelPropertyName();
+        protected abstract String getAlertEmailSubjectPropertyName();
 
-        try {
-            final Boolean alertActive = isAlertModuleEnabled();
+        protected LoginFailureModuleConfiguration readConfiguration(Domain domain) {
 
-            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
+            try {
+                final Boolean alertActive = isAlertModuleEnabled();
 
-            if (!alertActive || !loginFailureActive) {
-                LOG.debug("Alert Plugin Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
+                final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, getAlertActivePropertyName(), Boolean.FALSE.toString()));
+
+                if (!alertActive || !loginFailureActive) {
+                    LOG.debug("{} module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", getModuleName(), alertActive, loginFailureActive);
+                    return new LoginFailureModuleConfiguration();
+                }
+
+                final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, getAlertLevelPropertyName(), LOW));
+
+                final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, getAlertEmailSubjectPropertyName(), LOGIN_FAILURE_MAIL_SUBJECT);
+
+                LOG.info("{} module activated for domain:[{}]", getModuleName(), domain);
+                return new LoginFailureModuleConfiguration(loginFailureAlertLevel, loginFailureMailSubject);
+
+            } catch (Exception e) {
+                LOG.warn("An error occurred while reading {} module configuration for domain:[{}], ", getModuleName(), domain, e);
                 return new LoginFailureModuleConfiguration();
             }
-
-            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
-
-            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
-
-            LOG.info("Alert plugin login failure module activated for domain:[{}]", domain);
-            return new LoginFailureModuleConfiguration(loginFailureAlertLevel, loginFailureMailSubject);
-
-        } catch (Exception e) {
-            LOG.warn("An error occurred while reading plugin authenticator alert module configuration for domain:[{}], ", domain, e);
-            return new LoginFailureModuleConfiguration();
         }
     }
+
+    class PluginLoginFailConfigurationReader extends LoginFailConfigurationReader {
+        @Override
+        protected String getModuleName() {
+            return "Alert Plugin Login failure";
+        }
+
+        @Override
+        protected String getAlertActivePropertyName() {
+            return "domibus.alert.plugin.user.login_failure.active";
+        }
+
+        @Override
+        protected String getAlertLevelPropertyName() {
+            return "domibus.alert.plugin.user.login_failure.level";
+        }
+
+        @Override
+        protected String getAlertEmailSubjectPropertyName() {
+            return "domibus.alert.plugin.user.login_failure.mail.subject";
+        }
+    }
+
+//    // TODO: merge this code with login failure of console users
+//    protected LoginFailureModuleConfiguration readPluginLoginFailureConfiguration(Domain domain) {
+//        final String alertActivePropertyName = "domibus.alert.plugin.user.login_failure.active";
+//        final String alertLevelPropertyName = "domibus.alert.plugin.user.login_failure.level";
+//        final String alertEmailSubjectPropertyName = "domibus.alert.plugin.user.login_failure.mail.subject";
+//
+//        try {
+//            final Boolean alertActive = isAlertModuleEnabled();
+//
+//            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
+//
+//            if (!alertActive || !loginFailureActive) {
+//                LOG.debug("Alert Plugin Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
+//                return new LoginFailureModuleConfiguration();
+//            }
+//
+//            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
+//
+//            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
+//
+//            LOG.info("Alert plugin login failure module activated for domain:[{}]", domain);
+//            return new LoginFailureModuleConfiguration(loginFailureAlertLevel, loginFailureMailSubject);
+//
+//        } catch (Exception e) {
+//            LOG.warn("An error occurred while reading plugin authenticator alert module configuration for domain:[{}], ", domain, e);
+//            return new LoginFailureModuleConfiguration();
+//        }
+//    }
 }
