@@ -6,17 +6,15 @@ import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
 import eu.domibus.common.dao.security.UserDao;
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.model.security.IUser;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Tested;
-import mockit.VerificationsInOrder;
+import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +67,7 @@ public class UserAlertsServiceImplTest {
     private UserAlertsServiceImpl userAlertsService;
 
     @Test
-    public void testSendPasswordExpiredAlerts() {
+    public void testSendPasswordExpiredAlerts(@Mocked UserDaoBase dao) {
         final LocalDate today = LocalDate.of(2018, 10, 15);
         final Integer maxPasswordAge = 10;
         final Integer howManyDaysToGenerateAlertsAfterExpiration = 3;
@@ -94,7 +92,9 @@ public class UserAlertsServiceImplTest {
             result = ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE;
             domibusPropertyProvider.getOptionalDomainProperty(ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
-            userAlertsService.getUsersWithPasswordChangedBetween(false, from, to);
+            userAlertsService.getUserDao();
+            result = dao;
+            dao.findWithPasswordChangedBetween(from, to, false);
             result = users;
             userAlertsService.getEventTypeForPasswordExpired();
             result = EventType.PASSWORD_EXPIRED;
@@ -109,15 +109,15 @@ public class UserAlertsServiceImplTest {
     }
 
     @Test
-    public void testSendPasswordImminentExpirationAlerts() {
+    public void testSendPasswordImminentExpirationAlerts(@Mocked UserDaoBase dao) {
         final LocalDate today = LocalDate.of(2018, 10, 15);
         final Integer maxPasswordAge = 10;
         final Integer howManyDaysBeforeExpirationToGenerateAlerts = 4;
         final LocalDate from = LocalDate.of(2018, 10, 5);
         final LocalDate to = LocalDate.of(2018, 10, 9);
-        final IUser user1 = new User("user1", "anypassword");
-        final IUser user2 = new User("user2", "anypassword");
-        final List<IUser> users = Arrays.asList(user1, user2);
+        final UserBase user1 = new User("user1", "anypassword");
+        final UserBase user2 = new User("user2", "anypassword");
+        final List<UserBase> users = Arrays.asList(user1, user2);
 
         new Expectations(LocalDate.class) {{
             LocalDate.now();
@@ -134,16 +134,18 @@ public class UserAlertsServiceImplTest {
             result = howManyDaysBeforeExpirationToGenerateAlerts;
             domibusPropertyProvider.getOptionalDomainProperty(ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
-            userAlertsService.getUsersWithPasswordChangedBetween(false, from, to);
-            result = users;
             userAlertsService.getEventTypeForPasswordImminentExpiration();
             result = EventType.PASSWORD_IMMINENT_EXPIRATION;
+            userAlertsService.getUserDao();
+            result = dao;
+            dao.findWithPasswordChangedBetween(from, to, false);
+            result = users;
         }};
 
         userAlertsService.triggerImminentExpirationEvents(false);
 
         new VerificationsInOrder() {{
-            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, (IUser) any, maxPasswordAge);
+            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, (UserBase) any, maxPasswordAge);
             times = 2;
         }};
     }
@@ -152,7 +154,7 @@ public class UserAlertsServiceImplTest {
     @Test
     public void testSendPasswordAlerts() {
 
-        userAlertsService.triggetPasswordExpirationEvents();
+        userAlertsService.triggerPasswordExpirationEvents();
 
         new VerificationsInOrder() {{
             userAlertsService.triggerImminentExpirationEvents(false);

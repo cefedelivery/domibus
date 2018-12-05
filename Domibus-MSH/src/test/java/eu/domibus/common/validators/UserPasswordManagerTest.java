@@ -155,7 +155,7 @@ public class UserPasswordManagerTest {
     }
 
     @Test(expected = DomibusCoreException.class)
-    public void testPasswordHistory() throws Exception {
+    public void testValidateHistory() throws Exception {
         String username = "anyname";
         String testPassword = "anypassword";
         int oldPasswordsToCheck = 5;
@@ -166,7 +166,7 @@ public class UserPasswordManagerTest {
         new Expectations() {{
             domibusPropertyProvider.getOptionalDomainProperty(passwordValidator.getPasswordHistoryPolicyProperty());
             result = oldPasswordsToCheck;
-            userDao.loadActiveUserByUsername(username);
+            userDao.findByUserName(username);
             result = user;
             userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
             result = oldPasswords;
