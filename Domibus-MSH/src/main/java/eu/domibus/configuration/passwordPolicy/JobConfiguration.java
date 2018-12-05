@@ -82,7 +82,7 @@ public class JobConfiguration {
         CronTriggerFactoryBean bean = new CronTriggerFactoryBean();
 
         bean.setJobDetail(pluginUserPasswordPolicyAlertJob().getObject());
-        bean.setCronExpression(domibusPropertyProvider.getProperty("domibus.plugin_PasswordPolicies.check.cron"));
+        bean.setCronExpression(domibusPropertyProvider.getProperty("domibus.plugin_passwordPolicies.check.cron"));
 
         return bean;
     }
