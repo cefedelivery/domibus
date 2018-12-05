@@ -1,6 +1,7 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
@@ -34,20 +35,12 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
     private EventService eventService;
 
     protected abstract String getMaximumDefaultPasswordAgeProperty();
-
     protected abstract String getMaximumPasswordAgeProperty();
-
-    protected abstract List<UserBase> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to);
-
     protected abstract AlertType getAlertTypeForPasswordImminentExpiration();
-
     protected abstract AlertType getAlertTypeForPasswordExpired();
-
     protected abstract EventType getEventTypeForPasswordImminentExpiration();
-
     protected abstract EventType getEventTypeForPasswordExpired();
-
-//    protected abstract LoginFailureModuleConfiguration getPluginLoginFailureConfiguration();
+    protected abstract UserDaoBase getUserDao();
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -57,7 +50,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void triggetPasswordExpirationEvents() {
+    public void triggerPasswordExpirationEvents() {
         try {
             triggerExpiredEvents(true);
             triggerExpiredEvents(false);
@@ -86,7 +79,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays).plusDays(duration);
         LOG.debug("ImminentExpirationAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
 
-        List<UserBase> eligibleUsers = getUsersWithPasswordChangedBetween(usersWithDefaultPassword, from, to);
+        List<UserBase> eligibleUsers = getUserDao().findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
         LOG.debug("ImminentExpirationAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
         EventType eventType = getEventTypeForPasswordImminentExpiration();
@@ -108,7 +101,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays);
         LOG.debug("PasswordExpiredAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
 
-        List<UserBase> eligibleUsers = getUsersWithPasswordChangedBetween(usersWithDefaultPassword, from, to);
+        List<UserBase> eligibleUsers = getUserDao().findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
         LOG.debug("PasswordExpiredAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
 
         EventType eventType = getEventTypeForPasswordExpired();

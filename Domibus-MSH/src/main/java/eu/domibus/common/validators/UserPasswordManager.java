@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 
 @Service
-public abstract class UserPasswordManager<T extends UserBase> {
+public abstract class UserPasswordManager<U extends UserBase> {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserPasswordManager.class);
 
     private static final String CREDENTIALS_EXPIRED = "Expired";
@@ -40,18 +40,13 @@ public abstract class UserPasswordManager<T extends UserBase> {
     private BCryptPasswordEncoder bcryptEncoder;
 
     protected abstract String getPasswordComplexityPatternProperty();
-
     public abstract String getPasswordHistoryPolicyProperty();
-
     protected abstract String getMaximumDefaultPasswordAgeProperty();
-
     protected abstract String getMaximumPasswordAgeProperty();
-
     protected abstract String getWarningDaysBeforeExpiration();
-
     protected abstract UserPasswordHistoryDao getUserHistoryDao();
-
     protected abstract UserDaoBase getUserDao();
+
 
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
@@ -142,7 +137,7 @@ public abstract class UserPasswordManager<T extends UserBase> {
         }
     }
 
-    public void changePassword(T user, String newPassword) {
+    public void changePassword(U user, String newPassword) {
         savePasswordHistory(user); // save old password in history
 
         String userName = user.getUserName();
@@ -153,7 +148,7 @@ public abstract class UserPasswordManager<T extends UserBase> {
         user.setDefaultPassword(false);
     }
 
-    private void savePasswordHistory(T user) {
+    private void savePasswordHistory(U user) {
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
         if (passwordsToKeep == 0) {
             return;

@@ -92,7 +92,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendAlerts() {
-        userAlertsService.triggetPasswordExpirationEvents();
+        userAlertsService.triggerPasswordExpirationEvents();
     }
 
     /**

@@ -7,6 +7,6 @@ import eu.domibus.common.model.security.UserBase;
  * @since 4.1
  */
 public interface UserAlertsService {
-    void triggetPasswordExpirationEvents();
+    void triggerPasswordExpirationEvents();
     void triggerLoginFailureEvent(UserBase user);
 }

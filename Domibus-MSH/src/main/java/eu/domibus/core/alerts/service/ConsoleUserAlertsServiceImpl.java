@@ -1,14 +1,11 @@
 package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.List;
 
 /**
  * @author Ion Perpegel
@@ -34,11 +31,6 @@ public class ConsoleUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected List<UserBase> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
-        return userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-    }
-
-    @Override
     protected AlertType getAlertTypeForPasswordImminentExpiration() {
         return AlertType.PASSWORD_IMMINENT_EXPIRATION;
     }
@@ -55,5 +47,8 @@ public class ConsoleUserAlertsServiceImpl extends UserAlertsServiceImpl {
     protected EventType getEventTypeForPasswordExpired() {
         return EventType.PASSWORD_EXPIRED;
     }
+
+    @Override
+    protected UserDaoBase getUserDao() { return userDao; }
 
 }

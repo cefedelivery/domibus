@@ -1,5 +1,6 @@
 package eu.domibus.core.alerts.service;
 
+import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
@@ -49,14 +50,7 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected List<UserBase> getUsersWithPasswordChangedBetween(boolean usersWithDefaultPassword, LocalDate from, LocalDate to) {
-        return userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-    }
-
-    @Override
-    protected AlertType getAlertTypeForPasswordImminentExpiration() {
-        return AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION;
-    }
+    protected AlertType getAlertTypeForPasswordImminentExpiration() { return AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION; }
 
     @Override
     protected AlertType getAlertTypeForPasswordExpired() {
@@ -74,6 +68,9 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
+    protected UserDaoBase getUserDao() { return userDao; }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     // TODO: move this code to base class to use the same code for console and plugin users
     public void triggerLoginFailureEvent(UserBase user) {
@@ -83,6 +80,5 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
         if (configuration.isActive()) {
             eventService.enqueuePluginLoginFailureEvent(user.getUserName(), new Date());
         }
-
     }
 }

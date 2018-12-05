@@ -2,7 +2,6 @@ package eu.domibus.common.validators;
 
 import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
-import eu.domibus.common.model.security.UserPasswordHistory;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
@@ -11,9 +10,6 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * @author Ion Perpegel
  * @since 4.1
@@ -21,8 +17,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PluginUserPasswordManager extends UserPasswordManager<AuthenticationEntity> {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordManager.class);
 
     final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin_passwordPolicy.warning.beforeExpiration";
 

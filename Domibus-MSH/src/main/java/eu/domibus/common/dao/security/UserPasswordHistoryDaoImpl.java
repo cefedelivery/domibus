@@ -15,23 +15,23 @@ import java.util.List;
  */
 
 @Repository
-public abstract class UserPasswordHistoryDaoImpl<U extends UserBase, E extends UserPasswordHistory> extends BasicDao<E>
+public abstract class UserPasswordHistoryDaoImpl<U extends UserBase, UPH extends UserPasswordHistory> extends BasicDao<UPH>
         implements UserPasswordHistoryDao<U> {
 
-    private final Class<E> typeOfE;
+    private final Class<UPH> typeOfUPH;
     private String passwordHistoryQueryName;
 
-    protected abstract E createNew(final U user, String passwordHash, LocalDateTime passwordDate);
+    protected abstract UPH createNew(final U user, String passwordHash, LocalDateTime passwordDate);
 
-    public UserPasswordHistoryDaoImpl(Class<E> typeOfE, String passwordHistoryQueryName) {
-        super(typeOfE);
-        this.typeOfE = typeOfE;
+    public UserPasswordHistoryDaoImpl(Class<UPH> typeOfUPH, String passwordHistoryQueryName) {
+        super(typeOfUPH);
+        this.typeOfUPH = typeOfUPH;
         this.passwordHistoryQueryName = passwordHistoryQueryName;
     }
 
     @Override
     public void savePassword(final U user, String passwordHash, LocalDateTime passwordDate) {
-        E entry = createNew(user, passwordHash, passwordDate);
+        UPH entry = createNew(user, passwordHash, passwordDate);
         this.update(entry);
     }
 
@@ -39,7 +39,7 @@ public abstract class UserPasswordHistoryDaoImpl<U extends UserBase, E extends U
     public void removePasswords(final U user, int oldPasswordsToKeep) {
         List<UserPasswordHistory> oldEntries = getPasswordHistory(user, 0);
         if (oldEntries.size() > oldPasswordsToKeep) {
-            oldEntries.stream().skip(oldPasswordsToKeep).forEach(entry -> this.delete((E) entry)); // NOSONAR
+            oldEntries.stream().skip(oldPasswordsToKeep).forEach(entry -> this.delete((UPH) entry)); // NOSONAR
         }
     }
 
