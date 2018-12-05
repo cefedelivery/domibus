@@ -6,6 +6,7 @@ Domibus 4.1
 - Increase timeout of ListPendingMessages transaction to 5 minutes
 - Added a new Logging page into Admin console  - user can change and reset logging levels at runtime
 - Cluster configuration: reload truststore, PMode and logging set adn reset will be executed on all cluster servers excepting the current one
+- Renamed property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" and property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete"
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information
