@@ -52,5 +52,5 @@ public interface PluginUserService {
      */
     void updateUsers(List<AuthenticationEntity> addedUsers, List<AuthenticationEntity> updatedUsers, List<AuthenticationEntity> removedUsers);
 
-    void sendAlerts();
+    void triggerPasswordAlerts();
 }

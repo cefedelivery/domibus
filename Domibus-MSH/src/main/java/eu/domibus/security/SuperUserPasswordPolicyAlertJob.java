@@ -29,7 +29,7 @@ public class SuperUserPasswordPolicyAlertJob extends GeneralQuartzJobBean {
 
         LOG.debug("Executing job 'check password expiration' for super-users at " + LocalDateTime.now());
 
-        userService.sendAlerts();
+        userService.triggerPasswordAlerts();
     }
 
 }

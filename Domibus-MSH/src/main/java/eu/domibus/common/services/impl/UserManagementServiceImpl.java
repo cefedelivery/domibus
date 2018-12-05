@@ -310,7 +310,7 @@ public class UserManagementServiceImpl implements UserService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendAlerts() {
+    public void triggerPasswordAlerts() {
         userAlertsService.triggerPasswordExpirationEvents();
     }
 

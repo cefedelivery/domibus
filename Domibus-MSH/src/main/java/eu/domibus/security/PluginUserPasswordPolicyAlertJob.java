@@ -2,7 +2,6 @@ package eu.domibus.security;
 
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.common.services.PluginUserService;
-import eu.domibus.common.services.UserService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.quartz.DomibusQuartzJobBean;
@@ -32,7 +31,7 @@ public class PluginUserPasswordPolicyAlertJob extends DomibusQuartzJobBean {
 
         LOG.debug("Executing job 'check password expiration' for users at " + LocalDateTime.now());
 
-        pluginUserService.sendAlerts();
+        pluginUserService.triggerPasswordAlerts();
     }
 
 }

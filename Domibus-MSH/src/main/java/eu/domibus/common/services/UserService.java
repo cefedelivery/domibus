@@ -69,7 +69,7 @@ public interface UserService {
     Integer getDaysTillExpiration(String username);
 
 
-    public void sendAlerts();
+    public void triggerPasswordAlerts();
 
     void changePassword(String username, String currentPassword, String newPassword);
 }
