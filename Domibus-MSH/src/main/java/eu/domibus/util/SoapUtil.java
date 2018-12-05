@@ -5,6 +5,7 @@ import org.apache.commons.io.Charsets;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,15 +23,15 @@ import java.io.*;
 public class SoapUtil {
 
     public static String getRawXMLMessage(SOAPMessage soapMessage) throws TransformerException {
-        String rawXMLMessage = null;
-        final StringWriter sw = new StringWriter();
+        final StringWriter rawXmlMessageWriter = new StringWriter();
 
-        TransformerFactory.newInstance().newTransformer().transform(
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        transformerFactory.newTransformer().transform(
                 new DOMSource(soapMessage.getSOAPPart()),
-                new StreamResult(sw));
+                new StreamResult(rawXmlMessageWriter));
 
-        rawXMLMessage = sw.toString();
-        return rawXMLMessage;
+        return rawXmlMessageWriter.toString();
     }
 
     public static SOAPMessage createSOAPMessage(final String rawXml) throws SOAPException, IOException, ParserConfigurationException, SAXException {

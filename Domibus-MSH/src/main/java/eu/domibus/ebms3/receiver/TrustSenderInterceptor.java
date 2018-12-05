@@ -107,8 +107,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false")) &&
-                !Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
             LOG.debug("No trust verification of sending certificate");
             return;
         }
