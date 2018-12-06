@@ -13,7 +13,8 @@ import java.util.Date;
 @Entity
 @Table(name = "TB_COMMAND")
 @NamedQueries({
-        @NamedQuery(name = "CommandEntity.findByServerName", query = "SELECT c FROM CommandEntity c where c.serverName=:SERVER_NAME")
+        @NamedQuery(name = "CommandEntity.findByServerName", query = "SELECT c FROM CommandEntity c where c.serverName=:SERVER_NAME"),
+        @NamedQuery(name = "CommandEntity.findByServerAndDomainName", query = "SELECT c FROM CommandEntity c where c.serverName=:SERVER_NAME and c.domain=:DOMAIN_NAME")
 })
 public class CommandEntity extends AbstractBaseEntity {
 
