@@ -17,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.util.List;
 
 /**
+ * Creates a scheduler to execute the commands on all the cluster members
+ *
  * @author Cosmin Baciu
  * @since 4.1
  */

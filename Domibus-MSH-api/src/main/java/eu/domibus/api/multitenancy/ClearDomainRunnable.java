@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Thomas Dussart
+ * Wrapper for the Runnable class to be executed. Clear first the domain set on the thread before execution.
+ *
+ * @author Cosmin Baciu
  * @since 4.0.1
  */
 public class ClearDomainRunnable implements Runnable{
