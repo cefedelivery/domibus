@@ -40,7 +40,7 @@ public class ClusterCommandConfiguration {
     protected CommandService commandService;
 
     @Scheduled(fixedDelay = 5000)
-    public void scheduleFixedDelayTask() {
+    public void scheduleClusterCommandExecution() {
         final List<Domain> domains = domainService.getDomains();
         for (Domain domain : domains) {
             final Runnable task = new Runnable() {
