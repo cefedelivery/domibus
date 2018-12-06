@@ -6,7 +6,7 @@
 
     <groupId>eu.domibus</groupId>
     <artifactId>Domibus-taxud-ist</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <parent>
