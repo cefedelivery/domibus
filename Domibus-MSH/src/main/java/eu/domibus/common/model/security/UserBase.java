@@ -26,16 +26,12 @@ public interface UserBase {
         }
     }
 
-    UserBase.Type getType();
-
     int getEntityId();
-
+    UserBase.Type getType();
     String getUserName();
-
     String getPassword();
     void setPassword(String password);
-
     LocalDateTime getPasswordChangeDate();
-
     void setDefaultPassword(Boolean defaultPassword);
+    Boolean hasDefaultPassword();
 }

@@ -209,7 +209,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      * {@inheritDoc}
      */
     @Override
-    // TODO: refactor to avoid these repetitions
+    // TODO: refactor to avoid these repetitions cause we can easily miss to add the newly added alert types
     public AlertLevel getAlertLevel(Alert alert) {
         switch (alert.getAlertType()) {
             case MSG_STATUS_CHANGED:
@@ -218,6 +218,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 return getAccountDisabledConfiguration().getAlertLevel(alert);
             case USER_LOGIN_FAILURE:
                 return getLoginFailureConfiguration().getAlertLevel(alert);
+            case PLUGIN_USER_LOGIN_FAILURE:
+                return getPluginLoginFailureConfiguration().getAlertLevel(alert);
             case CERT_IMMINENT_EXPIRATION:
                 return getImminentExpirationCertificateConfiguration().getAlertLevel(alert);
             case CERT_EXPIRED:
@@ -246,6 +248,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 return getAccountDisabledConfiguration().getMailSubject();
             case USER_LOGIN_FAILURE:
                 return getLoginFailureConfiguration().getMailSubject();
+            case PLUGIN_USER_LOGIN_FAILURE:
+                return getPluginLoginFailureConfiguration().getMailSubject();
             case CERT_IMMINENT_EXPIRATION:
                 return getImminentExpirationCertificateConfiguration().getMailSubject();
             case CERT_EXPIRED:
@@ -529,8 +533,11 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     abstract class LoginFailConfigurationReader {
         protected abstract String getModuleName();
+
         protected abstract String getAlertActivePropertyName();
+
         protected abstract String getAlertLevelPropertyName();
+
         protected abstract String getAlertEmailSubjectPropertyName();
 
         protected LoginFailureModuleConfiguration readConfiguration(Domain domain) {
