@@ -4,14 +4,16 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
  */
 public class LoginFailureModuleConfiguration implements AlertModuleConfiguration {
 
-    private static final  Logger LOG = DomibusLoggerFactory.getLogger(LoginFailureModuleConfiguration.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(LoginFailureModuleConfiguration.class);
+
+    private AlertType alertType;
 
     private final Boolean loginFailureActive;
 
@@ -24,11 +26,13 @@ public class LoginFailureModuleConfiguration implements AlertModuleConfiguration
     }
 
     public LoginFailureModuleConfiguration(
+            AlertType alertType,
             AlertLevel loginFailureAlertLevel,
             String loginFailureMailSubject) {
-        this.loginFailureActive=true;
+        this.alertType = alertType;
+        this.loginFailureActive = true;
         this.loginFailureAlertLevel = loginFailureAlertLevel;
-        this.loginFailureMailSubject=loginFailureMailSubject;
+        this.loginFailureMailSubject = loginFailureMailSubject;
     }
 
 
@@ -44,9 +48,8 @@ public class LoginFailureModuleConfiguration implements AlertModuleConfiguration
 
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
-        final AlertType userLoginFailure = AlertType.USER_LOGIN_FAILURE;
-        if(userLoginFailure !=alert.getAlertType()){
-            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]",alert.getAlertType(), userLoginFailure);
+        if (alertType != alert.getAlertType()) {
+            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), alertType);
             throw new IllegalArgumentException("Invalid alert type of the strategy.");
         }
         return loginFailureAlertLevel;

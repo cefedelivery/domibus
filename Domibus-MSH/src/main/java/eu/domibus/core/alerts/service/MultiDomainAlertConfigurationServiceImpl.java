@@ -177,7 +177,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getLoginFailureConfiguration() {
-        //return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
         return loginFailureConfigurationLoader.getConfiguration(new ConsoleLoginFailConfigurationReader()::readConfiguration);
     }
 
@@ -406,6 +405,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
         @Override
+        protected AlertType getAlertType() { return AlertType.USER_LOGIN_FAILURE; }
+
+        @Override
         protected String getModuleName() {
             return "Alert Login failure";
         }
@@ -532,6 +534,8 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     abstract class LoginFailConfigurationReader {
+        protected abstract AlertType getAlertType();
+
         protected abstract String getModuleName();
 
         protected abstract String getAlertActivePropertyName();
@@ -557,7 +561,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, getAlertEmailSubjectPropertyName(), LOGIN_FAILURE_MAIL_SUBJECT);
 
                 LOG.info("{} module activated for domain:[{}]", getModuleName(), domain);
-                return new LoginFailureModuleConfiguration(loginFailureAlertLevel, loginFailureMailSubject);
+                return new LoginFailureModuleConfiguration(getAlertType(), loginFailureAlertLevel, loginFailureMailSubject);
 
             } catch (Exception e) {
                 LOG.warn("An error occurred while reading {} module configuration for domain:[{}], ", getModuleName(), domain, e);
@@ -567,6 +571,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     class PluginLoginFailConfigurationReader extends LoginFailConfigurationReader {
+        @Override
+        protected AlertType getAlertType() { return AlertType.PLUGIN_USER_LOGIN_FAILURE; }
+
         @Override
         protected String getModuleName() {
             return "Alert Plugin Login failure";
