@@ -142,6 +142,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     private ConfigurationLoader<LoginFailureModuleConfiguration> loginFailureConfigurationLoader;
 
     @Autowired
+    private ConfigurationLoader<LoginFailureModuleConfiguration> pluginLoginFailureConfigurationLoader;
+
+    @Autowired
     private ConfigurationLoader<ImminentExpirationCertificateModuleConfiguration> imminentExpirationCertificateConfigurationLoader;
 
     @Autowired
@@ -221,7 +224,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     // TODO: refactor to avoid these repetitions cause we can easily miss to add here the newly added alert types
-       public AlertModuleConfiguration getModuleConfiguration(AlertType alertType) {
+    private AlertModuleConfiguration getModuleConfiguration(AlertType alertType) {
         switch (alertType) {
             case MSG_STATUS_CHANGED:
                 return getMessageCommunicationConfiguration();
@@ -511,7 +514,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getPluginLoginFailureConfiguration() {
-        return loginFailureConfigurationLoader.getConfiguration(new PluginLoginFailConfigurationReader()::readConfiguration);
+        return pluginLoginFailureConfigurationLoader.getConfiguration(new PluginLoginFailConfigurationReader()::readConfiguration);
     }
 
     abstract class LoginFailConfigurationReader {
@@ -534,7 +537,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
                 if (!alertActive || !loginFailureActive) {
                     LOG.debug("{} module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", getModuleName(), alertActive, loginFailureActive);
-                    return new LoginFailureModuleConfiguration();
+                    return new LoginFailureModuleConfiguration(getAlertType());
                 }
 
                 final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, getAlertLevelPropertyName(), LOW));
@@ -546,7 +549,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
             } catch (Exception e) {
                 LOG.warn("An error occurred while reading {} module configuration for domain:[{}], ", getModuleName(), domain, e);
-                return new LoginFailureModuleConfiguration();
+                return new LoginFailureModuleConfiguration(getAlertType());
             }
         }
     }

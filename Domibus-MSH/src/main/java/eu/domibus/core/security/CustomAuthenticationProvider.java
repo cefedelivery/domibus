@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Component(value="securityCustomAuthenticationProvider")
+@Component(value = "securityCustomAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
@@ -71,13 +71,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 LOG.debug("Authenticating using the Basic authentication");
 
                 AuthenticationEntity user = securityAuthenticationDAO.findByUser(authentication.getName());
+                boolean isPasswordExpired = false;
                 //check if password is correct
                 boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), user.getPassword());
-                if(!isPasswordCorrect) {
+                if (!isPasswordCorrect) {
                     userAlertsService.triggerLoginFailureEvent(user);
+                } else {
+                    //check if password expired
+                    isPasswordExpired = isPasswordExpired(user);
                 }
-                //check if password expired
-                boolean isPasswordExpired = isPasswordExpired(user);
 
                 authentication.setAuthenticated(isPasswordCorrect && !isPasswordExpired);
 
@@ -85,7 +87,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
-        } catch (final Exception exception)  {
+        } catch (final Exception exception) {
             throw new AuthenticationServiceException("Couldn't authenticate the principal " + authentication.getPrincipal(), exception);
         }
         return authentication;
@@ -108,18 +110,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     private void setAuthority(Authentication authentication, List<AuthRole> authRoles) {
-        if(authRoles == null || authRoles.isEmpty())
+        if (authRoles == null || authRoles.isEmpty())
             return;
 
         List<GrantedAuthority> authorityList = new ArrayList<>();
-        for(AuthRole role : authRoles) {
+        for (AuthRole role : authRoles) {
             authorityList.add(new SimpleGrantedAuthority(role.name()));
         }
-        if(authentication instanceof BasicAuthentication) {
+        if (authentication instanceof BasicAuthentication) {
             ((BasicAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof X509CertificateAuthentication) {
+        } else if (authentication instanceof X509CertificateAuthentication) {
             ((X509CertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof BlueCoatClientCertificateAuthentication) {
+        } else if (authentication instanceof BlueCoatClientCertificateAuthentication) {
             ((BlueCoatClientCertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
         }
     }
