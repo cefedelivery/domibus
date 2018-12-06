@@ -14,6 +14,7 @@ Domibus 4.0.1
 - Allow empty "ConversationID" in the message sent by C1
 - Add possibility to exclude a protocol from the CRL list; stops at first positive or negative aoutcome;
 - Fixed alerts stuck in SEND_ENQUEUED state due to missing clearCurrentDomain
+- Moved UIReplication insert SQL script to distribution
 Domibus 4.0
 - Default WS Plugin: the XSD schema validation has been disabled by default due to performance reasons
 - Removed unused classes:Validator<T>,NullValidator,ValidationException
