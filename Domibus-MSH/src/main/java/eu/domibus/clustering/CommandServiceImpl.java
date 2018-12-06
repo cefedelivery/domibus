@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Cosmin Baciu
@@ -65,6 +67,12 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public List<Command> findCommandsByServerName(String serverName) {
         final List<CommandEntity> commands = commandDao.findCommandsByServerName(serverName);
+        return domainConverter.convert(commands, Command.class);
+    }
+
+    @Override
+    public List<Command> findCommandsByServerAndDomainName(String serverName, String domain) {
+        final List<CommandEntity> commands = commandDao.findCommandsByServerAndDomainName(serverName, domain);
         return domainConverter.convert(commands, Command.class);
     }
 
