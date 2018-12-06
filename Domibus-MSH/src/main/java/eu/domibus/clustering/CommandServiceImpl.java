@@ -58,6 +58,12 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    public List<Command> findCommandsByServerAndDomainName(String serverName, String domain) {
+        final List<CommandEntity> commands = commandDao.findCommandsByServerAndDomainName(serverName, domain);
+        return domainConverter.convert(commands, Command.class);
+    }
+
+    @Override
     public void executeCommand(String command, Domain domain) {
         LOG.debug("Executing command [{}] for domain [{}]", command, domain);
         switch (command) {

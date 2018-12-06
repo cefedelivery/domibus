@@ -13,4 +13,6 @@ public interface DomainTaskExecutor {
     <T extends Object> T submit(Callable<T> task);
 
     void submit(Runnable task);
+
+    void submit(Runnable task, Domain domain);
 }
