@@ -208,62 +208,43 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      * {@inheritDoc}
      */
     @Override
-    // TODO: refactor to avoid these repetitions cause we can easily miss to add the newly added alert types
     public AlertLevel getAlertLevel(Alert alert) {
-        switch (alert.getAlertType()) {
-            case MSG_STATUS_CHANGED:
-                return getMessageCommunicationConfiguration().getAlertLevel(alert);
-            case USER_ACCOUNT_DISABLED:
-                return getAccountDisabledConfiguration().getAlertLevel(alert);
-            case USER_LOGIN_FAILURE:
-                return getLoginFailureConfiguration().getAlertLevel(alert);
-            case PLUGIN_USER_LOGIN_FAILURE:
-                return getPluginLoginFailureConfiguration().getAlertLevel(alert);
-            case CERT_IMMINENT_EXPIRATION:
-                return getImminentExpirationCertificateConfiguration().getAlertLevel(alert);
-            case CERT_EXPIRED:
-                return getExpiredCertificateConfiguration().getAlertLevel(alert);
-            case PASSWORD_IMMINENT_EXPIRATION:
-            case PASSWORD_EXPIRED:
-            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
-            case PLUGIN_PASSWORD_EXPIRED:
-                return getRepetitiveEventConfiguration(alert.getAlertType()).getAlertLevel(alert);
-            default:
-                LOG.error("Invalid alert type[{}]", alert.getAlertType());
-                throw new IllegalArgumentException("Invalid alert type");
-        }
+        return getModuleConfiguration(alert.getAlertType()).getAlertLevel(alert);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    // TODO: refactor to avoid these repetitions
     public String getMailSubject(AlertType alertType) {
+        return getModuleConfiguration(alertType).getMailSubject();
+    }
+
+    // TODO: refactor to avoid these repetitions cause we can easily miss to add here the newly added alert types
+       public AlertModuleConfiguration getModuleConfiguration(AlertType alertType) {
         switch (alertType) {
             case MSG_STATUS_CHANGED:
-                return getMessageCommunicationConfiguration().getMailSubject();
+                return getMessageCommunicationConfiguration();
             case USER_ACCOUNT_DISABLED:
-                return getAccountDisabledConfiguration().getMailSubject();
+                return getAccountDisabledConfiguration();
             case USER_LOGIN_FAILURE:
-                return getLoginFailureConfiguration().getMailSubject();
+                return getLoginFailureConfiguration();
             case PLUGIN_USER_LOGIN_FAILURE:
-                return getPluginLoginFailureConfiguration().getMailSubject();
+                return getPluginLoginFailureConfiguration();
             case CERT_IMMINENT_EXPIRATION:
-                return getImminentExpirationCertificateConfiguration().getMailSubject();
+                return getImminentExpirationCertificateConfiguration();
             case CERT_EXPIRED:
-                return getExpiredCertificateConfiguration().getMailSubject();
+                return getExpiredCertificateConfiguration();
             case PASSWORD_IMMINENT_EXPIRATION:
             case PASSWORD_EXPIRED:
             case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
             case PLUGIN_PASSWORD_EXPIRED:
-                return getRepetitiveEventConfiguration(alertType).getMailSubject();
+                return getRepetitiveEventConfiguration(alertType);
             default:
                 LOG.error("Invalid alert type[{}]", alertType);
                 throw new IllegalArgumentException("Invalid alert type");
         }
     }
-
 
     @Override
     public Boolean isAlertModuleEnabled() {
@@ -502,7 +483,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             this.moduleName = alertType.getTitle();
         }
 
-        public <T> AlertEventModuleConfiguration readConfiguration(Domain domain) {
+        public AlertEventModuleConfiguration readConfiguration(Domain domain) {
             try {
                 final Boolean alertModuleActive = isAlertModuleEnabled();
                 final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
