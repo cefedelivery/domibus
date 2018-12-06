@@ -46,7 +46,6 @@ public class MessageAttemptDefaultService implements MessageAttemptService {
     }
 
     protected boolean isMessageAttemptAuditDisabled() {
-        String messageAttemptAuditEnabled = domibusPropertyProvider.getProperty("domibus.sendMessage.attempt.audit.active");
-        return !BooleanUtils.toBoolean(messageAttemptAuditEnabled);
+        return !domibusPropertyProvider.getBooleanProperty("domibus.sendMessage.attempt.audit.active");
     }
 }

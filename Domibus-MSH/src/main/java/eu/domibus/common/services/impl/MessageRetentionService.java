@@ -113,8 +113,7 @@ public class MessageRetentionService {
     }
 
     protected Integer getRetentionValue(String propertyName) {
-        final String propertyValueString = domibusPropertyProvider.getDomainProperty(propertyName);
-        return Integer.parseInt(propertyValueString);
+        return domibusPropertyProvider.getIntegerDomainProperty(propertyName);
     }
 
 }

@@ -358,7 +358,7 @@ public class CertificateServiceImpl implements CertificateService {
      * @return the certificate status.
      */
     protected CertificateStatus getCertificateStatus(Date notAfter) {
-        int revocationOffsetInDays = Integer.parseInt(domibusPropertyProvider.getProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY));
+        int revocationOffsetInDays = domibusPropertyProvider.getIntegerProperty(REVOCATION_TRIGGER_OFFSET_PROPERTY);
         LOG.debug("Property [{}], value [{}]", REVOCATION_TRIGGER_OFFSET_PROPERTY, revocationOffsetInDays);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime offsetDate = now.plusDays(revocationOffsetInDays);

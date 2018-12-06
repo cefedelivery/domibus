@@ -97,7 +97,7 @@ public class UpdateRetryLoggingService {
         }
         userMessageLogService.setMessageAsSendFailure(messageId);
 
-        if ("true".equalsIgnoreCase(domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE))) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE)) {
             messagingDao.clearPayloadData(messageId);
         }
     }

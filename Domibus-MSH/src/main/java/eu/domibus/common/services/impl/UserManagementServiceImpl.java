@@ -194,8 +194,7 @@ public class UserManagementServiceImpl implements UserService {
     protected void applyAccountLockingPolicy(User user) {
         final Domain domain = getCurrentOrDefaultDomainForUser(user);
 
-        String maxAttemptAmountPropVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT);
-        int maxAttemptAmount = Integer.valueOf(maxAttemptAmountPropVal);
+        int maxAttemptAmount = domibusPropertyProvider.getIntegerDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT);
 
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
@@ -233,13 +232,14 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional
     public void reactivateSuspendedUsers() {
-        String suspensionIntervalPropValue;
-        if (domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
-            suspensionIntervalPropValue = domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME);
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
+
+        int suspensionInterval;
+        if (domain == null) { //it is called for super-users so we read from default domain
+            suspensionInterval = domibusPropertyProvider.getIntegerProperty(LOGIN_SUSPENSION_TIME);
         } else { //for normal users the domain is set as current Domain
-            suspensionIntervalPropValue = domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME);
+            suspensionInterval = domibusPropertyProvider.getIntegerDomainProperty(LOGIN_SUSPENSION_TIME);
         }
-        int suspensionInterval = Integer.valueOf(suspensionIntervalPropValue);
 
         //user will not be reactivated.
         if (suspensionInterval <= 0) {

@@ -61,8 +61,7 @@ public class MSHDispatcher {
     }
 
     protected boolean isDispatchClientCacheActivated() {
-        String dispatchClientCacheable = domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CACHEABLE);
-        return Boolean.valueOf(dispatchClientCacheable);
+        return domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_DISPATCHER_CACHEABLE);
     }
 
 }

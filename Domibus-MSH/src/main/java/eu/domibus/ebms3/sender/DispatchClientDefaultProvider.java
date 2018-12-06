@@ -78,9 +78,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             httpConduit.setTlsClientParameters(params);
         }
 
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED);
-        Boolean useProxyBool = Boolean.parseBoolean(useProxy);
-        if (useProxyBool) {
+        if (domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED)) {
             LOG.info("Usage of Proxy required");
             configureProxy(httpClientPolicy, httpConduit);
         } else {

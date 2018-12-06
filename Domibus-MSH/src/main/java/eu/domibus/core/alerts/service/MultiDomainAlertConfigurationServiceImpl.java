@@ -281,9 +281,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     protected CommonConfiguration readCommonConfiguration(Domain domain) {
-        final boolean emailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(getSendEmailActivePropertyName()));
+        final boolean emailActive = domibusPropertyProvider.getBooleanOptionalDomainProperty(getSendEmailActivePropertyName());
         final String alertCleanerLifeTimePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME, DOMIBUS_ALERT_SUPER_CLEANER_ALERT_LIFETIME);
-        final Integer alertLifeTimeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertCleanerLifeTimePropertyName));
+        final Integer alertLifeTimeInDays = domibusPropertyProvider.getIntegerOptionalDomainProperty(alertCleanerLifeTimePropertyName);
 
         if (!emailActive) {
             return new CommonConfiguration(alertLifeTimeInDays);
@@ -321,7 +321,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     protected MessagingModuleConfiguration readMessageConfiguration(Domain domain) {
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean messageAlertActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE));
+            final Boolean messageAlertActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
             if (!alertActive || !messageAlertActive) {
                 LOG.debug("domain:[{}] Alert message status change module is inactive for the following reason:global alert module active[{}], message status change module active[{}]", domain, alertActive, messageAlertActive);
                 return new MessagingModuleConfiguration();
@@ -357,7 +357,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         try {
             final Boolean alertActive = isAlertModuleEnabled();
             final String accountDisabledAlertPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_ACTIVE);
-            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledAlertPropertyName));
+            final Boolean accountDisabledActive = domibusPropertyProvider.getBooleanDomainProperty(domain, accountDisabledAlertPropertyName);
             if (!alertActive || !accountDisabledActive) {
                 LOG.debug("domain:[{}] Alert account disabled module is inactive for the following reason:global alert module active[{}], account disabled module active[{}]", domain, alertActive, accountDisabledActive);
                 return new AccountDisabledModuleConfiguration();
@@ -388,7 +388,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             final Boolean alertActive = isAlertModuleEnabled();
 
             final String alertActivePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
-            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName));
+            final Boolean loginFailureActive = domibusPropertyProvider.getBooleanDomainProperty(domain, alertActivePropertyName);
 
             if (!alertActive || !loginFailureActive) {
                 LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
@@ -416,13 +416,13 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean imminentExpirationActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE));
+            final Boolean imminentExpirationActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE);
             if (!alertActive || !imminentExpirationActive) {
                 LOG.debug("domain:[{}] Alert certificate imminent expiration module is inactive for the following reason:global alert module active[{}], certificate imminent expiration module active[{}]", domain, alertActive, imminentExpirationActive);
                 return new ImminentExpirationCertificateModuleConfiguration();
             }
-            final Integer imminentExpirationDelay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS));
-            final Integer imminentExpirationFrequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS));
+            final Integer imminentExpirationDelay = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS);
+            final Integer imminentExpirationFrequency = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS);
             final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL));
             final String imminentExpirationMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT);
 
@@ -444,13 +444,13 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean expiredActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE));
+            final Boolean expiredActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE);
             if (!alertActive || !expiredActive) {
                 LOG.debug("domain:[{}] Alert certificate expired module is inactive for the following reason:global alert module active[{}], certificate expired module active[{}]", domain, alertActive, expiredActive);
                 return new ExpiredCertificateModuleConfiguration();
             }
-            final Integer revokedFrequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS));
-            final Integer revokedDuration = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS));
+            final Integer revokedFrequency = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS);
+            final Integer revokedDuration = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS);
             final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_LEVEL));
             final String expiredMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT);
 
