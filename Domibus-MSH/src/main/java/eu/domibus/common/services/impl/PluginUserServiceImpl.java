@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @Service
 public class PluginUserServiceImpl implements PluginUserService {
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserService.class);
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserServiceImpl.class);
 
     @Autowired
     @Qualifier("securityAuthenticationDAO")

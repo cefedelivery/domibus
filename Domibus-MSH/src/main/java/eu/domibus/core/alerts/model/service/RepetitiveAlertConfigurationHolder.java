@@ -28,7 +28,7 @@ public class RepetitiveAlertConfigurationHolder {
         LOG.debug("Retrieving repetitive alert configuration for alert type :[{}]", alertType);
         if (this.configurations.get(alertType) == null) {
             synchronized (this.configurations) {
-                if (this.configurations.get(alertType) == null) {
+                if (this.configurations.get(alertType) == null) { //NOSONAR: double-check locking
                     LOG.debug("Creating repetitive alert configuration for alert type :[{}]", alertType);
                     ConfigurationLoader<RepetitiveAlertModuleConfiguration> bean = applicationContext.getBean(ConfigurationLoader.class);
                     this.configurations.put(alertType, bean);

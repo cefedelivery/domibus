@@ -30,6 +30,4 @@ public interface UserDao extends UserDaoBase {
     void delete(final Collection<User> delete);
 
     void flush();
-
-    List<UserBase> findWithPasswordChangedBetween(LocalDate start, LocalDate end, boolean withDefaultPassword);
 }

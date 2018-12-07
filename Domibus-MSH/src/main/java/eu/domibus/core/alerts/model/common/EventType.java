@@ -63,8 +63,9 @@ public enum EventType {
 
     public DomibusMessageCode getSecurityMessageCode() {
         //TODO: see if we need to throw
-        if (this.securityMessageCode == null)
+        if (this.securityMessageCode == null) {
             throw new IllegalStateException("SecurityMessageCode for event type " + this.name() + " not defined");
+        }
         return this.securityMessageCode;
     }
 

@@ -88,7 +88,7 @@ public abstract class UserPasswordManager<U extends UserBase> {
         int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
         LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
 
-        if (maxPasswordAgeInDays == 0) {
+        if (maxPasswordAgeInDays <= 0) {
             return;
         }
 
@@ -102,14 +102,14 @@ public abstract class UserPasswordManager<U extends UserBase> {
 
     public Integer getDaysTillExpiration(String userName, boolean isDefaultPassword, LocalDateTime passwordChangeDate) {
         int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getWarningDaysBeforeExpiration()));
-        if (warningDaysBeforeExpiration == 0) {
+        if (warningDaysBeforeExpiration <= 0) {
             return null;
         }
 
         String expirationProperty = isDefaultPassword ? getMaximumDefaultPasswordAgeProperty() : getMaximumPasswordAgeProperty();
         int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
 
-        if (maxPasswordAgeInDays == 0) {
+        if (maxPasswordAgeInDays <= 0) {
             return null;
         }
 
@@ -150,7 +150,7 @@ public abstract class UserPasswordManager<U extends UserBase> {
 
     private void savePasswordHistory(U user) {
         int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
-        if (passwordsToKeep == 0) {
+        if (passwordsToKeep <= 0) {
             return;
         }
 
