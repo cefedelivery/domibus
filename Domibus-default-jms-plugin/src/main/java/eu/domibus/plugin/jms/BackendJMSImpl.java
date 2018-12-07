@@ -1,6 +1,9 @@
 package eu.domibus.plugin.jms;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
+import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
@@ -11,6 +14,7 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.MultiDomainPModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ext.domain.DomainDTO;
 import eu.domibus.ext.domain.JmsMessageDTO;
 import eu.domibus.ext.exceptions.DomibusPropertyExtException;
@@ -63,6 +67,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.codahale.metrics.MetricRegistry.name;
+import static eu.domibus.api.metrics.Metrics.METRIC_REGISTRY;
 import static eu.domibus.ebms3.common.model.Property.MIME_TYPE;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
 import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
@@ -170,6 +176,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         super(name);
     }
 
+    private static final Meter downloadMessage = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "downloadMessage"));
+    private static final Meter authenticate = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "authenticate"));
+    private static final Meter sendPayload = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "sendPayload"));
+
 
     @PostConstruct
     protected void init() {
@@ -273,6 +283,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     @Override
     public void deliverMessage(final String messageId) {
+        Timer.Context senderAliasContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message")).time();
         if (Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_DELIVER, "false"))) {
             LOG.warn("Skipping delivery.");
             try {
@@ -293,8 +304,12 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         try {
 
             if (!doNotSendToC4) {
+                Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
                 authenticate(submission);
+                authenticateContext.stop();
+                Timer.Context sendPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
                 sendPayload(submission);
+                sendPayloadContext.stop();
             }
 
             //means c4 is not pushing back to c3, so we send the submision from c3
@@ -312,6 +327,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         } catch (MessagingProcessingException e) {
             LOG.error(e.getMessage(), e);
         }
+        senderAliasContext.stop();
     }
 
     private Submission getSubmissionResponse(Submission submission, String message) {

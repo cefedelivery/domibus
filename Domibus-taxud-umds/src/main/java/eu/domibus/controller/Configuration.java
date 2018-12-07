@@ -1,5 +1,6 @@
 package eu.domibus.controller;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
@@ -10,9 +11,15 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({"eu.domibus.controller","eu.domibus.taxud"})
 public class Configuration {
 
-    /*@Bean
-    public MultipartResolver multipartResolver() {
-        return new CommonsMultipartResolver();
+
+
+ /*   @Bean
+    public SecurityWebFilterChain securityWebFilterChain(
+            ServerHttpSecurity http) {
+        return http.authorizeExchange()
+                .pathMatchers("/actuator/**").permitAll()
+                .anyExchange().authenticated()
+                .and().build();
     }*/
 
 }

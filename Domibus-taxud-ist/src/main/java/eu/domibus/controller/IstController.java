@@ -9,7 +9,8 @@ import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.taxud.IdentifierUtil;
 import eu.domibus.taxud.PayloadLogging;
-import io.reactivex.Observable;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
@@ -26,9 +27,11 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
 import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Thomas Dussart
@@ -70,7 +73,23 @@ public class IstController {
     private WebserviceExample webserviceExample;
 
 
-    private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(20);
+    private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(100);
+
+    private final AtomicInteger onMessageParallel = Metrics.gauge("ist.onMessage.parallel", new AtomicInteger(0));
+
+    private final AtomicInteger sendMessageParalell = Metrics.gauge("ist.sendMessage.parallel", new AtomicInteger(0));
+
+    private final AtomicInteger totalMessageReceivedCounter = Metrics.gauge("ist.totalMessageReceived.counter", new AtomicInteger(0));
+
+    private final Timer submissionTimer = Timer
+            .builder("ist.submission.timer")
+            .description("A timer around the preparation of the submission") // optional
+            .register(Metrics.globalRegistry);
+
+    private final Timer onMessageTimer = Timer
+            .builder("ist.onMessage.timer")
+            .description("A timer around the preparation of the submission") // optional
+            .register(Metrics.globalRegistry);
 
     private Scheduler scheduler;
 
@@ -94,27 +113,34 @@ public class IstController {
     }
 
     @PostConstruct
-    protected void init(){
-        doNotPushBack=Boolean.valueOf(doNotPushBackProperty);
-        LOG.warn("Do not push to c3:[{}]",doNotPushBack);
+    protected void init() {
+
+        doNotPushBack = Boolean.valueOf(doNotPushBackProperty);
+        LOG.warn("Do not push to c3:[{}]", doNotPushBack);
         scheduler = Schedulers.from(threadPoolExecutor);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
     public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
+        totalMessageReceivedCounter.getAndIncrement();
+        onMessageParallel.getAndIncrement();
         LOG.info("Message received with id:\n  [{}]", jsonSubmission.getMessageId());
+        onMessageTimer.record(() -> logAndSendBack(jsonSubmission));
+        onMessageParallel.getAndDecrement();
+    }
+
+    private void logAndSendBack(@RequestBody JsonSubmission jsonSubmission) {
         payloadLogging.decodeAndlog(jsonSubmission.getPayload());
-        if(!doNotPushBack) {
-            Observable<Submission> quoteObservable = Observable.<Submission>create(subscriber -> {
-                Submission submission = prepareSubmission(jsonSubmission);
-                subscriber.onNext(submission);
-                subscriber.onComplete();
-            }).subscribeOn(scheduler);
-            quoteObservable.subscribe(this::sendMessage);
+        if (!doNotPushBack) {
+            threadPoolExecutor.execute(() -> {
+                sendMessageParalell.getAndIncrement();
+                sendMessage(submissionTimer.record(() -> prepareSubmission(jsonSubmission)));
+                sendMessageParalell.getAndDecrement();
+            });
         }
     }
 
-    private void sendMessage(Submission submission){
+    private void sendMessage(Submission submission) {
         try {
             webserviceExample.getPort().submitMessage(submission.getSubmitRequest(), submission.getMessaging());
         } catch (MalformedURLException e) {
@@ -124,7 +150,7 @@ public class IstController {
         }
     }
 
-    private Submission prepareSubmission(JsonSubmission submission){
+    private Submission prepareSubmission(JsonSubmission submission) {
         String response = HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", submission.getMessageId());
         accessPointHelper.switchAccessPoint(submission);
         endPointHelper.switchEndPoint(submission);
@@ -180,7 +206,7 @@ public class IstController {
 
         String[] splitIdentifier = IdentifierUtil.splitIdentifier(finalRecipient.getValue());
         if (splitIdentifier[1].equalsIgnoreCase(pullUserIdentifier)) {
-            submissionServiceType = to_partyId+pullServiceType;
+            submissionServiceType = to_partyId + pullServiceType;
         }
         CollaborationInfo collaborationInfo = new CollaborationInfo();
         Service responseService = new Service();
@@ -218,10 +244,10 @@ public class IstController {
         responsePartInfoProperty.setName(MIME_TYPE);
         responsePartInfoProperty.setValue(TEXT_XML);
         messaging.setUserMessage(userMessage);
-        return new Submission(submitRequest,messaging);
+        return new Submission(submitRequest, messaging);
     }
 
-    static class Submission{
+    static class Submission {
         private SubmitRequest submitRequest;
         private Messaging messaging;
 

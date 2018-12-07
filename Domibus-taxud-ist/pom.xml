@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.9.RELEASE</version>
+        <version>2.1.1.RELEASE</version>
     </parent>
 
     <dependencies>
@@ -20,12 +20,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <!-- add exclusion to deploy in weblogic-->
-           <exclusions>
+          <!-- <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
-            </exclusions>
+            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>eu.domibus</groupId>
@@ -72,9 +72,6 @@
             <version>1.9</version>
         </dependency>
         <dependency>
-        <!--    <groupId>eu.domibus</groupId>
-            <artifactId>domibus-ws-stubs</artifactId>
-            <version>3.3.1</version>-->
             <groupId>eu.domibus</groupId>
             <artifactId>backend-client-example</artifactId>
             <version>4.0</version>
@@ -90,7 +87,15 @@
             <artifactId>rxjava</artifactId>
             <version>2.1.9</version>
         </dependency>
-</dependencies>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-servlets</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
 
 <build>
 <pluginManagement>
@@ -114,29 +119,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
         </plugin>
-        <!-- tag::wsdl[] -->
-       <!-- <plugin>
-            <groupId>org.jvnet.jaxb2.maven2</groupId>
-            <artifactId>maven-jaxb2-plugin</artifactId>
-            <version>0.12.3</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>generate</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <schemaLanguage>WSDL</schemaLanguage>
-                <generatePackage>domibus.wsdl</generatePackage>
-                <schemas>
-                    <schema>
-                        <url>http://localhost:8080/domibus/services/backend?wsdl</url>
-                    </schema>
-                </schemas>
-            </configuration>
-        </plugin>-->
-        <!-- end::wsdl[] -->
     </plugins>
 </pluginManagement>
 </build>
