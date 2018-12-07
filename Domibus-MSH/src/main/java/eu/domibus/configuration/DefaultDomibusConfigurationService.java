@@ -70,16 +70,12 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
         String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
         String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
 
-        if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)
-                || StringUtils.isEmpty(httpProxyUser) || StringUtils.isEmpty(httpProxyPassword)) {
-
-            LOG.error("Proxy is enabled but the configuration is invalid:" + httpProxyHost + " " + httpProxyPort + " " +
-                    httpProxyUser);
-
+        if (StringUtils.isEmpty(httpProxyHost) || StringUtils.isEmpty(httpProxyPort)) {
+            LOG.error("Proxy is enabled but httpProxyHost or httpProxyPort are not configured.");
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_006, "Proxy is enabled but the configuration is invalid.");
         }
-        LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
-                httpProxyUser);
+        LOG.info("Proxy configured: httpProxyHost=" + httpProxyHost + ", httpProxyPort=" + httpProxyPort + ", httpProxyUser=" +
+                (httpProxyUser != null ? httpProxyUser : "null"));
 
         return Boolean.parseBoolean(useProxy);
     }
