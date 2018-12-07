@@ -2,7 +2,7 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.IUser;
 import eu.domibus.core.alerts.model.service.Event;
 
 import java.util.Date;
@@ -81,7 +81,7 @@ public interface EventService {
     void enrichMessageEvent(Event event);
 
 
-    void enqueuePasswordExpiredEvent(User user, Integer maxPasswordAgeInDays);
+    void enqueuePasswordExpiredEvent(IUser user, Integer maxPasswordAgeInDays);
 
-    void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays);
+    void enqueuePasswordImminentExpirationEvent(IUser user, Integer maxPasswordAgeInDays);
 }

@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 public abstract class PasswordValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PasswordValidator.class);
 
-    public final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.passwordPolicy.warning.beforeExpiration";
     private static final String CREDENTIALS_EXPIRED = "Expired";
 
     @Autowired
@@ -45,6 +44,8 @@ public abstract class PasswordValidator {
     protected abstract String getMaximumDefaultPasswordAgeProperty();
 
     protected abstract String getMaximumPasswordAgeProperty();
+
+    protected abstract String getWarningDaysBeforeExpiration() ;
 
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
@@ -98,7 +99,7 @@ public abstract class PasswordValidator {
     }
 
     public Integer getDaysTillExpiration(String userName, boolean isDefaultPassword, LocalDateTime passwordChangeDate) {
-        int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(WARNING_DAYS_BEFORE_EXPIRATION));
+        int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getWarningDaysBeforeExpiration()));
         if (warningDaysBeforeExpiration == 0) {
             return null;
         }

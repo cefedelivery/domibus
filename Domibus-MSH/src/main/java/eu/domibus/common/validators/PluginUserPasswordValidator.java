@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 public class PluginUserPasswordValidator extends PasswordValidator {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserPasswordValidator.class);
 
+    final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin_passwordPolicy.warning.beforeExpiration";
+
     private static final String PASSWORD_COMPLEXITY_PATTERN = "domibus.plugin_passwordPolicy.pattern";
     private static final String PASSWORD_HISTORY_POLICY = "domibus.plugin_passwordPolicy.dontReuseLast";
 
@@ -47,11 +49,15 @@ public class PluginUserPasswordValidator extends PasswordValidator {
     @Override
     protected String getMaximumPasswordAgeProperty() { return MAXIMUM_PASSWORD_AGE; }
 
-
     protected List<String> getPasswordHistory(String userName, int oldPasswordsToCheck) {
         AuthenticationEntity user = userDao.findByUser(userName);
         List<PluginUserPasswordHistory> oldPasswords = userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
         return oldPasswords.stream().map(el -> el.getPasswordHash()).collect(Collectors.toList());
+    }
+
+    @Override
+    protected String getWarningDaysBeforeExpiration() {
+        return WARNING_DAYS_BEFORE_EXPIRATION;
     }
 
 }

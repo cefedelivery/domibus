@@ -7,48 +7,46 @@ import eu.domibus.logging.DomibusMessageCode;
  * @since 4.0
  */
 public enum EventType {
-    MSG_STATUS_CHANGED,
-    CERT_IMMINENT_EXPIRATION,
-    CERT_EXPIRED,
-    USER_LOGIN_FAILURE,
-    USER_ACCOUNT_DISABLED,
 
-    PASSWORD_EXPIRED,
-    PASSWORD_IMMINENT_EXPIRATION;
+    MSG_STATUS_CHANGED(AlertType.MSG_STATUS_CHANGED, "message"),
+    CERT_IMMINENT_EXPIRATION(AlertType.CERT_IMMINENT_EXPIRATION, "certificateImminentExpiration"),
+    CERT_EXPIRED(AlertType.CERT_EXPIRED, "certificateExpired"),
+    USER_LOGIN_FAILURE(AlertType.USER_LOGIN_FAILURE, "loginFailure"),
+    USER_ACCOUNT_DISABLED(AlertType.USER_ACCOUNT_DISABLED, "accountDisabled"),
 
+    //TODO: maybe we should get rid of the plugin variant of the Event types
+    PASSWORD_EXPIRED(AlertType.PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_EXPIRED),
+    PASSWORD_IMMINENT_EXPIRATION(AlertType.PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION),
+    PLUGIN_PASSWORD_EXPIRED(AlertType.PLUGIN_PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_EXPIRED),
+    PLUGIN_PASSWORD_IMMINENT_EXPIRATION(AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION);
 
-    public static String getQueueSelectorFromEventType(EventType eventType) {
-        switch (eventType) {
-            case MSG_STATUS_CHANGED:
-                return "message";
-            case CERT_IMMINENT_EXPIRATION:
-                return "certificateImminentExpiration";
-            case CERT_EXPIRED:
-                return "certificateExpired";
-            case USER_LOGIN_FAILURE:
-                return "loginFailure";
-            case USER_ACCOUNT_DISABLED:
-                return "accountDisabled";
-            case PASSWORD_IMMINENT_EXPIRATION:
-                return "userPasswordImminentExpiration";
-            case PASSWORD_EXPIRED:
-                return "userPasswordExpired";
+    private AlertType defaultAlertType;
+    private final String queueSelector;
+    private final DomibusMessageCode securityMessageCode;
 
-            default:
-                throw new IllegalStateException("Selector for event type " + eventType + " not defined");
-        }
+    EventType(AlertType defaultAlertType, String queueSelector, DomibusMessageCode securityMessageCode) {
+        this.defaultAlertType = defaultAlertType;
+        this.queueSelector = queueSelector;
+        this.securityMessageCode = securityMessageCode;
     }
 
-    public static DomibusMessageCode getSecurityMessageCode(EventType eventType) {
-        switch (eventType) {
-
-            case PASSWORD_IMMINENT_EXPIRATION:
-                return DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION;
-            case PASSWORD_EXPIRED:
-                return DomibusMessageCode.SEC_PASSWORD_EXPIRED;
-
-            default:
-                throw new IllegalStateException("SecurityMessageCode for event type " + eventType + " not defined");
-        }
+    EventType(AlertType defaultAlertType, String queueSelector) {
+        this(defaultAlertType, queueSelector, null);
     }
+
+    public AlertType geDefaultAlertType() {
+        return this.defaultAlertType;
+    }
+
+    public String getQueueSelector() {
+        return this.queueSelector;
+    }
+
+    public DomibusMessageCode getSecurityMessageCode() {
+        //TODO: see if we need to throw
+        if (this.securityMessageCode == null)
+            throw new IllegalStateException("SecurityMessageCode for event type " + this.name() + " not defined");
+        return this.securityMessageCode;
+    }
+
 }

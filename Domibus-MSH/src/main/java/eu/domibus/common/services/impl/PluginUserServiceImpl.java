@@ -7,15 +7,10 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
 import eu.domibus.api.user.UserManagementException;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.model.security.User;
 import eu.domibus.common.services.PluginUserService;
-import eu.domibus.common.validators.PasswordValidator;
 import eu.domibus.common.validators.PluginUserPasswordValidator;
-import eu.domibus.core.alerts.model.common.AlertType;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
-import eu.domibus.core.alerts.service.UserAlertsService;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
@@ -29,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +62,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     private PluginUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
-    UserAlertsService userAlertsService;
-
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Override
     public List<AuthenticationEntity> findUsers(AuthType authType, AuthRole authRole, String originalUser, String userName, int page, int pageSize) {
@@ -170,7 +163,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     }
 
     //TODO: try to merge this code with the similar one found in user.changePassword
-    private void changePassword(AuthenticationEntity entity , AuthenticationEntity userEntity) {
+    private void changePassword(AuthenticationEntity entity, AuthenticationEntity userEntity) {
         savePasswordHistory(userEntity); // save old password in history
         passwordValidator.validateComplexity(userEntity.getUsername(), userEntity.getPasswd());
         passwordValidator.validateHistory(userEntity.getUsername(), userEntity.getPasswd());
