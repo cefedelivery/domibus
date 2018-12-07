@@ -11,7 +11,7 @@ import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.*;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
+import eu.domibus.core.alerts.model.service.RepetitiveAlertModuleConfiguration;
 import eu.domibus.core.alerts.model.service.Event;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
@@ -254,7 +254,7 @@ public class EventServiceImpl implements EventService {
     protected boolean shouldCreateAlert(eu.domibus.core.alerts.model.persist.Event entity) {
 
         AlertType alertType = AlertType.getByEventType(entity.getType());
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(alertType);
+        final RepetitiveAlertModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(alertType);
         if (!eventConfiguration.isActive()) {
             return false;
         }

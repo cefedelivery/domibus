@@ -84,9 +84,9 @@ public class UserAlertsServiceImplTest {
         new Expectations() {{
             userAlertsService.getAlertTypeForPasswordExpired();
             result = AlertType.PASSWORD_EXPIRED;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
             result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
             result = howManyDaysToGenerateAlertsAfterExpiration;
             userAlertsService.getMaximumPasswordAgeProperty();
             result = ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE;
@@ -128,9 +128,9 @@ public class UserAlertsServiceImplTest {
             result = AlertType.PASSWORD_IMMINENT_EXPIRATION;
             userAlertsService.getMaximumPasswordAgeProperty();
             result = ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
             result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
             result = howManyDaysBeforeExpirationToGenerateAlerts;
             domibusPropertyProvider.getOptionalDomainProperty(ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();

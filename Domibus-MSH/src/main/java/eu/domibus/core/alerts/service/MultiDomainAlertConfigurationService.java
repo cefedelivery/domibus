@@ -68,7 +68,7 @@ public interface MultiDomainAlertConfigurationService {
     /**
      * @return alert events module configuration
      */
-    AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType);
+    RepetitiveAlertModuleConfiguration getRepetitiveAlertConfiguration(AlertType alertType);
 
     /**
      * With the introduction of multitenancy, a super user has been created.

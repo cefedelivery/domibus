@@ -9,18 +9,18 @@ import org.slf4j.Logger;
  * @author Ion Perpegel
  * @since 4.1
  */
-public class AlertEventModuleConfiguration extends AlertModuleConfigurationBase {
+public class RepetitiveAlertModuleConfiguration extends AlertModuleConfigurationBase {
 
-    private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertEventModuleConfiguration.class);
+    private static final Logger LOG = DomibusLoggerFactory.getLogger(RepetitiveAlertModuleConfiguration.class);
 
     private Integer eventDelay;
     private Integer eventFrequency;
 
-    public AlertEventModuleConfiguration(AlertType alertType) {
+    public RepetitiveAlertModuleConfiguration(AlertType alertType) {
         super(alertType);
     }
 
-    public AlertEventModuleConfiguration(AlertType alertType, Integer eventDelay, Integer eventFrequency, AlertLevel eventAlertLevel, String eventMailSubject) {
+    public RepetitiveAlertModuleConfiguration(AlertType alertType, Integer eventDelay, Integer eventFrequency, AlertLevel eventAlertLevel, String eventMailSubject) {
         super(alertType, eventAlertLevel, eventMailSubject);
 
         this.eventDelay = eventDelay;

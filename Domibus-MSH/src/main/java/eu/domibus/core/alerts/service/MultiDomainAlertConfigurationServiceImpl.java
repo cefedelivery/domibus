@@ -154,7 +154,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     private ConfigurationLoader<CommonConfiguration> commonConfigurationConfigurationLoader;
 
     @Autowired
-    private RepetitiveAlertConfigurationHolder repetitiveAlertsConfigurationLoader;
+    private RepetitiveAlertConfigurationHolder passwordExpirationAlertsConfigurationHolder;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -242,7 +242,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             case PASSWORD_EXPIRED:
             case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
             case PLUGIN_PASSWORD_EXPIRED:
-                return getRepetitiveEventConfiguration(alertType);
+                return getRepetitiveAlertConfiguration(alertType);
             default:
                 LOG.error("Invalid alert type[{}]", alertType);
                 throw new IllegalArgumentException("Invalid alert type");
@@ -471,28 +471,28 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      * {@inheritDoc}
      */
     @Override
-    public AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType) {
-        ConfigurationLoader<AlertEventModuleConfiguration> configurationLoader = repetitiveAlertsConfigurationLoader.get(alertType);
-        return configurationLoader.getConfiguration(new RepetitiveEventConfigurationReader(alertType)::readConfiguration);
+    public RepetitiveAlertModuleConfiguration getRepetitiveAlertConfiguration(AlertType alertType) {
+        ConfigurationLoader<RepetitiveAlertModuleConfiguration> configurationLoader = passwordExpirationAlertsConfigurationHolder.get(alertType);
+        return configurationLoader.getConfiguration(new RepetitiveAlertConfigurationReader(alertType)::readConfiguration);
     }
 
-    class RepetitiveEventConfigurationReader {
+    class RepetitiveAlertConfigurationReader {
         AlertType alertType;
         String property, moduleName;
 
-        public RepetitiveEventConfigurationReader(AlertType alertType) {
+        public RepetitiveAlertConfigurationReader(AlertType alertType) {
             this.alertType = alertType;
             this.property = alertType.getConfigurationProperty();
             this.moduleName = alertType.getTitle();
         }
 
-        public AlertEventModuleConfiguration readConfiguration(Domain domain) {
+        public RepetitiveAlertModuleConfiguration readConfiguration(Domain domain) {
             try {
                 final Boolean alertModuleActive = isAlertModuleEnabled();
                 final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
                 if (!alertModuleActive || !eventActive) {
                     LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], {} module active[{}]", domain, moduleName, alertModuleActive, eventActive);
-                    return new AlertEventModuleConfiguration(alertType);
+                    return new RepetitiveAlertModuleConfiguration(alertType);
                 }
 
                 final Integer delay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".delay_days"));
@@ -501,10 +501,10 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, property + ".mail.subject");
 
                 LOG.info("Alert {} module activated for domain:[{}]", moduleName, domain);
-                return new AlertEventModuleConfiguration(alertType, delay, frequency, alertLevel, mailSubject);
+                return new RepetitiveAlertModuleConfiguration(alertType, delay, frequency, alertLevel, mailSubject);
             } catch (Exception e) {
                 LOG.warn("An error occurred while reading {} alert module configuration for domain:[{}], ", moduleName, domain, e);
-                return new AlertEventModuleConfiguration(alertType);
+                return new RepetitiveAlertModuleConfiguration(alertType);
             }
         }
     }

@@ -48,16 +48,19 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     private ConfigurationLoader<CommonConfiguration> commonConfigurationConfigurationLoader;
 
     @Injectable
-    private ConfigurationLoader<AlertEventModuleConfiguration> expiredPasswordConfigurationLoader;
+    private ConfigurationLoader<RepetitiveAlertModuleConfiguration> expiredPasswordConfigurationLoader;
 
     @Injectable
-    private ConfigurationLoader<AlertEventModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
+    private ConfigurationLoader<RepetitiveAlertModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
 
     @Injectable
     private DomainContextProvider domainContextProvider;
 
     @Injectable
     RepetitiveAlertConfigurationHolder alertConfigurationHolder;
+
+    @Injectable
+    ConfigurationLoader<LoginFailureModuleConfiguration> pluginLoginFailureConfigurationLoader;
 
     @Test
     public void getAlertLevelForMessage(final @Mocked MessagingModuleConfiguration messagingConfiguration) {

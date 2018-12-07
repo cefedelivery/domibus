@@ -5,7 +5,7 @@ import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.model.security.UserBase;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
+import eu.domibus.core.alerts.model.service.RepetitiveAlertModuleConfiguration;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
     }
 
     void triggerImminentExpirationEvents(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveEventConfiguration(getAlertTypeForPasswordImminentExpiration());
+        final RepetitiveAlertModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveAlertConfiguration(getAlertTypeForPasswordImminentExpiration());
         if (!eventConfiguration.isActive()) {
             return;
         }
@@ -89,7 +89,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
     }
 
     void triggerExpiredEvents(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveEventConfiguration(getAlertTypeForPasswordExpired());
+        final RepetitiveAlertModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveAlertConfiguration(getAlertTypeForPasswordExpired());
         if (!eventConfiguration.isActive()) {
             return;
         }

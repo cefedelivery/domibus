@@ -30,7 +30,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 import static eu.domibus.core.alerts.model.common.AuthenticationEvent.*;
 import static eu.domibus.core.alerts.model.common.CertificateEvent.*;
@@ -249,7 +248,7 @@ public class EventServiceImplTest {
         persistedEvent.setType(EventType.PASSWORD_EXPIRED);
 
         new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration((AlertType)any).isActive();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration((AlertType)any).isActive();
             result = true;
             eventDao.findWithTypeAndPropertyValue((EventType) any, anyString, anyString);
             result = null;

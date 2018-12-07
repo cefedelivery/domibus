@@ -22,15 +22,15 @@ public class RepetitiveAlertConfigurationHolder {
     @Autowired
     ApplicationContext applicationContext;
 
-    private final HashMap<AlertType, ConfigurationLoader<AlertEventModuleConfiguration>> configurations = new HashMap<>();
+    private final HashMap<AlertType, ConfigurationLoader<RepetitiveAlertModuleConfiguration>> configurations = new HashMap<>();
 
-    public ConfigurationLoader<AlertEventModuleConfiguration> get(AlertType alertType) {
+    public ConfigurationLoader<RepetitiveAlertModuleConfiguration> get(AlertType alertType) {
         LOG.debug("Retrieving repetitive alert configuration for alert type :[{}]", alertType);
         if (this.configurations.get(alertType) == null) {
             synchronized (this.configurations) {
                 if (this.configurations.get(alertType) == null) {
                     LOG.debug("Creating repetitive alert configuration for alert type :[{}]", alertType);
-                    ConfigurationLoader<AlertEventModuleConfiguration> bean = applicationContext.getBean(ConfigurationLoader.class);
+                    ConfigurationLoader<RepetitiveAlertModuleConfiguration> bean = applicationContext.getBean(ConfigurationLoader.class);
                     this.configurations.put(alertType, bean);
                 }
             }
