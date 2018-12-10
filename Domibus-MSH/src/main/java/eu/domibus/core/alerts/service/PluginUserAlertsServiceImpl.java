@@ -24,8 +24,8 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserAlertsServiceImpl.class);
 
-    protected final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin_passwordPolicy.expiration";
-    protected final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin_passwordPolicy.defaultPasswordExpiration";
+    protected final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin.passwordPolicy.expiration";
+    protected final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin.passwordPolicy.defaultPasswordExpiration";
 
     @Autowired
     protected AuthenticationDAO userDao;

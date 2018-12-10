@@ -20,8 +20,8 @@ public interface DomibusConfigurationService {
 
     String PASSWORD_POLICY_PATTERN = "domibus.passwordPolicy.pattern";
     String PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.passwordPolicy.validationMessage";
-    String PLUGIN_PASSWORD_POLICY_PATTERN = "domibus.plugin_passwordPolicy.pattern";
-    String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.plugin_passwordPolicy.validationMessage";
+    String PLUGIN_PASSWORD_POLICY_PATTERN = "domibus.plugin.passwordPolicy.pattern";
+    String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.plugin.passwordPolicy.validationMessage";
 
     String getConfigLocation();
 

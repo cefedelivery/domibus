@@ -18,13 +18,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class PluginUserPasswordManager extends UserPasswordManager<AuthenticationEntity> {
 
-    final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin_passwordPolicy.warning.beforeExpiration";
+    final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin.passwordPolicy.warning.beforeExpiration";
 
-    static final String PASSWORD_COMPLEXITY_PATTERN = "domibus.plugin_passwordPolicy.pattern";
-    static final String PASSWORD_HISTORY_POLICY = "domibus.plugin_passwordPolicy.dontReuseLast";
+    static final String PASSWORD_COMPLEXITY_PATTERN = "domibus.plugin.passwordPolicy.pattern";
+    static final String PASSWORD_HISTORY_POLICY = "domibus.plugin.passwordPolicy.dontReuseLast";
 
-    final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin_passwordPolicy.expiration";
-    final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin_passwordPolicy.defaultPasswordExpiration";
+    final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin.passwordPolicy.expiration";
+    final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin.passwordPolicy.defaultPasswordExpiration";
 
     @Autowired
     protected AuthenticationDAO userDao;
