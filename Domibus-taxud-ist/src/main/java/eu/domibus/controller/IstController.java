@@ -1,18 +1,16 @@
 package eu.domibus.controller;
 
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
-import eu.domibus.example.ws.WebserviceExample;
-import eu.domibus.plugin.JsonSubmission;
+import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.LargePayloadType;
 import eu.domibus.plugin.webService.generated.SubmitMessageFault;
 import eu.domibus.plugin.webService.generated.SubmitRequest;
 import eu.domibus.taxud.IdentifierUtil;
+import eu.domibus.taxud.JsonSubmission;
 import eu.domibus.taxud.PayloadLogging;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.Timer;
-import io.reactivex.Scheduler;
-import io.reactivex.schedulers.Schedulers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.activation.DataHandler;
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.codahale.metrics.MetricRegistry.name;
 
 /**
  * @author Thomas Dussart
@@ -68,30 +63,17 @@ public class IstController {
     @Value("${domibus.do.not.push.back.to.c3}")
     private String doNotPushBackProperty;
 
+    @Value("backend.endpoint")
+    private String backendEndpoint;
+
     private boolean doNotPushBack;
 
-    private WebserviceExample webserviceExample;
+    private BackendInterface backendInterface;
 
 
-    private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(100);
+    private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(40);
 
-    private final AtomicInteger onMessageParallel = Metrics.gauge("ist.onMessage.parallel", new AtomicInteger(0));
-
-    private final AtomicInteger sendMessageParalell = Metrics.gauge("ist.sendMessage.parallel", new AtomicInteger(0));
-
-    private final AtomicInteger totalMessageReceivedCounter = Metrics.gauge("ist.totalMessageReceived.counter", new AtomicInteger(0));
-
-    private final Timer submissionTimer = Timer
-            .builder("ist.submission.timer")
-            .description("A timer around the preparation of the submission") // optional
-            .register(Metrics.globalRegistry);
-
-    private final Timer onMessageTimer = Timer
-            .builder("ist.onMessage.timer")
-            .description("A timer around the preparation of the submission") // optional
-            .register(Metrics.globalRegistry);
-
-    private Scheduler scheduler;
+    public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
 
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<response_to_message_id>\n" +
@@ -103,13 +85,14 @@ public class IstController {
 
     @Autowired
     public IstController(final PayloadLogging payloadLogging,
-                         final WebserviceExample webserviceExample,
+                         final BackendInterface backendInterface,
                          final AccessPointHelper accessPointHelper,
                          final EndPointHelper endPointHelper) {
         this.payloadLogging = payloadLogging;
-        this.webserviceExample = webserviceExample;
+        this.backendInterface = backendInterface;
         this.accessPointHelper = accessPointHelper;
         this.endPointHelper = endPointHelper;
+
     }
 
     @PostConstruct
@@ -117,34 +100,33 @@ public class IstController {
 
         doNotPushBack = Boolean.valueOf(doNotPushBackProperty);
         LOG.warn("Do not push to c3:[{}]", doNotPushBack);
-        scheduler = Schedulers.from(threadPoolExecutor);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
     public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
-        totalMessageReceivedCounter.getAndIncrement();
-        onMessageParallel.getAndIncrement();
+        final Timer.Context onMessage = METRIC_REGISTRY.timer(MetricRegistry.name(IstController.class,"ons_message")).time();
         LOG.info("Message received with id:\n  [{}]", jsonSubmission.getMessageId());
-        onMessageTimer.record(() -> logAndSendBack(jsonSubmission));
-        onMessageParallel.getAndDecrement();
+        logAndSendBack(jsonSubmission);
+        onMessage.stop();
+
     }
 
     private void logAndSendBack(@RequestBody JsonSubmission jsonSubmission) {
         payloadLogging.decodeAndlog(jsonSubmission.getPayload());
         if (!doNotPushBack) {
             threadPoolExecutor.execute(() -> {
-                sendMessageParalell.getAndIncrement();
-                sendMessage(submissionTimer.record(() -> prepareSubmission(jsonSubmission)));
-                sendMessageParalell.getAndDecrement();
+                final Submission submission = prepareSubmission(jsonSubmission);
+                final Timer.Context send_message = METRIC_REGISTRY.timer(MetricRegistry.name(IstController.class,"send message")).time();
+                sendMessage(submission);
+                send_message.stop();
             });
         }
     }
 
     private void sendMessage(Submission submission) {
         try {
-            webserviceExample.getPort().submitMessage(submission.getSubmitRequest(), submission.getMessaging());
-        } catch (MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            final SubmitRequest submitRequest = submission.getSubmitRequest();
+            backendInterface.submitMessage(submitRequest, submission.getMessaging());
         } catch (SubmitMessageFault submitMessageFault) {
             LOG.error(submitMessageFault.getMessage(), submitMessageFault);
         }

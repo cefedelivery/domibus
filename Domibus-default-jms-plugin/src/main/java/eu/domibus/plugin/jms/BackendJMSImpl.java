@@ -14,7 +14,6 @@ import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.core.pmode.MultiDomainPModeProvider;
 import eu.domibus.ebms3.common.model.PartyId;
-import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.ext.domain.DomainDTO;
 import eu.domibus.ext.domain.JmsMessageDTO;
 import eu.domibus.ext.exceptions.DomibusPropertyExtException;
@@ -176,10 +175,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         super(name);
     }
 
-    private static final Meter downloadMessage = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "downloadMessage"));
-    private static final Meter authenticate = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "authenticate"));
-    private static final Meter sendPayload = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "sendPayload"));
-
+  /*  private static final Meter downloadMessage = Metrics.METRIC_REGISTRY.meter(name(BackendJMSImpl.class, "downloadMessage"));
+    private static final Meter authenticate = Metrics.METRIC_REGISTRY.meter(name(BackendJMSImpl.class, "authenticate"));
+    private static final Meter sendPayload = Metrics.METRIC_REGISTRY.meter(name(BackendJMSImpl.class, "sendPayload"));
+*/
 
     @PostConstruct
     protected void init() {
@@ -307,7 +306,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
                 authenticate(submission);
                 authenticateContext.stop();
-                Timer.Context sendPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
+                Timer.Context sendPayloadContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.sendPayload")).time();
                 sendPayload(submission);
                 sendPayloadContext.stop();
             }

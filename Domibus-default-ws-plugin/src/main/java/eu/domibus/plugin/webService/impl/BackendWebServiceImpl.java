@@ -24,8 +24,12 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import eu.domibus.api.metrics.*;
 
+import static com.codahale.metrics.MetricRegistry.name;
 import static org.apache.commons.lang3.StringUtils.trim;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 
 
 @SuppressWarnings("ValidExternallyBoundObject")
@@ -57,6 +61,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
 
 
+
     @Autowired
     private StubDtoTransformer defaultTransformer;
 
@@ -79,6 +84,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
+        Timer.Context submitMessageContext = Metrics.METRIC_REGISTRY.timer(name(BackendWebServiceImpl.class, "submit.message")).time();
         LOG.debug("Received message");
 
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
@@ -125,7 +131,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         LOG.info("Received message from backend with messageID [{}]", messageId);
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
+        submitMessageContext.stop();
         return response;
+
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {

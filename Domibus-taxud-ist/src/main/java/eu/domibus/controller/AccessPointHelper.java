@@ -1,7 +1,8 @@
 package eu.domibus.controller;
 
-import eu.domibus.plugin.JsonSubmission;
+
 import eu.domibus.plugin.Submission;
+import eu.domibus.taxud.JsonSubmission;
 import eu.domibus.taxud.SubmissionLogging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
