@@ -389,7 +389,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
         @Override
-        protected AlertType getAlertType() { return AlertType.USER_LOGIN_FAILURE; }
+        protected AlertType getAlertType() {
+            return AlertType.USER_LOGIN_FAILURE;
+        }
 
         @Override
         protected String getModuleName() {
@@ -556,7 +558,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     class PluginLoginFailConfigurationReader extends LoginFailConfigurationReader {
         @Override
-        protected AlertType getAlertType() { return AlertType.PLUGIN_USER_LOGIN_FAILURE; }
+        protected AlertType getAlertType() {
+            return AlertType.PLUGIN_USER_LOGIN_FAILURE;
+        }
 
         @Override
         protected String getModuleName() {

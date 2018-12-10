@@ -40,11 +40,17 @@ public abstract class UserPasswordManager<U extends UserBase> {
     private BCryptPasswordEncoder bcryptEncoder;
 
     protected abstract String getPasswordComplexityPatternProperty();
+
     public abstract String getPasswordHistoryPolicyProperty();
+
     protected abstract String getMaximumDefaultPasswordAgeProperty();
+
     protected abstract String getMaximumPasswordAgeProperty();
+
     protected abstract String getWarningDaysBeforeExpiration();
+
     protected abstract UserPasswordHistoryDao getUserHistoryDao();
+
     protected abstract UserDaoBase getUserDao();
 
 

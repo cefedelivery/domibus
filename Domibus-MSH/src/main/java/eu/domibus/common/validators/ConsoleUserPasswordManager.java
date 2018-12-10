@@ -40,10 +40,14 @@ public class ConsoleUserPasswordManager extends UserPasswordManager<User> {
     }
 
     @Override
-    public String getMaximumDefaultPasswordAgeProperty() { return MAXIMUM_DEFAULT_PASSWORD_AGE; }
+    public String getMaximumDefaultPasswordAgeProperty() {
+        return MAXIMUM_DEFAULT_PASSWORD_AGE;
+    }
 
     @Override
-    protected String getMaximumPasswordAgeProperty() { return MAXIMUM_PASSWORD_AGE; }
+    protected String getMaximumPasswordAgeProperty() {
+        return MAXIMUM_PASSWORD_AGE;
+    }
 
     @Override
     public String getWarningDaysBeforeExpiration() {

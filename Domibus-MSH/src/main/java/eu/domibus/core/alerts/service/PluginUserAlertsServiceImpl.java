@@ -48,7 +48,9 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected AlertType getAlertTypeForPasswordImminentExpiration() { return AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION; }
+    protected AlertType getAlertTypeForPasswordImminentExpiration() {
+        return AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION;
+    }
 
     @Override
     protected AlertType getAlertTypeForPasswordExpired() {
@@ -66,7 +68,9 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     }
 
     @Override
-    protected UserDaoBase getUserDao() { return userDao; }
+    protected UserDaoBase getUserDao() {
+        return userDao;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
