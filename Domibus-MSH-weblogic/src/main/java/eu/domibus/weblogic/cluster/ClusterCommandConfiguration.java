@@ -56,7 +56,7 @@ public class ClusterCommandConfiguration {
                         return;
                     }
                     for (Command command : commandsByServerName) {
-                        commandService.executeCommand(command.getCommandName(), domain);
+                        commandService.executeCommand(command.getCommandName(), domain, command.getCommandProperties());
                         commandService.deleteCommand(command.getEntityId());
                     }
                 }
