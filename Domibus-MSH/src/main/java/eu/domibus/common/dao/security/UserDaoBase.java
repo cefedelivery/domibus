@@ -11,5 +11,6 @@ import java.util.List;
  */
 public interface UserDaoBase {
     UserBase findByUserName(String userName);
+
     List<UserBase> findWithPasswordChangedBetween(LocalDate start, LocalDate end, boolean withDefaultPassword);
 }

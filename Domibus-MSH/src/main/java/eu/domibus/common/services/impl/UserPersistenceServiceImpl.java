@@ -65,7 +65,6 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private EventService eventService;
 
     @Autowired
-    //@Qualifier("UserPasswordValidator")
     private ConsoleUserPasswordManager passwordManager;
 
     @Autowired
@@ -101,7 +100,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         userDao.update(userEntity);
     }
 
-    void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
+    protected void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
             User existing = prepareUserForUpdate(user);
 
@@ -117,8 +116,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    //TODO: try to merge this code with the similar one found in PluginUserServiceImpl
-    void changePassword(User user, String currentPassword, String newPassword) {
+    protected void changePassword(User user, String currentPassword, String newPassword) {
         //check if old password matches the persisted one
         if (!bcryptEncoder.matches(currentPassword, user.getPassword())) {
             throw new UserManagementException("The current password does not match the provided one.");
@@ -127,7 +125,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         changePassword(user, newPassword);
     }
 
-    void changePassword(User user, String newPassword) {
+    protected void changePassword(User user, String newPassword) {
         passwordManager.changePassword(user, newPassword);
     }
 
