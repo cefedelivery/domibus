@@ -5,10 +5,7 @@ import eu.domibus.api.csv.CsvException;
 import eu.domibus.api.multitenancy.DomainTaskExecutor;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.api.util.DateUtil;
-import eu.domibus.core.alerts.model.common.AlertCriteria;
-import eu.domibus.core.alerts.model.common.AlertLevel;
-import eu.domibus.core.alerts.model.common.AlertStatus;
-import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.core.alerts.model.common.*;
 import eu.domibus.core.alerts.model.service.Alert;
 import eu.domibus.core.alerts.model.web.AlertRo;
 import eu.domibus.core.alerts.service.AlertService;
@@ -16,6 +13,7 @@ import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,7 +127,13 @@ public class AlertResource {
             LOG.trace("Invalid or empty alert type:[{}] sent from the gui ", aType, e);
             return Lists.newArrayList();
         }
-        return alertType.getSourceEvents().get(0).getProperties();
+        List<EventType> sourceEvents = alertType.getSourceEvents();
+        if(!sourceEvents.isEmpty()) {
+            return sourceEvents.get(0).getProperties();
+        } else {
+            LOG.trace("Invalid alert type:[{}]: it has no source events.", aType);
+            return Lists.newArrayList();
+        }
     }
 
     @PutMapping
