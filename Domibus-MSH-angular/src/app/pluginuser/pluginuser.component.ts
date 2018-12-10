@@ -210,11 +210,11 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       const proceed = await this.dialog.open(SaveDialogComponent).afterClosed().toPromise();
       if (proceed) {
         await this.pluginUserService.saveUsers(this.users);
-        this.alertService.success('The \'save\' operation completed successfully.');
+        this.alertService.success('The operation \'update plugin users\' completed successfully.');
         this.search();
       }
     } catch (err) {
-      this.alertService.exception('Error saving plugin users. ', err, false);
+      this.alertService.exception('The operation \'update plugin users\' completed with errors. ', err, false);
     }
   }
 
