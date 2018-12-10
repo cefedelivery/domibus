@@ -16,7 +16,9 @@ Domibus 4.0.1 (from 4.0.0):
                     - replace old logback.xml with the new version of logback.xml keeping existing packages to be logged and uncomment the proper sections for multitenancy
                     - replace each domain-name_logback.xml file with the newer version and keep existing packages for logging
                     - add a configuration file of type domain_name-logback.xml for domain 'default' - it's mandatory
-                    - run the appropriate DB migration script(mysql5innoDb-4.0-to-4.0.1-multi-tenancy-migration.ddl for MySQL or oracle10g-4.0-to-4.0.1-multi-tenancy-migration.ddl for Oracle)
+                    - for the database general schema run the appropriate DB migration script(mysql5innoDb-4.0-to-4.0.1-multi-tenancy-migration.ddl for MySQL or oracle10g-4.0-to-4.0.1-multi-tenancy-migration.ddl for Oracle)
+                    - for each tenant schema in the database run the appropriate DB migration script(mysql5innoDb-4.0-to-4.0.1-migration.ddl for MySQL or oracle10g-4.0-to-4.0.1-migration.ddl for Oracle)
+                    - for Oracle database, for each tenant schema in the database, grant privileges to the general schema using oracle10g-4.0.1-multi-tenancy-rights.sql. Please update the schema name before execution.
 Domibus 4.0 (from 3.3.4):
                 - Run the appropriate DB migration script(mysql5innoDb-3.3.4-to-4.0-migration.ddl for MySQL or oracle10g-3.3.4-to-4.0-migration.ddl for Oracle)
                 - Replace the Domibus war and the default plugin(s) config file(s), property file(s) and jar(s) into "\domibus\conf\domibus\plugins\config" respectively into "\domibus\conf\domibus\plugins\lib"

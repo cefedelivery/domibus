@@ -15,6 +15,10 @@ public interface CommandService {
 
     List<Command> findCommandsByServerName(String serverName);
 
+    List<Command> findCommandsByServerAndDomainName(String serverName, String domain);
+
+    void executeCommand(String command, Domain domain);
+
     void executeCommand(String command, Domain domain, Map<String, String> commandProperties);
 
     void deleteCommand(Integer commandId);

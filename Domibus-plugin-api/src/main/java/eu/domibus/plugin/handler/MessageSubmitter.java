@@ -7,7 +7,7 @@ import eu.domibus.plugin.Submission;
 
 /**
  * Implementations of this interface handle the plugin of messages from the
- * backend to holodeck.
+ * backend to Domibus.
  *
  * @author Christian Koch, Stefan Mueller
  */
