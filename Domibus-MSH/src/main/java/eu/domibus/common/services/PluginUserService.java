@@ -7,7 +7,7 @@ import eu.domibus.core.security.AuthenticationEntity;
 import java.util.List;
 
 /**
- * @author Pion
+ * @author Ion Perpegel
  * @since 4.0
  */
 public interface PluginUserService {
@@ -51,4 +51,6 @@ public interface PluginUserService {
      * @param removedUsers Existing users to delete
      */
     void updateUsers(List<AuthenticationEntity> addedUsers, List<AuthenticationEntity> updatedUsers, List<AuthenticationEntity> removedUsers);
+
+    void triggerPasswordAlerts();
 }

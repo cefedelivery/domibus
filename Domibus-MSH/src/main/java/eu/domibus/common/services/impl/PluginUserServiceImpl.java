@@ -3,18 +3,25 @@ package eu.domibus.common.services.impl;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.security.AuthType;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.PluginUserService;
+import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
+import eu.domibus.core.security.PluginUserPasswordHistoryDao;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -22,11 +29,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Pion, Catalin Enache
+ * @author Ion Perpegel, Catalin Enache
  * @since 4.0
  */
 @Service
 public class PluginUserServiceImpl implements PluginUserService {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PluginUserServiceImpl.class);
 
     @Autowired
     @Qualifier("securityAuthenticationDAO")
@@ -43,6 +51,18 @@ public class PluginUserServiceImpl implements PluginUserService {
 
     @Autowired
     private DomainContextProvider domainProvider;
+
+    @Autowired
+    private PluginUserPasswordManager passwordManager;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
+    @Autowired
+    private PluginUserPasswordHistoryDao userPasswordHistoryDao;
+
+    @Autowired
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Override
     public List<AuthenticationEntity> findUsers(AuthType authType, AuthRole authRole, String originalUser, String userName, int page, int pageSize) {
@@ -67,6 +87,12 @@ public class PluginUserServiceImpl implements PluginUserService {
         addedUsers.forEach(u -> insertNewUser(u, currentDomain));
         updatedUsers.forEach(u -> updateUser(u));
         removedUsers.forEach(u -> deleteUser(u));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void triggerPasswordAlerts() {
+        userAlertsService.triggerPasswordExpirationEvents();
     }
 
     /**
@@ -117,8 +143,8 @@ public class PluginUserServiceImpl implements PluginUserService {
     }
 
     private void insertNewUser(AuthenticationEntity u, Domain domain) {
-        if (u.getPasswd() != null) {
-            u.setPasswd(bcryptEncoder.encode(u.getPasswd()));
+        if (u.getPassword() != null) {
+            u.setPassword(bcryptEncoder.encode(u.getPassword()));
         }
         securityAuthenticationDAO.create(u);
 
@@ -126,14 +152,19 @@ public class PluginUserServiceImpl implements PluginUserService {
         userDomainService.setDomainForUser(userIdentifier, domain.getCode());
     }
 
-    private void updateUser(AuthenticationEntity u) {
-        AuthenticationEntity entity = securityAuthenticationDAO.read(u.getEntityId());
-        if (u.getPasswd() != null) {
-            entity.setPasswd(bcryptEncoder.encode(u.getPasswd()));
+    private void updateUser(AuthenticationEntity modified) {
+        AuthenticationEntity existing = securityAuthenticationDAO.read(modified.getEntityId());
+        if (modified.getPassword() != null) {
+            changePassword(existing, modified.getPassword());
         }
-        entity.setAuthRoles(u.getAuthRoles());
-        entity.setOriginalUser(u.getOriginalUser());
-        securityAuthenticationDAO.update(entity);
+        existing.setAuthRoles(modified.getAuthRoles());
+        existing.setOriginalUser(modified.getOriginalUser());
+        securityAuthenticationDAO.update(existing);
+    }
+
+    //TODO: try to merge this code with the similar one found in UserPersistenceServiceImpl
+    private void changePassword(AuthenticationEntity user, String newPassword) {
+        passwordManager.changePassword(user, newPassword);
     }
 
     private void deleteUser(AuthenticationEntity u) {

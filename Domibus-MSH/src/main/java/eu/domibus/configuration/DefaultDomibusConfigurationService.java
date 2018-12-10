@@ -89,14 +89,4 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
         return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
     }
 
-    @Override
-    public String getPasswordPattern() {
-        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.pattern", "");
-    }
-
-    @Override
-    public String getPasswordValidationMessage() {
-        return domibusPropertyProvider.getDomainProperty("domibus.passwordPolicy.validationMessage", "");
-    }
-
 }

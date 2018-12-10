@@ -2,7 +2,8 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.common.MSHRole;
 import eu.domibus.common.MessageStatus;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserBase;
+import eu.domibus.core.alerts.model.common.EventType;
 import eu.domibus.core.alerts.model.service.Event;
 
 import java.util.Date;
@@ -80,8 +81,20 @@ public interface EventService {
      */
     void enrichMessageEvent(Event event);
 
+    /**
+     * Will create an expiration event and enqueue it to the alert/event monitoring queue.
+     *
+     * @param eventType    the specific type of expiration event: expired and imminent expiration for console or plugin users
+     * @param user          the user for which the event is triggered
+     * @param maxPasswordAgeInDays the number of days the password is not expired
+     */
+    void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays);
 
-    void enqueuePasswordExpiredEvent(User user, Integer maxPasswordAgeInDays);
-
-    void enqueuePasswordImminentExpirationEvent(User user, Integer maxPasswordAgeInDays);
+    /**
+     * Will create login failure event for plugin user and enqueue it to the alert/event monitoring queue.
+     *
+     * @param userName        the user name that had a failure login
+     * @param loginTime       the login failure time.
+     */
+    void enqueuePluginLoginFailureEvent(String userName, Date loginTime);
 }

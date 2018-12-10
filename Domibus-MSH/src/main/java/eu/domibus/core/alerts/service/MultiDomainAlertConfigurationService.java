@@ -68,7 +68,7 @@ public interface MultiDomainAlertConfigurationService {
     /**
      * @return alert events module configuration
      */
-    AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType);
+    RepetitiveAlertModuleConfiguration getRepetitiveAlertConfiguration(AlertType alertType);
 
     /**
      * With the introduction of multitenancy, a super user has been created.
@@ -99,5 +99,10 @@ public interface MultiDomainAlertConfigurationService {
      * @return name of the property for adding Domibus instance/server name to email subject
      */
     String getAlertSuperServerNameSubjectPropertyName();
+
+    /**
+     * @return login failure module configuration for plugin users
+     */
+    LoginFailureModuleConfiguration getPluginLoginFailureConfiguration();
 
 }

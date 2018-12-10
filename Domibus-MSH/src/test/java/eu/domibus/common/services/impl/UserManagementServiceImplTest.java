@@ -7,27 +7,24 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
+import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusMessageCode;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.security.authentication.CredentialsExpiredException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +49,7 @@ public class UserManagementServiceImplTest {
     private UserRoleDao userRoleDao;
 
     @Injectable
-    protected UserPasswordHistoryDao userPasswordHistoryDao;
+    protected ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Injectable
     private UserPersistenceService userPersistenceService;
@@ -64,7 +61,7 @@ public class UserManagementServiceImplTest {
     private UserConverter userConverter;
 
     @Injectable
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
 
     @Injectable
     private EventService eventService;
@@ -74,6 +71,12 @@ public class UserManagementServiceImplTest {
 
     @Injectable
     protected DomainService domainService;
+
+    @Injectable
+    ConsoleUserPasswordManager passwordValidator;
+
+    @Injectable
+    ConsoleUserAlertsServiceImpl userAlertsService;
 
     @Tested
     private UserManagementServiceImpl userManagementService;
@@ -98,7 +101,7 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.canApplyAccountLockingPolicy(anyString, user);
+            userManagementService.getUserLoginFailureReason(anyString, user);
             result = UserLoginErrorReason.UNKNOWN;
         }};
         userManagementService.handleWrongAuthentication("");
@@ -114,7 +117,7 @@ public class UserManagementServiceImplTest {
         new Expectations(userManagementService) {{
             userDao.loadUserByUsername(anyString);
             result = user;
-            userManagementService.canApplyAccountLockingPolicy(anyString, user);
+            userManagementService.getUserLoginFailureReason(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
         }};
         final String userName = "test";
@@ -193,7 +196,7 @@ public class UserManagementServiceImplTest {
 
     @Test
     public void logOnlyUserNull(@Mocked final DomibusLogger LOG, final @Mocked User user) {
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", null);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", null);
         assertEquals(UserLoginErrorReason.UNKNOWN, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, "test");
@@ -210,7 +213,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = null;
         }};
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.INACTIVE, userLoginErrorReason);
         new Verifications() {{
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, "test");
@@ -226,7 +229,7 @@ public class UserManagementServiceImplTest {
             user.getSuspensionDate();
             result = new Date();
         }};
-        UserLoginErrorReason userLoginErrorReason = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason userLoginErrorReason = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.SUSPENDED, userLoginErrorReason);
         new Verifications() {{
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, "test");
@@ -240,7 +243,7 @@ public class UserManagementServiceImplTest {
             user.isEnabled();
             result = true;
         }};
-        UserLoginErrorReason test = userManagementService.canApplyAccountLockingPolicy("test", user);
+        UserLoginErrorReason test = userManagementService.getUserLoginFailureReason("test", user);
         assertEquals(UserLoginErrorReason.BAD_CREDENTIALS, test);
     }
 
@@ -323,7 +326,7 @@ public class UserManagementServiceImplTest {
     public void triggerAlertBadCredential() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.BAD_CREDENTIALS);
@@ -337,7 +340,9 @@ public class UserManagementServiceImplTest {
     public void triggerAlertInactiveDisableEventOnEachLogin() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.INACTIVE);
@@ -351,7 +356,9 @@ public class UserManagementServiceImplTest {
     public void triggerAlertSuspendedDisableEventOnEachLogin() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.SUSPENDED);
@@ -365,9 +372,11 @@ public class UserManagementServiceImplTest {
     public void triggerAlertInactiveDisableEventOnlyAtTheMoment() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
             result = false;
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
+            result = true;
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
             result = true;
         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.INACTIVE);
@@ -381,11 +390,13 @@ public class UserManagementServiceImplTest {
     public void triggerAlertSuspendedDisableEventOnlyAtTheMoment() {
         final String userName = "test";
         new Expectations() {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
+            alertConfiguration.getAccountDisabledConfiguration().shouldTriggerAccountDisabledAtEachLogin();
             result = false;
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration().isActive();
+            alertConfiguration.getLoginFailureConfiguration().isActive();
             result = true;
-        }};
+            alertConfiguration.getAccountDisabledConfiguration().isActive();
+            result = true;
+         }};
         userManagementService.triggerEvent(userName, UserLoginErrorReason.SUSPENDED);
         new VerificationsInOrder() {{
             eventService.enqueueLoginFailureEvent(userName, withAny(new Date()), true);
@@ -394,126 +405,26 @@ public class UserManagementServiceImplTest {
     }
 
     @Test
-    public void testSendPasswordExpiredAlerts() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
-        final Integer maxPasswordAge = 10;
-        final Integer howManyDaysToGenerateAlertsAfterExpiration = 3;
-        final LocalDate from = LocalDate.of(2018, 10, 2);
-        final LocalDate to = LocalDate.of(2018, 10, 5);
-        final User user1 = new User("user1", "anypassword");
-        final User user2 = new User("user2", "anypassword");
-        final List<User> users = Arrays.asList(user1, user2);
-
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
-        new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
-            result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
-            result = howManyDaysToGenerateAlertsAfterExpiration;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to, false);
-            result = users;
-        }};
-
-        userManagementService.sendExpiredAlerts(false);
-
-        new VerificationsInOrder() {{
-            eventService.enqueuePasswordExpiredEvent((User) any, maxPasswordAge);
-            times = 2;
-        }};
-    }
-
-    @Test
-    public void testSendPasswordImminentExpirationAlerts() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
-        final Integer maxPasswordAge = 10;
-        final Integer howManyDaysBeforeExpirationToGenerateAlerts = 4;
-        final LocalDate from = LocalDate.of(2018, 10, 5);
-        final LocalDate to = LocalDate.of(2018, 10, 9);
-        final User user1 = new User("user1", "anypassword");
-        final User user2 = new User("user2", "anypassword");
-        final List<User> users = Arrays.asList(user1, user2);
-
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
-        new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
-            result = true;
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
-            result = howManyDaysBeforeExpirationToGenerateAlerts;
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            userDao.findWithPasswordChangedBetween(from, to, false);
-            result = users;
-        }};
-
-        userManagementService.sendImminentExpirationAlerts(false);
-
-        new VerificationsInOrder() {{
-            eventService.enqueuePasswordImminentExpirationEvent((User) any, maxPasswordAge);
-            times = 2;
-        }};
-    }
-
-
-    @Test
-    public void testSendPasswordAlerts() {
-
-        userManagementService.sendAlerts();
-
-        new VerificationsInOrder() {{
-            userManagementService.sendImminentExpirationAlerts(false);
-            times = 1;
-        }};
-        new VerificationsInOrder() {{
-            userManagementService.sendExpiredAlerts(false);
-            times = 1;
-        }};
-    }
-
-    @Test
-    public void testValidateDaysTillExpirationDisabled() {
-        final String username = "user1";
-        new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
-            result = "0";
-        }};
-
-        Integer result = userManagementService.getDaysTillExpiration(username);
-        Assert.assertEquals(null, result);
-    }
-
-    @Test
     public void testValidateDaysTillExpiration() {
-        final LocalDate today = LocalDate.of(2018, 10, 15);
         final LocalDateTime passwordChangeDate = LocalDateTime.of(2018, 9, 15, 15, 58, 59);
         final Integer maxPasswordAge = 45;
-        final Integer remainingDays = 15;
 
         final String username = "user1";
         final User user = new User(username, "anypassword");
         user.setPasswordChangeDate(passwordChangeDate);
+        user.setDefaultPassword(true);
 
-        new Expectations(LocalDate.class) {{
-            LocalDate.now();
-            result = today;
-        }};
         new Expectations() {{
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.MAXIMUM_PASSWORD_AGE);
-            result = maxPasswordAge.toString();
-            domibusPropertyProvider.getOptionalDomainProperty(UserManagementServiceImpl.WARNING_DAYS_BEFORE_EXPIRATION);
-            result = "20";
             userDao.loadActiveUserByUsername(username);
             result = user;
         }};
 
         Integer result = userManagementService.getDaysTillExpiration(username);
-        Assert.assertEquals(remainingDays, result);
+
+        new Verifications() {{
+            passwordValidator.getDaysTillExpiration(username, true, passwordChangeDate);
+            times = 1;
+        }};
     }
+
 }

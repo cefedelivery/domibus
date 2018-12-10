@@ -82,7 +82,7 @@ public class AlertServiceImpl implements AlertService {
         final Event eventEntity = eventDao.read(event.getEntityId());
         Alert alert = new Alert();
         alert.addEvent(eventEntity);
-        alert.setAlertType(AlertType.getAlertTypeFromEventType(event.getType()));
+        alert.setAlertType(AlertType.getByEventType(event.getType()));
         alert.setAttempts(0);
         final String alertRetryMaxAttemptPropertyName = multiDomainAlertConfigurationService.getAlertRetryMaxAttemptPropertyName();
         alert.setMaxAttempts(Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertRetryMaxAttemptPropertyName, "1")));

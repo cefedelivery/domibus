@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 public class PasswordEventsListenerTest {
 
     @Tested
-    private PasswordEventsListener passwordEventsListener;
+    private PasswordExpirationListener passwordEventsListener;
 
     @Injectable
     private AlertService alertService;

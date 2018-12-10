@@ -237,7 +237,7 @@ public class EventServiceImplTest {
     }
 
     @Test
-    public void enqueuePasswordExpiredEvent() throws ParseException {
+    public void enqueuePasswordExpirationEvent() throws ParseException {
         int maxPasswordAge = 15;
         LocalDateTime passwordDate = LocalDateTime.of(2018, 10, 01, 21, 58, 59);
         SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
@@ -248,7 +248,7 @@ public class EventServiceImplTest {
         persistedEvent.setType(EventType.PASSWORD_EXPIRED);
 
         new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration((AlertType)any).isActive();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration((AlertType)any).isActive();
             result = true;
             eventDao.findWithTypeAndPropertyValue((EventType) any, anyString, anyString);
             result = null;
@@ -256,7 +256,7 @@ public class EventServiceImplTest {
             result = persistedEvent;
         }};
 
-        eventService.enqueuePasswordExpiredEvent(user, maxPasswordAge);
+        eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_EXPIRED, user, maxPasswordAge);
 
         new VerificationsInOrder() {{
             Event event;
