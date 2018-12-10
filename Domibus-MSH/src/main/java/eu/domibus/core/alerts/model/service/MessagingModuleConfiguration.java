@@ -34,7 +34,7 @@ public class MessagingModuleConfiguration extends AlertModuleConfigurationBase {
     }
 
     public boolean shouldMonitorMessageStatus(MessageStatus messageStatus) {
-        return isActive && messageStatusLevels.get(messageStatus) != null;
+        return isActive() && messageStatusLevels.get(messageStatus) != null;
     }
 
     public AlertLevel getAlertLevel(MessageStatus messageStatus) {
@@ -44,7 +44,7 @@ public class MessagingModuleConfiguration extends AlertModuleConfigurationBase {
     @Override
     public String toString() {
         return "MessagingConfiguration{" +
-                "messageCommunicationActive=" + isActive +
+                "messageCommunicationActive=" + isActive() +
                 ", messageStatusLevels=" + messageStatusLevels +
                 '}';
     }

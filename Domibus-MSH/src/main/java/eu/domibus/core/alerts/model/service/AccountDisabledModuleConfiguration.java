@@ -26,7 +26,7 @@ public class AccountDisabledModuleConfiguration extends AlertModuleConfiguration
 
 
     public Boolean shouldTriggerAccountDisabledAtEachLogin() {
-        return isActive && accountDisabledMoment == AccountDisabledMoment.AT_LOGON;
+        return isActive() && accountDisabledMoment == AccountDisabledMoment.AT_LOGON;
     }
 
 }

@@ -151,7 +151,7 @@ public class UserManagementServiceImpl implements UserService {
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
         final LoginFailureModuleConfiguration loginFailureConfiguration = alertConfiguration.getLoginFailureConfiguration();
-        LOG.debug("loginFailureConfiguration.isActive() : [{}]", loginFailureConfiguration.isActive());
+        LOG.debug("loginFailureConfiguration.isActive : [{}]", loginFailureConfiguration.isActive());
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
                 if (loginFailureConfiguration.isActive()) {
@@ -293,10 +293,10 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     public void validateExpiredPassword(final String userName) {
         User user = userDao.loadActiveUserByUsername(userName);
-        boolean isDefaultPassword = user.hasDefaultPassword();
+        boolean defaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
-        userPasswordManager.validatePasswordExpired(userName, isDefaultPassword, passwordChangeDate);
+        userPasswordManager.validatePasswordExpired(userName, defaultPassword, passwordChangeDate);
     }
 
     @Override

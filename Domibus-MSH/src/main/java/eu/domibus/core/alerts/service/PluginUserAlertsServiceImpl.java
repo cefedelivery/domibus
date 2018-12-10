@@ -73,7 +73,7 @@ public class PluginUserAlertsServiceImpl extends UserAlertsServiceImpl {
     // TODO: move this code to base class to use the same code for console and plugin users
     public void triggerLoginFailureEvent(UserBase user) {
         final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
-        LOG.debug("Plugin login Failure Configuration isActive() : [{}]", configuration.isActive());
+        LOG.debug("Plugin login Failure Configuration active() : [{}]", configuration.isActive());
 
         if (configuration.isActive()) {
             eventService.enqueuePluginLoginFailureEvent(user.getUserName(), new Date());

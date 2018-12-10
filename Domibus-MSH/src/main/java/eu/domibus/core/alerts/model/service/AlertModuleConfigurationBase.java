@@ -14,13 +14,13 @@ public class AlertModuleConfigurationBase implements AlertModuleConfiguration {
     private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertModuleConfigurationBase.class);
 
     AlertType alertType;
-    protected boolean isActive;
-    protected AlertLevel alertLevel;
-    protected String mailSubject;
+    private boolean active;
+    private AlertLevel alertLevel;
+    private String mailSubject;
 
     private AlertModuleConfigurationBase(AlertType alertType, boolean isActive) {
         this.alertType = alertType;
-        this.isActive = isActive;
+        this.active = isActive;
     }
 
     public AlertModuleConfigurationBase(AlertType alertType) {
@@ -45,7 +45,7 @@ public class AlertModuleConfigurationBase implements AlertModuleConfiguration {
 
     @Override
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     @Override
