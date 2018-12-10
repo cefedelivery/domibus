@@ -35,11 +35,17 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
     private EventService eventService;
 
     protected abstract String getMaximumDefaultPasswordAgeProperty();
+
     protected abstract String getMaximumPasswordAgeProperty();
+
     protected abstract AlertType getAlertTypeForPasswordImminentExpiration();
+
     protected abstract AlertType getAlertTypeForPasswordExpired();
+
     protected abstract EventType getEventTypeForPasswordImminentExpiration();
+
     protected abstract EventType getEventTypeForPasswordExpired();
+
     protected abstract UserDaoBase getUserDao();
 
     @Override
@@ -65,7 +71,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         }
     }
 
-    void triggerImminentExpirationEvents(boolean usersWithDefaultPassword) {
+    protected void triggerImminentExpirationEvents(boolean usersWithDefaultPassword) {
         final RepetitiveAlertModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveAlertConfiguration(getAlertTypeForPasswordImminentExpiration());
         if (!eventConfiguration.isActive()) {
             return;
@@ -88,7 +94,7 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         });
     }
 
-    void triggerExpiredEvents(boolean usersWithDefaultPassword) {
+    protected void triggerExpiredEvents(boolean usersWithDefaultPassword) {
         final RepetitiveAlertModuleConfiguration eventConfiguration = alertConfiguration.getRepetitiveAlertConfiguration(getAlertTypeForPasswordExpired());
         if (!eventConfiguration.isActive()) {
             return;
