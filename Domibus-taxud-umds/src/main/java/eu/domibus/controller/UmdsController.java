@@ -50,7 +50,7 @@ public class UmdsController {
         try {
             LOG.info("Authentication required for :\n   [{}]", submission);
             if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
-                LOG.info("Not Authenticated");
+                LOG.warn("Wrong identifier:[{}], message should not be propagated",submission.getUser_identifier());
                 return false;
             }
             certificateLogging.decodeAndlog(submission.getCertficiate());
