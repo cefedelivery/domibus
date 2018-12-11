@@ -90,8 +90,7 @@ public class NotificationListenerServiceTest {
         final List<JmsMessage> messages = generateTestMessages();
 
         new Expectations() {{
-
-            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT);
+            domibusPropertyProvider.getIntegerProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT);
             result = 5;
 
             jmsManager.browseClusterMessages((String)any, (String)any);
@@ -118,8 +117,7 @@ public class NotificationListenerServiceTest {
         final List<JmsMessage> messages = generateTestMessages();
 
         new Expectations() {{
-
-            domibusPropertyProvider.getProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT);
+            domibusPropertyProvider.getIntegerProperty(NotificationListenerService.PROP_LIST_PENDING_MESSAGES_MAXCOUNT);
             result = 5;
 
             jmsManager.browseClusterMessages((String)any, (String)any);

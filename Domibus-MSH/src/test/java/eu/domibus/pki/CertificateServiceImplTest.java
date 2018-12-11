@@ -331,8 +331,8 @@ public class CertificateServiceImplTest {
         final List<Certificate> keyStoreCertificates = Lists.newArrayList(certificate);
 
         new Expectations(certificateService) {{
-            domibusPropertyProvider.getProperty(CertificateServiceImpl.REVOCATION_TRIGGER_OFFSET_PROPERTY);
-            result = "15";
+            domibusPropertyProvider.getIntegerProperty(CertificateServiceImpl.REVOCATION_TRIGGER_OFFSET_PROPERTY);
+            result = 15;
             times = 2;
             certificateService.extractCertificateFromKeyStore(trustStore);
             result = trustStoreCertificates;
@@ -349,8 +349,8 @@ public class CertificateServiceImplTest {
     @Test
     public void updateCertificateStatus() {
         new Expectations(certificateService) {{
-            domibusPropertyProvider.getProperty(CertificateServiceImpl.REVOCATION_TRIGGER_OFFSET_PROPERTY);
-            result = "15";
+            domibusPropertyProvider.getIntegerProperty(CertificateServiceImpl.REVOCATION_TRIGGER_OFFSET_PROPERTY);
+            result = 15;
         }};
 
         Date now = new Date();
