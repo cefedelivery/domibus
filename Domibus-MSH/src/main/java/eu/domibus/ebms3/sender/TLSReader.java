@@ -25,6 +25,8 @@ public class TLSReader {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(TLSReader.class);
 
+    public static final String REGEX_DOMIBUS_CONFIG_LOCATION = "\\Q${domibus.config.location}\\E";
+
     @Autowired
     private DomibusConfigurationService domibusConfigurationService;
 
@@ -36,7 +38,7 @@ public class TLSReader {
                 byte[] encoded = Files.readAllBytes(path.get());
                 String config = new String(encoded, "UTF-8");
                 //TODO this replacement should be extracted into a service method
-                config = config.replaceAll("\\Q${domibus.config.location}\\E", domibusConfigurationService.getConfigLocation().replace('\\', '/'));
+                config = config.replaceAll(REGEX_DOMIBUS_CONFIG_LOCATION, domibusConfigurationService.getConfigLocation().replace('\\', '/'));
 
                 return (TLSClientParameters) TLSClientParametersConfig.createTLSClientParameters(config);
             } catch (Exception e) {
@@ -59,12 +61,21 @@ public class TLSReader {
      * {@code Optional} path.
      */
     private Optional<Path> getClientAuthenticationPath(String domainCode) {
-        Path domainSpecificPath = Paths.get(domibusConfigurationService.getConfigLocation(), StringUtils.stripToEmpty(domainCode) + "_" + CLIENT_AUTHENTICATION_XML);
+        String domainSpecificFileName = StringUtils.stripToEmpty(domainCode) + "_" + CLIENT_AUTHENTICATION_XML;
+        Path domainSpecificPath = Paths.get(domibusConfigurationService.getConfigLocation(), domainSpecificFileName);
+        boolean domainSpecificPathExists = Files.exists(domainSpecificPath);
+        LOG.debug("Client authentication file [{}] at the domain specific path [{}] exists [{}]", domainSpecificFileName, domainSpecificPath, domainSpecificPathExists);
+        if(domainSpecificPathExists) {
+            return Optional.of(domainSpecificPath);
+        }
+
         Path defaultPath = Paths.get(domibusConfigurationService.getConfigLocation(), CLIENT_AUTHENTICATION_XML);
-        return Files.exists(domainSpecificPath)
-                ? Optional.of(domainSpecificPath)
-                : Files.exists(defaultPath)
-                        ? Optional.of(defaultPath)
-                        : Optional.empty();
+        boolean defaultPathExists = Files.exists(defaultPath);
+        LOG.debug("Client authentication file at the default path [{}] exists [{}]", defaultPath, defaultPathExists);
+        if(defaultPathExists) {
+            return Optional.of(defaultPath);
+        }
+
+        return Optional.empty();
     }
 }
