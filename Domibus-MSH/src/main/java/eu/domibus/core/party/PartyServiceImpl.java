@@ -2,6 +2,8 @@ package eu.domibus.core.party;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import eu.domibus.api.exceptions.DomibusCoreErrorCode;
+import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.party.Party;
@@ -18,18 +20,19 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.messaging.XmlProcessingException;
 import eu.domibus.pki.CertificateService;
-
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -270,6 +273,10 @@ public class PartyServiceImpl implements PartyService {
         List<eu.domibus.common.model.configuration.Party> removedParties = parties.getParty().stream()
                 .filter(existingP -> !newParties.stream().anyMatch(newP -> newP.getName().equals(existingP.getName())))
                 .collect(toList());
+
+        String partyMe = pModeProvider.getGatewayParty().getName();
+        if (removedParties.stream().anyMatch(party -> party.getName().equals(partyMe)))
+            throw new DomibusCoreException(DomibusCoreErrorCode.DOM_003, "Cannot delete the party describing the current system. ");
 
         parties.getParty().clear();
         parties.getParty().addAll(newParties);
