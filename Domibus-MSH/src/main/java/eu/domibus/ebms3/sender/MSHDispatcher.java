@@ -29,7 +29,6 @@ public class MSHDispatcher {
     public static final String MESSAGE_TYPE_IN = "MESSAGE_TYPE";
     public static final String MESSAGE_TYPE_OUT = "MESSAGE_TYPE_OUT";
     public static final String DOMIBUS_DISPATCHER_CACHEABLE = "domibus.dispatcher.cacheable";
-    public static final String DOMIBUS_DISPATCHER_CACHEABLE_DEFAULT = "false";
 
     @Autowired
     private DispatchClientProvider dispatchClientProvider;
@@ -62,8 +61,7 @@ public class MSHDispatcher {
     }
 
     protected boolean isDispatchClientCacheActivated() {
-        String dispatchClientCacheable = domibusPropertyProvider.getDomainProperty(DOMIBUS_DISPATCHER_CACHEABLE, DOMIBUS_DISPATCHER_CACHEABLE_DEFAULT);
-        return Boolean.valueOf(dispatchClientCacheable);
+        return domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_DISPATCHER_CACHEABLE);
     }
 
 }

@@ -4,6 +4,9 @@ Domibus 4.1 (from 4.0):
                    o in case the probe URL is used, the new probe URL is /domibus/services/msh
                 - [Wildfly only]
                    o in case the probe URL is used, the new probe URL is /domibus/services/msh
+               - (Optional)
+                   o rename the property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" in your domibus.properties file. If the property is not defined, do nothing. Default value "50" has not been changed.
+                   o rename the property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete" in your domibus.properties file. If the property is not defined, do nothing. Default value "50" has not been changed.
                 In case you are using multitenancy please make the following modifications:
                     - replace old logback.xml with the new version of logback.xml keeping existing packages to be logged
                     and uncomment the proper sections for multitenancy
