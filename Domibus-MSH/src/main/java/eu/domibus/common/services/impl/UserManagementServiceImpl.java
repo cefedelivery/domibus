@@ -50,10 +50,6 @@ public class UserManagementServiceImpl implements UserService {
 
     protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
-    private static final String DEFAULT_SUSPENSION_TIME = "3600";
-
-    private static final String DEFAULT_LOGIN_ATTEMPT = "5";
-
     @Autowired
     protected UserDao userDao;
 
@@ -194,15 +190,10 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void applyAccountLockingPolicy(User user) {
-        int maxAttemptAmount;
-        try {
-            final Domain domain = getCurrentOrDefaultDomainForUser(user);
+        final Domain domain = getCurrentOrDefaultDomainForUser(user);
 
-            String maxAttemptAmountPropVal = domibusPropertyProvider.getDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT, DEFAULT_LOGIN_ATTEMPT);
-            maxAttemptAmount = Integer.valueOf(maxAttemptAmountPropVal);
-        } catch (NumberFormatException n) {
-            maxAttemptAmount = Integer.valueOf(DEFAULT_LOGIN_ATTEMPT);
-        }
+        int maxAttemptAmount = domibusPropertyProvider.getIntegerDomainProperty(domain, MAXIMUM_LOGIN_ATTEMPT);
+
         user.setAttemptCount(user.getAttemptCount() + 1);
         if (user.getAttemptCount() >= maxAttemptAmount) {
             if (LOG.isDebugEnabled()) {
@@ -239,21 +230,17 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     @Transactional
     public void reactivateSuspendedUsers() {
-        int suspensionInterval;
+        Domain domain = domainContextProvider.getCurrentDomainSafely();
 
-        String suspensionIntervalPropValue;
-        if (domainContextProvider.getCurrentDomainSafely() == null) { //it is called for super-users so we read from default domain
-            suspensionIntervalPropValue = domibusPropertyProvider.getProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
+        int suspensionInterval;
+        if (domain == null) { //it is called for super-users so we read from default domain
+            suspensionInterval = domibusPropertyProvider.getIntegerProperty(LOGIN_SUSPENSION_TIME);
         } else { //for normal users the domain is set as current Domain
-            suspensionIntervalPropValue = domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME, DEFAULT_SUSPENSION_TIME);
+            suspensionInterval = domibusPropertyProvider.getIntegerDomainProperty(LOGIN_SUSPENSION_TIME);
         }
-        try {
-            suspensionInterval = Integer.valueOf(suspensionIntervalPropValue);
-        } catch (NumberFormatException n) {
-            suspensionInterval = Integer.valueOf(DEFAULT_SUSPENSION_TIME);
-        }
+
         //user will not be reactivated.
-        if (suspensionInterval == 0) {
+        if (suspensionInterval <= 0) {
             return;
         }
 

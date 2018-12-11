@@ -41,7 +41,7 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     @Override
     public boolean isClusterDeployment() {
-        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(CLUSTER_DEPLOYMENT, "false"));
+        return domibusPropertyProvider.getBooleanProperty(CLUSTER_DEPLOYMENT);
     }
 
     @Override
@@ -59,8 +59,8 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
 
     @Override
     public boolean useProxy() {
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-        if (StringUtils.isEmpty(useProxy) || !Boolean.parseBoolean(useProxy)) {
+        Boolean useProxy = domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED);
+        if (!useProxy) {
             LOG.debug("Proxy not required. The property domibus.proxy.enabled is not configured");
             return false;
         }
@@ -81,12 +81,12 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
         LOG.info("Proxy configured: " + httpProxyHost + " " + httpProxyPort + " " +
                 httpProxyUser);
 
-        return Boolean.parseBoolean(useProxy);
+        return useProxy;
     }
 
     @Override
     public boolean isFourCornerEnabled() {
-        return Boolean.parseBoolean(domibusPropertyProvider.getProperty(FOURCORNERMODEL_ENABLED_KEY, "true"));
+        return domibusPropertyProvider.getBooleanProperty(FOURCORNERMODEL_ENABLED_KEY);
     }
 
 }

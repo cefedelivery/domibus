@@ -8,6 +8,7 @@ Domibus 4.1
 - Cluster configuration: reload truststore, PMode and logging set adn reset will be executed on all cluster servers excepting the current one
 - Default password policy enforcement for all users at the back-end level;
 - Added route and component for changing password when default used or about to expire for all users.
+- Renamed property "message.retention.downloaded.max.delete" to "domibus.retentionWorker.message.retention.downloaded.max.delete" and property "message.retention.not_downloaded.max.delete" to "domibus.retentionWorker.message.retention.not_downloaded.max.delete"
 Domibus 4.0.1
 - Changes in order to improve logging for multitenancy:
     - domibus.log, business.log and security.log will contains only entries without domain information

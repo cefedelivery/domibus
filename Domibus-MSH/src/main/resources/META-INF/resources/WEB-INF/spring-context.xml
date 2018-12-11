@@ -17,6 +17,12 @@
     <context:component-scan base-package="eu.domibus"/>
     <context:annotation-config/>
 
+    <util:properties id="domibusDefaultProperties" ignore-resource-not-found="true"
+                     location="classpath:config/application.properties,
+                     classpath:config/domibus-default.properties,classpath:config/domibus.properties,
+                     classpath*:config/*-plugin-default.properties"/>
+
+
     <util:properties id="domibusProperties" ignore-resource-not-found="true"
                      location="classpath:config/application.properties,
                      classpath:config/domibus-default.properties,classpath:config/domibus.properties, file:///${domibus.config.location}/domibus.properties,
