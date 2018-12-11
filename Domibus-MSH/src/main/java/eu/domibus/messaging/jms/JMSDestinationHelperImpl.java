@@ -18,7 +18,6 @@ public class JMSDestinationHelperImpl implements JMSDestinationHelper {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(JMSDestinationHelperImpl.class);
 
-    private static final String DEFAULT_INTERNAL_QUEUE_EXPRESSION = ".*domibus\\.(internal|DLQ|backend\\.jms|notification\\.jms|notification\\.webservice|notification\\.kerkovi).*";
     private static final String INTERNALQUEUE_EXPRESSION = "domibus.jms.internalQueue.expression";
 
     @Autowired
@@ -30,10 +29,7 @@ public class JMSDestinationHelperImpl implements JMSDestinationHelper {
     @Override
     public boolean isInternal(String name) {
         String internalQueueExpression = domibusPropertyProvider.getProperty(INTERNALQUEUE_EXPRESSION);
-        if (StringUtils.isEmpty(internalQueueExpression)) {
-            LOG.info("Property [" + INTERNALQUEUE_EXPRESSION + "] is not defined: using the default expression [" + DEFAULT_INTERNAL_QUEUE_EXPRESSION + "]");
-            internalQueueExpression = DEFAULT_INTERNAL_QUEUE_EXPRESSION;
-        }
+        LOG.debug("Property [{}], value [{}]", INTERNALQUEUE_EXPRESSION, internalQueueExpression);
         return regexUtil.matches(internalQueueExpression, name);
     }
 }

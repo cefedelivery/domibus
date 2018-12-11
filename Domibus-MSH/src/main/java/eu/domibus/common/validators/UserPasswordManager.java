@@ -155,7 +155,7 @@ public abstract class UserPasswordManager<U extends UserBase> {
     }
 
     private void savePasswordHistory(U user) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(getPasswordHistoryPolicyProperty(), "0"));
+        int passwordsToKeep = domibusPropertyProvider.getIntegerOptionalDomainProperty(getPasswordHistoryPolicyProperty());
         if (passwordsToKeep <= 0) {
             return;
         }

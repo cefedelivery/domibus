@@ -32,6 +32,6 @@ public class ClusterDeploymentCondition implements ConfigurationCondition {
             LOGGER.debug("Condition not matching: environment is null");
             return false;
         }
-        return Boolean.parseBoolean(environment.getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT, "false"));
+        return Boolean.parseBoolean(environment.getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT));
     }
 }
