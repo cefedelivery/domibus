@@ -119,7 +119,7 @@ public class UserManagementServiceImplTest {
             result = user;
             userManagementService.getUserLoginFailureReason(anyString, user);
             result = UserLoginErrorReason.BAD_CREDENTIALS;
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
+            domibusPropertyProvider.getIntegerDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             result = 5;
         }};
         final String userName = "test";
@@ -135,7 +135,7 @@ public class UserManagementServiceImplTest {
     @Test
     public void applyAccountLockingPolicyBellowMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
+            domibusPropertyProvider.getIntegerDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -153,20 +153,10 @@ public class UserManagementServiceImplTest {
         }};
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void throwsNumberFormatExceptionPolicyNotNumberProperty(final @Mocked User user) {
-        new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
-            times = 1;
-            result = "a";
-        }};
-        userManagementService.applyAccountLockingPolicy(user);
-    }
-
     @Test
     public void applyAccountLockingPolicyReachMaxAttempt(final @Mocked User user) {
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
+            domibusPropertyProvider.getIntegerDomainProperty((Domain) any, MAXIMUM_LOGIN_ATTEMPT);
             times = 1;
             result = 2;
             user.getAttemptCount();
@@ -253,7 +243,7 @@ public class UserManagementServiceImplTest {
         final List<User> users = Lists.newArrayList(user);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(LOGIN_SUSPENSION_TIME);
+            domibusPropertyProvider.getIntegerDomainProperty(LOGIN_SUSPENSION_TIME);
             times = 1;
             result = suspensionInterval;
             System.currentTimeMillis();
