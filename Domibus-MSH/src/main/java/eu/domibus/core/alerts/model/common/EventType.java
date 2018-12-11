@@ -17,35 +17,48 @@ public enum EventType {
     CERT_IMMINENT_EXPIRATION(AlertType.CERT_IMMINENT_EXPIRATION, "certificateImminentExpiration", CertificateEvent.class),
     CERT_EXPIRED(AlertType.CERT_EXPIRED, "certificateExpired", CertificateEvent.class),
 
-    USER_LOGIN_FAILURE(AlertType.USER_LOGIN_FAILURE, "loginFailure", AuthenticationEvent.class),
-    USER_ACCOUNT_DISABLED(AlertType.USER_ACCOUNT_DISABLED, "accountDisabled", AuthenticationEvent.class),
+    USER_LOGIN_FAILURE(AlertType.USER_LOGIN_FAILURE, "loginFailure", AuthenticationEvent.class, true),
+    USER_ACCOUNT_DISABLED(AlertType.USER_ACCOUNT_DISABLED, "accountDisabled", AuthenticationEvent.class, true),
     PLUGIN_USER_LOGIN_FAILURE(AlertType.PLUGIN_USER_LOGIN_FAILURE, "loginFailure", AuthenticationEvent.class),
 
-    //TODO: maybe we should get rid of the plugin variant of the Event types
-    PASSWORD_EXPIRED(AlertType.PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_EXPIRED,
-            PasswordExpirationEventProperties.class),
-    PASSWORD_IMMINENT_EXPIRATION(AlertType.PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION,
-            PasswordExpirationEventProperties.class),
-    PLUGIN_PASSWORD_EXPIRED(AlertType.PLUGIN_PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_EXPIRED,
-            PasswordExpirationEventProperties.class),
-    PLUGIN_PASSWORD_IMMINENT_EXPIRATION(AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION,
-            PasswordExpirationEventProperties.class);
+    PASSWORD_EXPIRED(AlertType.PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class, true,
+            DomibusMessageCode.SEC_PASSWORD_EXPIRED),
+    PASSWORD_IMMINENT_EXPIRATION(AlertType.PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class, true,
+            DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION),
+    PLUGIN_PASSWORD_EXPIRED(AlertType.PLUGIN_PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class,
+            DomibusMessageCode.SEC_PASSWORD_EXPIRED),
+    PLUGIN_PASSWORD_IMMINENT_EXPIRATION(AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class,
+            DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION);
 
     private AlertType defaultAlertType;
     private final String queueSelector;
-    private final DomibusMessageCode securityMessageCode;
     private Class<? extends Enum> propertiesEnumClass;
+    private boolean userRelated;
+    private final DomibusMessageCode securityMessageCode;
 
-    EventType(AlertType defaultAlertType, String queueSelector, DomibusMessageCode securityMessageCode, Class<? extends Enum> propertiesEnumClass) {
+    EventType(AlertType defaultAlertType, String queueSelector, Class<? extends Enum> propertiesEnumClass,
+              boolean isUserRelated, DomibusMessageCode securityMessageCode) {
         this.defaultAlertType = defaultAlertType;
         this.queueSelector = queueSelector;
         this.securityMessageCode = securityMessageCode;
         this.propertiesEnumClass = propertiesEnumClass;
+        this.userRelated = isUserRelated;
+    }
+
+    EventType(AlertType defaultAlertType, String queueSelector, Class<? extends Enum> propertiesEnumClass,
+              boolean isUserRelated) {
+        this(defaultAlertType, queueSelector, propertiesEnumClass, isUserRelated, null);
+    }
+
+    EventType(AlertType defaultAlertType, String queueSelector, Class<? extends Enum> propertiesEnumClass,
+              DomibusMessageCode securityMessageCode) {
+        this(defaultAlertType, queueSelector, propertiesEnumClass, false, securityMessageCode);
     }
 
     EventType(AlertType defaultAlertType, String queueSelector, Class<? extends Enum> propertiesEnumClass) {
-        this(defaultAlertType, queueSelector, null, propertiesEnumClass);
+        this(defaultAlertType, queueSelector, propertiesEnumClass, false, null);
     }
+
 
     public AlertType geDefaultAlertType() {
         return this.defaultAlertType;
@@ -62,11 +75,10 @@ public enum EventType {
     }
 
     public DomibusMessageCode getSecurityMessageCode() {
-        //TODO: see if we need to throw
-        if (this.securityMessageCode == null) {
-            throw new IllegalStateException("SecurityMessageCode for event type " + this.name() + " not defined");
-        }
         return this.securityMessageCode;
     }
 
+    public boolean isUserRelated() {
+        return this.userRelated;
+    }
 }
