@@ -1,9 +1,13 @@
 package eu.domibus.controller;
 
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.servlets.AdminServlet;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.BackendService11;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -40,6 +44,25 @@ public class Configuration {
 
         return backendPort;
 
+    }
+
+    @Bean
+    public HealthCheckRegistry healthCheckRegistry(){
+        return new HealthCheckRegistry();
+    }
+
+    @Bean
+    public MetricRegistry metricRegistry(){
+        return new MetricRegistry();
+    }
+    @Bean
+    public MetricsServletContextListener metricsServletContextListener(MetricRegistry metricRegistry, HealthCheckRegistry healthCheckRegistry) {
+        return new MetricsServletContextListener(metricRegistry, healthCheckRegistry);
+    }
+
+    @Bean
+    public ServletRegistrationBean servletRegistrationBean(){
+        return new ServletRegistrationBean(new AdminServlet(),"/metrics/*");
     }
 
 

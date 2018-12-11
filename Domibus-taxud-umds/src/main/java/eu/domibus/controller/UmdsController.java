@@ -1,5 +1,8 @@
 package eu.domibus.controller;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.health.HealthCheckRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,23 +33,33 @@ public class UmdsController {
     @Value("${invalid.original.user.identifier}")
     private String invalidSender;
 
+    public final MetricRegistry metricRegistry;
+
+
     @Autowired
-    public UmdsController(CertificateLogging certificateLogging, PayloadLogging payloadLogging) {
+    public UmdsController(CertificateLogging certificateLogging, PayloadLogging payloadLogging,MetricRegistry metricRegistry) {
         this.certificateLogging = certificateLogging;
         this.payloadLogging = payloadLogging;
+        this.metricRegistry=metricRegistry;
     }
 
 
     @RequestMapping(method = RequestMethod.POST,value = "/authenticate",produces="application/json")
     public boolean authenticate(@RequestBody Umds submission) {
-        LOG.info("Authentication required for :\n   [{}]",submission);
-        if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
-            LOG.info("Not Authenticated");
-            return false;
+        final Timer.Context onMessage = this.metricRegistry.timer(MetricRegistry.name(UmdsController.class,"authenticate")).time();
+        try {
+            LOG.info("Authentication required for :\n   [{}]", submission);
+            if (invalidSender.equalsIgnoreCase(submission.getUser_identifier())) {
+                LOG.info("Not Authenticated");
+                return false;
+            }
+            certificateLogging.decodeAndlog(submission.getCertficiate());
+            LOG.info("Authenticated");
+
+            return true;
+        }finally {
+            onMessage.stop();
         }
-        certificateLogging.decodeAndlog(submission.getCertficiate());
-        LOG.info("Authenticated");
-        return true;
     }
 
     //for testing purpose.

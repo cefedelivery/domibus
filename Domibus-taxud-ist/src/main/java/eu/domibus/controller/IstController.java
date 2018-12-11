@@ -73,7 +73,7 @@ public class IstController {
 
     private ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(40);
 
-    public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+    public final MetricRegistry metricRegistry;
 
     private final static String HAPPY_FLOW_MESSAGE_TEMPLATE = "<?xml version='1.0' encoding='UTF-8'?>\n" +
             "<response_to_message_id>\n" +
@@ -87,12 +87,13 @@ public class IstController {
     public IstController(final PayloadLogging payloadLogging,
                          final BackendInterface backendInterface,
                          final AccessPointHelper accessPointHelper,
-                         final EndPointHelper endPointHelper) {
+                         final EndPointHelper endPointHelper,
+                         final MetricRegistry metricRegistry) {
         this.payloadLogging = payloadLogging;
         this.backendInterface = backendInterface;
         this.accessPointHelper = accessPointHelper;
         this.endPointHelper = endPointHelper;
-
+        this.metricRegistry=metricRegistry;
     }
 
     @PostConstruct
@@ -104,7 +105,7 @@ public class IstController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/message", produces = "application/json")
     public void onMessage(@RequestBody JsonSubmission jsonSubmission) {
-        final Timer.Context onMessage = METRIC_REGISTRY.timer(MetricRegistry.name(IstController.class,"ons_message")).time();
+        final Timer.Context onMessage = metricRegistry.timer(MetricRegistry.name(IstController.class,"on_message")).time();
         LOG.info("Message received with id:\n  [{}]", jsonSubmission.getMessageId());
         logAndSendBack(jsonSubmission);
         onMessage.stop();
@@ -116,7 +117,7 @@ public class IstController {
         if (!doNotPushBack) {
             threadPoolExecutor.execute(() -> {
                 final Submission submission = prepareSubmission(jsonSubmission);
-                final Timer.Context send_message = METRIC_REGISTRY.timer(MetricRegistry.name(IstController.class,"send message")).time();
+                final Timer.Context send_message = metricRegistry.timer(MetricRegistry.name(IstController.class,"send message")).time();
                 sendMessage(submission);
                 send_message.stop();
             });
