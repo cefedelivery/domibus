@@ -30,8 +30,4 @@ public interface DomibusConfigurationService {
 
     boolean isFourCornerEnabled();
 
-    String getPasswordPattern();
-
-    String getPasswordValidationMessage();
-
 }

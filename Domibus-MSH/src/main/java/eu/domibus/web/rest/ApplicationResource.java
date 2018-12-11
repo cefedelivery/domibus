@@ -32,6 +32,11 @@ public class ApplicationResource {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ApplicationResource.class);
 
+    String PASSWORD_POLICY_PATTERN = "domibus.passwordPolicy.pattern";
+    String PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.passwordPolicy.validationMessage";
+    String PLUGIN_PASSWORD_POLICY_PATTERN = "domibus.plugin.passwordPolicy.pattern";
+    String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.plugin.passwordPolicy.validationMessage";
+
     protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
 
     @Autowired
@@ -124,10 +129,39 @@ public class ApplicationResource {
     public PasswordPolicyRO getPasswordPolicy() {
         LOG.debug("Getting password policy");
 
-        String pattern = domibusConfigurationService.getPasswordPattern();
-        String validationMessage = domibusConfigurationService.getPasswordValidationMessage();
+        String pattern = this.getPasswordPattern();
+        String validationMessage = this.getPasswordValidationMessage();
 
         return new PasswordPolicyRO(pattern, validationMessage);
     }
 
+    /**
+     * Retrieves the password policy info for plugin users
+     *
+     * @return password policy info
+     */
+    @RequestMapping(value = "pluginPasswordPolicy", method = RequestMethod.GET)
+    public PasswordPolicyRO getPluginUsersPasswordPolicy() {
+        LOG.debug("Getting plugin password policy");
+
+        String pattern = this.getPluginPasswordPattern();
+        String validationMessage = this.getPluginPasswordValidationMessage();
+
+        return new PasswordPolicyRO(pattern, validationMessage);
+    }
+
+    private String getPasswordPattern() {
+        return domibusPropertyProvider.getDomainProperty(PASSWORD_POLICY_PATTERN);
+    }
+
+    private String getPasswordValidationMessage() {
+        return domibusPropertyProvider.getDomainProperty(PASSWORD_POLICY_VALIDATION_MESSAGE);
+    }
+
+    private String getPluginPasswordPattern() {
+        return domibusPropertyProvider.getDomainProperty(PLUGIN_PASSWORD_POLICY_PATTERN);
+    }
+    private String getPluginPasswordValidationMessage() {
+        return domibusPropertyProvider.getDomainProperty(PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE);
+    }
 }

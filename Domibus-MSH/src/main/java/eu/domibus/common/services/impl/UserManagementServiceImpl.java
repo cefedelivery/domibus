@@ -6,18 +6,18 @@ import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.converters.UserConverter;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
-import eu.domibus.core.alerts.model.common.AlertType;
+import eu.domibus.common.validators.ConsoleUserPasswordManager;
 import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
-import eu.domibus.core.alerts.model.service.AlertEventModuleConfiguration;
 import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
+import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.logging.DomibusLogger;
@@ -25,13 +25,11 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.Period;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,14 +50,6 @@ public class UserManagementServiceImpl implements UserService {
 
     protected static final String LOGIN_SUSPENSION_TIME = "domibus.console.login.suspension.time";
 
-    protected final static String MAXIMUM_PASSWORD_AGE = "domibus.passwordPolicy.expiration";
-
-    protected final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.passwordPolicy.defaultPasswordExpiration";
-
-    protected final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.passwordPolicy.warning.beforeExpiration";
-
-    private static final String CREDENTIALS_EXPIRED = "Expired";
-
     @Autowired
     protected UserDao userDao;
 
@@ -67,7 +57,7 @@ public class UserManagementServiceImpl implements UserService {
     private UserRoleDao userRoleDao;
 
     @Autowired
-    protected UserPasswordHistoryDao userPasswordHistoryDao;
+    protected ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -82,7 +72,7 @@ public class UserManagementServiceImpl implements UserService {
     protected UserPersistenceService userPersistenceService;
 
     @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
 
     @Autowired
     private EventService eventService;
@@ -92,6 +82,13 @@ public class UserManagementServiceImpl implements UserService {
 
     @Autowired
     protected DomainService domainService;
+
+    @Autowired
+    ConsoleUserPasswordManager userPasswordManager;
+
+    @Autowired
+    ConsoleUserAlertsServiceImpl userAlertsService;
+
 
     /**
      * {@inheritDoc}
@@ -139,7 +136,7 @@ public class UserManagementServiceImpl implements UserService {
     @Transactional
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
         User user = userDao.loadUserByUsername(userName);
-        UserLoginErrorReason userLoginErrorReason = canApplyAccountLockingPolicy(userName, user);
+        UserLoginErrorReason userLoginErrorReason = getUserLoginFailureReason(userName, user);
         if (BAD_CREDENTIALS.equals(userLoginErrorReason)) {
             applyAccountLockingPolicy(user);
         }
@@ -149,30 +146,31 @@ public class UserManagementServiceImpl implements UserService {
     }
 
     protected void triggerEvent(String userName, UserLoginErrorReason userLoginErrorReason) {
-
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.getLoginFailureConfiguration();
-        LOG.debug("loginFailureConfiguration.isActive() : [{}]", loginFailureConfiguration.isActive());
+        final LoginFailureModuleConfiguration loginFailureConfiguration = alertConfiguration.getLoginFailureConfiguration();
+        LOG.debug("loginFailureConfiguration.isActive : [{}]", loginFailureConfiguration.isActive());
         switch (userLoginErrorReason) {
             case BAD_CREDENTIALS:
                 if (loginFailureConfiguration.isActive()) {
                     eventService.enqueueLoginFailureEvent(userName, new Date(), false);
                 }
                 break;
-            case UNKNOWN:
-                break;
             case INACTIVE:
             case SUSPENDED:
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-                if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
-                    eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
-                } else if (loginFailureConfiguration.isActive()) {
-                    eventService.enqueueLoginFailureEvent(userName, new Date(), true);
+                final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
+                if(accountDisabledConfiguration.isActive()) {
+                    if (accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin()) {
+                        eventService.enqueueAccountDisabledEvent(userName, new Date(), true);
+                    } else if (loginFailureConfiguration.isActive()) {
+                        eventService.enqueueLoginFailureEvent(userName, new Date(), true);
+                    }
                 }
+                break;
+            case UNKNOWN:
                 break;
         }
     }
 
-    UserLoginErrorReason canApplyAccountLockingPolicy(String userName, User user) {
+    UserLoginErrorReason getUserLoginFailureReason(String userName, User user) {
 
         if (user == null) {
             LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
@@ -206,7 +204,7 @@ public class UserManagementServiceImpl implements UserService {
             user.setSuspensionDate(suspensionDate);
             LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
 
-            final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+            final AccountDisabledModuleConfiguration accountDisabledConfiguration = alertConfiguration.getAccountDisabledConfiguration();
             if (accountDisabledConfiguration.isActive()) {
                 eventService.enqueueAccountDisabledEvent(user.getUserName(), suspensionDate, true);
             }
@@ -282,128 +280,31 @@ public class UserManagementServiceImpl implements UserService {
     @Override
     public void validateExpiredPassword(final String userName) {
         User user = userDao.loadActiveUserByUsername(userName);
+        boolean defaultPassword = user.hasDefaultPassword();
+        LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
-        String expirationProperty = user.hasDefaultPassword() ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
-        LOG.debug("Password expiration policy for user [{}] : {} days", userName, maxPasswordAgeInDays);
-
-        if (maxPasswordAgeInDays == 0) {
-            return;
-        }
-
-        LocalDate expirationDate = user.getPasswordChangeDate() == null ? LocalDate.now() :
-                user.getPasswordChangeDate().plusDays(maxPasswordAgeInDays).toLocalDate();
-
-        if (expirationDate.isBefore(LocalDate.now())) {
-            LOG.debug("Password expired for user [{}]", user.getUserName());
-            throw new CredentialsExpiredException(CREDENTIALS_EXPIRED);
-        }
+        userPasswordManager.validatePasswordExpired(userName, defaultPassword, passwordChangeDate);
     }
 
     @Override
     public Integer getDaysTillExpiration(String userName) {
-
-        int warningDaysBeforeExpiration = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(WARNING_DAYS_BEFORE_EXPIRATION));
-        if (warningDaysBeforeExpiration == 0) {
-            return null;
-        }
         User user = userDao.loadActiveUserByUsername(userName);
+        boolean isDefaultPassword = user.hasDefaultPassword();
+        LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
 
-        String expirationProperty = user.hasDefaultPassword() ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
-
-        if (maxPasswordAgeInDays == 0) {
-            return null;
-        }
-
-        if (warningDaysBeforeExpiration >= maxPasswordAgeInDays) {
-            LOG.warn("Password policy: days until expiration for user [{}] is greater that max age.", userName);
-            return null;
-        }
-
-        LocalDate passwordDate = user.getPasswordChangeDate().toLocalDate();
-        if (passwordDate == null) {
-            LOG.debug("Password policy: expiration date for user [{}] is not set", userName);
-            return null;
-        }
-
-        LocalDate expirationDate = passwordDate.plusDays(maxPasswordAgeInDays);
-        LocalDate today = LocalDate.now();
-        int daysUntilExpiration = Period.between(today, expirationDate).getDays();
-
-        LOG.debug("Password policy: days until expiration for user [{}] : {} days", userName, daysUntilExpiration);
-
-        if (0 <= daysUntilExpiration && daysUntilExpiration <= warningDaysBeforeExpiration) {
-            return daysUntilExpiration;
-        } else {
-            return null;
-        }
+        return userPasswordManager.getDaysTillExpiration(userName, isDefaultPassword, passwordChangeDate);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void sendAlerts() {
-        try {
-            sendExpiredAlerts(true);
-            sendExpiredAlerts(false);
-        } catch (Exception ex) {
-            LOG.error("Send password expired alerts failed ", ex);
-        }
-        try {
-            sendImminentExpirationAlerts(true);
-            sendImminentExpirationAlerts(false);
-        } catch (Exception ex) {
-            LOG.error("Send imminent expiration alerts failed ", ex);
-        }
+    public void triggerPasswordAlerts() {
+        userAlertsService.triggerPasswordExpirationEvents();
     }
 
     @Override
     @Transactional
     public void changePassword(String username, String currentPassword, String newPassword) {
         userPersistenceService.changePassword(username, currentPassword, newPassword);
-    }
-
-    protected void sendImminentExpirationAlerts(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION);
-        if (!eventConfiguration.isActive()) {
-            return;
-        }
-
-        final Integer duration = eventConfiguration.getEventDelay();
-        String expirationProperty = usersWithDefaultPassword ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
-
-        LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays);
-        LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays).plusDays(duration);
-        LOG.debug("ImminentExpirationAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
-
-        List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-        LOG.debug("ImminentExpirationAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
-
-        eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordImminentExpirationEvent(user, maxPasswordAgeInDays);
-        });
-    }
-
-    protected void sendExpiredAlerts(boolean usersWithDefaultPassword) {
-        final AlertEventModuleConfiguration eventConfiguration = multiDomainAlertConfigurationService.getRepetitiveEventConfiguration(AlertType.PASSWORD_EXPIRED);
-        if (!eventConfiguration.isActive()) {
-            return;
-        }
-        final Integer duration = eventConfiguration.getEventDelay();
-        String expirationProperty = usersWithDefaultPassword ? MAXIMUM_DEFAULT_PASSWORD_AGE : MAXIMUM_PASSWORD_AGE;
-        int maxPasswordAgeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(expirationProperty));
-
-        LocalDate from = LocalDate.now().minusDays(maxPasswordAgeInDays).minusDays(duration);
-        LocalDate to = LocalDate.now().minusDays(maxPasswordAgeInDays);
-        LOG.debug("PasswordExpiredAlerts: Searching for " + (usersWithDefaultPassword ? "default " : "") + "users with password change date between [{}]->[{}]", from, to);
-
-        List<User> eligibleUsers = userDao.findWithPasswordChangedBetween(from, to, usersWithDefaultPassword);
-        LOG.debug("PasswordExpiredAlerts: Found [{}] eligible " + (usersWithDefaultPassword ? "default " : "") + "users", eligibleUsers.size());
-
-        eligibleUsers.forEach(user -> {
-            eventService.enqueuePasswordExpiredEvent(user, maxPasswordAgeInDays);
-        });
     }
 
 }

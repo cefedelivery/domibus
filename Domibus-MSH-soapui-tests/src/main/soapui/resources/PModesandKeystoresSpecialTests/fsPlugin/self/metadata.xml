@@ -14,7 +14,7 @@
     <CollaborationInfo>
         <!--You may enter the following 4 items in any order-->
         <!--Optional:-->
-        <!-- <AgreementRef type="">A1</AgreementRef> -->
+        <AgreementRef type="DUM">DummyAgr</AgreementRef>
         <Service type="tc20">bdx:noprocess</Service>
         <Action>TC20Leg1</Action>        
     </CollaborationInfo>

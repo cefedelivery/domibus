@@ -1,6 +1,8 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
+import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
@@ -48,11 +50,17 @@ public class CustomAuthenticationProviderTest {
     @Injectable
     private X509CertificateService securityX509CertificateServiceImpl;
 
-    @Tested
-    CustomAuthenticationProvider securityCustomAuthenticationProvider;
+    @Injectable
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Injectable
     BCryptPasswordEncoder bcryptEncoder;
+
+    @Injectable
+    PluginUserPasswordManager passwordValidator;
+
+    @Tested
+    CustomAuthenticationProvider securityCustomAuthenticationProvider;
 
     @Test
     public void authenticateX509Test() {
@@ -86,7 +94,7 @@ public class CustomAuthenticationProviderTest {
             AuthenticationEntity basicAuthenticationEntity = new AuthenticationEntity();
             basicAuthenticationEntity.setAuthRoles("ROLE_ADMIN");
             basicAuthenticationEntity.setUsername("admin");
-            basicAuthenticationEntity.setPasswd("123456");
+            basicAuthenticationEntity.setPassword("123456");
 
             securityAuthenticationDAO.findByUser(anyString);
             result = basicAuthenticationEntity;
