@@ -4,8 +4,8 @@ import {DomainService} from '../../security/domain.service';
 import {Domain} from '../../security/domain';
 import {MdDialog} from '@angular/material';
 import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
-import {Title} from '@angular/platform-browser';
 import {AlertService} from '../../alert/alert.service';
+import {Router, RoutesRecognized} from '@angular/router';
 
 @Component({
   selector: 'domain-selector',
@@ -15,6 +15,7 @@ import {AlertService} from '../../alert/alert.service';
 export class DomainSelectorComponent implements OnInit {
 
   showDomains: boolean;
+  displayDomains: boolean;
   currentDomainCode: string;
   domainCode: string;
   domains: Domain[];
@@ -25,7 +26,8 @@ export class DomainSelectorComponent implements OnInit {
   constructor (private domainService: DomainService,
                private securityService: SecurityService,
                private dialog: MdDialog,
-               private alertService: AlertService) {
+               private alertService: AlertService,
+               private router: Router) {
   }
 
   async ngOnInit () {
@@ -33,12 +35,19 @@ export class DomainSelectorComponent implements OnInit {
 
     if (isMultiDomain && this.securityService.isCurrentUserSuperAdmin()) {
       this.domains = await this.domainService.getDomains();
-      this.showDomains = true;
+      this.displayDomains = true;
 
       this.domainService.getCurrentDomain().subscribe(domain => {
         this.domainCode = this.currentDomainCode = (domain ? domain.code : null);
       });
     }
+
+    this.router.events.subscribe(event => {
+      if (event instanceof RoutesRecognized) {
+        let route = event.state.root.firstChild;
+        this.showDomains = this.displayDomains && !route.data.isDomainIndependent;
+      }
+    });
   }
 
   async changeDomain () {
