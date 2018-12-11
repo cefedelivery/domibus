@@ -10,8 +10,6 @@ public interface DomibusPropertyExtService {
 
     String getProperty(String propertyName);
 
-    String getProperty(String propertyName, String defaultValue);
-
     String getDomainProperty(DomainDTO domain, String propertyName);
 
     String getDomainProperty(DomainDTO domain, String propertyName, String defaultValue);

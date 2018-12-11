@@ -1,8 +1,8 @@
 package eu.domibus.common.model.logging;
 
-import org.apache.commons.collections.MapUtils;
+import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.persistence.TypedQuery;
 import java.util.Date;
@@ -36,8 +36,7 @@ public class MessageLogInfoFilter {
     private static final String LOG_MESSAGE_SUBTYPE = "log.messageSubtype";
 
     @Autowired
-    @Qualifier("domibusProperties")
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     protected String getHQLKey(String originalColumn) {
         switch(originalColumn) {
@@ -144,6 +143,6 @@ public class MessageLogInfoFilter {
      * @return true by default
      */
     protected boolean isFourCornerModel() {
-        return MapUtils.getBooleanValue(domibusProperties, "domibus.fourcornermodel.enabled", true);
+        return domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.FOURCORNERMODEL_ENABLED_KEY);
     }
 }
