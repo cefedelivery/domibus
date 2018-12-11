@@ -161,37 +161,13 @@ public class MessageRetentionServiceTest {
         }};
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void testGetRetentionValueWithUndefinedRetentionValue() throws Exception {
-        final String propertyName = "retentionLimitProperty";
-
-        new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getDomainProperty(propertyName);
-            result = null;
-        }};
-
-        messageRetentionService.getRetentionValue(propertyName);
-    }
-
-    @Test(expected = NumberFormatException.class)
-    public void testGetRetentionValueWithInvalidRetentionValue() throws Exception {
-        final String propertyName = "retentionLimitProperty";
-
-        new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getDomainProperty(propertyName);
-            result = "a2";
-        }};
-
-        messageRetentionService.getRetentionValue(propertyName);
-    }
-
     @Test
     public void testGetRetentionValueWithValidRetentionValue() throws Exception {
         final String propertyName = "retentionLimitProperty";
 
         new Expectations(messageRetentionService) {{
-            domibusPropertyProvider.getDomainProperty(propertyName);
-            result = "5";
+            domibusPropertyProvider.getIntegerDomainProperty(propertyName);
+            result = 5;
         }};
 
         final Integer retentionValue = messageRetentionService.getRetentionValue(propertyName);

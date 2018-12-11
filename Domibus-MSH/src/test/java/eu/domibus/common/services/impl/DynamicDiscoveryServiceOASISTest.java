@@ -82,7 +82,7 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = "bdxr-transport-ebms3-as4-v1p0";
 
             ServiceMetadata sm = buildServiceMetadata();
@@ -106,7 +106,7 @@ public class DynamicDiscoveryServiceOASISTest {
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);
             result = TEST_SML_ZONE;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = "bdxr-transport-ebms3-as4-v1p0";
 
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_CERT_REGEX);

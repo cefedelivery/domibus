@@ -107,7 +107,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
+            domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -154,7 +154,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setRestored(new Date(restoredTime));
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
+            domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -233,7 +233,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
+            domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -314,7 +314,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
+            domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);
@@ -358,7 +358,7 @@ public class UpdateRetryLoggingServiceTest {
         userMessageLog.setMessageId(messageId);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
+            domibusPropertyProvider.getBooleanDomainProperty(DELETE_PAYLOAD_ON_SEND_FAILURE);
             result = true;
 
             messageLogDao.findByMessageId(messageId, MSHRole.SENDING);

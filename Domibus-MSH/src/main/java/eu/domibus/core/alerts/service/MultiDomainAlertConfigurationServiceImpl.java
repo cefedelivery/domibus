@@ -238,7 +238,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public Boolean isAlertModuleEnabled() {
         String propertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_ACTIVE, DOMIBUS_ALERT_SUPER_ACTIVE);
-        return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, propertyName));
+        return domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, propertyName);
     }
 
     @Override
