@@ -479,7 +479,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 final Boolean alertModuleActive = isAlertModuleEnabled();
                 final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
                 if (!alertModuleActive || !eventActive) {
-                    LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], {} module active[{}]", domain, moduleName, alertModuleActive, eventActive);
+                    LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], event active[{}]", domain, moduleName, alertModuleActive, eventActive);
                     return new RepetitiveAlertModuleConfiguration(alertType);
                 }
 

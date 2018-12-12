@@ -146,10 +146,10 @@ public class PullMessageSender {
              *      Then the message is retrieved again before commit. The commit occurs just after we verify if the message
              *      already exist, then we have a constraint violation of the message. The shorter the saving transaction the better.
              *
-             * Ideally the message id should be commited to a queue and the sending of the receipt executed in another proces.
+             * Ideally the message id should be committed to a queue and the sending of the receipt executed in another process.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReicept(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
+                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }
