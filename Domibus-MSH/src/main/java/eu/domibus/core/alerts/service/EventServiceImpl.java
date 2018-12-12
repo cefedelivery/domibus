@@ -241,7 +241,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private eu.domibus.core.alerts.model.persist.Event getPersistedEvent(Event event) {
-        String id = event.findStringProperty(EVENT_IDENTIFIER).get();
+        String id = event.findStringProperty(EVENT_IDENTIFIER).orElse("");
         eu.domibus.core.alerts.model.persist.Event entity = eventDao.findWithTypeAndPropertyValue(event.getType(), EVENT_IDENTIFIER, id);
 
         if (entity == null) {

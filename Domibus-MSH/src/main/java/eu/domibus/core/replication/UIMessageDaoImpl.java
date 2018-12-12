@@ -144,7 +144,8 @@ public class UIMessageDaoImpl extends BasicDao<UIMessageEntity> implements UIMes
      */
     @Override
     public void saveOrUpdate(final UIMessageEntity uiMessageEntity) {
-        UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId());
+        // Sonar Bug: ignored because the following call happens within a transaction that gets started by the service calling this method
+        UIMessageEntity uiMessageEntityFound = findUIMessageByMessageId(uiMessageEntity.getMessageId()); //NOSONAR
         if (uiMessageEntityFound != null) {
             uiMessageEntity.setEntityId(uiMessageEntityFound.getEntityId());
             uiMessageEntity.setLastModified(uiMessageEntityFound.getLastModified());

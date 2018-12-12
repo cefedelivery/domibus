@@ -1,5 +1,6 @@
 package eu.domibus.common.model.logging;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -10,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
-import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -30,7 +30,7 @@ public class UserMessageLogInfoFilterTest {
             "and propsTo.name = 'finalRecipient'";
 
     @Injectable
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusProperties;
 
     @Tested
     UserMessageLogInfoFilter userMessageLogInfoFilter;

@@ -72,7 +72,8 @@ public class PullRequestHandler {
     public SOAPMessage handlePullRequest(String messageId, PullContext pullContext) {
         if (messageId != null) {
             LOG.info("Message id [{}] ", messageId);
-            return handleRequest(messageId, pullContext);
+            // Sonar Bug: ignored because the following call happens within a transaction that gets started by the web service calling this method
+            return handleRequest(messageId, pullContext); // NOSONAR
         } else {
             return notifyNoMessage(pullContext);
         }
