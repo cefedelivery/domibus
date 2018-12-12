@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 @Service
 public class AlertMethodEmail implements AlertMethod {
 
+    static final String USERNAME_EVENT_PROPERTY = "USER";
+
     private static final Logger LOG = DomibusLoggerFactory.getLogger(AlertMethodEmail.class);
 
     @Autowired
@@ -47,17 +49,30 @@ public class AlertMethodEmail implements AlertMethod {
         //if the alert is created form an event related to a user, send the email to the user address also
         Stream<Event> userEvents = alert.getEvents().stream().filter(event -> event.getType().isUserRelated());
         userEvents.forEach(event -> {
-            //TODO: think of a way to ensure by compiler that all events have "USER" field
-            String userName = event.findStringProperty("USER").get();
-            if (StringUtils.isEmpty(userName)) {
-                return;
-            }
-            User user = userDao.loadUserByUsername(userName);
-            if (user == null) {
+            //TODO: find a ggod way to ensure that all such events have "USER" field
+            if (!event.getType().getProperties().contains(USERNAME_EVENT_PROPERTY)) {
+                LOG.debug("Event type [{}] should have [{}] property.", event.getType(), USERNAME_EVENT_PROPERTY);
                 return;
             }
 
-            mailSender.sendMail(mailModelForAlert, from, user.getEmail());
+            String userName = event.findStringProperty(USERNAME_EVENT_PROPERTY).get();
+            if (StringUtils.isEmpty(userName)) {
+                LOG.error("Event [{}] should have [{}] property set.", event, USERNAME_EVENT_PROPERTY);
+                return;
+            }
+
+            User user = userDao.loadUserByUsername(userName);
+            if (user == null) {
+                LOG.error("Could not find a console user with the name [{}] .", userName);
+                return;
+            }
+
+            String userEmail = user.getEmail();
+            if (StringUtils.isEmpty(userEmail)) {
+                LOG.debug("User [{}] does not have an email to send an alert to.", userName);
+                return;
+            }
+            mailSender.sendMail(mailModelForAlert, from, userEmail);
         });
     }
 }
