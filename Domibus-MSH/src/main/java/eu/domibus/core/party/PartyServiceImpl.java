@@ -275,9 +275,10 @@ public class PartyServiceImpl implements PartyService {
                 .collect(toList());
 
         String partyMe = pModeProvider.getGatewayParty().getName();
-        if (removedParties.stream().anyMatch(party -> party.getName().equals(partyMe)))
+        if (removedParties.stream().anyMatch(party -> party.getName().equals(partyMe))) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_003, "Cannot delete the party describing the current system. ");
-
+        }
+        
         parties.getParty().clear();
         parties.getParty().addAll(newParties);
 
