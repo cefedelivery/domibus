@@ -93,7 +93,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = transportProfileAS4;
         }};
 
@@ -120,7 +120,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
             smpClient.getServiceMetadata((ParticipantIdentifier) any, (DocumentTypeIdentifier) any);
             result = sm;
 
-            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4, anyString);
+            domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.DYNAMIC_DISCOVERY_TRANSPORTPROFILEAS4);
             result = transportProfileAS4;
         }};
 

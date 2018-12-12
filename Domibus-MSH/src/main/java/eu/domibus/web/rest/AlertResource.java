@@ -13,6 +13,7 @@ import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,25 +127,13 @@ public class AlertResource {
             LOG.trace("Invalid or empty alert type:[{}] sent from the gui ", aType, e);
             return Lists.newArrayList();
         }
-        switch (alertType) {
-            case MSG_STATUS_CHANGED:
-                final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
-                return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case CERT_EXPIRED:
-            case CERT_IMMINENT_EXPIRATION:
-                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
-                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case USER_ACCOUNT_DISABLED:
-            case USER_LOGIN_FAILURE:
-                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
-                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case PASSWORD_EXPIRED:
-            case PASSWORD_IMMINENT_EXPIRATION:
-                return Arrays.asList("USER", "EXPIRATION_DATE");
-            default:
-                throw new IllegalArgumentException("Unsupported alert type.");
+        List<EventType> sourceEvents = alertType.getSourceEvents();
+        if(!sourceEvents.isEmpty()) {
+            return sourceEvents.get(0).getProperties();
+        } else {
+            LOG.trace("Invalid alert type:[{}]: it has no source events.", aType);
+            return Lists.newArrayList();
         }
-
     }
 
     @PutMapping

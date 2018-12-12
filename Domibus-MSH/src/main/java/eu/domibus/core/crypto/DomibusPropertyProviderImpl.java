@@ -5,7 +5,10 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.property.PropertyResolver;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,10 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     protected Properties domibusProperties;
 
     @Autowired
+    @Qualifier("domibusDefaultProperties")
+    protected Properties domibusDefaultProperties;
+
+    @Autowired
     protected PropertyResolver propertyResolver;
 
     @Autowired
@@ -48,15 +55,20 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     /**
-     * Get the value from the system properties and if not found get the value from domibus properties
+     * Get the value from the system properties; if not found get the value from Domibus properties; if still not found, look inside the Domibus default properties.
      *
-     * @param propertyName
-     * @return
+     * @param propertyName the property name
+     * @return The value of the property as found in the system properties, the Domibus properties or inside the default Domibus properties.
      */
     protected String getPropertyValue(String propertyName) {
         String result = System.getenv(propertyName);
         if (StringUtils.isEmpty(result)) {
             result = domibusProperties.getProperty(propertyName);
+
+            // There is no need to retrieve the default Domibus property value here since the Domibus properties above will contain it, unless overwritten by users.
+            // For String property values, if users have overwritten their original default Domibus property values, it is their responsibility to ensure they are valid.
+            // For all the other Boolean and Integer property values, if users have overwritten their original default Domibus property values, they are defaulted back to their
+            // original default Domibus values when invalid (please check the #getInteger..(..) and #getBoolean..(..) methods below).
         }
         return result;
     }
@@ -74,15 +86,6 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     @Override
     public String getProperty(String propertyName) {
         return getProperty(DomainService.DEFAULT_DOMAIN, propertyName);
-    }
-
-    @Override
-    public String getProperty(String propertyName, String defaultValue) {
-        String propertyValue = getProperty(propertyName);
-        if (StringUtils.isEmpty(propertyValue)) {
-            propertyValue = defaultValue;
-        }
-        return propertyValue;
     }
 
     @Override
@@ -156,7 +159,6 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         return propertyValue;
     }
 
-
     @Override
     public Set<String> filterPropertiesName(Predicate<String> predicate) {
         Set<String> filteredPropertyNames = new HashSet<>();
@@ -169,4 +171,63 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
         }
         return filteredPropertyNames;
     }
+
+    @Override
+    public Integer getIntegerProperty(String propertyName) {
+        String value = getProperty(propertyName);
+        return getIntegerInternal(propertyName, value);
+    }
+
+    @Override
+    public Integer getIntegerDomainProperty(String propertyName) {
+        String domainValue = getDomainProperty(propertyName);
+        return getIntegerInternal(propertyName, domainValue);
+    }
+
+    @Override
+    public Integer getIntegerDomainProperty(Domain domain, String propertyName) {
+        String domainValue = getDomainProperty(domain, propertyName);
+        return getIntegerInternal(propertyName, domainValue);
+    }
+
+    @Override
+    public Integer getIntegerOptionalDomainProperty(String propertyName) {
+        String optionalDomainValue = getOptionalDomainProperty(propertyName);
+        return getIntegerInternal(propertyName, optionalDomainValue);
+    }
+
+    private Integer getIntegerInternal(String propertyName, String customValue) {
+        Integer defaultValue = MapUtils.getInteger(domibusDefaultProperties, propertyName);
+        return NumberUtils.toInt(customValue, defaultValue);
+    }
+
+    @Override
+    public Boolean getBooleanProperty(String propertyName) {
+        String value = getProperty(propertyName);
+        return getBooleanInternal(propertyName, value);
+    }
+
+    @Override
+    public Boolean getBooleanDomainProperty(String propertyName) {
+        String domainValue = getDomainProperty(propertyName);
+        return getBooleanInternal(propertyName, domainValue);
+    }
+
+    @Override
+    public Boolean getBooleanDomainProperty(Domain domain, String propertyName) {
+        String domainValue = getDomainProperty(domain, propertyName);
+        return getBooleanInternal(propertyName, domainValue);
+    }
+
+    @Override
+    public Boolean getBooleanOptionalDomainProperty(String propertyName) {
+        String optionalDomainValue = getOptionalDomainProperty(propertyName);
+        return getBooleanInternal(propertyName, optionalDomainValue);
+    }
+
+    private Boolean getBooleanInternal(String propertyName, String customValue) {
+        Boolean defaultValue = MapUtils.getBoolean(domibusDefaultProperties, propertyName);
+        return BooleanUtils.toBooleanDefaultIfNull(BooleanUtils.toBooleanObject(customValue), defaultValue);
+    }
+
 }

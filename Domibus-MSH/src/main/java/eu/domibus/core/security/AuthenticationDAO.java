@@ -2,27 +2,30 @@ package eu.domibus.core.security;
 
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
+import eu.domibus.common.dao.security.UserDaoBase;
+import eu.domibus.common.model.security.UserBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
-public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
+public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase {
 
     public AuthenticationDAO() {
         super(AuthenticationEntity.class);
     }
-
 
     public AuthenticationEntity findByUser(final String username) {
         final TypedQuery<AuthenticationEntity> query = this.em.createNamedQuery("AuthenticationEntity.findByUsername", AuthenticationEntity.class);
@@ -129,6 +132,19 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> {
             }
         }
         return predicates;
+    }
+
+    public List<UserBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
+        TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findWithPasswordChangedBetween", AuthenticationEntity.class);
+        namedQuery.setParameter("START_DATE", from.atStartOfDay());
+        namedQuery.setParameter("END_DATE", to.atStartOfDay());
+        namedQuery.setParameter("DEFAULT_PASSWORD", withDefaultPassword);
+        return namedQuery.getResultList().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public UserBase findByUserName(String userName) {
+        return findByUser(userName);
     }
 
 }

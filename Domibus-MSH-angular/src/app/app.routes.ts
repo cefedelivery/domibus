@@ -83,8 +83,15 @@ const appRoutes: Routes = [
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
-  {path: 'logging', component: LoggingComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'changePassword', component: ChangePasswordComponent, canActivate: [AuthenticatedGuard]},
+  {
+    path: 'logging',
+    component: LoggingComponent,
+    canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard],
+    data: {
+      isDomainIndependent: true
+    }
+  },
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

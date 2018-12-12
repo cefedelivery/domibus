@@ -1,10 +1,7 @@
 package eu.domibus.common.services;
 
-import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.user.User;
 import eu.domibus.common.model.security.UserLoginErrorReason;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,12 +18,14 @@ public interface UserService {
 
     /**
      * Get all user roles
+     *
      * @return all user roles
      */
     List<eu.domibus.api.user.UserRole> findUserRoles();
 
     /**
      * Create or update users of the system (edited in the user management gui console).
+     *
      * @param users to create of update.
      */
     void updateUsers(List<User> users);
@@ -49,25 +48,28 @@ public interface UserService {
 
     /**
      * Verify if user add some incorrect login attempt and reset the attempt counter.
+     *
      * @param username the userName
      */
     void handleCorrectAuthentication(String username);
 
     /**
      * Verify if the user's password is expired.
+     *
      * @param username the userName
      */
     void validateExpiredPassword(String username);
 
     /**
      * Verify if the user's password is "almost" expired
+     *
      * @param username the userName
      * @return the days till expiration; null if it is not to raise a warning
      */
     Integer getDaysTillExpiration(String username);
 
 
-    public void sendAlerts();
+    public void triggerPasswordAlerts();
 
     void changePassword(String username, String currentPassword, String newPassword);
 }

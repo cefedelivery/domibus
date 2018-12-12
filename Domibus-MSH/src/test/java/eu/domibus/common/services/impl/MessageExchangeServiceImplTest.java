@@ -158,7 +158,7 @@ public class MessageExchangeServiceImplTest {
     public void testInitiatePullRequest() throws Exception {
         when(pModeProvider.isConfigurationLoaded()).thenReturn(true);
         when(domainProvider.getCurrentDomain()).thenReturn(new Domain("default", "Default"));
-        when(domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1")).thenReturn("10");
+        when(domibusPropertyProvider.getIntegerDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE)).thenReturn(10);
         when(domibusConfigurationService.isMultiTenantAware()).thenReturn(false);
 
         ArgumentCaptor<JmsMessage> mapArgumentCaptor = ArgumentCaptor.forClass(JmsMessage.class);

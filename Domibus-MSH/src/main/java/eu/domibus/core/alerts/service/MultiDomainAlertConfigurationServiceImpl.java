@@ -8,7 +8,6 @@ import eu.domibus.common.MessageStatus;
 import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.service.*;
-import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -102,20 +101,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     private static final String DOMIBUS_ALERT_SUPER_ACTIVE = "domibus.alert.super.active";
 
-    static final String MESSAGE_STATUS_CHANGE_MAIL_SUBJECT = "Message status change";
-
-    static final String ACCOUNT_DISABLED_MAIL_SUBJECT = "Account disabled";
-
-    static final String WHEN_BLOCKED = "WHEN_BLOCKED";
-
-    static final String LOW = "LOW";
-
-    static final String LOGIN_FAILURE_MAIL_SUBJECT = "Login failure";
-
-    static final String CERTIFICATE_IMMINENT_EXPIRATION_MAIL_SUBJECT = "Certificate imminent expiration";
-
-    static final String CERTIFICATE_EXPIRED_MAIL_SUBJECT = "Certificate expired";
-
     static final String DOMIBUS_ALERT_MAIL_SENDING_ACTIVE = "domibus.alert.mail.sending.active";
 
     private static final String DOMIBUS_ALERT_SUPER_MAIL_SENDING_ACTIVE = "domibus.alert.super.mail.sending.active";
@@ -143,6 +128,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     private ConfigurationLoader<LoginFailureModuleConfiguration> loginFailureConfigurationLoader;
 
     @Autowired
+    private ConfigurationLoader<LoginFailureModuleConfiguration> pluginLoginFailureConfigurationLoader;
+
+    @Autowired
     private ConfigurationLoader<ImminentExpirationCertificateModuleConfiguration> imminentExpirationCertificateConfigurationLoader;
 
     @Autowired
@@ -152,10 +140,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     private ConfigurationLoader<CommonConfiguration> commonConfigurationConfigurationLoader;
 
     @Autowired
-    private ConfigurationLoader<AlertEventModuleConfiguration> expiredPasswordConfigurationLoader;
-
-    @Autowired
-    private ConfigurationLoader<AlertEventModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
+    private RepetitiveAlertConfigurationHolder passwordExpirationAlertsConfigurationHolder;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -181,7 +166,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public LoginFailureModuleConfiguration getLoginFailureConfiguration() {
-        return loginFailureConfigurationLoader.getConfiguration(this::readLoginFailureConfiguration);
+        return loginFailureConfigurationLoader.getConfiguration(new ConsoleLoginFailConfigurationReader()::readConfiguration);
     }
 
     /**
@@ -213,24 +198,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public AlertLevel getAlertLevel(Alert alert) {
-        switch (alert.getAlertType()) {
-            case MSG_STATUS_CHANGED:
-                return getMessageCommunicationConfiguration().getAlertLevel(alert);
-            case USER_ACCOUNT_DISABLED:
-                return getAccountDisabledConfiguration().getAlertLevel(alert);
-            case USER_LOGIN_FAILURE:
-                return getLoginFailureConfiguration().getAlertLevel(alert);
-            case CERT_IMMINENT_EXPIRATION:
-                return getImminentExpirationCertificateConfiguration().getAlertLevel(alert);
-            case CERT_EXPIRED:
-                return getExpiredCertificateConfiguration().getAlertLevel(alert);
-            case PASSWORD_IMMINENT_EXPIRATION:
-            case PASSWORD_EXPIRED:
-                return getRepetitiveEventConfiguration(alert.getAlertType()).getAlertLevel(alert);
-            default:
-                LOG.error("Invalid alert type[{}]", alert.getAlertType());
-                throw new IllegalArgumentException("Invalid alert type");
-        }
+        return getModuleConfiguration(alert.getAlertType()).getAlertLevel(alert);
     }
 
     /**
@@ -238,31 +206,39 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      */
     @Override
     public String getMailSubject(AlertType alertType) {
+        return getModuleConfiguration(alertType).getMailSubject();
+    }
+
+    // TODO: refactor to avoid these repetitions cause we can easily miss to add here the newly added alert types
+    private AlertModuleConfiguration getModuleConfiguration(AlertType alertType) {
         switch (alertType) {
             case MSG_STATUS_CHANGED:
-                return getMessageCommunicationConfiguration().getMailSubject();
+                return getMessageCommunicationConfiguration();
             case USER_ACCOUNT_DISABLED:
-                return getAccountDisabledConfiguration().getMailSubject();
+                return getAccountDisabledConfiguration();
             case USER_LOGIN_FAILURE:
-                return getLoginFailureConfiguration().getMailSubject();
+                return getLoginFailureConfiguration();
+            case PLUGIN_USER_LOGIN_FAILURE:
+                return getPluginLoginFailureConfiguration();
             case CERT_IMMINENT_EXPIRATION:
-                return getImminentExpirationCertificateConfiguration().getMailSubject();
+                return getImminentExpirationCertificateConfiguration();
             case CERT_EXPIRED:
-                return getExpiredCertificateConfiguration().getMailSubject();
+                return getExpiredCertificateConfiguration();
             case PASSWORD_IMMINENT_EXPIRATION:
             case PASSWORD_EXPIRED:
-                return getRepetitiveEventConfiguration(alertType).getMailSubject();
+            case PLUGIN_PASSWORD_IMMINENT_EXPIRATION:
+            case PLUGIN_PASSWORD_EXPIRED:
+                return getRepetitiveAlertConfiguration(alertType);
             default:
                 LOG.error("Invalid alert type[{}]", alertType);
                 throw new IllegalArgumentException("Invalid alert type");
         }
     }
 
-
     @Override
     public Boolean isAlertModuleEnabled() {
         String propertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_ACTIVE, DOMIBUS_ALERT_SUPER_ACTIVE);
-        return Boolean.valueOf(domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, propertyName));
+        return domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, propertyName);
     }
 
     @Override
@@ -295,9 +271,9 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     }
 
     protected CommonConfiguration readCommonConfiguration(Domain domain) {
-        final boolean emailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(getSendEmailActivePropertyName(), "false"));
+        final boolean emailActive = domibusPropertyProvider.getBooleanOptionalDomainProperty(getSendEmailActivePropertyName());
         final String alertCleanerLifeTimePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME, DOMIBUS_ALERT_SUPER_CLEANER_ALERT_LIFETIME);
-        final Integer alertLifeTimeInDays = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(alertCleanerLifeTimePropertyName, "20"));
+        final Integer alertLifeTimeInDays = domibusPropertyProvider.getIntegerOptionalDomainProperty(alertCleanerLifeTimePropertyName);
 
         if (!emailActive) {
             return new CommonConfiguration(alertLifeTimeInDays);
@@ -326,7 +302,7 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             }
         }
         if (missConfigured) {
-            LOG.error("Alert module can not send email, mail sender property name:[{}]/value[{}] and receiver property name:[{}]/value[{}] are mandatory in domain:[{}]",alertSenderPropertyName, alertEmailSender, alertReceiverPropertyName,alertEmailReceiver, domain);
+            LOG.error("Alert module can not send email, mail sender property name:[{}]/value[{}] and receiver property name:[{}]/value[{}] are mandatory in domain:[{}]", alertSenderPropertyName, alertEmailSender, alertReceiverPropertyName, alertEmailReceiver, domain);
             throw new IllegalArgumentException("Invalid email address configured for the alert module.");
         }
         return new CommonConfiguration(alertLifeTimeInDays, alertEmailSender, alertEmailReceiver);
@@ -335,14 +311,14 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     protected MessagingModuleConfiguration readMessageConfiguration(Domain domain) {
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean messageAlertActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString()));
+            final Boolean messageAlertActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
             if (!alertActive || !messageAlertActive) {
                 LOG.debug("domain:[{}] Alert message status change module is inactive for the following reason:global alert module active[{}], message status change module active[{}]", domain, alertActive, messageAlertActive);
                 return new MessagingModuleConfiguration();
             }
             final String messageCommunicationStates = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
-            final String messageCommunicationLevels = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
-            final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT, MESSAGE_STATUS_CHANGE_MAIL_SUBJECT);
+            final String messageCommunicationLevels = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
+            final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT);
 
             if (StringUtils.isEmpty(messageCommunicationStates) || StringUtils.isEmpty(messageCommunicationLevels)) {
                 LOG.warn("Message status change alert module misconfiguration -> states[{}], levels[{}]", messageCommunicationStates, messageCommunicationLevels);
@@ -371,18 +347,18 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
         try {
             final Boolean alertActive = isAlertModuleEnabled();
             final String accountDisabledAlertPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_ACTIVE);
-            final Boolean accountDisabledActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledAlertPropertyName, Boolean.FALSE.toString()));
+            final Boolean accountDisabledActive = domibusPropertyProvider.getBooleanDomainProperty(domain, accountDisabledAlertPropertyName);
             if (!alertActive || !accountDisabledActive) {
                 LOG.debug("domain:[{}] Alert account disabled module is inactive for the following reason:global alert module active[{}], account disabled module active[{}]", domain, alertActive, accountDisabledActive);
                 return new AccountDisabledModuleConfiguration();
             }
 
             final String accountDisabledLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_LEVEL);
-            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledLevelPropertyName, LOW));
+            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledLevelPropertyName));
             final String accountDisabledMomentPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_MOMENT);
-            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledMomentPropertyName, WHEN_BLOCKED));
-            final String accountDisabledSubjectPropertyName=getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT,DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_SUBJECT);
-            final String accountDisabledMailSubject = domibusPropertyProvider.getDomainProperty(domain, accountDisabledSubjectPropertyName, ACCOUNT_DISABLED_MAIL_SUBJECT);
+            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledMomentPropertyName));
+            final String accountDisabledSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_SUBJECT);
+            final String accountDisabledMailSubject = domibusPropertyProvider.getDomainProperty(domain, accountDisabledSubjectPropertyName);
 
             LOG.info("Alert account disabled module activated for domain:[{}]", domain);
             return new AccountDisabledModuleConfiguration(
@@ -397,48 +373,46 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
     }
 
-    protected LoginFailureModuleConfiguration readLoginFailureConfiguration(Domain domain) {
-        try {
-            final Boolean alertActive = isAlertModuleEnabled();
-
-            final String alertActivePropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
-            final Boolean loginFailureActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertActivePropertyName, Boolean.FALSE.toString()));
-
-            if (!alertActive || !loginFailureActive) {
-                LOG.debug("Alert Login failure module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", domain, alertActive, loginFailureActive);
-                return new LoginFailureModuleConfiguration();
-            }
-            final String alertLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
-            final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, alertLevelPropertyName, LOW));
-
-            final String alertEmailSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
-            final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, alertEmailSubjectPropertyName, LOGIN_FAILURE_MAIL_SUBJECT);
-
-            LOG.info("Alert login failure module activated for domain:[{}]", domain);
-            return new LoginFailureModuleConfiguration(
-                    loginFailureAlertLevel,
-                    loginFailureMailSubject);
-
-        } catch (Exception e) {
-            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
-            return new LoginFailureModuleConfiguration();
+    class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
+        @Override
+        protected AlertType getAlertType() {
+            return AlertType.USER_LOGIN_FAILURE;
         }
 
+        @Override
+        protected String getModuleName() {
+            return "Alert Login failure";
+        }
+
+        @Override
+        protected String getAlertActivePropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_ACTIVE);
+        }
+
+        @Override
+        protected String getAlertLevelPropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_LEVEL);
+        }
+
+        @Override
+        protected String getAlertEmailSubjectPropertyName() {
+            return getDomainOrSuperProperty(DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, DOMIBUS_ALERT_SUPER_USER_LOGIN_FAILURE_MAIL_SUBJECT);
+        }
     }
 
     protected ImminentExpirationCertificateModuleConfiguration readImminentExpirationCertificateConfiguration(Domain domain) {
 
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean imminentExpirationActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE, Boolean.FALSE.toString()));
+            final Boolean imminentExpirationActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE);
             if (!alertActive || !imminentExpirationActive) {
                 LOG.debug("domain:[{}] Alert certificate imminent expiration module is inactive for the following reason:global alert module active[{}], certificate imminent expiration module active[{}]", domain, alertActive, imminentExpirationActive);
                 return new ImminentExpirationCertificateModuleConfiguration();
             }
-            final Integer imminentExpirationDelay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS, "61"));
-            final Integer imminentExpirationFrequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS, "14"));
-            final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL, LOW));
-            final String imminentExpirationMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT, CERTIFICATE_IMMINENT_EXPIRATION_MAIL_SUBJECT);
+            final Integer imminentExpirationDelay = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS);
+            final Integer imminentExpirationFrequency = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS);
+            final AlertLevel imminentExpirationAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL));
+            final String imminentExpirationMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT);
 
             LOG.info("Alert certificate imminent expiration module activated for domain:[{}]", domain);
             return new ImminentExpirationCertificateModuleConfiguration(
@@ -458,15 +432,15 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
 
         try {
             final Boolean alertActive = isAlertModuleEnabled();
-            final Boolean expiredActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE, Boolean.FALSE.toString()));
+            final Boolean expiredActive = domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE);
             if (!alertActive || !expiredActive) {
                 LOG.debug("domain:[{}] Alert certificate expired module is inactive for the following reason:global alert module active[{}], certificate expired module active[{}]", domain, alertActive, expiredActive);
                 return new ExpiredCertificateModuleConfiguration();
             }
-            final Integer revokedFrequency = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS, "7"));
-            final Integer revokedDuration = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS, "92"));
-            final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_LEVEL, LOW));
-            final String expiredMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT, CERTIFICATE_EXPIRED_MAIL_SUBJECT);
+            final Integer revokedFrequency = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS);
+            final Integer revokedDuration = domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS);
+            final AlertLevel revocationLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_LEVEL));
+            final String expiredMailSubject = domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT);
 
             LOG.info("Alert certificate expired activated for domain:[{}]", domain);
             return new ExpiredCertificateModuleConfiguration(
@@ -485,43 +459,28 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
      * {@inheritDoc}
      */
     @Override
-    public AlertEventModuleConfiguration getRepetitiveEventConfiguration(AlertType alertType) {
-        ConfigurationLoader<AlertEventModuleConfiguration> alertEventConfigurationLoader = null;
-        if (alertType == AlertType.PASSWORD_IMMINENT_EXPIRATION) {
-            alertEventConfigurationLoader = imminentPasswordExpirationConfigurationLoader;
-        }
-        else if (alertType == AlertType.PASSWORD_EXPIRED) {
-            alertEventConfigurationLoader = expiredPasswordConfigurationLoader;
-        } else {
-            throw new IllegalArgumentException("Invalid alert type");
-        }
-
-        return alertEventConfigurationLoader.getConfiguration(new ConfigurationReader(alertType)::readAlertConfiguration);
+    public RepetitiveAlertModuleConfiguration getRepetitiveAlertConfiguration(AlertType alertType) {
+        ConfigurationLoader<RepetitiveAlertModuleConfiguration> configurationLoader = passwordExpirationAlertsConfigurationHolder.get(alertType);
+        return configurationLoader.getConfiguration(new RepetitiveAlertConfigurationReader(alertType)::readConfiguration);
     }
 
-    class ConfigurationReader {
+    class RepetitiveAlertConfigurationReader {
         AlertType alertType;
         String property, moduleName;
 
-        public ConfigurationReader(AlertType alertType) {
+        public RepetitiveAlertConfigurationReader(AlertType alertType) {
             this.alertType = alertType;
-
-            if (alertType.equals(AlertType.PASSWORD_IMMINENT_EXPIRATION)) {
-                this.property = "domibus.alert.password.imminent_expiration";
-                this.moduleName = "Password imminent expiration";
-            } else if (alertType.equals(AlertType.PASSWORD_EXPIRED)) {
-                this.property = "domibus.alert.password.expired";
-                this.moduleName = "Password expired";
-            }
+            this.property = alertType.getConfigurationProperty();
+            this.moduleName = alertType.getTitle();
         }
 
-        public <T> AlertEventModuleConfiguration readAlertConfiguration(Domain domain) {
+        public RepetitiveAlertModuleConfiguration readConfiguration(Domain domain) {
             try {
                 final Boolean alertModuleActive = isAlertModuleEnabled();
                 final Boolean eventActive = Boolean.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".active"));
                 if (!alertModuleActive || !eventActive) {
                     LOG.debug("domain:[{}] Alert {} module is inactive for the following reason: global alert module active[{}], event active[{}]", domain, moduleName, alertModuleActive, eventActive);
-                    return new AlertEventModuleConfiguration(alertType);
+                    return new RepetitiveAlertModuleConfiguration(alertType);
                 }
 
                 final Integer delay = Integer.valueOf(domibusPropertyProvider.getDomainProperty(domain, property + ".delay_days"));
@@ -530,15 +489,84 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
                 final String mailSubject = domibusPropertyProvider.getDomainProperty(domain, property + ".mail.subject");
 
                 LOG.info("Alert {} module activated for domain:[{}]", moduleName, domain);
-                return new AlertEventModuleConfiguration(alertType, delay, frequency, alertLevel, mailSubject);
-
+                return new RepetitiveAlertModuleConfiguration(alertType, delay, frequency, alertLevel, mailSubject);
             } catch (Exception e) {
                 LOG.warn("An error occurred while reading {} alert module configuration for domain:[{}], ", moduleName, domain, e);
-                return new AlertEventModuleConfiguration(alertType);
+                return new RepetitiveAlertModuleConfiguration(alertType);
             }
+        }
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoginFailureModuleConfiguration getPluginLoginFailureConfiguration() {
+        return pluginLoginFailureConfigurationLoader.getConfiguration(new PluginLoginFailConfigurationReader()::readConfiguration);
+    }
+
+    abstract class LoginFailConfigurationReader {
+        protected abstract AlertType getAlertType();
+
+        protected abstract String getModuleName();
+
+        protected abstract String getAlertActivePropertyName();
+
+        protected abstract String getAlertLevelPropertyName();
+
+        protected abstract String getAlertEmailSubjectPropertyName();
+
+        protected LoginFailureModuleConfiguration readConfiguration(Domain domain) {
+
+            try {
+                final Boolean alertActive = isAlertModuleEnabled();
+
+                final Boolean loginFailureActive = domibusPropertyProvider.getBooleanDomainProperty(domain, getAlertActivePropertyName());
+
+                if (!alertActive || !loginFailureActive) {
+                    LOG.debug("{} module is inactive for the following reason:global alert module active[{}], login failure module active[{}]", getModuleName(), alertActive, loginFailureActive);
+                    return new LoginFailureModuleConfiguration(getAlertType());
+                }
+
+                final AlertLevel loginFailureAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, getAlertLevelPropertyName()));
+
+                final String loginFailureMailSubject = domibusPropertyProvider.getDomainProperty(domain, getAlertEmailSubjectPropertyName());
+
+                LOG.info("{} module activated for domain:[{}]", getModuleName(), domain);
+                return new LoginFailureModuleConfiguration(getAlertType(), loginFailureAlertLevel, loginFailureMailSubject);
+
+            } catch (Exception e) {
+                LOG.warn("An error occurred while reading {} module configuration for domain:[{}], ", getModuleName(), domain, e);
+                return new LoginFailureModuleConfiguration(getAlertType());
+            }
+        }
+    }
+
+    class PluginLoginFailConfigurationReader extends LoginFailConfigurationReader {
+        @Override
+        protected AlertType getAlertType() {
+            return AlertType.PLUGIN_USER_LOGIN_FAILURE;
         }
 
+        @Override
+        protected String getModuleName() {
+            return "Alert Plugin Login failure";
+        }
+
+        @Override
+        protected String getAlertActivePropertyName() {
+            return "domibus.alert.plugin.user.login_failure.active";
+        }
+
+        @Override
+        protected String getAlertLevelPropertyName() {
+            return "domibus.alert.plugin.user.login_failure.level";
+        }
+
+        @Override
+        protected String getAlertEmailSubjectPropertyName() {
+            return "domibus.alert.plugin.user.login_failure.mail.subject";
+        }
     }
 
 }

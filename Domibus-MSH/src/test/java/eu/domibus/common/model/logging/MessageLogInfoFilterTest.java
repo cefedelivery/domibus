@@ -1,5 +1,6 @@
 package eu.domibus.common.model.logging;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.integration.junit4.JMockit;
@@ -10,7 +11,6 @@ import org.junit.runner.RunWith;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Properties;
 
 import static org.mockito.Mockito.spy;
 
@@ -27,7 +27,7 @@ public class MessageLogInfoFilterTest {
     MessageLogInfoFilter messageLogInfoFilter;
 
     @Injectable
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusProperties;
 
     public static HashMap<String, Object> returnFilters() {
         HashMap<String, Object> filters = new HashMap<>();

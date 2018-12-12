@@ -102,7 +102,7 @@
 			</legConfigurations>
 		<process name="tc2Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
-				<initiatorParty name="senderalias"/>
+				<initiatorParty name="senderalias"/>			
 				<initiatorParty name="green_gw"/>
 			</initiatorParties>
 			<responderParties>
