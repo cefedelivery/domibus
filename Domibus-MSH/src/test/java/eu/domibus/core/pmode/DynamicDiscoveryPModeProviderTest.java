@@ -172,11 +172,10 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testUseDynamicDiscovery() {
-
-        doReturn("false").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(false).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         assertFalse(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
 
-        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(true).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         assertTrue(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
     }
 
@@ -270,7 +269,7 @@ public class DynamicDiscoveryPModeProviderTest {
         }
 
         doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.SMLZONE_KEY));
-        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(true).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();
