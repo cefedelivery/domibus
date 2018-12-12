@@ -49,7 +49,7 @@ public class AlertMethodEmail implements AlertMethod {
         //if the alert is created form an event related to a user, send the email to the user address also
         Stream<Event> userEvents = alert.getEvents().stream().filter(event -> event.getType().isUserRelated());
         userEvents.forEach(event -> {
-            //TODO: find a ggod way to ensure that all such events have "USER" field
+            //TODO: find a better way to ensure that all such events have "USER" field
             if (!event.getType().getProperties().contains(USERNAME_EVENT_PROPERTY)) {
                 LOG.debug("Event type [{}] should have [{}] property.", event.getType(), USERNAME_EVENT_PROPERTY);
                 return;
@@ -75,4 +75,5 @@ public class AlertMethodEmail implements AlertMethod {
             mailSender.sendMail(mailModelForAlert, from, userEmail);
         });
     }
+
 }
