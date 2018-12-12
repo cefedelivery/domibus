@@ -24,8 +24,7 @@
         <web-resource-collection>
             <web-resource-name>Domibus</web-resource-name>
             <description>Require users to authenticate</description>
-            <url-pattern>/logging/*</url-pattern>
-            <url-pattern>/rest/*</url-pattern>
+            <url-pattern>/*</url-pattern>
             <http-method-omission>OPTIONS</http-method-omission>
         </web-resource-collection>
         <auth-constraint>
