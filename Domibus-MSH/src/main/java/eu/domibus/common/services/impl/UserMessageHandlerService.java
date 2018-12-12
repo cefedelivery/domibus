@@ -5,16 +5,13 @@ import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.common.*;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
-import eu.domibus.common.model.configuration.ErrorHandling;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
@@ -129,6 +126,9 @@ public class UserMessageHandlerService {
     @Autowired
     protected UIReplicationSignalService uiReplicationSignalService;
 
+    @Autowired
+    protected RawEnvelopeLogDao rawEnvelopeLogDao;
+
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
@@ -180,7 +180,7 @@ public class UserMessageHandlerService {
                     }
                 }
             }
-            return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
+            return generateReceipt(request, messaging.getUserMessage(), legConfiguration, messageExists, selfSendingFlag);
         }
     }
 
@@ -399,7 +399,7 @@ public class UserMessageHandlerService {
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate,
+    SOAPMessage generateReceipt(final SOAPMessage request, UserMessage userMessage, final LegConfiguration legConfiguration, final Boolean duplicate,
                                 boolean selfSendingFlag) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
@@ -417,12 +417,21 @@ public class UserMessageHandlerService {
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
                 final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
-                final Source requestMessage = request.getSOAPPart().getContent();
+
                 transformer.setParameter("messageid", this.messageIdGenerator.generateMessageId());
                 transformer.setParameter("timestamp", this.timestampDateFormatter.generateTimestamp());
                 transformer.setParameter("nonRepudiation", Boolean.toString(legConfiguration.getReliability().isNonRepudiation()));
 
                 final DOMResult domResult = new DOMResult();
+
+                Source requestMessage = null;
+                if(duplicate) {
+                    final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(userMessage.getMessageInfo().getMessageId());
+                    requestMessage = new StreamSource(new StringReader(rawXmlByMessageId.getRawMessage()));
+                } else {
+                    requestMessage = request.getSOAPPart().getContent();
+                }
+
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
                 saveResponse(responseMessage, selfSendingFlag);

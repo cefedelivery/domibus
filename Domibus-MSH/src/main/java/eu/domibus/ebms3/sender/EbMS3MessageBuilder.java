@@ -2,7 +2,6 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
-import eu.domibus.common.dao.AttachmentDAO;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.MessageIdGenerator;
@@ -11,6 +10,7 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,7 @@ import org.xml.sax.SAXParseException;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,21 +33,24 @@ import java.util.Locale;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @Service
 public class EbMS3MessageBuilder {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EbMS3MessageBuilder.class);
     private final ObjectFactory ebMS3Of = new ObjectFactory();
+
     @Autowired
     private MessageFactory messageFactory;
-    @Autowired
-    private AttachmentDAO attachmentDAO;
+
     @Autowired
     @Qualifier(value = "jaxbContextEBMS")
     private JAXBContext jaxbContext;
+
     @Autowired
     private DocumentBuilderFactory documentBuilderFactory;
+
     @Autowired
     private MessageIdGenerator messageIdGenerator;
 
@@ -55,12 +59,11 @@ public class EbMS3MessageBuilder {
     }
 
     public SOAPMessage buildSOAPMessage(final SignalMessage signalMessage, final LegConfiguration leg) throws EbMS3Exception {
-        return this.buildSOAPMessage(null, signalMessage, leg);
-
+        return buildSOAPMessage(signalMessage);
     }
 
     public SOAPMessage buildSOAPMessage(final UserMessage userMessage, final LegConfiguration leg) throws EbMS3Exception {
-        return this.buildSOAPMessage(userMessage, null, leg);
+        return buildSOAPMessage(userMessage);
     }
 
     //TODO: If Leg is used in future releases we have to update this method
@@ -84,31 +87,56 @@ public class EbMS3MessageBuilder {
         return soapMessage;
     }
 
-    public SOAPMessage buildSOAPMessage(final UserMessage userMessage, final SignalMessage signalMessage, final LegConfiguration leg) throws EbMS3Exception {
-        String messageId = null;
+    protected SOAPMessage buildSOAPMessage(final UserMessage userMessage) throws EbMS3Exception {
         final SOAPMessage message;
         try {
             message = this.messageFactory.createMessage();
-
             final Messaging messaging = this.ebMS3Of.createMessaging();
-            if (userMessage != null) {
-                if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
-                    userMessage.getMessageInfo().setTimestamp(new Date());
-                }
-                messageId = userMessage.getMessageInfo().getMessageId();
-                messaging.setUserMessage(userMessage);
-                for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
-                    this.attachPayload(partInfo, message);
-                }
 
+            final String qualifiedName = "xmlns:wsu";
+            final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+            message.getSOAPBody().setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
+            QName idQname = new QName(namespace, "Id", "wsu");
+
+            String messageIDDigest = DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId());
+            message.getSOAPBody().addAttribute(idQname, "_2" + messageIDDigest);
+            if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
+                userMessage.getMessageInfo().setTimestamp(new Date());
             }
+
+            messaging.setUserMessage(userMessage);
+            for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
+                this.attachPayload(partInfo, message);
+            }
+
+            this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+            final Object next = message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+            final SOAPElement next1 = (SOAPElement) next;
+            next1.setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
+            next1.addAttribute(idQname, "_1" + messageIDDigest);
+
+            message.saveChanges();
+        } catch (final SAXParseException e) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", userMessage.getMessageInfo().getMessageId(), e);
+        } catch (final JAXBException | SOAPException | ParserConfigurationException | IOException | SAXException ex) {
+            throw new SendMessageException(ex);
+        }
+        return message;
+    }
+
+    protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {
+        final SOAPMessage message;
+        try {
+            message = this.messageFactory.createMessage();
+            final Messaging messaging = this.ebMS3Of.createMessaging();
+
             if (signalMessage != null) {
                 final MessageInfo msgInfo = new MessageInfo();
 
-                messageId = this.messageIdGenerator.generateMessageId();
+                String messageId = this.messageIdGenerator.generateMessageId();
                 msgInfo.setMessageId(messageId);
                 msgInfo.setTimestamp(new Date());
-                if(signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
+                if (signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
                     msgInfo.setRefToMessageId(signalMessage.getError().iterator().next().getRefToMessageInError());
                 }
 
@@ -116,11 +144,10 @@ public class EbMS3MessageBuilder {
             }
             messaging.setSignalMessage(signalMessage);
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+
             message.saveChanges();
 
-        } catch (final SAXParseException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, e);
-        } catch (final JAXBException | SOAPException | ParserConfigurationException | IOException | SAXException ex) {
+        } catch (final JAXBException | SOAPException ex) {
             throw new SendMessageException(ex);
         }
         return message;
@@ -129,7 +156,7 @@ public class EbMS3MessageBuilder {
     private void attachPayload(final PartInfo partInfo, final SOAPMessage message) throws ParserConfigurationException, SOAPException, IOException, SAXException {
         String mimeType = null;
 
-        if(partInfo.getPartProperties() != null) {
+        if (partInfo.getPartProperties() != null) {
             for (final Property prop : partInfo.getPartProperties().getProperties()) {
                 if (Property.MIME_TYPE.equalsIgnoreCase(prop.getName())) {
                     mimeType = prop.getValue();
@@ -147,10 +174,10 @@ public class EbMS3MessageBuilder {
         }
         final AttachmentPart attachmentPart = message.createAttachmentPart(dataHandler);
         String href = partInfo.getHref();
-        if(href.contains("cid:")) {
+        if (href.contains("cid:")) {
             href = href.substring(href.lastIndexOf("cid:") + "cid:".length());
         }
-        if(!href.startsWith("<")) {
+        if (!href.startsWith("<")) {
             href = "<" + href + ">";
         }
         attachmentPart.setContentId(href);
