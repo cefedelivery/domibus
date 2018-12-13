@@ -73,6 +73,7 @@ public class ReliabilityChecker {
         return check(request, response, pmodeKey, pushMatcher);
     }
 
+    @Transactional(rollbackFor = EbMS3Exception.class)
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey, final ReliabilityMatcher matcher) throws EbMS3Exception {
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         String messageId = null;
