@@ -198,7 +198,7 @@ public class ReliabilityChecker {
             transformerFactory.newTransformer().transform(new DOMSource(soapMessage.getSOAPPart()), new StreamResult(stringWriter));
             return stringWriter.toString();
         } catch (IOException | TransformerException e) {
-            LOG.warn("Could get soap part");
+            LOG.warn("Couldn't get soap part", e);
         }
         return null;
     }
