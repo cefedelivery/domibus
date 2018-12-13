@@ -444,13 +444,13 @@ public class UserMessageHandlerService {
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
 
-                if (duplicate) {
-                    final Object next = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-                    final SOAPElement next1 = (SOAPElement) next;
-                    final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-                    QName idQname = new QName(namespace, "Id", "wsu");
-                    next1.addAttribute(idQname, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
-                } else {
+                final Object next = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+                final SOAPElement next1 = (SOAPElement) next;
+                final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+                QName idQname = new QName(namespace, "Id", "wsu");
+                next1.addAttribute(idQname, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
+
+                if (!duplicate) {
                     saveResponse(responseMessage, selfSendingFlag);
                 }
 

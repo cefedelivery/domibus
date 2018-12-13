@@ -18,7 +18,8 @@ public class TimestampDateFormatter {
 
 
     public String generateTimestamp() {
-        return generateTimestamp(new Date());
+        final Date dateWithTruncatedMilliseconds = new Date(1000 * (new Date().getTime() / 1000));
+        return generateTimestamp(dateWithTruncatedMilliseconds);
     }
 
     public String generateTimestamp(Date timestamp) {
