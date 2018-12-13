@@ -68,7 +68,7 @@ public class AlertMethodEmail implements AlertMethod {
             }
 
             String userEmail = user.getEmail();
-            if (StringUtils.isEmpty(userEmail)) {
+            if (StringUtils.isBlank(userEmail)) {
                 LOG.debug("User [{}] does not have an email to send an alert to.", userName);
                 return;
             }

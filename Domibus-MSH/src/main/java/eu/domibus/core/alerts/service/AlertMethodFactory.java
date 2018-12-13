@@ -16,21 +16,21 @@ public class AlertMethodFactory {
     private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    protected AlertMethodEmail alertEmailMethod;
+    protected AlertMethodEmail alertMethodEmail;
 
     @Autowired
-    protected AlertMethodLog alertLogMethod;
+    protected AlertMethodLog alertMethodLog;
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
     public AlertMethod getAlertMethod() {
-        AlertMethod result = alertLogMethod;
+        AlertMethod result = alertMethodLog;
 
         final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
         final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (mailActive) {
-            result = alertEmailMethod;
+            result = alertMethodEmail;
         }
 
         return result;
