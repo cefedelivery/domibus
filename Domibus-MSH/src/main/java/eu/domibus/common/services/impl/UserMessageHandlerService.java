@@ -444,11 +444,7 @@ public class UserMessageHandlerService {
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
 
-                final Object next = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-                final SOAPElement next1 = (SOAPElement) next;
-                final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-                QName idQname = new QName(namespace, "Id", "wsu");
-                next1.addAttribute(idQname, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
+                setMessagingId(responseMessage, userMessage);
 
                 if (!duplicate) {
                     saveResponse(responseMessage, selfSendingFlag);
@@ -468,6 +464,19 @@ public class UserMessageHandlerService {
             }
         }
         return responseMessage;
+    }
+
+    protected void setMessagingId(SOAPMessage responseMessage, UserMessage userMessage) throws SOAPException {
+        final Iterator childElements = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
+        if(childElements == null || !childElements.hasNext()) {
+            LOG.warn("Could not set the Messaging Id value");
+            return;
+        }
+
+        final SOAPElement messagingElement = (SOAPElement) childElements.next();
+        final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+        QName idQname = new QName(namespace, "Id", "wsu");
+        messagingElement.addAttribute(idQname, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
     }
 
     public ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {

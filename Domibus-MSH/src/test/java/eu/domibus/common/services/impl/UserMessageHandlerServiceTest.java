@@ -23,10 +23,16 @@ import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Tested;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,6 +44,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -59,6 +66,8 @@ import java.util.List;
  */
 @RunWith(JMockit.class)
 public class UserMessageHandlerServiceTest {
+
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(UserMessageHandlerServiceTest.class);
 
     @Tested
     UserMessageHandlerService userMessageHandlerService;
@@ -210,11 +219,12 @@ public class UserMessageHandlerServiceTest {
         try {
             userMessageHandlerService.generateReceipt(soapRequestMessage, messaging, legConfiguration, false, false);
         } catch (Exception e) {
+            LOGGER.error("No exception was expected with valid configuration input !!!", e);
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
 
         new Verifications() {{
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage),false  );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false);
             times = 1;
         }};
     }
@@ -264,7 +274,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(messaging);
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, false );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, false);
         }};
     }
 
@@ -315,7 +325,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             boolean selfSendingFlagActual;
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, selfSendingFlagActual = withCapture() );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, selfSendingFlagActual = withCapture());
             Assert.assertEquals(true, selfSendingFlagActual);
         }};
     }
@@ -361,7 +371,7 @@ public class UserMessageHandlerServiceTest {
             times = 1;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
-            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, false );
+            userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, false);
         }};
     }
 
@@ -544,13 +554,13 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.generateReceipt(soapRequestMessage, messaging, legConfiguration, false, false );
+            userMessageHandlerService.generateReceipt(soapRequestMessage, messaging, legConfiguration, false, false);
         } catch (Exception e) {
             Assert.fail("No exception was expected with valid configuration input !!!");
         }
 
         new Verifications() {{
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false);
             times = 0;
         }};
     }
@@ -578,7 +588,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.generateReceipt(soapRequestMessage, messaging, legConfiguration, false, false );
+            userMessageHandlerService.generateReceipt(soapRequestMessage, messaging, legConfiguration, false, false);
             Assert.fail("Expected Transformer exception to be raised !!!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0201, e.getErrorCode());
@@ -605,7 +615,7 @@ public class UserMessageHandlerServiceTest {
             result = receiptMessage;
         }};
 
-        userMessageHandlerService.saveResponse(soapResponseMessage, false );
+        userMessageHandlerService.saveResponse(soapResponseMessage, false);
 
         new Verifications() {{
             signalMessageDao.create(responseSignalMessage);
@@ -630,7 +640,7 @@ public class UserMessageHandlerServiceTest {
             result = receiptMessage;
         }};
 
-        userMessageHandlerService.saveResponse(soapResponseMessage, true );
+        userMessageHandlerService.saveResponse(soapResponseMessage, true);
 
         new Verifications() {{
             signalMessageDao.create(responseSignalMessage);
@@ -657,7 +667,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.saveResponse(soapResponseMessage, false );
+            userMessageHandlerService.saveResponse(soapResponseMessage, false);
         } catch (Exception e) {
             Assert.fail("No exception is expected to be raised.");
         }
@@ -692,7 +702,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.saveResponse(soapResponseMessage, false );
+            userMessageHandlerService.saveResponse(soapResponseMessage, false);
             Assert.fail("Expected failure propagation during DB commit failure!");
         } catch (Exception e) {
             Assert.assertTrue("Expected Runtime exception mocked!", e instanceof RuntimeException);
@@ -865,7 +875,7 @@ public class UserMessageHandlerServiceTest {
 
         new Verifications() {{
             //verify that saveResponse is not invoked
-            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false );
+            userMessageHandlerService.saveResponse(withAny(soapResponseMessage), false);
             times = 0;
         }};
     }
@@ -1189,6 +1199,37 @@ public class UserMessageHandlerServiceTest {
             }
         }
         return result;
+    }
+
+    @Test
+    public void testSetMessagingId(@Injectable SOAPMessage responseMessage, @Injectable UserMessage userMessage, @Injectable Iterator childElements, @Injectable SOAPElement messagingElement) throws Exception {
+        String messageId = "123";
+        new Expectations() {{
+            responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
+            result = childElements;
+
+            childElements.hasNext();
+            result = true;
+
+            childElements.next();
+            result = messagingElement;
+
+            userMessage.getMessageInfo().getMessageId();
+            result = messageId;
+        }};
+
+        userMessageHandlerService.setMessagingId(responseMessage, userMessage);
+
+        new Verifications() {{
+            QName idQname = null;
+            String value = null;
+            messagingElement.addAttribute(idQname = withCapture(), value = withCapture());
+            Assert.assertNotNull(idQname);
+            Assert.assertEquals(idQname.getLocalPart(), "Id");
+            Assert.assertEquals(idQname.getPrefix(), "wsu");
+            Assert.assertNotNull(value);
+            Assert.assertEquals(value, "_1" + DigestUtils.sha256Hex(messageId));
+        }};
     }
 
 }

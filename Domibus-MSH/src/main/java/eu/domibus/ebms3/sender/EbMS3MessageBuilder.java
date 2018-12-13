@@ -110,10 +110,9 @@ public class EbMS3MessageBuilder {
             }
 
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
-            final Object next = message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-            final SOAPElement next1 = (SOAPElement) next;
-            next1.setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
-            next1.addAttribute(idQname, "_1" + messageIDDigest);
+            final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+            messagingElement.setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
+            messagingElement.addAttribute(idQname, "_1" + messageIDDigest);
 
             message.saveChanges();
         } catch (final SAXParseException e) {
