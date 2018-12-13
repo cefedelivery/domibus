@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -49,15 +50,20 @@ public class AlertMethodEmail implements AlertMethod {
         //if the alert is created form an event related to a user, send the email to the user address also
         Stream<Event> userEvents = alert.getEvents().stream().filter(event -> event.getType().isUserRelated());
         userEvents.forEach(event -> {
-            //TODO: find a better way to ensure that all such events have "USER" field
             if (!event.getType().getProperties().contains(USERNAME_EVENT_PROPERTY)) {
                 LOG.debug("Event type [{}] should have [{}] property.", event.getType(), USERNAME_EVENT_PROPERTY);
                 return;
             }
 
-            String userName = event.findStringProperty(USERNAME_EVENT_PROPERTY).get();
-            if (StringUtils.isEmpty(userName)) {
+            Optional<String> userNameProp = event.findOptionalProperty(USERNAME_EVENT_PROPERTY);
+            if (!userNameProp.isPresent()) {
                 LOG.error("Event [{}] should have [{}] property set.", event, USERNAME_EVENT_PROPERTY);
+                return;
+            }
+
+            String userName = userNameProp.get();
+            if (StringUtils.isBlank(userName)) {
+                LOG.error("Event [{}] should have [{}] property set to a non-empty value.", event, USERNAME_EVENT_PROPERTY);
                 return;
             }
 
