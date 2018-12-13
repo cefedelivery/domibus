@@ -33,14 +33,17 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
 
     private final String name;
+
     @Autowired
     protected MessageRetriever messageRetriever;
+
     @Autowired
     protected MessageSubmitter messageSubmitter;
-    private MessageLister lister;
+
     @Autowired
     protected MessagePuller messagePuller;
 
+    private MessageLister lister;
 
     public AbstractBackendConnector(final String name) {
         this.name = name;
