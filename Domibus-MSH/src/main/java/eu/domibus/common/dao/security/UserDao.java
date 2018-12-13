@@ -1,9 +1,7 @@
 package eu.domibus.common.dao.security;
 
-import eu.domibus.common.model.security.UserBase;
 import eu.domibus.common.model.security.User;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;

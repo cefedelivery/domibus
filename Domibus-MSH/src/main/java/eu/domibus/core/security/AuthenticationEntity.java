@@ -1,11 +1,12 @@
 package eu.domibus.core.security;
 
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "TB_AUTHENTICATION_ENTRY")
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
         @NamedQuery(name = "AuthenticationEntity.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
         @NamedQuery(name = "AuthenticationEntity.findWithPasswordChangedBetween", query = "FROM AuthenticationEntity ae where ae.passwordChangeDate is not null " +
                 "and ae.passwordChangeDate>:START_DATE and ae.passwordChangeDate<:END_DATE " + "and ae.defaultPassword=:DEFAULT_PASSWORD")
-public class AuthenticationEntity extends AbstractBaseEntity implements UserBase {
+public class AuthenticationEntity extends AbstractBaseEntity implements UserEntityBase {
 
     @Column(name = "CERTIFICATE_ID")
     private String certificateId;
@@ -36,6 +37,18 @@ public class AuthenticationEntity extends AbstractBaseEntity implements UserBase
     @NotNull
     @Column(name = "DEFAULT_PASSWORD")
     private Boolean defaultPassword = false;
+
+    @NotNull
+    @Column(name = "USER_ENABLED")
+    private Boolean active;
+
+    @Column(name = "ATTEMPT_COUNT")
+    private Integer attemptCount = 0;
+
+    @Column(name = "SUSPENSION_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date suspensionDate;
+
 
     public String getCertificateId() {
         return certificateId;
@@ -87,7 +100,7 @@ public class AuthenticationEntity extends AbstractBaseEntity implements UserBase
     }
 
     @Override
-    public UserBase.Type getType() {
+    public UserEntityBase.Type getType() {
         return Type.PLUGIN;
     }
 
@@ -96,7 +109,9 @@ public class AuthenticationEntity extends AbstractBaseEntity implements UserBase
         return this.getUsername();
     }
 
-    public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }
+    public LocalDateTime getPasswordChangeDate() {
+        return passwordChangeDate;
+    }
 
     public void setPasswordChangeDate(LocalDateTime passwordChangeDate) {
         this.passwordChangeDate = passwordChangeDate;
@@ -109,4 +124,29 @@ public class AuthenticationEntity extends AbstractBaseEntity implements UserBase
     public void setDefaultPassword(Boolean defaultPassword) {
         this.defaultPassword = defaultPassword;
     }
+
+    public void setActive(Boolean enabled) {
+        this.active = enabled;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public Integer getAttemptCount() {
+        return attemptCount;
+    }
+
+    public void setAttemptCount(Integer attemptCount) {
+        this.attemptCount = attemptCount;
+    }
+
+    public Date getSuspensionDate() {
+        return suspensionDate;
+    }
+
+    public void setSuspensionDate(Date suspensionDate) {
+        this.suspensionDate = suspensionDate;
+    }
+
 }

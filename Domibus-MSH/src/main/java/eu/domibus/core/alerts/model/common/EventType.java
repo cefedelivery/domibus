@@ -7,7 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 /**
- * @author Thomas Dussart
+ * @author Thomas Dussart, Ion Perpegel
  * @since 4.0
  */
 public enum EventType {
@@ -20,6 +20,7 @@ public enum EventType {
     USER_LOGIN_FAILURE(AlertType.USER_LOGIN_FAILURE, "loginFailure", AuthenticationEvent.class, true),
     USER_ACCOUNT_DISABLED(AlertType.USER_ACCOUNT_DISABLED, "accountDisabled", AuthenticationEvent.class, true),
     PLUGIN_USER_LOGIN_FAILURE(AlertType.PLUGIN_USER_LOGIN_FAILURE, "loginFailure", AuthenticationEvent.class),
+    PLUGIN_USER_ACCOUNT_DISABLED(AlertType.PLUGIN_USER_ACCOUNT_DISABLED, "accountDisabled", AuthenticationEvent.class),
 
     PASSWORD_EXPIRED(AlertType.PASSWORD_EXPIRED, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class, true,
             DomibusMessageCode.SEC_PASSWORD_EXPIRED),
@@ -29,6 +30,7 @@ public enum EventType {
             DomibusMessageCode.SEC_PASSWORD_EXPIRED),
     PLUGIN_PASSWORD_IMMINENT_EXPIRATION(AlertType.PLUGIN_PASSWORD_IMMINENT_EXPIRATION, "PASSWORD_EXPIRATION", PasswordExpirationEventProperties.class,
             DomibusMessageCode.SEC_PASSWORD_IMMINENT_EXPIRATION);
+
 
     private AlertType defaultAlertType;
     private final String queueSelector;
