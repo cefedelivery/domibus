@@ -17,7 +17,7 @@ public enum DomibusMessageCode implements MessageCode {
     BUS_RELIABILITY_INVALID_WITH_NO_SECURITY_HEADER("BUS-006", "Invalid NonRepudiationInformation: no security header found"),
     BUS_RELIABILITY_INVALID_WITH_MULTIPLE_SECURITY_HEADERS("BUS-007", "Invalid NonRepudiationInformation: multiple security headers found"),
     BUS_RELIABILITY_INVALID_WITH_MESSAGING_NOT_SIGNED("BUS-008", "Invalid NonRepudiationInformation: eb:Messaging not signed"),
-    BUS_RELIABILITY_INVALID_NOT_MATCHING_THE_MESSAGE("BUS-009", "Invalid NonRepudiationInformation: non repudiation information and request message do not match"),
+    BUS_RELIABILITY_INVALID_NOT_MATCHING_THE_MESSAGE("BUS-009", "Invalid NonRepudiationInformation: non repudiation information [{}] and request message do not match [{}]"),
     BUS_RELIABILITY_RECEIPT_INVALID_EMPTY("BUS-010", "There is no content inside the receipt element received by the responding gateway"),
     BUS_RELIABILITY_GENERAL_ERROR("BUS-011", "Reliability check failed, check your configuration"),
     BUS_RELIABILITY_SUCCESSFUL("BUS-012", "Reliability check was successful"),
