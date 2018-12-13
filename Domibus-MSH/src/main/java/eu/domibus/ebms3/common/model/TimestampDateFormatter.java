@@ -18,9 +18,11 @@ public class TimestampDateFormatter {
 
 
     public String generateTimestamp() {
-        this.xmlDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        return this.xmlDateTimeFormat.format(new Date());
+        return generateTimestamp(new Date());
     }
 
+    public String generateTimestamp(Date timestamp) {
+        this.xmlDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return this.xmlDateTimeFormat.format(timestamp);
+    }
 }
