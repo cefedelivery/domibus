@@ -28,7 +28,7 @@
 
       <div style="margin-top:15px;">
         <md-input-container [style.width]="'100%'">
-          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [(ngModel)]="user.passwd" [formControl]="userForm.controls['password']"
+          <input mdInput placeholder="Password" name="password" id="password_id" type="password" [(ngModel)]="user.password" [formControl]="userForm.controls['password']"
                  [pattern]="passwordPattern" [required]="!editMode" >
           <div *ngIf="!editMode && userForm.controls['password'].hasError('required')" style="color:red; font-size: 70%">You should type a password</div>
           <div *ngIf="userForm.controls['password'].dirty && userForm.controls['password'].hasError('pattern')"

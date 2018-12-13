@@ -114,6 +114,11 @@ public class PModeDaoTestIT {
             return Mockito.mock(DomibusPropertyProviderImpl.class);
         }
 
+        @Bean(name = "domibusDefaultProperties")
+        public Properties domibusDefaultProperties() {
+            return Mockito.mock(Properties.class);
+        }
+
         @Bean(name = "domibusProperties")
         public Properties domibusProperties() {
             return Mockito.mock(Properties.class);

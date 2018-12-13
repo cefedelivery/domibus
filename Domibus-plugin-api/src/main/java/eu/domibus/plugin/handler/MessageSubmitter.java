@@ -6,7 +6,7 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.Submission;
 
 /**
- * Implementations of this interface handle the plugin of messages from the
+ * Implementations of this interface handle the submit of messages from the
  * backend to Domibus.
  *
  * @author Christian Koch, Stefan Mueller

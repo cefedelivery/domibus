@@ -1,13 +1,12 @@
 package eu.domibus.common.dao.security;
 
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserBase;
 import eu.domibus.common.model.security.UserPasswordHistory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.TypedQuery;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,27 +15,37 @@ import java.util.List;
  */
 
 @Repository
-public class UserPasswordHistoryDaoImpl extends BasicDao<UserPasswordHistory> implements UserPasswordHistoryDao {
+public abstract class UserPasswordHistoryDaoImpl<U extends UserBase, UPH extends UserPasswordHistory> extends BasicDao<UPH>
+        implements UserPasswordHistoryDao<U> {
 
-    public UserPasswordHistoryDaoImpl() {
-        super(UserPasswordHistory.class);
+    private final Class<UPH> typeOfUPH;
+    private String passwordHistoryQueryName;
+
+    protected abstract UPH createNew(final U user, String passwordHash, LocalDateTime passwordDate);
+
+    public UserPasswordHistoryDaoImpl(Class<UPH> typeOfUPH, String passwordHistoryQueryName) {
+        super(typeOfUPH);
+        this.typeOfUPH = typeOfUPH;
+        this.passwordHistoryQueryName = passwordHistoryQueryName;
     }
 
-    public void savePassword(final User user, String passwordHash, LocalDateTime passwordDate) {
-        UserPasswordHistory entry = new UserPasswordHistory(user, passwordHash, passwordDate);
+    @Override
+    public void savePassword(final U user, String passwordHash, LocalDateTime passwordDate) {
+        UPH entry = createNew(user, passwordHash, passwordDate);
         this.update(entry);
     }
 
-    public void removePasswords(final User user, int oldPasswordsToKeep) {
-        UserPasswordHistory[] oldEntries = getPasswordHistory(user, 0).toArray(new UserPasswordHistory[]{});
-        if (oldEntries.length > oldPasswordsToKeep) {
-            Arrays.stream(oldEntries).skip(oldPasswordsToKeep).forEach(entry -> this.delete(entry)); // NOSONAR
+    @Override
+    public void removePasswords(final U user, int oldPasswordsToKeep) {
+        List<UserPasswordHistory> oldEntries = getPasswordHistory(user, 0);
+        if (oldEntries.size() > oldPasswordsToKeep) {
+            oldEntries.stream().skip(oldPasswordsToKeep).forEach(entry -> this.delete((UPH) entry)); // NOSONAR
         }
     }
 
     @Override
-    public List<UserPasswordHistory> getPasswordHistory(User user, int entriesCount) {
-        TypedQuery<UserPasswordHistory> namedQuery = em.createNamedQuery("UserPasswordHistory.findPasswords", UserPasswordHistory.class);
+    public List<UserPasswordHistory> getPasswordHistory(U user, int entriesCount) {
+        TypedQuery<UserPasswordHistory> namedQuery = em.createNamedQuery(passwordHistoryQueryName, UserPasswordHistory.class);
         namedQuery.setParameter("USER", user);
         if (entriesCount > 0) {
             namedQuery = namedQuery.setMaxResults(entriesCount);
@@ -44,3 +53,4 @@ public class UserPasswordHistoryDaoImpl extends BasicDao<UserPasswordHistory> im
         return namedQuery.getResultList();
     }
 }
+

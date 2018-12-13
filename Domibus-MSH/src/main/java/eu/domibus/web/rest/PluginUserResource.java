@@ -135,7 +135,7 @@ public class PluginUserResource {
         List<PluginUserRO> pluginUserROs = domainConverter.convert(users, PluginUserRO.class);
         for (PluginUserRO pluginUserRO : pluginUserROs) {
             pluginUserRO.setStatus(UserState.PERSISTED.name());
-            pluginUserRO.setPasswd(null);
+            pluginUserRO.setPassword(null);
             if (StringUtils.isEmpty(pluginUserRO.getCertificateId())) {
                 pluginUserRO.setAuthenticationType(AuthType.BASIC.name());
             } else {

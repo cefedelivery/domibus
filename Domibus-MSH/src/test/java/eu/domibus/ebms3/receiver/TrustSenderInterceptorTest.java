@@ -68,7 +68,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
 
     @Bean
     @Qualifier("jmsTemplateCommand")
-    public JmsOperations jmsOperations() throws JAXBException {
+    public JmsOperations jmsOperations() {
         return Mockito.mock(JmsOperations.class);
     }
 
@@ -106,7 +106,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             result=X_509_V_3;
             certificateService.isCertificateValid((X509Certificate) any);
             result = false;
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
+            domibusPropertyProvider.getBooleanDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING);
             result = true;
         }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
@@ -125,7 +125,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
             result="#X509-99bde7b7-932f-4dbd-82dd-3539ba51791b";
             binarySecurityTokenReference.getValueType();
             result=X_509_V_3;
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
             result = false;
         }};
         testHandleMessage(doc, trustoreFilename, trustorePassword);
@@ -169,7 +169,7 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         SoapMessage soapMessage = getSoapMessageForDom(doc);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
             result = true;
         }};
         trustSenderInterceptor.handleMessage(soapMessage);
@@ -181,8 +181,8 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING);
+            result = true;
             certificateService.isCertificateValid(certificate);
             result = true;
             certificateService.isCertificateValid(expiredCertificate);
@@ -199,8 +199,8 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate expiredCertificate = pkiUtil.createCertificate(BigInteger.ONE, new DateTime().minusDays(2).toDate(), new DateTime().minusDays(1).toDate(), null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true");
-            result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(TrustSenderInterceptor.DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING);
+            result = false;
         }};
         Assert.assertTrue(trustSenderInterceptor.checkCertificateValidity(expiredCertificate, "test sender", false));
     }
@@ -210,8 +210,8 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
+            result = true;
         }};
 
         Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "GlobalSign", "messageID123", false));
@@ -223,8 +223,8 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
         final X509Certificate certificate = pkiUtil.createCertificate(BigInteger.ONE, null);
 
         new Expectations() {{
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
-            result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
+            result = false;
         }};
 
         Assert.assertTrue(trustSenderInterceptor.checkSenderPartyTrust(certificate, "test sender", "messageID123", false));
@@ -233,10 +233,10 @@ public class TrustSenderInterceptorTest extends SoapInterceptorTest {
     @Test
     public void testHandleOneTestActivated(@Mocked final SoapMessage message){
         new Expectations(){{
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
-            result="false";
-            domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false");
-            result="false";
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
+            result=false;
+            domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING);
+            result=false;
         }};
         trustSenderInterceptor.handleMessage(message);
         new Verifications(){{

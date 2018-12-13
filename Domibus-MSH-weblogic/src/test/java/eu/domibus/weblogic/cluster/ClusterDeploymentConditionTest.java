@@ -27,7 +27,7 @@ public class ClusterDeploymentConditionTest {
     @Test
     public void testClusterDeploymentFalse(@Injectable ConditionContext context, @Injectable AnnotatedTypeMetadata metadata) {
         new Expectations() {{
-            context.getEnvironment().getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT, "false");
+            context.getEnvironment().getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT);
             result = false;
         }};
 
@@ -37,7 +37,7 @@ public class ClusterDeploymentConditionTest {
     @Test
     public void testClusterDeploymentTrue(@Injectable ConditionContext context, @Injectable AnnotatedTypeMetadata metadata) {
         new Expectations() {{
-            context.getEnvironment().getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT, "false");
+            context.getEnvironment().getProperty(DomibusConfigurationService.CLUSTER_DEPLOYMENT);
             result = true;
         }};
 

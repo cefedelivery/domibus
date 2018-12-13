@@ -42,7 +42,7 @@ public class UserDetailServiceImplTest {
         User user = new User("admin", "whateverdifferentthandefaultpasswordhash");
 
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
-        when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD), anyString())).thenReturn("true");
+        when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD))).thenReturn("true");
         when(userService.getDaysTillExpiration(eq("admin"))).thenReturn(90);
 
         UserDetail admin = (UserDetail) userDetailService.loadUserByUsername("admin");
@@ -71,7 +71,7 @@ public class UserDetailServiceImplTest {
         User user = new User("user", "$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
 
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
-        when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD), anyString())).thenReturn("false");
+        when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD))).thenReturn("false");
         when(userService.getDaysTillExpiration(eq("admin"))).thenReturn(90);
 
         UserDetail admin = (UserDetail) userDetailService.loadUserByUsername("admin");
