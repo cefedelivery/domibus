@@ -88,6 +88,13 @@ public interface BackendConnector<U, T> {
     void deliverMessage(final String messageId);
 
     /**
+     * Initiates a pull request for the given mpc
+     *
+     * @param mpc the MPC to be used in the pull request
+     */
+    void initiatePull(final String mpc);
+
+    /**
      * The name of the plugin instance. To allow for multiple deployments of the same plugin this value should be externalized.
      *
      * @return the name of the plugin
