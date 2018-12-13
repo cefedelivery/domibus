@@ -22,7 +22,6 @@ import org.xml.sax.SAXParseException;
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -93,13 +92,10 @@ public class EbMS3MessageBuilder {
             message = this.messageFactory.createMessage();
             final Messaging messaging = this.ebMS3Of.createMessaging();
 
-            final String qualifiedName = "xmlns:wsu";
-            final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-            message.getSOAPBody().setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
-            QName idQname = new QName(namespace, "Id", "wsu");
+            message.getSOAPBody().setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
 
             String messageIDDigest = DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId());
-            message.getSOAPBody().addAttribute(idQname, "_2" + messageIDDigest);
+            message.getSOAPBody().addAttribute(NonRepudiationConstants.ID_QNAME, "_2" + messageIDDigest);
             if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
                 userMessage.getMessageInfo().setTimestamp(new Date());
             }
@@ -111,8 +107,8 @@ public class EbMS3MessageBuilder {
 
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
-            messagingElement.setAttributeNS("http://www.w3.org/2000/xmlns/", qualifiedName, namespace);
-            messagingElement.addAttribute(idQname, "_1" + messageIDDigest);
+            messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
+            messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + messageIDDigest);
 
             message.saveChanges();
         } catch (final SAXParseException e) {

@@ -474,9 +474,7 @@ public class UserMessageHandlerService {
         }
 
         final SOAPElement messagingElement = (SOAPElement) childElements.next();
-        final String namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-        QName idQname = new QName(namespace, "Id", "wsu");
-        messagingElement.addAttribute(idQname, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
+        messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
     }
 
     public ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {
