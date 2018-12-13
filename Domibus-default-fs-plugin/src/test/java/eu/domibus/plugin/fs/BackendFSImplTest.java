@@ -13,6 +13,7 @@ import eu.domibus.plugin.fs.exception.FSSetUpException;
 import eu.domibus.plugin.fs.worker.FSSendMessagesService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
+import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
 import eu.domibus.plugin.transformer.MessageSubmissionTransformer;
 import mockit.*;
@@ -45,6 +46,9 @@ public class BackendFSImplTest {
 
     @Injectable
     protected MessageSubmitter messageSubmitter;
+
+    @Injectable
+    protected MessagePuller messagePuller;
 
     @Injectable
     private MessageLister lister;
