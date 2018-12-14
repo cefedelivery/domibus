@@ -3,7 +3,7 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.dao.security.UserDaoBase;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,7 +134,7 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
         return predicates;
     }
 
-    public List<UserBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
+    public List<UserEntityBase> findWithPasswordChangedBetween(LocalDate from, LocalDate to, boolean withDefaultPassword) {
         TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findWithPasswordChangedBetween", AuthenticationEntity.class);
         namedQuery.setParameter("START_DATE", from.atStartOfDay());
         namedQuery.setParameter("END_DATE", to.atStartOfDay());
@@ -143,7 +143,13 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
     }
 
     @Override
-    public UserBase findByUserName(String userName) {
+    public void update(UserEntityBase user, boolean flush) {
+        super.update((AuthenticationEntity) user);
+        super.flush();
+    }
+
+    @Override
+    public UserEntityBase findByUserName(String userName) {
         return findByUser(userName);
     }
 

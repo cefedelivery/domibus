@@ -10,7 +10,7 @@ import java.util.List;
  * @since 3.3
  */
 
-public class User {
+public class User implements UserBase {
     private String userName;
     private String email;
     private boolean active;
@@ -38,6 +38,7 @@ public class User {
     public User() {
     }
 
+    @Override
     public String getUserName() {
         return userName;
     }
@@ -46,7 +47,8 @@ public class User {
         return email;
     }
 
-    public boolean isActive() {
+    @Override
+    public Boolean isActive() {
         return active;
     }
 
@@ -58,6 +60,7 @@ public class User {
         return status;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -70,7 +73,8 @@ public class User {
         this.email = email;
     }
 
-    public void setActive(boolean active) {
+    @Override
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -82,6 +86,7 @@ public class User {
         this.status = status;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }

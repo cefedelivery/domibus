@@ -16,6 +16,8 @@ public class PluginUserRO implements Serializable {
     private String authRoles; 
     private String authenticationType; 
     private String status;
+    private boolean active;
+    private boolean suspended;
 
     public Integer getEntityId() {
         return entityId;
@@ -80,5 +82,20 @@ public class PluginUserRO implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
+    }
 }

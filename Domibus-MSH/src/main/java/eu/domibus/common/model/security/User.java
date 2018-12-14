@@ -34,7 +34,7 @@ import java.util.*;
 
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName("User")
-public class User extends AbstractBaseEntity implements UserBase {
+public class User extends AbstractBaseEntity implements UserEntityBase {
 
     @NotNull
     @Column(name = "USER_NAME")
@@ -50,7 +50,7 @@ public class User extends AbstractBaseEntity implements UserBase {
 
     @NotNull
     @Column(name = "USER_ENABLED")
-    private Boolean active;
+    private Boolean active = true;
 
     @Column(name = "OPTLOCK")
     public Integer version;
@@ -85,13 +85,13 @@ public class User extends AbstractBaseEntity implements UserBase {
     private LocalDateTime passwordChangeDate;
 
 
-    @SuppressWarnings("squid:S2637")
-    public User(@NotNull final String userName, @NotNull final String password) {
-        this.userName = userName;
-        this.active = Boolean.TRUE;
-        this.password = password;
-        this.defaultPassword = false;
-    }
+//    @SuppressWarnings("squid:S2637")
+//    public User(@NotNull final String userName, @NotNull final String password) {
+//        this.userName = userName;
+//        this.active = Boolean.TRUE;
+//        this.password = password;
+//        this.defaultPassword = false;
+//    }
 
     @SuppressWarnings("squid:S2637")
     public User() {
@@ -103,10 +103,6 @@ public class User extends AbstractBaseEntity implements UserBase {
 
     public String getPassword() {
         return password;
-    }
-
-    public Boolean isEnabled() {
-        return active;
     }
 
     public Collection<UserRole> getRoles() {
@@ -123,7 +119,7 @@ public class User extends AbstractBaseEntity implements UserBase {
     }
 
     @Override
-    public UserBase.Type getType() {
+    public UserEntityBase.Type getType() {
         return Type.CONSOLE;
     }
 
@@ -163,7 +159,7 @@ public class User extends AbstractBaseEntity implements UserBase {
         this.userName = userName;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 
