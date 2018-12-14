@@ -1,4 +1,4 @@
-package eu.domibus.common.validators;
+package eu.domibus.security;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
@@ -7,6 +7,7 @@ import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserPasswordHistory;
+import eu.domibus.security.ConsoleUserSecurityPolicyManager;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -26,7 +27,7 @@ import java.util.List;
  * @since 4.1
  */
 
-public class UserPasswordManagerTest {
+public class UserSecurityPolicyManagerTest {
 
     private static final String PASSWORD_COMPLEXITY_PATTERN = "^.*(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~`!@#$%^&+=\\-_<>.,?:;*/()|\\[\\]{}'\"\\\\]).{8,32}$";
 
@@ -43,7 +44,7 @@ public class UserPasswordManagerTest {
     BCryptPasswordEncoder bcryptEncoder;
 
     @Tested
-    ConsoleUserPasswordManager passwordValidator;
+    ConsoleUserSecurityPolicyManager passwordValidator;
 
     @Test
     public void checkPasswordComplexity() throws Exception {
@@ -159,7 +160,10 @@ public class UserPasswordManagerTest {
         String username = "anyname";
         String testPassword = "anypassword";
         int oldPasswordsToCheck = 5;
-        final User user = new User(username, testPassword);
+        final User user = new User() {{
+            setUserName(username);
+            setPassword(testPassword);
+        }};
         user.setDefaultPassword(true);
         List<UserPasswordHistory> oldPasswords = Arrays.asList(new UserPasswordHistory(user, testPassword, LocalDateTime.now()));
 

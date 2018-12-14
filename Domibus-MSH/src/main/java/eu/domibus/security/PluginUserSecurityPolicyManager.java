@@ -1,10 +1,15 @@
-package eu.domibus.common.validators;
+package eu.domibus.security;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
+import eu.domibus.common.model.security.UserEntityBase;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
+import eu.domibus.core.alerts.service.UserAlertsService;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
+import eu.domibus.security.UserSecurityPolicyManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +19,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class PluginUserPasswordManager extends UserPasswordManager<AuthenticationEntity> {
+public class PluginUserSecurityPolicyManager extends UserSecurityPolicyManager<AuthenticationEntity> {
 
     final static String WARNING_DAYS_BEFORE_EXPIRATION = "domibus.plugin.passwordPolicy.warning.beforeExpiration";
 
@@ -24,11 +29,22 @@ public class PluginUserPasswordManager extends UserPasswordManager<Authenticatio
     final static String MAXIMUM_PASSWORD_AGE = "domibus.plugin.passwordPolicy.expiration";
     final static String MAXIMUM_DEFAULT_PASSWORD_AGE = "domibus.plugin.passwordPolicy.defaultPasswordExpiration";
 
+    protected static final String MAXIMUM_LOGIN_ATTEMPT = "domibus.plugin.login.maximum.attempt";
+
+    protected static final String LOGIN_SUSPENSION_TIME = "domibus.plugin.login.suspension.time";
+
     @Autowired
     protected AuthenticationDAO userDao;
 
     @Autowired
     private PluginUserPasswordHistoryDao userPasswordHistoryDao;
+
+    @Autowired
+    private PluginUserAlertsServiceImpl userAlertsService;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
+
 
     @Override
     protected String getPasswordComplexityPatternProperty() {
@@ -63,6 +79,21 @@ public class PluginUserPasswordManager extends UserPasswordManager<Authenticatio
     @Override
     protected UserDaoBase getUserDao() {
         return userDao;
+    }
+
+    @Override
+    protected int getMaxAttemptAmount(UserEntityBase user) {
+        return domibusPropertyProvider.getIntegerProperty(MAXIMUM_LOGIN_ATTEMPT);
+    }
+
+    @Override
+    protected UserAlertsService getUserAlertsService() {
+        return userAlertsService;
+    }
+
+    @Override
+    protected int getSuspensionInterval() {
+        return domibusPropertyProvider.getIntegerDomainProperty(LOGIN_SUSPENSION_TIME);
     }
 
 }

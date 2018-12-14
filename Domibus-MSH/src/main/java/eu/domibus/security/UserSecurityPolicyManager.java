@@ -1,23 +1,31 @@
-package eu.domibus.common.validators;
+package eu.domibus.security;
 
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.api.user.UserBase;
 import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserPasswordHistory;
+import eu.domibus.core.alerts.service.UserAlertsService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.logging.DomibusMessageCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,8 +36,8 @@ import java.util.regex.Pattern;
  */
 
 @Service
-public abstract class UserPasswordManager<U extends UserBase> {
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserPasswordManager.class);
+public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserSecurityPolicyManager.class);
 
     private static final String CREDENTIALS_EXPIRED = "Expired";
 
@@ -37,8 +45,16 @@ public abstract class UserPasswordManager<U extends UserBase> {
     private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    private BCryptPasswordEncoder bcryptEncoder;
+    private BCryptPasswordEncoder bCryptEncoder;
 
+    @Autowired
+    protected UserDomainService userDomainService;
+
+    @Autowired
+    protected DomainService domainService;
+
+
+    // abstract methods
     protected abstract String getPasswordComplexityPatternProperty();
 
     public abstract String getPasswordHistoryPolicyProperty();
@@ -53,7 +69,13 @@ public abstract class UserPasswordManager<U extends UserBase> {
 
     protected abstract UserDaoBase getUserDao();
 
+    protected abstract int getMaxAttemptAmount(UserEntityBase user);
 
+    protected abstract UserAlertsService getUserAlertsService();
+
+    protected abstract int getSuspensionInterval();
+
+    // public interface
     public void validateComplexity(final String userName, final String password) throws DomibusCoreException {
 
         String errorMessage = "The password of " + userName + " user does not meet the minimum complexity requirements";
@@ -80,9 +102,9 @@ public abstract class UserPasswordManager<U extends UserBase> {
             return;
         }
 
-        UserBase user = getUserDao().findByUserName(userName);
+        UserEntityBase user = getUserDao().findByUserName(userName);
         List<UserPasswordHistory> oldPasswords = getUserHistoryDao().getPasswordHistory(user, oldPasswordsToCheck);
-        if (oldPasswords.stream().anyMatch(userHistoryEntry -> bcryptEncoder.matches(password, userHistoryEntry.getPasswordHash()))) {
+        if (oldPasswords.stream().anyMatch(userHistoryEntry -> bCryptEncoder.matches(password, userHistoryEntry.getPasswordHash()))) {
             String errorMessage = "The password of " + userName + " user cannot be the same as the last " + oldPasswordsToCheck;
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, errorMessage);
         }
@@ -150,7 +172,7 @@ public abstract class UserPasswordManager<U extends UserBase> {
         validateComplexity(userName, newPassword);
         validateHistory(userName, newPassword);
 
-        user.setPassword(bcryptEncoder.encode(newPassword));
+        user.setPassword(bCryptEncoder.encode(newPassword));
         user.setDefaultPassword(false);
     }
 
@@ -163,6 +185,99 @@ public abstract class UserPasswordManager<U extends UserBase> {
         UserPasswordHistoryDao dao = getUserHistoryDao();
         dao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
         dao.removePasswords(user, passwordsToKeep - 1);
+    }
+
+    public void handleCorrectAuthentication(final String userName) {
+        UserEntityBase user = getUserDao().findByUserName(userName);
+        LOG.debug("handleCorrectAuthentication for user [{}]", userName);
+        if (user.getAttemptCount() > 0) {
+            LOG.debug("user [{}] has [{}] attempts. Resetting to 0. ", userName, user.getAttemptCount());
+            user.setAttemptCount(0);
+            getUserDao().update(user, true);
+        }
+    }
+
+    public UserLoginErrorReason handleWrongAuthentication(final String userName) {
+        UserEntityBase user = getUserDao().findByUserName(userName);
+        UserLoginErrorReason userLoginErrorReason = getLoginFailureReason(userName, user);
+        if (UserLoginErrorReason.BAD_CREDENTIALS == userLoginErrorReason) {
+            applyLockingPolicyOnLogin(user);
+        }
+        getUserAlertsService().triggerLoginEvents(userName, userLoginErrorReason);
+        return userLoginErrorReason;
+    }
+
+    protected UserLoginErrorReason getLoginFailureReason(String userName, UserEntityBase user) {
+        if (user == null) {
+            LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_UNKNOWN_USER, userName);
+            return UserLoginErrorReason.UNKNOWN;
+        }
+        if (!user.isActive()) {
+            if (user.getSuspensionDate() == null) {
+                LOG.securityInfo(DomibusMessageCode.SEC_CONSOLE_LOGIN_INACTIVE_USER, userName);
+                return UserLoginErrorReason.INACTIVE;
+            } else {
+                LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_SUSPENDED_USER, userName);
+                return UserLoginErrorReason.SUSPENDED;
+            }
+        }
+
+        LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_BAD_CREDENTIALS, userName);
+        return UserLoginErrorReason.BAD_CREDENTIALS;
+    }
+
+    protected void applyLockingPolicyOnLogin(UserEntityBase user) {
+        int maxAttemptAmount = getMaxAttemptAmount(user);
+
+        user.setAttemptCount(user.getAttemptCount() + 1);
+
+        if (user.getAttemptCount() >= maxAttemptAmount) {
+            LOG.debug("Applying account locking policy, max number of attempt ([{}]) reached for user [{}]", maxAttemptAmount, user.getUserName());
+            user.setActive(false);
+            user.setSuspensionDate(new Date(System.currentTimeMillis()));
+            LOG.securityWarn(DomibusMessageCode.SEC_CONSOLE_LOGIN_LOCKED_USER, user.getUserName(), maxAttemptAmount);
+
+            getUserAlertsService().triggerDisabledEvent(user);
+        }
+
+        getUserDao().update(user, true);
+    }
+
+    public UserEntityBase applyLockingPolicyOnUpdate(UserBase user) {
+        UserEntityBase userEntity = getUserDao().findByUserName(user.getUserName());
+        if (!userEntity.isActive() && user.isActive()) {
+            userEntity.setSuspensionDate(null);
+            userEntity.setAttemptCount(0);
+        }
+        if (!user.isActive() && userEntity.isActive()) {
+            LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
+            getUserAlertsService().triggerDisabledEvent(user);
+        }
+        userEntity.setActive(user.isActive());
+        return userEntity;
+    }
+
+    @Transactional
+    public void reactivateSuspendedUsers() {
+        int suspensionInterval = getSuspensionInterval();
+
+        //user will not be reactivated.
+        if (suspensionInterval <= 0) {
+            return;
+        }
+
+        Date currentTimeMinusSuspensionInterval = new Date(System.currentTimeMillis() - (suspensionInterval * 1000));
+
+        List<UserEntityBase> users = getUserDao().getSuspendedUsers(currentTimeMinusSuspensionInterval);
+        for (UserEntityBase user : users) {
+            LOG.debug("Suspended user [{}] of type [{}] is going to be reactivated.", user.getUserName(), user.getType().getName());
+
+            user.setSuspensionDate(null);
+            user.setAttemptCount(0);
+            user.setActive(true);
+        }
+
+        getUserDao().update(users);
     }
 
 }
