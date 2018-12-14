@@ -151,6 +151,15 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
+        initiatePullRequest(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void initiatePullRequest(final String mpc) {
         if (!pModeProvider.isConfigurationLoaded()) {
             LOG.debug("A configuration problem occurred while initiating the pull request. Probably no configuration is loaded.");
             return;
@@ -174,6 +183,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
                     for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
+                        if(mpc != null && !mpc.equals(mpcQualifiedName)) {
+                            continue;
+                        }
                         //@thom remove the pullcontext from here.
                         PullContext pullContext = new PullContext(pullProcess,
                                 initiatorParty,

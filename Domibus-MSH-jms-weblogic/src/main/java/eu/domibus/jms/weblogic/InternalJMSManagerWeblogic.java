@@ -376,9 +376,16 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         LOG.debug("Cluster deployment: using command signaling via database instead of uniform distributed topic");
         String command = (String) internalJmsMessage.getProperty(Command.COMMAND);
         String domain = (String) internalJmsMessage.getProperty(MessageConstants.DOMAIN);
+        String originServer = (String) internalJmsMessage.getProperty(CommandProperty.ORIGIN_SERVER);
 
         final List<String> managedServerNames = getManagedServerNames();
         LOG.debug("Found managed servers [{}]", managedServerNames);
+
+        if(StringUtils.isNotBlank(originServer)) {
+            managedServerNames.remove(originServer);
+            LOG.debug("Managed servers [{}] after exclusion of origin server [{}]", managedServerNames, originServer);
+        }
+
         for (String managedServerName : managedServerNames) {
             commandService.createClusterCommand(command, domain, managedServerName, internalJmsMessage.getCustomProperties());
         }

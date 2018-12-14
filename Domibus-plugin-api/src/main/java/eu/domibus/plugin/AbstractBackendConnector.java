@@ -10,6 +10,7 @@ import eu.domibus.messaging.MessageNotFoundException;
 import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.messaging.PModeMismatchException;
 import eu.domibus.plugin.exception.TransformationException;
+import eu.domibus.plugin.handler.MessagePuller;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
 import eu.domibus.plugin.transformer.MessageRetrievalTransformer;
@@ -32,10 +33,16 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AbstractBackendConnector.class);
 
     private final String name;
+
     @Autowired
     protected MessageRetriever messageRetriever;
+
     @Autowired
     protected MessageSubmitter messageSubmitter;
+
+    @Autowired
+    protected MessagePuller messagePuller;
+
     private MessageLister lister;
 
     public AbstractBackendConnector(final String name) {
@@ -84,6 +91,11 @@ public abstract class AbstractBackendConnector<U, T> implements BackendConnector
     @Override
     public List<ErrorResult> getErrorsForMessage(final String messageId) {
         return new ArrayList<>(this.messageRetriever.getErrorsForMessage(messageId));
+    }
+
+    @Override
+    public void initiatePull(final String mpc) {
+        messagePuller.initiatePull(mpc);
     }
 
     @Override
