@@ -34,10 +34,10 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     }
 
     @Override
-    public List<User> getSuspendedUsers(final Date currentTimeMinusSuspensionInterval) {
+    public List<UserEntityBase> getSuspendedUsers(final Date currentTimeMinusSuspensionInterval) {
         TypedQuery<User> namedQuery = em.createNamedQuery("User.findSuspendedUsers", User.class);
         namedQuery.setParameter("SUSPENSION_INTERVAL", currentTimeMinusSuspensionInterval);
-        return namedQuery.getResultList();
+        return namedQuery.getResultList().stream().collect(Collectors.toList());
     }
 
     @Override
@@ -62,10 +62,11 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
         }
     }
 
+    //todo: replace with generic
     @Override
-    public void update(final List<User> users) {
-        for (final User u : users) {
-            super.update(u);
+    public void update(final List<UserEntityBase> users) {
+        for (final UserEntityBase u : users) {
+            super.update((User)u);
         }
     }
 

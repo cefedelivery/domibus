@@ -3,7 +3,6 @@ package eu.domibus.common.dao.security;
 import eu.domibus.common.model.security.User;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,15 +14,11 @@ public interface UserDao extends UserDaoBase {
 
     void create(final User user);
 
-    List<User> getSuspendedUsers(Date currentTimeMinusSuspensionInterval);
-
     User loadUserByUsername(String userName);
 
     User loadActiveUserByUsername(String userName);
 
     void update(final User entity);
-
-    void update(final List<User> users);
 
     void delete(final Collection<User> delete);
 
