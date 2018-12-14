@@ -353,7 +353,7 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
             this.result = false;
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertFalse(accountDisabledConfiguration.isActive());
 
     }
@@ -376,7 +376,7 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT);
             this.result = mailSubject;
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertTrue(accountDisabledConfiguration.isActive());
         assertEquals(mailSubject, accountDisabledConfiguration.getMailSubject());
         Alert alert = new Alert();
@@ -399,7 +399,7 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL);
             result = "HIGHPP";
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertFalse(accountDisabledConfiguration.isActive());
     }
 
