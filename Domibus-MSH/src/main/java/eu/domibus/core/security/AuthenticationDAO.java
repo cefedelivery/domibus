@@ -3,6 +3,7 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.dao.security.UserDaoBase;
+import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserEntityBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -146,6 +148,21 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
     public void update(UserEntityBase user, boolean flush) {
         super.update((AuthenticationEntity) user);
         super.flush();
+    }
+
+    @Override
+    public List<UserEntityBase> getSuspendedUsers(Date currentTimeMinusSuspensionInterval) {
+        TypedQuery<AuthenticationEntity> namedQuery = em.createNamedQuery("AuthenticationEntity.findSuspendedUsers", AuthenticationEntity.class);
+        namedQuery.setParameter("SUSPENSION_INTERVAL", currentTimeMinusSuspensionInterval);
+        return namedQuery.getResultList().stream().collect(Collectors.toList());
+    }
+
+    //todo: replace with generic
+    @Override
+    public void update(final List<UserEntityBase> users) {
+        for (final UserEntityBase u : users) {
+            super.update((AuthenticationEntity) u);
+        }
     }
 
     @Override
