@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.services.SoapService;
 import eu.domibus.configuration.storage.Storage;
+import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.io.FileUtils;
@@ -20,10 +21,11 @@ import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.zip.GZIPOutputStream;
 
 
 @Service
@@ -46,6 +48,10 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
 
     @Override
     public void handleMessage(Message message) throws Fault {
+        Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+        String messageId = getHeaderValue(headers, MSHDispatcher.HEADER_DOMIBUS_MESSAGE_ID);
+        boolean compression = Boolean.valueOf(getHeaderValue(headers, MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION));
+        String domain = getHeaderValue(headers, MSHDispatcher.HEADER_DOMIBUS_DOMAIN);
         String encoding = (String) message.get(Message.ENCODING);
         String contentType = (String) message.get(Message.CONTENT_TYPE);
         LOG.putMDC(Message.CONTENT_TYPE, contentType);
@@ -61,8 +67,10 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
             cacheMessageContent(message, temporaryDirectoryLocation, in, cos);
 
             String fileName = generateSourceFileName(temporaryDirectoryLocation);
-            copyMessageContentToFile(cos, fileName);
+            copyMessageContentToFile(cos, fileName, compression);
             LOG.putMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE, fileName);
+            LOG.putMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION, String.valueOf(compression));
+            LOG.putMDC(MSHDispatcher.HEADER_DOMIBUS_DOMAIN, domain);
         } finally {
             try {
                 cos.close();
@@ -72,11 +80,45 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         }
     }
 
+    protected String getHeaderValue(Map<String, List<String>> headers, String headerName) {
+        final List<String> headerValue = headers.get(headerName);
+        if (headerValue != null && headerValue.size() > 0) {
+            return headerValue.iterator().next();
+        }
+        return null;
+
+    }
+
+    protected void copyMessageContentToFile(CachedOutputStream cos, String fileName, boolean compression) {
+        if (compression) {
+            compressMessageContentToFile(cos, fileName);
+        } else {
+            copyMessageContentToFile(cos, fileName);
+        }
+    }
+
     protected void copyMessageContentToFile(CachedOutputStream cos, String fileName) {
+        LOG.debug("Copying the message content to file " + fileName);
         try {
             FileUtils.copyInputStreamToFile(cos.getInputStream(), new File(fileName));
         } catch (IOException e) {
             LOG.error("Could not copy the message content to file " + fileName);
+            throw new Fault(e);
+        }
+    }
+
+    protected void compressMessageContentToFile(CachedOutputStream cos, String fileName) {
+        LOG.debug("Compressing the message content to file " + fileName);
+        try (GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(fileName))) {
+            final InputStream inputStream = cos.getInputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+
+        } catch (IOException e) {
+            LOG.error("Could not compress the message content to file " + fileName);
             throw new Fault(e);
         }
     }

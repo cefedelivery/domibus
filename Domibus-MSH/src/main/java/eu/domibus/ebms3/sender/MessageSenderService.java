@@ -63,5 +63,4 @@ public class MessageSenderService  {
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_SEND_INITIATION);
         messageSender.sendMessage(userMessage);
     }
-
 }

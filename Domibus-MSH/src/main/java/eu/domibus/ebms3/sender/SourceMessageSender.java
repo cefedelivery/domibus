@@ -10,13 +10,11 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.services.MessageExchangeService;
-import eu.domibus.common.services.ReliabilityService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
-import eu.domibus.pki.PolicyService;
 import org.apache.commons.lang3.Validate;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,19 +46,10 @@ public class SourceMessageSender implements MessageSender {
     private ReliabilityChecker reliabilityChecker;
 
     @Autowired
-    private ResponseHandler responseHandler;
-
-    @Autowired
     private MessageAttemptService messageAttemptService;
 
     @Autowired
     private MessageExchangeService messageExchangeService;
-
-    @Autowired
-    PolicyService policyService;
-
-    @Autowired
-    private ReliabilityService reliabilityService;
 
     @Autowired
     UserMessageLogDao userMessageLogDao;
@@ -75,19 +64,10 @@ public class SourceMessageSender implements MessageSender {
         MessageAttemptStatus attemptStatus = MessageAttemptStatus.SUCCESS;
         String attemptError = null;
 
-
-        ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.SEND_FAIL;
-        // Assuming that everything goes fine
-        ResponseHandler.CheckResult isOk = ResponseHandler.CheckResult.OK;
-
-        LegConfiguration legConfiguration = null;
-        final String pModeKey;
-
-
         try {
-            pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
+            final String pModeKey = pModeProvider.findUserMessageExchangeContext(userMessage, MSHRole.SENDING).getPmodeKey();
             LOG.debug("PMode key found : " + pModeKey);
-            legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
             LOG.info("Found leg [{}] for PMode key [{}]", legConfiguration.getName(), pModeKey);
 
             Party sendingParty = pModeProvider.getSenderParty(pModeKey);
@@ -102,17 +82,13 @@ public class SourceMessageSender implements MessageSender {
                 LOG.securityError(DomibusMessageCode.SEC_INVALID_X509CERTIFICATE, cciEx, null);
                 attemptError = cciEx.getMessage();
                 attemptStatus = MessageAttemptStatus.ABORT;
-                // this flag is used in the finally clause
-                reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.ABORT;
                 LOG.error("Cannot handle request for message:[{}], Certificate is not valid or it has been revoked ", messageId, cciEx);
                 LOG.info("Skipped checking the reliability for message [" + messageId + "]: message sending has been aborted");
                 return;
             }
 
-            LOG.debug("PMode found : " + pModeKey);
             final SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(userMessage, legConfiguration);
-            final SOAPMessage response = mshDispatcher.dispatchLocal(soapMessage);
-
+            mshDispatcher.dispatchLocal(userMessage, soapMessage, legConfiguration);
         } catch (final SOAPFaultException soapFEx) {
             if (soapFEx.getCause() instanceof Fault && soapFEx.getCause().getCause() instanceof EbMS3Exception) {
                 reliabilityChecker.handleEbms3Exception((EbMS3Exception) soapFEx.getCause().getCause(), messageId);

@@ -59,19 +59,20 @@ import java.util.Map;
     "compressedMessageSize",
     "any"
 })
+@XmlRootElement(name = "MessageFragment")
 public class MessageFragmentType {
 
     @XmlElement(name = "GroupId", required = true)
     protected String groupId;
     @XmlElement(name = "MessageSize")
     @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger messageSize;
+    protected Long messageSize;
     @XmlElement(name = "FragmentCount")
     @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger fragmentCount;
+    protected Long fragmentCount;
     @XmlElement(name = "FragmentNum", required = true)
     @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger fragmentNum;
+    protected Long fragmentNum;
     @XmlElement(name = "MessageHeader")
     protected MessageHeaderType messageHeader;
     @XmlElement(name = "Action")
@@ -81,7 +82,7 @@ public class MessageFragmentType {
     protected String compressionAlgorithm;
     @XmlElement(name = "CompressedMessageSize")
     @XmlSchemaType(name = "positiveInteger")
-    protected BigInteger compressedMessageSize;
+    protected Long compressedMessageSize;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAttribute(name = "href")
@@ -129,10 +130,10 @@ public class MessageFragmentType {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public BigInteger getMessageSize() {
+    public Long getMessageSize() {
         return messageSize;
     }
 
@@ -141,10 +142,10 @@ public class MessageFragmentType {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public void setMessageSize(BigInteger value) {
+    public void setMessageSize(Long value) {
         this.messageSize = value;
     }
 
@@ -153,10 +154,10 @@ public class MessageFragmentType {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public BigInteger getFragmentCount() {
+    public Long getFragmentCount() {
         return fragmentCount;
     }
 
@@ -165,10 +166,10 @@ public class MessageFragmentType {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public void setFragmentCount(BigInteger value) {
+    public void setFragmentCount(Long value) {
         this.fragmentCount = value;
     }
 
@@ -177,10 +178,10 @@ public class MessageFragmentType {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public BigInteger getFragmentNum() {
+    public Long getFragmentNum() {
         return fragmentNum;
     }
 
@@ -189,10 +190,10 @@ public class MessageFragmentType {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public void setFragmentNum(BigInteger value) {
+    public void setFragmentNum(Long value) {
         this.fragmentNum = value;
     }
 
@@ -273,10 +274,10 @@ public class MessageFragmentType {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public BigInteger getCompressedMessageSize() {
+    public Long getCompressedMessageSize() {
         return compressedMessageSize;
     }
 
@@ -285,10 +286,10 @@ public class MessageFragmentType {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Long }
      *     
      */
-    public void setCompressedMessageSize(BigInteger value) {
+    public void setCompressedMessageSize(Long value) {
         this.compressedMessageSize = value;
     }
 

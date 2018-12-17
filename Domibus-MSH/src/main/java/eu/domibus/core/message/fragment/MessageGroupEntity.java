@@ -11,6 +11,9 @@ import java.math.BigInteger;
  */
 @Entity
 @Table(name = "TB_MESSAGE_GROUP")
+@NamedQueries({
+        @NamedQuery(name = "MessageGroupEntity.findByGroupId", query = "SELECT c FROM MessageGroupEntity c where c.groupId=:GROUP_ID")
+})
 public class MessageGroupEntity extends AbstractBaseEntity {
 
     @Column(name = "GROUP_ID")
@@ -20,16 +23,16 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     protected String sourceMessageId;
 
     @Column(name = "MESSAGE_SIZE")
-    protected BigInteger messageSize;
+    protected Long messageSize;
 
     @Column(name = "FRAGMENT_COUNT")
-    protected Integer fragmentCount;
+    protected Long fragmentCount;
 
     @Column(name = "COMPRESSION_ALGORITHM")
     protected String compressionAlgorithm;
 
     @Column(name = "COMPRESSED_MESSAGE_SIZE")
-    protected BigInteger compressedMessageSize;
+    protected Long compressedMessageSize;
 
     @Column(name = "SOAP_ACTION")
     protected String soapAction;
@@ -46,19 +49,19 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.groupId = groupId;
     }
 
-    public BigInteger getMessageSize() {
+    public Long getMessageSize() {
         return messageSize;
     }
 
-    public void setMessageSize(BigInteger messageSize) {
+    public void setMessageSize(Long messageSize) {
         this.messageSize = messageSize;
     }
 
-    public Integer getFragmentCount() {
+    public long getFragmentCount() {
         return fragmentCount;
     }
 
-    public void setFragmentCount(Integer fragmentCount) {
+    public void setFragmentCount(long fragmentCount) {
         this.fragmentCount = fragmentCount;
     }
 
@@ -70,11 +73,11 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.compressionAlgorithm = compressionAlgorithm;
     }
 
-    public BigInteger getCompressedMessageSize() {
+    public Long getCompressedMessageSize() {
         return compressedMessageSize;
     }
 
-    public void setCompressedMessageSize(BigInteger compressedMessageSize) {
+    public void setCompressedMessageSize(Long compressedMessageSize) {
         this.compressedMessageSize = compressedMessageSize;
     }
 

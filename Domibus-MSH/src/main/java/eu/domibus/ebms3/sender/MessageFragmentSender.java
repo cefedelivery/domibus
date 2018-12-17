@@ -1,21 +1,37 @@
 package eu.domibus.ebms3.sender;
 
+import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
+import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.xml.soap.SOAPMessage;
 
 /**
  * @author Cosmin Baciu
  * @since 4.1
  */
 @Service
-public class MessageFragmentSender implements MessageSender {
+public class MessageFragmentSender extends AbstractUserMessageSender {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(MessageFragmentSender.class);
 
+    @Autowired
+    protected MessageGroupDao messageGroupDao;
+
     @Override
-    public void sendMessage(final UserMessage userMessage) {
-        LOG.info("-------------MessageFragmentSender");
+    protected SOAPMessage createSOAPMessage(UserMessage userMessage, LegConfiguration legConfiguration) throws EbMS3Exception {
+        final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(userMessage.getMessageFragment().getGroupId());
+        return messageBuilder.buildSOAPMessageForFragment(userMessage, groupEntity, legConfiguration);
+    }
+
+    @Override
+    protected DomibusLogger getLog() {
+        return LOG;
     }
 }

@@ -101,10 +101,11 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     @Override
     public Dispatch<SOAPMessage> getLocalClient(String domain, String endpoint) {
         LOG.debug("Creating the dispatch client for endpoint [{}] on domain [{}]", endpoint, domain);
-        Dispatch<SOAPMessage> dispatch = dispatch = createLocalWSServiceDispatcher(endpoint);
+        Dispatch<SOAPMessage> dispatch = createLocalWSServiceDispatcher(endpoint);
 
         final Client client = ((DispatchImpl<SOAPMessage>) dispatch).getClient();
         final LocalConduit httpConduit = (LocalConduit) client.getConduit();
+
         httpConduit.setMessageObserver(new MessageObserver() {
             @Override
             public void onMessage(Message message) {
