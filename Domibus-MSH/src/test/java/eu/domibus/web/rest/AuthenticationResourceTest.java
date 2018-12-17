@@ -77,7 +77,10 @@ public class AuthenticationResourceTest {
 
     @Test
     public void testWarningWhenDefaultPasswordUsed(@Mocked WarningUtil warningUtil) throws Exception {
-        User user = new User("user", "user");
+        User user = new User() {{
+            setUserName("user");
+            setPassword("user");
+        }};
         user.setDefaultPassword(true);
         LoginRO loginRO = new LoginRO();
         loginRO.setUsername("user");

@@ -1,6 +1,9 @@
 package eu.domibus.security;
 
+import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.PluginUserPasswordHistoryDao;
 import eu.domibus.security.PluginUserSecurityPolicyManager;
@@ -28,6 +31,15 @@ public class PluginUserSecurityPolicyManagerTest {
 
     @Injectable
     BCryptPasswordEncoder bcryptEncoder;
+
+    @Injectable
+    PluginUserAlertsServiceImpl userAlertsService;
+
+    @Injectable
+    UserDomainService userDomainService;
+
+    @Injectable
+    DomainService domainService;
 
     @Tested
     PluginUserSecurityPolicyManager passwordManager;
