@@ -24,6 +24,7 @@ import eu.domibus.messaging.MessagingProcessingException;
 import eu.domibus.plugin.handler.DatabaseMessageHandler;
 import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import eu.domibus.util.MessageUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.message.Message;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,17 +141,24 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             LOG.error("Could not split source message", e);
             throw new WebServiceException(e);
         }
+        LOG.debug("Deleting source file [{}]", sourceMessageFile);
+        sourceMessageFile.delete();
+        LOG.debug("Finished deleting source file [{}]", sourceMessageFile);
 
         MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
         messageHeaderEntity.setBoundary(contentType.getParameter("boundary"));
-        messageHeaderEntity.setStart(contentType.getParameter("start"));
+        final String start = contentType.getParameter("start");
+        messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"",""}));
         messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
         messageGroupDao.create(messageGroupEntity);
 
         String backendName = userMessageLogDao.findBackendForMessageId(userMessage.getMessageInfo().getMessageId());
         for (int index = 0; index < fragmentFiles.size(); index++) {
             try {
-                createMessagingForFragment(userMessage, messageGroupEntity, backendName, fragmentFiles.get(index), index + 1);
+                final String fragmentFile = fragmentFiles.get(index);
+                createMessagingForFragment(userMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
+                LOG.debug("Deleting fragment file [{}]", fragmentFile);
+                new File(fragmentFile).delete();
             } catch (MessagingProcessingException e) {
                 LOG.error("Could not create messagin for fragment [{}]", index);
                 throw new WebServiceException(e);

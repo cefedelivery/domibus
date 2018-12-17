@@ -5,8 +5,13 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.MessageIdGenerator;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
+import eu.domibus.core.message.fragment.MessageHeaderEntity;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
+import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
+import eu.domibus.ebms3.common.model.mf.TypeType;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -62,10 +67,11 @@ public class EbMS3MessageBuilder {
     }
 
     public SOAPMessage buildSOAPMessage(final UserMessage userMessage, final LegConfiguration leg) throws EbMS3Exception {
-        return buildSOAPMessage(userMessage);
+        return buildSOAPUserMessage(userMessage, null);
     }
+
     public SOAPMessage buildSOAPMessageForFragment(final UserMessage userMessage, MessageGroupEntity messageGroupEntity, final LegConfiguration leg) throws EbMS3Exception {
-        return buildSOAPMessage(userMessage, null, leg, messageGroupEntity);
+        return buildSOAPUserMessage(userMessage, messageGroupEntity);
     }
 
     //TODO: If Leg is used in future releases we have to update this method
@@ -89,7 +95,7 @@ public class EbMS3MessageBuilder {
         return soapMessage;
     }
 
-    protected SOAPMessage buildSOAPMessage(final UserMessage userMessage) throws EbMS3Exception {
+    protected SOAPMessage buildSOAPUserMessage(final UserMessage userMessage, MessageGroupEntity messageGroupEntity) throws EbMS3Exception {
         final SOAPMessage message;
         try {
             message = this.messageFactory.createMessage();
@@ -107,11 +113,21 @@ public class EbMS3MessageBuilder {
             for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
                 this.attachPayload(partInfo, message);
             }
+            if(messageGroupEntity != null) {
+                final MessageFragmentType messageFragment = createMessageFragment(userMessage, messageGroupEntity);
+                jaxbContextMessageFragment.createMarshaller().marshal(messageFragment, message.getSOAPHeader());
 
+                final SOAPElement messageFragmentElement = (SOAPElement) message.getSOAPHeader().getChildElements(eu.domibus.ebms3.common.model.mf.ObjectFactory._MessageFragment_QNAME).next();
+                messageFragmentElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
+                messageFragmentElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_3" + messageIDDigest);
+
+            }
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
             messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
             messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + messageIDDigest);
+
 
             message.saveChanges();
         } catch (final SAXParseException e) {

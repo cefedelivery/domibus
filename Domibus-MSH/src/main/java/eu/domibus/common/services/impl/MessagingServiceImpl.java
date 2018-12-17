@@ -113,14 +113,14 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setMime("application/unknown");
         }
 
-        InputStream is = partInfo.getPayloadDatahandler().getInputStream();
-
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
         if (currentStorage == null) {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
         }
+
+        InputStream is = partInfo.getPayloadDatahandler().getInputStream();
 
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);

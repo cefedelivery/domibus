@@ -52,7 +52,6 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
         partInfo.setPayloadDatahandler(new DataHandler(new AutoCloseFileDataSource(fragmentFile)));
         partInfo.setHref("cid:fragment" + fragmentNumber);
         final PartProperties partProperties = new PartProperties();
-
         final Property property = new Property();
         property.setName(Property.MIME_TYPE);
         property.setValue("application/octet-stream");
