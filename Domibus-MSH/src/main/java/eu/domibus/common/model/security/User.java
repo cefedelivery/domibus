@@ -2,18 +2,19 @@ package eu.domibus.common.model.security;
 
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.model.common.RevisionLogicalName;
-import eu.domibus.ebms3.common.model.AbstractBaseEntity;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author Thomas Dussart
+ * @author Thomas Dussart, Ion Perpegel
  * @since 3.3
  */
 @Entity
@@ -35,7 +36,7 @@ import java.util.*;
 
 @Audited(withModifiedFlag = true)
 @RevisionLogicalName("User")
-public class User extends AbstractBaseEntity implements UserEntityBase {
+public class User extends UserEntityBaseImpl implements UserEntityBase {
 
     @NotNull
     @Column(name = "USER_NAME")
@@ -49,61 +50,48 @@ public class User extends AbstractBaseEntity implements UserEntityBase {
     @Column(name = "USER_PASSWORD")
     private String password;
 
-    @NotNull
-    @Column(name = "USER_ENABLED")
-    private Boolean active = true;
-
     @Column(name = "OPTLOCK")
     public Integer version;
-
-    @Column(name = "ATTEMPT_COUNT")
-    @NotAudited
-    private Integer attemptCount = 0;
-
-    @Column(name = "SUSPENSION_DATE")
-    @Temporal(TemporalType.TIMESTAMP)
-    @NotAudited
-    private Date suspensionDate;
 
     @NotNull
     @Column(name = "USER_DELETED")
     private Boolean deleted = false;
 
-    @NotNull
-    @Column(name = "DEFAULT_PASSWORD")
-    private Boolean defaultPassword = false;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "TB_USER_ROLES",
-            joinColumns = @JoinColumn(
-                    name = "USER_ID", referencedColumnName = "ID_PK"),
-            inverseJoinColumns = @JoinColumn(
-                    name = "ROLE_ID", referencedColumnName = "ID_PK"))
+            joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID_PK"),
+            inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID_PK"))
     private Set<UserRole> roles = new HashSet<>();
 
-    @Column(name = "PASSWORD_CHANGE_DATE")
-    private LocalDateTime passwordChangeDate;
+    @Override
+    public UserEntityBase.Type getType() {
+        return Type.CONSOLE;
+    }
 
+    public String getUserName() {
+        return userName;
+    }
 
-//    @SuppressWarnings("squid:S2637")
-//    public User(@NotNull final String userName, @NotNull final String password) {
-//        this.userName = userName;
-//        this.active = Boolean.TRUE;
-//        this.password = password;
-//        this.defaultPassword = false;
-//    }
-
-    @SuppressWarnings("squid:S2637")
-    public User() {
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getEmail() {
         return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+        this.setPasswordChangeDate(LocalDateTime.now());
     }
 
     public Collection<UserRole> getRoles() {
@@ -119,29 +107,20 @@ public class User extends AbstractBaseEntity implements UserEntityBase {
         roles.clear();
     }
 
-    @Override
-    public UserEntityBase.Type getType() {
-        return Type.CONSOLE;
+    public Boolean isDeleted() {
+        return this.deleted;
     }
 
-    public String getUserName() {
-        return userName;
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
-    public Boolean isDeleted() { return this.deleted; }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public boolean isSuperAdmin() {
+        if (roles == null) {
+            return false;
+        }
+        return roles.stream().anyMatch(role -> AuthRole.ROLE_AP_ADMIN.name().equals(role.getName()));
     }
-
-    public void setPassword(String password) {
-        this.password = password;
-        this.passwordChangeDate = LocalDateTime.now();
-    }
-
-    public void setActive(Boolean enabled) { this.active = enabled; }
-
-    public void setDeleted(Boolean deleted) { this.deleted = deleted; }
 
     @Override
     public boolean equals(Object o) {
@@ -156,48 +135,4 @@ public class User extends AbstractBaseEntity implements UserEntityBase {
         return userName.hashCode();
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public Boolean isActive() {
-        return active;
-    }
-
-    public Integer getAttemptCount() {
-        return attemptCount;
-    }
-
-    public void setAttemptCount(Integer attemptCount) {
-        this.attemptCount = attemptCount;
-    }
-
-    public Date getSuspensionDate() {
-        return suspensionDate;
-    }
-
-    public void setSuspensionDate(Date suspensionDate) {
-        this.suspensionDate = suspensionDate;
-    }
-
-    public LocalDateTime getPasswordChangeDate() { return passwordChangeDate; }
-
-    public void setPasswordChangeDate(LocalDateTime passwordChangeDate) {
-        this.passwordChangeDate = passwordChangeDate;
-    }
-
-    public boolean isSuperAdmin() {
-        if (roles == null) {
-            return false;
-        }
-        return roles.stream().anyMatch(role -> AuthRole.ROLE_AP_ADMIN.name().equals(role.getName()));
-    }
-
-    public Boolean hasDefaultPassword() {
-        return this.defaultPassword;
-    }
-
-    public void setDefaultPassword(Boolean defaultPassword) {
-        this.defaultPassword = defaultPassword;
-    }
 }

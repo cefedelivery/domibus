@@ -10,15 +10,15 @@ import java.util.List;
  * @author Ion Perpegel
  * @since 4.1
  */
-public interface UserDaoBase {
+public interface UserDaoBase<U extends UserEntityBase> {
     UserEntityBase findByUserName(String userName);
 
     List<UserEntityBase> findWithPasswordChangedBetween(LocalDate start, LocalDate end, boolean withDefaultPassword);
 
-    void update(UserEntityBase user, boolean flush);
-
     List<UserEntityBase> getSuspendedUsers(Date currentTimeMinusSuspensionInterval);
 
-    void update(List<UserEntityBase> users);
+    void update(U user, boolean flush);
+
+    void update(List<U> users);
 
 }

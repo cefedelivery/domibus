@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Repository("securityAuthenticationDAO")
 @Transactional
-public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase {
+public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements UserDaoBase<AuthenticationEntity> {
 
     public AuthenticationDAO() {
         super(AuthenticationEntity.class);
@@ -145,9 +145,11 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
     }
 
     @Override
-    public void update(UserEntityBase user, boolean flush) {
-        super.update((AuthenticationEntity) user);
-        super.flush();
+    public void update(AuthenticationEntity user, boolean flush) {
+        super.update(user);
+        if(flush) {
+            //super.flush();
+        }
     }
 
     @Override
@@ -157,11 +159,10 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
         return namedQuery.getResultList().stream().collect(Collectors.toList());
     }
 
-    //todo: replace with generic
     @Override
-    public void update(final List<UserEntityBase> users) {
-        for (final UserEntityBase u : users) {
-            super.update((AuthenticationEntity) u);
+    public void update(final List<AuthenticationEntity> users) {
+        for (final AuthenticationEntity u : users) {
+            super.update(u);
         }
     }
 

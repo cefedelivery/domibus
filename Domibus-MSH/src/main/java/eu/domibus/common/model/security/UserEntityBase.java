@@ -7,6 +7,34 @@ import java.util.Date;
 
 public interface UserEntityBase extends UserBase {
 
+    int getEntityId();
+
+    UserEntityBase.Type getType();
+
+    String getUserName();
+
+    String getPassword();
+
+    void setPassword(String password);
+
+    LocalDateTime getPasswordChangeDate();
+
+    Boolean hasDefaultPassword();
+
+    void setDefaultPassword(Boolean defaultPassword);
+
+    Integer getAttemptCount();
+
+    void setAttemptCount(Integer i);
+
+    boolean isActive();
+
+    void setActive(boolean b);
+
+    Date getSuspensionDate();
+
+    void setSuspensionDate(Date suspensionDate);
+
     enum Type {
         CONSOLE("console_user", "Console User"),
         PLUGIN("plugin_user", "Plugin User");
@@ -28,33 +56,4 @@ public interface UserEntityBase extends UserBase {
             return name;
         }
     }
-
-    int getEntityId();
-
-    UserEntityBase.Type getType();
-
-    String getUserName();
-
-    String getPassword();
-
-    void setPassword(String password);
-
-    LocalDateTime getPasswordChangeDate();
-
-    Boolean hasDefaultPassword();
-
-    void setDefaultPassword(Boolean defaultPassword);
-
-    Integer getAttemptCount();
-
-    void setAttemptCount(Integer i);
-
-    Boolean isActive();
-
-    void setActive(Boolean b);
-
-    Date getSuspensionDate();
-
-    void setSuspensionDate(Date suspensionDate);
-
 }

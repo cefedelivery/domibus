@@ -174,7 +174,7 @@ public class UserResource {
     }
 
     /**
-     * convert user to userresponsero.
+     * convert User to UserResponseRO.
      *
      * @param users
      * @return a list of

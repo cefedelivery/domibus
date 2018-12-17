@@ -2,8 +2,8 @@ package eu.domibus.common.dao.security;
 
 
 import eu.domibus.common.dao.BasicDao;
-import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Thomas Dussart
+ * @author Thomas Dussart, Ion Perpegel
  * @since 3.3
  * <p>
  * Dao to handle admin console users.
@@ -62,16 +62,15 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
         }
     }
 
-    //todo: replace with generic
     @Override
-    public void update(final List<UserEntityBase> users) {
-        for (final UserEntityBase u : users) {
-            super.update((User)u);
+    public void update(final List<User> users) {
+        for (final User u : users) {
+            super.update(u);
         }
     }
 
     @Override
-    public void delete(final Collection<User> users){
+    public void delete(final Collection<User> users) {
         for (final User u : users) {
             u.setDeleted(true);
             super.update(u);
@@ -93,9 +92,11 @@ public class UserDaoImpl extends BasicDao<User> implements UserDao {
     }
 
     @Override
-    public void update(UserEntityBase user, boolean flush) {
-        this.update((User)user);
-        this.flush();
+    public void update(User user, boolean flush) {
+        this.update((User) user);
+        if (flush) {
+            this.flush();
+        }
     }
 
 }

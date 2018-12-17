@@ -9,7 +9,7 @@ import java.util.List;
  * @author Thomas Dussart
  * @since 3.3
  */
-public interface UserDao extends UserDaoBase {
+public interface UserDao extends UserDaoBase<User> {
     List<User> listUsers();
 
     void create(final User user);
