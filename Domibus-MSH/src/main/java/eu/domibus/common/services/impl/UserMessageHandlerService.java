@@ -6,15 +6,13 @@ import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.routing.BackendFilter;
 import eu.domibus.common.*;
-import eu.domibus.common.dao.MessagingDao;
-import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
-import eu.domibus.common.dao.UserMessageLogDao;
+import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.configuration.ReplyPattern;
+import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.SignalMessageLog;
 import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
@@ -32,6 +30,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -44,10 +43,8 @@ import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
+import javax.xml.namespace.QName;
+import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -55,12 +52,12 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Thomas Dussart
  * @author Catalin Enache
  * @since 3.3
- *
  */
 @org.springframework.stereotype.Service
 public class UserMessageHandlerService {
@@ -68,7 +65,9 @@ public class UserMessageHandlerService {
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerService.class);
 
-    /** to be appended to messageId when saving to DB on receiver side */
+    /**
+     * to be appended to messageId when saving to DB on receiver side
+     */
     public static final String SELF_SENDING_SUFFIX = "_1";
 
 
@@ -129,8 +128,11 @@ public class UserMessageHandlerService {
     @Autowired
     protected UIReplicationSignalService uiReplicationSignalService;
 
+    @Autowired
+    protected RawEnvelopeLogDao rawEnvelopeLogDao;
 
-    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging,final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
+
+    public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
         String messageId;
@@ -165,7 +167,7 @@ public class UserMessageHandlerService {
             final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
             LOG.debug("Message duplication status:{}", messageExists);
             if (!messageExists) {
-                if(testMessage) {
+                if (testMessage) {
                     // ping messages are only stored and not notified to the plugins
                     persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, null);
                 } else {
@@ -180,10 +182,9 @@ public class UserMessageHandlerService {
                     }
                 }
             }
-            return generateReceipt(request, legConfiguration, messageExists, selfSendingFlag);
+            return generateReceipt(request, messaging, legConfiguration, messageExists, selfSendingFlag);
         }
     }
-
 
 
     /**
@@ -213,7 +214,7 @@ public class UserMessageHandlerService {
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.debug("Checking charset for attachments");
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
-            if(partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
+            if (partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
                 continue;
             }
             for (final Property property : partInfo.getPartProperties().getProperties()) {
@@ -249,7 +250,7 @@ public class UserMessageHandlerService {
     protected Boolean checkTestMessage(final LegConfiguration legConfiguration) {
         LOG.debug("Checking if it is a test message");
 
-        if(legConfiguration == null) {
+        if (legConfiguration == null) {
             return false;
         }
 
@@ -297,7 +298,7 @@ public class UserMessageHandlerService {
         Party to = pModeProvider.getReceiverParty(pmodeKey);
         Validate.notNull(to, "Responder party was not found");
 
-        NotificationStatus notificationStatus = (legConfiguration.getErrorHandling() != null &&legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
+        NotificationStatus notificationStatus = (legConfiguration.getErrorHandling() != null && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) ? NotificationStatus.REQUIRED : NotificationStatus.NOT_REQUIRED;
         LOG.debug("NotificationStatus [{}]", notificationStatus);
 
         userMessageLogService.save(
@@ -395,15 +396,16 @@ public class UserMessageHandlerService {
      * @param request          the incoming message
      * @param legConfiguration processing information of the message
      * @param duplicate        indicates whether or not the message is a duplicate
-     * @param selfSendingFlag indicates that the message is sent to the same Domibus instance
+     * @param selfSendingFlag  indicates that the message is sent to the same Domibus instance
      * @return the response message to the incoming request message
      * @throws EbMS3Exception if generation of receipt was not successful
      */
-    SOAPMessage generateReceipt(final SOAPMessage request, final LegConfiguration legConfiguration, final Boolean duplicate,
-                                boolean selfSendingFlag) throws EbMS3Exception {
+    protected SOAPMessage generateReceipt(final SOAPMessage request, Messaging messaging, final LegConfiguration legConfiguration, final Boolean duplicate,
+                                          boolean selfSendingFlag) throws EbMS3Exception {
 
         SOAPMessage responseMessage = null;
         assert legConfiguration != null;
+        UserMessage userMessage = messaging.getUserMessage();
 
         if (legConfiguration.getReliability() == null) {
             LOG.warn("No reliability found for leg [{}]", legConfiguration.getName());
@@ -417,15 +419,37 @@ public class UserMessageHandlerService {
                 InputStream generateAS4ReceiptStream = getAs4ReceiptXslInputStream();
                 Source messageToReceiptTransform = new StreamSource(generateAS4ReceiptStream);
                 final Transformer transformer = this.transformerFactory.newTransformer(messageToReceiptTransform);
-                final Source requestMessage = request.getSOAPPart().getContent();
-                transformer.setParameter("messageid", this.messageIdGenerator.generateMessageId());
-                transformer.setParameter("timestamp", this.timestampDateFormatter.generateTimestamp());
-                transformer.setParameter("nonRepudiation", Boolean.toString(legConfiguration.getReliability().isNonRepudiation()));
+
+                String messageId;
+                String timestamp;
+                String nonRepudiation = Boolean.toString(legConfiguration.getReliability().isNonRepudiation());
+
+                Source requestMessage;
+                if (duplicate) {
+                    final RawEnvelopeDto rawXmlByMessageId = rawEnvelopeLogDao.findRawXmlByMessageId(userMessage.getMessageInfo().getMessageId());
+                    Messaging existingMessage = messagingDao.findMessageByMessageId(userMessage.getMessageInfo().getMessageId());
+                    messageId = existingMessage.getSignalMessage().getMessageInfo().getMessageId();
+                    timestamp = timestampDateFormatter.generateTimestamp(existingMessage.getSignalMessage().getMessageInfo().getTimestamp());
+                    requestMessage = new StreamSource(new StringReader(rawXmlByMessageId.getRawMessage()));
+                } else {
+                    messageId = messageIdGenerator.generateMessageId();
+                    timestamp = timestampDateFormatter.generateTimestamp();
+                    requestMessage = request.getSOAPPart().getContent();
+                }
+
+                transformer.setParameter("messageid", messageId);
+                transformer.setParameter("timestamp", timestamp);
+                transformer.setParameter("nonRepudiation", nonRepudiation);
 
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
                 responseMessage.getSOAPPart().setContent(new DOMSource(domResult.getNode()));
-                saveResponse(responseMessage, selfSendingFlag);
+
+                setMessagingId(responseMessage, userMessage);
+
+                if (!duplicate) {
+                    saveResponse(responseMessage, selfSendingFlag);
+                }
 
                 LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
@@ -441,6 +465,17 @@ public class UserMessageHandlerService {
             }
         }
         return responseMessage;
+    }
+
+    protected void setMessagingId(SOAPMessage responseMessage, UserMessage userMessage) throws SOAPException {
+        final Iterator childElements = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
+        if(childElements == null || !childElements.hasNext()) {
+            LOG.warn("Could not set the Messaging Id value");
+            return;
+        }
+
+        final SOAPElement messagingElement = (SOAPElement) childElements.next();
+        messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId()));
     }
 
     public ErrorResult createErrorResult(EbMS3Exception ebm3Exception) {

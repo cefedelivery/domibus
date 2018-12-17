@@ -5,16 +5,12 @@ import eu.domibus.common.MSHRole;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.MessageIdGenerator;
-import eu.domibus.core.message.fragment.MessageGroupEntity;
-import eu.domibus.core.message.fragment.MessageHeaderEntity;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
-import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
-import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
-import eu.domibus.ebms3.common.model.mf.TypeType;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -36,6 +32,7 @@ import java.util.Locale;
 
 /**
  * @author Christian Koch, Stefan Mueller
+ * @author Cosmin Baciu
  */
 @Service
 public class EbMS3MessageBuilder {
@@ -61,13 +58,12 @@ public class EbMS3MessageBuilder {
     private MessageIdGenerator messageIdGenerator;
 
     public SOAPMessage buildSOAPMessage(final SignalMessage signalMessage, final LegConfiguration leg) throws EbMS3Exception {
-        return this.buildSOAPMessage(null, signalMessage, leg, null);
+        return buildSOAPMessage(signalMessage);
     }
 
     public SOAPMessage buildSOAPMessage(final UserMessage userMessage, final LegConfiguration leg) throws EbMS3Exception {
-        return this.buildSOAPMessage(userMessage, null, leg, null);
+        return buildSOAPMessage(userMessage);
     }
-
     public SOAPMessage buildSOAPMessageForFragment(final UserMessage userMessage, MessageGroupEntity messageGroupEntity, final LegConfiguration leg) throws EbMS3Exception {
         return buildSOAPMessage(userMessage, null, leg, messageGroupEntity);
     }
@@ -93,31 +89,49 @@ public class EbMS3MessageBuilder {
         return soapMessage;
     }
 
-    public SOAPMessage buildSOAPMessage(final UserMessage userMessage, final SignalMessage signalMessage, final LegConfiguration leg, MessageGroupEntity messageGroupEntity) throws EbMS3Exception {
-        String messageId = null;
+    protected SOAPMessage buildSOAPMessage(final UserMessage userMessage) throws EbMS3Exception {
         final SOAPMessage message;
         try {
             message = this.messageFactory.createMessage();
-
             final Messaging messaging = this.ebMS3Of.createMessaging();
-            if (userMessage != null) {
-                if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
-                    userMessage.getMessageInfo().setTimestamp(new Date());
-                }
-                messageId = userMessage.getMessageInfo().getMessageId();
-                messaging.setUserMessage(userMessage);
-                for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
-                    this.attachPayload(partInfo, message);
-                }
-                if(messageGroupEntity != null) {
-                    final MessageFragmentType messageFragment = createMessageFragment(userMessage, messageGroupEntity);
-                    jaxbContextMessageFragment.createMarshaller().marshal(messageFragment, message.getSOAPHeader());
-                }
+
+            message.getSOAPBody().setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
+
+            String messageIDDigest = DigestUtils.sha256Hex(userMessage.getMessageInfo().getMessageId());
+            message.getSOAPBody().addAttribute(NonRepudiationConstants.ID_QNAME, "_2" + messageIDDigest);
+            if (userMessage.getMessageInfo() != null && userMessage.getMessageInfo().getTimestamp() == null) {
+                userMessage.getMessageInfo().setTimestamp(new Date());
             }
+
+            messaging.setUserMessage(userMessage);
+            for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
+                this.attachPayload(partInfo, message);
+            }
+
+            this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+            final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
+            messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
+            messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + messageIDDigest);
+
+            message.saveChanges();
+        } catch (final SAXParseException e) {
+            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", userMessage.getMessageInfo().getMessageId(), e);
+        } catch (final JAXBException | SOAPException | ParserConfigurationException | IOException | SAXException ex) {
+            throw new SendMessageException(ex);
+        }
+        return message;
+    }
+
+    protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {
+        final SOAPMessage message;
+        try {
+            message = this.messageFactory.createMessage();
+            final Messaging messaging = this.ebMS3Of.createMessaging();
+
             if (signalMessage != null) {
                 final MessageInfo msgInfo = new MessageInfo();
 
-                messageId = this.messageIdGenerator.generateMessageId();
+                String messageId = this.messageIdGenerator.generateMessageId();
                 msgInfo.setMessageId(messageId);
                 msgInfo.setTimestamp(new Date());
                 if (signalMessage.getError() != null && signalMessage.getError().iterator().hasNext()) {
@@ -128,11 +142,10 @@ public class EbMS3MessageBuilder {
             }
             messaging.setSignalMessage(signalMessage);
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+
             message.saveChanges();
 
-        } catch (final SAXParseException e) {
-            throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0001, "Payload in body must be valid XML", messageId, e);
-        } catch (final JAXBException | SOAPException | ParserConfigurationException | IOException | SAXException ex) {
+        } catch (final JAXBException | SOAPException ex) {
             throw new SendMessageException(ex);
         }
         return message;
