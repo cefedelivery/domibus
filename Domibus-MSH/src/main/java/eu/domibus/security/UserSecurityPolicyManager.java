@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -166,7 +167,8 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
     }
 
     public void changePassword(U user, String newPassword) {
-        savePasswordHistory(user); // save old password in history
+        // save old password in history
+        savePasswordHistory(user);
 
         String userName = user.getUserName();
         validateComplexity(userName, newPassword);
@@ -187,6 +189,7 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
         dao.removePasswords(user, passwordsToKeep - 1);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleCorrectAuthentication(final String userName) {
         UserEntityBase user = getUserDao().findByUserName(userName);
         LOG.debug("handleCorrectAuthentication for user [{}]", userName);
@@ -197,12 +200,16 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserLoginErrorReason handleWrongAuthentication(final String userName) {
         UserEntityBase user = getUserDao().findByUserName(userName);
+
         UserLoginErrorReason userLoginErrorReason = getLoginFailureReason(userName, user);
+
         if (UserLoginErrorReason.BAD_CREDENTIALS == userLoginErrorReason) {
             applyLockingPolicyOnLogin(user);
         }
+
         getUserAlertsService().triggerLoginEvents(userName, userLoginErrorReason);
         return userLoginErrorReason;
     }
@@ -248,8 +255,7 @@ public abstract class UserSecurityPolicyManager<U extends UserEntityBase> {
         if (!userEntity.isActive() && user.isActive()) {
             userEntity.setSuspensionDate(null);
             userEntity.setAttemptCount(0);
-        }
-        if (!user.isActive() && userEntity.isActive()) {
+        } else if (!user.isActive() && userEntity.isActive()) {
             LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
             getUserAlertsService().triggerDisabledEvent(user);
         }

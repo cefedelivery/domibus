@@ -101,11 +101,11 @@ public class PluginUserServiceImpl implements PluginUserService {
     private void checkUsers(List<AuthenticationEntity> addedUsers) {
         // check duplicates with other plugin users
         for (AuthenticationEntity user : addedUsers) {
-            if (!StringUtils.isEmpty(user.getUsername())) {
-                if (addedUsers.stream().anyMatch(x -> x != user && user.getUsername().equalsIgnoreCase(x.getUsername())))
-                    throw new UserManagementException("Cannot add user " + user.getUsername() + " more than once.");
-                if (!authenticationDAO.listByUser(user.getUsername()).isEmpty())
-                    throw new UserManagementException("Cannot add user " + user.getUsername() + " because this name already exists.");
+            if (!StringUtils.isEmpty(user.getUserName())) {
+                if (addedUsers.stream().anyMatch(x -> x != user && user.getUserName().equalsIgnoreCase(x.getUserName())))
+                    throw new UserManagementException("Cannot add user " + user.getUserName() + " more than once.");
+                if (!authenticationDAO.listByUser(user.getUserName()).isEmpty())
+                    throw new UserManagementException("Cannot add user " + user.getUserName() + " because this name already exists.");
             }
             if (!StringUtils.isEmpty(user.getCertificateId())) {
                 if (addedUsers.stream().anyMatch(x -> x != user && user.getCertificateId().equalsIgnoreCase(x.getCertificateId())))
@@ -118,8 +118,8 @@ public class PluginUserServiceImpl implements PluginUserService {
         // check for duplicates with other users or plugin users in multi-tenancy mode
         List<String> allUserNames = userDomainService.getAllUserNames();
         for (AuthenticationEntity user : addedUsers) {
-            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUsername())))
-                throw new UserManagementException("Cannot add user " + user.getUsername() + " because this name already exists.");
+            if (allUserNames.stream().anyMatch(name -> name.equalsIgnoreCase(user.getUserName())))
+                throw new UserManagementException("Cannot add user " + user.getUserName() + " because this name already exists.");
         }
     }
 
@@ -136,7 +136,7 @@ public class PluginUserServiceImpl implements PluginUserService {
             filters.put("authRoles", authRole.name());
         }
         filters.put("originalUser", originalUser);
-        filters.put("username", userName);
+        filters.put("userName", userName);
         return filters;
     }
 
@@ -146,16 +146,16 @@ public class PluginUserServiceImpl implements PluginUserService {
         }
         authenticationDAO.create(u);
 
-        String userIdentifier = u.getCertificateId() != null ? u.getCertificateId() : u.getUsername();
+        String userIdentifier = u.getCertificateId() != null ? u.getCertificateId() : u.getUserName();
         userDomainService.setDomainForUser(userIdentifier, domain.getCode());
     }
 
     private void updateUser(AuthenticationEntity modified) {
         AuthenticationEntity existing = authenticationDAO.read(modified.getEntityId());
 
-        passwordManager.applyLockingPolicyOnUpdate(existing);
+        passwordManager.applyLockingPolicyOnUpdate(modified);
 
-        if (modified.getPassword() != null) {
+        if (!StringUtils.isEmpty(modified.getPassword())) {
             changePassword(existing, modified.getPassword());
         }
 
@@ -173,7 +173,7 @@ public class PluginUserServiceImpl implements PluginUserService {
         AuthenticationEntity entity = authenticationDAO.read(u.getEntityId());
         authenticationDAO.delete(entity);
 
-        String userIdentifier = u.getCertificateId() != null ? u.getCertificateId() : u.getUsername();
+        String userIdentifier = u.getCertificateId() != null ? u.getCertificateId() : u.getUserName();
         userDomainService.deleteDomainForUser(userIdentifier);
     }
 }
