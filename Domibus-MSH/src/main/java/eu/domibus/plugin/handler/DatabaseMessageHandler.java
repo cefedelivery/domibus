@@ -55,7 +55,7 @@ import java.util.Map;
  * @since 3.0
  */
 @Service
-public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever {
+public class DatabaseMessageHandler implements MessageSubmitter, MessageRetriever, MessagePuller {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DatabaseMessageHandler.class);
     private static final String MESSAGE_WITH_ID_STR = "Message with id [";
@@ -417,6 +417,12 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
             errorLogDao.create(new ErrorLogEntry(MSHRole.SENDING, userMessage.getMessageInfo().getMessageId(), ErrorCode.EBMS_0010, p.getMessage()));
             throw new PModeMismatchException(p.getMessage(), p);
         }
+    }
+
+    @Override
+    @Transactional
+    public void initiatePull(String mpc) {
+        messageExchangeService.initiatePullRequest(mpc);
     }
 
     private Party messageValidations(UserMessage userMessage, String pModeKey, String backendName) throws EbMS3Exception, MessagingProcessingException {

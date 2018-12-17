@@ -9,6 +9,7 @@ import eu.domibus.core.alerts.model.common.AlertType;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 /**
  * @author Thomas Dussart
  * @since 4.0
@@ -66,9 +67,7 @@ public class Alert {
         this.processedTime = processedTime;
     }
 
-    public AlertType getAlertType() {
-        return alertType;
-    }
+    public AlertType getAlertType() { return alertType; }
 
     public void setAlertType(AlertType alertType) {
         this.alertType = alertType;

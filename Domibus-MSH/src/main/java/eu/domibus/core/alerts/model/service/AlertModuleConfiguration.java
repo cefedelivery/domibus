@@ -6,7 +6,7 @@ import eu.domibus.core.alerts.model.common.AlertLevel;
  * @author Thomas Dussart
  * @since 4.0
  */
-interface AlertModuleConfiguration{
+public interface AlertModuleConfiguration{
 
     String getMailSubject();
 

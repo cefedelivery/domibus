@@ -36,6 +36,7 @@ import org.apache.wss4j.dom.util.WSSecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -74,6 +75,8 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
     public static final String X_509_PKIPATHV_1 = "X509PKIPathv1";
 
+    public static final String ID = "Id";
+
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
@@ -104,8 +107,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
      */
     @Override
     public void handleMessage(final SoapMessage message) throws Fault {
-        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false")) &&
-                !Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+        if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("No trust verification of sending certificate");
             return;
         }
@@ -146,7 +148,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkCertificateValidity(X509Certificate certificate, String sender, boolean isPullMessage) {
-        if (Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING, "true"))) {
+        if (domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONRECEIVING)) {
             try {
                 if (!certificateService.isCertificateValid(certificate)) {
                     LOG.error("Cannot receive message: sender certificate is not valid or it has been revoked [" + sender + "]");
@@ -166,7 +168,7 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
     }
 
     protected Boolean checkSenderPartyTrust(X509Certificate certificate, String sender, String messageId, boolean isPullMessage) {
-        if (!Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING, "false"))) {
+        if (!domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_TRUST_VALIDATION_ONRECEIVING)) {
             LOG.debug("Sender alias verification is disabled");
             return true;
         }
@@ -295,10 +297,18 @@ public class TrustSenderInterceptor extends WSS4JInInterceptor {
 
         for (int i = 0; i < binarySecurityTokenElement.getLength(); i++) {
             final Node item = binarySecurityTokenElement.item(i);
-            final Node id = item.getAttributes().getNamedItem("wsu:Id");
+            final NamedNodeMap attributes = item.getAttributes();
+            final int length = attributes.getLength();
+            Node id =null;
+            for (int j=0;j<length;j++){
+                final Node bstAttribute = attributes.item(j);
+                if(ID.equalsIgnoreCase(bstAttribute.getLocalName())){
+                    id=bstAttribute;
+                    break;
+                }
+            }
             if (id != null && uriFragment.equalsIgnoreCase(id.getNodeValue())) {
                 String certString = getTextFromElement((Element) item);
-
                 if (certString == null || certString.isEmpty()) {
                     return null;
                 }

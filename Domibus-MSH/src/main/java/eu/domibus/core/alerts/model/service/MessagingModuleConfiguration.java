@@ -15,25 +15,18 @@ import java.util.Optional;
  * @author Thomas Dussart
  * @since 4.0
  */
-public class MessagingModuleConfiguration implements AlertModuleConfiguration {
+public class MessagingModuleConfiguration extends AlertModuleConfigurationBase {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(MessagingModuleConfiguration.class);
-
-    private final boolean messageCommunicationActive;
-
-    private String mailSubject;
 
     private Map<MessageStatus, AlertLevel> messageStatusLevels = new EnumMap<>(MessageStatus.class);
 
     public MessagingModuleConfiguration(final String mailSubject) {
-        this.messageCommunicationActive = true;
-        this.mailSubject = mailSubject;
-
+        super(AlertType.MSG_STATUS_CHANGED, mailSubject);
     }
 
     public MessagingModuleConfiguration() {
-        this.messageCommunicationActive = false;
-
+        super(AlertType.MSG_STATUS_CHANGED);
     }
 
     public void addStatusLevelAssociation(MessageStatus messageStatus, AlertLevel alertLevel) {
@@ -41,7 +34,7 @@ public class MessagingModuleConfiguration implements AlertModuleConfiguration {
     }
 
     public boolean shouldMonitorMessageStatus(MessageStatus messageStatus) {
-        return messageCommunicationActive && messageStatusLevels.get(messageStatus) != null;
+        return isActive() && messageStatusLevels.get(messageStatus) != null;
     }
 
     public AlertLevel getAlertLevel(MessageStatus messageStatus) {
@@ -51,27 +44,15 @@ public class MessagingModuleConfiguration implements AlertModuleConfiguration {
     @Override
     public String toString() {
         return "MessagingConfiguration{" +
-                "messageCommunicationActive=" + messageCommunicationActive +
+                "messageCommunicationActive=" + isActive() +
                 ", messageStatusLevels=" + messageStatusLevels +
                 '}';
     }
 
     @Override
-    public String getMailSubject() {
-        return mailSubject;
-    }
-
-    @Override
-    public boolean isActive() {
-        return messageCommunicationActive;
-    }
-
-    @Override
     public AlertLevel getAlertLevel(Alert alert) {
-        if (AlertType.MSG_STATUS_CHANGED != alert.getAlertType()) {
-            LOG.error("Invalid alert type[{}] for this strategy, it should be[{}]", alert.getAlertType(), AlertType.MSG_STATUS_CHANGED);
-            throw new IllegalArgumentException("Invalid alert type of the strategy.");
-        }
+        super.getAlertLevel(alert);
+
         final Event event = alert.getEvents().iterator().next();
         final Optional<String> stringPropertyValue = event.findStringProperty(MessageEvent.NEW_STATUS.name());
         final MessageStatus newStatus = MessageStatus.valueOf(stringPropertyValue.

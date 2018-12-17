@@ -1,5 +1,6 @@
 package eu.domibus.common.model.logging;
 
+import eu.domibus.api.property.DomibusPropertyProvider;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -10,7 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
-import java.util.Properties;
 
 /**
  * @author Tiago Miguel
@@ -20,7 +20,7 @@ import java.util.Properties;
 public class SignalMessageLogInfoFilterTest {
 
     @Injectable
-    private Properties domibusProperties;
+    private DomibusPropertyProvider domibusProperties;
 
     public static final String QUERY = "select new eu.domibus.common.model.logging.MessageLogInfo(log, partyFrom.value, partyTo.value, propsFrom.value, propsTo.value, info.refToMessageId) from SignalMessageLog log, " +
             "SignalMessage message " +

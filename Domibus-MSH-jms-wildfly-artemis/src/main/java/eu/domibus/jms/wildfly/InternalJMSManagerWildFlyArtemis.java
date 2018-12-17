@@ -121,7 +121,7 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
         String[] queueNames = jmsServerControl.getQueueNames();
 
         for (String queueName : queueNames) {
-            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY, "default")
+            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY)
                     + "\",module=JMS,serviceType=Queue,name=\"" + queueName + "\"";
 
             try {
@@ -142,7 +142,7 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
         topicMap = new HashMap<>();
         String[] topicNames = jmsServerControl.getTopicNames();
         for (String topicName : topicNames) {
-            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY, "default")
+            String mbeanObjectName = MBEAN_PREFIX_QUEUE_TOPIC + domibusPropertyProvider.getProperty(JMS_BROKER_PROPERTY)
                     + "\",module=JMS,serviceType=Topic,name=\"" + topicName + "\"";
 
             try {

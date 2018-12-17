@@ -13,7 +13,6 @@ import eu.domibus.web.rest.ro.DomainRO;
 import eu.domibus.web.rest.ro.DomibusInfoRO;
 import eu.domibus.web.rest.ro.PasswordPolicyRO;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,9 +32,12 @@ public class ApplicationResource {
 
     private static final Logger LOG = DomibusLoggerFactory.getLogger(ApplicationResource.class);
 
-    protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
+    String PASSWORD_POLICY_PATTERN = "domibus.passwordPolicy.pattern";
+    String PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.passwordPolicy.validationMessage";
+    String PLUGIN_PASSWORD_POLICY_PATTERN = "domibus.plugin.passwordPolicy.pattern";
+    String PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE = "domibus.plugin.passwordPolicy.validationMessage";
 
-    protected static final String DOMIBUS_DEFAULTVALUE_NAME = "Domibus";
+    protected static final String DOMIBUS_CUSTOM_NAME = "domibus.UI.title.name";
 
     @Autowired
     private DomibusPropertiesService domibusPropertiesService;
@@ -87,7 +89,7 @@ public class ApplicationResource {
         if (domain == null) {
             domain = DomainService.DEFAULT_DOMAIN;
         }
-        return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME, DOMIBUS_DEFAULTVALUE_NAME);
+        return domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_CUSTOM_NAME);
     }
 
     /**
@@ -127,10 +129,39 @@ public class ApplicationResource {
     public PasswordPolicyRO getPasswordPolicy() {
         LOG.debug("Getting password policy");
 
-        String pattern = domibusConfigurationService.getPasswordPattern();
-        String validationMessage = domibusConfigurationService.getPasswordValidationMessage();
+        String pattern = this.getPasswordPattern();
+        String validationMessage = this.getPasswordValidationMessage();
 
         return new PasswordPolicyRO(pattern, validationMessage);
     }
 
+    /**
+     * Retrieves the password policy info for plugin users
+     *
+     * @return password policy info
+     */
+    @RequestMapping(value = "pluginPasswordPolicy", method = RequestMethod.GET)
+    public PasswordPolicyRO getPluginUsersPasswordPolicy() {
+        LOG.debug("Getting plugin password policy");
+
+        String pattern = this.getPluginPasswordPattern();
+        String validationMessage = this.getPluginPasswordValidationMessage();
+
+        return new PasswordPolicyRO(pattern, validationMessage);
+    }
+
+    private String getPasswordPattern() {
+        return domibusPropertyProvider.getDomainProperty(PASSWORD_POLICY_PATTERN);
+    }
+
+    private String getPasswordValidationMessage() {
+        return domibusPropertyProvider.getDomainProperty(PASSWORD_POLICY_VALIDATION_MESSAGE);
+    }
+
+    private String getPluginPasswordPattern() {
+        return domibusPropertyProvider.getDomainProperty(PLUGIN_PASSWORD_POLICY_PATTERN);
+    }
+    private String getPluginPasswordValidationMessage() {
+        return domibusPropertyProvider.getDomainProperty(PLUGIN_PASSWORD_POLICY_VALIDATION_MESSAGE);
+    }
 }

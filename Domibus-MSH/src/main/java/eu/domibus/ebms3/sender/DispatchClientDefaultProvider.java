@@ -62,7 +62,6 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
-
     @Cacheable(value = "dispatchClient", key = "#domain + #endpoint + #pModeKey", condition = "#cacheable")
     @Override
     public Dispatch<SOAPMessage> getClient(String domain, String endpoint, String algorithm, Policy policy, final String pModeKey, boolean cacheable) {
@@ -79,14 +78,14 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
         httpConduit.setClient(httpClientPolicy);
         setHttpClientPolicy(httpClientPolicy);
 
-        final TLSClientParameters params = tlsReader.getTlsClientParameters();
-        if (params != null && endpoint.startsWith("https://")) {
-            httpConduit.setTlsClientParameters(params);
+        if (endpoint.startsWith("https://")) {
+            final TLSClientParameters params = tlsReader.getTlsClientParameters(domain);
+            if(params != null) {
+                httpConduit.setTlsClientParameters(params);
+            }
         }
 
-        String useProxy = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED, "false");
-        Boolean useProxyBool = Boolean.parseBoolean(useProxy);
-        if (useProxyBool) {
+        if (domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED)) {
             LOG.info("Usage of Proxy required");
             configureProxy(httpClientPolicy, httpConduit);
         } else {

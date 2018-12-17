@@ -66,7 +66,6 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
     }
 
     protected boolean isNonRepudiationAuditDisabled() {
-        String nonRepudiationActive = domibusPropertyProvider.getProperty("domibus.nonrepudiation.audit.active", "true");
-        return !Boolean.valueOf(nonRepudiationActive);
+        return !domibusPropertyProvider.getBooleanProperty("domibus.nonrepudiation.audit.active");
     }
 }

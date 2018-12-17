@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-
 /**
  * @author Cosmin Baciu
  * @since 4.0
@@ -17,21 +16,23 @@ public class AlertMethodFactory {
     private DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    protected AlertMethodEmail alertEmailMethod;
+    protected AlertMethodEmail alertMethodEmail;
 
     @Autowired
-    protected AlertMethodLog alertEmailLog;
+    protected AlertMethodLog alertMethodLog;
 
     @Autowired
     private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
 
     public AlertMethod getAlertMethod() {
-        AlertMethod result = alertEmailLog;
+        AlertMethod result = alertMethodLog;
+
         final String sendEmailActivePropertyName = multiDomainAlertConfigurationService.getSendEmailActivePropertyName();
         final boolean mailActive = Boolean.parseBoolean(domibusPropertyProvider.getOptionalDomainProperty(sendEmailActivePropertyName));
         if (mailActive) {
-            result = alertEmailMethod;
+            result = alertMethodEmail;
         }
+
         return result;
     }
 }

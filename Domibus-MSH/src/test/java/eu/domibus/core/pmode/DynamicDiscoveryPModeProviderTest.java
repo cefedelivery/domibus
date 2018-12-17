@@ -172,11 +172,10 @@ public class DynamicDiscoveryPModeProviderTest {
 
     @Test
     public void testUseDynamicDiscovery() {
-
-        doReturn("false").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(false).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         assertFalse(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
 
-        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(true).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         assertTrue(dynamicDiscoveryPModeProvider.useDynamicDiscovery());
     }
 
@@ -270,7 +269,7 @@ public class DynamicDiscoveryPModeProviderTest {
         }
 
         doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.SMLZONE_KEY));
-        doReturn("true").when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY), eq("false"));
+        doReturn(true).when(domibusPropertyProvider).getBooleanDomainProperty(eq(DynamicDiscoveryService.USE_DYNAMIC_DISCOVERY));
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();
@@ -443,7 +442,7 @@ public class DynamicDiscoveryPModeProviderTest {
 
     private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
-        TransportProfile transportProfile = new TransportProfile(DynamicDiscoveryService.DEFAULT_TRANSPORTPROFILEAS4);
+        TransportProfile transportProfile = new TransportProfile("bdxr-transport-ebms3-as4-v1p0");
         X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);
