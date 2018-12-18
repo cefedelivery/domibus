@@ -61,7 +61,9 @@ export class PluginUserService {
   createNew (): PluginUserRO {
     const item = new PluginUserRO();
     item.status = UserState[UserState.NEW];
-    item.username = '';
+    item.userName = '';
+    item.active = true;
+    item.suspended = false;
     return item;
   }
 

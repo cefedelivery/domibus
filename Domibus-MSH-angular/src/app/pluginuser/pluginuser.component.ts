@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
 import {AlertService} from '../alert/alert.service';
@@ -21,6 +21,7 @@ import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
   providers: [PluginUserService, UserService]
 })
 export class PluginUserComponent implements OnInit, DirtyOperations {
+  @ViewChild('activeTpl') activeTpl: TemplateRef<any>;
 
   columnPickerBasic: ColumnPickerBase = new ColumnPickerBase();
   columnPickerCert: ColumnPickerBase = new ColumnPickerBase();
@@ -42,10 +43,11 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   constructor(private alertService: AlertService,
               private pluginUserService: PluginUserService,
               public dialog: MdDialog) {
-    this.initColumns();
   }
 
   ngOnInit() {
+    this.initColumns();
+
     this.offset = 0;
     this.selected = [];
     this.loading = false;
@@ -63,9 +65,10 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
   private initColumns() {
     this.columnPickerBasic.allColumns = [
-      {name: 'User Name', prop: 'username', width: 20},
+      {name: 'User Name', prop: 'userName', width: 20},
       {name: 'Password', prop: 'hiddenPassword', width: 20, sortable: false},
       {name: 'Role', prop: 'authRoles', width: 10},
+      {name: 'Active', prop: 'active', cellTemplate: this.activeTpl, width: 25},
       {name: 'Original User', prop: 'originalUser', width: 240},
     ];
     this.columnPickerCert.allColumns = [
