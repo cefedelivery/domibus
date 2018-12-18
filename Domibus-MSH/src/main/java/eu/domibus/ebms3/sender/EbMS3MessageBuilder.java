@@ -121,6 +121,8 @@ public class EbMS3MessageBuilder {
                 messageFragmentElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
                 messageFragmentElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_3" + messageIDDigest);
 
+                userMessage.setPayloadInfo(null);
+
             }
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
 

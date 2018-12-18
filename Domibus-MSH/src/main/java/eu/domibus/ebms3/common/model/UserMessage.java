@@ -1,6 +1,7 @@
 package eu.domibus.ebms3.common.model;
 
 import eu.domibus.core.message.fragment.MessageFragmentEntity;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -72,7 +73,7 @@ public class UserMessage extends AbstractBaseEntity {
 
     @XmlTransient
     @Column(name = "SPLIT_AND_JOIN")
-    protected boolean splitAndJoin;
+    protected Boolean splitAndJoin;
 
     @XmlTransient
     @JoinColumn(name = "FK_MESSAGE_FRAGMENT_ID")
@@ -241,11 +242,11 @@ public class UserMessage extends AbstractBaseEntity {
         return false;
     }
 
-    public boolean isSplitAndJoin() {
-        return splitAndJoin;
+    public Boolean isSplitAndJoin() {
+        return BooleanUtils.toBoolean(splitAndJoin);
     }
 
-    public void setSplitAndJoin(boolean splitAndJoin) {
+    public void setSplitAndJoin(Boolean splitAndJoin) {
         this.splitAndJoin = splitAndJoin;
     }
 
