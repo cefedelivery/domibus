@@ -2,20 +2,19 @@ package eu.domibus.core.alerts.service;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.model.security.UserBase;
-import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.core.alerts.model.common.AlertType;
-import mockit.Expectations;
+import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import mockit.Injectable;
 import mockit.Tested;
+import mockit.VerificationsInOrder;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 
 /**
  * @author Thomas Dussart
@@ -31,7 +30,10 @@ public class ConsoleUserAlertsServiceImplTest {
     private UserDao userDao;
 
     @Injectable
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService alertsConfiguration;
 
     @Injectable
     private EventService eventService;
@@ -67,4 +69,27 @@ public class ConsoleUserAlertsServiceImplTest {
         Assert.assertEquals(AlertType.PASSWORD_EXPIRED, val);
     }
 
+    @Test
+    public void testGetEventTypeForPasswordExpired() {
+        EventType val = userAlertsService.getEventTypeForPasswordExpired();
+
+        Assert.assertEquals(EventType.PASSWORD_EXPIRED, val);
+    }
+
+    @Test
+    public void testGetUserType() {
+        UserEntityBase.Type val = userAlertsService.getUserType();
+
+        Assert.assertEquals( UserEntityBase.Type.CONSOLE, val);
+    }
+
+    @Test
+    public void testGetAccountDisabledConfiguration() {
+        AccountDisabledModuleConfiguration val = userAlertsService.getAccountDisabledConfiguration();
+
+        new VerificationsInOrder() {{
+            alertsConfiguration.getAccountDisabledConfiguration();
+            times = 1;
+        }};
+    }
 }

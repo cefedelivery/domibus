@@ -9,11 +9,13 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.model.security.UserPasswordHistory;
-import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
 import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import mockit.*;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -24,6 +26,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Ion Perpegel
@@ -50,7 +55,7 @@ public class UserSecurityPolicyManagerTest {
     UserDao userDao;
 
     @Injectable
-    BCryptPasswordEncoder bcryptEncoder;
+    BCryptPasswordEncoder bCryptEncoder;
 
     @Injectable
     UserDomainService userDomainService;
@@ -60,7 +65,7 @@ public class UserSecurityPolicyManagerTest {
 
     @Injectable
     private MultiDomainAlertConfigurationService alertConfigurationService;
-    
+
     @Tested
     UserSecurityPolicyManager securityPolicyManager;
 
@@ -81,7 +86,6 @@ public class UserSecurityPolicyManagerTest {
 //        - At least one letter in uppercase
 //        - At least one digit
 //        - At least one special character
-
 
 
         // Happy Flow: No error should occur
@@ -112,7 +116,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
         // Maximum length: 32 characters
         try {
@@ -120,7 +124,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
         // At least one letter in lowercase
         try {
@@ -128,7 +132,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
         // At least one letter in uppercase
         try {
@@ -136,7 +140,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
         // At least one digit
         try {
@@ -144,7 +148,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
         // At least one special character
         try {
@@ -152,7 +156,7 @@ public class UserSecurityPolicyManagerTest {
             securityPolicyManager.validateComplexity(userName, invalidPassword1);
             Assert.fail("Expected exception was not raised!");
         } catch (DomibusCoreException e2) {
-            Assert.assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
+            assertEquals(DomibusCoreErrorCode.DOM_001, e2.getError());
         }
     }
 
@@ -196,7 +200,7 @@ public class UserSecurityPolicyManagerTest {
             result = userPasswordHistoryDao;
             userPasswordHistoryDao.getPasswordHistory(user, oldPasswordsToCheck);
             result = oldPasswords;
-            bcryptEncoder.matches((CharSequence) any, anyString);
+            bCryptEncoder.matches((CharSequence) any, anyString);
             result = true;
         }};
 
@@ -227,7 +231,7 @@ public class UserSecurityPolicyManagerTest {
 
         Integer result = securityPolicyManager.getDaysTillExpiration(username, true, passwordChangeDate);
 
-        Assert.assertEquals(remainingDays, result);
+        assertEquals(remainingDays, result);
     }
 
     @Test
@@ -239,7 +243,7 @@ public class UserSecurityPolicyManagerTest {
         }};
 
         Integer result = securityPolicyManager.getDaysTillExpiration(username, true, LocalDateTime.now());
-        Assert.assertEquals(null, result);
+        assertEquals(null, result);
     }
 
     @Test(expected = CredentialsExpiredException.class)
@@ -257,7 +261,7 @@ public class UserSecurityPolicyManagerTest {
     }
 
     @Test
-    public void prepareUserForUpdate() {
+    public void applyLockingPolicyOnUpdateUnlock() {
         final User userEntity = new User() {{
             setActive(false);
             setSuspensionDate(new Date());
@@ -267,37 +271,190 @@ public class UserSecurityPolicyManagerTest {
             setActive(true);
         }};
         new Expectations() {{
-            userDao.loadUserByUsername(anyString);
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.findByUserName(anyString);
             result = userEntity;
         }};
 
-//        User user1 = userPersistenceService.prepareUserForUpdate(user);
-//        assertNull(user1.getSuspensionDate());
-//        assertEquals(0, user1.getAttemptCount(), 0d);
+        securityPolicyManager.applyLockingPolicyOnUpdate(user);
+
+        assertNull(userEntity.getSuspensionDate());
+        assertEquals(0, userEntity.getAttemptCount(), 0d);
     }
 
     @Test
-    public void prepareUserForUpdateSendAlert(@Mocked AccountDisabledModuleConfiguration
-                                                      accountDisabledConfiguration) {
+    public void applyLockingPolicyOnUpdateSendAlert() {
         final User userEntity = new User();
         userEntity.setActive(true);
         eu.domibus.api.user.User user = new eu.domibus.api.user.User();
         user.setActive(false);
         user.setUserName("user");
+
         new Expectations() {{
-            userDao.loadUserByUsername(anyString);
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.findByUserName(anyString);
             result = userEntity;
-
-            alertConfigurationService.getAccountDisabledConfiguration();
-            result = accountDisabledConfiguration;
-
-            accountDisabledConfiguration.isActive();
-            result = true;
+            securityPolicyManager.getUserAlertsService();
+            result = userAlertsService;
         }};
-        //userPersistenceService.prepareUserForUpdate(user);
+
+        securityPolicyManager.applyLockingPolicyOnUpdate(user);
+
         new Verifications() {{
-//            eventService.enqueueAccountDisabledEvent(user.getUserName(), withAny(new Date()), true);
-//            times = 1;
+            userAlertsService.triggerDisabledEvent(user);
+            times = 1;
         }};
+    }
+
+    @Test
+    public void changePasswordTest() {
+        String newPassword = "newPassword";
+
+        final User user = new User() {{
+            setActive(true);
+            setUserName("user");
+            setDefaultPassword(true);
+        }};
+
+        new Expectations() {{
+//            securityPolicyManager.getPasswordHistoryPolicyProperty();
+//            result = "anyProperty";
+//            domibusPropertyProvider.getIntegerOptionalDomainProperty("anyProperty");
+//            result = 0;
+//            securityPolicyManager.getUserHistoryDao();
+//            result = userPasswordHistoryDao;
+            securityPolicyManager.getPasswordComplexityPatternProperty();
+            result = "prop2";
+            domibusPropertyProvider.getOptionalDomainProperty("prop2");
+            result = StringUtils.EMPTY;
+            securityPolicyManager.getPasswordHistoryPolicyProperty();
+            result = "prop3";
+            domibusPropertyProvider.getOptionalDomainProperty("prop3");
+            result = 0;
+            bCryptEncoder.encode(newPassword);
+            result = "encoded_password";
+        }};
+
+        securityPolicyManager.changePassword(user, newPassword);
+
+        new Verifications() {{
+            userPasswordHistoryDao.savePassword(user, user.getPassword(), user.getPasswordChangeDate());
+            times = 0;
+        }};
+
+        assertEquals(false, user.hasDefaultPassword());
+        assertEquals("encoded_password", user.getPassword());
+    }
+
+    @Test
+    public void handleCorrectAuthenticationTest() {
+        String userName = "user1";
+        final User userEntity = new User() {{
+            setUserName(userName);
+            setActive(true);
+            setAttemptCount(3);
+        }};
+
+        new Expectations() {{
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.findByUserName(anyString);
+            result = userEntity;
+        }};
+
+        securityPolicyManager.handleCorrectAuthentication(userName);
+
+        assertEquals(0, userEntity.getAttemptCount(), 0d);
+    }
+
+    @Test
+    public void handleWrongAuthenticationSuspendedTest() {
+        String userName = "user1";
+        final User user = new User() {{
+            setUserName(userName);
+            setActive(false);
+            setSuspensionDate(new Date());
+            setAttemptCount(5);
+        }};
+
+        new Expectations() {{
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.findByUserName(anyString);
+            result = user;
+            securityPolicyManager.getUserAlertsService();
+            result = userAlertsService;
+        }};
+
+        securityPolicyManager.handleWrongAuthentication(userName);
+
+        new Verifications() {{
+            userAlertsService.triggerLoginEvents(userName, UserLoginErrorReason.SUSPENDED);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void handleWrongAuthenticationBadCredentialsTest() {
+        String userName = "user1";
+        int attemptCount = 5;
+        final User user = new User() {{
+            setUserName(userName);
+            setActive(true);
+            setAttemptCount(attemptCount - 1);
+        }};
+
+        new Expectations() {{
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.findByUserName(anyString);
+            result = user;
+            securityPolicyManager.getMaxAttemptAmount(user);
+            result = attemptCount;
+            securityPolicyManager.getUserAlertsService();
+            result = userAlertsService;
+        }};
+
+        securityPolicyManager.handleWrongAuthentication(userName);
+
+        new Verifications() {{
+            userAlertsService.triggerDisabledEvent(user);
+            times = 1;
+        }};
+
+        assertEquals(false, user.isActive());
+        assert (user.getSuspensionDate() != null);
+    }
+
+    @Test
+    public void reactivateSuspendedUsersTest() {
+        final User user1 = new User() {{
+            setUserName("user1");
+            setActive(true);
+        }};
+        final User user2 = new User() {{
+            setUserName("user2");
+            setActive(false);
+            setSuspensionDate(new Date());
+        }};
+        List<UserEntityBase> users = Arrays.asList(user1);
+
+        new Expectations() {{
+            securityPolicyManager.getSuspensionInterval();
+            result = 1;
+            securityPolicyManager.getUserDao();
+            result = userDao;
+            userDao.getSuspendedUsers((Date)any);
+            result = users;
+        }};
+
+        securityPolicyManager.reactivateSuspendedUsers();
+
+        assertEquals(true, user1.isActive());
+        assertEquals((long)0, (long)user1.getAttemptCount());
+        assertEquals(null, user1.getSuspensionDate());
+
     }
 }

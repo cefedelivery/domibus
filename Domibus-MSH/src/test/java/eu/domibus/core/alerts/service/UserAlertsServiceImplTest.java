@@ -11,9 +11,14 @@ import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
+import eu.domibus.core.alerts.model.service.AccountDisabledMoment;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -21,11 +26,12 @@ import org.junit.runner.RunWith;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
- * @author Thomas Dussart
- * @since 4.0
+ * @author Ion Perpegel
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class UserAlertsServiceImplTest {
@@ -165,7 +171,6 @@ public class UserAlertsServiceImplTest {
         }};
     }
 
-
     @Test
     public void testSendPasswordAlerts() {
 
@@ -177,6 +182,51 @@ public class UserAlertsServiceImplTest {
         }};
         new VerificationsInOrder() {{
             userAlertsService.triggerExpiredEvents(false);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void triggerDisabledEventTest() {
+        final User user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        AccountDisabledModuleConfiguration conf = new AccountDisabledModuleConfiguration(AlertType.USER_ACCOUNT_DISABLED,
+                AlertLevel.MEDIUM, AccountDisabledMoment.AT_LOGON, "");
+        new Expectations() {{
+            alertsConfiguration.getAccountDisabledConfiguration();
+            result = conf;
+            userAlertsService.getUserType();
+            result = UserEntityBase.Type.CONSOLE;
+        }};
+
+        userAlertsService.triggerDisabledEvent(user1);
+
+        new VerificationsInOrder() {{
+            eventService.enqueueAccountDisabledEvent(UserEntityBase.Type.CONSOLE, user1.getUserName(), (Date)any);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void triggerLoginEventsTest() {
+        final User user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        LoginFailureModuleConfiguration conf = new LoginFailureModuleConfiguration(AlertType.USER_LOGIN_FAILURE, AlertLevel.MEDIUM, "");
+        new Expectations() {{
+            userAlertsService.getLoginFailureConfiguration();
+            result = conf;
+            userAlertsService.getUserType();
+            result = UserEntityBase.Type.CONSOLE;
+        }};
+
+        userAlertsService.triggerLoginEvents("user1", UserLoginErrorReason.BAD_CREDENTIALS);
+
+        new VerificationsInOrder() {{
+            eventService.enqueueLoginFailureEvent(UserEntityBase.Type.CONSOLE, user1.getUserName(), (Date)any, false);
             times = 1;
         }};
     }
