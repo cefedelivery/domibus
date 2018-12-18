@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 
 
 /**
- * @author Thomas Dussart
+ * @author Thomas Dussart, Ion Perpegel
  * @since 4.0
  */
 @Service
@@ -162,7 +162,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
     @Override
     public AccountDisabledModuleConfiguration getAccountDisabledConfiguration() {
         return accountDisabledConfigurationLoader.getConfiguration(new ConsoleAccountDisabledConfigurationReader()::readConfiguration);
-//        return accountDisabledConfigurationLoader.getConfiguration(this::readAccountDisabledConfiguration);
     }
 
     /**
@@ -451,37 +450,6 @@ public class MultiDomainAlertConfigurationServiceImpl implements MultiDomainAler
             return "domibus.alert.plugin.user.account_disabled.subject";
         }
     }
-
-//    protected AccountDisabledModuleConfiguration readAccountDisabledConfiguration(Domain domain) {
-//        //return pluginLoginFailureConfigurationLoader.getConfiguration(new PluginLoginFailConfigurationReader()::readConfiguration);
-////        try {
-////            final String accountDisabledAlertPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_ACTIVE);
-////            final String accountDisabledLevelPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_LEVEL);
-////            final String accountDisabledMomentPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_MOMENT);
-////            final String accountDisabledSubjectPropertyName = getDomainOrSuperProperty(DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT, DOMIBUS_ALERT_SUPER_USER_ACCOUNT_DISABLED_SUBJECT);
-////
-////            final Boolean alertActive = isAlertModuleEnabled();
-////            final Boolean accountDisabledActive = domibusPropertyProvider.getBooleanDomainProperty(domain, accountDisabledAlertPropertyName);
-////            if (!alertActive || !accountDisabledActive) {
-////                LOG.debug("domain:[{}] Alert account disabled module is inactive for the following reason:global alert module active[{}], account disabled module active[{}]", domain, alertActive, accountDisabledActive);
-////                return new AccountDisabledModuleConfiguration();
-////            }
-////
-////            final AlertLevel accountDisabledAlertLevel = AlertLevel.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledLevelPropertyName));
-////            final AccountDisabledMoment accountDisabledMoment = AccountDisabledMoment.valueOf(domibusPropertyProvider.getDomainProperty(domain, accountDisabledMomentPropertyName));
-////            final String accountDisabledMailSubject = domibusPropertyProvider.getDomainProperty(domain, accountDisabledSubjectPropertyName);
-////
-////            LOG.info("Alert account disabled module activated for domain:[{}]", domain);
-////            return new AccountDisabledModuleConfiguration(
-////                    accountDisabledAlertLevel,
-////                    accountDisabledMoment,
-////                    accountDisabledMailSubject);
-////
-////        } catch (Exception e) {
-////            LOG.warn("An error occurred while reading authenticator alert module configuration for domain:[{}], ", domain, e);
-////            return new AccountDisabledModuleConfiguration();
-////        }
-//    }
 
     class ConsoleLoginFailConfigurationReader extends LoginFailConfigurationReader {
         @Override

@@ -3,6 +3,7 @@ package eu.domibus.api.user;
 import eu.domibus.api.security.AuthRole;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class User implements UserBase {
     private boolean suspended;
     private boolean deleted;
 
-    public User(String userName, String email, boolean active, List<String> authorities, UserState userState,
+    public User(String userName, String email, Boolean active, List<String> authorities, UserState userState,
                 Date suspensionDate, boolean deleted) {
         this.userName = userName;
         this.email = email;
@@ -36,6 +37,7 @@ public class User implements UserBase {
     }
 
     public User() {
+        authorities = new LinkedList<>();
     }
 
     @Override
@@ -48,8 +50,13 @@ public class User implements UserBase {
     }
 
     @Override
-    public Boolean isActive() {
+    public boolean isActive() {
         return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<String> getAuthorities() {
@@ -71,11 +78,6 @@ public class User implements UserBase {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    @Override
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public void setAuthorities(List<String> authorities) {
@@ -116,7 +118,7 @@ public class User implements UserBase {
     }
 
     public boolean isSuperAdmin() {
-        if(authorities == null) {
+        if (authorities == null) {
             return false;
         }
         return authorities.contains(AuthRole.ROLE_AP_ADMIN.name());

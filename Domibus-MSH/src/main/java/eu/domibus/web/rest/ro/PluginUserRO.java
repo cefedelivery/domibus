@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class PluginUserRO implements Serializable {
 
     private Integer entityId;
-    private String username;
+    private String userName;
     private String password;
     private String certificateId;
     private String originalUser;
@@ -27,12 +27,12 @@ public class PluginUserRO implements Serializable {
         this.entityId = entityId;
     }
  
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String username) {
+        this.userName = username;
     }
   
     public String getPassword() {

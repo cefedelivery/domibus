@@ -5,7 +5,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,16 +24,6 @@ public class UserResponseRO {
     private String domain;
     private boolean deleted;
 
-    public UserResponseRO() {
-    }
-
-    public UserResponseRO(String userName, String email, boolean actif) {
-        this.userName = userName;
-        this.email = email;
-        this.active = actif;
-        this.authorities = new ArrayList<>();
-    }
-
     public String getUserName() {
         return userName;
     }
@@ -45,6 +34,10 @@ public class UserResponseRO {
 
     public boolean isActive() {
         return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public void updateRolesField() {
@@ -86,10 +79,6 @@ public class UserResponseRO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public void setAuthorities(List<String> authorities) {

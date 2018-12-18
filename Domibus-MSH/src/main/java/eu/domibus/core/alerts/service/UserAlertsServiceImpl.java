@@ -160,17 +160,4 @@ public abstract class UserAlertsServiceImpl implements UserAlertsService {
         });
     }
 
-//    @Override
-//    public abstract void triggerLoginEvents(String userName, UserLoginErrorReason userLoginErrorReason) ;
-
-//    @Override
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
-//    public void triggerLoginFailureEvent(UserEntityBase user) {
-//        final LoginFailureModuleConfiguration configuration = alertConfiguration.getPluginLoginFailureConfiguration();
-//        LOG.debug("Plugin login Failure Configuration active() : [{}]", configuration.isActive());
-//
-//        if (configuration.isActive()) {
-//            eventService.enqueuePluginLoginFailureEvent(user.getUserName(), new Date(), false);
-//        }
-//    }
 }
