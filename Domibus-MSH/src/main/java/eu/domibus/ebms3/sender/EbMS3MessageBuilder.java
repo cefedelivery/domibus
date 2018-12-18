@@ -15,6 +15,7 @@ import eu.domibus.ebms3.common.model.mf.TypeType;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.transformer.impl.UserMessageFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,21 +47,24 @@ public class EbMS3MessageBuilder {
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
     @Autowired
-    private MessageFactory messageFactory;
+    protected MessageFactory messageFactory;
 
     @Autowired
     @Qualifier(value = "jaxbContextEBMS")
-    private JAXBContext jaxbContext;
+    protected JAXBContext jaxbContext;
 
     @Autowired
     @Qualifier(value = "jaxbContextMessageFragment")
-    private JAXBContext jaxbContextMessageFragment;
+    protected JAXBContext jaxbContextMessageFragment;
 
     @Autowired
-    private DocumentBuilderFactory documentBuilderFactory;
+    protected DocumentBuilderFactory documentBuilderFactory;
 
     @Autowired
-    private MessageIdGenerator messageIdGenerator;
+    protected MessageIdGenerator messageIdGenerator;
+
+    @Autowired
+    protected UserMessageFactory userMessageFactory;
 
     public SOAPMessage buildSOAPMessage(final SignalMessage signalMessage, final LegConfiguration leg) throws EbMS3Exception {
         return buildSOAPMessage(signalMessage);
@@ -109,7 +113,6 @@ public class EbMS3MessageBuilder {
                 userMessage.getMessageInfo().setTimestamp(new Date());
             }
 
-            messaging.setUserMessage(userMessage);
             for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
                 this.attachPayload(partInfo, message);
             }
@@ -121,9 +124,11 @@ public class EbMS3MessageBuilder {
                 messageFragmentElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
                 messageFragmentElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_3" + messageIDDigest);
 
-                userMessage.setPayloadInfo(null);
-
+                messaging.setUserMessage(userMessageFactory.cloneUserMessageFragment(userMessage));
+            } else {
+                messaging.setUserMessage(userMessage);
             }
+
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
 
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();

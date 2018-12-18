@@ -37,6 +37,16 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
         return result;
     }
 
+    @Override
+    public UserMessage cloneUserMessageFragment(UserMessage userMessageFragment) {
+        UserMessage result = new UserMessage();
+        result.setCollaborationInfo(createCollaborationInfo(userMessageFragment.getCollaborationInfo()));
+        result.setMessageInfo(createMessageInfo(userMessageFragment.getMessageInfo(), userMessageFragment.getMessageInfo().getMessageId()));
+        result.setPartyInfo(createPartyInfo(userMessageFragment.getPartyInfo()));
+        result.setMessageProperties(createMessageProperties(userMessageFragment.getMessageProperties()));
+        return result;
+    }
+
     protected MessageFragmentEntity createMessageFragmentEntity(MessageGroupEntity messageGroupEntity, int fragmentNumber) {
         MessageFragmentEntity result = new MessageFragmentEntity();
         result.setFragmentNumber(fragmentNumber);

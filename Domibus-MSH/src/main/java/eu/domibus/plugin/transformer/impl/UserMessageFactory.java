@@ -11,4 +11,6 @@ public interface UserMessageFactory {
 
     UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, int fragmentNumber, String fragmentFile);
 
+    UserMessage cloneUserMessageFragment(UserMessage sourceMessage);
+
 }
