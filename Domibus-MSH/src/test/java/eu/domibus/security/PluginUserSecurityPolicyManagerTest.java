@@ -42,33 +42,33 @@ public class PluginUserSecurityPolicyManagerTest {
     DomainService domainService;
 
     @Tested
-    PluginUserSecurityPolicyManager passwordManager;
+    PluginUserSecurityPolicyManager userSecurityPolicyManager;
 
     @Test
     public void testGetPasswordComplexityPatternProperty() {
-        String result = passwordManager.getPasswordComplexityPatternProperty();
+        String result = userSecurityPolicyManager.getPasswordComplexityPatternProperty();
         Assert.assertEquals(PluginUserSecurityPolicyManager.PASSWORD_COMPLEXITY_PATTERN, result);
     }
 
     @Test
     public void testGetPasswordHistoryPolicyProperty() {
-        String result = passwordManager.getPasswordHistoryPolicyProperty();
+        String result = userSecurityPolicyManager.getPasswordHistoryPolicyProperty();
         Assert.assertEquals(PluginUserSecurityPolicyManager.PASSWORD_HISTORY_POLICY, result);
     }
 
     @Test
     public void testGetMaximumDefaultPasswordAgeProperty() {
-        String result = passwordManager.getMaximumDefaultPasswordAgeProperty();
+        String result = userSecurityPolicyManager.getMaximumDefaultPasswordAgeProperty();
         Assert.assertEquals(PluginUserSecurityPolicyManager.MAXIMUM_DEFAULT_PASSWORD_AGE, result);
     }
     @Test
     public void testGetMaximumPasswordAgeProperty() {
-        String result = passwordManager.getMaximumPasswordAgeProperty();
+        String result = userSecurityPolicyManager.getMaximumPasswordAgeProperty();
         Assert.assertEquals(PluginUserSecurityPolicyManager.MAXIMUM_PASSWORD_AGE, result);
     }
     @Test
     public void testGetWarningDaysBeforeExpiration() {
-        String result = passwordManager.getWarningDaysBeforeExpiration();
+        String result = userSecurityPolicyManager.getWarningDaysBeforeExpiration();
         Assert.assertEquals(PluginUserSecurityPolicyManager.WARNING_DAYS_BEFORE_EXPIRATION, result);
     }
 }

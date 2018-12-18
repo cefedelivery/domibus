@@ -51,7 +51,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     private DomainContextProvider domainProvider;
 
     @Autowired
-    private PluginUserSecurityPolicyManager passwordManager;
+    private PluginUserSecurityPolicyManager userSecurityPolicyManager;
 
     @Autowired
     PluginUserAlertsServiceImpl userAlertsService;
@@ -90,7 +90,7 @@ public class PluginUserServiceImpl implements PluginUserService {
 
     @Override
     public void reactivateSuspendedUsers() {
-        passwordManager.reactivateSuspendedUsers();
+        userSecurityPolicyManager.reactivateSuspendedUsers();
     }
 
     /**
@@ -153,7 +153,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     private void updateUser(AuthenticationEntity modified) {
         AuthenticationEntity existing = authenticationDAO.read(modified.getEntityId());
 
-        passwordManager.applyLockingPolicyOnUpdate(modified);
+        userSecurityPolicyManager.applyLockingPolicyOnUpdate(modified);
 
         if (!StringUtils.isEmpty(modified.getPassword())) {
             changePassword(existing, modified.getPassword());
@@ -166,7 +166,7 @@ public class PluginUserServiceImpl implements PluginUserService {
     }
 
     private void changePassword(AuthenticationEntity user, String newPassword) {
-        passwordManager.changePassword(user, newPassword);
+        userSecurityPolicyManager.changePassword(user, newPassword);
     }
 
     private void deleteUser(AuthenticationEntity u) {
