@@ -100,4 +100,18 @@
 
     </changeSet>
 
+    <changeSet author="nperpion" id="EDELIVERY-4210">
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="ATTEMPT_COUNT" type="int" defaultValueNumeric="0"/>
+        </addColumn>
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="SUSPENSION_DATE" type="timestamp"/>
+        </addColumn>
+        <addColumn tableName="TB_AUTHENTICATION_ENTRY">
+            <column name="USER_ENABLED" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
