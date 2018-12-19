@@ -147,9 +147,6 @@ public class AuthenticationDAO extends BasicDao<AuthenticationEntity> implements
     @Override
     public void update(AuthenticationEntity user, boolean flush) {
         super.update(user);
-        if(flush) {
-            //super.flush();
-        }
     }
 
     @Override
