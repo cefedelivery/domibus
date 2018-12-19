@@ -5,6 +5,12 @@ import eu.domibus.api.user.UserBase;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * @author Ion Perpegel
+ * @since 4.1
+ * Base class for console and plugin users entities
+ * It derives from an even narrower interface to be able to use some common code between these entities and the api.User class
+ */
 public interface UserEntityBase extends UserBase {
 
     int getEntityId();

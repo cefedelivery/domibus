@@ -107,7 +107,7 @@ public class PluginUserServiceImpl implements PluginUserService {
                 if (!authenticationDAO.listByUser(user.getUserName()).isEmpty())
                     throw new UserManagementException("Cannot add user " + user.getUserName() + " because this name already exists.");
             }
-            if (!StringUtils.isEmpty(user.getCertificateId())) {
+            if (StringUtils.isNotBlank(user.getCertificateId())) {
                 if (addedUsers.stream().anyMatch(x -> x != user && user.getCertificateId().equalsIgnoreCase(x.getCertificateId())))
                     throw new UserManagementException("Cannot add user with certificate " + user.getCertificateId() + " more than once.");
                 if (!authenticationDAO.listByCertificateId(user.getCertificateId()).isEmpty())
