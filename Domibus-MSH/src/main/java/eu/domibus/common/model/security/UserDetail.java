@@ -29,6 +29,16 @@ public class UserDetail implements UserDetails {
                 .build();
     }
 
+    public UserDetail(String username, String password,
+                      Collection<? extends GrantedAuthority> authorities) {
+
+        this.springUser = org.springframework.security.core.userdetails.User
+                .withUsername(username)
+                .password(password)
+                .authorities(authorities)
+                .build();
+    }
+
     private List<GrantedAuthority> getGrantedAuthorities(Collection<UserRole> roles) {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (UserRole role : roles) {

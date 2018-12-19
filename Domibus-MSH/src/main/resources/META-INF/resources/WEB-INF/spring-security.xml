@@ -8,14 +8,14 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <http pattern="/services/**" security="none"/>
+   <!-- <http pattern="/services/**" security="none"/>-->
 
     <!-- Skip the security; the REST services exposed in the domibus-ext-services-api are protected by an interceptor -->
-    <http pattern="/ext/**" security="none"/>
+   <!-- <http pattern="/ext/**" security="none"/>-->
 
     <beans:bean id="setDomainFilter" class="eu.domibus.web.filter.SetDomainFilter"/>
 
-    <http auto-config="false"
+   <!-- <http auto-config="false"
           use-expressions="true"
           entry-point-ref="http403ForbiddenEntryPoint"
           authentication-manager-ref="authenticationManagerForAdminConsole">
@@ -42,7 +42,7 @@
         <intercept-url pattern="/rest/logging/**" access="hasAnyRole('ROLE_ADMIN','ROLE_AP_ADMIN')"/>
         <intercept-url pattern="/rest/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_AP_ADMIN')"/>
 
-        <!-- Enable CSRF protection -->
+        <!- Enable CSRF protection ->
         <csrf request-matcher-ref="csrfURLMatcher" token-repository-ref="tokenRepository"/>
 
         <headers>
@@ -52,11 +52,11 @@
         </headers>
 
         <custom-filter position="FORM_LOGIN_FILTER" ref="setDomainFilter" />
-    </http>
+    </http>-->
 
-    <beans:bean id="tokenRepository" class="org.springframework.security.web.csrf.CookieCsrfTokenRepository">
-        <beans:property name="cookieHttpOnly" value="false"/>
-    </beans:bean>
+    <!--<beans:bean id="tokenRepository" class="org.springframework.security.web.csrf.CookieCsrfTokenRepository">-->
+        <!--<beans:property name="cookieHttpOnly" value="false"/>-->
+    <!--</beans:bean>-->
     <beans:bean id="csrfURLMatcher" class="eu.domibus.web.matcher.URLCsrfMatcher">
         <beans:property name="ignoreUrl" value="/rest/security/authentication"/>
     </beans:bean>

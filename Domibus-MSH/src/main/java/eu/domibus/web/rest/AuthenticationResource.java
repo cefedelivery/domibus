@@ -5,7 +5,6 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.AuthUtils;
 import eu.domibus.common.model.security.UserDetail;
-import eu.domibus.common.services.UserPersistenceService;
 import eu.domibus.common.services.UserService;
 import eu.domibus.common.util.WarningUtil;
 import eu.domibus.core.converter.DomainCoreConverter;
@@ -35,6 +34,7 @@ import org.springframework.security.web.authentication.logout.CookieClearingLogo
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -188,7 +188,10 @@ public class AuthenticationResource {
     }
 
     UserDetail getLoggedUser() {
-        UserDetail securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetail securityUser = null;
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        }
         return securityUser;
     }
 

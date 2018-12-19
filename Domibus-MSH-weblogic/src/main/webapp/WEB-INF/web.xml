@@ -18,6 +18,16 @@
         <res-sharing-scope>Unshareable</res-sharing-scope>
     </resource-ref>
 
+
+    <!--<filter>-->
+        <!--<filter-name>springSecurityFilterChain</filter-name>-->
+        <!--<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>-->
+    <!--</filter>-->
+    <!--<filter-mapping>-->
+        <!--<filter-name>springSecurityFilterChain</filter-name>-->
+        <!--<url-pattern>/*</url-pattern>-->
+    <!--</filter-mapping>-->
+
     <!-- ECAS security -->
     <!-- Here we specify which URLs are protected by ECAS and which application server role is used. -->
     <security-constraint>

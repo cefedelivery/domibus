@@ -9,8 +9,10 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +28,9 @@ public class AuthenticationService {
 
     public static final String SUSPENDED = "Suspended";
 
-    @Autowired
-    @Qualifier("authenticationManagerForAdminConsole")
-    private AuthenticationManager authenticationManager;
+//    @Autowired
+//    @Qualifier("authenticationManagerForAdminConsole")
+//    private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserService userService;
@@ -42,7 +44,7 @@ public class AuthenticationService {
         UserDetail principal = null;
         Authentication authentication = null;
         try {
-            authentication = authenticationManager.authenticate(authenticationToken);
+            //authentication = authenticationManager.authenticate(authenticationToken);
             principal = (UserDetail) authentication.getPrincipal();
             userService.validateExpiredPassword(username);
             userService.handleCorrectAuthentication(username);

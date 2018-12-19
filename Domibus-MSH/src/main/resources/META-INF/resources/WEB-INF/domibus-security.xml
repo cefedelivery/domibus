@@ -11,15 +11,22 @@
 
     <bean name="userDetailService"
           class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>
+
+    <!--
     <sec:authentication-manager>
         <sec:authentication-provider ref="allowAllAuthenticationProvider"/>
-    </sec:authentication-manager>
+    </sec:authentication-manager>-->
 
+    <!--
     <sec:authentication-manager id="authenticationManagerForAdminConsole">
         <sec:authentication-provider user-service-ref="userDetailService">
             <sec:password-encoder ref="bcryptEncoder"/>
         </sec:authentication-provider>
-    </sec:authentication-manager>
+    </sec:authentication-manager>-->
+
+    <!--<sec:authentication-manager id="authenticationManagerECAS">
+        <sec:authentication-provider user-service-ref="userDetailsServiceECAS"/>
+    </sec:authentication-manager>-->
 
     <sec:global-method-security pre-post-annotations="enabled"/>
 

@@ -45,7 +45,6 @@
         </dependency>
         <!-- End Domibus modules -->
 
-
         <dependency>
             <groupId>org.glassfish.main.javaee-api</groupId>
             <artifactId>javax.jws</artifactId>

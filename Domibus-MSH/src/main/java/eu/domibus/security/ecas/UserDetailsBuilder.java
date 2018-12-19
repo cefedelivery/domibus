@@ -22,7 +22,7 @@
  * DAMAGE.
  */
 
-package eu.domibus.weblogic.ecas;
+package eu.domibus.security.ecas;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
