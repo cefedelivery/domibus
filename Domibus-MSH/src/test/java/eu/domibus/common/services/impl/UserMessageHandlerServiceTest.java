@@ -21,12 +21,14 @@ import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
+import eu.domibus.util.MessageUtil;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -138,6 +140,9 @@ public class UserMessageHandlerServiceTest {
     @Injectable
     protected UIReplicationSignalService uiReplicationSignalService;
 
+    @Injectable
+    protected MessageUtil messageUtil;
+
 
     private static final String TEST_RESOURCES_DIR = "./src/test/resources";
     private static final String VALID_PMODE_CONFIG_URI = "samplePModes/domibus-configuration-valid.xml";
@@ -230,7 +235,7 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_tc1Process_HappyFlow(@Injectable final BackendFilter matchingBackendFilter)
+    public void testInvoke_tc1Process_HappyFlow(@Injectable final BackendFilter matchingBackendFilter, @Injectable MessageFragmentType messageFragment)
             throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -272,14 +277,14 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, false);
         }};
     }
 
     @Test
-    public void testInvoke_tc1Process_SelfSending_HappyFlow(@Injectable final BackendFilter matchingBackendFilter)
+    public void testInvoke_tc1Process_SelfSending_HappyFlow(@Injectable final BackendFilter matchingBackendFilter, @Injectable MessageFragmentType messageFragment)
             throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -322,7 +327,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, anyString);
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             boolean selfSendingFlagActual;
             userMessageHandlerService.generateReceipt(withAny(soapRequestMessage), messaging, legConfiguration, anyBoolean, selfSendingFlagActual = withCapture());
@@ -331,7 +336,11 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_TestMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
+    public void testInvoke_TestMessage(@Injectable final BackendFilter matchingBackendFilter,
+                                       @Injectable final LegConfiguration legConfiguration,
+                                       @Injectable final Messaging messaging,
+                                       @Injectable final UserMessage userMessage,
+                                       @Injectable MessageFragmentType messageFragment) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
@@ -367,7 +376,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, anyString);
             times = 1;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
@@ -424,7 +433,8 @@ public class UserMessageHandlerServiceTest {
     @Test
     public void testPersistReceivedMessage_HappyFlow(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging,
                                                      @Injectable final UserMessage userMessage, @Injectable final Party receiverParty,
-                                                     @Injectable final UserMessageLog userMessageLog)
+                                                     @Injectable final UserMessageLog userMessageLog,
+                                                     @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
         final String messageId = "TestMessageId123";
@@ -443,7 +453,7 @@ public class UserMessageHandlerServiceTest {
             result = messageId;
 
         }};
-        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
+        userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
 
         new Verifications() {{
             userMessageHandlerService.handlePayloads(soapRequestMessage, userMessage);
@@ -509,8 +519,11 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testPersistReceivedMessage_ValidationException(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging,
-                                                               @Injectable final UserMessage userMessage, @Injectable final UserMessageLog userMessageLog)
+    public void testPersistReceivedMessage_ValidationException(@Injectable final LegConfiguration legConfiguration,
+                                                               @Injectable final Messaging messaging,
+                                                               @Injectable final UserMessage userMessage,
+                                                               @Injectable final UserMessageLog userMessageLog,
+                                                               @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -526,7 +539,7 @@ public class UserMessageHandlerServiceTest {
         }};
 
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
         } catch (Exception e) {
             Assert.assertTrue("Expecting Ebms3 exception", e instanceof EbMS3Exception);
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ((EbMS3Exception) e).getErrorCode());
@@ -606,9 +619,9 @@ public class UserMessageHandlerServiceTest {
 
         final Messaging responseMessaging = createValidSampleResponseMessaging();
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
-        new Expectations(userMessageHandlerService) {{
+        new Expectations() {{
 
-            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
+            messageUtil.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -633,7 +646,7 @@ public class UserMessageHandlerServiceTest {
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
         new Expectations(userMessageHandlerService) {{
 
-            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
+            messageUtil.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId() + UserMessageHandlerService.SELF_SENDING_SUFFIX);
@@ -691,7 +704,7 @@ public class UserMessageHandlerServiceTest {
         final SignalMessage responseSignalMessage = responseMessaging.getSignalMessage();
         new Expectations(userMessageHandlerService) {{
 
-            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
+            messageUtil.getMessaging(withAny(soapRequestMessage));
             result = responseMessaging;
 
             messagingDao.findMessageByMessageId(responseSignalMessage.getMessageInfo().getRefToMessageId());
@@ -719,9 +732,12 @@ public class UserMessageHandlerServiceTest {
 
 
     @Test
-    public void testPersistReceivedMessage_CompressionError(@Injectable final LegConfiguration legConfiguration, @Injectable final Messaging messaging,
-                                                            @Injectable final UserMessage userMessage, @Injectable final Party receiverParty,
-                                                            @Injectable final UserMessageLog userMessageLog)
+    public void testPersistReceivedMessage_CompressionError(@Injectable final LegConfiguration legConfiguration,
+                                                            @Injectable final Messaging messaging,
+                                                            @Injectable final UserMessage userMessage,
+                                                            @Injectable final Party receiverParty,
+                                                            @Injectable final UserMessageLog userMessageLog,
+                                                            @Injectable MessageFragmentType messageFragment)
             throws EbMS3Exception, TransformerException, SOAPException, JAXBException {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -739,7 +755,7 @@ public class UserMessageHandlerServiceTest {
             result = "TestMessageId123";
         }};
         try {
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, "");
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, "");
             Assert.fail("Exception for compression failure expected!");
         } catch (EbMS3Exception e) {
             Assert.assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0303, e.getErrorCode());
@@ -907,8 +923,11 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_DuplicateMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration,
-                                            @Injectable final Messaging messaging, @Injectable final UserMessage userMessage)
+    public void testInvoke_DuplicateMessage(@Injectable final BackendFilter matchingBackendFilter,
+                                            @Injectable final LegConfiguration legConfiguration,
+                                            @Injectable final Messaging messaging,
+                                            @Injectable final UserMessage userMessage,
+                                            @Injectable MessageFragmentType messageFragment)
             throws SOAPException, JAXBException, EbMS3Exception, TransformerException, IOException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
@@ -946,7 +965,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkCharset(messaging);
             userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
             userMessageHandlerService.checkDuplicate(messaging);
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, anyString);
             times = 0;
             backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
             times = 0;
@@ -957,8 +976,11 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final BackendFilter matchingBackendFilter, @Injectable final LegConfiguration legConfiguration,
-                                                           @Injectable final Messaging messaging, @Injectable final UserMessage userMessage) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
+    public void testInvoke_ErrorInNotifyingIncomingMessage(@Injectable final BackendFilter matchingBackendFilter,
+                                                           @Injectable final LegConfiguration legConfiguration,
+                                                           @Injectable final Messaging messaging,
+                                                           @Injectable final UserMessage userMessage,
+                                                           @Injectable MessageFragmentType messageFragment) throws SOAPException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, JAXBException, EbMS3Exception, TransformerException {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -979,7 +1001,7 @@ public class UserMessageHandlerServiceTest {
             userMessageHandlerService.checkDuplicate(withAny(messaging));
             result = false;
 
-            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, anyString);
+            userMessageHandlerService.persistReceivedMessage(soapRequestMessage, legConfiguration, pmodeKey, messaging, messageFragment, anyString);
             result = any;
 
             userMessageHandlerService.checkSelfSending(pmodeKey);
@@ -1028,7 +1050,7 @@ public class UserMessageHandlerServiceTest {
             result = JAXBContext.newInstance(Messaging.class).createUnmarshaller();
         }};
 
-        Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), userMessageHandlerService.getMessaging(soapRequestMessage));
+        Assert.assertEquals(JAXBContext.newInstance(Messaging.class).createUnmarshaller().unmarshal(messagingNode, Messaging.class).getValue(), messageUtil.getMessaging(soapRequestMessage));
     }
 
     @Test

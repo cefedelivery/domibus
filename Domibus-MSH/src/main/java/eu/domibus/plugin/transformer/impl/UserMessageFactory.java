@@ -9,7 +9,7 @@ import eu.domibus.ebms3.common.model.UserMessage;
  */
 public interface UserMessageFactory {
 
-    UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, int fragmentNumber, String fragmentFile);
+    UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, Long fragmentNumber, String fragmentFile);
 
     UserMessage cloneUserMessageFragment(UserMessage sourceMessage);
 

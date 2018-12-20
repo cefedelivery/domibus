@@ -18,7 +18,7 @@ public class MessageFragmentEntity extends AbstractBaseEntity {
     protected String groupId;
 
     @Column(name = "FRAGMENT_NUMBER")
-    protected Integer fragmentNumber;
+    protected Long fragmentNumber;
 
     public String getGroupId() {
         return groupId;
@@ -28,11 +28,11 @@ public class MessageFragmentEntity extends AbstractBaseEntity {
         this.groupId = groupId;
     }
 
-    public Integer getFragmentNumber() {
+    public Long getFragmentNumber() {
         return fragmentNumber;
     }
 
-    public void setFragmentNumber(Integer fragmentNumber) {
+    public void setFragmentNumber(Long fragmentNumber) {
         this.fragmentNumber = fragmentNumber;
     }
 }

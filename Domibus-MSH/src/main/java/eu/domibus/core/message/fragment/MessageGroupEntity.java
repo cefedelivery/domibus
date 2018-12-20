@@ -41,6 +41,9 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     protected MessageHeaderEntity messageHeaderEntity;
 
+    @Column(name = "REJECTED")
+    protected Boolean rejected;
+
     public String getGroupId() {
         return groupId;
     }
@@ -57,11 +60,11 @@ public class MessageGroupEntity extends AbstractBaseEntity {
         this.messageSize = messageSize;
     }
 
-    public long getFragmentCount() {
+    public Long getFragmentCount() {
         return fragmentCount;
     }
 
-    public void setFragmentCount(long fragmentCount) {
+    public void setFragmentCount(Long fragmentCount) {
         this.fragmentCount = fragmentCount;
     }
 
@@ -103,5 +106,13 @@ public class MessageGroupEntity extends AbstractBaseEntity {
 
     public void setSourceMessageId(String sourceMessageId) {
         this.sourceMessageId = sourceMessageId;
+    }
+
+    public Boolean getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(Boolean rejected) {
+        this.rejected = rejected;
     }
 }

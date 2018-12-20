@@ -21,6 +21,7 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -128,10 +129,14 @@ public class MessagingServiceImpl implements MessagingService {
             partInfo.setLength(binaryData.length);
             partInfo.setFileName(null);
         } else {
-            final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
-            partInfo.setFileName(attachmentStore.getAbsolutePath());
-            final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
-            partInfo.setLength(fileLength);
+            final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
+            userMessage.setSplitAndJoin(mayUseSplitAndJoin);
+            if (StringUtils.isBlank(partInfo.getFileName())) {
+                final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
+                partInfo.setFileName(attachmentStore.getAbsolutePath());
+                final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);
+                partInfo.setLength(fileLength);
+            }
         }
 
         LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED_PAYLOAD_SIZE, partInfo.getHref(), messageId, partInfo.getLength());
@@ -172,17 +177,12 @@ public class MessagingServiceImpl implements MessagingService {
     protected long saveOutgoingFileToDisk(File file, PartInfo partInfo, InputStream is, UserMessage userMessage, final LegConfiguration legConfiguration) throws IOException, EbMS3Exception {
         OutputStream fileOutputStream = new FileOutputStream(file);
 
-        final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
-        if (!mayUseSplitAndJoin) {
-            boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
-            LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
+        boolean useCompression = compressionService.handleCompression(userMessage.getMessageInfo().getMessageId(), partInfo, legConfiguration);
+        LOG.debug("Compression for message with id: [{}] applied: [{}]", userMessage.getMessageInfo().getMessageId(), useCompression);
 
-            if (useCompression) {
-                LOG.debug("Using compression for storing the file [{}]", file);
-                fileOutputStream = new GZIPOutputStream(fileOutputStream);
-            }
-        } else {
-            userMessage.setSplitAndJoin(true);
+        if (useCompression) {
+            LOG.debug("Using compression for storing the file [{}]", file);
+            fileOutputStream = new GZIPOutputStream(fileOutputStream);
         }
 
         final long total = IOUtils.copyLarge(is, fileOutputStream);

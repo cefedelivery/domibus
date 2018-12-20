@@ -7,6 +7,7 @@ import eu.domibus.ebms3.common.model.*;
 import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
 
 
     @Override
-    public UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, int fragmentNumber, String fragmentFile) {
+    public UserMessage createUserMessageFragment(UserMessage sourceMessage, MessageGroupEntity messageGroupEntity, Long fragmentNumber, String fragmentFile) {
         UserMessage result = new UserMessage();
         result.setSplitAndJoin(true);
         String messageId = sourceMessage.getMessageInfo().getMessageId() + "_" + fragmentNumber;
@@ -47,20 +48,22 @@ public class UserMessageDefaultFactory implements UserMessageFactory {
         return result;
     }
 
-    protected MessageFragmentEntity createMessageFragmentEntity(MessageGroupEntity messageGroupEntity, int fragmentNumber) {
+    protected MessageFragmentEntity createMessageFragmentEntity(MessageGroupEntity messageGroupEntity, Long fragmentNumber) {
         MessageFragmentEntity result = new MessageFragmentEntity();
         result.setFragmentNumber(fragmentNumber);
         result.setGroupId(messageGroupEntity.getGroupId());
         return result;
     }
 
-    protected PayloadInfo createPayloadInfo(String fragmentFile, int fragmentNumber) {
+    protected PayloadInfo createPayloadInfo(String fragmentFile, Long fragmentNumber) {
         final PayloadInfo payloadInfo = new PayloadInfo();
 
         final PartInfo partInfo = new PartInfo();
         partInfo.setInBody(false);
         partInfo.setPayloadDatahandler(new DataHandler(new AutoCloseFileDataSource(fragmentFile)));
         partInfo.setHref("cid:fragment" + fragmentNumber);
+        partInfo.setFileName(fragmentFile);
+        partInfo.setLength(new File(fragmentFile).length());
         final PartProperties partProperties = new PartProperties();
         final Property property = new Property();
         property.setName(Property.MIME_TYPE);

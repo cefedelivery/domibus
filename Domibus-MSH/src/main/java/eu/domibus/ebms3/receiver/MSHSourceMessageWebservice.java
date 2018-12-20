@@ -28,11 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.message.Message;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.jws.WebMethod;
 import javax.jws.WebResult;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -60,10 +58,6 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     @Autowired
     protected MessageFactory messageFactory;
 
-    @Qualifier("jaxbContextEBMS")
-    @Autowired
-    protected JAXBContext jaxbContext;
-
     @Autowired
     protected PModeProvider pModeProvider;
 
@@ -72,6 +66,10 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
 
     @Autowired
     StorageProvider storageProvider;
+
+
+    @Autowired
+    protected MessageUtil messageUtil;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -91,7 +89,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         Messaging messaging = null;
         UserMessage userMessage = null;
         try {
-            messaging = MessageUtil.getMessaging(request, jaxbContext);
+            messaging = messageUtil.getMessaging(request);
             userMessage = messaging.getUserMessage();
         } catch (SOAPException | JAXBException e) {
             LOG.error("Could not parse Messaging from message", e);
@@ -157,8 +155,6 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             try {
                 final String fragmentFile = fragmentFiles.get(index);
                 createMessagingForFragment(userMessage, messageGroupEntity, backendName, fragmentFile, index + 1);
-                LOG.debug("Deleting fragment file [{}]", fragmentFile);
-                new File(fragmentFile).delete();
             } catch (MessagingProcessingException e) {
                 LOG.error("Could not create messagin for fragment [{}]", index);
                 throw new WebServiceException(e);
@@ -180,7 +176,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected void createMessagingForFragment(UserMessage userMessage, MessageGroupEntity messageGroupEntity, String backendName, String fragmentFile, int index) throws MessagingProcessingException {
-        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, index, fragmentFile);
+        final UserMessage userMessageFragment = userMessageFactory.createUserMessageFragment(userMessage, messageGroupEntity, Long.valueOf(index), fragmentFile);
         databaseMessageHandler.submitMessageFragment(userMessageFragment, backendName);
     }
 

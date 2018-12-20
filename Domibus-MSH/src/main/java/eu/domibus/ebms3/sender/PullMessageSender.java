@@ -14,8 +14,8 @@ import eu.domibus.common.services.impl.PullContext;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullReceiptSender;
-import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.common.model.Error;
+import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -55,14 +54,13 @@ public class PullMessageSender {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(PullMessageSender.class);
 
     @Autowired
+    protected MessageUtil messageUtil;
+
+    @Autowired
     private MSHDispatcher mshDispatcher;
 
     @Autowired
     private EbMS3MessageBuilder messageBuilder;
-
-    @Qualifier("jaxbContextEBMS")
-    @Autowired
-    private JAXBContext jaxbContext;
 
     @Autowired
     private UserMessageHandlerService userMessageHandlerService;
@@ -124,7 +122,7 @@ public class PullMessageSender {
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
             LOG.trace("Send soap message");
             final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
-            messaging = MessageUtil.getMessage(response, jaxbContext);
+            messaging = messageUtil.getMessage(response);
             if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
                 LOG.trace("No message for sent pull request with mpc:[{}]", mpc);
                 logError(signalMessage);
@@ -149,7 +147,7 @@ public class PullMessageSender {
              * Ideally the message id should be committed to a queue and the sending of the receipt executed in another process.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId,domainCode));
+                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId, domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

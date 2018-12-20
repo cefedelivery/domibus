@@ -10,9 +10,7 @@
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
 
-    <bean id="mshWebservice" class="eu.domibus.ebms3.receiver.MSHWebservice">
-        <property name="jaxbContext" ref="jaxbContextEBMS"/>
-    </bean>
+    <bean id="mshWebservice" class="eu.domibus.ebms3.receiver.MSHWebservice"/>
     <bean id="mshWebserviceSerializer" class="eu.domibus.ebms3.receiver.MSHSourceMessageWebservice"/>
 
     <cxf:bus>

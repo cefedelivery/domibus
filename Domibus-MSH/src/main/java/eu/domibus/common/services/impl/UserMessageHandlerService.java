@@ -18,10 +18,16 @@ import eu.domibus.common.model.logging.SignalMessageLogBuilder;
 import eu.domibus.common.services.MessagingService;
 import eu.domibus.common.validators.PayloadProfileValidator;
 import eu.domibus.common.validators.PropertyProfileValidator;
+import eu.domibus.core.message.fragment.MessageFragmentEntity;
+import eu.domibus.core.message.fragment.MessageGroupDao;
+import eu.domibus.core.message.fragment.MessageGroupEntity;
+import eu.domibus.core.message.fragment.MessageHeaderEntity;
 import eu.domibus.core.nonrepudiation.NonRepudiationService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.replication.UIReplicationSignalService;
 import eu.domibus.ebms3.common.model.*;
+import eu.domibus.ebms3.common.model.mf.MessageFragmentType;
+import eu.domibus.ebms3.common.model.mf.MessageHeaderType;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
 import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
@@ -36,14 +42,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
@@ -52,7 +55,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Thomas Dussart
@@ -118,9 +120,6 @@ public class UserMessageHandlerService {
     @Autowired
     private SignalMessageLogDao signalMessageLogDao;
 
-    @Qualifier("jaxbContextEBMS")
-    @Autowired
-    protected JAXBContext jaxbContext;
 
     @Autowired
     protected NonRepudiationService nonRepudiationService;
@@ -131,14 +130,61 @@ public class UserMessageHandlerService {
     @Autowired
     protected RawEnvelopeLogDao rawEnvelopeLogDao;
 
+    @Autowired
+    protected MessageUtil messageUtil;
+
+    @Autowired
+    protected MessageGroupDao messageGroupDao;
+
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         userMessageHandlerContext.setLegConfiguration(legConfiguration);
-        String messageId;
-        try (StringWriter sw = new StringWriter()) {
-            if (LOG.isDebugEnabled()) {
 
+        logMessage(request);
+
+        //check if the message is sent to the same Domibus instance
+        final boolean selfSendingFlag = checkSelfSending(pmodeKey);
+        if (selfSendingFlag) {
+                /* we add a defined suffix in order to assure DB integrity - messageId uniqueness
+                basically we are generating another messageId for Signal Message on receiver side
+                */
+            messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
+        }
+
+        String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+        userMessageHandlerContext.setMessageId(messageId);
+
+        checkCharset(messaging);
+        boolean testMessage = checkTestMessage(messaging.getUserMessage());
+        userMessageHandlerContext.setTestMessage(testMessage);
+        final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
+        LOG.debug("Message duplication status:{}", messageExists);
+        if (!messageExists) {
+            if (testMessage) {
+                // ping messages are only stored and not notified to the plugins
+                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, null, null);
+            } else {
+                final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
+                String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
+
+                MessageFragmentType messageFragmentType = messageUtil.getMessageFragment(request);
+                persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName);
+                try {
+                    backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
+                } catch (SubmissionValidationException e) {
+                    LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
+                    throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                }
+            }
+        }
+        return generateReceipt(request, messaging, legConfiguration, messageExists, selfSendingFlag);
+
+    }
+
+    protected void logMessage(SOAPMessage request) throws IOException, TransformerException {
+        if (LOG.isDebugEnabled()) {
+            try (StringWriter sw = new StringWriter()) {
                 transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
                 LOG.debug(sw.toString());
@@ -148,41 +194,6 @@ public class UserMessageHandlerService {
                     LOG.debug("attachment: {}", i.next());
                 }
             }
-
-            //check if the message is sent to the same Domibus instance
-            final boolean selfSendingFlag = checkSelfSending(pmodeKey);
-            if (selfSendingFlag) {
-                /* we add a defined suffix in order to assure DB integrity - messageId uniqueness
-                basically we are generating another messageId for Signal Message on receiver side
-                */
-                messaging.getUserMessage().getMessageInfo().setMessageId(messaging.getUserMessage().getMessageInfo().getMessageId() + SELF_SENDING_SUFFIX);
-            }
-
-            messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-            userMessageHandlerContext.setMessageId(messageId);
-
-            checkCharset(messaging);
-            boolean testMessage = checkTestMessage(messaging.getUserMessage());
-            userMessageHandlerContext.setTestMessage(testMessage);
-            final boolean messageExists = legConfiguration.getReceptionAwareness().getDuplicateDetection() && this.checkDuplicate(messaging);
-            LOG.debug("Message duplication status:{}", messageExists);
-            if (!messageExists) {
-                if (testMessage) {
-                    // ping messages are only stored and not notified to the plugins
-                    persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, null);
-                } else {
-                    final BackendFilter matchingBackendFilter = backendNotificationService.getMatchingBackendFilter(messaging.getUserMessage());
-                    String backendName = (matchingBackendFilter != null ? matchingBackendFilter.getBackendName() : null);
-                    persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, backendName);
-                    try {
-                        backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
-                    } catch (SubmissionValidationException e) {
-                        LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
-                        throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
-                    }
-                }
-            }
-            return generateReceipt(request, messaging, legConfiguration, messageExists, selfSendingFlag);
         }
     }
 
@@ -213,7 +224,13 @@ public class UserMessageHandlerService {
      */
     protected void checkCharset(final Messaging messaging) throws EbMS3Exception {
         LOG.debug("Checking charset for attachments");
-        for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
+        final PayloadInfo payloadInfo = messaging.getUserMessage().getPayloadInfo();
+        if (payloadInfo == null) {
+            LOG.debug("No partInfo found");
+            return;
+        }
+
+        for (final PartInfo partInfo : payloadInfo.getPartInfo()) {
             if (partInfo.getPartProperties() == null || partInfo.getPartProperties().getProperties() == null) {
                 continue;
             }
@@ -271,9 +288,13 @@ public class UserMessageHandlerService {
      * @throws EbMS3Exception
      */
     //TODO: improve error handling
-    String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
+    protected String persistReceivedMessage(final SOAPMessage request, final LegConfiguration legConfiguration, final String pmodeKey, final Messaging messaging, MessageFragmentType messageFragmentType, final String backendName) throws SOAPException, TransformerException, EbMS3Exception {
         LOG.info("Persisting received message");
         UserMessage userMessage = messaging.getUserMessage();
+
+        if (messageFragmentType != null) {
+            handleMessageFragment(messaging.getUserMessage(), messageFragmentType);
+        }
 
         handlePayloads(request, userMessage);
 
@@ -322,18 +343,79 @@ public class UserMessageHandlerService {
         return userMessage.getMessageInfo().getMessageId();
     }
 
+    protected void handleMessageFragment(UserMessage userMessage, MessageFragmentType messageFragmentType) throws EbMS3Exception {
+        validateUserMessageFragment(userMessage, messageFragmentType);
+        addPartInfoFromFragment(userMessage, messageFragmentType);
+    }
+
+    protected void validateUserMessageFragment(UserMessage userMessage, MessageFragmentType messageFragmentType) throws EbMS3Exception {
+        final String groupId = messageFragmentType.getGroupId();
+        MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
+        if (messageGroupEntity != null) {
+            if (messageGroupEntity.getRejected()) {
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0040, "A fragment is received that relates to a group that was previously rejected", userMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+            }
+            final Long fragmentCount = messageGroupEntity.getFragmentCount();
+            if (fragmentCount != null && messageFragmentType.getFragmentCount() != null && messageFragmentType.getFragmentCount() > fragmentCount) {
+                EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0048, "An incoming message fragment has a a value greater than the known FragmentCount", userMessage.getMessageInfo().getMessageId(), null);
+                ex.setMshRole(MSHRole.RECEIVING);
+                throw ex;
+            }
+        } else {
+            messageGroupEntity = new MessageGroupEntity();
+            MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
+            final MessageHeaderType messageHeader = messageFragmentType.getMessageHeader();
+            messageHeaderEntity.setStart(messageHeader.getStart());
+            messageHeaderEntity.setBoundary(messageHeader.getBoundary());
+            messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
+            messageGroupEntity.setSoapAction(messageFragmentType.getAction());
+            messageGroupEntity.setCompressionAlgorithm(messageFragmentType.getCompressionAlgorithm());
+            messageGroupEntity.setMessageSize(messageFragmentType.getMessageSize());
+            messageGroupEntity.setCompressedMessageSize(messageFragmentType.getCompressedMessageSize());
+            messageGroupEntity.setGroupId(messageFragmentType.getGroupId());
+            messageGroupEntity.setFragmentCount(messageFragmentType.getFragmentCount());
+            messageGroupDao.create(messageGroupEntity);
+        }
+
+        MessageFragmentEntity messageFragmentEntity = new MessageFragmentEntity();
+        messageFragmentEntity.setGroupId(groupId);
+        messageFragmentEntity.setFragmentNumber(messageFragmentType.getFragmentNum());
+        userMessage.setMessageFragment(messageFragmentEntity);
+
+        if(messageFragmentEntity.getFragmentNumber() == messageGroupEntity.getFragmentCount()) {
+            //reassemble the source message fragments
+            // create source UserMessage
+            //deliver to the backend
+        }
+    }
+
+    protected void addPartInfoFromFragment(UserMessage userMessage, final MessageFragmentType messageFragment) {
+        if (messageFragment == null) {
+            LOG.debug("No message fragment found");
+            return;
+        }
+        PartInfo partInfo = new PartInfo();
+        partInfo.setHref(messageFragment.getHref());
+        PayloadInfo payloadInfo = new PayloadInfo();
+        payloadInfo.getPartInfo().add(partInfo);
+        userMessage.setPayloadInfo(payloadInfo);
+
+    }
+
     /**
      * If message with same messageId is already in the database return <code>true</code> else <code>false</code>
      *
      * @param messaging the message
      * @return result of duplicate handle
      */
-    Boolean checkDuplicate(final Messaging messaging) {
+    protected Boolean checkDuplicate(final Messaging messaging) {
         LOG.debug("Checking for duplicate messages");
         return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
     }
 
-    void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
+    protected void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
         boolean bodyloadFound = false;
         for (final PartInfo partInfo : userMessage.getPayloadInfo().getPartInfo()) {
             final String cid = partInfo.getHref();
@@ -469,7 +551,7 @@ public class UserMessageHandlerService {
 
     protected void setMessagingId(SOAPMessage responseMessage, UserMessage userMessage) throws SOAPException {
         final Iterator childElements = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
-        if(childElements == null || !childElements.hasNext()) {
+        if (childElements == null || !childElements.hasNext()) {
             LOG.warn("Could not set the Messaging Id value");
             return;
         }
@@ -499,7 +581,7 @@ public class UserMessageHandlerService {
      */
     void saveResponse(final SOAPMessage responseMessage, boolean selfSendingFlag) {
         try {
-            Messaging messaging = getMessaging(responseMessage);
+            Messaging messaging = messageUtil.getMessaging(responseMessage);
             final SignalMessage signalMessage = messaging.getSignalMessage();
 
             if (selfSendingFlag) {
@@ -549,10 +631,4 @@ public class UserMessageHandlerService {
         }
         return as4ReceiptXslBytes;
     }
-
-    public Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        LOG.debug("Unmarshalling the Messaging instance from the request");
-        return MessageUtil.getMessaging(request, jaxbContext);
-    }
-
 }

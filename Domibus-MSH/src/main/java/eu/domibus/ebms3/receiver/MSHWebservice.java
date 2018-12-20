@@ -29,6 +29,7 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
+import eu.domibus.util.MessageUtil;
 import eu.domibus.util.SoapUtil;
 import org.apache.cxf.interceptor.Fault;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
@@ -69,8 +69,6 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private MessagingDao messagingDao;
 
-    private JAXBContext jaxbContext;
-
     @Autowired
     private PModeProvider pModeProvider;
 
@@ -101,18 +99,15 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     @Autowired
     private PullMessageService pullMessageService;
 
-    public void setJaxbContext(final JAXBContext jaxbContext) {
-        this.jaxbContext = jaxbContext;
-    }
+    @Autowired
+    protected MessageUtil messageUtil;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
     public SOAPMessage invoke(final SOAPMessage request) {
-
         SOAPMessage responseMessage = null;
-        Messaging messaging;
-        messaging = getMessage(request);
-        UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+        Messaging messaging = getMessage(request);
+
         LOG.trace("Message received");
         if (messaging.getSignalMessage() != null) {
             if (messaging.getSignalMessage().getPullRequest() != null) {
@@ -136,6 +131,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
                 assert false;
             }
+            UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
             try {
                 LOG.info("Using pmodeKey {}", pmodeKey);
                 responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
@@ -241,18 +237,11 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     private Messaging getMessage(SOAPMessage request) {
         Messaging messaging;
         try {
-            messaging = getMessaging(request);
+            messaging = messageUtil.getMessaging(request);
         } catch (SOAPException | JAXBException e) {
             throw new MessagingException(DomibusCoreErrorCode.DOM_001, "Problems getting message", e);
         }
         return messaging;
     }
-
-
-    protected Messaging getMessaging(final SOAPMessage request) throws SOAPException, JAXBException {
-        LOG.trace("Unmarshalling the Messaging instance from the request");
-        return userMessageHandlerService.getMessaging(request);
-    }
-
 
 }

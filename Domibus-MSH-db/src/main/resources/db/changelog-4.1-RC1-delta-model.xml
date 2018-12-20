@@ -118,6 +118,7 @@
             <column name="COMPRESSED_MESSAGE_SIZE" type="INT"/>
             <column name="SOAP_ACTION" type="VARCHAR(255)"/>
             <column name="FK_MESSAGE_HEADER_ID" type="INT"/>
+            <column name="REJECTED" type="BOOLEAN"/>
         </createTable>
         <createIndex indexName="FK_MG_MH" tableName="TB_MESSAGE_GROUP">
             <column name="FK_MESSAGE_HEADER_ID"/>

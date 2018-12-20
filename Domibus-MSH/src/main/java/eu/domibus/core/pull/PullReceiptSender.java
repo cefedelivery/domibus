@@ -13,12 +13,10 @@ import eu.domibus.util.MessageUtil;
 import org.apache.neethi.Policy;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.soap.SOAPMessage;
 import java.util.Optional;
 import java.util.Set;
@@ -31,9 +29,8 @@ public class PullReceiptSender {
     @Autowired
     private MSHDispatcher mshDispatcher;
 
-    @Qualifier("jaxbContextEBMS")
     @Autowired
-    private JAXBContext jaxbContext;
+    protected MessageUtil messageUtil;
 
     @Autowired
     private DomainContextProvider domainContextProvider;
@@ -54,7 +51,7 @@ public class PullReceiptSender {
 
     private void handleDispatchReceiptResult(SOAPMessage acknowledgementResult) throws EbMS3Exception {
         if (acknowledgementResult != null) {
-            Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
+            Messaging errorMessage = messageUtil.getMessage(acknowledgementResult);
             Set<Error> errors = errorMessage.getSignalMessage().getError();
             Optional<Error> firstError = errors.stream().findFirst();
             if(firstError.isPresent()) {

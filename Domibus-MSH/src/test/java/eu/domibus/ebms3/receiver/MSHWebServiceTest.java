@@ -36,6 +36,7 @@ import eu.domibus.ebms3.sender.ResponseHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
+import eu.domibus.util.MessageUtil;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.commons.lang3.StringUtils;
@@ -161,6 +162,9 @@ public class MSHWebServiceTest {
     @Injectable
     PullMessageService pullMessageService;
 
+    @Injectable
+    MessageUtil messageUtil;
+
 
 
     /**
@@ -185,7 +189,7 @@ public class MSHWebServiceTest {
             soapRequestMessage.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
             result = pmodeKey;
 
-            mshWebservice.getMessaging(withAny(soapRequestMessage));
+            messageUtil.getMessaging(withAny(soapRequestMessage));
             result = messaging;
 
             messaging.getSignalMessage();
@@ -221,7 +225,7 @@ public class MSHWebServiceTest {
 
         new Expectations(mshWebservice) {{
 
-            userMessageHandlerService.getMessaging(withAny(soapRequestMessage));
+            messageUtil.getMessaging(withAny(soapRequestMessage));
             result = messaging;
 
             messaging.getSignalMessage();
