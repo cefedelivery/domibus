@@ -1,6 +1,6 @@
 embed-server --server-config=${SERVER_CONFIG}
 
-module add --name=com.mysql --resources=${JDBC_DRIVER_DIR}/${JDBC_DRIVER_NAME} --dependencies=javax.api,javax.transaction.api
+module add --name=com.mysql --resources=${JDBC_DRIVER_DIR}/${JDBC_DRIVER_NAME} --dependencies=javax.api,javax.transaction.api --allow-nonexistent-resources
 /subsystem=datasources/jdbc-driver=com.mysql:add(driver-name="com.mysql", driver-module-name="com.mysql", driver-xa-datasource-class-name=com.mysql.jdbc.jdbc2.optional.MysqlXADataSource)
 
 xa-data-source add \
