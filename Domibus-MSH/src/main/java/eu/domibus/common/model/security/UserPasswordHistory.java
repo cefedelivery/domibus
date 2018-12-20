@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  */
 
 @MappedSuperclass
-public class UserPasswordHistory<U extends UserBase> extends AbstractBaseEntity {
+public class UserPasswordHistory<U extends UserEntityBase> extends AbstractBaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")

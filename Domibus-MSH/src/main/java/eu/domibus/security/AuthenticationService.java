@@ -39,28 +39,28 @@ public class AuthenticationService {
     @Transactional(noRollbackFor = AuthenticationException.class)
     public UserDetail authenticate(String username, String password, String domain) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        UserDetail principal = null;
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(authenticationToken);
-            principal = (UserDetail) authentication.getPrincipal();
+            //expired case doesn't get handled by the handleWrongAuthentication method.
             userService.validateExpiredPassword(username);
-            userService.handleCorrectAuthentication(username);
         } catch (CredentialsExpiredException ex) {
             LOG.trace("Caught CredentialsExpiredException: [{}]", ex);
             throw ex;
         } catch (AuthenticationException ae) {
             LOG.trace("Caught AuthenticationException: [{}]", ae.getClass().getName());
             UserLoginErrorReason userLoginErrorReason = userService.handleWrongAuthentication(username);
-            if (UserLoginErrorReason.INACTIVE.equals(userLoginErrorReason)) {
+            if (UserLoginErrorReason.INACTIVE == userLoginErrorReason) {
                 throw new DisabledException(INACTIVE, ae);
-            } else if (UserLoginErrorReason.SUSPENDED.equals(userLoginErrorReason)) {
+            } else if (UserLoginErrorReason.SUSPENDED == userLoginErrorReason) {
                 throw new LockedException(SUSPENDED, ae);
             }
             LOG.trace("AuthenticationException: {}", ae.getMessage());
             throw ae;
         }
 
+        userService.handleCorrectAuthentication(username);
+        UserDetail principal = (UserDetail) authentication.getPrincipal();
         principal.setDomain(domain);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return principal;

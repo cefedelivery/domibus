@@ -15,15 +15,14 @@ public class AccountDisabledModuleConfiguration extends AlertModuleConfiguration
 
     private AccountDisabledMoment accountDisabledMoment;
 
-    public AccountDisabledModuleConfiguration() {
-        super(AlertType.USER_ACCOUNT_DISABLED);
+    public AccountDisabledModuleConfiguration(AlertType alertType) {
+        super(alertType);
     }
 
-    public AccountDisabledModuleConfiguration(AlertLevel alertLevel, AccountDisabledMoment moment, String mailSubject) {
-        super(AlertType.USER_ACCOUNT_DISABLED, alertLevel, mailSubject);
+    public AccountDisabledModuleConfiguration(AlertType alertType, AlertLevel alertLevel, AccountDisabledMoment moment, String mailSubject) {
+        super(alertType, alertLevel, mailSubject);
         this.accountDisabledMoment = moment;
     }
-
 
     public Boolean shouldTriggerAccountDisabledAtEachLogin() {
         return isActive() && accountDisabledMoment == AccountDisabledMoment.AT_LOGON;

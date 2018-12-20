@@ -5,7 +5,7 @@ import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.security.PluginUserSecurityPolicyManager;
 import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.core.security.AuthenticationDAO;
 import eu.domibus.core.security.AuthenticationEntity;
@@ -49,7 +49,7 @@ public class PluginUserServiceImplTest {
     private DomainContextProvider domainProvider;
 
     @Injectable
-    private PluginUserPasswordManager passwordValidator;
+    private PluginUserSecurityPolicyManager passwordValidator;
 
     @Injectable
     DomibusPropertyProvider domibusPropertyProvider;
@@ -64,9 +64,9 @@ public class PluginUserServiceImplTest {
     @Test(expected = UserManagementException.class)
     public void testUpdateUsersWithDuplicateName() {
         AuthenticationEntity user1 = new AuthenticationEntity();
-        user1.setUsername("username1");
+        user1.setUserName("username1");
         AuthenticationEntity user2 = new AuthenticationEntity();
-        user2.setUsername("username1");
+        user2.setUserName("username1");
 
         List<AuthenticationEntity> addedUsers = Arrays.asList(new AuthenticationEntity[]{user1, user2});
         List<AuthenticationEntity> updatedUsers = new ArrayList();
