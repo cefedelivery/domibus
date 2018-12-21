@@ -93,11 +93,11 @@ public class SoapInterceptorTest {
 
     @Test
     public void testCreateSoapEnvelope() throws Exception {
-        InputStream rawInputStream = new FileInputStream(new File("c:/DEV/_work/test-e38f79d9-e3c9-4639-a08a-b8f782c99d44"));
+        InputStream rawInputStream = new FileInputStream(new File("c:/DEV/domibus-tomcat-4.0/domibus/files/temp/2133e4d5-2247-4727-a44a-f07ae8abdec0"));
         MessageImpl messageImpl = new MessageImpl();//"org.apache.cxf.binding.soap.SoapVersion" ->
         messageImpl.setContent(InputStream.class, rawInputStream);
         messageImpl.put(Message.CONTENT_TYPE,
-                "multipart/related; type=\"application/soap+xml\"; boundary=\"uuid:b5efe608-fa17-48cf-9ddd-e19022a3c3fc\"; start=\"<split.root.message@cxf.apache.org>\"; start-info=\"application/soap+xml\"");
+                "multipart/related; type=\"application/soap+xml\"; boundary=\"uuid:df560ff6-f165-4c38-8873-965a3caa48c7\"; start=\"<split.root.message@cxf.apache.org>\"; start-info=\"application/soap+xml\"");
         new AttachmentDeserializer(messageImpl).initializeAttachments();
         createSoapMessage(messageImpl);
 

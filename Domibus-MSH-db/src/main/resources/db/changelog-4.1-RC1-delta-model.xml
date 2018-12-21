@@ -109,9 +109,7 @@
             <column name="GROUP_ID" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="SOURCE_MESSAGE_ID" type="VARCHAR(255)"/>
             <column name="MESSAGE_SIZE" type="INT"/>
             <column name="FRAGMENT_COUNT" type="INT"/>
             <column name="COMPRESSION_ALGORITHM" type="VARCHAR(255)"/>

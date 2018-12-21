@@ -1,9 +1,9 @@
 package eu.domibus.core.message.fragment;
 
 import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.persistence.*;
-import java.math.BigInteger;
 
 /**
  * @author Cosmin Baciu
@@ -109,7 +109,7 @@ public class MessageGroupEntity extends AbstractBaseEntity {
     }
 
     public Boolean getRejected() {
-        return rejected;
+        return BooleanUtils.toBoolean(rejected);
     }
 
     public void setRejected(Boolean rejected) {

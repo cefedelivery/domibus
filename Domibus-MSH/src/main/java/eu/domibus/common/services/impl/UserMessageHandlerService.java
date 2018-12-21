@@ -5,6 +5,7 @@ import eu.domibus.api.message.MessageSubtype;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
 import eu.domibus.api.routing.BackendFilter;
+import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.*;
 import eu.domibus.common.dao.*;
 import eu.domibus.common.exception.CompressionException;
@@ -42,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 
 import javax.activation.DataHandler;
@@ -59,9 +61,10 @@ import java.util.Iterator;
 /**
  * @author Thomas Dussart
  * @author Catalin Enache
+ * @author Cosmin Baciu
  * @since 3.3
  */
-@org.springframework.stereotype.Service
+@Service
 public class UserMessageHandlerService {
 
     private static final String XSLT_GENERATE_AS4_RECEIPT_XSL = "xslt/GenerateAS4Receipt.xsl";
@@ -136,6 +139,9 @@ public class UserMessageHandlerService {
     @Autowired
     protected MessageGroupDao messageGroupDao;
 
+    @Autowired
+    protected UserMessageService userMessageService;
+
 
     public SOAPMessage handleNewUserMessage(final String pmodeKey, final SOAPMessage request, final Messaging messaging, final UserMessageHandlerContext userMessageHandlerContext) throws EbMS3Exception, TransformerException, IOException, JAXBException, SOAPException {
         final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
@@ -170,11 +176,20 @@ public class UserMessageHandlerService {
 
                 MessageFragmentType messageFragmentType = messageUtil.getMessageFragment(request);
                 persistReceivedMessage(request, legConfiguration, pmodeKey, messaging, messageFragmentType, backendName);
+
                 try {
                     backendNotificationService.notifyMessageReceived(matchingBackendFilter, messaging.getUserMessage());
                 } catch (SubmissionValidationException e) {
                     LOG.businessError(DomibusMessageCode.BUS_MESSAGE_VALIDATION_FAILED, messageId);
                     throw new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0004, e.getMessage(), messageId, e);
+                }
+
+                if (messageFragmentType != null) {
+                    final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
+                    if(messageFragmentType.getFragmentNum() == groupEntity.getFragmentCount()) {
+                        LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
+                        userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId());
+                    }
                 }
             }
         }
@@ -384,11 +399,7 @@ public class UserMessageHandlerService {
         messageFragmentEntity.setFragmentNumber(messageFragmentType.getFragmentNum());
         userMessage.setMessageFragment(messageFragmentEntity);
 
-        if(messageFragmentEntity.getFragmentNumber() == messageGroupEntity.getFragmentCount()) {
-            //reassemble the source message fragments
-            // create source UserMessage
-            //deliver to the backend
-        }
+
     }
 
     protected void addPartInfoFromFragment(UserMessage userMessage, final MessageFragmentType messageFragment) {

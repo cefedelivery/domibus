@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.services.SoapService;
 import eu.domibus.configuration.storage.Storage;
+import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.ebms3.sender.MSHDispatcher;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -46,6 +47,9 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
     @Autowired
     protected DomainContextProvider domainContextProvider;
 
+    @Autowired
+    protected SplitAndJoinService splitAndJoinService;
+
     @Override
     public void handleMessage(Message message) throws Fault {
         Map<String, List<String>> headers = (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
@@ -66,7 +70,7 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
         try {
             cacheMessageContent(message, temporaryDirectoryLocation, in, cos);
 
-            String fileName = generateSourceFileName(temporaryDirectoryLocation);
+            String fileName = splitAndJoinService.generateSourceFileName(temporaryDirectoryLocation);
             copyMessageContentToFile(cos, fileName, compression);
             LOG.putMDC(MSHSourceMessageWebservice.SOURCE_MESSAGE_FILE, fileName);
             LOG.putMDC(MSHDispatcher.HEADER_DOMIBUS_SPLITTING_COMPRESSION, String.valueOf(compression));
@@ -121,11 +125,6 @@ public class SaveRequestToFileInInterceptor extends AbstractPhaseInterceptor<Mes
             LOG.error("Could not compress the message content to file " + fileName);
             throw new Fault(e);
         }
-    }
-
-    protected String generateSourceFileName(String temporaryDirectoryLocation) {
-        final String uuid = UUID.randomUUID().toString();
-        return temporaryDirectoryLocation + "/" + uuid;
     }
 
 

@@ -11,6 +11,10 @@ import java.util.List;
  */
 public interface UserMessageService {
 
+    String MSG_SOURCE_USER_MESSAGE_REJOIN = "SourceUserMessageRejoin";
+    String MSG_TYPE = "messageType";
+    String MSG_GROUP_ID = "groupId";
+
     String getFinalRecipient(final String messageId);
 
     List<String> getFailedMessages(String finalRecipient);
@@ -30,6 +34,8 @@ public interface UserMessageService {
     void deleteMessage(String messageId);
 
     void scheduleSending(String messageId);
+
+    void scheduleSourceMessageRejoin(String groupId);
 
     void scheduleSending(String messageId, Long delay);
 

@@ -3,6 +3,7 @@ package eu.domibus.core.message;
 import eu.domibus.api.exceptions.DomibusCoreErrorCode;
 import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.jms.JMSManager;
+import eu.domibus.api.jms.JMSMessageBuilder;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.api.message.UserMessageLogService;
@@ -14,7 +15,6 @@ import eu.domibus.api.usermessage.UserMessageService;
 import eu.domibus.common.MessageStatus;
 import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.dao.SignalMessageDao;
-import eu.domibus.common.dao.SignalMessageLogDao;
 import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.model.logging.UserMessageLog;
 import eu.domibus.common.services.MessageExchangeService;
@@ -215,7 +215,8 @@ public class UserMessageDefaultService implements UserMessageService {
 
     protected void scheduleSending(String messageId, JmsMessage jmsMessage) {
         UserMessage userMessage = messagingDao.findUserMessageByMessageId(messageId);
-        if(userMessage.isSplitAndJoin()) {
+
+        if (userMessage.isSplitAndJoin()) {
             LOG.debug("Sending message to sendLargeMessageQueue");
             jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
         } else {
@@ -225,9 +226,19 @@ public class UserMessageDefaultService implements UserMessageService {
     }
 
     @Override
+    public void scheduleSourceMessageRejoin(String groupId) {
+        final JmsMessage jmsMessage = JMSMessageBuilder
+                .create()
+                .property(UserMessageService.MSG_TYPE, UserMessageService.MSG_SOURCE_USER_MESSAGE_REJOIN)
+                .property(UserMessageService.MSG_GROUP_ID, groupId)
+                .build();
+        jmsManager.sendMessageToQueue(jmsMessage, sendLargeMessageQueue);
+    }
+
+    @Override
     public eu.domibus.api.usermessage.domain.UserMessage getMessage(String messageId) {
         final UserMessage userMessageByMessageId = messagingDao.findUserMessageByMessageId(messageId);
-        if(userMessageByMessageId == null) {
+        if (userMessageByMessageId == null) {
             return null;
         }
         return domainExtConverter.convert(userMessageByMessageId, eu.domibus.api.usermessage.domain.UserMessage.class);

@@ -13,5 +13,8 @@ public interface SplitAndJoinService {
     boolean useSplitAndJoin(LegConfiguration legConfiguration, long payloadSize);
 
 
+    String generateSourceFileName(String temporaryDirectoryLocation);
+
+    void rejoinSourceMessage(String groupId);
 
 }
