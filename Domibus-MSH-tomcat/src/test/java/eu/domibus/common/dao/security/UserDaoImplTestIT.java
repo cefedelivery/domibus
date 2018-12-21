@@ -30,10 +30,9 @@ public class UserDaoImplTestIT extends AbstractIT {
     @Transactional
     @Rollback
     public void listUsers() throws Exception {
-        User user = new User() {{
-            setUserName("userOne");
-            setPassword("test");
-        }};
+        User user = new User();
+        user.setUserName("userOne");
+        user.setPassword("test");
         UserRole userRole = new UserRole("ROLE_USER");
         entityManager.persist(userRole);
         user.addRole(userRole);
@@ -52,10 +51,9 @@ public class UserDaoImplTestIT extends AbstractIT {
     @Transactional
     @Rollback
     public void loadActiveUserByUsername() {
-        User user = new User() {{
-            setUserName("userTwo");
-            setPassword("test");
-        }};
+        User user = new User();
+        user.setUserName("userTwo");
+        user.setPassword("test");
         UserRole userRole = new UserRole("ROLE_USER_2");
         entityManager.persist(userRole);
         user.addRole(userRole);
