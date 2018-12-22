@@ -60,17 +60,17 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final String ECAS_GROUP = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasGroup";
 
-    static final String ECAS_DOMIBUS_USER_ROLE_PREFIX = "DOMIBUS_USER_ROLE_";
-    static final String ECAS_DOMIBUS_DOMAIN_PREFIX = "DOMIBUS_DOMAIN_";
+    private static final String ECAS_DOMIBUS_USER_ROLE_PREFIX = "DOMIBUS_USER_ROLE_";
+    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX = "DOMIBUS_DOMAIN_";
 
     @Autowired
-    DomainService domainService;
+    private DomainService domainService;
 
     @Autowired
-    DomibusConfigurationService domibusConfigurationService;
+    private DomibusConfigurationService domibusConfigurationService;
 
     @Autowired
-    DomainContextProvider domainContextProvider;
+    private DomainContextProvider domainContextProvider;
 
     @Override
     public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken) throws UsernameNotFoundException {

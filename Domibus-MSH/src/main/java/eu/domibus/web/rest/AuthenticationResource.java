@@ -148,6 +148,25 @@ public class AuthenticationResource {
         return getLoggedUser().getUsername();
     }
 
+    @RequestMapping(value = "user2", method = RequestMethod.GET)
+    public UserRO getUser2() {
+        LOG.info("get user 2 - start");
+        UserDetail userDetail = getLoggedUser();
+        //Parse Granted authorities to a list of string authorities
+        List<String> authorities = new ArrayList<>();
+        for (GrantedAuthority grantedAuthority : userDetail.getAuthorities()) {
+            authorities.add(grantedAuthority.getAuthority());
+        }
+
+        UserRO userRO = new UserRO();
+        userRO.setUsername(userDetail.getUsername());
+        userRO.setAuthorities(authorities);
+        userRO.setDefaultPasswordUsed(userDetail.isDefaultPasswordUsed());
+        userRO.setDaysTillExpiration(userDetail.getDaysTillExpiration());
+        return userRO;
+    }
+
+
     /**
      * Retrieve the current domain of the current user (in multi-tenancy mode)
      *
