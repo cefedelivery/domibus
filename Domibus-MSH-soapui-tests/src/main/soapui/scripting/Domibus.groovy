@@ -29,12 +29,12 @@ class Domibus
 	def sqlGreen=null;
 	def thirdGateway = "false"; def multitenancyModeC2=0; def multitenancyModeC3=0;
 	static def backup_file_sufix = "_backup_for_soapui_tests";
-	static def DEFAULT_LOG_LEVEL = 0
+	static def DEFAULT_LOG_LEVEL = 0;
 	static def DEFAULT_PASSWORD = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 	static def SUPER_USER="super";
-	static def SUPER_USER_PWD="123456";
+	static def SUPER_USER_PWD="Domibus-123";
 	static def DEFAULT_ADMIN_USER="admin";
-	static def DEFAULT_ADMIN_USER_PWD="123456";
+	static def DEFAULT_ADMIN_USER_PWD="Domibus-123";
 	static def TRUSTSTORE_PASSWORD="test123";
 	static def MAX_LOGIN_BEFORE_LOCK = 5;
 	static def XSFRTOKEN_C2=null;
@@ -48,8 +48,8 @@ class Domibus
         this.messageExchange = messageExchange;
         this.context=context;
 		thirdGateway = context.expand( '${#Project#thirdGateway}' );
-		multitenancyModeC2=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC2}' ));
-		multitenancyModeC3=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC3}' ));
+		multitenancyModeC2=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC2}' ),log);
+		multitenancyModeC3=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC3}' ),log);
     }
 
     // Class destructor
@@ -67,7 +67,8 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Connect to a schema
 	def connectTo(String database, String driver, String url, String dbUser, String dbPassword){
-		debugLog("Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||",log);
+		debugLog("  ====  Calling \"connectTo\".",log);
+		debugLog("  connectTo  [][]  Open connection to || DB: " + database + " || Url: " + url+ " || Driver: "+ driver+" ||",log);
 		def sql = null;
 
         try{
@@ -84,17 +85,18 @@ class Domibus
 				log.warn "Unknown type of DB"
                 sql = Sql.newInstance(url, driver)
 			}
-			debugLog("Connection opened with success",log);
+			debugLog("  connectTo  [][]  Connection opened with success",log);
 			return sql;
         }
         catch (SQLException ex){
-			log.error "Connection failed";
+			log.error "  connectTo  [][]  Connection failed";
             assert 0,"SQLException occurred: " + ex;
         }
 	}
 //---------------------------------------------------------------------------------------------------------------------------------	
     // Open DB connections
     def openConnection(){
+		debugLog("  ====  Calling \"openConnection\".",log);
 		def i=0;
 		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
 		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
@@ -123,7 +125,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Close the DB connections opened previously
     def closeConnection(){
-        debugLog("DB connection would be closed",log)
+        debugLog("  ====  Calling \"closeConnection\".",log);
         if(sqlBlue){
             sqlBlue.connection.close()
             sqlBlue = null
@@ -147,6 +149,7 @@ class Domibus
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     def executeListOfQueriesOnAllDB(String[] sqlQueriesList) {
+		debugLog("  ====  Calling \"executeListOfQueriesOnAllDB\".",log);
 	    // Keep for backward compatibilty. To be removed
         executeListOfSqlQueries(sqlQueriesList,"BLUE");
         executeListOfSqlQueries(sqlQueriesList,"RED");
@@ -164,32 +167,36 @@ class Domibus
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     def executeListOfQueriesOnBlue(String[] sqlQueriesList) {
-        log.info "Executing SQL queries on sender/Blue"
+		debugLog("  ====  Calling \"executeListOfQueriesOnBlue\".",log);
+        log.info "  executeListOfQueriesOnBlue  [][]  Executing SQL queries on sender/Blue"
         executeListOfSqlQueries(sqlQueriesList,"BLUE")
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     def executeListOfQueriesOnRed(String[] sqlQueriesList) {
-        log.info "Executing SQL queries on receiver/Red"
+		debugLog("  ====  Calling \"executeListOfQueriesOnRed\".",log);
+        log.info "  executeListOfQueriesOnRed  [][]  Executing SQL queries on receiver/Red"
         executeListOfSqlQueries(sqlQueriesList,"RED")
     }
 //---------------------------------------------------------------------------------------------------------------------------------	
 	def executeListOfQueriesOnGreen(String[] sqlQueriesList) {
-        log.info "Executing SQL queries on Third/Green"
+		debugLog("  ====  Calling \"executeListOfQueriesOnGreen\".",log);
+        log.info "  executeListOfQueriesOnGreen  [][]  Executing SQL queries on Third/Green"
         executeListOfSqlQueries(sqlQueriesList,"GREEN")
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     def executeListOfSqlQueries(String[] sqlQueriesList, String targetSchema) {
+		debugLog("  ====  Calling \"executeListOfSqlQueries\".",log);
         def connectionOpenedInsideMethod = false
         def sqlDB
         if (!((sqlRed) || (sqlBlue) || (sqlGreen))) {
-            debugLog("Method executed without connections open to the DB - try to open connection", log)
+            debugLog("  executeListOfSqlQueries  [][]  Method executed without connections open to the DB - try to open connection", log)
             openConnection()
             connectionOpenedInsideMethod = true
         }
 		sqlDB=retrieveRefFromSchemaName(targetSchema);
 
         for (query in sqlQueriesList) {
-            debugLog("Executing SQL query: " + query, log)
+            debugLog("  executeListOfSqlQueries  [][]  Executing SQL query: " + query, log)
 			try{
 				sqlDB.execute query
 			}
@@ -200,14 +207,15 @@ class Domibus
         }
 
         if (connectionOpenedInsideMethod) {
-            debugLog("Connection to DB opened during method execution - close opened connection", log)
+            debugLog("  executeListOfSqlQueries  [][]  Connection to DB opened during method execution - close opened connection", log)
             closeConnection()
         }
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     // Clean all the messages from the DB
     def cleanDatabaseAll(){
-        log.info "Clean all message related information from DB"
+		debugLog("  ====  Calling \"cleanDatabaseAll\".",log);
+        log.info "  cleanDatabaseAll  [][]  Clean all message related information from DB"
         openConnection()
 
 
@@ -235,17 +243,19 @@ class Domibus
         executeListOfQueriesOnAllDB(sqlQueriesList)
 
         closeConnection();
-		log.info "Cleaning Done.";
+		log.info "  cleanDatabaseAll  [][]  Cleaning Done.";
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     // Clean single message identified by messageID starting with provided value
     def cleanDBMessageIDStartsWith(String messageID){
+		debugLog("  ====  Calling \"cleanDBMessageIDStartsWith\".",log);
         cleanDBMessageID(messageID, true)
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     // Clean single message identified by ID
     def cleanDBMessageID(String messageID, boolean  messgaeIDStartWithProvidedValue = false){
-        log.info "Clean from DB information related to the message with ID: " + messageID
+		debugLog("  ====  Calling \"cleanDBMessageID\".",log);
+        log.info "  cleanDBMessageID  [][]  Clean from DB information related to the message with ID: " + messageID
         openConnection()
 
         def messageIDCheck = "= '${messageID}'" //default comparison method use equal operator
@@ -285,6 +295,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Extract messageID from the request if it exists
     String findGivenMessageID(){
+		debugLog("  ====  Calling \"findGivenMessageID\".",log);
         def messageID = null
         def requestContent = messageExchange.getRequestContentAsXml()
         def requestFile = new XmlSlurper().parseText(requestContent)
@@ -298,6 +309,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Extract messageID from the response
     String findReturnedMessageID(){
+		debugLog("  ====  Calling \"findReturnedMessageID\".",log);
         def messageID=null
         def responseContent = messageExchange.getResponseContentAsXml()
         def responseFile = new XmlSlurper().parseText(responseContent)
@@ -316,6 +328,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Verification of message existence
     def verifyMessagePresence(int presence1,int presence2, String IDMes=null, int mapDoms = 3){
+		debugLog("  ====  Calling \"verifyMessagePresence\".",log);
         def messageID=null;
 		def sqlSender = null; def sqlReceiver = null;
         sleep(sleepDelay);
@@ -360,6 +373,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Verification of message unicity
     def verifyMessageUnicity(String IDMes=null, int mapDoms = 3){
+		debugLog("  ====  Calling \"verifyMessageUnicity\".",log);
         sleep(sleepDelay);
         def messageID;
         def total=0;
@@ -388,6 +402,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Wait until status or timer expire
     def waitForStatus(String SMSH=null,String RMSH=null,String IDMes=null,String bonusTimeForSender=null,String bonusTimeForReceiver=null, int mapDoms = 3){
+		debugLog("  ====  Calling \"waitForStatus\".",log);
 		def MAX_WAIT_TIME=80_000; // Maximum time to wait to check the message status. 
 		def STEP_WAIT_TIME=1000; // Time to wait before re-checking the message status.	
         def messageID=null;
@@ -405,15 +420,15 @@ class Domibus
             messageID=findReturnedMessageID()
         }
 
-		log.info "waitForStatus params: messageID: " + messageID +" SMSH: "+SMSH+ " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
+		log.info "  waitForStatus  [][]  params: messageID: " + messageID +" SMSH: "+SMSH+ " RMSH: " + RMSH + " IDMes: " + IDMes + " bonusTimeForSender: " + bonusTimeForSender + " bonusTimeForReceiver: " + bonusTimeForReceiver
 		
         if(bonusTimeForSender){
-            log.info "Waiting time for Sender extended to 500 seconds"
+            log.info "  waitForStatus  [][]  Waiting time for Sender extended to 500 seconds"
             MAX_WAIT_TIME=500_000
         }
 
         openConnection();
-		debugLog("--- mapDoms="+mapDoms,log);
+		debugLog("  waitForStatus  [][]  mapDoms="+mapDoms,log);
 		(sqlSender,sqlReceiver)=selectCornersReferences(mapDoms);
 		
         if(SMSH){
@@ -421,9 +436,8 @@ class Domibus
                 sleep(STEP_WAIT_TIME)
                 if(MAX_WAIT_TIME>0){
                     MAX_WAIT_TIME=MAX_WAIT_TIME-STEP_WAIT_TIME
-                }
-                //log.info "maxNumberAttempts: "+maxNumberAttempts+ "- numberAttempts: "+numberAttempts+"-- 
-				log.info "WAIT: "+MAX_WAIT_TIME
+                } 
+				log.info "  waitForStatus  [][]  WAIT: "+MAX_WAIT_TIME
                 sqlSender.eachRow("Select * from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
                     messageStatus=it.MESSAGE_STATUS
                     numberAttempts=it.SEND_ATTEMPTS
@@ -444,14 +458,14 @@ class Domibus
 					}
                 }
             }
-            log.info "finished checking sender, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
+            log.info "  waitForStatus  [][]  finished checking sender, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
 
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the sender side."
             assert(messageStatus.toLowerCase()==SMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the sender side has status "+messageStatus+" instead of "+SMSH+"."
         }
         if (bonusTimeForReceiver)
         {
-            log.info "Waiting time for Receiver extended to 500 seconds"
+            log.info "  waitForStatus  [][]  Waiting time for Receiver extended to 500 seconds"
             MAX_WAIT_TIME=100_000
         }
         else
@@ -466,9 +480,9 @@ class Domibus
                 sqlReceiver.eachRow("Select * from TB_MESSAGE_LOG where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
                     messageStatus=it.MESSAGE_STATUS
                 }
-                log.info "W:" + MAX_WAIT_TIME + " M:" + messageStatus
+                log.info "  waitForStatus  [][]  W:" + MAX_WAIT_TIME + " M:" + messageStatus
             }
-            log.info "finished checking receiver, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
+            log.info "  waitForStatus  [][]  finished checking receiver, messageStatus: " + messageStatus + " MAX_WAIT_TIME: " + MAX_WAIT_TIME
             assert(messageStatus!="INIT"),locateTest(context)+"Error:waitForStatus: Message "+messageID+" is not present in the receiver side."
             assert(messageStatus.toLowerCase()==RMSH.toLowerCase()),locateTest(context)+"Error:waitForStatus: Message in the receiver side has status "+messageStatus+" instead of "+RMSH+"."
         }
@@ -477,6 +491,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Check that an entry is created in the table TB_SEND_ATTEMPT
 	def checkSendAttempt(String messageID, String targetSchema="BLUE"){
+		debugLog("  ====  Calling \"checkSendAttempt\".",log);
 		def MAX_WAIT_TIME=10_000;
 		def STEP_WAIT_TIME=1000;
 		def sqlSender = null;
@@ -489,7 +504,7 @@ class Domibus
 			sqlSender.eachRow("Select count(*) lignes from tb_send_attempt where REPLACE(LOWER(MESSAGE_ID),' ','') = REPLACE(LOWER(${messageID}),' ','')"){
 				total=it.lignes
 			}
-			log.info "W: "+MAX_WAIT_TIME;
+			log.info "  checkSendAttempt  [][]  W: "+MAX_WAIT_TIME;
 			sleep(STEP_WAIT_TIME);
 			MAX_WAIT_TIME = MAX_WAIT_TIME - STEP_WAIT_TIME;
 		}
@@ -498,6 +513,7 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
     static def getStatusRetriveStatus(log, context, messageExchange) {
+		debugLog("  ====  Calling \"getStatusRetriveStatus\".",log);
         def outStatus=null
         def responseContent = messageExchange.getResponseContentAsXml()
         def requestFile = new XmlSlurper().parseText(responseContent)
@@ -512,6 +528,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Compare payloads order
 	static def checkPayloadOrder(submitRequest, log, context, messageExchange){
+		debugLog("  ====  Calling \"checkPayloadOrder\".",log);
 		def requestAtts = [];
 		def responseAtts = [];
 		def i = 0;
@@ -522,22 +539,22 @@ class Domibus
 		assert (responseContent != null),locateTest(context)+"Error: response is empty.";
 		def parserFile = new XmlSlurper().parseText(requestContent);
 		debugLog("===========================================",log);
-		debugLog("Attachments in request: ",log);
+		debugLog("  checkPayloadOrder  [][]  Attachments in request: ",log);
 		parserFile.depthFirst().each{
             if(it.name()== "PartInfo"){
                 requestAtts[i]=it.@href.text();
-				debugLog("Attachment: "+requestAtts[i]+" in position "+(i+1)+".",log);
+				debugLog("  checkPayloadOrder  [][]  Attachment: "+requestAtts[i]+" in position "+(i+1)+".",log);
 				i++;
             }
         }
 		debugLog("===========================================",log);
-		debugLog("Attachments in response: ",log);
+		debugLog("  checkPayloadOrder  [][]  Attachments in response: ",log);
 		i = 0;
 		parserFile = new XmlSlurper().parseText(responseContent);
 		parserFile.depthFirst().each{
             if(it.name()== "PartInfo"){
                 responseAtts[i]=it.@href.text();
-				debugLog("Attachment: "+responseAtts[i]+" in position "+(i+1)+".",log);
+				debugLog("  checkPayloadOrder  [][]  Attachment: "+responseAtts[i]+" in position "+(i+1)+".",log);
 				i++;
             }
         }
@@ -551,6 +568,7 @@ class Domibus
 //  PopUP Functions
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     static def showPopUpForManualCheck(messagePrefix, log, testRunner) {
+		debugLog("  ====  Calling \"showPopUpForManualCheck\".",log);
         def message = messagePrefix + """
 
 		After the manual check of the expected result:
@@ -575,6 +593,7 @@ class Domibus
     }
 //---------------------------------------------------------------------------------------------------------------------------------
     static def showPopUpForManualConfigurationChange(messagePrefix, log, testRunner) {
+		debugLog("  ====  Calling \"showPopUpForManualConfigurationChange\".",log);
         def message = messagePrefix + """
 
 		Did configuration was changed?
@@ -602,6 +621,7 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     // Ping Gateway
     static def String pingMSH(String side, context, log){
+		debugLog("  ====  Calling \"pingMSH\".",log);
 		def commandString = null;
 		def commandResult = null;
 		
@@ -612,6 +632,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Clear domibus cache
     static def clearCache(String side, context, log, String server = "tomcat"){
+		debugLog("  ====  Calling \"clearCache\".",log);
 		log.info "Cleaning cache for domibus "+side+" ...";
 		def outputCatcher = new StringBuffer();
         def errorCatcher = new StringBuffer();
@@ -640,10 +661,10 @@ class Domibus
 				}
 				break;
 			case "weblogic":
-				log.info "I don't know how to clean in weblogic yet.";
+				log.info "  clearCache  [][]  I don't know how to clean in weblogic yet.";
 				break;
 			case "wildfly":
-				log.info "I don't know how to clean in wildfly yet.";
+				log.info "  clearCache  [][]  I don't know how to clean in wildfly yet.";
 				break;
 			default:
 				assert (false) , "Unknown server.";
@@ -654,16 +675,16 @@ class Domibus
 				proc.consumeProcessOutput(outputCatcher, errorCatcher)
 				proc.waitFor()
 			}
-			debugLog("commandToRun = "+commandToRun, log);
-			debugLog("outputCatcher = "+outputCatcher, log);
-			debugLog("errorCatcher = "+errorCatcher, log);
-			log.info "Cleaning should be done."
+			debugLog("  clearCache  [][]  commandToRun = "+commandToRun, log);
+			debugLog("  clearCache  [][]  outputCatcher = "+outputCatcher, log);
+			debugLog("  clearCache  [][]  errorCatcher = "+errorCatcher, log);
+			log.info "  clearCache  [][]  Cleaning should be done."
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
     // Start several gateways
     static def startSetMSHs(int dom1,int dom2,int dom3, context, log){
- 
+		debugLog("  ====  Calling \"startSetMSHs\".",log);
 		if(dom1>0){
 			startMSH("sender", context, log);
 		}
@@ -677,6 +698,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Start Gateway
     static def startMSH(String side, context, log){
+		debugLog("  ====  Calling \"startMSH\".",log);
 		def MAX_WAIT_TIME=100000; // Maximum time to wait for the domibus to start. 
 		def STEP_WAIT_TIME=2000; // Time to wait before re-checking the domibus status.
 		def confirmation = 0;
@@ -691,12 +713,12 @@ class Domibus
 		// In case of ping failure try 2 times: from experience, sometimes domibus is running and for some reason the ping fails (trying 2 times could reduce the error occurence).
 		while(confirmation<=1){ 		
 			if(pingMSH(side,context,log).equals("200")){
-				log.info side.toUpperCase()+" is already running!";
+				log.info "  startMSH  [][]  "+side.toUpperCase()+" is already running!";
 				confirmation++;
 			}
 			else{
 				if(confirmation>0){
-					log.info "Trying to start the " + side.toUpperCase()
+					log.info "  startMSH  [][]  Trying to start the " + side.toUpperCase()
 					if(side.toLowerCase()=="sender"){
 						proc="cmd /c cd ${pathS} && startup.bat".execute()
 					}
@@ -723,7 +745,7 @@ class Domibus
 						sleep(STEP_WAIT_TIME)
 					}
 					assert(pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to start the MSH."
-					log.info "--- DONE - " + side.toUpperCase() + " started ---"
+					log.info "  startMSH  [][]  DONE - " + side.toUpperCase() + " started."
 				}			
 			}
 			sleep(STEP_WAIT_TIME);
@@ -733,7 +755,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Stop several gateways
     static def stopSetMSHs(int dom1,int dom2,int dom3, context, log){
- 
+		debugLog("  ====  Calling \"stopSetMSHs\".",log);
 		if(dom1>0){
 			stopMSH("sender", context, log);
 		}
@@ -747,6 +769,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------	
 	// Stop Gateway
     static def stopMSH(String side, context, log){
+		debugLog("  ====  Calling \"stopMSH\".",log);
 		def MAX_WAIT_TIME=5000; // Maximum time to wait for the domibus to stop.
 		def STEP_WAIT_TIME=500; // Time to wait before re-checking the domibus status.
         def outputCatcher = new StringBuffer();
@@ -758,10 +781,10 @@ class Domibus
 		def passedDuration=0;
 
 		if(!pingMSH(side,context,log).equals("200")){
-			log.info side.toUpperCase()+" is not running!"
+			log.info "  stopMSH  [][]  "+side.toUpperCase()+" is not running!"
 		}
 		else{
-			log.info "Trying to stop the " + side.toUpperCase();
+			log.info "  stopMSH  [][]  Trying to stop the " + side.toUpperCase();
 			switch(side.toLowerCase()){
 				case "sender":
 					proc="cmd /c cd ${pathS} && shutdown.bat".execute();
@@ -785,27 +808,28 @@ class Domibus
 				sleep(STEP_WAIT_TIME);
 			}
 			assert(!pingMSH(side,context,log).equals("200")),locateTest(context)+"Error:startMSH: Error while trying to stop the MSH."
-			log.info "--- DONE - " + side.toUpperCase() + " stopped ---"
+			log.info "  stopMSH  [][]  DONE - " + side.toUpperCase() + " stopped."
 		}
     }
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def uploadPmode(String side, String baseFilePath, String extFilePath,context,log, String domainValue="Default", String outcome = "successfully", String message =null, String authUser=null,authPwd=null){
-		log.info "Start upload PMode for Domibus \""+side+"\".";
+		debugLog("  ====  Calling \"uploadPmode\".",log);
+		log.info "  uploadPmode  [][]  Start upload PMode for Domibus \""+side+"\".";
 	    def commandString = null;
 		def commandResult = null;
 		def pmDescription = "SoapUI sample test description for PMode upload";		
 		def multitenancyOn=false;
 		def authenticationUser=authUser;
 		def authenticationPwd=authPwd;
-		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
+		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context,log);
 		
-		log.info "PMODE FILE PATH: "+pmodeFile;
+		log.info "  uploadPmode  [][]  PMODE FILE PATH: "+pmodeFile;
 		
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("uploadPmode for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  uploadPmode  [][]  uploadPmode for Domibus $side and domain $domainValue.");
+				debugLog("  uploadPmode  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -814,7 +838,7 @@ class Domibus
 				}
 			}
 			else{
-				log.info("uploadPmode for Domibus $side.");
+				log.info("  uploadPmode  [][]  uploadPmode for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
@@ -826,44 +850,45 @@ class Domibus
 			commandResult = runCurlCommand(commandString,log);
 			assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to upload the PMode: response doesn't contain the expected outcome \""+outcome+"\"."
 			if(outcome.toLowerCase()=="successfully"){
-				log.info commandResult[0]+" Domibus: \""+side+"\".";
+				log.info "  uploadPmode  [][]  "+commandResult[0]+" Domibus: \""+side+"\".";
 				if(message!=null){
 					assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
 				}
 			}
 			else{
-				log.info "Upload PMode was not done for Domibus: \""+side+"\".";
+				log.info "  uploadPmode  [][]  Upload PMode was not done for Domibus: \""+side+"\".";
 				if(message!=null){
 					assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
 				}
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------	
 	static def uploadPmodeWithoutToken(String side, String baseFilePath, String extFilePath,context,log, String outcome = "successfully", String message =null, String userLogin=null,passwordLogin=null){
-		log.info "Start upload PMode for Domibus \""+side+"\".";
+		debugLog("  ====  Calling \"uploadPmodeWithoutToken\".",log);
+		log.info "  uploadPmodeWithoutToken  [][]  Start upload PMode for Domibus \""+side+"\".";
 	    def commandString = null;
 		def commandResult = null;
 		def pmDescription = "Dummy";
 		
 		def String output = fetchCookieHeader(side,context,log,userLogin,passwordLogin);		
 		def XXSRFTOKEN = null;
-		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context);
+		def String pmodeFile = computePathRessources(baseFilePath,extFilePath,context,log);
 		
 		commandString="curl " + urlToDomibus(side, log, context) + "/rest/pmode -v -F \"description=" + pmDescription + "\" -F  file=@" + pmodeFile ;
 		commandResult = runCurlCommand(commandString,log);
 		assert(commandResult[0].contains(outcome)),"Error:uploadPmode: Error while trying to connect to domibus."
 		if(outcome.toLowerCase()=="successfully"){
-			log.info commandResult[0]+" Domibus: \""+side+"\".";
+			log.info "  uploadPmodeWithoutToken  [][]  "+commandResult[0]+" Domibus: \""+side+"\".";
 			if(message!=null){
 				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload done but expected message \""+message+"\" was not returned."
 			}
 		}
 		else{
-			log.info "Upload PMode was not done for Domibus: \""+side+"\".";
+			log.info "  uploadPmodeWithoutToken  [][]  Upload PMode was not done for Domibus: \""+side+"\".";
 			if(message!=null){
 				assert(commandResult[0].contains(message)),"Error:uploadPmode: Upload was not done but expected message \""+message+"\" was not returned."
 			}
@@ -871,7 +896,8 @@ class Domibus
 	} 
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def uploadTruststore(String side, String baseFilePath, String extFilePath,context,log, String domainValue="Default",String outcome="successfully",String tsPassword=TRUSTSTORE_PASSWORD, String authUser=null,authPwd=null){
-		log.info "Start upload truststore for Domibus \""+side+"\".";
+		debugLog("  ====  Calling \"uploadTruststore\".",log);
+		log.info "  uploadTruststore  [][]  Start upload truststore for Domibus \""+side+"\".";
 	    def commandString = null;
 		def commandResult = null;	
 		def multitenancyOn=false;
@@ -880,12 +906,12 @@ class Domibus
 		def String truststoreFile=null;
 		
 		try{
-			debugLog("Fetch multitenancy mode on domibus $side.",log);
+			debugLog("  uploadTruststore  [][]  Fetch multitenancy mode on domibus $side.",log);
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
-			debugLog("Multitenancy mode on domibus $side = $multitenancyOn.",log);
+			debugLog("  uploadTruststore  [][]  Multitenancy mode on domibus $side = $multitenancyOn.",log);
 			if(multitenancyOn){
-				log.info("uploadTruststore for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  uploadTruststore  [][]  uploadTruststore for Domibus $side and domain $domainValue.");
+				debugLog("  uploadTruststore  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -894,7 +920,7 @@ class Domibus
 				}
 			}
 			else{
-				log.info("uploadTruststore for Domibus $side.");
+				log.info("  uploadTruststore  [][]  uploadTruststore for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
@@ -902,19 +928,20 @@ class Domibus
 				}
 			}	
 		
-			truststoreFile=computePathRessources(baseFilePath,extFilePath,context);				
+			truststoreFile=computePathRessources(baseFilePath,extFilePath,context,log);				
 			commandString="curl "+ urlToDomibus(side, log, context) +"/rest/truststore/save -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -F \"password="+tsPassword+"\" -F  truststore=@"+truststoreFile;
 			commandResult = runCurlCommand(commandString,log);
 			assert(commandResult[0].contains(outcome)),"Error:uploadTruststore: Error while trying to upload the truststore to domibus."
-			log.info commandResult[0]+" Domibus: \""+side+"\".";
+			log.info "  uploadTruststore  [][]  "+commandResult[0]+" Domibus: \""+side+"\".";
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	} 
 //---------------------------------------------------------------------------------------------------------------------------------
    // Change Domibus configuration file 
     static def void changeDomibusProperties(color, propValueDict, log, context, testRunner){
+		debugLog("  ====  Calling \"changeDomibusProperties\".",log);
 		// Check that properties file exist and if yes create backup_file
 		// For all properties name and new value pairs change value in file
 		// to restore configuration use method restoreDomibusPropertiesFromBackup(domibusPath,  log, context, testRunner)
@@ -926,17 +953,17 @@ class Domibus
 			testRunner.fail("File [${pathToPropertyFile}] does not exist. Can't change value.")
 			return null
 			}
-		else log.info "File [${pathToPropertyFile}] exists."
+		else log.info "  changeDomibusProperties  [][]  File [${pathToPropertyFile}] exists."
 
 		// Create backup file if already not created
 		def backupFileName = "${pathToPropertyFile}${backup_file_sufix}"
 		def backupFile = new File(backupFileName)
 		if (backupFile.exists()) {
-			log.info "File [${backupFileName}] already exists and would not be overwrite - old backup file would be preserved."
+			log.info "  changeDomibusProperties  [][]  File [${backupFileName}] already exists and would not be overwrite - old backup file would be preserved."
 		}
 		else  {		
 			copyFile(pathToPropertyFile, backupFileName, log)
-			log.info "Backup copy of config file created: [${backupFile}]"
+			log.info "  changeDomibusProperties  [][]  Backup copy of config file created: [${backupFile}]"
 		}
 		
 		def fileContent = testFile.text
@@ -951,11 +978,11 @@ class Domibus
 			testFile.eachLine{line, n ->
 			    n++
 			  if (line =~ /^\s*${propertyToChangeName}=/) {
-			     log.info "In line $n searched property was found. Line value is: $line"
+			     log.info "  changeDomibusProperties  [][]  In line $n searched property was found. Line value is: $line"
 			     found++
 			  }
 			  if (line =~ ~/#+\s*${propertyToChangeName}=.*/) {
-			     log.info "In line $n commented searched property was found. Line value is: $line"
+			     log.info "  changeDomibusProperties  [][]  In line $n commented searched property was found. Line value is: $line"
 			     foundInCommentedRow++
 			  }
 			}
@@ -974,16 +1001,17 @@ class Domibus
 					testRunner.fail("The search string ($propertyToChangeName) was not found in file [${pathToPropertyFile}]. No changes would be applied - properties file restored.") 
 					return null
 				}
-		    log.info "In [${pathToPropertyFile}] file property ${propertyToChangeName} was changed to value ${newValueToAssign}"
+		    log.info "  changeDomibusProperties  [][]  In [${pathToPropertyFile}] file property ${propertyToChangeName} was changed to value ${newValueToAssign}"
 		 } //loop end 
 		
 		 // Store new content of properties file after all changes
 		  testFile.text=fileContent
-		  log.info "Property file [${pathToPropertyFile}] amended" 
+		  log.info "  changeDomibusProperties  [][]  Property file [${pathToPropertyFile}] amended" 
     }
 //---------------------------------------------------------------------------------------------------------------------------------
    // Restor Domibus configuration file 
     static def void restoreDomibusPropertiesFromBackup(color, log, context, testRunner){
+		debugLog("  ====  Calling \"restoreDomibusPropertiesFromBackup\".",log);
 		// Restore from backup file domibus.properties file
 		def pathToPropertyFile = pathToDomibus(color, log, context) + context.expand('${#Project#subPathToDomibusProperties}')
 		def backupFile = "${pathToPropertyFile}${backup_file_sufix}"
@@ -995,10 +1023,10 @@ class Domibus
 			return null
 		}
 		else {	
-			log.info "Restore properties file from existing backup"
+			log.info "  restoreDomibusPropertiesFromBackup  [][]  Restore properties file from existing backup"
 			copyFile(backupFile, pathToPropertyFile, log)
 			if (backupFileHandler.delete()) {
-			   log.info "Successufuly restory configuration from backup file and backup file was removed" 
+			   log.info "  restoreDomibusPropertiesFromBackup  [][]  Successufuly restory configuration from backup file and backup file was removed" 
 			}
 			else {
 			   testRunner.fail "Not able to delete configuration backup file" 
@@ -1010,8 +1038,9 @@ class Domibus
 //  Domain Functions
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def getDomainName(String domainInfo,log){
+		debugLog("  ====  Calling \"getDomainName\".",log);
 		assert((domainInfo!=null)&&(domainInfo!="")),"Error:getDomainName: provided domain info are empty.";
-		debugLog("Get domain name from domain info: $domainInfo.",log);
+		debugLog("  getDomainName  [][]  Get domain name from domain info: $domainInfo.",log);
 		def jsonSlurper = new JsonSlurper();
 		def domainMap=jsonSlurper.parseText(domainInfo);
 		assert(domainMap.name!=null),"Error:getDomain: Domain informations are corrupted: $domainInfo.";
@@ -1019,8 +1048,9 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def getDomain(String side,context,log, String userLogin=SUPER_USER, String passwordLogin=SUPER_USER_PWD){
+		debugLog("  ====  Calling \"getDomain\".",log);
 		assert(userLogin==SUPER_USER),"Error:getDomains: To manipulate domains, login must be done with user: \"$SUPER_USER\"."
-		log.info "Get current domain for Domibus $side.";
+		log.info "  getDomain  [][]  Get current domain for Domibus $side.";
 	    def commandString = null;		
 		def commandResult = null;
 		
@@ -1031,24 +1061,26 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def setDomain(String side,context,log, String domainValue, String userLogin=SUPER_USER, String passwordLogin=SUPER_USER_PWD){
+		debugLog("  ====  Calling \"setDomain\".",log);
 		def commandString = null;		
 		def commandResult = null;
 
 		assert(userLogin==SUPER_USER),"Error:getDomains: To manipulate domains, login must be done with user: \"$SUPER_USER\"."
-		debugLog("Set domain for Domibus $side.",log);
+		debugLog("  setDomain  [][]  Set domain for Domibus $side.",log);
 		if(domainValue == getDomainName(getDomain(side,context,log),log)){
-			debugLog("Requested domain is equal to the current value: no action needed",log);
+			debugLog("  setDomain  [][]  Requested domain is equal to the current value: no action needed",log);
 		}
 		else{
 			commandString="curl "+urlToDomibus(side, log, context)+"/rest/security/user/domain -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,userLogin,passwordLogin) +"\" -X PUT -d \"\"\""+domainValue+"\"\"\"";
 			commandResult = runCurlCommand(commandString,log);	
 			assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:setDomain: Error while trying to set the domain: verify that domain $domainValue is correctly configured."
-			debugLog("Domain set to $domainValue.",log);
+			debugLog("  setDomain  [][]  Domain set to $domainValue.",log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Return number of domains
-	static def getMultitenancyMode(String inputValue){
+	static def getMultitenancyMode(String inputValue,log){
+		debugLog("  ====  Calling \"getMultitenancyMode\".",log);
 		if((inputValue==null)||(inputValue=="")){
 			return 0;
 		}
@@ -1063,7 +1095,8 @@ class Domibus
 //  Users Functions
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def getAdminConsoleUsers(String side,context,log, String authUser=null, String authPwd=null){
-		debugLog("Get users for Domibus $side.",log);
+		debugLog("  ====  Calling \"getAdminConsoleUsers\".",log);
+		debugLog("  getAdminConsoleUsers  [][]  Get Admin Console users for Domibus \"$side\".",log);
 	    def commandString = null;		
 		def commandResult = null;
 		def multitenancyOn=false;
@@ -1093,6 +1126,7 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def addAdminConsoleUser(String side,context,log, String domainValue="Default", String userRole="ROLE_ADMIN", String userAC, String passwordAC="Domibus-123", String authUser=null, String authPwd=null){
+		debugLog("  ====  Calling \"addAdminConsoleUser\".",log);
 		def usersMap=null;
 		def mapElement=null;
 		def multitenancyOn=false;
@@ -1106,8 +1140,8 @@ class Domibus
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("Add admin console user for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  addAdminConsoleUser  [][]  Add Admin Console user for Domibus \"$side\" and domain \"$domainValue\".");
+				debugLog("  addAdminConsoleUser  [][]  First, set domain to \"$domainValue\".",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -1116,40 +1150,37 @@ class Domibus
 				}
 			}
 			else{
-				log.info("Add admin console user for Domibus $side.");
+				log.info("  addAdminConsoleUser  [][]  Add Admin Console user for Domibus \"$side\".");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
 					authenticationPwd=DEFAULT_ADMIN_USER_PWD;
 				}
-			}
-			debugLog("Fetch users list and verify that user $userAC doesn't already exist.",log);		
+			}	
+			debugLog("  addAdminConsoleUser  [][]  Fetch users list and verify that user \"$userAC\" doesn't already exist.",log);		
 			usersMap=jsonSlurper.parseText(getAdminConsoleUsers(side,context,log));
-			if(userExists(usersMap,userAC,log)){
-				log.error "Error:addAdminConsoleUser: admin console user $userAC already exist: usernames must be unique.";
+			if(userExists(usersMap,userAC,log,false)){
+				log.error "Error:addAdminConsoleUser: Admin Console user \"$userAC\" already exist: usernames must be unique.";
 			}
 			else{
-				//assert(!userExists(usersMap,userAC,log)),"Error:addAdminConsoleUser: admin console user $userAC already exist: usernames must be unique.";
-				debugLog("Users list before the update: "+usersMap,log);
-				debugLog("Prepare user $userAC details to be added.",log);
-				mapElement=[password:passwordAC, roles:userRole, domain:usersMap[0].domain, active:true, userName:userAC, email:null, authorities:[userRole], suspended:false, status:'NEW']
-				debugLog("Update users list.",log);
-				usersMap<<mapElement;
-				debugLog("Users list after the update: "+usersMap,log);
-				debugLog("Insert users list.",log);
-				curlParams=JsonOutput.toJson(usersMap).toString();
+				debugLog("  addAdminConsoleUser  [][]  Users list before the update: "+usersMap,log);
+				debugLog("  addAdminConsoleUser  [][]  Prepare user \"$userAC\" details to be added.",log);
+				curlParams="[\n  {\n    \"roles\": \"$userRole\",\n    \"userName\": \"$userAC\",\n    \"password\": \"$passwordAC\",\n    \"status\": \"NEW\",\n    \"active\": true,\n    \"suspended\": false,\n    \"authorities\": [],\n    \"deleted\": false\n    }\n]";
+				debugLog("  addAdminConsoleUser  [][]  Inserting user \"$userAC\" in list.",log);
+				debugLog("  addAdminConsoleUser  [][]  User \"$userAC\" parameters: $curlParams.",log);
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/user/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
 				commandResult = runCurlCommand(commandString,log);	
-				assert(commandResult[1].contains("200 OK")),"Error:addAdminConsoleUser: Error while trying to add user $userAC.";
-				log.info "User $userAC added."
+				assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:addAdminConsoleUser: Error while trying to add a user.";
+				log.info "  addAdminConsoleUser  [][]  Admin Console user \"$userAC\" added.";
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def removeAdminConsoleUser(String side,context,log, String domainValue="Default", String userAC, String authUser=null, String authPwd=null){
+		debugLog("  ====  Calling \"removeAdminConsoleUser\".",log);
 		def usersMap=null;
 		def multitenancyOn=false;
 		def commandString = null;		
@@ -1158,14 +1189,15 @@ class Domibus
 		def curlParams=null;
 		def authenticationUser=authUser;
 		def authenticationPwd=authPwd;
-		def indexUser=-1;
+		def roleAC=null;
+		def userDeleted=false;
 		def i=0;
 		
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("Remove admin console user for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  removeAdminConsoleUser  [][]  Remove admin console user for Domibus $side and domain $domainValue.");
+				debugLog("  removeAdminConsoleUser  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -1174,43 +1206,49 @@ class Domibus
 				}
 			}
 			else{
-				log.info("Remove admin console user for Domibus $side.");
+				log.info("  removeAdminConsoleUser  [][]  Remove admin console user for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
 					authenticationPwd=DEFAULT_ADMIN_USER_PWD;
 				}
 			}
-			debugLog("Fetch users list and verify that user $userAC exists.",log);		
+			debugLog("  removeAdminConsoleUser  [][]  Fetch users list and verify that user \"$userAC\" exists.",log);		
 			usersMap=jsonSlurper.parseText(getAdminConsoleUsers(side,context,log));
-			if(!userExists(usersMap,userAC,log)){
-				log.info "Admin console user $userAC doesn't exist. No action needed.";
+			if(!userExists(usersMap,userAC,log,false)){
+				log.info "  removeAdminConsoleUser  [][]  Admin console user \"$userAC\" doesn't exist. No action needed.";
 			}
 			else{
-				while((i<usersMap.size())&&(indexUser<0)){
+				while(i<usersMap.size()){
 					assert(usersMap[i]!=null),"Error:removeAdminConsoleUser: Error while parsing the list of admin console users.";
 					if(usersMap[i].userName==userAC){
-						indexUser=i;
+						roleAC=usersMap[i].roles;
+						userDeleted=usersMap[i].deleted;
+						i=usersMap.size();
 					}
 					i++;
 				}
-				assert(indexUser>=0),"Error:removeAdminConsoleUser: Error while fetching the index of user $userAC.";
-				usersMap.remove(indexUser);
-				assert(!userExists(usersMap,userAC,log)),"Error:removeAdminConsoleUser: admin console user $userAC is still in the list.";
-				curlParams=JsonOutput.toJson(usersMap).toString();
-				commandString="curl "+urlToDomibus(side, log, context)+"/rest/user/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
-				commandResult = runCurlCommand(commandString,log);	
-				assert(commandResult[1].contains("200 OK")),"Error:removeAdminConsoleUser: Error while trying to remove user $userAC.";
-				log.info "User $userAC Removed."
+				assert(roleAC!=null),"Error:removeAdminConsoleUser: Error while fetching the role of user \"$userAC\".";
+				assert(userDeleted!=null),"Error:removeAdminConsoleUser: Error while fetching the \"deleted\" status of user \"$userAC\".";
+				if(userDeleted==false){
+					curlParams="[\n  {\n    \"userName\": \"$userAC\",\n    \"roles\": \"$roleAC\",\n    \"active\": true,\n    \"authorities\": [\n      \"$roleAC\"\n    ],\n    \"status\": \"REMOVED\",\n    \"suspended\": false,\n    \"deleted\": true\n    }\n]";
+					commandString="curl "+urlToDomibus(side, log, context)+"/rest/user/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
+					commandResult = runCurlCommand(commandString,log);	
+					assert(commandResult[1].contains("200 OK")),"Error:removeAdminConsoleUser: Error while trying to remove user $userAC.";
+					log.info "  removeAdminConsoleUser  [][]  User \"$userAC\" Removed."
+				}
+				else{
+					log.info "  removeAdminConsoleUser  [][]  User \"$userAC\" was already deleted. No action needed.";
+				}
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def getPluginUsers(String side,context,log, String authUser=null, String authPwd=null){
-		debugLog("Get users for Domibus $side.",log);
+		debugLog("  ====  Calling \"getPluginUsers\".",log);
 	    def commandString = null;		
 		def commandResult = null;
 		def multitenancyOn=false;
@@ -1220,6 +1258,7 @@ class Domibus
 		multitenancyOn=getMultitenancyFromSide(side,context,log);
 		if(multitenancyOn){
 			// If authentication details are not fully provided, use default values 
+			debugLog("  getPluginUsers  [][]  Multitenancy on.",log);
 			if((authUser==null)||(authPwd==null)){
 				authenticationUser=SUPER_USER;
 				authenticationPwd=SUPER_USER_PWD;
@@ -1227,6 +1266,7 @@ class Domibus
 		}
 		else{
 			// If authentication details are not fully provided, use default values
+			debugLog("  getPluginUsers  [][]  Multitenancy off.",log);
 			if((authUser==null)||(authPwd==null)){
 				authenticationUser=DEFAULT_ADMIN_USER;
 				authenticationPwd=DEFAULT_ADMIN_USER_PWD;
@@ -1240,6 +1280,7 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def addPluginUser(String side,context,log, String domainValue="Default", String userRole="ROLE_ADMIN", String userPl, String passwordPl="Domibus-123", String originalUser="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", String authUser=null, String authPwd=null){
+		debugLog("  ====  Calling \"addPluginUser\".",log);
 		def usersMap=null;
 		def mapElement=null;
 		def multitenancyOn=false;
@@ -1253,8 +1294,8 @@ class Domibus
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("Add plugin user for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  addPluginUser  [][]  Add plugin user for Domibus $side and domain $domainValue.");
+				debugLog("  addPluginUser  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -1263,36 +1304,36 @@ class Domibus
 				}
 			}
 			else{
-				log.info("Add plugin user for Domibus $side.");
+				log.info("  addPluginUser  [][]  Add plugin user for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
 					authenticationPwd=DEFAULT_ADMIN_USER_PWD;
 				}
 			}	
-			debugLog("Fetch users list and verify that user $userPl doesn't already exist.",log);		
+			debugLog("  addPluginUser  [][]  Fetch users list and verify that user $userPl doesn't already exist.",log);		
 			usersMap=jsonSlurper.parseText(getPluginUsers(side,context,log));
 			if(userExists(usersMap,userPl,log,true)){
 				log.error "Error:addPluginUser: plugin user $userPl already exist: usernames must be unique.";
 			}
 			else{
-				//assert(!userExists(usersMap,userPl,log,true)),"Error:addPluginUser: plugin user $userPl already exist: usernames must be unique.";
-				debugLog("Users list before the update: "+usersMap,log);
-				debugLog("Prepare user $userPl details to be added.",log);
+				debugLog("  addPluginUser  [][]  Users list before the update: "+usersMap,log);
+				debugLog("  addPluginUser  [][]  Prepare user $userPl details to be added.",log);
 				curlParams="[\n  {\n    \"status\": \"NEW\",\n    \"username\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$userRole\",\n    \"passwd\": \"$passwordPl\"\n  }\n]";
-				debugLog("Inser user in list.",log);
+				debugLog("  addPluginUser  [][]  Inserting user $userPl in the list.",log);
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/plugin/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
 				commandResult = runCurlCommand(commandString,log);	
 				assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:addPluginUser: Error while trying to add a user.";
-				log.info "Plugin user $userPl added.";
+				log.info "  addPluginUser  [][]  Plugin user $userPl added.";
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
-	static def removePluginUser(String side,context,log, String domainValue="Default", String userRole="ROLE_ADMIN", String userPl, String passwordPl="Domibus-123", String originalUser="urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1", String authUser=null, String authPwd=null){
+	static def removePluginUser(String side,context,log, String domainValue="Default", String userPl, String authUser=null, String authPwd=null){
+        debugLog("  ====  Calling \"removePluginUser\".",log);
 		def usersMap=null;
 		def mapElement=null;
 		def multitenancyOn=false;
@@ -1302,12 +1343,15 @@ class Domibus
 		def curlParams=null;
 		def authenticationUser=authUser;
 		def authenticationPwd=authPwd;
+		def originalUser=null;
+		def rolePl=null;
+		def i=0;
 		
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("Remove plugin user for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  removePluginUser  [][]  Remove plugin user for Domibus $side and domain $domainValue.");
+				debugLog("  removePluginUser  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -1316,41 +1360,55 @@ class Domibus
 				}
 			}
 			else{
-				log.info("Add admin console user for Domibus $side.");
+				log.info("  removePluginUser  [][]  Add admin console user for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
 					authenticationPwd=DEFAULT_ADMIN_USER_PWD;
 				}
 			}
-			debugLog("Fetch users list and verify that user $userPl exists.",log);		
+			debugLog("  removePluginUser  [][]  Fetch users list and verify that user $userPl exists.",log);		
 			usersMap=jsonSlurper.parseText(getPluginUsers(side,context,log));
-			debugLog(usersMap,log);
+			debugLog("  removePluginUser  [][]  usersMap:	$usersMap",log);
 			if(!userExists(usersMap,userPl,log,true)){
-				log.info "Plugin user $userPl doesn't exist. No action needed.";
+				log.info "  removePluginUser  [][]  Plugin user $userPl doesn't exist. No action needed.";
 			}
 			else{
-				curlParams="[\n  {\n    \"status\": \"REMOVED\",\n    \"username\": \"$userPl\",\n    \"authenticationType\": \"BASIC\",\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$userRole\",\n    \"passwd\": \"$passwordPl\"\n  }\n]";
+				while(i<usersMap.entries.size()){
+					assert(usersMap.entries[i]!=null),"Error:removePluginUser: Error while parsing the list of plugin users.";
+					if(usersMap.entries[i].username==userPl){
+						rolePl=usersMap.entries[i].authRoles;
+						originalUser=usersMap.entries[i].originalUser;
+						i=usersMap.entries.size();
+					}
+					i++;
+				}
+				assert(rolePl!=null),"Error:removePluginUser: Error while fetching the role of user \"$userPl\".";
+				assert(originalUser!=null),"Error:removePluginUser: Error while fetching the original user of user \"$userPl\".";
+				//curlParams="[\n  {\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\",\n    \"hiddenPassword\": \"******\"\n  }\n]";
+				curlParams="[\n  {\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/plugin/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
 				commandResult = runCurlCommand(commandString,log);	
 				assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:removePluginUser: Error while trying to remove user $userPl.";
-				log.info "Plugin user $userPl removed.";
+				log.info "  removePluginUser  [][]  Plugin user $userPl removed.";
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def userExists(usersMap,String targetedUser,log,boolean plugin=false){
+		debugLog("  ====  Calling \"userExists\".",log);
 		def i=0;
-		def userFound=false;
-		
+		def userFound=false;		
 		if(plugin){
+			debugLog("  userExists  [][]  Checking if plugin user \"$targetedUser\" exists.",log);
+			debugLog("  userExists  [][]  Plugin users map: $usersMap.",log);
 			assert(usersMap.entries!=null),"Error:userExists: Error while parsing the list of plugin users.";
 			while((i<usersMap.entries.size())&&(userFound==false)){
 				assert(usersMap.entries[i]!=null),"Error:userExists: Error while parsing the list of plugin users.";
-				debugLog("- Iteration $i: comparing --$targetedUser--and--"+usersMap.entries[i].username+"--.",log);
+				debugLog("  userExists  [][]  Iteration $i: comparing --$targetedUser--and--"+usersMap.entries[i].username+"--.",log);
 				if(usersMap.entries[i].username==targetedUser){
 					userFound=true;
 				}
@@ -1358,6 +1416,8 @@ class Domibus
 			}
 		}
 		else{
+			debugLog("  userExists  [][]  Checking if admin console user \"$targetedUser\" exists.",log);
+			debugLog("  userExists  [][]  Admin console users map: $usersMap.",log);
 			assert(usersMap!=null),"Error:userExists: Error while parsing the list of admin console users.";
 			while((i<usersMap.size())&&(userFound==false)){
 				assert(usersMap[i]!=null),"Error:userExists: Error while parsing the list of admin console users.";
@@ -1371,155 +1431,66 @@ class Domibus
 		return userFound;
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
-	static def resetAuthTokens(){
+	static def resetAuthTokens(log){
+		debugLog("  ====  Calling \"resetAuthTokens\".",log);
 		XSFRTOKEN_C2=null;
 		XSFRTOKEN_C3=null;
 		XSFRTOKEN_C_Other=null;
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
-   //!!! To be updated/deleted with new functions to add users that uses curl only !!!
-   // Add user 
-    def void addUser(color,username,idUser=12345,password='$2a$10$HApapHvDStTEwjjneMCvxuqUKVyycXZRfXMwjU0rRmaWMsjWQp/Zu'){
-		debugLog("Trying to add user (" +username+","+password+")", log);
-		if(searchUser(color,username)!=0){
-			log.info "User \""+username+"\" already exists. If you want to insert it again, please use method deleteUser to delete it."
-		}
-		else{
-			def sqlQueriesList = ["INSERT INTO TB_USER (ID_PK, USER_NAME, USER_PASSWORD, USER_ENABLED) VALUES ('"+idUser+"','"+username+"','"+password+"', 1)","INSERT INTO TB_USER_ROLES (USER_ID, ROLE_ID) VALUES ("+idUser+", '2')"] as String[];
-			executeListOfSqlQueries(sqlQueriesList,color);
-			log.info "User \""+username+"\" created."
-		}
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
-   //!!! To be updated/deleted with new functions to add users that uses curl only !!!
-   // Delete user 
-    def void deleteUser(color,username){
-		debugLog("Trying to delete user " +username, log);
-		def idUser=searchUser(color,username);
-		if(idUser==0){
-			log.info "User \""+username+"\" doesn't exist. Nothing to do !"
-		}
-		else{	
-			def sqlQueriesList = ["DELETE FROM TB_USER_ROLES WHERE USER_ID = "+idUser,"DELETE FROM TB_USER WHERE (ID_PK = "+idUser+")"] as String[];
-			executeListOfSqlQueries(sqlQueriesList,color);
-			log.info "User \""+username+"\" deleted." 
-		}
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
-	//!!! To be updated/deleted with new functions to add users that uses curl only !!!
-	// search for user 
-    def searchUser(color,username){
-		debugLog("Searching for user \"" +username+"\" in the DB", log);
-		def idFound=null;
-		def sql=null;
-		// Connect to database
-		openConnection();
-		switch(color.toLowerCase()){
-			case "blue":
-				sql=sqlBlue;
-				break;
-			case "red":
-				sql=sqlRed;
-				break;
-			case "green":
-				sql=sqlGreen;
-				break;
-			default:
-				assert (false) , "Unknown side color. Supported values: BLUE, RED, GREEN"
-		}
-		try{
-			sql.eachRow ("select ID_PK FROM TB_USER WHERE (USER_NAME = ${username})"){
-					idFound = it.ID_PK;
-			}
-		}
-		catch (SQLException ex){
-			closeConnection();
-			assert 0,"SQLException occured during searching: " + ex;
-		}
-		// Close DB connection
-		closeConnection();
-		if(!idFound){
-			return 0;
-		}
-		else{
-			return idFound; 
-		}
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
-	//!!! To be updated/deleted with new functions to add users that uses curl only !!!
 	// Insert wrong password 
-    def insertWrongPassword(side,color,username,password){
-		debugLog("Insert wrong password for user " +username, log);
-		if(searchUser(color,username)==0){
-			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
-		}
-		else{
-			def commandResult = null;
-			def commandString = null; 
-			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-			commandResult = runCurlCommand(commandString,log);
-			assert((commandResult[0].contains("Bad credentials"))||(commandResult[0].contains("Suspended"))),"Error:Authenticating user: Error while trying to connect to domibus."
-		}
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
-	//!!! To be updated/deleted with new functions to add users that uses curl only !!!
-	// lock user  
-    def lockUser(side,color,username,password){
-		debugLog("Trying to lock user " +username, log);
-		if(searchUser(color,username)==0){
-			log.info "User "+username+" doesn't exist. Please insert it first. You can use method addUser."
-		}
-		else{
-			def commandResult = null;
-			def commandString = null;
-			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\""+password+"\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
-			for(def i=0;i<=MAX_LOGIN_BEFORE_LOCK;i++){
-				commandResult = runCurlCommand(commandString,log);
-			}
-			assert(commandResult[0].contains("Suspended")),"Error:blocking user: Error while trying to block the user."
-			log.info "User \""+username+"\" should be locked."
-		}
-    }
-//---------------------------------------------------------------------------------------------------------------------------------
-	// !!! To be removed !!!
-    // Add quote when value is not null - for sql queries or return String "null"
-    static def String addQuotationWhenNotNull(value) {
-		if (value != null) 
-			return "'" + value +"'"
+    static def insertWrongPassword(String side,context,log,String username,int attempts=1,String domainValue="Default",String wrongPass="zzzdumzzz",String authUser=null, String authPwd=null){
+		debugLog("  ====  Calling \"insertWrongPassword\".",log);
+		def usersMap=null;
+		def multitenancyOn=false;
+		def jsonSlurper = new JsonSlurper();
+		def authenticationUser=authUser;
+		def authenticationPwd=authPwd;
+		def commandResult = null;
+		def commandString = null; 
 		
-		return "null"
-	}
-	
-//---------------------------------------------------------------------------------------------------------------------------------
-	// !!! To be removed !!!
-    // Add authentication record if it's not present already in table
-    def addAuthenticationRecord(targetSchema, userName, authRoles, originaUser, passwd = DEFAULT_PASSWORD){
-        log.info "Add authentication record, if exist delete first, to: ${targetSchema} with user name: ${userName} and original user value: ${originaUser}"
-
-        def sqlQuery = [
-				"delete from TB_AUTHENTICATION_ENTRY where username in ('" + userName + "')",
-                "INSERT INTO tb_authentication_entry (USERNAME, PASSWD, AUTH_ROLES, ORIGINAL_USER) values (" + addQuotationWhenNotNull(userName) +", "+ 
-				addQuotationWhenNotNull(passwd) +", " + addQuotationWhenNotNull(authRoles) + ", " + addQuotationWhenNotNull(originaUser) +")" ] as String[]
-
-        executeListOfSqlQueries(sqlQuery, targetSchema)
+		try{
+			multitenancyOn=getMultitenancyFromSide(side,context,log);
+			if(multitenancyOn){
+				log.info("  insertWrongPassword  [][]  Insert wrong password for user \"$username\", Domibus \"$side\" and domain \"$domainValue\".");
+				debugLog("  insertWrongPassword  [][]  First, set domain to $domainValue.",log);
+				setDomain(side,context,log, domainValue);
+				// If authentication details are not fully provided, use default values 
+				if((authUser==null)||(authPwd==null)){
+					authenticationUser=SUPER_USER;
+					authenticationPwd=SUPER_USER_PWD;
+				}
+			}
+			else{
+				log.info("  insertWrongPassword  [][]  Insert wrong password for user \"$username\" and Domibus \"$side\".");
+				// If authentication details are not fully provided, use default values
+				if((authUser==null)||(authPwd==null)){
+					authenticationUser=DEFAULT_ADMIN_USER;
+					authenticationPwd=DEFAULT_ADMIN_USER_PWD;
+				}
+			}
+			debugLog("  insertWrongPassword  [][]  Fetch users list and verify that user $username exists.",log);		
+			usersMap=jsonSlurper.parseText(getAdminConsoleUsers(side,context,log));
+			debugLog("  insertWrongPassword  [][]  usersMap:	$usersMap",log);
+			assert(userExists(usersMap,username,log,false)),"Error:insertWrongPassword: user \"$username\" was not found.";
+			// Try to login with wrong password
+			commandString = "curl "+urlToDomibus(side, log, context)+"/rest/security/authentication -i -H \"Content-Type: application/json\" -X POST -d \"{\"\"\"username\"\"\":\"\"\""+username+"\"\"\",\"\"\"password\"\"\":\"\"\"$wrongPass\"\"\"}\" -c "+context.expand( '${projectDir}')+"\\cookie.txt";
+			for(def i=1;i<=attempts;i++){
+				log.info("  insertWrongPassword  [][]  Try to login with wrong password: Attempt $i.")
+				commandResult = runCurlCommand(commandString,log);
+				assert((commandResult[0].contains("Bad credentials"))||(commandResult[0].contains("Suspended"))),"Error:Authenticating user: Error while trying to connect to domibus."		
+			}			
+		}
+		finally{
+			resetAuthTokens(log);
+		}
     }
-//---------------------------------------------------------------------------------------------------------------------------------
-	// !!! To be removed !!!
-    // Remove authentication Record from TB_AUTHENTICATION_ENTRY table
-    def delAuthenticationRecord(targetSchema, userNameList){
-		userNameList = [] + userNameList
-        log.info "Remove authentication record from TB_AUTHENTICATION_ENTRY table for user(s) name: ${userNameList}"
-
-        def sqlQuery = ["delete from TB_AUTHENTICATION_ENTRY where username in ('" + userNameList.join("','") + "')" ] as String[]
-
-        executeListOfSqlQueries(sqlQuery, targetSchema)
-    }
-
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 //  Message filter Functions
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def getMessageFilters(String side,context,log, String authUser=null,authPwd=null){
-		log.info "Get message filters for Domibus \""+side+"\".";
+		debugLog("  ====  Calling \"getMessageFilters\".",log);
+		log.info "  getMessageFilters  [][]  Get message filters for Domibus \""+side+"\".";
 	    def commandString = null;		
 		def commandResult = null;
 		def multitenancyOn=false;
@@ -1549,26 +1520,27 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def formatFilters(filtersMap,String filterChoice,context,log, String extraCriteria=null){
-		log.info "Analysing backends filters order ..."
+		debugLog("  ====  Calling \"formatFilters\".",log);
+		log.info "  formatFilters  [][]  Analysing backends filters order ..."
 		def swapBck = null;
 		def i=0;
 		assert(filtersMap!=null),"Error:formatFilters: Not able to get the backend details.";
-		debugLog("FILTERS:" + filtersMap, log);
+		debugLog("  formatFilters  [][]  FILTERS:" + filtersMap, log);
 		
 		// Single backend: no action needed
 		if(filtersMap.messageFilterEntries.size()==1){
 			return "ok";
 		}
-		debugLog("Loop over :" +filtersMap.messageFilterEntries.size()+" backend filters.", log);
+		debugLog("  formatFilters  [][]  Loop over :" +filtersMap.messageFilterEntries.size()+" backend filters.", log);
 		while(i<filtersMap.messageFilterEntries.size()){
 			assert(filtersMap.messageFilterEntries[i]!=null),"Error:formatFilters: Error while parsing filter details.";
 			if(filtersMap.messageFilterEntries[i].backendName.toLowerCase()==filterChoice.toLowerCase()){
-				debugLog("Comparing --"+filtersMap.messageFilterEntries[i].backendName+"-- and --"+filterChoice+"--", log);
+				debugLog("  formatFilters  [][]  Comparing --"+filtersMap.messageFilterEntries[i].backendName+"-- and --"+filterChoice+"--", log);
 				if((extraCriteria==null)||((extraCriteria!=null)&&filtersMap.messageFilterEntries[i].toString().contains(extraCriteria))){
 					if(i==0){
 						return "correct";
 					}
-					debugLog("switch $i element", log);
+					debugLog("  formatFilters  [][]  switch $i element", log);
 					swapBck=filtersMap.messageFilterEntries[0];
 					filtersMap.messageFilterEntries[0]=filtersMap.messageFilterEntries[i];
 					filtersMap.messageFilterEntries[i]=swapBck;
@@ -1581,7 +1553,8 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def setMessageFilters(String side, String filterChoice,context,log,domainValue="Default",String extraCriteria=null,String authUser=null,authPwd=null){
-		log.info "Start setting message filters for Domibus \""+side+"\".";
+		debugLog("  ====  Calling \"setMessageFilters\".",log);
+		log.info "  setMessageFilters  [][]  Start setting message filters for Domibus \""+side+"\".";
 		def String output=null;
 	    def commandString=null;
 		def commandResult=null;
@@ -1595,8 +1568,8 @@ class Domibus
 		try{
 			multitenancyOn=getMultitenancyFromSide(side,context,log);
 			if(multitenancyOn){
-				log.info("setMessageFilters for Domibus $side and domain $domainValue.");
-				debugLog("First, set domain to $domainValue.",log);
+				log.info("  setMessageFilters  [][]  setMessageFilters for Domibus $side and domain $domainValue.");
+				debugLog("  setMessageFilters  [][]  First, set domain to $domainValue.",log);
 				setDomain(side,context,log, domainValue);
 				// If authentication details are not fully provided, use default values 
 				if((authUser==null)||(authPwd==null)){
@@ -1605,7 +1578,7 @@ class Domibus
 				}
 			}
 			else{
-				log.info("Add admin console user for Domibus $side.");
+				log.info("  setMessageFilters  [][]  Set admin console user for Domibus $side.");
 				// If authentication details are not fully provided, use default values
 				if((authUser==null)||(authPwd==null)){
 					authenticationUser=DEFAULT_ADMIN_USER;
@@ -1614,36 +1587,37 @@ class Domibus
 			}
 		
 			filtersMap=jsonSlurper.parseText(getMessageFilters(side,context,log));
-			debugLog("filtersMap:" + filtersMap, log);
+			debugLog("  setMessageFilters  [][]  filtersMap:" + filtersMap, log);
 			assert(filtersMap!=null),"Error:setMessageFilter: Not able to get the backend details.";
 			assert(filtersMap.toString().toLowerCase().contains(filterChoice.toLowerCase())),"Error:setMessageFilter: The backend you want to set is not installed.";
 			filtersMap=formatFilters(filtersMap,filterChoice,context,log,extraCriteria);
 			assert(filtersMap!="ko"),"Error:setMessageFilter: The backend you want to set is not installed."
-			debugLog("Backend filters order analyse done.", log);
+			debugLog("  setMessageFilters  [][]  Backend filters order analyse done.", log);
 			if(filtersMap.equals("ok")){
-				log.info "Only one backend installed: Nothing to do.";
+				log.info "  setMessageFilters  [][]  Only one backend installed: Nothing to do.";
 			}
 			else{
 				if(filtersMap.equals("correct")){
-					log.info "The requested backend is already selected: Nothing to do.";
+					log.info "  setMessageFilters  [][]  The requested backend is already selected: Nothing to do.";
 				}
 				else{
 					curlParams=JsonOutput.toJson(filtersMap).toString();
 					commandString="curl "+urlToDomibus(side, log, context)+"/rest/messagefilters -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
 					commandResult = runCurlCommand(commandString,log);
 					assert(commandResult[1].contains("200 OK")||commandResult[1].contains("successfully")),"Error:setMessageFilter: Error while trying to connect to domibus.";
-					log.info "Message filters update done successfully for Domibus: \""+side+"\".";
+					log.info "  setMessageFilters  [][]  Message filters update done successfully for Domibus: \""+side+"\".";
 				}
 			}
 		}
 		finally{
-			resetAuthTokens();
+			resetAuthTokens(log);
 		}
 	} 
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 //  Curl related Functions
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	static def fetchCookieHeader(String side,context,log,String userLogin=SUPER_USER,passwordLogin=SUPER_USER_PWD){
+		debugLog("  ====  Calling \"fetchCookieHeader\".",log);
 		def commandString = null;
 		def commandResult = null;
 		
@@ -1654,7 +1628,8 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def String returnXsfrToken(String side,context,log,String userLogin=SUPER_USER,passwordLogin=SUPER_USER_PWD){
-		debugLog("Call returnXsfrToken with values: --side=$side--XSFRTOKEN_C2=$XSFRTOKEN_C2--XSFRTOKEN_C3=$XSFRTOKEN_C3.",log);
+		debugLog("  ====  Calling \"returnXsfrToken\".",log);
+		debugLog("  returnXsfrToken  [][]  Call returnXsfrToken with values: --side=$side--XSFRTOKEN_C2=$XSFRTOKEN_C2--XSFRTOKEN_C3=$XSFRTOKEN_C3.",log);
 		def String output=null;
 
 		switch(side.toLowerCase()){
@@ -1690,14 +1665,16 @@ class Domibus
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
 	static def formatJsonForCurl(String input,log){
+		debugLog("  ====  Calling \"formatJsonForCurl\".",log);
 		def intermediate=null;
 		assert(input!=null),"Error:formatJsonForCurl: input string is null.";
-		assert(input.contains("[")&&input.contains("]")),"Error:formatJsonForCurl: input string is corrupted is null.";
+		assert(input.contains("[")&&input.contains("]")),"Error:formatJsonForCurl: input string is corrupted.";
 		intermediate=input.substring(input.indexOf("[")+1,input.lastIndexOf("]")).replace("\"","\"\"\"");
 		return "[\""+intermediate+"\"]";
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
-	static def computePathRessources(String type,String extension,context){
+	static def computePathRessources(String type,String extension,context,log){
+		debugLog("  ====  Calling \"computePathRessources\".",log);
 		def returnPath = null;
 		if(type.toLowerCase()=="special"){
 			returnPath = (context.expand('${#Project#specialPModesPath}')+extension).replace("\\\\","\\").replace("\\","\\\\");			
@@ -1709,10 +1686,11 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------	
 	// Run curl command
 	static def runCurlCommand(String inputCommand,log){
+		debugLog("  ====  Calling \"runCurlCommand\".",log);
 		def proc=null;
 		def outputCatcher = new StringBuffer();
 		def errorCatcher = new StringBuffer();
-		debugLog("Run curl command: "+inputCommand,log);
+		debugLog("  runCurlCommand  [][]  Run curl command: "+inputCommand,log);
 		if(inputCommand){
 			proc = inputCommand.execute();
 			if(proc!=null){
@@ -1720,8 +1698,8 @@ class Domibus
 				proc.waitFor()
 			}
 		}
-		debugLog("outputCatcher: "+outputCatcher.toString(),log);
-		debugLog("errorCatcher: "+errorCatcher.toString(),log);
+		debugLog("  runCurlCommand  [][]  outputCatcher: "+outputCatcher.toString(),log);
+		debugLog("  runCurlCommand  [][]  errorCatcher: "+errorCatcher.toString(),log);
 		return([outputCatcher.toString(),errorCatcher.toString()]);
 	}
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
@@ -1729,24 +1707,25 @@ class Domibus
 //IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
 	// Return multitenancy mode
 	static def getMultitenancyFromSide(String side,context,log){
+		debugLog("  ====  Calling \"getMultitenancyFromSide\".",log);
 		def mode=0;
 		switch(side.toUpperCase()){
 			case "C2":
 			case "BLUE":
 			case "SENDER":
 				//mode=multitenancyModeC2;
-				mode=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC2}' ));
-				debugLog("mode on domibus $side set to $mode.",log);
+				mode=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC2}' ),log);
+				debugLog("  getMultitenancyFromSide  [][]  mode on domibus $side set to $mode.",log);
 				break;
 			case "C3":
 			case "RED":
 			case "RECEIVER":
 				//mode=multitenancyModeC3;
-				mode=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC3}' ));
-				debugLog("mode on domibus $side set to $mode.",log);
+				mode=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC3}' ),log);
+				debugLog("  getMultitenancyFromSide  [][]  mode on domibus $side set to $mode.",log);
 				break;
 			default:
-				log.error "ERROR:getMultitenancyFromSide: dominus $side not found.";
+				log.error "  getMultitenancyFromSide  [][]  ERROR:getMultitenancyFromSide: dominus $side not found.";
 		}
 		if(mode>0){
 			return true;
@@ -1765,6 +1744,7 @@ class Domibus
 //---------------------------------------------------------------------------------------------------------------------------------
     // Copy file from source to destination
     static def void copyFile(String source, String destination, log, overwriteOpt=true){
+		debugLog("  ====  Calling \"copyFile\".",log);
 		// Check that destination folder exists.
 		//def destFolder = new File("${destination}");
 		//assert destFolder.exists(), "Error while trying to copy file to folder "+destination+": Destination folder doesn't exist.";
@@ -1774,10 +1754,10 @@ class Domibus
 			builder.sequential {
 				copy(tofile: destination, file:source, overwrite:overwriteOpt)
 			}
-			log.info "File ${source} was successfuly copied to ${destination}"
+			log.info "  copyFile  [][]  File ${source} was successfuly copied to ${destination}"
 		}
 		catch(Exception ex){
-			log.error "Error while trying to copy files: "+ex;
+			log.error "  copyFile  [][]  Error while trying to copy files: "+ex;
 			assert 0;
 		}
     }
@@ -1789,9 +1769,10 @@ class Domibus
 		}
     }
 //---------------------------------------------------------------------------------------------------------------------------------
-// Return path to domibus folder
-static def String pathToDomibus(color, log, context){
-	// Return path to domibus folder base on the "color"
+	// Return path to domibus folder
+	static def String pathToDomibus(color, log, context){
+		debugLog("  ====  Calling \"pathToDomibus\".",log);
+		// Return path to domibus folder base on the "color"
 		def propName = ""
 		switch(color.toLowerCase()){
 			case "blue":
@@ -1808,36 +1789,37 @@ static def String pathToDomibus(color, log, context){
 		}
 
 		return context.expand("\${#Project#${propName}}")
-}
+	}
 //---------------------------------------------------------------------------------------------------------------------------------
    // Select C2 and C3 DB references  
     def selectCornersReferences(int selector){
-		debugLog("--- SelectCornersReferences, selector="+selector,log);
+		debugLog("  ====  Calling \"selectCornersReferences\".",log);
+		debugLog("  selectCornersReferences  [][]  SelectCornersReferences, selector="+selector,log);
 		def sqlSender=null; def sqlReceiver=null;
 		// Currently, we support only 3 domains on each corner: to be improved later in case more are needed
 		// For Backward compatibilty: to be removed afterwords
 		switch(selector){
 			case 3:
-				debugLog("sqlSender = sqlBlue; sqlReceiver = sqlRed",log);
+				debugLog("  selectCornersReferences  [][]  sqlSender = sqlBlue; sqlReceiver = sqlRed",log);
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 			case 5:
-				debugLog("sqlSender = sqlBlue; sqlReceiver = sqlGreen",log);
+				debugLog("  selectCornersReferences  [][]  sqlSender = sqlBlue; sqlReceiver = sqlGreen",log);
 				sqlSender = sqlBlue; sqlReceiver = sqlGreen;
 				break;
 			case 6:
-				debugLog("sqlSender = sqlRed; sqlReceiver = sqlGreen",log);
+				debugLog("  selectCornersReferences  [][]  sqlSender = sqlRed; sqlReceiver = sqlGreen",log);
 				sqlSender = sqlRed; sqlReceiver = sqlGreen;
 				break;
 			default:
-				debugLog("sqlSender = sqlBlue; sqlReceiver = sqlRed",log);
+				debugLog("  selectCornersReferences  [][]  sqlSender = sqlBlue; sqlReceiver = sqlRed",log);
 				sqlSender = sqlBlue; sqlReceiver = sqlRed;
 				break;
 		}
 		if((selector>10)&&(selector<100)){
-			debugLog("sqlSender: "+sqlRefrences[selector.intdiv(10)][0],log);
+			debugLog("  selectCornersReferences  [][]  sqlSender: "+sqlRefrences[selector.intdiv(10)][0],log);
 			sqlSender=sqlRefrences[selector.intdiv(10)][1];
-			debugLog("sqlReceiver: "+sqlRefrences[selector % 10][0],log);
+			debugLog("  selectCornersReferences  [][]  sqlReceiver: "+sqlRefrences[selector % 10][0],log);
 			sqlReceiver=sqlRefrences[selector % 10][1];
 		}
 		assert((sqlSender!=null)&&(sqlReceiver!=null)),"Error: Selecting sql references: Null values found (sqlSender=$sqlSender,sqlReceiver=$sqlReceiver). Verify that you have already opened the correct DB connections.";
@@ -1846,6 +1828,7 @@ static def String pathToDomibus(color, log, context){
 //---------------------------------------------------------------------------------------------------------------------------------
    // Retrieve sql reference from schema name  
     def retrieveRefFromSchemaName(String inputName){
+		debugLog("  ====  Calling \"retrieveRefFromSchemaName\".",log);
 		def i=0;
 		def sqlDB=null;
 		// For Backward compatibilty: to be removed afterwords
@@ -1859,7 +1842,7 @@ static def String pathToDomibus(color, log, context){
                 sqlDB = this.sqlBlue
                 break
 			case "GREEN":
-				assert(thirdGateway.toLowerCase().trim()=="true"), "\"GREEN\" schema is not actif. Please set soapui project custom property \"thirdGateway\" to true."
+				assert(thirdGateway.toLowerCase().trim()=="true"), "\"GREEN\" schema is not actif. Please set soapui project custom property \"thirdGateway\" to \"true\"."
                 sqlDB = this.sqlGreen
                 break
             default:
@@ -1879,6 +1862,7 @@ static def String pathToDomibus(color, log, context){
 //---------------------------------------------------------------------------------------------------------------------------------
 	// Return url to specific domibus
 	static def String urlToDomibus(side, log, context){
+		debugLog("  ====  Calling \"urlToDomibus\".",log);
 		// Return url to specific domibus base on the "side"
 		def propName = ""
 		switch(side.toLowerCase()){
@@ -1892,6 +1876,7 @@ static def String pathToDomibus(color, log, context){
 			case "receiver":
 				propName = "remoteUrl"
 				break;
+			case "green":
 			case "receivergreen":
 				propName  = "greenUrl"
 				break;
@@ -1901,22 +1886,7 @@ static def String pathToDomibus(color, log, context){
 			default:
 				assert (false) , "Unknown side. Supported values: sender, receiver, receivergreen and testEnv"
 		}
-
 		return context.expand("\${#Project#${propName}}")
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
-	// !!! To be removed !!!
-	// Switch the jdbcURLs
-	static def swapJdbcUrls(String msh1,String msh2, testRunner, log){
-		def name1 = "jdbcUrl"+msh1;
-		def name2 = "jdbcUrl"+msh2;
-		def jdbcUrlMsh1 = testRunner.testCase.testSuite.project.getPropertyValue(name1);
-		def jdbcUrlMsh2 = testRunner.testCase.testSuite.project.getPropertyValue(name2);
-		
-		testRunner.testCase.testSuite.project.setPropertyValue(name1,jdbcUrlMsh2);
-		testRunner.testCase.testSuite.project.setPropertyValue(name2,jdbcUrlMsh1);
-		
-		log.info "jdbcURLs swap done between "+msh1+" and "+msh2;
-
-	}
 }
