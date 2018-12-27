@@ -23,7 +23,7 @@
             <md-option [value]="'(IR)'">IR</md-option>
           </md-select>
           <div class="searchArea">
-            <button md-raised-button color="primary" id="searchbutton_id">
+            <button md-raised-button color="primary" id="searchbutton_id" button-click-behaviour>
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
@@ -76,23 +76,23 @@
 <table class="group-action-button">
   <tr>
     <td>
-      <button md-raised-button (click)="cancel()" color="primary" [disabled]="!canCancel()">
+      <button md-raised-button (click)="cancel()" color="primary" [disabled]="!canCancel()" button-click-behaviour>
         <md-icon>cancel</md-icon>
         <span>Cancel</span>
       </button>
-      <button md-raised-button (click)="save()" color="primary" [disabled]="!canSave()">
+      <button md-raised-button (click)="save()" color="primary" [disabled]="!canSave()" button-click-behaviour>
         <md-icon>save</md-icon>
         <span>Save</span>
       </button>
-      <button md-raised-button (click)="add()" color="primary" [disabled]="!canAdd()">
+      <button md-raised-button (click)="add()" color="primary" [disabled]="!canAdd()" button-click-behaviour>
         <md-icon>add</md-icon>
         <span>New</span>
       </button>
-      <button md-raised-button (click)="edit(null)" color="primary" [disabled]="!canEdit()">
+      <button md-raised-button (click)="edit(null)" color="primary" [disabled]="!canEdit()" button-click-behaviour>
         <md-icon>edit</md-icon>
         <span>Edit</span>
       </button>
-      <button md-raised-button (click)="remove()" color="primary" [disabled]="!canDelete()">
+      <button md-raised-button (click)="remove()" color="primary" [disabled]="!canDelete()" button-click-behaviour>
         <md-icon>delete</md-icon>
         <span>Delete</span>
       </button>
