@@ -1345,6 +1345,7 @@ class Domibus
 		def authenticationPwd=authPwd;
 		def originalUser=null;
 		def rolePl=null;
+		def entityId=null;
 		def i=0;
 		
 		try{
@@ -1379,14 +1380,15 @@ class Domibus
 					if(usersMap.entries[i].username==userPl){
 						rolePl=usersMap.entries[i].authRoles;
 						originalUser=usersMap.entries[i].originalUser;
+						entityId=usersMap.entries[i].entityId;
 						i=usersMap.entries.size();
 					}
 					i++;
 				}
 				assert(rolePl!=null),"Error:removePluginUser: Error while fetching the role of user \"$userPl\".";
 				assert(originalUser!=null),"Error:removePluginUser: Error while fetching the original user of user \"$userPl\".";
-				//curlParams="[\n  {\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\",\n    \"hiddenPassword\": \"******\"\n  }\n]";
-				curlParams="[\n  {\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
+				assert(entityId!=null),"Error:removePluginUser: Error while fetching the \"entityId\" of user \"$userPl\" from the user list.";
+				curlParams="[\n  {\n    \"entityId\": $entityId,\n    \"username\": \"$userPl\",\n    \"password\": null,\n    \"certificateId\": null,\n    \"originalUser\": \"$originalUser\",\n    \"authRoles\": \"$rolePl\",\n    \"authenticationType\": \"BASIC\",\n    \"status\": \"REMOVED\"\n  }\n]";
 				commandString="curl "+urlToDomibus(side, log, context)+"/rest/plugin/users -b "+context.expand( '${projectDir}')+"\\cookie.txt -v -H \"Content-Type: application/json\" -H \"X-XSRF-TOKEN: "+ returnXsfrToken(side,context,log,authenticationUser,authenticationPwd) +"\" -X PUT -d "+formatJsonForCurl(curlParams,log);
 				commandResult = runCurlCommand(commandString,log);	
 				assert(commandResult[1].contains("200 OK")||(commandResult[1]==~ /(?s).*HTTP\/\d.\d\s*204.*/)),"Error:removePluginUser: Error while trying to remove user $userPl.";
