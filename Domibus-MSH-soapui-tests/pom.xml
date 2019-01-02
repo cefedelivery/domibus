@@ -66,16 +66,9 @@
                         <projectProperties>
                             <value>${localUrl}</value>
                             <value>${remoteUrl}</value>
-                            <value>${driverBlue}</value>
-                            <value>${driverRed}</value>
-                            <value>${jdbcUrlBlue}</value>
-                            <value>${jdbcUrlRed}</value>
-                            <value>${databaseBlue}</value>
-                            <value>${databaseRed}</value>
-                            <value>${blueDbUser}</value>
-                            <value>${blueDbPassword}</value>
-                            <value>${redDbUser}</value>
-                            <value>${redDbPassword}</value>
+							<value>${allDBproperties}</value>
+							<value>multitenancyModeC2=0</value>
+							<value>multitenancyModeC3=0</value>
                             <value>updateReport=false</value>
                             <value>thirdGateway=false</value>
                             <value>pdfAttachment=${soapui.root.folder}/resources/fileSmall.pdf</value>

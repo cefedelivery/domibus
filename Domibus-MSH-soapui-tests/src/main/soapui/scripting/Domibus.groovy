@@ -19,6 +19,7 @@ class Domibus
     def messageExchange=null;
     def context=null;
     def log=null;
+	def allDBproperties=null;
 	// sleepDelay value is increased from 2000 to 6000 because of pull request take longer ...
     def sleepDelay=6000
     def sqlBlue=null; def sqlC2Dom1=null; def sqlC2Dom2=null; def sqlC2Dom3=null;
@@ -47,6 +48,7 @@ class Domibus
         this.log = log;
         this.messageExchange = messageExchange;
         this.context=context;
+		allDBproperties=context.expand( '${#Project#allDBproperties}' );
 		thirdGateway = context.expand( '${#Project#thirdGateway}' );
 		multitenancyModeC2=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC2}' ),log);
 		multitenancyModeC3=getMultitenancyMode(context.expand( '${#Project#multitenancyModeC3}' ),log);
@@ -94,32 +96,69 @@ class Domibus
         }
 	}
 //---------------------------------------------------------------------------------------------------------------------------------	
+    // Return DB connections properties
+    def returnDBconnectionProperties(String DBconnectionAlias){
+		debugLog("  ====  Calling \"returnDBproperties\".",log);
+		debugLog("  returnDBproperties  [][]  Return database properties for connection \"$DBconnectionAlias\" ...",log);
+		def jsonSlurper = new JsonSlurper();
+		def dbpropMap=jsonSlurper.parseText(allDBproperties);
+		
+		debugLog("  returnDBproperties  [][]  All DB custom properties list $dbpropMap.",log);
+		debugLog("  returnDBproperties  [][]  DONE.",log);
+		debugLog("  returnDBproperties  [][]  Custom properties targeted by alias \"$DBconnectionAlias\": "+dbpropMap."$DBconnectionAlias"+".",log);
+		assert(dbpropMap."$DBconnectionAlias".dbType!=null),"Error:returnDBproperties: \"dbType\" property couldn't be retrieved for connection \"$DBconnectionAlias\".";
+		assert(dbpropMap."$DBconnectionAlias".dbDriver!=null),"Error:returnDBproperties: \"dbDriver\" property couldn't be retrieved for connection \"$DBconnectionAlias\".";
+		assert(dbpropMap."$DBconnectionAlias".dbJdbcUrl!=null),"Error:returnDBproperties: \"dbJdbcUrl\" property couldn't be retrieved for connection \"$DBconnectionAlias\".";
+		assert(dbpropMap."$DBconnectionAlias".dbUser!=null),"Error:returnDBproperties: \"dbUser\" property couldn't be retrieved for connection \"$DBconnectionAlias\".";
+		assert(dbpropMap."$DBconnectionAlias".dbPassword!=null),"Error:returnDBproperties: \"dbPassword\" property couldn't be retrieved for connection \"$DBconnectionAlias\".";
+		
+		return [dbpropMap."$DBconnectionAlias".dbType,dbpropMap."$DBconnectionAlias".dbDriver,dbpropMap."$DBconnectionAlias".dbJdbcUrl,dbpropMap."$DBconnectionAlias".dbUser,dbpropMap."$DBconnectionAlias".dbPassword];
+	}
+//---------------------------------------------------------------------------------------------------------------------------------	
     // Open DB connections
     def openConnection(){
 		debugLog("  ====  Calling \"openConnection\".",log);
 		def i=0;
-		sqlBlue=connectTo(context.expand( '${#Project#databaseBlue}' ),context.expand('${#Project#driverBlue}'),context.expand('${#Project#jdbcUrlBlue}'),context.expand( '${#Project#blueDbUser}' ),context.expand( '${#Project#blueDbPassword}' ));
-		sqlRed=connectTo(context.expand( '${#Project#databaseRed}' ),context.expand('${#Project#driverRed}'),context.expand('${#Project#jdbcUrlRed}'),context.expand( '${#Project#redDbUser}' ),context.expand( '${#Project#redDbPassword}' ));
+		def tableProp=null;
+		
+		tableProp=returnDBconnectionProperties("DBc2Default");
+		sqlBlue=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
+		tableProp=null;
+		tableProp=returnDBconnectionProperties("DBc3Default");
+		sqlRed=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
+
+		if(thirdGateway.toLowerCase().trim()=="true"){
+			tableProp=null;
+			tableProp=returnDBconnectionProperties("DBthirdDefault");
+			sqlGreen=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
+		}
+		
 		sqlRefrences[0][1]=sqlBlue;
 		sqlRefrences[1][1]=sqlRed;
 		sqlRefrences[2][1]=sqlGreen;
-		if(thirdGateway.toLowerCase().trim()=="true"){
-			sqlGreen=connectTo(context.expand( '${#Project#databaseGreen}' ),context.expand('${#Project#driverGreen}'),context.expand('${#Project#jdbcUrlGreen}'),context.expand( '${#Project#greenDbUser}' ),context.expand( '${#Project#greenDbPassword}' ));
-		}
+		
 		while(i<multitenancyModeC2){
-			sqlRefrences[i+3][1]=connectTo(context.expand( '${#Project#databaseC2Dom'+(i+1)+'}' ),context.expand('${#Project#driverC2Dom'+(i+1)+'}'),context.expand('${#Project#jdbcUrlC2Dom'+(i+1)+'}'),context.expand( '${#Project#C2Dom'+(i+1)+'DbUser}' ),context.expand( '${#Project#C2Dom'+(i+1)+'DbPassword}' ));
+			tableProp=null;
+			tableProp=returnDBconnectionProperties("DBc2Dom"+i);
+			sqlRefrences[i+3][1]=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
 			i++;
 		}
 		i=0;
 		while(i<multitenancyModeC3){
-			sqlRefrences[i+6][1]=connectTo(context.expand( '${#Project#databaseC3Dom'+(i+1)+'}' ),context.expand('${#Project#driverC3Dom'+(i+1)+'}'),context.expand('${#Project#jdbcUrlC3Dom'+(i+1)+'}'),context.expand( '${#Project#C3Dom'+(i+1)+'DbUser}' ),context.expand( '${#Project#C3Dom'+(i+1)+'DbPassword}' ));
+			tableProp=null;
+			tableProp=returnDBconnectionProperties("DBc3Dom"+i);
+			sqlRefrences[i+6][1]=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
 			i++;
 		}
 		if(multitenancyModeC2>0){
-			sqlRefrences[9][1]=connectTo(context.expand( '${#Project#databaseGeneralC2}' ),context.expand('${#Project#driverGeneralC2}'),context.expand('${#Project#jdbcUrlGeneralC2}'),context.expand( '${#Project#generalDbUserC2}' ),context.expand( '${#Project#generalDbPasswordC2}' ));
+			tableProp=null;
+			tableProp=returnDBconnectionProperties("DBgeneralC2");
+			sqlRefrences[9][1]=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
 		}
 		if(multitenancyModeC3>0){
-			sqlRefrences[10][1]=connectTo(context.expand( '${#Project#databaseGeneralC3}' ),context.expand('${#Project#driverGeneralC3}'),context.expand('${#Project#jdbcUrlGeneralC3}'),context.expand( '${#Project#generalDbUserC3}' ),context.expand( '${#Project#generalDbPasswordC3}' ));
+			tableProp=null;
+			tableProp=returnDBconnectionProperties("DBgeneralC3");
+			sqlRefrences[10][1]=connectTo(tableProp[0],tableProp[1],tableProp[2],tableProp[3],tableProp[4]);
 		}
 	}
 //---------------------------------------------------------------------------------------------------------------------------------
