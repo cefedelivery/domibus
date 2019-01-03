@@ -144,15 +144,6 @@ public class AlertResource {
         domainTaskExecutor.submit(() -> alertService.updateAlertProcessed(superAlerts));
     }
 
-    private Alert toAlert(AlertRo alertRo) {
-        final int entityId = alertRo.getEntityId();
-        final boolean processed = alertRo.isProcessed();
-        Alert alert = new Alert();
-        alert.setEntityId(entityId);
-        alert.setProcessed(processed);
-        return alert;
-    }
-
     @GetMapping(path = "/csv")
     public ResponseEntity<String> getCsv(@RequestParam(value = "page", defaultValue = "0") int page,
                                          @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
@@ -169,8 +160,8 @@ public class AlertResource {
                                          @RequestParam(value = "reportingTo", required = false) String reportingTo,
                                          @RequestParam(value = "parameters", required = false) String[] nonDateDynamicParameters,
                                          @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
-                                         @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
-    ) {
+                                         @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo,
+                                        @RequestParam(value = "domainAlerts", required = false, defaultValue = "false") Boolean domainAlerts) {
 
         AlertCriteria alertCriteria = getAlertCriteria(
                 0,
@@ -190,9 +181,12 @@ public class AlertResource {
                 dynamicaPropertyFrom,
                 dynamicaPropertyTo);
 
-        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
-        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
-
+        List<AlertRo> alertRoList;
+        if (!authUtils.isSuperAdmin() || domainAlerts) {
+            alertRoList = fetchAndTransformAlerts(alertCriteria, false);
+        } else {
+            alertRoList = domainTaskExecutor.submit(() -> fetchAndTransformAlerts(alertCriteria, true));
+        }
 
         String resultText;
         try {
@@ -210,6 +204,22 @@ public class AlertResource {
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("alerts"))
                 .body(resultText);
 
+    }
+
+    private Alert toAlert(AlertRo alertRo) {
+        final int entityId = alertRo.getEntityId();
+        final boolean processed = alertRo.isProcessed();
+        Alert alert = new Alert();
+        alert.setEntityId(entityId);
+        alert.setProcessed(processed);
+        return alert;
+    }
+
+    private List<AlertRo> fetchAndTransformAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
+        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        alertRoList.forEach(alert->alert.setSuperAdmin(isSuperAdmin));
+        return alertRoList;
     }
 
     private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String
