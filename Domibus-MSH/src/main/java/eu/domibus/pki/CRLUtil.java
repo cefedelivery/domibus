@@ -67,7 +67,7 @@ public class CRLUtil {
     /**
      * Downloads CRL from the given URL. Supports loading the crl using http, https, ftp based,  classpath
      */
-    private X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
+    protected X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
         LOG.debug("Downloading CRL from url [{}]", crlURL);
 
         URL url;
