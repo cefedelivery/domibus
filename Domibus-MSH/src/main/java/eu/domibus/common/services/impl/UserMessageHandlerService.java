@@ -322,14 +322,33 @@ public class UserMessageHandlerService {
     }
 
     /**
-     * If message with same messageId is already in the database return <code>true</code> else <code>false</code>
+     * If a message with same messageId and from party value is already in the database return <code>true</code> else <code>false</code>
      *
-     * @param messaging the message
-     * @return result of duplicate handle
+     * @param messaging the received message
+     * @return result of duplicate check
+     * @throws EbMS3Exception if message already exists and the From party value from the received message is different than the From party value from the existing message
      */
-    Boolean checkDuplicate(final Messaging messaging) {
+    protected Boolean checkDuplicate(final Messaging messaging) throws EbMS3Exception {
         LOG.debug("Checking for duplicate messages");
-        return userMessageLogDao.findByMessageId(messaging.getUserMessage().getMessageInfo().getMessageId(), MSHRole.RECEIVING) != null;
+        final String messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
+        final boolean messageExists = userMessageLogDao.findByMessageId(messageId, MSHRole.RECEIVING) != null;
+        if (!messageExists) {
+            LOG.debug("Message [{}] is not a duplicate", messageId);
+            return false;
+        }
+        LOG.debug("Message [{}] already exists: checking the from party", messageId);
+        final UserMessage existingUserMessage = messagingDao.findUserMessageByMessageId(messageId);
+        final String existingFromPartyValue = existingUserMessage.getPartyInfo().getFrom().getFirstPartyId();
+        final String receivedFromPartyValue = messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId();
+        final boolean fromPartyValueIsEqual = StringUtils.equals(existingFromPartyValue, receivedFromPartyValue);
+
+        if (!fromPartyValueIsEqual) {
+            LOG.debug("From party value from the received message [{}] is different than the From party value from the existing message [{}]", receivedFromPartyValue, existingFromPartyValue);
+            EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0003, "From party value from the received message [" + receivedFromPartyValue + "] is different than the From party value from the existing message", messageId, null);
+            ex.setMshRole(MSHRole.RECEIVING);
+            throw ex;
+        }
+        return true;
     }
 
     void handlePayloads(SOAPMessage request, UserMessage userMessage) throws EbMS3Exception, SOAPException, TransformerException {
@@ -468,7 +487,7 @@ public class UserMessageHandlerService {
 
     protected void setMessagingId(SOAPMessage responseMessage, UserMessage userMessage) throws SOAPException {
         final Iterator childElements = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
-        if(childElements == null || !childElements.hasNext()) {
+        if (childElements == null || !childElements.hasNext()) {
             LOG.warn("Could not set the Messaging Id value");
             return;
         }
