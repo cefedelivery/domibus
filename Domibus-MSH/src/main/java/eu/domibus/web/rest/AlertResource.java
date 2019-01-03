@@ -215,7 +215,7 @@ public class AlertResource {
         return alert;
     }
 
-    private List<AlertRo> fetchAndTransformAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
+    protected List<AlertRo> fetchAndTransformAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
         alertRoList.forEach(alert->alert.setSuperAdmin(isSuperAdmin));
