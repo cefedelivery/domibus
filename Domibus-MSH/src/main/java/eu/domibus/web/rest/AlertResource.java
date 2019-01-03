@@ -13,7 +13,6 @@ import eu.domibus.core.csv.CsvCustomColumns;
 import eu.domibus.core.csv.CsvService;
 import eu.domibus.core.csv.CsvServiceImpl;
 import eu.domibus.logging.DomibusLoggerFactory;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,16 +83,17 @@ public class AlertResource {
                 dynamicaPropertyTo);
 
         if (!authUtils.isSuperAdmin() || domainAlerts) {
-            return retrieveAlerts(alertCriteria);
+            return retrieveAlerts(alertCriteria, false);
         }
 
-        return domainTaskExecutor.submit(() -> retrieveAlerts(alertCriteria));
+        return domainTaskExecutor.submit(() -> retrieveAlerts(alertCriteria, true));
     }
 
-    private AlertResult retrieveAlerts(AlertCriteria alertCriteria) {
+    private AlertResult retrieveAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
         final Long alertCount = alertService.countAlerts(alertCriteria);
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        alertRoList.forEach(alert->alert.setSuperAdmin(isSuperAdmin));
         final AlertResult alertResult = new AlertResult();
         alertResult.setAlertsEntries(alertRoList);
         alertResult.setCount(alertCount.intValue());
@@ -128,7 +128,7 @@ public class AlertResource {
             return Lists.newArrayList();
         }
         List<EventType> sourceEvents = alertType.getSourceEvents();
-        if(!sourceEvents.isEmpty()) {
+        if (!sourceEvents.isEmpty()) {
             return sourceEvents.get(0).getProperties();
         } else {
             LOG.trace("Invalid alert type:[{}]: it has no source events.", aType);
