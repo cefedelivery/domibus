@@ -244,7 +244,7 @@ public class MessageLogResource {
         LOG.debug("Getting last sent test message for partyId='{}'", partyId);
 
         String userMessageId = userMessageLogDao.findLastUserTestMessageId(partyId);
-        if(StringUtils.isBlank(userMessageId)) {
+        if (StringUtils.isBlank(userMessageId)) {
             LOG.debug("Could not find last user message id for party [{}]", partyId);
             return ResponseEntity.noContent().build();
         }
@@ -253,7 +253,7 @@ public class MessageLogResource {
         //TODO create a UserMessageLog object independent of Hibernate annotations in the domibus-api and use the UserMessageLogService instead
         try {
             userMessageLog = userMessageLogDao.findByMessageId(userMessageId);
-        } catch (NoResultException ex){
+        } catch (NoResultException ex) {
             LOG.trace("No UserMessageLog found for message with id [{}]", userMessageId);
         }
 
@@ -275,24 +275,25 @@ public class MessageLogResource {
     public ResponseEntity<TestServiceMessageInfoRO> getLastTestReceived(@RequestParam(value = "partyId") String partyId, @RequestParam(value = "userMessageId") String userMessageId) {
         LOG.debug("Getting last received test message from partyId='{}'", partyId);
         Messaging messaging = messagingDao.findMessageByMessageId(userMessageId);
-        if(messaging == null) {
+        if (messaging == null) {
             LOG.debug("Could not find messaging for message ID[{}]", userMessageId);
             return ResponseEntity.noContent().build();
         }
 
         SignalMessage signalMessage = messaging.getSignalMessage();
-        if (signalMessage != null) {
-            TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
-            testServiceMessageInfoRO.setMessageId(signalMessage.getMessageInfo().getMessageId());
-            testServiceMessageInfoRO.setTimeReceived(signalMessage.getMessageInfo().getTimestamp());
-            Party party = pModeProvider.getPartyByIdentifier(partyId);
-            testServiceMessageInfoRO.setPartyId(partyId);
-            testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
-
-            return ResponseEntity.ok().body(testServiceMessageInfoRO);
+        if (signalMessage == null) {
+            LOG.debug("Could not find signal message for message ID[{}]", userMessageId);
+            return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.noContent().build();
+        TestServiceMessageInfoRO testServiceMessageInfoRO = new TestServiceMessageInfoRO();
+        testServiceMessageInfoRO.setMessageId(signalMessage.getMessageInfo().getMessageId());
+        testServiceMessageInfoRO.setTimeReceived(signalMessage.getMessageInfo().getTimestamp());
+        Party party = pModeProvider.getPartyByIdentifier(partyId);
+        testServiceMessageInfoRO.setPartyId(partyId);
+        testServiceMessageInfoRO.setAccessPoint(party.getEndpoint());
+
+        return ResponseEntity.ok().body(testServiceMessageInfoRO);
     }
 
     private HashMap<String, Object> createFilterMap(@RequestParam(value = "messageId", required = false) String messageId, @RequestParam(value = "conversationId", required = false) String conversationId, @RequestParam(value = "mshRole", required = false) MSHRole mshRole, @RequestParam(value = "messageStatus", required = false) MessageStatus messageStatus, @RequestParam(value = "notificationStatus", required = false) NotificationStatus notificationStatus, @RequestParam(value = "fromPartyId", required = false) String fromPartyId, @RequestParam(value = "toPartyId", required = false) String toPartyId, @RequestParam(value = "refToMessageId", required = false) String refToMessageId, @RequestParam(value = "originalSender", required = false) String originalSender, @RequestParam(value = "finalRecipient", required = false) String finalRecipient, @RequestParam(value = "messageSubtype") MessageSubtype messageSubtype) {
