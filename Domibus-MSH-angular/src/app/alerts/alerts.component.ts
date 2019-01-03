@@ -39,14 +39,12 @@ export class AlertsComponent {
 
   // data table
   rows = [];
-  count: number = 0;
-  offset: number = 0;
-  //default value
-  orderBy: string = 'creationTime';
-  //default value
-  asc: boolean = false;
+  count = 0;
+  offset = 0;
+  orderBy = 'creationTime';
+  asc = false;
 
-  buttonsDisabled: boolean = true;
+  isDirty = false;
 
   aTypes = [];
   aStatuses = [];
@@ -328,7 +326,7 @@ export class AlertsComponent {
   }
 
   saveAsCSV () {
-    if (!this.buttonsDisabled) {
+    if (this.isDirty) {
       this.save(true);
     } else {
       if (this.count > AlertComponent.MAX_COUNT_CSV) {
@@ -390,20 +388,21 @@ export class AlertsComponent {
     this.dialog.open(CancelDialogComponent)
       .afterClosed().subscribe(result => {
       if (result) {
-        this.buttonsDisabled = true;
+        this.isDirty = false;
         this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
       }
     });
   }
 
   save (withDownloadCSV: boolean) {
-    let headers = new Headers({'Content-Type': 'application/json'});
-    let dialogRef = this.dialog.open(SaveDialogComponent);
+    const headers = new Headers({'Content-Type': 'application/json'});
+    const dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(() => {
           this.alertService.success('The operation \'update alerts\' completed successfully.', false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+          this.isDirty = false;
           if (withDownloadCSV) {
             DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL);
           }
@@ -420,7 +419,7 @@ export class AlertsComponent {
   }
 
   setProcessedValue (row) {
-    this.buttonsDisabled = false;
+    this.isDirty = true;
     row.processed = !row.processed;
     this.rows[row.$$index] = row;
   }
