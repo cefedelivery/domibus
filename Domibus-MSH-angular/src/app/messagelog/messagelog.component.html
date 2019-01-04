@@ -90,7 +90,7 @@
           </ng-container>
 
           <div class="searchArea">
-            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id">
+            <button md-raised-button color="primary" [disabled]="!filterForm.form.valid" id="searchbutton_id" button-click-behaviour>
               <md-icon>search</md-icon>
               <span>Search</span>
             </button>
@@ -113,7 +113,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
@@ -170,12 +170,12 @@
 
   <div class="group-action-button">
     <button md-raised-button color="primary" [disabled]="!isDownloadButtonEnabled()" (click)="download()"
-            id="downloadbutton_id">
+            id="downloadbutton_id" button-click-behaviour>
       <md-icon>file_download</md-icon>
       <span>Download</span>
     </button>
     <button md-raised-button color="primary" [disabled]="!isResendButtonEnabled()" (click)="resendDialog()"
-            id="resendbutton_id">
+            id="resendbutton_id" button-click-behaviour>
       <md-icon>send</md-icon>
       <span>Resend</span>
     </button>
