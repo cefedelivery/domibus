@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 
 @Entity
-@Table(name = "TB_PLUGIN_USER_PASSWORD_HISTORY")
+@Table(name = "TB_PLUGIN_USER_PASSWD_HISTORY")
 @NamedQueries({
         @NamedQuery(name = "PluginUserPasswordHistory.findPasswords",
                 query = "from PluginUserPasswordHistory where user=:USER order by passwordChangeDate DESC"),

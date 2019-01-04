@@ -38,7 +38,7 @@
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="IDX_USER_PASSWORD_HISTORY_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
+        <createIndex indexName="IDX_UPH_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
             <column name="USER_ID"/>
         </createIndex>
 
@@ -76,7 +76,7 @@
             <column name="DEFAULT_PASSWORD" type="BOOLEAN" defaultValueBoolean="false" />
         </addColumn>
 
-        <createTable tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+        <createTable tableName="TB_PLUGIN_USER_PASSWD_HISTORY">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
@@ -89,12 +89,12 @@
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWD_HISTORY">
             <column name="USER_ID"/>
         </createIndex>
 
-        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWORD_HISTORY"
-                                 constraintName="FK_PLUGIN_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWD_HISTORY"
+                                 constraintName="FK_PLUGIN_USER_PASSWD_HISTORY" deferrable="false" initiallyDeferred="false"
                                  onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_AUTHENTICATION_ENTRY"/>
 
