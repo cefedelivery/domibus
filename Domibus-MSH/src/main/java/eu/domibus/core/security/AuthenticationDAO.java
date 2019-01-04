@@ -3,7 +3,6 @@ package eu.domibus.core.security;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.dao.BasicDao;
 import eu.domibus.common.dao.security.UserDaoBase;
-import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserEntityBase;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
