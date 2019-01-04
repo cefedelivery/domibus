@@ -82,8 +82,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.debug("Received message");
 
-        validatePayloads(submitRequest.getPayload());
-
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
         List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
 
@@ -98,7 +96,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.debug("Looking for payload: " + href);
             for (final LargePayloadType payload : submitRequest.getPayload()) {
                 LOG.debug("comparing with payload id: " + payload.getPayloadId());
-                if (!payload.isInBody() && StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
+                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
@@ -109,7 +107,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             }
 
             if (!foundPayload) {
-                final LargePayloadType bodyload = getInBodyPayload(submitRequest.getPayload());
+                final LargePayloadType bodyload = submitRequest.getBodyload();
                 if (bodyload == null) {
                     // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
                     throw new SubmitMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
@@ -142,17 +140,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
-    }
-
-    protected void validatePayloads(List<LargePayloadType> payloadList) throws SubmitMessageFault {
-        final long inBodyPayloads = payloadList.stream().filter(payload -> payload.isInBody()).count();
-        if (inBodyPayloads > 1) {
-            throw new SubmitMessageFault("Multiple inBody payloads detected. Only one inBody payload is allowed", generateDefaultFaultDetail(null));
-        }
-    }
-
-    protected LargePayloadType getInBodyPayload(List<LargePayloadType> payloadList) {
-        return payloadList.stream().filter(payload -> payload.isInBody()).findFirst().orElse(null);
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {

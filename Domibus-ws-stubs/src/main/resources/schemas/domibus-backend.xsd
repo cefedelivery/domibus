@@ -67,6 +67,7 @@
     <xsd:element name="submitRequest">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element minOccurs="0" name="bodyload" type="tns:LargePayloadType"/>
                 <xsd:element maxOccurs="unbounded" minOccurs="0" name="payload" nillable="true" type="tns:LargePayloadType"/>
             </xsd:sequence>
         </xsd:complexType>
@@ -93,7 +94,6 @@
         </xsd:sequence>
         <xsd:attribute name="payloadId" type="xsd:token" use="required"/>
         <xsd:attribute name="contentType" type="xsd:string"/>
-        <xsd:attribute name="inBody" type="xsd:boolean" use="optional"/>
     </xsd:complexType>
 
     <xsd:complexType name="errorResultImpl">
