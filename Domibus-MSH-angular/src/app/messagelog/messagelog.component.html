@@ -2,9 +2,7 @@
 
 <div class="selectionCriteria">
   <md-card>
-
     <md-card-content>
-
       <div class="panel">
         <form name="filterForm" #filterForm="ngForm" (ngSubmit)="search()">
           <md-input-container>
@@ -95,7 +93,7 @@
               <span>Search</span>
             </button>
             <a href="#" *ngIf="!advancedSearch" (click)="toggleAdvancedSearch()" id="advancedlink_id">Advanced</a>
-            <a href="#" *ngIf="advancedSearch" (click)="toggleAdvancedSearch()" id="basiclink_id">Basic</a>
+            <a href="#" *ngIf="advancedSearch" (click)="toggleBasicSearch()" id="basiclink_id">Basic</a>
           </div>
         </form>
       </div>
