@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.xml.ws.BindingType;
 import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
@@ -81,8 +82,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.debug("Received message");
 
-        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
+        validatePayloads(submitRequest.getPayload());
 
+        List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
         List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
 
         for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
@@ -96,7 +98,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
             LOG.debug("Looking for payload: " + href);
             for (final LargePayloadType payload : submitRequest.getPayload()) {
                 LOG.debug("comparing with payload id: " + payload.getPayloadId());
-                if (StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
+                if (!payload.isInBody() && StringUtils.equalsIgnoreCase(payload.getPayloadId(), href)) {
                     this.copyPartProperties(payload.getContentType(), extendedPartInfo);
                     extendedPartInfo.setInBody(false);
                     LOG.debug("sendMessage - payload Content Type: " + payload.getContentType());
@@ -105,8 +107,22 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                     break;
                 }
             }
+
             if (!foundPayload) {
-                throw new SubmitMessageFault("No Payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                final LargePayloadType bodyload = getInBodyPayload(submitRequest.getPayload());
+                if (bodyload == null) {
+                    // in this case the payload referenced in the partInfo was neither an external payload nor a bodyload
+                    throw new SubmitMessageFault("No Payload or Bodyload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
+                // It can only be in body load, href MAY be null!
+                if (href == null && bodyload.getPayloadId() == null || href != null && StringUtils.equalsIgnoreCase(href, bodyload.getPayloadId())) {
+                    this.copyPartProperties(bodyload.getContentType(), extendedPartInfo);
+                    extendedPartInfo.setInBody(true);
+                    LOG.debug("sendMessage - bodyload Content Type: " + bodyload.getContentType());
+                    extendedPartInfo.setPayloadDatahandler(bodyload.getValue());
+                } else {
+                    throw new SubmitMessageFault("No payload found for PartInfo with href: " + extendedPartInfo.getHref(), generateDefaultFaultDetail(extendedPartInfo.getHref()));
+                }
             }
         }
         partInfoList.addAll(partInfosToAdd);
@@ -126,6 +142,17 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
+    }
+
+    protected void validatePayloads(List<LargePayloadType> payloadList) throws SubmitMessageFault {
+        final long inBodyPayloads = payloadList.stream().filter(payload -> payload.isInBody()).count();
+        if (inBodyPayloads > 1) {
+            throw new SubmitMessageFault("Multiple inBody payloads detected. Only one inBody payload is allowed", generateDefaultFaultDetail(null));
+        }
+    }
+
+    protected LargePayloadType getInBodyPayload(List<LargePayloadType> payloadList) {
+        return payloadList.stream().filter(payload -> payload.isInBody()).findFirst().orElse(null);
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
@@ -198,12 +225,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         UserMessage userMessage;
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(retrieveMessageRequest.getMessageID());
 
-        if(!isMessageIdNotEmpty) {
+        if (!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new RetrieveMessageFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
 
-        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t","");
+        String trimmedMessageId = trim(retrieveMessageRequest.getMessageID()).replace("\t", "");
 
         try {
             userMessage = downloadMessage(trimmedMessageId, null);
@@ -243,7 +270,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         for (final PartInfo partInfo : messaging.getUserMessage().getPayloadInfo().getPartInfo()) {
             ExtendedPartInfo extPartInfo = (ExtendedPartInfo) partInfo;
             LargePayloadType payloadType = WEBSERVICE_OF.createLargePayloadType();
-            if(extPartInfo.getPayloadDatahandler() != null) {
+            if (extPartInfo.getPayloadDatahandler() != null) {
                 LOG.debug("payloadDatahandler Content Type: " + extPartInfo.getPayloadDatahandler().getContentType());
                 payloadType.setValue(extPartInfo.getPayloadDatahandler());
             }
@@ -282,7 +309,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public MessageStatus getStatus(final StatusRequest statusRequest) throws StatusFault {
         boolean isMessageIdNotEmpty = StringUtils.isNotEmpty(statusRequest.getMessageID());
 
-        if(!isMessageIdNotEmpty) {
+        if (!isMessageIdNotEmpty) {
             LOG.error(MESSAGE_ID_EMPTY);
             throw new StatusFault(MESSAGE_ID_EMPTY, createFault("MessageId is empty"));
         }
