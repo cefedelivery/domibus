@@ -1,7 +1,9 @@
 package eu.domibus.core.security;
 
+import eu.domibus.common.model.common.RevisionLogicalName;
 import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.common.model.security.UserEntityBaseImpl;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
                 "and ae.passwordChangeDate>:START_DATE and ae.passwordChangeDate<:END_DATE " + "and ae.defaultPassword=:DEFAULT_PASSWORD"),
         @NamedQuery(name = "AuthenticationEntity.findSuspendedUsers", query = "FROM AuthenticationEntity u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
 })
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("PluginUser")
 public class AuthenticationEntity extends UserEntityBaseImpl implements UserEntityBase {
 
     @Column(name = "CERTIFICATE_ID")

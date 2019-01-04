@@ -28,7 +28,7 @@
                         #timestampControl="ngModel" id="to_id" *ngIf="advancedSearch">
         </md2-datepicker>
         <div class="searchArea">
-          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()">
+          <button md-raised-button color="primary" id="searchbutton_id" (click)="searchAndCount()" button-click-behaviour>
             <md-icon>search</md-icon>
             <span>Search</span>
           </button>
@@ -50,7 +50,7 @@
       <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
                          (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
     </span>
-    <button md-icon-button color="primary" (click)="saveAsCSV()"
+    <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
       <img src="assets/images/exportCSV.svg" width="30" height="30">
     </button>
