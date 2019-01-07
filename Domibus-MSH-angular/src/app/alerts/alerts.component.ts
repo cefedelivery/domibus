@@ -316,11 +316,10 @@ export class AlertsComponent {
     if (event.newValue === 'desc') {
       ascending = false;
     }
-    this.page(this.offset, this.rowLimiter.pageSize, event.column.prop, ascending);
+    this.page(0, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
   changePageSize (newPageLimit: number) {
-    console.log('New page limit:', newPageLimit);
     this.rowLimiter.pageSize = newPageLimit;
     this.page(0, newPageLimit, this.orderBy, this.asc);
   }

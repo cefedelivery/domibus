@@ -158,7 +158,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
         for (const key in destinations) {
           this.queues.push(destinations[key]);
         }
-        this.orderedQueues = (this.queues).sort((a: any, b: any) => a.name < b.name ? -1 : 1);
+        this.orderedQueues = (this.queues).sort((a: any, b: any) => {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        });
         this.queuesInfoGot.emit();
       }
     );

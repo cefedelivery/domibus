@@ -26,12 +26,14 @@
             </md-input-container>
           </div>
 
-          <button md-raised-button color="primary" [disabled]="this.buttonDisabled || !messageInfoSent.messageId" id="updatebutton_id" (click)="update()">
+          <button md-raised-button color="primary" [disabled]="this.buttonDisabled || !messageInfoSent.messageId" id="updatebutton_id"
+                  (click)="update()" button-click-behaviour>
             <md-icon>refresh</md-icon>
             <span>Update</span>
           </button>
           <!-- Test Button -->
-          <button md-raised-button color="primary" [disabled]="this.buttonDisabled" id="testbutton_id" (click)="test()">
+          <button md-raised-button color="primary" [disabled]="this.buttonDisabled" id="testbutton_id" (click)="test()"
+                  button-click-behaviour>
             <md-icon>import_export</md-icon>
             <span>Test</span>
           </button>

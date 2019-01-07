@@ -38,7 +38,7 @@
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="IDX_USER_PASSWORD_HISTORY_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
+        <createIndex indexName="IDX_UPH_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
             <column name="USER_ID"/>
         </createIndex>
 
@@ -76,7 +76,7 @@
             <column name="DEFAULT_PASSWORD" type="BOOLEAN" defaultValueBoolean="false" />
         </addColumn>
 
-        <createTable tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+        <createTable tableName="TB_PLUGIN_USER_PASSWD_HISTORY">
             <column autoIncrement="true" name="ID_PK" type="INT">
                 <constraints primaryKey="true"/>
             </column>
@@ -89,12 +89,12 @@
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWORD_HISTORY">
+        <createIndex indexName="IDX_PLUGIN_USER_ID" tableName="TB_PLUGIN_USER_PASSWD_HISTORY">
             <column name="USER_ID"/>
         </createIndex>
 
-        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWORD_HISTORY"
-                                 constraintName="FK_PLUGIN_USER_PASSWORD_HISTORY" deferrable="false" initiallyDeferred="false"
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="TB_PLUGIN_USER_PASSWD_HISTORY"
+                                 constraintName="FK_PLUGIN_USER_PASSWD_HISTORY" deferrable="false" initiallyDeferred="false"
                                  onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID_PK" referencedTableName="TB_AUTHENTICATION_ENTRY"/>
 
@@ -112,6 +112,49 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+    </changeSet>
+
+    <changeSet author="nperpion" id="EDELIVERY-3811">
+
+        <createTable tableName="TB_AUTHENTICATION_ENTRY_AUD">
+            <column name="ID_PK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REV" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REVTYPE" type="TINYINT"/>
+            <column name="CERTIFICATE_ID" type="VARCHAR(255)"/>
+            <column name="CERTIFICATEID_MOD" type="BOOLEAN"/>
+            <column name="USERNAME" type="VARCHAR(255)"/>
+            <column name="USERNAME_MOD" type="BOOLEAN"/>
+            <column name="PASSWD" type="VARCHAR(255)"/>
+            <column name="PASSWORD_MOD" type="BOOLEAN"/>
+            <column name="AUTH_ROLES" type="VARCHAR(255)"/>
+            <column name="AUTHROLES_MOD" type="BOOLEAN"/>
+            <column name="ORIGINAL_USER" type="VARCHAR(255)"/>
+            <column name="ORIGINALUSER_MOD" type="BOOLEAN"/>
+            <column name="BACKEND" type="VARCHAR(255)"/>
+            <column name="BACKEND_MOD" type="BOOLEAN"/>
+            <column name="USER_ENABLED" type="BOOLEAN"/>
+            <column name="ACTIVE_MOD" type="BOOLEAN"/>
+            <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"></column>
+            <column name="PASSWORDCHANGEDATE_MOD" type="BOOLEAN"></column>
+            <column name="DEFAULT_PASSWORD" type="BOOLEAN"></column>
+            <column name="DEFAULTPASSWORD_MOD" type="BOOLEAN"></column>
+        </createTable>
+
+        <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_AUTHENTICATION_ENTRY_AUD" tableName="TB_AUTHENTICATION_ENTRY_AUD"/>
+
+        <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_AUTHENTICATION_ENTRY_AUD"
+                                 constraintName="FK_AUTHENTICATION_ENTRY_AUD_REV" deferrable="false"
+                                 initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
+
+        <createIndex indexName="IDX_FK_AUTHENTICATION_ENTRY_AUD_REV" tableName="TB_AUTHENTICATION_ENTRY_AUD">
+            <column name="REV"/>
+        </createIndex>
+
     </changeSet>
 
 </databaseChangeLog>

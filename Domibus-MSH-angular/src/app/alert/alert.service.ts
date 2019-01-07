@@ -8,7 +8,7 @@ import {Response} from '@angular/http';
 export class AlertService {
   private subject = new Subject<any>();
   private previousRoute: string;
-  private keepAfterNavigationChange: boolean;
+  private needsExplicitClosing: boolean;
 
   // TODO move the logic in the ngInit block
   constructor(private router: Router) {
@@ -18,7 +18,7 @@ export class AlertService {
       if (event instanceof NavigationStart) {
         if (this.isRouteChanged(event.url)) {
           // console.log('Clearing alert when navigating from [' + this.previousRoute + '] to [' + event.url + ']');
-          if (!this.keepAfterNavigationChange) {
+          if (!this.needsExplicitClosing) {
             this.clearAlert();
           }
         } else {
@@ -31,37 +31,30 @@ export class AlertService {
     });
   }
 
-  getPath(url: string): string {
-    var parser = document.createElement('a');
-    parser.href = url;
-    return parser.pathname;
-  }
-
-  isRouteChanged(currentRoute: string): boolean {
-    let result = false;
-    const previousRoutePath = this.getPath(this.previousRoute);
-    const currentRoutePath = this.getPath(currentRoute);
-    if (previousRoutePath !== currentRoutePath) {
-      result = true;
-    }
-    return result;
-  }
-
-  clearAlert(): void {
+  // called from the alert component explicitly by the user
+  public close(): void {
     this.subject.next();
   }
 
-  success(message: string, keepAfterNavigationChange = false) {
-    this.keepAfterNavigationChange = keepAfterNavigationChange;
+  public clearAlert(): void {
+    if (this.needsExplicitClosing) {
+      return;
+    }
+    this.close();
+  }
+
+  public success(message: string, keepAfterNavigationChange = false) {
+    this.needsExplicitClosing = keepAfterNavigationChange;
     this.subject.next({type: 'success', text: message});
   }
 
-  error(message: Response | string | any, keepAfterNavigationChange = false, fadeTime: number = 0) {
+  public error(message: Response | string | any, keepAfterNavigationChange = false,
+               fadeTime: number = 0) {
     if (message.handled) return;
     if (message instanceof Response && (message.status === 401 || message.status === 403)) return;
     if (message.toString().indexOf('Response with status: 403 Forbidden') >= 0) return;
 
-    this.keepAfterNavigationChange = keepAfterNavigationChange;
+    this.needsExplicitClosing = keepAfterNavigationChange;
     const errMsg = this.formatError(message);
     this.subject.next({type: 'error', text: errMsg});
     if (fadeTime) {
@@ -69,13 +62,46 @@ export class AlertService {
     }
   }
 
-  exception(message: string, error: any, keepAfterNavigationChange = false, fadeTime: number = 0) {
+  public exception(message: string, error: any, keepAfterNavigationChange = false,
+                   fadeTime: number = 0) {
     const errMsg = this.formatError(error, message);
     this.error(errMsg, keepAfterNavigationChange, fadeTime);
   }
 
-  getMessage(): Observable<any> {
+  public getMessage(): Observable<any> {
     return this.subject.asObservable();
+  }
+
+  public handleError(error: Response | any) {
+
+    this.error(error, false);
+
+    let errMsg: string;
+    if (error instanceof Response) {
+      const body = error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8' ? error.json() || '' : error.toString();
+      const err = body.error || JSON.stringify(body);
+      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
+    } else {
+      errMsg = error.message ? error.message : error.toString();
+    }
+    console.error(errMsg);
+    return Promise.reject({reason: errMsg, handled: true});
+  }
+
+  private getPath(url: string): string {
+    var parser = document.createElement('a');
+    parser.href = url;
+    return parser.pathname;
+  }
+
+  private isRouteChanged(currentRoute: string): boolean {
+    let result = false;
+    const previousRoutePath = this.getPath(this.previousRoute);
+    const currentRoutePath = this.getPath(currentRoute);
+    if (previousRoutePath !== currentRoutePath) {
+      result = true;
+    }
+    return result;
   }
 
   private formatError(error: Response | string | any, message: string = null): string {
@@ -106,19 +132,4 @@ export class AlertService {
     return (message ? message + ' \n' : '') + (errMsg || '');
   }
 
-  handleError(error: Response | any) {
-
-    this.error(error, false);
-
-    let errMsg: string;
-    if (error instanceof Response) {
-      const body = error.headers && error.headers.get('content-type') !== 'text/html;charset=utf-8' ? error.json() || '' : error.toString();
-      const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Promise.reject({reason: errMsg, handled: true});
-  }
 }
