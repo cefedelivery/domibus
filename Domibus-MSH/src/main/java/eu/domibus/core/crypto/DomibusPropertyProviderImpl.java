@@ -4,6 +4,8 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.property.PropertyResolver;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -39,6 +41,8 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
+
+    private static final DomibusLogger LOGGER = DomibusLoggerFactory.getLogger(DomibusPropertyProviderImpl.class);
 
     protected String getPropertyName(Domain domain, String propertyName) {
         return domain.getCode() + "." + propertyName;
@@ -197,8 +201,20 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     private Integer getIntegerInternal(String propertyName, String customValue) {
+        if(customValue != null) {
+            try {
+                return Integer.valueOf(customValue);
+            } catch (final NumberFormatException e) {
+                LOGGER.warn("Could not parse the property [" + propertyName + "] custom value [" + customValue + "] to an integer value", e);
+                return getDefaultIntegerValue(propertyName);
+            }
+        }
+        return getDefaultIntegerValue(propertyName);
+    }
+
+    private Integer getDefaultIntegerValue(String propertyName) {
         Integer defaultValue = MapUtils.getInteger(domibusDefaultProperties, propertyName);
-        return NumberUtils.toInt(customValue, defaultValue);
+        return checkDefaultValue(propertyName, defaultValue);
     }
 
     @Override
@@ -226,8 +242,31 @@ public class DomibusPropertyProviderImpl implements DomibusPropertyProvider {
     }
 
     private Boolean getBooleanInternal(String propertyName, String customValue) {
-        Boolean defaultValue = MapUtils.getBoolean(domibusDefaultProperties, propertyName);
-        return BooleanUtils.toBooleanDefaultIfNull(BooleanUtils.toBooleanObject(customValue), defaultValue);
+        if(customValue != null) {
+            Boolean customBoolean = BooleanUtils.toBooleanObject(customValue);
+            if(customBoolean != null) {
+                return customBoolean;
+            }
+            LOGGER.warn("Could not parse the property [{}] custom value [{}] to a boolean value", propertyName, customValue);
+            return getDefaultBooleanValue(propertyName);
+        }
+        return getDefaultBooleanValue(propertyName);
     }
+
+    private Boolean getDefaultBooleanValue(String propertyName) {
+        // We need to fetch the Boolean value in two steps as the MapUtils#getBoolean(Properties, String) does not return "null" when the value is an invalid Boolean.
+        String defaultValue = MapUtils.getString(domibusDefaultProperties, propertyName);
+        Boolean defaultBooleanValue = BooleanUtils.toBooleanObject(defaultValue);
+        return checkDefaultValue(propertyName, defaultBooleanValue);
+    }
+
+    private <T> T checkDefaultValue(String propertyName, T defaultValue) {
+        if(defaultValue == null) {
+            throw new IllegalStateException("The default property [" + propertyName + "] is required but was either not found inside the default properties or found having an invalid value");
+        }
+        LOGGER.debug("Found the property [{}] default value [{}]", propertyName, defaultValue);
+        return defaultValue;
+    }
+
 
 }

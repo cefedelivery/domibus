@@ -6,8 +6,8 @@ import {SecurityService} from '../../security/security.service';
 import {PluginUserRO} from '../pluginuser';
 import {PluginUserService} from '../pluginuser.service';
 
-const NEW_MODE = 'New User';
-const EDIT_MODE = 'User Edit';
+const NEW_MODE = 'New PluginUser';
+const EDIT_MODE = 'Plugin User Edit';
 
 @Component({
   selector: 'editcertificatepluginuser-form',

@@ -1,6 +1,7 @@
 package eu.domibus.core.alerts.service;
 
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.api.user.UserBase;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 
 /**
  * @author Ion Perpegel
@@ -9,5 +10,10 @@ import eu.domibus.common.model.security.UserBase;
 public interface UserAlertsService {
     void triggerPasswordExpirationEvents();
 
-    void triggerLoginFailureEvent(UserBase user);
+    void triggerLoginEvents(String userName, UserLoginErrorReason userLoginErrorReason);
+
+    void triggerDisabledEvent(UserBase user);
+
+//    void triggerLoginFailureEvent(UserEntityBase user);
+
 }

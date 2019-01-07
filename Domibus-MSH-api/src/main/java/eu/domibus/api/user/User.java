@@ -3,6 +3,7 @@ package eu.domibus.api.user;
 import eu.domibus.api.security.AuthRole;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  * @since 3.3
  */
 
-public class User {
+public class User implements UserBase {
     private String userName;
     private String email;
     private boolean active;
@@ -21,7 +22,7 @@ public class User {
     private boolean suspended;
     private boolean deleted;
 
-    public User(String userName, String email, boolean active, List<String> authorities, UserState userState,
+    public User(String userName, String email, Boolean active, List<String> authorities, UserState userState,
                 Date suspensionDate, boolean deleted) {
         this.userName = userName;
         this.email = email;
@@ -36,8 +37,10 @@ public class User {
     }
 
     public User() {
+        authorities = new LinkedList<>();
     }
 
+    @Override
     public String getUserName() {
         return userName;
     }
@@ -46,8 +49,14 @@ public class User {
         return email;
     }
 
+    @Override
     public boolean isActive() {
         return active;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<String> getAuthorities() {
@@ -58,6 +67,7 @@ public class User {
         return status;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -70,10 +80,6 @@ public class User {
         this.email = email;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public void setAuthorities(List<String> authorities) {
         this.authorities = authorities;
     }
@@ -82,6 +88,7 @@ public class User {
         this.status = status;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }
@@ -111,7 +118,7 @@ public class User {
     }
 
     public boolean isSuperAdmin() {
-        if(authorities == null) {
+        if (authorities == null) {
             return false;
         }
         return authorities.contains(AuthRole.ROLE_AP_ADMIN.name());

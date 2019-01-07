@@ -39,7 +39,7 @@
             <column name="PASSWORD_CHANGE_DATE" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="IDX_USER_PASSWORD_HISTORY_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
+        <createIndex indexName="IDX_UPH_USER_ID" tableName="TB_USER_PASSWORD_HISTORY">
             <column name="USER_ID"/>
         </createIndex>
 
@@ -65,5 +65,5 @@
         </addColumn>
 
     </changeSet>
-    
+
 </databaseChangeLog>

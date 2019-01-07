@@ -10,6 +10,7 @@ import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
 import eu.domibus.plugin.handler.MessageRetriever;
 import eu.domibus.plugin.handler.MessageSubmitter;
+import eu.domibus.plugin.handler.MessagePuller;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.activemq.command.ActiveMQMapMessage;
@@ -34,6 +35,9 @@ public class BackendJMSImplTest {
 
     @Injectable
     protected MessageSubmitter messageSubmitter;
+
+    @Injectable
+    protected MessagePuller messagePuller;
 
     @Injectable
     private JmsOperations replyJmsTemplate;

@@ -9,11 +9,16 @@ import eu.domibus.common.dao.security.UserDao;
 import eu.domibus.common.dao.security.UserDaoBase;
 import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserLoginErrorReason;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.core.alerts.model.common.AlertLevel;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
+import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
+import eu.domibus.core.alerts.model.service.AccountDisabledMoment;
+import eu.domibus.core.alerts.model.service.LoginFailureModuleConfiguration;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -21,11 +26,12 @@ import org.junit.runner.RunWith;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
- * @author Thomas Dussart
- * @since 4.0
+ * @author Ion Perpegel
+ * @since 4.1
  */
 @RunWith(JMockit.class)
 public class UserAlertsServiceImplTest {
@@ -52,7 +58,10 @@ public class UserAlertsServiceImplTest {
     private UserConverter userConverter;
 
     @Injectable
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationService alertConfiguration;
+
+    @Injectable
+    private MultiDomainAlertConfigurationService alertsConfiguration;
 
     @Injectable
     private EventService eventService;
@@ -73,8 +82,14 @@ public class UserAlertsServiceImplTest {
         final Integer howManyDaysToGenerateAlertsAfterExpiration = 3;
         final LocalDate from = LocalDate.of(2018, 10, 2);
         final LocalDate to = LocalDate.of(2018, 10, 5);
-        final User user1 = new User("user1", "anypassword");
-        final User user2 = new User("user2", "anypassword");
+        final User user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        final User user2 = new User() {{
+            setUserName("user2");
+            setPassword("anypassword");
+        }};
         final List<User> users = Arrays.asList(user1, user2);
 
         new Expectations(LocalDate.class) {{
@@ -84,9 +99,9 @@ public class UserAlertsServiceImplTest {
         new Expectations() {{
             userAlertsService.getAlertTypeForPasswordExpired();
             result = AlertType.PASSWORD_EXPIRED;
-            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
+            alertConfiguration.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).isActive();
             result = true;
-            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
+            alertConfiguration.getRepetitiveAlertConfiguration(AlertType.PASSWORD_EXPIRED).getEventDelay();
             result = howManyDaysToGenerateAlertsAfterExpiration;
             userAlertsService.getMaximumPasswordAgeProperty();
             result = ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE;
@@ -115,9 +130,15 @@ public class UserAlertsServiceImplTest {
         final Integer howManyDaysBeforeExpirationToGenerateAlerts = 4;
         final LocalDate from = LocalDate.of(2018, 10, 5);
         final LocalDate to = LocalDate.of(2018, 10, 9);
-        final UserBase user1 = new User("user1", "anypassword");
-        final UserBase user2 = new User("user2", "anypassword");
-        final List<UserBase> users = Arrays.asList(user1, user2);
+        final UserEntityBase user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        final UserEntityBase user2 = new User() {{
+            setUserName("user2");
+            setPassword("anypassword");
+        }};
+        final List<UserEntityBase> users = Arrays.asList(user1, user2);
 
         new Expectations(LocalDate.class) {{
             LocalDate.now();
@@ -128,9 +149,9 @@ public class UserAlertsServiceImplTest {
             result = AlertType.PASSWORD_IMMINENT_EXPIRATION;
             userAlertsService.getMaximumPasswordAgeProperty();
             result = ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE;
-            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
+            alertConfiguration.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).isActive();
             result = true;
-            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
+            alertConfiguration.getRepetitiveAlertConfiguration(AlertType.PASSWORD_IMMINENT_EXPIRATION).getEventDelay();
             result = howManyDaysBeforeExpirationToGenerateAlerts;
             domibusPropertyProvider.getOptionalDomainProperty(ConsoleUserAlertsServiceImpl.MAXIMUM_PASSWORD_AGE);
             result = maxPasswordAge.toString();
@@ -145,11 +166,10 @@ public class UserAlertsServiceImplTest {
         userAlertsService.triggerImminentExpirationEvents(false);
 
         new VerificationsInOrder() {{
-            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, (UserBase) any, maxPasswordAge);
+            eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_IMMINENT_EXPIRATION, (UserEntityBase) any, maxPasswordAge);
             times = 2;
         }};
     }
-
 
     @Test
     public void testSendPasswordAlerts() {
@@ -162,6 +182,51 @@ public class UserAlertsServiceImplTest {
         }};
         new VerificationsInOrder() {{
             userAlertsService.triggerExpiredEvents(false);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void triggerDisabledEventTest() {
+        final User user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        AccountDisabledModuleConfiguration conf = new AccountDisabledModuleConfiguration(AlertType.USER_ACCOUNT_DISABLED,
+                AlertLevel.MEDIUM, AccountDisabledMoment.AT_LOGON, "");
+        new Expectations() {{
+            alertsConfiguration.getAccountDisabledConfiguration();
+            result = conf;
+            userAlertsService.getUserType();
+            result = UserEntityBase.Type.CONSOLE;
+        }};
+
+        userAlertsService.triggerDisabledEvent(user1);
+
+        new VerificationsInOrder() {{
+            eventService.enqueueAccountDisabledEvent(UserEntityBase.Type.CONSOLE, user1.getUserName(), (Date)any);
+            times = 1;
+        }};
+    }
+
+    @Test
+    public void triggerLoginEventsTest() {
+        final User user1 = new User() {{
+            setUserName("user1");
+            setPassword("anypassword");
+        }};
+        LoginFailureModuleConfiguration conf = new LoginFailureModuleConfiguration(AlertType.USER_LOGIN_FAILURE, AlertLevel.MEDIUM, "");
+        new Expectations() {{
+            userAlertsService.getLoginFailureConfiguration();
+            result = conf;
+            userAlertsService.getUserType();
+            result = UserEntityBase.Type.CONSOLE;
+        }};
+
+        userAlertsService.triggerLoginEvents("user1", UserLoginErrorReason.BAD_CREDENTIALS);
+
+        new VerificationsInOrder() {{
+            eventService.enqueueLoginFailureEvent(UserEntityBase.Type.CONSOLE, user1.getUserName(), (Date)any, false);
             times = 1;
         }};
     }

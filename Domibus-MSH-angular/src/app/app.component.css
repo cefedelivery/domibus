@@ -93,6 +93,6 @@ html, body, material-app, .my-content {
 }
 
 router-outlet {
-  min-height: 100px;
-  display: block;
+  /*min-height: 100px;*/
+  /*display: block;*/
 }

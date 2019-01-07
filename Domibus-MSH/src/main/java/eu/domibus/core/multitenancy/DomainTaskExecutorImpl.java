@@ -35,12 +35,23 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
 
     @Override
     public void submit(Runnable task) {
-        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, task);
+        final ClearDomainRunnable domainRunnable = new ClearDomainRunnable(domainContextProvider, task);
         final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
         try {
             utrFuture.get(5000L, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new DomainException("Could not execute task", e);
+        }
+    }
+
+    @Override
+    public void submit(Runnable task, Domain domain) {
+        final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
+        final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
+        try {
+            utrFuture.get(5000L, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new DomainException("Could not execute task for domain " + domain, e);
         }
     }
 }

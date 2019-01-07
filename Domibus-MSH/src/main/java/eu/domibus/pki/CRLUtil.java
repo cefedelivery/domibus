@@ -11,6 +11,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.naming.Context;
@@ -54,6 +55,7 @@ public class CRLUtil {
      * @return {@link X509CRL} certificate to download
      * @throws DomibusCRLException runtime exception in case of error
      */
+    @Cacheable(value = "crlByCert",  key = "#crlURL")
     public X509CRL downloadCRL(String crlURL) throws DomibusCRLException {
         if (CRLUrlType.LDAP.canHandleURL(crlURL)) {
             return downloadCRLfromLDAP(crlURL);
@@ -65,7 +67,7 @@ public class CRLUtil {
     /**
      * Downloads CRL from the given URL. Supports loading the crl using http, https, ftp based,  classpath
      */
-    X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
+    protected X509CRL downloadCRLFromWebOrClasspath(String crlURL) throws DomibusCRLException {
         LOG.debug("Downloading CRL from url [{}]", crlURL);
 
         URL url;

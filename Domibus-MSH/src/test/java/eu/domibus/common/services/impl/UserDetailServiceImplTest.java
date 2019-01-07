@@ -39,7 +39,10 @@ public class UserDetailServiceImplTest {
 
     @Test
     public void loadUserByUsernameSuccessfully() throws Exception {
-        User user = new User("admin", "whateverdifferentthandefaultpasswordhash");
+        User user = new User() {{
+            setUserName("admin");
+            setPassword("whateverdifferentthandefaultpasswordhash");
+        }};
 
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
         when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD))).thenReturn("true");
@@ -54,7 +57,10 @@ public class UserDetailServiceImplTest {
 
     @Test
     public void loadUserByUsernameSuccessfullyUsingDefaultPassword() throws Exception {
-        User user = new User("user", "$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+        User user = new User() {{
+            setUserName("user");
+            setPassword("$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+        }};
 
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
         when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD))).thenReturn("true");
@@ -68,7 +74,10 @@ public class UserDetailServiceImplTest {
 
     @Test
     public void loadUserByUsernameSuccessfullyUsingDefaultPasswordWarningDisabled() throws Exception {
-        User user = new User("user", "$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+        User user = new User() {{
+            setUserName("user");
+            setPassword("$2a$10$5uKS72xK2ArGDgb2CwjYnOzQcOmB7CPxK6fz2MGcDBM9vJ4rUql36");
+        }};
 
         when(userDao.loadActiveUserByUsername(eq("admin"))).thenReturn(user);
         when(domibusPropertyProvider.getOptionalDomainProperty(eq(UserDetailServiceImpl.CHECK_DEFAULT_PASSWORD))).thenReturn("false");

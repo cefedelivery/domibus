@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Thomas Dussart
  * @since 3.3
  */
-public class UserDaoImplTestIT extends AbstractIT{
+public class UserDaoImplTestIT extends AbstractIT {
     @Autowired
     private UserDao userDao;
 
@@ -30,26 +30,30 @@ public class UserDaoImplTestIT extends AbstractIT{
     @Transactional
     @Rollback
     public void listUsers() throws Exception {
-        User user=new User("userOne", "test");
-        UserRole userRole=new UserRole("ROLE_USER");
+        User user = new User();
+        user.setUserName("userOne");
+        user.setPassword("test");
+        UserRole userRole = new UserRole("ROLE_USER");
         entityManager.persist(userRole);
         user.addRole(userRole);
         user.setEmail("test@gmail.com");
         user.setActive(true);
         userDao.create(user);
         List<User> users = userDao.listUsers();
-        assertEquals(1,users.size());
+        assertEquals(1, users.size());
         user = users.get(0);
-        assertEquals("test@gmail.com",user.getEmail());
-        assertEquals("test",user.getPassword());
-        assertEquals(true,user.isEnabled());
+        assertEquals("test@gmail.com", user.getEmail());
+        assertEquals("test", user.getPassword());
+        assertEquals(true, user.isActive());
     }
 
     @Test
     @Transactional
     @Rollback
     public void loadActiveUserByUsername() {
-        User user = new User("userTwo", "test");
+        User user = new User();
+        user.setUserName("userTwo");
+        user.setPassword("test");
         UserRole userRole = new UserRole("ROLE_USER_2");
         entityManager.persist(userRole);
         user.addRole(userRole);

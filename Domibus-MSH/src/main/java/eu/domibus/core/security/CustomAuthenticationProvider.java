@@ -1,7 +1,7 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
-import eu.domibus.common.validators.PluginUserPasswordManager;
+import eu.domibus.security.PluginUserSecurityPolicyManager;
 import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -43,7 +43,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private BCryptPasswordEncoder bcryptEncoder;
 
     @Autowired
-    PluginUserPasswordManager pluginUserPasswordValidator;
+    PluginUserSecurityPolicyManager pluginUserPasswordManager;
 
     @Autowired
     PluginUserAlertsServiceImpl userAlertsService;
@@ -70,20 +70,22 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
 
-                AuthenticationEntity user = securityAuthenticationDAO.findByUser(authentication.getName());
-                boolean isPasswordExpired = false;
-                //check if password is correct
-                boolean isPasswordCorrect = bcryptEncoder.matches((String) authentication.getCredentials(), user.getPassword());
-                if (!isPasswordCorrect) {
-                    userAlertsService.triggerLoginFailureEvent(user);
+                String userName = authentication.getName();
+                String password = (String) authentication.getCredentials();
+                AuthenticationEntity user = securityAuthenticationDAO.findByUser(userName);
+
+                boolean isAuthenticated = checkUserAccount(user, password);
+                if (isAuthenticated) {
+                    pluginUserPasswordManager.handleCorrectAuthentication(userName);
+                    //check expired; it does not produce an alert here
+                    isAuthenticated = isAuthenticated && !isPasswordExpired(user);
                 } else {
-                    //check if password expired
-                    isPasswordExpired = isPasswordExpired(user);
+                    pluginUserPasswordManager.handleWrongAuthentication(userName);
                 }
 
-                authentication.setAuthenticated(isPasswordCorrect && !isPasswordExpired);
-
-                ((BasicAuthentication) authentication).setOriginalUser(user.getOriginalUser());
+                authentication.setAuthenticated(isAuthenticated);
+                String originalUser = user != null ? user.getOriginalUser() : null;
+                ((BasicAuthentication) authentication).setOriginalUser(originalUser);
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
@@ -93,11 +95,30 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return authentication;
     }
 
+    private boolean checkUserAccount(AuthenticationEntity user, String password) {
+        if (user == null) {
+            return false;
+        }
+
+        //check if password is correct
+        boolean isPasswordCorrect = bcryptEncoder.matches(password, user.getPassword());
+        if (!isPasswordCorrect) {
+            return false;
+        }
+
+        //check locked; if true, declare that it is not authenticated, so that handle method works
+        if (!user.isActive()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean isPasswordExpired(AuthenticationEntity user) {
         boolean isDefaultPassword = user.hasDefaultPassword();
         LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
         try {
-            pluginUserPasswordValidator.validatePasswordExpired(user.getUsername(), isDefaultPassword, passwordChangeDate);
+            pluginUserPasswordManager.validatePasswordExpired(user.getUserName(), isDefaultPassword, passwordChangeDate);
             return false;
         } catch (CredentialsExpiredException ex) {
             return true;

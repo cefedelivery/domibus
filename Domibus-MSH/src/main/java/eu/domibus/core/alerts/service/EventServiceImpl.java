@@ -8,11 +8,11 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.Party;
 import eu.domibus.common.model.logging.ErrorLogEntry;
-import eu.domibus.common.model.security.UserBase;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.*;
-import eu.domibus.core.alerts.model.service.RepetitiveAlertModuleConfiguration;
 import eu.domibus.core.alerts.model.service.Event;
+import eu.domibus.core.alerts.model.service.RepetitiveAlertModuleConfiguration;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
@@ -106,24 +106,18 @@ public class EventServiceImpl implements EventService {
      * {@inheritDoc}
      */
     @Override
-    public void enqueueLoginFailureEvent(final String userName, final Date loginTime, final boolean accountDisabled) {
-        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), loginTime, accountDisabled, EventType.USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    public void enqueueLoginFailureEvent(UserEntityBase.Type userType, final String userName, final Date loginTime, final boolean accountDisabled) {
+        EventType eventType = userType == UserEntityBase.Type.CONSOLE ? EventType.USER_LOGIN_FAILURE : EventType.PLUGIN_USER_LOGIN_FAILURE;
+        enqueueLoginFailure(userName, userType.getName(), loginTime, accountDisabled, eventType, LOGIN_FAILURE);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void enqueueAccountDisabledEvent(final String userName, final Date accountDisabledTime, final boolean accountDisabled) {
-        enqueueLoginFailure(userName, UserBase.Type.CONSOLE.getName(), accountDisabledTime, accountDisabled, EventType.USER_ACCOUNT_DISABLED, ACCOUNT_DISABLED);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void enqueuePluginLoginFailureEvent(String userName, Date loginTime) {
-        enqueueLoginFailure(userName, UserBase.Type.PLUGIN.getName(), loginTime, false, EventType.PLUGIN_USER_LOGIN_FAILURE, LOGIN_FAILURE);
+    public void enqueueAccountDisabledEvent(UserEntityBase.Type userType, final String userName, final Date accountDisabledTime) {
+        EventType eventType = userType == UserEntityBase.Type.CONSOLE ? EventType.USER_ACCOUNT_DISABLED : EventType.PLUGIN_USER_ACCOUNT_DISABLED;
+        enqueueLoginFailure(userName, userType.getName(), accountDisabledTime, true, eventType, ACCOUNT_DISABLED);
     }
 
     private void enqueueLoginFailure(String userName, String userType, Date loginTime, boolean accountDisabled, EventType eventType, String selector) {
@@ -219,11 +213,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void enqueuePasswordExpirationEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
+    public void enqueuePasswordExpirationEvent(EventType eventType, UserEntityBase user, Integer maxPasswordAgeInDays) {
         enqueuePasswordEvent(eventType, user, maxPasswordAgeInDays);
     }
 
-    protected void enqueuePasswordEvent(EventType eventType, UserBase user, Integer maxPasswordAgeInDays) {
+    protected void enqueuePasswordEvent(EventType eventType, UserEntityBase user, Integer maxPasswordAgeInDays) {
 
         Event event = preparePasswordEvent(user, eventType, maxPasswordAgeInDays);
         eu.domibus.core.alerts.model.persist.Event entity = getPersistedEvent(event);
@@ -274,7 +268,7 @@ public class EventServiceImpl implements EventService {
         return false;
     }
 
-    private Event preparePasswordEvent(UserBase user, EventType eventType, Integer maxPasswordAgeInDays) {
+    private Event preparePasswordEvent(UserEntityBase user, EventType eventType, Integer maxPasswordAgeInDays) {
         Event event = new Event(eventType);
         event.setReportingTime(new Date());
 
@@ -288,7 +282,7 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
-    private String getUniqueIdentifier(UserBase user) {
+    private String getUniqueIdentifier(UserEntityBase user) {
         return user.getType().getCode() + "/" + user.getEntityId() + "/" + user.getPasswordChangeDate().toLocalDate();
     }
 

@@ -105,4 +105,8 @@ public interface MultiDomainAlertConfigurationService {
      */
     LoginFailureModuleConfiguration getPluginLoginFailureConfiguration();
 
+    /**
+     * @return account disabled module configuration for plugin users
+     */
+    AccountDisabledModuleConfiguration getPluginAccountDisabledConfiguration();
 }

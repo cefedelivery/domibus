@@ -24,6 +24,6 @@ export class AlertComponent implements OnInit {
   }
 
   clearAlert (): void {
-    this.alertService.clearAlert();
+    this.alertService.close();
   }
 }

@@ -28,8 +28,14 @@ import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Iterator;
 
 /**
@@ -39,31 +45,36 @@ import java.util.Iterator;
 public class ReliabilityChecker {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ReliabilityChecker.class);
     private final String UNRECOVERABLE_ERROR_RETRY = "domibus.dispatch.ebms.error.unrecoverable.retry";
+
     @Autowired
     @Qualifier("jaxbContextEBMS")
-    JAXBContext jaxbContext;
+    protected JAXBContext jaxbContext;
 
     @Autowired
-    private NonRepudiationChecker nonRepudiationChecker;
+    protected NonRepudiationChecker nonRepudiationChecker;
 
     @Autowired
-    private PModeProvider pModeProvider;
+    protected PModeProvider pModeProvider;
 
     @Autowired
-    private UserMessageLogService userMessageLogService;
+    protected UserMessageLogService userMessageLogService;
 
     @Autowired
-    private ErrorLogDao errorLogDao;
+    protected ErrorLogDao errorLogDao;
 
     @Autowired
-    private ReliabilityMatcher pushMatcher;
+    protected ReliabilityMatcher pushMatcher;
 
+    @Autowired
+    protected TransformerFactory transformerFactory;
+
+    @Transactional(rollbackFor = EbMS3Exception.class)
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey) throws EbMS3Exception {
         return check(request, response, pmodeKey, pushMatcher);
     }
 
+    @Transactional(rollbackFor = EbMS3Exception.class)
     public CheckResult check(final SOAPMessage request, final SOAPMessage response, final String pmodeKey, final ReliabilityMatcher matcher) throws EbMS3Exception {
-
         final LegConfiguration legConfiguration = this.pModeProvider.getLegConfiguration(pmodeKey);
         String messageId = null;
 
@@ -140,6 +151,7 @@ public class ReliabilityChecker {
                     }
                     if (!signatureFound) {
                         LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_WITH_MESSAGING_NOT_SIGNED, messageId);
+                        LOG.error("Response message [{}]", soapPartToString(response));
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: eb:Messaging not signed", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
@@ -150,7 +162,7 @@ public class ReliabilityChecker {
                     final NodeList referencesFromNonRepudiationInformation = nonRepudiationChecker.getNonRepudiationNodeList(response.getSOAPHeader().getElementsByTagNameNS(NonRepudiationConstants.NS_NRR, NonRepudiationConstants.NRR_LN).item(0));
 
                     if (!nonRepudiationChecker.compareUnorderedReferenceNodeLists(referencesFromSecurityHeader, referencesFromNonRepudiationInformation)) {
-                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_NOT_MATCHING_THE_MESSAGE, messageId);
+                        LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_INVALID_NOT_MATCHING_THE_MESSAGE, soapPartToString(response), soapPartToString(request));
                         EbMS3Exception ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.EBMS_0302, "Invalid NonRepudiationInformation: non repudiation information and request message do not match", null, null);
                         ex.setMshRole(MSHRole.SENDING);
                         ex.setSignalMessageId(messageId);
@@ -177,6 +189,19 @@ public class ReliabilityChecker {
         LOG.businessError(DomibusMessageCode.BUS_RELIABILITY_GENERAL_ERROR, messageId);
         return matcher.fails();
 
+    }
+
+    protected String soapPartToString(SOAPMessage soapMessage) {
+        if(soapMessage == null) {
+            return null;
+        }
+        try (StringWriter stringWriter = new StringWriter()) {
+            transformerFactory.newTransformer().transform(new DOMSource(soapMessage.getSOAPPart()), new StreamResult(stringWriter));
+            return stringWriter.toString();
+        } catch (IOException | TransformerException e) {
+            LOG.warn("Couldn't get soap part", e);
+        }
+        return null;
     }
 
     protected String getMessageId(SignalMessage signalMessage) {

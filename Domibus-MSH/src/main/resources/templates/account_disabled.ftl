@@ -78,6 +78,7 @@
                             <tr>
                               <td valign="top" align="left" style=" font-size: 13px; font-family: Arial, Helvetica, sans-serif; color: #000;"><br/>
                                 <br/>
+                                  <p><strong>User type:</strong> ${USER_TYPE}</p>
                                   <p><strong>User:</strong> ${USER}</p>
                                   <p><strong>Login time:</strong> ${LOGIN_TIME}</p>
                                   <p><strong>Account disabled:</strong> ${ACCOUNT_DISABLED}</p>
