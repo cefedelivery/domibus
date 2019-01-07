@@ -11,8 +11,8 @@ import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {isNullOrUndefined} from 'util';
-import {AppComponent} from '../app.component';
 import {DatatableComponent} from '@swimlane/ngx-datatable';
+import {DomibusInfoService} from '../appinfo/domibusinfo.service';
 
 @Component({
   moduleId: module.id,
@@ -56,14 +56,16 @@ export class MessageLogComponent implements OnInit {
   notifStatus: Array<String>;
 
   advancedSearch: boolean;
+  fourCornerEnabled: boolean;
 
   messageResent: EventEmitter<boolean>;
 
-  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent,
+  constructor(private http: Http, private alertService: AlertService, private domibusInfoService: DomibusInfoService,
+              public dialog: MdDialog, // public app: AppComponent,
               private elementRef: ElementRef) {
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.columnPicker = new ColumnPickerBase();
     this.rowLimiter = new RowLimiterBase();
 
@@ -82,6 +84,8 @@ export class MessageLogComponent implements OnInit {
     this.asc = false;
 
     this.messageResent = new EventEmitter(false);
+
+    this.fourCornerEnabled = await this.domibusInfoService.isFourCornerEnabled();
 
     this.columnPicker.allColumns.push(
       {
@@ -142,7 +146,7 @@ export class MessageLogComponent implements OnInit {
       }
     );
 
-    if (this.app.fourCornerEnabled) {
+    if (this.fourCornerEnabled) {
       this.columnPicker.allColumns.push(
         {
           name: 'Original Sender'
@@ -346,7 +350,7 @@ export class MessageLogComponent implements OnInit {
   }
 
   resendDialog() {
-    let dialogRef = this.dialog.open(MessagelogDialogComponent);
+    const dialogRef = this.dialog.open(MessagelogDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       switch (result) {
         case 'Resend' :
@@ -357,7 +361,7 @@ export class MessageLogComponent implements OnInit {
           });
           break;
         case 'Cancel' :
-        //do nothing
+        // do nothing
       }
     });
   }
@@ -424,12 +428,8 @@ export class MessageLogComponent implements OnInit {
   }
 
   details(selectedRow: any) {
-    const dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
-    dialogRef.componentInstance.message = selectedRow;
-    dialogRef.componentInstance.fourCornerEnabled = this.app.fourCornerEnabled;
-    // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
-    dialogRef.afterClosed().subscribe(result => {
-      //Todo:
+    this.dialog.open(MessagelogDetailsComponent, {
+      data: {message: selectedRow, fourCornerEnabled: this.fourCornerEnabled}
     });
   }
 

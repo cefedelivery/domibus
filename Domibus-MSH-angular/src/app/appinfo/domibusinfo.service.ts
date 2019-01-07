@@ -2,15 +2,17 @@ import {Injectable} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import "rxjs/add/operator/map";
-import {Router} from "@angular/router";
-import {HttpEventService} from "../http/http.event.service";
 import {ReplaySubject} from "rxjs";
 import {DomibusInfo} from "./domibusinfo";
 
 @Injectable()
 export class DomibusInfoService {
-  constructor(private http: Http, private router: Router) {
+
+  private isFourCornerEnabledPromise: Promise<boolean>;
+
+  constructor(private http: Http) {
   }
+
 
   getDomibusInfo(): Observable<DomibusInfo> {
     let subject = new ReplaySubject();
@@ -27,4 +29,11 @@ export class DomibusInfoService {
     return subject.asObservable();
   }
 
+  isFourCornerEnabled(): Promise<boolean> {
+    if (!this.isFourCornerEnabledPromise) {
+      this.isFourCornerEnabledPromise = this.http.get('rest/application/fourcornerenabled')
+        .map((res: Response) => res.json()).toPromise();
+    }
+    return this.isFourCornerEnabledPromise;
+  }
 }
