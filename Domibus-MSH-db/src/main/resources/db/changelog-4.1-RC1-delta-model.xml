@@ -147,11 +147,11 @@
         <addPrimaryKey columnNames="ID_PK, REV" constraintName="PK_AUTHENTICATION_ENTRY_AUD" tableName="TB_AUTHENTICATION_ENTRY_AUD"/>
 
         <addForeignKeyConstraint baseColumnNames="REV" baseTableName="TB_AUTHENTICATION_ENTRY_AUD"
-                                 constraintName="FK_AUTHENTICATION_ENTRY_AUD_REV" deferrable="false"
+                                 constraintName="FK_AUTH_ENTRY_AUD_REV" deferrable="false"
                                  initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="ID" referencedTableName="TB_REV_INFO"/>
 
-        <createIndex indexName="IDX_FK_AUTHENTICATION_ENTRY_AUD_REV" tableName="TB_AUTHENTICATION_ENTRY_AUD">
+        <createIndex indexName="IDX_FK_AUTH_ENTRY_AUD_REV" tableName="TB_AUTHENTICATION_ENTRY_AUD">
             <column name="REV"/>
         </createIndex>
 
