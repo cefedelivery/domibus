@@ -38,6 +38,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
   @ViewChild('rowActions') rowActions: TemplateRef<any>;
 
   queues: any[];
+  orderedQueues: any[];
 
   currentSearchSelectedSource;
 
@@ -50,21 +51,21 @@ export class JmsComponent implements OnInit, DirtyOperations {
   private headers = new Headers({'Content-Type': 'application/json'});
 
   private _selectedSource: any;
-  get selectedSource (): any {
+  get selectedSource(): any {
     return this._selectedSource;
   }
 
-  set selectedSource (value: any) {
+  set selectedSource(value: any) {
     this._selectedSource = value;
     this.request.source = value.name;
     this.defaultQueueSet.emit();
   }
 
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     this.request = new MessagesRequestRO();
   }
 
-  ngOnInit () {
+  ngOnInit() {
     this.timestampFromMaxDate = new Date();
     this.timestampToMinDate = null;
     this.timestampToMaxDate = new Date();
@@ -73,6 +74,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.queuesInfoGot = new EventEmitter(false);
 
     this.queues = [];
+    this.orderedQueues = [];
 
     this.columnPicker.allColumns = [
       {
@@ -142,13 +144,13 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   }
 
-  private getDestinations (): Observable<Response> {
+  private getDestinations(): Observable<Response> {
     return this.http.get('rest/jms/destinations')
       .map(response => response.json().jmsDestinations)
       .catch((error: Response) => this.alertService.handleError('Could not load queues: ' + error));
   }
 
-  private loadDestinations (): Observable<Response> {
+  private loadDestinations(): Observable<Response> {
     const result = this.getDestinations();
     result.subscribe(
       (destinations) => {
@@ -156,6 +158,9 @@ export class JmsComponent implements OnInit, DirtyOperations {
         for (const key in destinations) {
           this.queues.push(destinations[key]);
         }
+        this.orderedQueues = (this.queues).sort((a: any, b: any) => {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        });
         this.queuesInfoGot.emit();
       }
     );
@@ -163,7 +168,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return result;
   }
 
-  private refreshDestinations (): Observable<Response> {
+  private refreshDestinations(): Observable<Response> {
     const result = this.getDestinations();
     result.subscribe(
       (destinations) => {
@@ -178,7 +183,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return result;
   }
 
-  private setDefaultQueue (queueName: string) {
+  private setDefaultQueue(queueName: string) {
     if (!this.queues || this.queues.length == 0) return;
 
     const matching = this.queues.find((el => el.name && el.name.match(queueName)));
@@ -187,35 +192,35 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.selectedSource = toSelect;
   }
 
-  changePageSize (newPageSize: number) {
+  changePageSize(newPageSize: number) {
     this.rowLimiter.pageSize = newPageSize;
     this.search();
   }
 
-  onSelect ({selected}) {
+  onSelect({selected}) {
     this.selectedMessages.splice(0, this.selectedMessages.length);
     this.selectedMessages.push(...selected);
   }
 
-  onActivate (event) {
+  onActivate(event) {
     if ('dblclick' === event.type) {
       this.details(event.row);
     }
   }
 
-  onTimestampFromChange (event) {
+  onTimestampFromChange(event) {
     this.timestampToMinDate = event.value;
   }
 
-  onTimestampToChange (event) {
+  onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
   }
 
-  canSearch () {
+  canSearch() {
     return this.request.source && !this.loading;
   }
 
-  search () {
+  search() {
     if (!this.request.source) {
       this.alertService.error('Source should be set');
       return;
@@ -248,7 +253,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     );
   }
 
-  cancel () {
+  cancel() {
     let dialogRef: MdDialogRef<CancelDialogComponent> = this.dialog.open(CancelDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -257,14 +262,14 @@ export class JmsComponent implements OnInit, DirtyOperations {
     });
   }
 
-  save () {
+  save() {
     let messageIds = this.markedForDeletionMessages.map((message) => message.id);
     //because the user can change the source after pressing search and then select the messages and press delete
     //in this case I need to use currentSearchSelectedSource
     this.serverRemove(this.currentSearchSelectedSource.name, messageIds);
   }
 
-  move () {
+  move() {
     const dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
@@ -290,8 +295,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
               }
               break;
             }
-          }
-          catch (e) {
+          } catch (e) {
             console.error(e);
           }
         }
@@ -315,7 +319,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     });
   }
 
-  moveAction (row) {
+  moveAction(row) {
     let dialogRef: MdDialogRef<MoveDialogComponent> = this.dialog.open(MoveDialogComponent);
 
     if (/DLQ/.test(this.currentSearchSelectedSource.name)) {
@@ -332,8 +336,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
         if (queues.length == 1) {
           dialogRef.componentInstance.destinationsChoiceDisabled = true;
         }
-      }
-      catch (e) {
+      } catch (e) {
         console.error(e);
       }
 
@@ -353,7 +356,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     });
   }
 
-  details (selectedRow: any) {
+  details(selectedRow: any) {
     let dialogRef: MdDialogRef<MessageDialogComponent> = this.dialog.open(MessageDialogComponent);
     dialogRef.componentInstance.message = selectedRow;
     dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
@@ -362,7 +365,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     });
   }
 
-  deleteAction (row) {
+  deleteAction(row) {
     this.markedForDeletionMessages.push(row);
     let newRows = this.rows.filter((element) => {
       return row !== element;
@@ -371,7 +374,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.rows = newRows;
   }
 
-  delete () {
+  delete() {
     this.markedForDeletionMessages.push(...this.selectedMessages);
     let newRows = this.rows.filter((element) => {
       return !this.selectedMessages.includes(element);
@@ -380,7 +383,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     this.rows = newRows;
   }
 
-  serverMove (source: string, destination: string, messageIds: Array<any>) {
+  serverMove(source: string, destination: string, messageIds: Array<any>) {
     console.log('serverMove');
     this.http.post('rest/jms/messages/action', {
       source: source,
@@ -409,7 +412,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     )
   }
 
-  serverRemove (source: string, messageIds: Array<any>) {
+  serverRemove(source: string, messageIds: Array<any>) {
     this.http.post('rest/jms/messages/action', {
       source: source,
       selectedMessages: messageIds,
@@ -426,7 +429,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     )
   }
 
-  getFilterPath () {
+  getFilterPath() {
     let result = '?';
     if (!isNullOrUndefined(this.request.source)) {
       result += 'source=' + this.request.source + '&';
@@ -446,7 +449,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return result;
   }
 
-  saveAsCSV () {
+  saveAsCSV() {
     if (!this.request.source) {
       this.alertService.error('Source should be set');
       return;
@@ -459,7 +462,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     DownloadService.downloadNative('rest/jms/csv' + this.getFilterPath());
   }
 
-  isDirty (): boolean {
+  isDirty(): boolean {
     return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
 

@@ -151,6 +151,15 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
     @Override
     @Transactional
     public void initiatePullRequest() {
+        initiatePullRequest(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void initiatePullRequest(final String mpc) {
         if (!pModeProvider.isConfigurationLoaded()) {
             LOG.debug("A configuration problem occurred while initiating the pull request. Probably no configuration is loaded.");
             return;
@@ -161,10 +170,10 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if(pullProcesses.isEmpty()){
             LOG.trace("No pull process configured !");
         }
-        String numberOfPullRequestPerMpcProp = domibusPropertyProvider.getDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE, "1");
+
+        final Integer numberOfPullRequestPerMpc = domibusPropertyProvider.getIntegerDomainProperty(DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE);
         LOG.debug("DOMIBUS_PULL_REQUEST_SEND_PER_JOB_CYCLE property read for domain[{}]", domainProvider.getCurrentDomain());
 
-        final Integer numberOfPullRequestPerMpc = Integer.valueOf(numberOfPullRequestPerMpcProp);
         if (!domibusConfigurationService.isMultiTenantAware() && pause(pullProcesses, numberOfPullRequestPerMpc)) {
             return;
         }
@@ -174,6 +183,9 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
                 for (LegConfiguration legConfiguration : pullProcess.getLegs()) {
                     for (Party initiatorParty : pullProcess.getResponderParties()) {
                         String mpcQualifiedName = legConfiguration.getDefaultMpc().getQualifiedName();
+                        if(mpc != null && !mpc.equals(mpcQualifiedName)) {
+                            continue;
+                        }
                         //@thom remove the pullcontext from here.
                         PullContext pullContext = new PullContext(pullProcess,
                                 initiatorParty,
@@ -297,7 +309,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_RECEIVER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: receiver certificate is not valid or it has been revoked [" + receiverName + "]";
             try {
                 boolean certificateChainValid = multiDomainCertificateProvider.isCertificateChainValid(domainProvider.getCurrentDomain(), receiverName);
@@ -318,7 +330,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
         if (policyService.isNoSecurityPolicy(policy)) {
             return;
         }
-        if(Boolean.parseBoolean(domibusPropertyProvider.getDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING, "true"))) {
+        if(domibusPropertyProvider.getBooleanDomainProperty(DOMIBUS_SENDER_CERTIFICATE_VALIDATION_ONSENDING)) {
             String chainExceptionMessage = "Cannot send message: sender certificate is not valid or it has been revoked [" + senderName + "]";
             try {
                 X509Certificate certificate = multiDomainCertificateProvider.getCertificateFromKeystore(domainProvider.getCurrentDomain(), senderName);

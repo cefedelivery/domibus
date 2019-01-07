@@ -1,13 +1,16 @@
 import {NgModule} from "@angular/core";
 
-import {ClickStopPropagationDirective} from "app/common/directive/attribute/ClickStopPropagation";
+import {ClickStopPropagationDirective} from 'app/common/directive/attribute/ClickStopPropagation';
+import {ButtonClickBehaviourDirective} from '../directive/ButtonClickBehaviour';
 
 @NgModule({
   declarations: [
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    ButtonClickBehaviourDirective
   ],
   exports: [
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    ButtonClickBehaviourDirective
   ]
 })
 export class SharedModule {

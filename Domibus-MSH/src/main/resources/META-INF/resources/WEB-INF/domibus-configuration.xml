@@ -13,6 +13,18 @@
         <property name="durability" value="true"/>
     </bean>
 
+    <bean id="activateSuspendedPluginUsersJob"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="eu.domibus.security.ActivateSuspendedPluginUsersJob"/>
+        <property name="durability" value="true"/>
+    </bean>
+
+    <bean id="activateSuspendedPluginUserTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean" scope="prototype">
+        <property name="jobDetail" ref="activateSuspendedPluginUsersJob"/>
+        <property name="cronExpression" value="${domibus.plugin.account.unlock.cron}"/>
+    </bean>
+
     <bean id="activateSuspendedSuperUsersJob"
           class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="jobClass" value="eu.domibus.security.ActivateSuspendedSuperUsersJob"/>

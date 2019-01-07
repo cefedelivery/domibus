@@ -69,6 +69,12 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    public List<Command> findCommandsByServerAndDomainName(String serverName, String domain) {
+        final List<CommandEntity> commands = commandDao.findCommandsByServerAndDomainName(serverName, domain);
+        return domainConverter.convert(commands, Command.class);
+    }
+
+    @Override
     public void executeCommand(String command, Domain domain, Map<String, String> commandProperties) {
 
         //skip the command if runs on same server

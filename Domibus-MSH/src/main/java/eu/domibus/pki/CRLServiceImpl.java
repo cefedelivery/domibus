@@ -29,7 +29,7 @@ public class CRLServiceImpl implements CRLService {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
-    private List<String> supportedCrlProtocols;
+    private volatile List<String> supportedCrlProtocols;
 
     private Object supportedCrlProtocolsLock = new Object();
 

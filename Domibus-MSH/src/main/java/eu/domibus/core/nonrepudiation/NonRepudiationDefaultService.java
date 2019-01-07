@@ -39,6 +39,9 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
             String rawXMLMessage = SoapUtil.getRawXMLMessage(request);
             LOG.debug("Persist raw XML envelope: " + rawXMLMessage);
             RawEnvelopeLog rawEnvelopeLog = new RawEnvelopeLog();
+            if (userMessage != null) {
+                rawEnvelopeLog.setMessageId(userMessage.getMessageInfo().getMessageId());
+            }
             rawEnvelopeLog.setRawXML(rawXMLMessage);
             rawEnvelopeLog.setUserMessage(userMessage);
             rawEnvelopeLogDao.create(rawEnvelopeLog);
@@ -66,7 +69,6 @@ public class NonRepudiationDefaultService implements NonRepudiationService {
     }
 
     protected boolean isNonRepudiationAuditDisabled() {
-        String nonRepudiationActive = domibusPropertyProvider.getProperty("domibus.nonrepudiation.audit.active", "true");
-        return !Boolean.valueOf(nonRepudiationActive);
+        return !domibusPropertyProvider.getBooleanProperty("domibus.nonrepudiation.audit.active");
     }
 }

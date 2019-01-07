@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Tested
-    private MultiDomainAlertConfigurationServiceImpl multiDomainAlertConfigurationService;
+    private MultiDomainAlertConfigurationServiceImpl configurationService;
 
     @Injectable
     protected DomibusPropertyProvider domibusPropertyProvider;
@@ -48,23 +48,32 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     private ConfigurationLoader<CommonConfiguration> commonConfigurationConfigurationLoader;
 
     @Injectable
-    private ConfigurationLoader<AlertEventModuleConfiguration> expiredPasswordConfigurationLoader;
+    private ConfigurationLoader<RepetitiveAlertModuleConfiguration> expiredPasswordConfigurationLoader;
 
     @Injectable
-    private ConfigurationLoader<AlertEventModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
+    private ConfigurationLoader<RepetitiveAlertModuleConfiguration> imminentPasswordExpirationConfigurationLoader;
 
     @Injectable
     private DomainContextProvider domainContextProvider;
+
+    @Injectable
+    RepetitiveAlertConfigurationHolder alertConfigurationHolder;
+
+    @Injectable
+    ConfigurationLoader<LoginFailureModuleConfiguration> pluginLoginFailureConfigurationLoader;
+
+    @Injectable
+    ConfigurationLoader<AccountDisabledModuleConfiguration> pluginAccountDisabledConfigurationLoader;
 
     @Test
     public void getAlertLevelForMessage(final @Mocked MessagingModuleConfiguration messagingConfiguration) {
         final Alert alert = new Alert();
         alert.setAlertType(AlertType.MSG_STATUS_CHANGED);
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getMessageCommunicationConfiguration();
             result = messagingConfiguration;
         }};
-        multiDomainAlertConfigurationService.getAlertLevel(alert);
+        configurationService.getAlertLevel(alert);
         new Verifications() {{
             messagingConfiguration.getAlertLevel(alert);
             times = 1;
@@ -75,11 +84,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     public void getAlertLevelForAccountDisabled(final @Mocked AccountDisabledModuleConfiguration accountDisabledConfiguration) {
         final Alert alert = new Alert();
         alert.setAlertType(AlertType.USER_ACCOUNT_DISABLED);
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getAccountDisabledConfiguration();
             this.result = accountDisabledConfiguration;
         }};
-        multiDomainAlertConfigurationService.getAlertLevel(alert);
+        configurationService.getAlertLevel(alert);
         new Verifications() {{
             accountDisabledConfiguration.getAlertLevel(alert);
             times = 1;
@@ -91,11 +100,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     public void getAlertLevelForLoginFailure(final @Mocked LoginFailureModuleConfiguration loginFailureConfiguration) {
         final Alert alert = new Alert();
         alert.setAlertType(AlertType.USER_LOGIN_FAILURE);
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getLoginFailureConfiguration();
             this.result = loginFailureConfiguration;
         }};
-        multiDomainAlertConfigurationService.getAlertLevel(alert);
+        configurationService.getAlertLevel(alert);
         new Verifications() {{
             loginFailureConfiguration.getAlertLevel(alert);
             times = 1;
@@ -106,11 +115,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     public void getAlertLevelCertificateForImminentExpiration(final @Mocked ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration) {
         final Alert alert = new Alert();
         alert.setAlertType(AlertType.CERT_IMMINENT_EXPIRATION);
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getImminentExpirationCertificateConfiguration();
             this.result = imminentExpirationCertificateConfiguration;
         }};
-        multiDomainAlertConfigurationService.getAlertLevel(alert);
+        configurationService.getAlertLevel(alert);
         new Verifications() {{
             imminentExpirationCertificateConfiguration.getAlertLevel(alert);
             times = 1;
@@ -121,11 +130,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     public void getAlertLevelForCertificateExpired(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration) {
         final Alert alert = new Alert();
         alert.setAlertType(AlertType.CERT_EXPIRED);
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getExpiredCertificateConfiguration();
             this.result = expiredCertificateConfiguration;
         }};
-        multiDomainAlertConfigurationService.getAlertLevel(alert);
+        configurationService.getAlertLevel(alert);
         new Verifications() {{
             expiredCertificateConfiguration.getAlertLevel(alert);
             times = 1;
@@ -134,11 +143,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Test
     public void getMailSubjectForMessage(final @Mocked MessagingModuleConfiguration messagingConfiguration) {
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getMessageCommunicationConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getMessageCommunicationConfiguration();
             result = messagingConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.MSG_STATUS_CHANGED);
+        configurationService.getMailSubject(AlertType.MSG_STATUS_CHANGED);
         new Verifications() {{
             messagingConfiguration.getMailSubject();
             times = 1;
@@ -147,11 +156,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Test
     public void getMailSubjectForAccountDisabled(final @Mocked AccountDisabledModuleConfiguration accountDisabledConfiguration) {
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getAccountDisabledConfiguration();
             this.result = accountDisabledConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.USER_ACCOUNT_DISABLED);
+        configurationService.getMailSubject(AlertType.USER_ACCOUNT_DISABLED);
         new Verifications() {{
             accountDisabledConfiguration.getMailSubject();
             times = 1;
@@ -161,11 +170,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Test
     public void getMailSubjectForLoginFailure(final @Mocked LoginFailureModuleConfiguration loginFailureConfiguration) {
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getLoginFailureConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getLoginFailureConfiguration();
             this.result = loginFailureConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.USER_LOGIN_FAILURE);
+        configurationService.getMailSubject(AlertType.USER_LOGIN_FAILURE);
         new Verifications() {{
             loginFailureConfiguration.getMailSubject();
             times = 1;
@@ -174,11 +183,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Test
     public void getMailSubjectForCertificateImminentExpiration(final @Mocked ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration) {
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getImminentExpirationCertificateConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getImminentExpirationCertificateConfiguration();
             this.result = imminentExpirationCertificateConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.CERT_IMMINENT_EXPIRATION);
+        configurationService.getMailSubject(AlertType.CERT_IMMINENT_EXPIRATION);
         new Verifications() {{
             imminentExpirationCertificateConfiguration.getMailSubject();
             times = 1;
@@ -187,11 +196,11 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
 
     @Test
     public void getMailSubjectForCertificateExpired(final @Mocked ExpiredCertificateModuleConfiguration expiredCertificateConfiguration) {
-        new Expectations(multiDomainAlertConfigurationService) {{
-            multiDomainAlertConfigurationService.getExpiredCertificateConfiguration();
+        new Expectations(configurationService) {{
+            configurationService.getExpiredCertificateConfiguration();
             this.result = expiredCertificateConfiguration;
         }};
-        multiDomainAlertConfigurationService.getMailSubject(AlertType.CERT_EXPIRED);
+        configurationService.getMailSubject(AlertType.CERT_EXPIRED);
         new Verifications() {{
             expiredCertificateConfiguration.getMailSubject();
             times = 1;
@@ -208,12 +217,12 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             result = sender;
             domibusPropertyProvider.getProperty(domain, DOMIBUS_ALERT_RECEIVER_EMAIL);
             result = receiver;
-            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE, "false");
+            domibusPropertyProvider.getBooleanOptionalDomainProperty(DOMIBUS_ALERT_MAIL_SENDING_ACTIVE);
             result = true;
-            domibusPropertyProvider.getOptionalDomainProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME, "20");
-            result = "20";
+            domibusPropertyProvider.getIntegerOptionalDomainProperty(DOMIBUS_ALERT_CLEANER_ALERT_LIFETIME);
+            result = 20;
         }};
-        final CommonConfiguration commonConfiguration = multiDomainAlertConfigurationService.readCommonConfiguration(domain);
+        final CommonConfiguration commonConfiguration = configurationService.readCommonConfiguration(domain);
         assertEquals(sender, commonConfiguration.getSendFrom());
         assertEquals(receiver, commonConfiguration.getSendTo());
         assertEquals(20, commonConfiguration.getAlertLifeTimeInDays(), 0);
@@ -225,10 +234,10 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
             this.result = true;
         }};
-        assertEquals(true, multiDomainAlertConfigurationService.isAlertModuleEnabled());
+        assertEquals(true, configurationService.isAlertModuleEnabled());
     }
 
     @Test
@@ -238,18 +247,18 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
+            result = true;
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
             result = "SEND_FAILURE,ACKNOWLEDGED";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
             result = "HIGH,LOW";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT, MESSAGE_STATUS_CHANGE_MAIL_SUBJECT);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT);
             this.result = mailSubject;
         }};
-        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.readMessageConfiguration(domain);
+        final MessagingModuleConfiguration messagingConfiguration = configurationService.readMessageConfiguration(domain);
         assertEquals(mailSubject, messagingConfiguration.getMailSubject());
         assertEquals(AlertLevel.HIGH, messagingConfiguration.getAlertLevel(MessageStatus.SEND_FAILURE));
         assertEquals(AlertLevel.LOW, messagingConfiguration.getAlertLevel(MessageStatus.ACKNOWLEDGED));
@@ -263,18 +272,18 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
+            result = true;
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
             result = "SEND_FAILURE,ACKNOWLEDGED";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
             result = "HIGH";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT, MESSAGE_STATUS_CHANGE_MAIL_SUBJECT);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_MAIL_SUBJECT);
             this.result = mailSubject;
         }};
-        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.readMessageConfiguration(domain);
+        final MessagingModuleConfiguration messagingConfiguration = configurationService.readMessageConfiguration(domain);
         assertEquals(mailSubject, messagingConfiguration.getMailSubject());
         assertEquals(AlertLevel.HIGH, messagingConfiguration.getAlertLevel(MessageStatus.SEND_FAILURE));
         assertEquals(AlertLevel.HIGH, messagingConfiguration.getAlertLevel(MessageStatus.ACKNOWLEDGED));
@@ -288,16 +297,16 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
+            result = true;
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
             result = "SEND_FLOP";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
             result = "HIGH";
         }};
-        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.readMessageConfiguration(domain);
+        final MessagingModuleConfiguration messagingConfiguration = configurationService.readMessageConfiguration(domain);
         assertFalse(messagingConfiguration.isActive());
 
     }
@@ -308,12 +317,12 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString());
-            result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            this.result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
+            result = false;
         }};
-        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.readMessageConfiguration(domain);
+        final MessagingModuleConfiguration messagingConfiguration = configurationService.readMessageConfiguration(domain);
         assertFalse(messagingConfiguration.isActive());
 
     }
@@ -324,16 +333,16 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            this.result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_ACTIVE);
+            result = true;
             domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_STATES);
             result = "";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL, LOW);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_MSG_COMMUNICATION_FAILURE_LEVEL);
             result = "";
         }};
-        final MessagingModuleConfiguration messagingConfiguration = multiDomainAlertConfigurationService.readMessageConfiguration(domain);
+        final MessagingModuleConfiguration messagingConfiguration = configurationService.readMessageConfiguration(domain);
         assertFalse(messagingConfiguration.isActive());
 
     }
@@ -344,10 +353,10 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            this.result = false;
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertFalse(accountDisabledConfiguration.isActive());
 
     }
@@ -359,22 +368,52 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL, LOW);
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL);
             result = "HIGH";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT, WHEN_BLOCKED);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_MOMENT);
             result = "AT_LOGON";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT, ACCOUNT_DISABLED_MAIL_SUBJECT);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_SUBJECT);
             this.result = mailSubject;
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertTrue(accountDisabledConfiguration.isActive());
         assertEquals(mailSubject, accountDisabledConfiguration.getMailSubject());
         Alert alert = new Alert();
         alert.setAlertType(AlertType.USER_ACCOUNT_DISABLED);
+        assertEquals(AlertLevel.HIGH, accountDisabledConfiguration.getAlertLevel(alert));
+        assertTrue(accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin());
+
+    }
+
+    @Test
+    public void readPluginAccountDisabledConfigurationTest() {
+        Domain domain = new Domain();
+        final String mailSubject = "Plugin accout disabled";
+        new Expectations() {{
+            domainContextProvider.getCurrentDomainSafely();
+            result = DomainService.DEFAULT_DOMAIN;
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, "domibus.alert.plugin.user.account_disabled.active");
+            result = true;
+            domibusPropertyProvider.getDomainProperty(domain, "domibus.alert.plugin.user.account_disabled.level");
+            result = "HIGH";
+            domibusPropertyProvider.getDomainProperty(domain, "domibus.alert.plugin.user.account_disabled.moment");
+            result = "AT_LOGON";
+            domibusPropertyProvider.getDomainProperty(domain, "domibus.alert.plugin.user.account_disabled.subject");
+            this.result = mailSubject;
+        }};
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new
+                PluginAccountDisabledConfigurationReader().readConfiguration(domain);
+
+        assertTrue(accountDisabledConfiguration.isActive());
+        assertEquals(mailSubject, accountDisabledConfiguration.getMailSubject());
+        Alert alert = new Alert();
+        alert.setAlertType(AlertType.PLUGIN_USER_ACCOUNT_DISABLED);
         assertEquals(AlertLevel.HIGH, accountDisabledConfiguration.getAlertLevel(alert));
         assertTrue(accountDisabledConfiguration.shouldTriggerAccountDisabledAtEachLogin());
 
@@ -386,14 +425,14 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            this.result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL, LOW);
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_ACCOUNT_DISABLED_LEVEL);
             result = "HIGHPP";
         }};
-        final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.readAccountDisabledConfiguration(domain);
+        final AccountDisabledModuleConfiguration accountDisabledConfiguration = configurationService.new ConsoleAccountDisabledConfigurationReader().readConfiguration(domain);
         assertFalse(accountDisabledConfiguration.isActive());
     }
 
@@ -404,13 +443,13 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             {
                 domainContextProvider.getCurrentDomainSafely();
                 result = DomainService.DEFAULT_DOMAIN;
-                domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-                result = "false";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, Boolean.FALSE.toString());
-                result = "true";
+                domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+                result = false;
+                domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE);
+                result = true;
             }
         };
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.readLoginFailureConfiguration(domain);
+        final LoginFailureModuleConfiguration loginFailureConfiguration = configurationService.new ConsoleLoginFailConfigurationReader().readConfiguration(domain);
         assertFalse(loginFailureConfiguration.isActive());
     }
 
@@ -421,13 +460,13 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             {
                 domainContextProvider.getCurrentDomainSafely();
                 result = DomainService.DEFAULT_DOMAIN;
-                domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-                result = "true";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, Boolean.FALSE.toString());
-                result = "false";
+                domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+                result = true;
+                domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE);
+                result = false;
             }
         };
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.readLoginFailureConfiguration(domain);
+        final LoginFailureModuleConfiguration loginFailureConfiguration = configurationService.new ConsoleLoginFailConfigurationReader().readConfiguration(domain);
         assertFalse(loginFailureConfiguration.isActive());
     }
 
@@ -440,17 +479,17 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             {
                 domainContextProvider.getCurrentDomainSafely();
                 result = DomainService.DEFAULT_DOMAIN;
-                domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-                result = "true";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, Boolean.FALSE.toString());
-                result = "true";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, LOW);
+                domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+                result = true;
+                domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE);
+                result = true;
+                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL);
                 result = "MEDIUM";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT, LOGIN_FAILURE_MAIL_SUBJECT);
+                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_MAIL_SUBJECT);
                 this.result = mailSubject;
             }
         };
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.readLoginFailureConfiguration(domain);
+        final LoginFailureModuleConfiguration loginFailureConfiguration = configurationService.new ConsoleLoginFailConfigurationReader().readConfiguration(domain);
         assertTrue(loginFailureConfiguration.isActive());
         Alert alert = new Alert();
         alert.setAlertType(AlertType.USER_LOGIN_FAILURE);
@@ -465,15 +504,15 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
             {
                 domainContextProvider.getCurrentDomainSafely();
                 result = DomainService.DEFAULT_DOMAIN;
-                domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-                result = "true";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE, Boolean.FALSE.toString());
-                result = "true";
-                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL, LOW);
+                domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+                result = true;
+                domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_ACTIVE);
+                result = true;
+                domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_USER_LOGIN_FAILURE_LEVEL);
                 result = "WHAT?";
             }
         };
-        final LoginFailureModuleConfiguration loginFailureConfiguration = multiDomainAlertConfigurationService.readLoginFailureConfiguration(domain);
+        final LoginFailureModuleConfiguration loginFailureConfiguration = configurationService.new ConsoleLoginFailConfigurationReader().readConfiguration(domain);
         assertFalse(loginFailureConfiguration.isActive());
     }
 
@@ -483,12 +522,12 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "false";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = false;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE);
+            result = true;
         }};
-        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.readImminentExpirationCertificateConfiguration(domain);
+        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = configurationService.readImminentExpirationCertificateConfiguration(domain);
         assertFalse(imminentExpirationCertificateConfiguration.isActive());
 
     }
@@ -498,37 +537,37 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE, Boolean.FALSE.toString());
-            result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE);
+            result = false;
         }};
-        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.readImminentExpirationCertificateConfiguration(domain);
+        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = configurationService.readImminentExpirationCertificateConfiguration(domain);
         assertFalse(imminentExpirationCertificateConfiguration.isActive());
 
     }
 
     @Test
-    public void readImminentExpirationCertificateConfigurationModule() {
+    public void readImminentExpirationCertificateConfigurationModuleTest() {
         Domain domain = new Domain();
         final String mailSubject = "Certificate imminent expiration";
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS, "61");
-            result = "60";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS, "14");
-            result = "10";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL, LOW);
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS);
+            result = 60;
+            domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_FREQUENCY_DAYS);
+            result = 10;
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_LEVEL);
             result = "MEDIUM";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT, CERTIFICATE_IMMINENT_EXPIRATION_MAIL_SUBJECT);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_MAIL_SUBJECT);
             this.result = mailSubject;
         }};
-        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.readImminentExpirationCertificateConfiguration(domain);
+        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = configurationService.readImminentExpirationCertificateConfiguration(domain);
         assertTrue(imminentExpirationCertificateConfiguration.isActive());
         assertEquals(mailSubject, imminentExpirationCertificateConfiguration.getMailSubject());
         assertEquals(60, imminentExpirationCertificateConfiguration.getImminentExpirationDelay(), 0);
@@ -540,75 +579,58 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
     }
 
     @Test
-    public void readImminentExpirationCertificateConfigurationModuleWrongConfig(@Mocked final Domain domain) {
-        new Expectations() {{
-            domainContextProvider.getCurrentDomainSafely();
-            result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_IMMINENT_EXPIRATION_DELAY_DAYS, "61");
-            result = "WRONG NUMBER";
-
-        }};
-        final ImminentExpirationCertificateModuleConfiguration imminentExpirationCertificateConfiguration = multiDomainAlertConfigurationService.readImminentExpirationCertificateConfiguration(domain);
-        assertFalse(imminentExpirationCertificateConfiguration.isActive());
-    }
-
-    @Test
-    public void readExpiredCertificateConfigurationMainModuleInactive() {
+    public void readExpiredCertificateConfigurationMainModuleInactiveTest() {
         Domain domain = new Domain();
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "false";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = false;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE);
+            result = true;
         }};
-        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.readExpiredCertificateConfiguration(new Domain());
+        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = configurationService.readExpiredCertificateConfiguration(new Domain());
         assertFalse(expiredCertificateConfiguration.isActive());
     }
 
     @Test
-    public void readExpiredCertificateConfigurationModuleInactive() {
+    public void readExpiredCertificateConfigurationModuleInactiveTest() {
         Domain domain = new Domain();
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE, Boolean.FALSE.toString());
-            result = "false";
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE);
+            result = false;
         }};
-        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.readExpiredCertificateConfiguration(new Domain());
+        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = configurationService.readExpiredCertificateConfiguration(new Domain());
         assertFalse(expiredCertificateConfiguration.isActive());
     }
 
     @Test
-    public void readExpiredCertificateConfiguration() {
+    public void readExpiredCertificateConfigurationTest() {
         Domain domain = new Domain();
         final String mailSubject = "Certificate expired";
         new Expectations() {{
             domainContextProvider.getCurrentDomainSafely();
             result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS, "7");
-            result = "20";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS, "92");
-            result = "10";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_LEVEL, LOW);
+            domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getBooleanDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE);
+            result = true;
+            domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS);
+            result = 20;
+            domibusPropertyProvider.getIntegerDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_DURATION_DAYS);
+            result = 10;
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_LEVEL);
             result = "LOW";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT, CERTIFICATE_EXPIRED_MAIL_SUBJECT);
+            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_MAIL_SUBJECT);
             this.result = mailSubject;
 
 
         }};
-        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.readExpiredCertificateConfiguration(new Domain());
+        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = configurationService.readExpiredCertificateConfiguration(new Domain());
         assertTrue(expiredCertificateConfiguration.isActive());
         assertEquals(20, expiredCertificateConfiguration.getExpiredFrequency(), 0);
         assertEquals(10, expiredCertificateConfiguration.getExpiredDuration(), 0);
@@ -618,24 +640,44 @@ public class MultiDomainAlertModuleConfigurationServiceImplTest {
         assertEquals(mailSubject, expiredCertificateConfiguration.getMailSubject());
     }
 
+
     @Test
-    public void readExpiredCertificateConfigurationIncorrect() {
+    public void getRepetitiveAlertConfigurationTest() {
         Domain domain = new Domain();
-        new Expectations() {{
-            domainContextProvider.getCurrentDomainSafely();
-            result = DomainService.DEFAULT_DOMAIN;
-            domibusPropertyProvider.getDomainProperty(DomainService.DEFAULT_DOMAIN, DOMIBUS_ALERT_ACTIVE);
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_ACTIVE, Boolean.FALSE.toString());
-            result = "true";
-            domibusPropertyProvider.getDomainProperty(domain, DOMIBUS_ALERT_CERT_EXPIRED_FREQUENCY_DAYS, "7");
-            result = "WRONG";
+        String property = "domibus.alert.password.expired";
+        new Expectations() {
+            {
+                domainContextProvider.getCurrentDomainSafely();
+                result = DomainService.DEFAULT_DOMAIN;
 
+                domibusPropertyProvider.getBooleanDomainProperty(DomainService.DEFAULT_DOMAIN, "domibus.alert.active");
+                result = true;
 
+                domibusPropertyProvider.getDomainProperty(domain, property + ".active");
+                result = "true";
+
+                domibusPropertyProvider.getDomainProperty(domain, property + ".delay_days");
+                result = "15";
+
+                domibusPropertyProvider.getDomainProperty(domain, property + ".frequency_days");
+                result = "5";
+
+                domibusPropertyProvider.getDomainProperty(domain, property + ".level");
+                result = AlertLevel.MEDIUM.name();
+
+                domibusPropertyProvider.getDomainProperty(domain, property + ".mail.subject");
+                result = "my subjects";
+            }
+        };
+        final RepetitiveAlertModuleConfiguration conf = configurationService.new
+                RepetitiveAlertConfigurationReader(AlertType.PASSWORD_EXPIRED).readConfiguration(domain);
+
+        assertTrue(conf.isActive());
+        assertEquals((long)15, (long)conf.getEventDelay());
+        Alert a = new Alert(){{
+           setAlertType(AlertType.PASSWORD_EXPIRED);
         }};
-        final ExpiredCertificateModuleConfiguration expiredCertificateConfiguration = multiDomainAlertConfigurationService.readExpiredCertificateConfiguration(new Domain());
-        assertFalse(expiredCertificateConfiguration.isActive());
+        assertEquals(AlertLevel.MEDIUM, conf.getAlertLevel(a));
+
     }
-
-
 }

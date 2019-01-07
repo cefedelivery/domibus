@@ -8,10 +8,12 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.User;
 import eu.domibus.common.converters.UserConverter;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.services.UserPersistenceService;
+import eu.domibus.security.ConsoleUserSecurityPolicyManager;
+import eu.domibus.core.alerts.service.ConsoleUserAlertsServiceImpl;
 import eu.domibus.core.alerts.service.EventService;
 import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import mockit.*;
@@ -54,7 +56,7 @@ public class SuperUserManagementServiceImplTest {
     DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    UserPasswordHistoryDao userPasswordHistoryDao;
+    ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Injectable
     protected UserRoleDao userRoleDao;
@@ -70,6 +72,12 @@ public class SuperUserManagementServiceImplTest {
 
     @Mocked
     private UserManagementServiceImpl userManagementService;
+
+    @Injectable
+    ConsoleUserSecurityPolicyManager userPasswordValidator;
+
+    @Injectable
+    ConsoleUserAlertsServiceImpl userAlertsService;
 
     @Tested
     private SuperUserManagementServiceImpl superUserManagementService;

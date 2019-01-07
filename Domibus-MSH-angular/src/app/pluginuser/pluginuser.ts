@@ -7,11 +7,13 @@ export enum UserState {
 
 export class PluginUserRO {
   entityId: number;
-  username: string;
-  passwd: string;
+  userName: string;
+  password: string;
   certificateId: string;
   originalUser: string;
   authRoles: string;
   authenticationType: string;
   status: string;
+  active: boolean;
+  suspended: boolean;
 }

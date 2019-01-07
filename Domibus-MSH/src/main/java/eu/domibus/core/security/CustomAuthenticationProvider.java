@@ -1,26 +1,28 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
+import eu.domibus.security.PluginUserSecurityPolicyManager;
+import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Component(value="securityCustomAuthenticationProvider")
+@Component(value = "securityCustomAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProvider.class);
@@ -39,6 +41,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
     private BCryptPasswordEncoder bcryptEncoder;
+
+    @Autowired
+    PluginUserSecurityPolicyManager pluginUserPasswordManager;
+
+    @Autowired
+    PluginUserAlertsServiceImpl userAlertsService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -61,21 +69,60 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 setAuthority(authentication, authRoles);
             } else if (authentication instanceof BasicAuthentication) {
                 LOG.debug("Authenticating using the Basic authentication");
-                Boolean res = false;
-                AuthenticationEntity basicAuthenticationEntity = securityAuthenticationDAO.findByUser(authentication.getName());
-                res = bcryptEncoder.matches((String) authentication.getCredentials(), basicAuthenticationEntity.getPasswd());
 
-                authentication.setAuthenticated(res);
+                String userName = authentication.getName();
+                String password = (String) authentication.getCredentials();
+                AuthenticationEntity user = securityAuthenticationDAO.findByUser(userName);
 
-                ((BasicAuthentication) authentication).setOriginalUser(basicAuthenticationEntity.getOriginalUser());
+                boolean isAuthenticated = checkUserAccount(user, password);
+                if (isAuthenticated) {
+                    pluginUserPasswordManager.handleCorrectAuthentication(userName);
+                    //check expired; it does not produce an alert here
+                    isAuthenticated = isAuthenticated && !isPasswordExpired(user);
+                } else {
+                    pluginUserPasswordManager.handleWrongAuthentication(userName);
+                }
+
+                authentication.setAuthenticated(isAuthenticated);
+                String originalUser = user != null ? user.getOriginalUser() : null;
+                ((BasicAuthentication) authentication).setOriginalUser(originalUser);
                 List<AuthRole> authRoles = securityAuthenticationDAO.getRolesForUser(authentication.getName());
                 setAuthority(authentication, authRoles);
             }
-        } catch (final Exception exception)  {
+        } catch (final Exception exception) {
             throw new AuthenticationServiceException("Couldn't authenticate the principal " + authentication.getPrincipal(), exception);
-
         }
         return authentication;
+    }
+
+    private boolean checkUserAccount(AuthenticationEntity user, String password) {
+        if (user == null) {
+            return false;
+        }
+
+        //check if password is correct
+        boolean isPasswordCorrect = bcryptEncoder.matches(password, user.getPassword());
+        if (!isPasswordCorrect) {
+            return false;
+        }
+
+        //check locked; if true, declare that it is not authenticated, so that handle method works
+        if (!user.isActive()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean isPasswordExpired(AuthenticationEntity user) {
+        boolean isDefaultPassword = user.hasDefaultPassword();
+        LocalDateTime passwordChangeDate = user.getPasswordChangeDate();
+        try {
+            pluginUserPasswordManager.validatePasswordExpired(user.getUserName(), isDefaultPassword, passwordChangeDate);
+            return false;
+        } catch (CredentialsExpiredException ex) {
+            return true;
+        }
     }
 
     @Override
@@ -84,18 +131,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     private void setAuthority(Authentication authentication, List<AuthRole> authRoles) {
-        if(authRoles == null || authRoles.isEmpty())
+        if (authRoles == null || authRoles.isEmpty())
             return;
 
         List<GrantedAuthority> authorityList = new ArrayList<>();
-        for(AuthRole role : authRoles) {
+        for (AuthRole role : authRoles) {
             authorityList.add(new SimpleGrantedAuthority(role.name()));
         }
-        if(authentication instanceof BasicAuthentication) {
+        if (authentication instanceof BasicAuthentication) {
             ((BasicAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof X509CertificateAuthentication) {
+        } else if (authentication instanceof X509CertificateAuthentication) {
             ((X509CertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
-        } else if(authentication instanceof BlueCoatClientCertificateAuthentication) {
+        } else if (authentication instanceof BlueCoatClientCertificateAuthentication) {
             ((BlueCoatClientCertificateAuthentication) authentication).setAuthorityList(Collections.unmodifiableList(authorityList));
         }
     }

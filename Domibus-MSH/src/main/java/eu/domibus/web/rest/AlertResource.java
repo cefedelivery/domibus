@@ -83,16 +83,17 @@ public class AlertResource {
                 dynamicaPropertyTo);
 
         if (!authUtils.isSuperAdmin() || domainAlerts) {
-            return retrieveAlerts(alertCriteria);
+            return retrieveAlerts(alertCriteria, false);
         }
 
-        return domainTaskExecutor.submit(() -> retrieveAlerts(alertCriteria));
+        return domainTaskExecutor.submit(() -> retrieveAlerts(alertCriteria, true));
     }
 
-    private AlertResult retrieveAlerts(AlertCriteria alertCriteria) {
+    private AlertResult retrieveAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
         final Long alertCount = alertService.countAlerts(alertCriteria);
         final List<Alert> alerts = alertService.findAlerts(alertCriteria);
         final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        alertRoList.forEach(alert->alert.setSuperAdmin(isSuperAdmin));
         final AlertResult alertResult = new AlertResult();
         alertResult.setAlertsEntries(alertRoList);
         alertResult.setCount(alertCount.intValue());
@@ -126,25 +127,13 @@ public class AlertResource {
             LOG.trace("Invalid or empty alert type:[{}] sent from the gui ", aType, e);
             return Lists.newArrayList();
         }
-        switch (alertType) {
-            case MSG_STATUS_CHANGED:
-                final List<MessageEvent> messageEvents = Lists.newArrayList(MessageEvent.values());
-                return messageEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case CERT_EXPIRED:
-            case CERT_IMMINENT_EXPIRATION:
-                final List<CertificateEvent> certificateEvents = Lists.newArrayList(CertificateEvent.values());
-                return certificateEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case USER_ACCOUNT_DISABLED:
-            case USER_LOGIN_FAILURE:
-                final List<AuthenticationEvent> authenticationEvents = Lists.newArrayList(AuthenticationEvent.values());
-                return authenticationEvents.stream().map(Enum::name).collect(Collectors.toList());
-            case PASSWORD_EXPIRED:
-            case PASSWORD_IMMINENT_EXPIRATION:
-                return Arrays.asList("USER", "EXPIRATION_DATE");
-            default:
-                throw new IllegalArgumentException("Unsupported alert type.");
+        List<EventType> sourceEvents = alertType.getSourceEvents();
+        if (!sourceEvents.isEmpty()) {
+            return sourceEvents.get(0).getProperties();
+        } else {
+            LOG.trace("Invalid alert type:[{}]: it has no source events.", aType);
+            return Lists.newArrayList();
         }
-
     }
 
     @PutMapping
@@ -153,15 +142,6 @@ public class AlertResource {
         final List<Alert> superAlerts = alertRos.stream().filter(Objects::nonNull).filter(AlertRo::isSuperAdmin).map(this::toAlert).collect(Collectors.toList());
         alertService.updateAlertProcessed(domainAlerts);
         domainTaskExecutor.submit(() -> alertService.updateAlertProcessed(superAlerts));
-    }
-
-    private Alert toAlert(AlertRo alertRo) {
-        final int entityId = alertRo.getEntityId();
-        final boolean processed = alertRo.isProcessed();
-        Alert alert = new Alert();
-        alert.setEntityId(entityId);
-        alert.setProcessed(processed);
-        return alert;
     }
 
     @GetMapping(path = "/csv")
@@ -180,8 +160,8 @@ public class AlertResource {
                                          @RequestParam(value = "reportingTo", required = false) String reportingTo,
                                          @RequestParam(value = "parameters", required = false) String[] nonDateDynamicParameters,
                                          @RequestParam(value = "dynamicFrom", required = false) String dynamicaPropertyFrom,
-                                         @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo
-    ) {
+                                         @RequestParam(value = "dynamicTo", required = false) String dynamicaPropertyTo,
+                                        @RequestParam(value = "domainAlerts", required = false, defaultValue = "false") Boolean domainAlerts) {
 
         AlertCriteria alertCriteria = getAlertCriteria(
                 0,
@@ -201,9 +181,12 @@ public class AlertResource {
                 dynamicaPropertyFrom,
                 dynamicaPropertyTo);
 
-        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
-        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
-
+        List<AlertRo> alertRoList;
+        if (!authUtils.isSuperAdmin() || domainAlerts) {
+            alertRoList = fetchAndTransformAlerts(alertCriteria, false);
+        } else {
+            alertRoList = domainTaskExecutor.submit(() -> fetchAndTransformAlerts(alertCriteria, true));
+        }
 
         String resultText;
         try {
@@ -221,6 +204,22 @@ public class AlertResource {
                 .header("Content-Disposition", "attachment; filename=" + csvServiceImpl.getCsvFilename("alerts"))
                 .body(resultText);
 
+    }
+
+    private Alert toAlert(AlertRo alertRo) {
+        final int entityId = alertRo.getEntityId();
+        final boolean processed = alertRo.isProcessed();
+        Alert alert = new Alert();
+        alert.setEntityId(entityId);
+        alert.setProcessed(processed);
+        return alert;
+    }
+
+    protected List<AlertRo> fetchAndTransformAlerts(AlertCriteria alertCriteria, boolean isSuperAdmin) {
+        final List<Alert> alerts = alertService.findAlerts(alertCriteria);
+        final List<AlertRo> alertRoList = alerts.stream().map(this::transform).collect(Collectors.toList());
+        alertRoList.forEach(alert->alert.setSuperAdmin(isSuperAdmin));
+        return alertRoList;
     }
 
     private AlertCriteria getAlertCriteria(int page, int pageSize, Boolean ask, String column, String

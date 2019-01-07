@@ -9,6 +9,7 @@ import eu.domibus.common.dao.MessagingDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.logging.ErrorLogEntry;
 import eu.domibus.common.model.security.User;
+import eu.domibus.common.model.security.UserEntityBase;
 import eu.domibus.core.alerts.dao.EventDao;
 import eu.domibus.core.alerts.model.common.AlertType;
 import eu.domibus.core.alerts.model.common.EventType;
@@ -94,7 +95,7 @@ public class EventServiceImplTest {
         SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
         final Date loginTime = parser.parse("25/10/1977 00:00:00");
         final boolean accountDisabled = false;
-        eventService.enqueueLoginFailureEvent(userName, loginTime, accountDisabled);
+        eventService.enqueueLoginFailureEvent(UserEntityBase.Type.CONSOLE, userName, loginTime, accountDisabled);
         new Verifications() {{
             Event event;
             jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, eventService.LOGIN_FAILURE);
@@ -111,15 +112,15 @@ public class EventServiceImplTest {
         final String userName = "thomas";
         SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
         final Date loginTime = parser.parse("25/10/1977 00:00:00");
-        final boolean accountDisabled = false;
-        eventService.enqueueAccountDisabledEvent(userName, loginTime, accountDisabled);
+//        final boolean accountDisabled = false;
+        eventService.enqueueAccountDisabledEvent(UserEntityBase.Type.CONSOLE, userName, loginTime);
         new Verifications() {{
             Event event;
             jmsManager.convertAndSendToQueue(event = withCapture(), alertMessageQueue, eventService.ACCOUNT_DISABLED);
             times = 1;
             Assert.assertEquals(userName, event.getProperties().get(USER.name()).getValue());
             Assert.assertEquals(loginTime, event.getProperties().get(LOGIN_TIME.name()).getValue());
-            Assert.assertEquals("false", event.getProperties().get(ACCOUNT_DISABLED.name()).getValue());
+            Assert.assertEquals("true", event.getProperties().get(ACCOUNT_DISABLED.name()).getValue());
         }};
     }
 
@@ -237,7 +238,7 @@ public class EventServiceImplTest {
     }
 
     @Test
-    public void enqueuePasswordExpiredEvent() throws ParseException {
+    public void enqueuePasswordExpirationEvent() throws ParseException {
         int maxPasswordAge = 15;
         LocalDateTime passwordDate = LocalDateTime.of(2018, 10, 01, 21, 58, 59);
         SimpleDateFormat parser = new SimpleDateFormat("dd/MM/yyy HH:mm:ss");
@@ -248,7 +249,7 @@ public class EventServiceImplTest {
         persistedEvent.setType(EventType.PASSWORD_EXPIRED);
 
         new Expectations() {{
-            multiDomainAlertConfigurationService.getRepetitiveEventConfiguration((AlertType)any).isActive();
+            multiDomainAlertConfigurationService.getRepetitiveAlertConfiguration((AlertType) any).isActive();
             result = true;
             eventDao.findWithTypeAndPropertyValue((EventType) any, anyString, anyString);
             result = null;
@@ -256,7 +257,7 @@ public class EventServiceImplTest {
             result = persistedEvent;
         }};
 
-        eventService.enqueuePasswordExpiredEvent(user, maxPasswordAge);
+        eventService.enqueuePasswordExpirationEvent(EventType.PASSWORD_EXPIRED, user, maxPasswordAge);
 
         new VerificationsInOrder() {{
             Event event;

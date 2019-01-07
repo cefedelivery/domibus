@@ -363,41 +363,40 @@ export class UserComponent implements OnInit, DirtyOperations {
     });
   }
 
-  save(withDownloadCSV: boolean) {
+  async save(withDownloadCSV: boolean) {
     try {
       const isValid = this.userValidatorService.validateUsers(this.users);
       if (!isValid) return;
 
-      this.dialog.open(SaveDialogComponent).afterClosed().subscribe(result => {
-        if (result) {
-          this.disableSelectionAndButtons();
-          const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
-          this.isBusy = true;
-          this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
-            this.isBusy = false;
-            this.getUsers();
-            this.alertService.success('The operation \'update users\' completed successfully.', false);
-            if (withDownloadCSV) {
-              DownloadService.downloadNative(UserComponent.USER_CSV_URL);
-            }
-          }, err => {
-            this.isBusy = false;
-            this.getUsers();
-            this.alertService.exception('The operation \'update users\' not completed successfully.', err, false);
-          });
-        } else {
+      const proceed = await this.dialog.open(SaveDialogComponent).afterClosed().toPromise();
+      if (proceed) {
+        this.disableSelectionAndButtons();
+        const modifiedUsers = this.users.filter(el => el.status !== UserState[UserState.PERSISTED]);
+        this.isBusy = true;
+        this.http.put(UserComponent.USER_USERS_URL, modifiedUsers).subscribe(res => {
+          this.isBusy = false;
+          this.getUsers();
+          this.alertService.success('The operation \'update users\' completed successfully.', false);
           if (withDownloadCSV) {
             DownloadService.downloadNative(UserComponent.USER_CSV_URL);
           }
+        }, err => {
+          this.isBusy = false;
+          this.getUsers();
+          this.alertService.exception('The operation \'update users\' not completed successfully.', err, false);
+        });
+      } else {
+        if (withDownloadCSV) {
+          DownloadService.downloadNative(UserComponent.USER_CSV_URL);
         }
-      });
+      }
     } catch (err) {
       this.isBusy = false;
       this.alertService.exception('The operation \'update users\' completed with errors.', err);
     }
   }
 
-   /**
+  /**
    * Saves the content of the datatable into a CSV file
    */
   saveAsCSV() {

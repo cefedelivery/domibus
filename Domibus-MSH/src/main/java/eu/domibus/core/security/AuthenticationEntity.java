@@ -1,25 +1,34 @@
 package eu.domibus.core.security;
 
-import eu.domibus.ebms3.common.model.AbstractBaseEntity;
+import eu.domibus.common.model.common.RevisionLogicalName;
+import eu.domibus.common.model.security.UserEntityBase;
+import eu.domibus.common.model.security.UserEntityBaseImpl;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "TB_AUTHENTICATION_ENTRY")
 @NamedQueries({
-        @NamedQuery(name = "AuthenticationEntity.findByUsername", query = "select bae from AuthenticationEntity bae where bae.username=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntity.findByUsername", query = "select bae from AuthenticationEntity bae where bae.userName=:USERNAME"),
         @NamedQuery(name = "AuthenticationEntity.findByCertificateId", query = "select bae from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
-        @NamedQuery(name = "AuthenticationEntity.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.username=:USERNAME"),
-        @NamedQuery(name = "AuthenticationEntity.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID")})
-
-public class AuthenticationEntity extends AbstractBaseEntity {
+        @NamedQuery(name = "AuthenticationEntity.getRolesForUsername", query = "select bae.authRoles from AuthenticationEntity bae where bae.userName=:USERNAME"),
+        @NamedQuery(name = "AuthenticationEntity.getRolesForCertificateId", query = "select bae.authRoles from AuthenticationEntity bae where bae.certificateId=:CERTIFICATE_ID"),
+        @NamedQuery(name = "AuthenticationEntity.findWithPasswordChangedBetween", query = "FROM AuthenticationEntity ae where ae.passwordChangeDate is not null " +
+                "and ae.passwordChangeDate>:START_DATE and ae.passwordChangeDate<:END_DATE " + "and ae.defaultPassword=:DEFAULT_PASSWORD"),
+        @NamedQuery(name = "AuthenticationEntity.findSuspendedUsers", query = "FROM AuthenticationEntity u where u.suspensionDate is not null and u.suspensionDate<:SUSPENSION_INTERVAL")
+})
+@Audited(withModifiedFlag = true)
+@RevisionLogicalName("PluginUser")
+public class AuthenticationEntity extends UserEntityBaseImpl implements UserEntityBase {
 
     @Column(name = "CERTIFICATE_ID")
     private String certificateId;
     @Column(name = "USERNAME")
-    private String username;
+    private String userName;
     @Column(name = "PASSWD")
-    private String passwd;
+    private String password;
     @Column(name = "AUTH_ROLES")
     private String authRoles; // semicolon separated roles
     @Column(name = "ORIGINAL_USER")
@@ -27,28 +36,30 @@ public class AuthenticationEntity extends AbstractBaseEntity {
     @Column(name = "BACKEND")
     private String backend;
 
+    @Override
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+        this.setPasswordChangeDate(LocalDateTime.now());
+    }
+
     public String getCertificateId() {
         return certificateId;
     }
 
     public void setCertificateId(String certificateId) {
         this.certificateId = certificateId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPasswd() {
-        return passwd;
-    }
-
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
     }
 
     public String getAuthRoles() {
@@ -74,4 +85,10 @@ public class AuthenticationEntity extends AbstractBaseEntity {
     public void setBackend(String backend) {
         this.backend = backend;
     }
+
+    @Override
+    public UserEntityBase.Type getType() {
+        return Type.PLUGIN;
+    }
+
 }

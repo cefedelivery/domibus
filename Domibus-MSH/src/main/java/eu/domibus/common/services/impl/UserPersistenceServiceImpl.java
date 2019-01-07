@@ -6,19 +6,16 @@ import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.api.user.UserManagementException;
 import eu.domibus.api.user.UserState;
+import eu.domibus.common.dao.security.ConsoleUserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserDao;
-import eu.domibus.common.dao.security.UserPasswordHistoryDao;
 import eu.domibus.common.dao.security.UserRoleDao;
 import eu.domibus.common.model.security.User;
 import eu.domibus.common.model.security.UserRole;
 import eu.domibus.common.services.UserPersistenceService;
-import eu.domibus.common.validators.PasswordValidator;
-import eu.domibus.core.alerts.model.service.AccountDisabledModuleConfiguration;
-import eu.domibus.core.alerts.service.EventService;
-import eu.domibus.core.alerts.service.MultiDomainAlertConfigurationService;
 import eu.domibus.core.converter.DomainCoreConverter;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.security.ConsoleUserSecurityPolicyManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +23,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,10 +42,10 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     private UserRoleDao userRoleDao;
 
     @Autowired
-    private UserPasswordHistoryDao userPasswordHistoryDao;
+    private ConsoleUserPasswordHistoryDao userPasswordHistoryDao;
 
     @Autowired
-    private BCryptPasswordEncoder bcryptEncoder;
+    private BCryptPasswordEncoder bCryptEncoder;
 
     @Autowired
     private DomainCoreConverter domainConverter;
@@ -58,13 +54,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
     protected UserDomainService userDomainService;
 
     @Autowired
-    private MultiDomainAlertConfigurationService multiDomainAlertConfigurationService;
-
-    @Autowired
-    private EventService eventService;
-
-    @Autowired
-    private PasswordValidator passwordValidator;
+    private ConsoleUserSecurityPolicyManager securityPolicyManager;
 
     @Autowired
     private DomibusPropertyProvider domibusPropertyProvider;
@@ -81,6 +71,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         Collection<eu.domibus.api.user.User> noPasswordChangedModifiedUsers = filterModifiedUserWithoutPasswordChange(users);
         LOG.debug("Modified users without password change:" + noPasswordChangedModifiedUsers.size());
         updateUsers(noPasswordChangedModifiedUsers, false);
+
         Collection<eu.domibus.api.user.User> passwordChangedModifiedUsers = filterModifiedUserWithPasswordChange(users);
         LOG.debug("Modified users with password change:" + passwordChangedModifiedUsers.size());
         updateUsers(passwordChangedModifiedUsers, true);
@@ -99,48 +90,43 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         userDao.update(userEntity);
     }
 
-    void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
+    protected void updateUsers(Collection<eu.domibus.api.user.User> users, boolean withPasswordChange) {
         for (eu.domibus.api.user.User user : users) {
-            User userEntity = prepareUserForUpdate(user);
+            User existing = userDao.loadUserByUsername(user.getUserName());
+
+            //suspension logic
+            securityPolicyManager.applyLockingPolicyOnUpdate(user);
 
             if (withPasswordChange) {
-                changePassword(userEntity, userEntity.getPassword(), user.getPassword());
+                changePassword(existing, user.getPassword());
             }
-            addRoleToUser(user.getAuthorities(), userEntity);
-            userDao.update(userEntity);
 
-            if (user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
+            existing.setEmail(user.getEmail());
+            existing.clearRoles();
+            addRoleToUser(user.getAuthorities(), existing);
+
+            userDao.update(existing);
+
+            if (user.getAuthorities() != null && user.getAuthorities().contains(AuthRole.ROLE_AP_ADMIN.name())) {
                 userDomainService.setPreferredDomainForUser(user.getUserName(), user.getDomain());
             }
         }
     }
 
-    void changePassword(User userEntity, String currentPassword, String newPassword) {
+    protected void changePassword(User user, String currentPassword, String newPassword) {
         //check if old password matches the persisted one
-        if (!bcryptEncoder.matches(currentPassword, userEntity.getPassword())) {
+        if (!bCryptEncoder.matches(currentPassword, user.getPassword())) {
             throw new UserManagementException("The current password does not match the provided one.");
         }
 
-        savePasswordHistory(userEntity); // save old password in history
-
-        String userName = userEntity.getUserName();
-        passwordValidator.validateComplexity(userName, newPassword);
-        passwordValidator.validateHistory(userName, newPassword);
-
-        userEntity.setPassword(bcryptEncoder.encode(newPassword));
-        userEntity.setDefaultPassword(false);
+        changePassword(user, newPassword);
     }
 
-    void savePasswordHistory(User userEntity) {
-        int passwordsToKeep = Integer.valueOf(domibusPropertyProvider.getOptionalDomainProperty(PasswordValidator.PASSWORD_HISTORY_POLICY, "0"));
-        if (passwordsToKeep == 0) {
-            return;
-        }
-        this.userPasswordHistoryDao.savePassword(userEntity, userEntity.getPassword(), userEntity.getPasswordChangeDate());
-        this.userPasswordHistoryDao.removePasswords(userEntity, passwordsToKeep - 1);
+    protected void changePassword(User user, String newPassword) {
+        securityPolicyManager.changePassword(user, newPassword);
     }
 
-    private void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
+    protected void insertNewUsers(Collection<eu.domibus.api.user.User> newUsers) {
         // validate user not already in general schema
         //get all users from user-domains table in general schema
         List<String> allUserNames = userDomainService.getAllUserNames();
@@ -156,11 +142,11 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
 
         for (eu.domibus.api.user.User user : newUsers) {
-            passwordValidator.validateComplexity(user.getUserName(), user.getPassword());
+            securityPolicyManager.validateComplexity(user.getUserName(), user.getPassword());
 
             User userEntity = domainConverter.convert(user, User.class);
 
-            userEntity.setPassword(bcryptEncoder.encode(userEntity.getPassword()));
+            userEntity.setPassword(bCryptEncoder.encode(userEntity.getPassword()));
             addRoleToUser(user.getAuthorities(), userEntity);
             userDao.create(userEntity);
 
@@ -172,7 +158,7 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         }
     }
 
-    private void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
+    protected void deleteUsers(List<eu.domibus.api.user.User> usersToDelete) {
         List<User> users = usersToDelete.stream()
                 .map(user -> userDao.loadUserByUsername(user.getUserName()))
                 .filter(user -> user != null)
@@ -180,35 +166,16 @@ public class UserPersistenceServiceImpl implements UserPersistenceService {
         userDao.delete(users);
     }
 
-    private void addRoleToUser(List<String> authorities, User userEntity) {
+    protected void addRoleToUser(List<String> authorities, User userEntity) {
+        if (authorities == null || userEntity == null) {
+            return;
+        }
         for (String authority : authorities) {
             UserRole userRole = userRoleDao.findByName(authority);
             userEntity.addRole(userRole);
         }
     }
 
-    protected User prepareUserForUpdate(eu.domibus.api.user.User user) {
-        User userEntity = userDao.loadUserByUsername(user.getUserName());
-        if (!userEntity.getActive() && user.isActive()) {
-            userEntity.setSuspensionDate(null);
-            userEntity.setAttemptCount(0);
-        }
-        if (!user.isActive() && userEntity.getActive()) {
-            LOG.debug("User:[{}] has been disabled by administrator", user.getUserName());
-            //TODO trigger events for super user in 4.1 EDELIVERY-3768
-            if (!user.isSuperAdmin()) {
-                final AccountDisabledModuleConfiguration accountDisabledConfiguration = multiDomainAlertConfigurationService.getAccountDisabledConfiguration();
-                if (accountDisabledConfiguration.isActive()) {
-                    LOG.debug("Sending account disabled event for user:[{}]", user.getUserName());
-                    eventService.enqueueAccountDisabledEvent(user.getUserName(), new Date(), true);
-                }
-            }
-        }
-        userEntity.setActive(user.isActive());
-        userEntity.setEmail(user.getEmail());
-        userEntity.clearRoles();
-        return userEntity;
-    }
 
     private Collection<eu.domibus.api.user.User> filterNewUsers(List<eu.domibus.api.user.User> users) {
         return Collections2.filter(users, user -> UserState.NEW.name().equals(user.getStatus()));

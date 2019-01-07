@@ -9,13 +9,15 @@ import java.io.Serializable;
 public class PluginUserRO implements Serializable {
 
     private Integer entityId;
-    private String username;
-    private String passwd;
+    private String userName;
+    private String password;
     private String certificateId;
     private String originalUser;
     private String authRoles; 
     private String authenticationType; 
     private String status;
+    private boolean active;
+    private boolean suspended;
 
     public Integer getEntityId() {
         return entityId;
@@ -25,20 +27,20 @@ public class PluginUserRO implements Serializable {
         this.entityId = entityId;
     }
  
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String username) {
+        this.userName = username;
     }
   
-    public String getPasswd() {
-        return passwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
+    public void setPassword(String password) {
+        this.password = password;
     }
     
     public String getCertificateId() {
@@ -80,5 +82,20 @@ public class PluginUserRO implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
+    }
 }

@@ -59,11 +59,11 @@ export class MessageLogComponent implements OnInit {
 
   messageResent: EventEmitter<boolean>;
 
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent,
-               private elementRef: ElementRef) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, public app: AppComponent,
+              private elementRef: ElementRef) {
   }
 
-  ngOnInit () {
+  ngOnInit() {
     this.columnPicker = new ColumnPickerBase();
     this.rowLimiter = new RowLimiterBase();
 
@@ -181,13 +181,13 @@ export class MessageLogComponent implements OnInit {
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
-  public beforeDomainChange () {
+  public beforeDomainChange() {
     if (this.list.isHorScroll) {
       this.scrollLeft();
     }
   }
 
-  createSearchParams (): URLSearchParams {
+  createSearchParams(): URLSearchParams {
     const searchParams = new URLSearchParams();
 
     if (this.orderBy) {
@@ -256,7 +256,7 @@ export class MessageLogComponent implements OnInit {
     return searchParams;
   }
 
-  getMessageLogEntries (offset: number, pageSize: number): Observable<MessageLogResult> {
+  getMessageLogEntries(offset: number, pageSize: number): Observable<MessageLogResult> {
 
     const searchParams = this.createSearchParams();
 
@@ -269,7 +269,7 @@ export class MessageLogComponent implements OnInit {
       );
   }
 
-  page (offset, pageSize) {
+  page(offset, pageSize) {
     this.loading = true;
 
     this.getMessageLogEntries(offset, pageSize).subscribe((result: MessageLogResult) => {
@@ -312,22 +312,22 @@ export class MessageLogComponent implements OnInit {
     });
   }
 
-  onPage (event) {
+  onPage(event) {
     this.page(event.offset, event.pageSize);
   }
 
-  onSort (event) {
+  onSort(event) {
     this.orderBy = event.column.prop;
     this.asc = (event.newValue === 'desc') ? false : true;
 
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
-  onSelect ({selected}) {
+  onSelect({selected}) {
     // console.log('Select Event', selected, this.selected);
   }
 
-  onActivate (event) {
+  onActivate(event) {
     // console.log('Activate Event', event);
 
     if ('dblclick' === event.type) {
@@ -335,17 +335,17 @@ export class MessageLogComponent implements OnInit {
     }
   }
 
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
     console.log('New page limit:', newPageLimit);
     this.page(0, newPageLimit);
   }
 
-  search () {
+  search() {
     console.log('Searching using filter:' + this.filter);
     this.page(0, this.rowLimiter.pageSize);
   }
 
-  resendDialog () {
+  resendDialog() {
     let dialogRef = this.dialog.open(MessagelogDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       switch (result) {
@@ -362,7 +362,7 @@ export class MessageLogComponent implements OnInit {
     });
   }
 
-  resend (messageId: string) {
+  resend(messageId: string) {
     console.log('Resending message with id ', messageId);
 
     let url = MessageLogComponent.RESEND_URL.replace('${messageId}', encodeURIComponent(messageId));
@@ -379,42 +379,42 @@ export class MessageLogComponent implements OnInit {
     });
   }
 
-  isResendButtonEnabledAction (row): boolean {
+  isResendButtonEnabledAction(row): boolean {
     return !row.deleted && row.messageStatus === 'SEND_FAILURE';
   }
 
-  isResendButtonEnabled () {
+  isResendButtonEnabled() {
     if (this.selected && this.selected.length == 1 && !this.selected[0].deleted && this.selected[0].messageStatus === 'SEND_FAILURE')
       return true;
 
     return false;
   }
 
-  isDownloadButtonEnabledAction (row): boolean {
+  isDownloadButtonEnabledAction(row): boolean {
     return !row.deleted && row.messageType !== 'SIGNAL_MESSAGE';
   }
 
-  isDownloadButtonEnabled (): boolean {
+  isDownloadButtonEnabled(): boolean {
     if (this.selected && this.selected.length == 1 && !this.selected[0].deleted)
       return true;
 
     return false;
   }
 
-  private downloadMessage (messageId) {
+  private downloadMessage(messageId) {
     const url = MessageLogComponent.DOWNLOAD_MESSAGE_URL.replace('${messageId}', encodeURIComponent(messageId));
     DownloadService.downloadNative(url);
   }
 
-  downloadAction (row) {
+  downloadAction(row) {
     this.downloadMessage(row.messageId);
   }
 
-  download () {
+  download() {
     this.downloadMessage(this.selected[0].messageId);
   }
 
-  saveAsCSV () {
+  saveAsCSV() {
     if (this.count > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
@@ -423,7 +423,7 @@ export class MessageLogComponent implements OnInit {
     DownloadService.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + '/csv?' + this.createSearchParams().toString());
   }
 
-  details (selectedRow: any) {
+  details(selectedRow: any) {
     const dialogRef: MdDialogRef<MessagelogDetailsComponent> = this.dialog.open(MessagelogDetailsComponent);
     dialogRef.componentInstance.message = selectedRow;
     dialogRef.componentInstance.fourCornerEnabled = this.app.fourCornerEnabled;
@@ -433,25 +433,44 @@ export class MessageLogComponent implements OnInit {
     });
   }
 
-  toggleAdvancedSearch () {
-    this.advancedSearch = !this.advancedSearch;
+  toggleAdvancedSearch() {
+    this.advancedSearch = true;
   }
 
-  onTimestampFromChange (event) {
+  toggleBasicSearch() {
+    this.advancedSearch = false;
+
+    this.resetAdvancedSearchParams();
+  }
+
+  resetAdvancedSearchParams() {
+    this.filter.mshRole = null;
+    this.filter.conversationId = null;
+    this.filter.messageType = this.msgTypes[1];
+    this.filter.notificationStatus = null;
+    this.filter.originalSender = null;
+    this.filter.finalRecipient = null;
+    this.filter.refToMessageId = null;
+    this.filter.receivedFrom = null;
+    this.filter.receivedTo = null;
+    this.filter.isTestMessage = null;
+  }
+
+  onTimestampFromChange(event) {
     this.timestampToMinDate = event.value;
   }
 
-  onTimestampToChange (event) {
+  onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
   }
 
-  private showNextAttemptInfo (row: any): boolean {
+  private showNextAttemptInfo(row: any): boolean {
     if (row && (row.messageType === 'SIGNAL_MESSAGE' || row.mshRole === 'RECEIVING'))
       return false;
     return true;
   }
 
-  public scrollLeft () {
+  public scrollLeft() {
     const dataTableBodyDom = this.elementRef.nativeElement.querySelector('.datatable-body');
 
     dataTableBodyDom.scrollLeft = 0;
