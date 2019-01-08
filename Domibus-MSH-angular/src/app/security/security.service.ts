@@ -100,6 +100,7 @@ export class SecurityService {
   }
 
   updateCurrentUser(user: User): void {
+    console.log('save current user on local storage');
     localStorage.setItem('currentUser', JSON.stringify(user));
   }
 
@@ -118,10 +119,11 @@ export class SecurityService {
     const subject = new ReplaySubject();
     this.http.get('rest/security/user2')
       .subscribe((res: Response) => {
-        subject.next(res.text());
+        subject.next(res.json());
       }, (error: any) => {
         subject.next(null);
       });
+    console.log('getCurrentUserFromServer:' + subject);
     return subject.asObservable();
   }
 

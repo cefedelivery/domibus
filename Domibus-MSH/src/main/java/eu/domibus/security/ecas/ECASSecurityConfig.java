@@ -52,11 +52,6 @@ public class ECASSecurityConfig extends WebSecurityConfigurerAdapter {
         return new Http403ForbiddenEntryPoint();
     }
 
-    /*
-        <beans:bean id="http403ForbiddenEntryPoint"
-                class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint"/>
-     */
-
     @Override
     public void configure(WebSecurity web) throws Exception {
         web
