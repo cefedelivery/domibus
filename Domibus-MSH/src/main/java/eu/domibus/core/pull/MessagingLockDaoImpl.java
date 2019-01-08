@@ -44,6 +44,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @eu.domibus.common.statistics.Timer(clazz = MessagingLockDaoImpl.class,timerName = "get_next_message_to_process")
     public PullMessageId getNextPullMessageToProcess(final Integer idPk) {
         try {
             Query q = entityManager.createNativeQuery(LOCK_BY_ID_QUERY, MessagingLock.class);
@@ -141,6 +142,7 @@ public class MessagingLockDaoImpl implements MessagingLockDao {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @eu.domibus.common.statistics.Timer(clazz = MessagingLockDaoImpl.class,timerName = "find_ready_to_pull")
     public List<MessagingLock> findReadyToPull(final String mpc, final String initiator) {
         final TypedQuery<MessagingLock> namedQuery = entityManager.createNamedQuery("MessagingLock.findReadyToPull", MessagingLock.class);
         namedQuery.setFirstResult(0);

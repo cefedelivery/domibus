@@ -28,6 +28,7 @@ import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.core.pull.PullMessageService;
 import eu.domibus.ebms3.common.context.MessageExchangeConfiguration;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.ebms3.receiver.MSHWebservice;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
@@ -231,6 +232,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    @eu.domibus.common.statistics.Timer(clazz = MessageExchangeServiceImpl.class,timerName = "retrieve_ready_to_pull_message_id")
     public String retrieveReadyToPullUserMessageId(final String mpc, final Party initiator) {
         Set<Identifier> identifiers = initiator.getIdentifiers();
         if (identifiers.size() == 0) {
@@ -245,6 +247,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
      * {@inheritDoc}
      */
     @Override
+    @eu.domibus.common.statistics.Timer(clazz = MessageExchangeServiceImpl.class,timerName = "extract_process_on_mpc")
     public PullContext extractProcessOnMpc(final String mpcQualifiedName) {
         try {
             final Party gatewayParty = pModeProvider.getGatewayParty();

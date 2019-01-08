@@ -30,9 +30,7 @@ public class BasicAuditAspect {
      */
     @Before("@annotation(eu.domibus.common.model.common.BasicAudit) && args(auditEntity)")
     public void addBasicAudit(AbstractBaseAuditEntity auditEntity) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Adding basic audit to entity " + auditEntity + " whith id " + auditEntity.getEntityId());
-        }
+        LOG.trace("Adding basic audit to entity:[{}] whith id:[{}] ", auditEntity, auditEntity.getEntityId());
         final String userName = LOG.getMDC(MDC_USER);
         if (auditEntity.getEntityId() == 0) {
             auditEntity.setCreatedBy(userName);

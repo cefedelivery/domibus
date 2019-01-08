@@ -162,7 +162,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
     private Boolean sendToC4;
-    private Boolean pushToC3;
+    private Boolean sendResponseFromC3Plugin;
 
     private org.springframework.web.client.RestTemplate umdsTemplate;
 
@@ -183,9 +183,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
         int timeout = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT, "10000"));
         int connections = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL, "100"));
         sendToC4 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_SEND_TO_C4));
-        pushToC3 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_SEND_FROM_C3));
-        LOG.warn("Do not send to c4:[{}]", sendToC4);
-        LOG.warn("Do not push to c3:[{}]", pushToC3);
+        sendResponseFromC3Plugin = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_SEND_FROM_C3));
+        LOG.warn("Send to c4:[{}]", sendToC4);
+        LOG.warn("Send response from c3 plugin:[{}]", sendResponseFromC3Plugin);
 
         umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -300,7 +300,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         try {
 
-            if (!sendToC4) {
+            if (sendToC4) {
                 Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
                 authenticate(submission);
                 authenticateContext.stop();
@@ -310,7 +310,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             }
 
             //means c4 is not pushing back to c3, so we send the submision from the plugin to c3
-            if (pushToC3) {
+            if (sendResponseFromC3Plugin) {
                 LOG.warn("The response message does not come from C4");
                 Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
                 messageSubmitter.submit(submissionResponse, getName());

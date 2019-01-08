@@ -111,78 +111,63 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         this.jaxbContext = jaxbContext;
     }
 
-    private static final Meter requestsPerSecond = Metrics.METRIC_REGISTRY.meter(name(MSHWebservice.class, "mshRequestsMeter"));
-    private static final Counter pendingRequests = Metrics.METRIC_REGISTRY.counter(name(MSHWebservice.class, "mshRequestsCounter"));
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED, timeout = 1200) // 20 minutes
+    @eu.domibus.common.statistics.Timer(clazz = MSHWebservice.class, timerName = "invoke")
     public SOAPMessage invoke(final SOAPMessage request) {
-        requestsPerSecond.mark();
-        pendingRequests.inc();
-
-
-        Timer mshWebservice = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "invoke"));
-        final Timer.Context mshWebserviceContext = mshWebservice.time();
-        try {
-            SOAPMessage responseMessage = null;
-            Messaging messaging;
-            messaging = getMessage(request);
-            UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
-            LOG.trace("Message received");
-            if (messaging.getSignalMessage() != null) {
-                if (messaging.getSignalMessage().getPullRequest() != null) {
-                    LOG.trace("before pull request.");
-                    Timer pullRequestTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request"));
-                    final Timer.Context pullRequestTimerContext = pullRequestTimer.time();
-                    final SOAPMessage soapMessage = handlePullRequest(messaging);
-                    pullRequestTimerContext.stop();
-                    LOG.trace("returning pull request message.");
-                    return soapMessage;
-                } else if (messaging.getSignalMessage().getReceipt() != null) {
-                    LOG.trace("before pull receipt.");
-                    Timer pullRequestReceiptTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request_receipt"));
-                    final Timer.Context pullRequestReceiptTimerContext = pullRequestReceiptTimer.time();
-                    final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
-                    pullRequestReceiptTimerContext.stop();
-                    LOG.trace("returning pull receipt.");
-                    return soapMessage;
-                }
-            } else {
-                String pmodeKey = null;
-                try {
-                    //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
-                    pmodeKey = (String) request.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
-                } catch (final SOAPException soapEx) {
-                    //this error should never occur because pmode handling is done inside the in-interceptorchain
-                    LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
-                    assert false;
-                }
-                try {
-                    LOG.info("Using pmodeKey {}", pmodeKey);
-                    responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
-                    final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
-                    LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
-                    LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
-                } catch (TransformerException | SOAPException | JAXBException | IOException e) {
-                    throw new UserMessageException(e);
-                } catch (final EbMS3Exception e) {
-                    try {
-                        if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
-                            backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
-                        }
-                    } catch (Exception ex) {
-                        LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
-                    }
-                    throw new WebServiceException(e);
-                }
+        SOAPMessage responseMessage = null;
+        Messaging messaging;
+        messaging = getMessage(request);
+        UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+        LOG.trace("Message received");
+        if (messaging.getSignalMessage() != null) {
+            if (messaging.getSignalMessage().getPullRequest() != null) {
+                LOG.trace("before pull request.");
+                final SOAPMessage soapMessage = handlePullRequest(messaging);
+                LOG.trace("returning pull request message.");
+                return soapMessage;
+            } else if (messaging.getSignalMessage().getReceipt() != null) {
+                LOG.trace("before pull receipt.");
+                Timer pullRequestReceiptTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request_receipt"));
+                final Timer.Context pullRequestReceiptTimerContext = pullRequestReceiptTimer.time();
+                final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
+                pullRequestReceiptTimerContext.stop();
+                LOG.trace("returning pull receipt.");
+                return soapMessage;
             }
-
-
-            return responseMessage;
-        } finally {
-            mshWebserviceContext.stop();
-            pendingRequests.dec();
+        } else {
+            String pmodeKey = null;
+            try {
+                //FIXME: use a consistent way of property exchange between JAXWS and CXF message model. This: PropertyExchangeInterceptor
+                pmodeKey = (String) request.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
+            } catch (final SOAPException soapEx) {
+                //this error should never occur because pmode handling is done inside the in-interceptorchain
+                LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
+                assert false;
+            }
+            try {
+                LOG.info("Using pmodeKey {}", pmodeKey);
+                responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
+                final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
+                LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
+            } catch (TransformerException | SOAPException | JAXBException | IOException e) {
+                throw new UserMessageException(e);
+            } catch (final EbMS3Exception e) {
+                try {
+                    if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
+                        backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
+                    }
+                } catch (Exception ex) {
+                    LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
+                }
+                throw new WebServiceException(e);
+            }
         }
+
+
+        return responseMessage;
+
     }
 
     UserMessageHandlerContext getMessageHandler() {
@@ -257,18 +242,12 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return soapMessage;
     }
 
+    @eu.domibus.common.statistics.Timer(clazz = MSHWebservice.class, timerName = "handle_pull_request")
     protected SOAPMessage handlePullRequest(Messaging messaging) {
-        Timer extractProcessTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "extract_process_with_mpc"));
-        final Timer.Context pullRequestTimerContext = extractProcessTimer.time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
-        pullRequestTimerContext.stop();
-        Timer retrievePullMessageIdTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "retrieve_pull_message_id"));
-        final Timer.Context retrievePullMessageIdContext = retrievePullMessageIdTimer.time();
         String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
-        retrievePullMessageIdContext.stop();
-        SOAPMessage soapMessage = pullRequestHandler.handlePullRequest(messageId, pullContext);
-        return soapMessage;
+        return pullRequestHandler.handlePullRequest(messageId, pullContext);
     }
 
     private Messaging getMessage(SOAPMessage request) {
