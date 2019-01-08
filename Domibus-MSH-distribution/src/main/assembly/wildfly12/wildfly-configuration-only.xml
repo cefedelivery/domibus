@@ -21,6 +21,36 @@
             </excludes>
             <filtered>false</filtered>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly12/src/main/conf/scripts</directory>
+            <outputDirectory>scripts</outputDirectory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <fileMode>0777</fileMode>
+            <directoryMode>0555</directoryMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly12/src/main/conf/scripts</directory>
+            <outputDirectory>scripts</outputDirectory>
+            <includes>
+                <include>*.bat</include>
+                <include>util/win/replace.vbs</include>
+            </includes>
+            <fileMode>0777</fileMode>
+            <directoryMode>0555</directoryMode>
+            <lineEnding>windows</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../Domibus-MSH-wildfly12/src/main/conf/scripts</directory>
+            <outputDirectory>scripts</outputDirectory>
+            <includes>
+                <include>**/*.cli</include>
+            </includes>
+            <fileMode>0444</fileMode>
+            <directoryMode>0555</directoryMode>
+        </fileSet>
     </fileSets>
 
     <files>
