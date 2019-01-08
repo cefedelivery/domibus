@@ -172,26 +172,26 @@ public class CategoryLogger extends LoggerWrapper implements Logger {
 
     public void clearCustomKeys() {
         if (mdcPropertyPrefix == null) {
-            LOG.debug("No custom keys defined: mdcPropertyPrefix is empty");
+            LOG.trace("No custom keys defined: mdcPropertyPrefix is empty");
             return;
         }
 
         final Map<String, String> copyOfContextMap = MDC.getCopyOfContextMap();
         if (copyOfContextMap == null) {
-            LOG.debug("No MDC keys to clear");
+            LOG.trace("No MDC keys to clear");
             return;
         }
         final Set<String> keySet = copyOfContextMap.keySet();
         for (String key : keySet) {
             if (StringUtils.startsWith(key, mdcPropertyPrefix)) {
                 MDC.remove(key);
-                LOG.debug("Removed key [{}] from MDC", key);
+                LOG.trace("Removed key [{}] from MDC", key);
             }
         }
     }
 
     public void clearAll() {
         MDC.clear();
-        LOG.debug("Cleared MDC");
+        LOG.trace("Cleared MDC");
     }
 }
