@@ -22,4 +22,11 @@ public class CommandDao extends BasicDao<CommandEntity> {
         namedQuery.setParameter("SERVER_NAME", serverName);
         return namedQuery.getResultList();
     }
+
+    public List<CommandEntity> findCommandsByServerAndDomainName(String serverName, String domain) {
+        final TypedQuery<CommandEntity> namedQuery = em.createNamedQuery("CommandEntity.findByServerAndDomainName", CommandEntity.class);
+        namedQuery.setParameter("SERVER_NAME", serverName);
+        namedQuery.setParameter("DOMAIN_NAME", domain);
+        return namedQuery.getResultList();
+    }
 }

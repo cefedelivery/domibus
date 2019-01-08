@@ -9,7 +9,7 @@ import eu.domibus.plugin.Submission;
  *
  * @param <T> Data transfer object
  *            (http://en.wikipedia.org/wiki/Data_transfer_object) transported between the
- *            backend and holodeck
+ *            backend and Domibus
  * @author Christian Koch, Stefan Mueller
  * @since 3.0
  */
