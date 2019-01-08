@@ -61,8 +61,7 @@ export class MessageLogComponent implements OnInit {
   messageResent: EventEmitter<boolean>;
 
   constructor(private http: Http, private alertService: AlertService, private domibusInfoService: DomibusInfoService,
-              public dialog: MdDialog, // public app: AppComponent,
-              private elementRef: ElementRef) {
+              public dialog: MdDialog, private elementRef: ElementRef) {
   }
 
   async ngOnInit() {
