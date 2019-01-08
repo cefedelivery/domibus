@@ -1,9 +1,7 @@
 package eu.domibus.plugin.jms;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.Lists;
-import eu.domibus.api.metrics.Metrics;
 import eu.domibus.api.multitenancy.DomainService;
 import eu.domibus.common.ErrorResult;
 import eu.domibus.common.MessageReceiveFailureEvent;
@@ -116,8 +114,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     public static final String DOMIBUS_PULL_ACTION = "domibus.pull.action";
     public static final String DOMIBUS_PULL_SERVICE = "domibus.pull.service";
     public static final String DOMIBUS_PULL_SERVICE_TYPE = "domibus.pull.service.type";
-    public static final String DOMIBUS_DO_NOT_SEND_TO_C4 = "domibus.do.not.send.to.c4";
-    public static final String DOMIBUS_DO_NOT_PUSH_BACK_TO_C3 = "domibus.do.not.push.back.to.c3";
+    public static final String DOMIBUS_SEND_TO_C4 = "domibus.send.to.c4";
+    public static final String DOMIBUS_SEND_FROM_C3 = "domibus.send.from.c3";
     public static final String DOMIBUS_TAXUD_REST_TIMEOUT = "domibus.taxud.rest.timeout";
     public static final String DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL = "domibus.taxud.rest.connections";
 
@@ -163,8 +161,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
-    private Boolean doNotSendToC4;
-    private Boolean doNotPushToC3;
+    private Boolean sendToC4;
+    private Boolean pushToC3;
 
     private org.springframework.web.client.RestTemplate umdsTemplate;
 
@@ -184,10 +182,10 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     protected void init() {
         int timeout = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_TIMEOUT, "10000"));
         int connections = Integer.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_TAXUD_REST_CONNECTIONS_TOTAL, "100"));
-        doNotSendToC4 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_SEND_TO_C4, "false"));
-        doNotPushToC3 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_DO_NOT_PUSH_BACK_TO_C3, "false"));
-        LOG.warn("Do not send to c4:[{}]", doNotSendToC4);
-        LOG.warn("Do not push to c3:[{}]", doNotPushToC3);
+        sendToC4 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_SEND_TO_C4));
+        pushToC3 = Boolean.valueOf(domibusPropertyExtService.getProperty(DOMIBUS_SEND_FROM_C3));
+        LOG.warn("Do not send to c4:[{}]", sendToC4);
+        LOG.warn("Do not push to c3:[{}]", pushToC3);
 
         umdsTemplate = new RestTemplate(getClientHttpRequestFactory(timeout, connections));
         umdsTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -302,7 +300,7 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
 
         try {
 
-            if (!doNotSendToC4) {
+            if (!sendToC4) {
                 Timer.Context authenticateContext = METRIC_REGISTRY.timer(name(BackendJMSImpl.class, "jms.deliver.message.authenticate")).time();
                 authenticate(submission);
                 authenticateContext.stop();
@@ -311,8 +309,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
                 sendPayloadContext.stop();
             }
 
-            //means c4 is not pushing back to c3, so we send the submision from c3
-            if (doNotPushToC3) {
+            //means c4 is not pushing back to c3, so we send the submision from the plugin to c3
+            if (pushToC3) {
+                LOG.warn("The response message does not come from C4");
                 Submission submissionResponse = getSubmissionResponse(submission, HAPPY_FLOW_MESSAGE_TEMPLATE.replace("$messId", messageId));
                 messageSubmitter.submit(submissionResponse, getName());
             }
