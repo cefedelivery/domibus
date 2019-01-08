@@ -132,12 +132,18 @@ public class MSHWebservice implements Provider<SOAPMessage> {
             if (messaging.getSignalMessage() != null) {
                 if (messaging.getSignalMessage().getPullRequest() != null) {
                     LOG.trace("before pull request.");
+                    Timer pullRequestTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request"));
+                    final Timer.Context pullRequestTimerContext = pullRequestTimer.time();
                     final SOAPMessage soapMessage = handlePullRequest(messaging);
+                    pullRequestTimerContext.stop();
                     LOG.trace("returning pull request message.");
                     return soapMessage;
                 } else if (messaging.getSignalMessage().getReceipt() != null) {
                     LOG.trace("before pull receipt.");
+                    Timer pullRequestReceiptTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request_receipt"));
+                    final Timer.Context pullRequestReceiptTimerContext = pullRequestReceiptTimer.time();
                     final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
+                    pullRequestReceiptTimerContext.stop();
                     LOG.trace("returning pull receipt.");
                     return soapMessage;
                 }
@@ -252,10 +258,17 @@ public class MSHWebservice implements Provider<SOAPMessage> {
     }
 
     protected SOAPMessage handlePullRequest(Messaging messaging) {
+        Timer extractProcessTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "extract_process_with_mpc"));
+        final Timer.Context pullRequestTimerContext = extractProcessTimer.time();
         PullRequest pullRequest = messaging.getSignalMessage().getPullRequest();
         PullContext pullContext = messageExchangeService.extractProcessOnMpc(pullRequest.getMpc());
+        pullRequestTimerContext.stop();
+        Timer retrievePullMessageIdTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "retrieve_pull_message_id"));
+        final Timer.Context retrievePullMessageIdContext = retrievePullMessageIdTimer.time();
         String messageId = messageExchangeService.retrieveReadyToPullUserMessageId(pullContext.getMpcQualifiedName(), pullContext.getInitiator());
-        return pullRequestHandler.handlePullRequest(messageId, pullContext);
+        retrievePullMessageIdContext.stop();
+        SOAPMessage soapMessage = pullRequestHandler.handlePullRequest(messageId, pullContext);
+        return soapMessage;
     }
 
     private Messaging getMessage(SOAPMessage request) {

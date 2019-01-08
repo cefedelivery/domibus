@@ -4,13 +4,11 @@ stopAdmin on machine 1
 sqldevelopper as sysdba to db.
 
 DROP USER DOMIBUS_TAXUD cascade;
-create USER DOMIBUS_TAXUD identified by "domi005bus!";
+create USER DOMIBUS_TAXUD identified by "Domi_005Bus!";
 grant all privileges to DOMIBUS_TAXUD;
 grant execute on dbms_xa to DOMIBUS_TAXUD;
 grant select on pending_trans$ to DOMIBUS_TAXUD;
 grant select on dba_2pc_pending to DOMIBUS_TAXUD;
-grant select on dba_pending_transactions to DOMIBUS_TAXUD;
-GRANT SELECT ON SYS.DBA_RECYCLEBIN TO DOMIBUS_TAXUD;
 
 SELECT sid, serial#, username, logon_time, (last_call_et / 60 / 60 / 24 ) "Days Inactive" FROM v$session WHERE username LIKE 'DOMIBUS_TAXUD';
 
@@ -22,8 +20,8 @@ execute script oracle10g-3.3.1.ddl on C1
 
 To start c3:
 
-nohup startAdmin.sh > nohupAdmin.out 2>&1 & (on C1)
-nohup startNodeManager.sh > nohupNodeManager.out 2>&1 & (C1-C4)
+nohup startAdmin.sh > nohupAdmin.out 2>&1 &
+nohup startNodeManager.sh > nohupNodeManager.out 2>&1 &
 
 upload https pmode
 Send one message per c2 (6)

@@ -213,7 +213,7 @@
             <action name="tc1Action" value="TC1Leg1"/>
         </actions>
         <as4>
-            <receptionAwareness name="receptionAwareness" retry="5;10;CONSTANT" duplicateDetection="true"/>
+            <receptionAwareness name="receptionAwareness" retry="15;30;CONSTANT" duplicateDetection="true"/>
             <reliability name="AS4Reliability" nonRepudiation="true" replyPattern="response"/>
             <reliability name="noReliability" nonRepudiation="false" replyPattern="response"/>
         </as4>
