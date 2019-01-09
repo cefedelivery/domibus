@@ -1,16 +1,13 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:sec="http://www.springframework.org/schema/security"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/security
-    http://www.springframework.org/schema/security/spring-security.xsd">
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <!-- Administration GUI user credentials-->
-    <bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <!--<bean name="bcryptEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>-->
 
-    <bean name="userDetailService"
-          class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>
+    <!--<bean name="userDetailService"-->
+          <!--class="eu.domibus.common.services.impl.UserDetailServiceImpl"/>-->
 
     <!--
     <sec:authentication-manager>
@@ -24,10 +21,6 @@
         </sec:authentication-provider>
     </sec:authentication-manager>-->
 
-    <!--<sec:authentication-manager id="authenticationManagerECAS">
-        <sec:authentication-provider user-service-ref="userDetailsServiceECAS"/>
-    </sec:authentication-manager>-->
-
-    <sec:global-method-security pre-post-annotations="enabled"/>
+    <!--<sec:global-method-security pre-post-annotations="enabled"/>-->
 
 </beans>

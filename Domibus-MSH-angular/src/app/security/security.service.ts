@@ -106,7 +106,7 @@ export class SecurityService {
 
   private getCurrentUsernameFromServer(): Observable<string> {
     const subject = new ReplaySubject();
-    this.http.get('rest/security/user')
+    this.http.get('rest/security/username')
       .subscribe((res: Response) => {
         subject.next(res.text());
       }, (error: any) => {
@@ -117,7 +117,7 @@ export class SecurityService {
 
   private getCurrentUserFromServer(): Observable<User> {
     const subject = new ReplaySubject();
-    this.http.get('rest/security/user2')
+    this.http.get('rest/security/user')
       .subscribe((res: Response) => {
         subject.next(res.json());
       }, (error: any) => {

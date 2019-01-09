@@ -732,6 +732,14 @@
             </modules>
         </profile>
         <profile>
+            <id>weblogic-ecas</id>
+            <modules>
+                <module>Domibus-MSH-taskexecutor-weblogic</module>
+                <module>Domibus-MSH-jms-weblogic</module>
+                <module>Domibus-MSH-weblogic-ecas</module>
+            </modules>
+        </profile>
+        <profile>
             <id>wildfly</id>
             <modules>
                 <module>Domibus-MSH-jms-wildfly</module>

@@ -1,71 +1,53 @@
-package eu.domibus.security.ecas;
+package eu.domibus.configuration.security;
 
+import eu.domibus.common.services.impl.UserDetailServiceImpl;
 import eu.domibus.web.filter.SetDomainFilter;
-import eu.domibus.web.matcher.URLCsrfMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
+ * Default Spring security config for Domibus
+ *
  * @author Catalin Enache
  * @since 4.1
  */
+@Conditional(SecurityInternalAuthProviderCondition.class)
 @Configuration
 @EnableWebSecurity(debug = true)
-public class ECASSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private ECASUserDetailsService ecasUserDetailsService;
+    CsrfTokenRepository tokenRepository;
 
-    @Bean
-    CsrfTokenRepository tokenRepository(){
-        CookieCsrfTokenRepository csrfTokenRepository = new CookieCsrfTokenRepository();
-        csrfTokenRepository.setCookieHttpOnly(false);
-        return csrfTokenRepository;
-    }
+    @Autowired
+    RequestMatcher csrfURLMatcher;
 
-    @Bean
-    RequestMatcher csrfURLMatcher() {
-        URLCsrfMatcher requestMatcher = new URLCsrfMatcher();
-        requestMatcher.setIgnoreUrl("/rest/security/authentication");
-        return requestMatcher;
-    }
+    @Autowired
+    SetDomainFilter setDomainFilter;
 
-    @Bean
-    SetDomainFilter setDomainFilter() {
-        return new SetDomainFilter();
-    }
+    @Autowired
+    Http403ForbiddenEntryPoint http403ForbiddenEntryPoint;
 
-    @Bean
-    Http403ForbiddenEntryPoint http403ForbiddenEntryPoint() {
-        return new Http403ForbiddenEntryPoint();
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web
-                .ignoring().antMatchers("/services/**")
-                .and()
-                .ignoring().antMatchers("/ext/**")
-                .and()
-                .debug(true);
-    }
+    @Autowired
+    UserDetailServiceImpl userDetailService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().csrfTokenRepository(tokenRepository()).requireCsrfProtectionMatcher(csrfURLMatcher())
+                .csrf().csrfTokenRepository(tokenRepository).requireCsrfProtectionMatcher(csrfURLMatcher)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
@@ -90,19 +72,27 @@ public class ECASSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/logging/**").hasAnyRole ("ADMIN","AP_ADMIN")
                 .antMatchers("/rest/**").hasAnyRole ("USER","ADMIN","AP_ADMIN")
                 .and()
-                .jee().authenticatedUserDetailsService(ecasUserDetailsService).and()
-                .sessionManagement().sessionFixation().none().and()
                 .exceptionHandling().and()
                 .headers().frameOptions().deny().contentTypeOptions().and().xssProtection().xssProtectionEnabled(true).and()
                 .and()
-                .httpBasic().authenticationEntryPoint(http403ForbiddenEntryPoint())
+                .httpBasic().authenticationEntryPoint(http403ForbiddenEntryPoint)
                 .and()
-                .addFilterBefore(setDomainFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(setDomainFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web
+                .ignoring().antMatchers("/services/**")
+                .and()
+                .ignoring().antMatchers("/ext/**")
+                .and()
+                .debug(true);
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(ecasUserDetailsService);
+        auth.userDetailsService(userDetailService);
     }
 
 }

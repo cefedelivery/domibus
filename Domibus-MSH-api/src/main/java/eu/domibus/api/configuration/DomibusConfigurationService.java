@@ -17,6 +17,7 @@ public interface DomibusConfigurationService {
 
     String FOURCORNERMODEL_ENABLED_KEY = "domibus.fourcornermodel.enabled";
     String CLUSTER_DEPLOYMENT = "domibus.deployment.clustered";
+    String EXTERNAL_AUTH_PROVIDER = "domibus.security.external.auth.provider.enabled";
 
     String getConfigLocation();
 

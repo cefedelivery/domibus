@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Thomas Dussart
+ * @author Thomas Dussart, Catalin Enache
  * @since 3.3
  */
 public class UserDetail implements UserDetails {
@@ -29,6 +29,13 @@ public class UserDetail implements UserDetails {
                 .build();
     }
 
+    /**
+     * Build the user detail object from Spring principal only
+     *
+     * @param username
+     * @param password
+     * @param authorities
+     */
     public UserDetail(String username, String password,
                       Collection<? extends GrantedAuthority> authorities) {
 

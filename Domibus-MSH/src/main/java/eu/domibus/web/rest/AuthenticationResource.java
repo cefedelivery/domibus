@@ -114,19 +114,9 @@ public class AuthenticationResource {
             LOG.warn(WarningUtil.warnOutput(principal.getUsername() + " is using default password."));
         }
 
-        //Parse Granted authorities to a list of string authorities
-        List<String> authorities = new ArrayList<>();
-        for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
-            authorities.add(grantedAuthority.getAuthority());
-        }
-
-        UserRO userRO = new UserRO();
-        userRO.setUsername(loginRO.getUsername());
-        userRO.setAuthorities(authorities);
-        userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
-        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
-        return userRO;
+        return createUserRO(principal, loginRO.getUsername());
     }
+
 
     @RequestMapping(value = "authentication", method = RequestMethod.DELETE)
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -143,27 +133,18 @@ public class AuthenticationResource {
         LOG.debug("Logged out");
     }
 
-    @RequestMapping(value = "user", method = RequestMethod.GET)
-    public String getUser() {
+    @RequestMapping(value = "username", method = RequestMethod.GET)
+    public String getUsername() {
         return getLoggedUser().getUsername();
     }
 
-    @RequestMapping(value = "user2", method = RequestMethod.GET)
-    public UserRO getUser2() {
-        LOG.info("get user 2 - start");
+    @RequestMapping(value = "user", method = RequestMethod.GET)
+    public UserRO getUser() {
+        LOG.info("get user - start");
         UserDetail userDetail = getLoggedUser();
-        //Parse Granted authorities to a list of string authorities
-        List<String> authorities = new ArrayList<>();
-        for (GrantedAuthority grantedAuthority : userDetail.getAuthorities()) {
-            authorities.add(grantedAuthority.getAuthority());
-        }
 
-        UserRO userRO = new UserRO();
-        userRO.setUsername(userDetail.getUsername());
-        userRO.setAuthorities(authorities);
-        userRO.setDefaultPasswordUsed(userDetail.isDefaultPasswordUsed());
-        userRO.setDaysTillExpiration(userDetail.getDaysTillExpiration());
-        return userRO;
+
+        return createUserRO(userDetail, userDetail.getUsername());
     }
 
 
@@ -220,6 +201,22 @@ public class AuthenticationResource {
         } else {
             return userManagementService;
         }
+    }
+
+
+    private UserRO createUserRO(UserDetail principal, String username) {
+        //Parse Granted authorities to a list of string authorities
+        List<String> authorities = new ArrayList<>();
+        for (GrantedAuthority grantedAuthority : principal.getAuthorities()) {
+            authorities.add(grantedAuthority.getAuthority());
+        }
+
+        UserRO userRO = new UserRO();
+        userRO.setUsername(username);
+        userRO.setAuthorities(authorities);
+        userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
+        userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
+        return userRO;
     }
 
 }

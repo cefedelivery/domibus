@@ -1,4 +1,4 @@
-package eu.domibus.security.ecas;
+package eu.domibus.weblogic.ecas;
 
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author Catalin Enache
  * @since 4.1
  */
-@Service(value="userDetailsServiceECAS")
+@Service
 public class ECASUserDetailsService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken>, UserDetailsService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ECASUserDetailsService.class);
