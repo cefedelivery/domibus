@@ -9,10 +9,8 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.CredentialsExpiredException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +26,9 @@ public class AuthenticationService {
 
     public static final String SUSPENDED = "Suspended";
 
-//    @Autowired
-//    @Qualifier("authenticationManagerForAdminConsole")
-//    private AuthenticationManager authenticationManager;
+    @Autowired
+    @Qualifier("authenticationManagerForAdminConsole")
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserService userService;
@@ -41,9 +39,9 @@ public class AuthenticationService {
     @Transactional(noRollbackFor = AuthenticationException.class)
     public UserDetail authenticate(String username, String password, String domain) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-        Authentication authentication = null;
+        Authentication authentication;
         try {
-            //authentication = authenticationManager.authenticate(authenticationToken);
+            authentication = authenticationManager.authenticate(authenticationToken);
             //expired case doesn't get handled by the handleWrongAuthentication method.
             userService.validateExpiredPassword(username);
         } catch (CredentialsExpiredException ex) {

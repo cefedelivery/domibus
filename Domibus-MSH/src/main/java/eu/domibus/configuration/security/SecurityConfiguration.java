@@ -3,9 +3,11 @@ package eu.domibus.configuration.security;
 import eu.domibus.common.services.impl.UserDetailServiceImpl;
 import eu.domibus.web.filter.SetDomainFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +29,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 @EnableWebSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     CsrfTokenRepository tokenRepository;
@@ -57,20 +59,20 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasRole("AP_ADMIN")
-                .antMatchers(HttpMethod.PUT,"/rest/security/user/password").hasAnyRole ("USER","ADMIN","AP_ADMIN")
-                .antMatchers(HttpMethod.PUT,"/rest/security/user/domain").hasAnyRole ("AP_ADMIN")
-                .antMatchers("/rest/pmode/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/party/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/truststore/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/messagefilters/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/jms/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/user/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/plugin/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/audit/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/alerts/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/testservice/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/logging/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/**").hasAnyRole ("USER","ADMIN","AP_ADMIN")
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole("AP_ADMIN")
+                .antMatchers("/rest/pmode/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/party/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/truststore/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/messagefilters/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/jms/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/user/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/plugin/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/audit/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/alerts/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/testservice/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/logging/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/**").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
                 .and()
                 .exceptionHandling().and()
                 .headers().frameOptions().deny().contentTypeOptions().and().xssProtection().xssProtectionEnabled(true).and()
@@ -93,6 +95,13 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService);
+        auth.authenticationProvider(null);
+    }
+
+    @Bean(name = "authenticationManagerForAdminConsole" /*BeanIds.AUTHENTICATION_MANAGER*/)
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
 }
