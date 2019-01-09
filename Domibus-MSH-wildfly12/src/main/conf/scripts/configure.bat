@@ -51,12 +51,12 @@ ECHO --------------JDBC_DRIVER_DIR: %JDBC_DRIVER_DIR%
 ECHO --------------JDBC_DRIVER_NAME: %JDBC_DRIVER_NAME%
 
 ECHO --------------Configure Wildfly12 to resolve parameter values from properties files
-CSCRIPT util\win\replace.vbs "%JBOSS_HOME%/bin/jboss-cli.xml" "<resolve-parameter-values>false</resolve-parameter-values>" "<resolve-parameter-values>true</resolve-parameter-values>"
+@PowerShell -Command "(Get-Content %JBOSS_HOME%/bin/jboss-cli.xml) -replace '<resolve-parameter-values>false</resolve-parameter-values>', '<resolve-parameter-values>true</resolve-parameter-values>' | Out-File -encoding UTF8 %JBOSS_HOME%/bin/jboss-cli.xml"
 
 ECHO --------------Prepare
 SET > env.properties
-CSCRIPT util\win\replace.vbs "%~dp0\env.properties" "\" "\\"
-CSCRIPT util\win\replace.vbs "%~dp0\env.properties" "^&" "&"
+@PowerShell -Command "(Get-Content env.properties) -replace '\\', '\\' | Out-File -encoding ASCII env.properties"
+@PowerShell -Command "(Get-Content env.properties) -replace '\^&', '&' | Out-File -encoding ASCII env.properties"
 
 ECHO --------------Configure Wildfly12
 IF "%SERVER_CONFIG%" == "standalone-full-ha.xml" (

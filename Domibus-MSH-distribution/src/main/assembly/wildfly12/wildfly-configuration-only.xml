@@ -36,7 +36,6 @@
             <outputDirectory>scripts</outputDirectory>
             <includes>
                 <include>*.bat</include>
-                <include>util/win/replace.vbs</include>
             </includes>
             <fileMode>0777</fileMode>
             <directoryMode>0555</directoryMode>
