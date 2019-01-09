@@ -1,8 +1,6 @@
 package eu.domibus.util;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.HttpUtil;
 import eu.domibus.logging.DomibusLogger;
@@ -42,6 +40,7 @@ public class HttpUtilImpl implements HttpUtil {
 
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
+        LOG.debug("Download from URL " + url);
         if (domibusConfigurationService.useProxy()) {
             String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
             String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
@@ -71,7 +70,8 @@ public class HttpUtilImpl implements HttpUtil {
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom();
         //Proxy requires user and password
-        if(!StringUtils.isEmpty(proxyHost) && !StringUtils.isEmpty(proxyPassword)) {
+        if(!StringUtils.isEmpty(proxyUser) && !StringUtils.isEmpty(proxyPassword)) {
+            LOG.debug("Add proxy credentials for user [{}]", proxyUser);
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(
                     new AuthScope(proxyHost, proxyPort),
@@ -82,6 +82,7 @@ public class HttpUtilImpl implements HttpUtil {
         CloseableHttpClient httpclient = httpClientBuilder.build();
 
         try {
+            LOG.debug("Building proxy, host [{}], port [{}]", proxyHost, proxyPort);
             HttpHost proxy = new HttpHost(proxyHost, proxyPort);
 
             RequestConfig config = RequestConfig.custom()
