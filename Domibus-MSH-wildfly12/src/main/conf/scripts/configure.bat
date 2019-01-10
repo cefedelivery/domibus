@@ -22,7 +22,7 @@ SET DB_USER=edelivery
 SET DB_PASS=edelivery
 SET JDBC_CONNECTION_URL=jdbc:mysql://%DB_HOST%:%DB_PORT%/!DB_NAME!
 SET JDBC_DRIVER_DIR=%JBOSS_HOME%\modules\system\layers\base\com\mysql\main
-SET JDBC_DRIVER_NAME=mysql-connector-java-5.1.46.jar
+SET JDBC_DRIVER_NAME=mysql-connector-java-x.y.z.jar
 
 :: Oracle configuration
 :: SET DB_TYPE=Oracle
@@ -32,7 +32,7 @@ SET JDBC_DRIVER_NAME=mysql-connector-java-5.1.46.jar
 :: SET DB_PASS=edelivery_password
 :: SET JDBC_CONNECTION_URL="jdbc:oracle:thin:@%DB_HOST%:%DB_PORT%[:SID|/Service]"
 :: SET JDBC_DRIVER_DIR=%JBOSS_HOME%\modules\system\layers\base\com\oracle\main
-:: SET JDBC_DRIVER_NAME=ojdbc6-12.1.0.2.jar
+:: SET JDBC_DRIVER_NAME=ojdbc-x.y.z.jar
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::: The following part is not to be modified by the users ::::::::::::::::::::::::::::::::::::
