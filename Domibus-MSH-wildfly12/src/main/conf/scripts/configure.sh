@@ -21,7 +21,7 @@ DB_USER=edelivery
 DB_PASS=edelivery
 JDBC_CONNECTION_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}
 JDBC_DRIVER_DIR=${JBOSS_HOME}/modules/system/layers/base/com/mysql/main
-JDBC_DRIVER_NAME=mysql-connector-java-x.y.z.jar
+JDBC_DRIVER_NAME=mysql-connector-java-X.Y.Z.jar
 
 # Oracle configuration
 #DB_TYPE=Oracle
@@ -31,7 +31,7 @@ JDBC_DRIVER_NAME=mysql-connector-java-x.y.z.jar
 #DB_PASS=edelivery_password
 #JDBC_CONNECTION_URL="jdbc:oracle:thin:@${DB_HOST}:${DB_PORT}[:SID|/Service]"
 #JDBC_DRIVER_DIR=${JBOSS_HOME}/modules/system/layers/base/com/oracle/main
-#JDBC_DRIVER_NAME=ojdbc-x.y.z.jar
+#JDBC_DRIVER_NAME=ojdbc-X.Y.Z.jar
 
 ########################################################################################################################
 ############################ The following part is not to be modified by the users #####################################
