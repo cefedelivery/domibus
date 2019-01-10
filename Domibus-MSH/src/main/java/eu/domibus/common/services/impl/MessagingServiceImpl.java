@@ -121,9 +121,10 @@ public class MessagingServiceImpl implements MessagingService {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not retrieve Storage for domain" + currentDomain + " is null");
         }
 
-        InputStream is = partInfo.getPayloadDatahandler().getInputStream();
+
 
         if (currentStorage.getStorageDirectory() == null || currentStorage.getStorageDirectory().getName() == null) {
+            InputStream is = partInfo.getPayloadDatahandler().getInputStream();
             byte[] binaryData = getOutgoingBinaryData(partInfo, is, userMessage, legConfiguration);
             partInfo.setBinaryData(binaryData);
             partInfo.setLength(binaryData.length);
@@ -132,6 +133,7 @@ public class MessagingServiceImpl implements MessagingService {
             final boolean mayUseSplitAndJoin = splitAndJoinService.mayUseSplitAndJoin(legConfiguration);
             userMessage.setSplitAndJoin(mayUseSplitAndJoin);
             if (StringUtils.isBlank(partInfo.getFileName())) {
+                InputStream is = partInfo.getPayloadDatahandler().getInputStream();
                 final File attachmentStore = new File(currentStorage.getStorageDirectory(), UUID.randomUUID().toString() + ".payload");
                 partInfo.setFileName(attachmentStore.getAbsolutePath());
                 final long fileLength = saveOutgoingFileToDisk(attachmentStore, partInfo, is, userMessage, legConfiguration);

@@ -146,7 +146,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
         MessageHeaderEntity messageHeaderEntity = new MessageHeaderEntity();
         messageHeaderEntity.setBoundary(contentType.getParameter("boundary"));
         final String start = contentType.getParameter("start");
-        messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"",""}));
+        messageHeaderEntity.setStart(StringUtils.replaceEach(start, new String[]{"<", ">"}, new String[]{"", ""}));
         messageGroupEntity.setMessageHeaderEntity(messageHeaderEntity);
         messageGroupDao.create(messageGroupEntity);
 
@@ -196,15 +196,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     protected List<String> splitSourceMessage(File sourceMessageFile, long fragmentCount) throws IOException {
         List<String> result = new ArrayList<>();
 
-        int maxReadBufferSize = 8 * 1024; //8KB
-        final long sourceSize = sourceMessageFile.length();
-
-
         LOG.debug("File [{}] will be split into [{}] fragments ", sourceMessageFile, fragmentCount);
-
-        long bytesPerSplit = sourceSize / fragmentCount;
-        long remainingBytes = sourceSize % fragmentCount;
-
         Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
         Storage currentStorage = storageProvider.forDomain(currentDomain);
         LOG.debug("Retrieved Storage for domain [{}]", currentDomain);
@@ -215,6 +207,11 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             throw new DomibusCoreException(DomibusCoreErrorCode.DOM_001, "Could not store fragment payload. Please configure " + Storage.ATTACHMENT_STORAGE_LOCATION + " when using SplitAndJoin");
         }
 
+        int maxReadBufferSize = 8 * 1024; //8KB
+        final long sourceSize = sourceMessageFile.length();
+        long bytesPerSplit = sourceSize / fragmentCount;
+        long remainingBytes = sourceSize % fragmentCount;
+
         try (RandomAccessFile raf = new RandomAccessFile(sourceMessageFile, "r")) {
             for (int index = 1; index <= fragmentCount; index++) {
                 final String fragmentFileName = getFragmentFileName(currentStorage.getStorageDirectory(), sourceMessageFile.getName(), index);
@@ -224,7 +221,9 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
             if (remainingBytes > 0) {
                 final String remainingFragmentFileName = getFragmentFileName(currentStorage.getStorageDirectory(), sourceMessageFile.getName(), (fragmentCount + 1));
                 result.add(remainingFragmentFileName);
-                try (BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(remainingFragmentFileName))) {
+
+                try (final FileOutputStream outputStream = new FileOutputStream(remainingFragmentFileName);
+                     BufferedOutputStream bw = new BufferedOutputStream(outputStream)) {
                     readWrite(raf, bw, remainingBytes);
                 }
             }
@@ -233,7 +232,8 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected void saveFragmentPayload(long bytesPerSplit, int maxReadBufferSize, RandomAccessFile raf, final String fragmentFileName) throws IOException {
-        try (BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(fragmentFileName))) {
+        try (final FileOutputStream fileOutputStream = new FileOutputStream(fragmentFileName);
+             BufferedOutputStream bw = new BufferedOutputStream(fileOutputStream)) {
             if (bytesPerSplit > maxReadBufferSize) {
                 long numReads = bytesPerSplit / maxReadBufferSize;
                 long numRemainingRead = bytesPerSplit % maxReadBufferSize;
@@ -250,7 +250,7 @@ public class MSHSourceMessageWebservice implements Provider<SOAPMessage> {
     }
 
     protected String getFragmentFileName(File outputDirectory, String sourceFileName, long fragmentNumber) {
-        return outputDirectory.getAbsolutePath() + File.separator  + sourceFileName + "_" + fragmentNumber;
+        return outputDirectory.getAbsolutePath() + File.separator + sourceFileName + "_" + fragmentNumber;
     }
 
     protected void readWrite(RandomAccessFile raf, BufferedOutputStream bw, long numBytes) throws IOException {
