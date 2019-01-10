@@ -7,10 +7,8 @@
 # The location where the Wildfly12 instance is installed
 JBOSS_HOME=/path/to/wildfly12
 
-# The name of the standalone configuration file that need to be updated: standalone-full.xml for a
-# non-clustered Wildfly12 environment and standalone-full-ha.xml for a clustered one.
+# The name of the standalone configuration file that need to be updated
 SERVER_CONFIG=standalone-full.xml
-#SERVER_CONFIG=standalone-full-ha.xml
 
 # MySQL configuration
 DB_TYPE=MySQL
@@ -59,11 +57,7 @@ export JBOSS_HOME SERVER_CONFIG DB_TYPE DB_HOST DB_NAME DB_PORT DB_PORT DB_USER 
 printenv > env.properties
 
 echo "--------------Configure Wildfly12"
-if [ "${SERVER_CONFIG}" == "standalone-full-ha.xml" ] ; then
-	${JBOSS_HOME}/bin/jboss-cli.sh --file=resources/domibus-configuration-${DB_TYPE}-cluster.cli --properties=env.properties
-else
-	${JBOSS_HOME}/bin/jboss-cli.sh --file=resources/domibus-configuration-${DB_TYPE}.cli --properties=env.properties
-fi
+${JBOSS_HOME}/bin/jboss-cli.sh --file=resources/domibus-configuration-${DB_TYPE}.cli --properties=env.properties
 
 echo "--------------Clean"
 rm env.properties

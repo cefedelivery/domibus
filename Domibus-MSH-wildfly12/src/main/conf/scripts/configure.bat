@@ -8,10 +8,8 @@ SETLOCAL EnableDelayedExpansion
 :: The location where the Wildfly12 instance is installed
 SET JBOSS_HOME=C:\path\to\wildfly12
 
-:: The name of the standalone configuration file that need to be updated: standalone-full.xml for a
-:: non-clustered Wildfly12 environment and standalone-full-ha.xml for a clustered one.
+:: The name of the standalone configuration file that need to be updated
 SET SERVER_CONFIG=standalone-full.xml
-:: SET SERVER_CONFIG=standalone-full-ha.xml
 
 :: MySQL configuration
 SET DB_TYPE=MySQL
@@ -59,11 +57,7 @@ SET > env.properties
 @PowerShell -Command "(Get-Content env.properties) -replace '\^&', '&' | Out-File -encoding ASCII env.properties"
 
 ECHO --------------Configure Wildfly12
-IF "%SERVER_CONFIG%" == "standalone-full-ha.xml" (
-	%JBOSS_HOME%\bin\jboss-cli.bat --file=resources\domibus-configuration-%DB_TYPE%-cluster.cli --properties=env.properties
-) ELSE (
-	%JBOSS_HOME%\bin\jboss-cli.bat --file=resources\domibus-configuration-%DB_TYPE%.cli --properties=env.properties
-)
+%JBOSS_HOME%\bin\jboss-cli.bat --file=resources\domibus-configuration-%DB_TYPE%.cli --properties=env.properties
 
 ECHO --------------Clean
 DEL env.properties
