@@ -19,6 +19,7 @@ public class UserDetail implements UserDetails {
     private boolean defaultPasswordUsed;
     protected String domain;
     private Integer daysTillExpiration;
+    private boolean externalAuthProvider = false;
 
     public UserDetail(final User user) {
         this.defaultPasswordUsed = user.hasDefaultPassword();
@@ -109,5 +110,13 @@ public class UserDetail implements UserDetails {
 
     public void setDaysTillExpiration(Integer daysTillExpiration) {
         this.daysTillExpiration = daysTillExpiration;
+    }
+
+    public boolean isExternalAuthProvider() {
+        return externalAuthProvider;
+    }
+
+    public void setExternalAuthProvider(boolean externalAuthProvider) {
+        this.externalAuthProvider = externalAuthProvider;
     }
 }

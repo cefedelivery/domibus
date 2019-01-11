@@ -143,7 +143,6 @@ public class AuthenticationResource {
         LOG.info("get user - start");
         UserDetail userDetail = getLoggedUser();
 
-
         return createUserRO(userDetail, userDetail.getUsername());
     }
 

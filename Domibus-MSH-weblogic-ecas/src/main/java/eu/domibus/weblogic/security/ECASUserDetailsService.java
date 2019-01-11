@@ -120,7 +120,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         userGroups.add(chooseHighestUserGroup(userGroupsStr));
         UserDetail userDetail = new UserDetail(username, StringUtils.EMPTY, userGroups);
         userDetail.setDefaultPasswordUsed(false);
-
+        userDetail.setExternalAuthProvider(true);
 
         setDomainFromECASGroup(domainName, userDetail);
         userDetail.setDaysTillExpiration(Integer.MAX_VALUE);
