@@ -155,6 +155,10 @@ export class SecurityService {
     return this.isCurrentUserInRole([SecurityService.ROLE_DOMAIN_ADMIN, SecurityService.ROLE_AP_ADMIN]);
   }
 
+  isUserFromExternalAuthProvider(): boolean {
+    return this.getCurrentUser().externalAuthProvider;
+  }
+
   isCurrentUserInRole(roles: Array<string>): boolean {
     let hasRole = false;
     const currentUser = this.getCurrentUser();

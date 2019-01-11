@@ -32,7 +32,7 @@ public class SecurityInternalAuthProviderCondition implements ConfigurationCondi
         final Environment environment = context.getEnvironment();
         if (environment == null) {
             LOG.debug("Condition not matching: environment is null");
-            return false;
+            return true;
         }
         return !Boolean.parseBoolean(environment.getProperty(DomibusConfigurationService.EXTERNAL_AUTH_PROVIDER));
     }

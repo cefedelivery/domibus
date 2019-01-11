@@ -215,6 +215,7 @@ public class AuthenticationResource {
         userRO.setAuthorities(authorities);
         userRO.setDefaultPasswordUsed(principal.isDefaultPasswordUsed());
         userRO.setDaysTillExpiration(principal.getDaysTillExpiration());
+        userRO.setExternalAuthProvider(principal.isExternalAuthProvider());
         return userRO;
     }
 

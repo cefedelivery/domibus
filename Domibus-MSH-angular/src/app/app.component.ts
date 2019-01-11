@@ -70,6 +70,11 @@ export class AppComponent implements OnInit {
     return !!this.currentUser;
   }
 
+  isUserFromExternalAuthProvider (): boolean {
+    //console.log('isUserFromExternalAuthProvider: ' + this.securityService.isUserFromExternalAuthProvider());
+    return this.securityService.isUserFromExternalAuthProvider();
+  }
+
   get currentUser (): string {
     const user = this.securityService.getCurrentUser();
     return user ? user.username : '';
