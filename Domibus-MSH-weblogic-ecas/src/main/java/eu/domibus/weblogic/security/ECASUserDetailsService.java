@@ -1,4 +1,4 @@
-package eu.domibus.weblogic.ecas;
+package eu.domibus.weblogic.security;
 
 
 import eu.domibus.api.configuration.DomibusConfigurationService;

@@ -1,6 +1,8 @@
 package eu.domibus.configuration.security;
 
 import eu.domibus.common.services.impl.UserDetailServiceImpl;
+import eu.domibus.security.AuthenticationService;
+import eu.domibus.security.AuthenticationServiceImpl;
 import eu.domibus.web.filter.SetDomainFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -95,13 +97,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailService);
-        auth.authenticationProvider(null);
     }
 
-    @Bean(name = "authenticationManagerForAdminConsole" /*BeanIds.AUTHENTICATION_MANAGER*/)
+    @Bean(name = "authenticationManagerForAdminConsole")
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
+    }
+
+    @Bean(name = "authenticationService")
+    public AuthenticationService authenticationService() {
+        return new AuthenticationServiceImpl();
     }
 
 }

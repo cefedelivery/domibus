@@ -1,8 +1,10 @@
-package eu.domibus.weblogic.ecas;
+package eu.domibus.weblogic.security;
 
 import eu.domibus.configuration.security.SecurityExternalAuthProviderCondition;
+import eu.domibus.security.AuthenticationService;
 import eu.domibus.web.filter.SetDomainFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -67,20 +69,20 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasRole("AP_ADMIN")
-                .antMatchers(HttpMethod.PUT,"/rest/security/user/password").hasAnyRole ("USER","ADMIN","AP_ADMIN")
-                .antMatchers(HttpMethod.PUT,"/rest/security/user/domain").hasAnyRole ("AP_ADMIN")
-                .antMatchers("/rest/pmode/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/party/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/truststore/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/messagefilters/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/jms/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/user/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/plugin/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/audit/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/alerts/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/testservice/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/logging/**").hasAnyRole ("ADMIN","AP_ADMIN")
-                .antMatchers("/rest/**").hasAnyRole ("USER","ADMIN","AP_ADMIN")
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole("AP_ADMIN")
+                .antMatchers("/rest/pmode/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/party/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/truststore/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/messagefilters/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/jms/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/user/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/plugin/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/audit/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/alerts/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/testservice/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/logging/**").hasAnyRole("ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/**").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
                 .and()
                 .jee().authenticatedUserDetailsService(ecasUserDetailsService)
                 .and()
@@ -97,6 +99,11 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(ecasUserDetailsService);
+    }
+
+    @Bean(name = "authenticationService")
+    public AuthenticationService authenticationService() {
+        return new ECASAuthenticationServiceImpl();
     }
 
 }
