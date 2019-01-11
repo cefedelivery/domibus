@@ -128,10 +128,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
                 return soapMessage;
             } else if (messaging.getSignalMessage().getReceipt() != null) {
                 LOG.trace("before pull receipt.");
-                Timer pullRequestReceiptTimer = Metrics.METRIC_REGISTRY.timer(name(MSHWebservice.class, "pull_request_receipt"));
-                final Timer.Context pullRequestReceiptTimerContext = pullRequestReceiptTimer.time();
                 final SOAPMessage soapMessage = handlePullRequestReceipt(request, messaging);
-                pullRequestReceiptTimerContext.stop();
                 LOG.trace("returning pull receipt.");
                 return soapMessage;
             }
@@ -174,6 +171,7 @@ public class MSHWebservice implements Provider<SOAPMessage> {
         return new UserMessageHandlerContext();
     }
 
+    @eu.domibus.common.statistics.Timer(clazz = MSHWebservice.class, timerName = "handle_pull_receipt")
     protected SOAPMessage handlePullRequestReceipt(SOAPMessage request, Messaging messaging) {
         String messageId = messaging.getSignalMessage().getMessageInfo().getRefToMessageId();
         ReliabilityChecker.CheckResult reliabilityCheckSuccessful = ReliabilityChecker.CheckResult.PULL_FAILED;
