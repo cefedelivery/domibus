@@ -128,13 +128,14 @@ public class DatabaseMessageHandler implements MessageSubmitter, MessageRetrieve
         if (!authUtils.isUnsecureLoginAllowed()) {
             authUtils.hasUserOrAdminRole();
         }
+        LOG.info("Downloading message with id [{}]", messageId);
         String originalUser = authUtils.getOriginalUserFromSecurityContext();
         String displayUser = originalUser == null ? "super user" : originalUser;
         LOG.debug("Authorized as [{}]", displayUser);
 
         UserMessage userMessage;
         try {
-            LOG.info("Searching message with id [{}]", messageId);
+            LOG.debug("Searching message with id [{}]", messageId);
             userMessage = messagingDao.findUserMessageByMessageId(messageId);
             // Authorization check
             validateOriginalUser(userMessage, originalUser, MessageConstants.FINAL_RECIPIENT);
