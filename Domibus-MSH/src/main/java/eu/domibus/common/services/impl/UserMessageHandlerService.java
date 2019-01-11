@@ -12,6 +12,7 @@ import eu.domibus.common.exception.CompressionException;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.model.configuration.Party;
+import eu.domibus.common.model.configuration.Reliability;
 import eu.domibus.common.model.configuration.ReplyPattern;
 import eu.domibus.common.model.logging.RawEnvelopeDto;
 import eu.domibus.common.model.logging.SignalMessageLog;
@@ -186,7 +187,7 @@ public class UserMessageHandlerService {
 
                 if (messageFragmentType != null) {
                     final MessageGroupEntity groupEntity = messageGroupDao.findByGroupId(messageFragmentType.getGroupId());
-                    if(messageFragmentType.getFragmentNum() == groupEntity.getFragmentCount()) {
+                    if (messageFragmentType.getFragmentNum() == groupEntity.getFragmentCount()) {
                         LOG.info("All fragment files received for group [{}], scheduling the source message rejoin", groupEntity.getGroupId());
                         userMessageService.scheduleSourceMessageRejoin(groupEntity.getGroupId());
                     }
@@ -495,17 +496,26 @@ public class UserMessageHandlerService {
      */
     protected SOAPMessage generateReceipt(final SOAPMessage request, Messaging messaging, final LegConfiguration legConfiguration, final Boolean duplicate,
                                           boolean selfSendingFlag) throws EbMS3Exception {
-
-        SOAPMessage responseMessage = null;
         assert legConfiguration != null;
-        UserMessage userMessage = messaging.getUserMessage();
 
         if (legConfiguration.getReliability() == null) {
             LOG.warn("No reliability found for leg [{}]", legConfiguration.getName());
             return null;
         }
 
-        if (ReplyPattern.RESPONSE.equals(legConfiguration.getReliability().getReplyPattern())) {
+        return generateReceipt(request, messaging, legConfiguration.getReliability(), legConfiguration.getReliability().isNonRepudiation(), duplicate, selfSendingFlag);
+    }
+
+    protected SOAPMessage generateReceipt(final SOAPMessage request,
+                                          final Messaging messaging,
+                                          final Reliability reliability,
+                                          final Boolean nonRepudiation,
+                                          final Boolean duplicate,
+                                          final boolean selfSendingFlag) throws EbMS3Exception {
+        SOAPMessage responseMessage = null;
+        UserMessage userMessage = messaging.getUserMessage();
+
+        if (ReplyPattern.RESPONSE.equals(reliability.getReplyPattern())) {
             LOG.debug("Generating receipt for incoming message");
             try {
                 responseMessage = messageFactory.createMessage();
@@ -515,7 +525,6 @@ public class UserMessageHandlerService {
 
                 String messageId;
                 String timestamp;
-                String nonRepudiation = Boolean.toString(legConfiguration.getReliability().isNonRepudiation());
 
                 Source requestMessage;
                 if (duplicate) {
@@ -532,7 +541,7 @@ public class UserMessageHandlerService {
 
                 transformer.setParameter("messageid", messageId);
                 transformer.setParameter("timestamp", timestamp);
-                transformer.setParameter("nonRepudiation", nonRepudiation);
+                transformer.setParameter("nonRepudiation", Boolean.toString(nonRepudiation));
 
                 final DOMResult domResult = new DOMResult();
                 transformer.transform(requestMessage, domResult);
@@ -544,7 +553,7 @@ public class UserMessageHandlerService {
                     saveResponse(responseMessage, selfSendingFlag);
                 }
 
-                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, legConfiguration.getReliability().isNonRepudiation());
+                LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIPT_GENERATED, nonRepudiation);
             } catch (TransformerConfigurationException | SOAPException | IOException e) {
                 LOG.businessError(DomibusMessageCode.BUS_MESSAGE_RECEIPT_FAILURE);
                 // this cannot happen
@@ -559,6 +568,7 @@ public class UserMessageHandlerService {
         }
         return responseMessage;
     }
+
 
     protected void setMessagingId(SOAPMessage responseMessage, UserMessage userMessage) throws SOAPException {
         final Iterator childElements = responseMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME);
