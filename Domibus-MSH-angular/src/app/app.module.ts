@@ -89,6 +89,7 @@ import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {SanitizeHtmlPipe} from './common/sanitizeHtml.pipe';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
+import {AuthExternalProviderGuard} from "./guards/auth-external-provider.guard";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -202,6 +203,7 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     AuthorizedAdminGuard,
     DirtyGuard,
     DefaultPasswordGuard,
+    AuthExternalProviderGuard,
     HttpEventService,
     SecurityService,
     SecurityEventService,
