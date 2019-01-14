@@ -28,7 +28,7 @@ public class DomibusContextLoaderListener extends ContextLoaderListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        registerBouncyCastle();
+        //registerBouncyCastle();
 
         ServletContext servletContext = servletContextEvent.getServletContext();
         String pluginsLocation = servletContext.getInitParameter("pluginsLocation");

@@ -1,6 +1,8 @@
 package eu.domibus.core.pull;
 
 import eu.domibus.ebms3.common.model.MessagingLock;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -9,6 +11,11 @@ import java.util.List;
  * @since 3.3.4
  */
 public interface MessagingLockDao {
+
+
+    PullMessageId getOracleNextPullMessageToProcess(final String initiator, final String mpc);
+
+    PullMessageId getMessageIdInTransaction(Long idPk);
 
     PullMessageId getNextPullMessageToProcess(Integer messageId);
 

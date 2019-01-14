@@ -240,7 +240,7 @@ public class MessageExchangeServiceImpl implements MessageExchangeService {
             return null;
         }
         String partyId = identifiers.iterator().next().getPartyId();
-        return pullMessageService.getPullMessageId(partyId, mpc);
+        return pullMessageService.getOracleMessageIdWithOtherTransaction(partyId, mpc);
     }
 
     /**

@@ -7,6 +7,8 @@ import eu.domibus.ebms3.common.model.MessagingLock;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
 import eu.domibus.ebms3.sender.ResponseHandler;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface PullMessageService {
 
@@ -20,6 +22,14 @@ public interface PullMessageService {
      * @return the id of the message or null.
      */
     String getPullMessageId(String initiator, String mpc);
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class,timerName = "get_pull_message_id")
+    String getOracleMessageIdWithOtherTransaction(String initiator, String mpc);
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class,timerName = "get_pull_message_id")
+    String getOracleMessageId(String initiator, String mpc);
 
     /**
      * When a message arrives in the system, if it is configured to be pulled, some extra information needed for finding

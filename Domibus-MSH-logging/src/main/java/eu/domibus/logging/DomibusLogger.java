@@ -1,12 +1,16 @@
 package eu.domibus.logging;
 
 import eu.domibus.logging.api.CategoryLogger;
+import eu.domibus.logging.api.MessageCode;
 import eu.domibus.logging.api.MessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,7 +29,83 @@ public class DomibusLogger extends CategoryLogger {
     public static final String MDC_PROPERTY_PREFIX = "d_";
 
     public static final Marker BUSINESS_MARKER = MarkerFactory.getMarker("BUSINESS");
+
     public static final Marker SECURITY_MARKER = MarkerFactory.getMarker("SECURITY");
+
+    static boolean trace=false;
+
+    static {
+        String value = System.getenv("domibus.trace");
+        if(value!=null){
+            trace=Boolean.valueOf("value");
+        }
+    }
+
+    static Map<String, List<String>> traceMap= Collections.synchronizedMap(new HashMap());
+
+    @Override
+    public void trace(Marker marker, MessageCode key, Object... args){
+        saveSmartTrace(marker, key, args);
+        super.trace(marker,key,args);
+    }
+
+    private void saveSmartTrace(Marker marker, MessageCode key, Object[] args) {
+        if(trace){
+            final String messageID = this.getMDC(DomibusLogger.MDC_MESSAGE_ID);
+            if(messageID!=null){
+                final List<String> traceList = traceMap.get(messageID);
+                if(traceList==null){
+                    traceMap.put(messageID,traceList);
+                }
+                final String formattedMessage = formatMessage(marker, key, args);
+                traceList.add(formattedMessage);
+            }
+        }
+    }
+
+    public void removeMDC(String key) {
+        if(trace){
+            if(DomibusLogger.MDC_MESSAGE_ID.equalsIgnoreCase(key)){
+                traceMap.remove(this.getMDC(DomibusLogger.MDC_MESSAGE_ID));
+            }
+        }
+        super.removeMDC(key);
+    }
+
+    public void smartTrace(){
+        if(trace){
+            final List<String> traceList = traceMap.get(this.getMDC(DomibusLogger.MDC_MESSAGE_ID));
+            if(traceList!=null){
+                for (String trace : traceList) {
+                    this.warn("Smart trace->map size:[{}] trace[{}]",traceMap.size(),trace);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void debug(Marker marker, MessageCode key, Object... args){
+        saveSmartTrace(marker, key, args);
+        super.debug(marker,key,args);
+    }
+
+    @Override
+    public void info(Marker marker, MessageCode key, Object... args){
+        saveSmartTrace(marker, key, args);
+        super.info(marker,key,args);
+    }
+
+    @Override
+    public void warn(Marker marker, MessageCode key, Object... args){
+        saveSmartTrace(marker, key, args);
+        super.warn(marker,key,args);
+    }
+
+    @Override
+    public void error(Marker marker, MessageCode key, Object... args){
+        saveSmartTrace(marker, key, args);
+        super.error(marker,key,args);
+    }
 
 
     public DomibusLogger(Logger logger, MessageConverter messageConverter) {

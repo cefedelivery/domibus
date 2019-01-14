@@ -55,6 +55,10 @@ public class ReliabilityServiceImpl implements ReliabilityService {
     private void changeMessageStatusAndNotify(String messageId,  UserMessage userMessage, ReliabilityChecker.CheckResult reliabilityCheckSuccessful, ResponseHandler.CheckResult isOk, LegConfiguration legConfiguration) {
         final Boolean isTestMessage = userMessageHandlerService.checkTestMessage(legConfiguration);
 
+       /* int random = (int)(Math.random() * 20 + 1);
+        if(random==20){
+            reliabilityCheckSuccessful= ReliabilityChecker.CheckResult.SEND_FAIL;
+        }*/
         switch (reliabilityCheckSuccessful) {
             case OK:
                 switch (isOk) {
@@ -79,6 +83,7 @@ public class ReliabilityServiceImpl implements ReliabilityService {
                 updateRetryLoggingService.updateWaitingReceiptMessageRetryLogging(messageId, legConfiguration);
                 break;
             case SEND_FAIL:
+                LOG.smartTrace();
                 updateRetryLoggingService.updatePushedMessageRetryLogging(messageId, legConfiguration);
                 break;
         }

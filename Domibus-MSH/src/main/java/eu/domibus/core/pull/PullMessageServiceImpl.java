@@ -27,10 +27,14 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -83,6 +87,16 @@ public class PullMessageServiceImpl implements PullMessageService {
     @Autowired
     @Qualifier("domibusProperties")
     private java.util.Properties domibusProperties;
+
+    private JdbcTemplate jdbcTemplate;
+
+
+
+    @Autowired
+    @Qualifier("domibusJDBC-XADataSource")
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     private Integer extraNumberOfAttemptTimeForExpirationDate;
 
@@ -170,9 +184,9 @@ public class PullMessageServiceImpl implements PullMessageService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class,timerName = "get_pull_message_id")
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "get_pull_message_id")
     public String getPullMessageId(final String initiator, final String mpc) {
-        final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(mpc, initiator);
+        final List<MessagingLock> messagingLock = messagingLockDao.findReadyToPull(initiator, mpc);
         LOG.trace("[PULL_REQUEST]:Reading messages for initiatior [{}] mpc[{}].", initiator, mpc);
         for (MessagingLock lock : messagingLock) {
             LOG.trace("[getPullMessageId]:Message[{}]] try to acquire lock", lock.getMessageId());
@@ -203,6 +217,62 @@ public class PullMessageServiceImpl implements PullMessageService {
         LOG.trace("[PULL_REQUEST]:No message found.");
         return null;
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "get_pull_message_id")
+    public String getOracleMessageIdWithOtherTransaction(final String initiator, final String mpc) {
+        final SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("select ml.ID_PK from TB_MESSAGING_LOCK ml where ml.MESSAGE_STATE = 'READY' and ml.MPC=? and ml.INITIATOR=? and ml.NEXT_ATTEMPT<CURRENT_TIMESTAMP and ml.MESSAGE_STALED>CURRENT_TIMESTAMP and rownum <= 50 order by ml.ID_PK ", mpc, initiator);
+        while (sqlRowSet.next()) {
+            final PullMessageId pullMessageId = messagingLockDao.getMessageIdInTransaction(sqlRowSet.getLong(1));
+            if (pullMessageId != null) {
+                LOG.debug("[PULL_REQUEST]:Message:[{}] retrieved", pullMessageId.getMessageId());
+                final String messageId = pullMessageId.getMessageId();
+                switch (pullMessageId.getState()) {
+                    case EXPIRED:
+                        pullMessageStateService.expirePullMessage(messageId);
+                        LOG.debug("[PULL_REQUEST]:Message:[{}] is staled for reason:[{}].", pullMessageId.getMessageId(), pullMessageId.getStaledReason());
+                        break;
+                    case FIRST_ATTEMPT:
+                        LOG.debug("[PULL_REQUEST]:Message:[{}] first pull attempt.", pullMessageId.getMessageId());
+                        return messageId;
+                    case RETRY:
+                        LOG.debug("[PULL_REQUEST]:message:[{}] retry pull attempt.", pullMessageId.getMessageId());
+                        rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+                        return messageId;
+                }
+            }
+            LOG.trace("[PULL_REQUEST]:No message found.");
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    @eu.domibus.common.statistics.Timer(clazz = PullMessageServiceImpl.class, timerName = "get_pull_message_id")
+    public String getOracleMessageId(final String initiator, final String mpc) {
+        final PullMessageId pullMessageId = messagingLockDao.getOracleNextPullMessageToProcess(initiator, mpc);
+        if (pullMessageId != null) {
+            LOG.debug("[PULL_REQUEST]:Message:[{}] retrieved", pullMessageId.getMessageId());
+            final String messageId = pullMessageId.getMessageId();
+            switch (pullMessageId.getState()) {
+                case EXPIRED:
+                    pullMessageStateService.expirePullMessage(messageId);
+                    LOG.debug("[PULL_REQUEST]:Message:[{}] is staled for reason:[{}].", pullMessageId.getMessageId(), pullMessageId.getStaledReason());
+                    break;
+                case FIRST_ATTEMPT:
+                    LOG.debug("[PULL_REQUEST]:Message:[{}] first pull attempt.", pullMessageId.getMessageId());
+                    return messageId;
+                case RETRY:
+                    LOG.debug("[PULL_REQUEST]:message:[{}] retry pull attempt.", pullMessageId.getMessageId());
+                    rawEnvelopeLogDao.deleteUserMessageRawEnvelope(messageId);
+                    return messageId;
+            }
+        }
+        LOG.trace("[PULL_REQUEST]:No message found.");
+        return null;
+    }
+
 
     /**
      * {@inheritDoc}
@@ -236,7 +306,7 @@ public class PullMessageServiceImpl implements PullMessageService {
                 mpc,
                 messageLog.getReceived(),
                 staledDate,
-                messageLog.getNextAttempt()==null?new Date():messageLog.getNextAttempt(),
+                messageLog.getNextAttempt() == null ? new Date() : messageLog.getNextAttempt(),
                 messageLog.getSendAttempts(),
                 messageLog.getSendAttemptsMax());
     }
@@ -274,7 +344,7 @@ public class PullMessageServiceImpl implements PullMessageService {
     protected void updateMessageLogNextAttemptDate(LegConfiguration legConfiguration, MessageLog userMessageLog) {
         final MessageLog userMessageLog1 = userMessageLog;
         Date nextAttempt = new Date();
-        if (userMessageLog.getNextAttempt() !=null) {
+        if (userMessageLog.getNextAttempt() != null) {
             nextAttempt = userMessageLog.getNextAttempt();
         }
         userMessageLog1.setNextAttempt(legConfiguration.getReceptionAwareness().getStrategy().getAlgorithm().compute(nextAttempt, userMessageLog1.getSendAttemptsMax(), legConfiguration.getReceptionAwareness().getRetryTimeout()));
@@ -282,8 +352,9 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * This method is called when a message has been pulled successfully.
+     *
      * @param legConfiguration processing information for the message
-     * @param userMessageLog the user message
+     * @param userMessageLog   the user message
      */
     protected void waitingForCallBack(LegConfiguration legConfiguration, UserMessageLog
             userMessageLog) {
@@ -323,7 +394,8 @@ public class PullMessageServiceImpl implements PullMessageService {
 
     /**
      * Check if the message can be sent again: there is time and attempts left
-     * @param userMessageLog the message
+     *
+     * @param userMessageLog   the message
      * @param legConfiguration processing information for the message
      * @return true if the message can be sent again
      */
