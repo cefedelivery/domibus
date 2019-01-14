@@ -9,10 +9,17 @@ import eu.domibus.common.model.configuration.Splitting;
 import eu.domibus.configuration.storage.Storage;
 import eu.domibus.ebms3.common.model.PartInfo;
 import eu.domibus.ebms3.common.model.UserMessage;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.attachment.AttachmentDeserializer;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.message.MessageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.soap.SOAPMessage;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -26,6 +33,8 @@ import java.util.zip.GZIPInputStream;
  */
 @Service
 public class SplitAndJoinDefaultService implements SplitAndJoinService {
+
+    public static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SplitAndJoinDefaultService.class);
 
     @Autowired
     protected MessagingDao messagingDao;
@@ -61,7 +70,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     }
 
     @Override
-    public void rejoinSourceMessage(String groupId) {
+    public SOAPMessage rejoinSourceMessage(String groupId) {
         final List<UserMessage> userMessageFragments = messagingDao.findUserMessageByGroupId(groupId);
         final MessageGroupEntity messageGroupEntity = messageGroupDao.findByGroupId(groupId);
         if (messageGroupEntity.getFragmentCount() != userMessageFragments.size()) {
@@ -79,8 +88,23 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
         }
 
         final File sourceMessageFile = mergeSourceFile(fragmentFilesInOrder, messageGroupEntity);
+        try (InputStream rawInputStream = new FileInputStream(sourceMessageFile)) {
+            MessageImpl messageImpl = new MessageImpl();
+            messageImpl.setContent(InputStream.class, rawInputStream);
+            messageImpl.put(Message.CONTENT_TYPE, createContentType(messageGroupEntity.getMessageHeaderEntity().getBoundary(), messageGroupEntity.getMessageHeaderEntity().getStart()));
+            new AttachmentDeserializer(messageImpl).initializeAttachments();
+            return SoapUtil.createUserMessage(messageImpl);
+        } catch (Exception e) {
+            //TODO return a signal error to C2 and notify the backend
+            LOG.error("Error parsing the source file [{}]", sourceMessageFile);
+            return null;
+        }
+    }
 
-
+    protected String createContentType(String boundary, String start) {
+        final String contentType = "multipart/related; type=\"application/soap+xml\"; boundary=" + boundary + "; start=" + start + "; start-info=\"application/soap+xml\"";
+        LOG.debug("Created contentType [{}]", contentType);
+        return contentType;
     }
 
     protected File mergeSourceFile(List<File> fragmentFilesInOrder, MessageGroupEntity messageGroupEntity) {

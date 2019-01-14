@@ -1,11 +1,17 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.usermessage.UserMessageService;
+import eu.domibus.common.MSHRole;
+import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
+import eu.domibus.core.pmode.PModeProvider;
+import eu.domibus.ebms3.common.model.Messaging;
+import eu.domibus.ebms3.receiver.handler.IncomingUserMessageHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
+import eu.domibus.util.MessageUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 
 /**
  * @author Cosmin Baciu
@@ -25,6 +33,15 @@ public class LargeMessageSenderListener extends AbstractMessageSenderListener {
 
     @Autowired
     protected SplitAndJoinService splitAndJoinService;
+
+    @Autowired
+    protected IncomingUserMessageHandler incomingUserMessageHandler;
+
+    @Autowired
+    protected MessageUtil messageUtil;
+
+    @Autowired
+    private PModeProvider pModeProvider;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
@@ -47,7 +64,19 @@ public class LargeMessageSenderListener extends AbstractMessageSenderListener {
 
                 domainContextProvider.setCurrentDomain(domainCode);
                 final String groupId = message.getStringProperty(UserMessageService.MSG_GROUP_ID);
-                splitAndJoinService.rejoinSourceMessage(groupId);
+                final SOAPMessage request = splitAndJoinService.rejoinSourceMessage(groupId);
+                Messaging messaging = messageUtil.getMessage(request);
+                String pmodeKey = null;
+                try {
+                     pmodeKey = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey();
+                     request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
+                } catch (EbMS3Exception | SOAPException e) {
+                    //TODO return a signal error to C2 and notify the backend
+                    LOG.error("Error getting the pmodeKey");
+                    return;
+                }
+
+                incomingUserMessageHandler.processMessage(request, messaging);
             } else {
                 super.onMessage(message);
             }

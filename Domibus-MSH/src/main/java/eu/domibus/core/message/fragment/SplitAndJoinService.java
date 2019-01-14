@@ -2,6 +2,8 @@ package eu.domibus.core.message.fragment;
 
 import eu.domibus.common.model.configuration.LegConfiguration;
 
+import javax.xml.soap.SOAPMessage;
+
 /**
  * @author Cosmin Baciu
  * @since 4.1
@@ -12,9 +14,8 @@ public interface SplitAndJoinService {
 
     boolean useSplitAndJoin(LegConfiguration legConfiguration, long payloadSize);
 
-
     String generateSourceFileName(String temporaryDirectoryLocation);
 
-    void rejoinSourceMessage(String groupId);
+    SOAPMessage rejoinSourceMessage(String groupId);
 
 }

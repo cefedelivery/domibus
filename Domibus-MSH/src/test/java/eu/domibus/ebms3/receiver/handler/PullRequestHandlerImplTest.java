@@ -281,6 +281,4 @@ public class PullRequestHandlerImplTest {
             times = 0;
         }};
     }
-
-
 }
