@@ -17,7 +17,6 @@ import eu.domibus.core.pull.PullReceiptSender;
 import eu.domibus.ebms3.common.model.Error;
 import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.DomibusMessageCode;
@@ -108,20 +107,20 @@ public class PullMessageSender {
         String messageId = null;
         try {
             final String mpc = map.getStringProperty(PullContext.MPC);
-            final String pMode = map.getStringProperty(PullContext.PMODE_KEY);
+            final String pModeKey = map.getStringProperty(PullContext.PMODE_KEY);
             notifyBusinessOnError = Boolean.valueOf(map.getStringProperty(PullContext.NOTIFY_BUSINNES_ON_ERROR));
             SignalMessage signalMessage = new SignalMessage();
             PullRequest pullRequest = new PullRequest();
             pullRequest.setMpc(mpc);
             signalMessage.setPullRequest(pullRequest);
             LOG.debug("Sending pull request with mpc:[{}]", mpc);
-            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pMode);
-            final Party receiverParty = pModeProvider.getReceiverParty(pMode);
+            final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pModeKey);
+            final Party receiverParty = pModeProvider.getReceiverParty(pModeKey);
             final Policy policy = getPolicy(legConfiguration);
             LOG.trace("Build soap message");
             SOAPMessage soapMessage = messageBuilder.buildSOAPMessage(signalMessage, null);
             LOG.trace("Send soap message");
-            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pMode);
+            final SOAPMessage response = mshDispatcher.dispatch(soapMessage, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey);
             messaging = messageUtil.getMessage(response);
             if (messaging.getUserMessage() == null && messaging.getSignalMessage() != null) {
                 LOG.trace("No message for sent pull request with mpc:[{}]", mpc);
@@ -129,9 +128,10 @@ public class PullMessageSender {
                 return;
             }
             messageId = messaging.getUserMessage().getMessageInfo().getMessageId();
-            UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
+
             LOG.trace("handle message");
-            final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(pMode, response, messaging, userMessageHandlerContext);
+            Boolean testMessage = userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
+            final SOAPMessage acknowledgement = userMessageHandlerService.handleNewUserMessage(legConfiguration, pModeKey, response, messaging, testMessage);
             final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
             final String sendMessageId = messageId;
@@ -147,7 +147,7 @@ public class PullMessageSender {
              * Ideally the message id should be committed to a queue and the sending of the receipt executed in another process.
              */
             try {
-                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pMode, sendMessageId, domainCode));
+                executor.execute(() -> pullReceiptSender.sendReceipt(acknowledgement, receiverParty.getEndpoint(), policy, legConfiguration, pModeKey, sendMessageId, domainCode));
             } catch (Exception ex) {
                 LOG.warn("Message[{}] exception while sending receipt asynchronously.", messageId, ex);
             }

@@ -2,11 +2,12 @@ package eu.domibus.ebms3.receiver.handler;
 
 import eu.domibus.api.message.UserMessageException;
 import eu.domibus.common.exception.EbMS3Exception;
+import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.UserMessageHandlerService;
+import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.PartyInfo;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -40,6 +41,9 @@ public class IncomingUserMessageHandler implements IncomingMessageHandler {
     @Autowired
     protected MessageUtil messageUtil;
 
+    @Autowired
+    protected PModeProvider pModeProvider;
+
     @Override
     public SOAPMessage processMessage(SOAPMessage request, Messaging messaging) {
         SOAPMessage responseMessage = null;
@@ -51,31 +55,29 @@ public class IncomingUserMessageHandler implements IncomingMessageHandler {
             LOG.error("Cannot find PModeKey property for incoming Message", soapEx);
             assert false;
         }
-        UserMessageHandlerContext userMessageHandlerContext = getMessageHandler();
+
+        Boolean testMessage = userMessageHandlerService.checkTestMessage(messaging.getUserMessage());
+        LOG.info("Using pmodeKey {}", pmodeKey);
+        final LegConfiguration legConfiguration = pModeProvider.getLegConfiguration(pmodeKey);
         try {
-            LOG.info("Using pmodeKey {}", pmodeKey);
-            responseMessage = userMessageHandlerService.handleNewUserMessage(pmodeKey, request, messaging, userMessageHandlerContext);
+            responseMessage = userMessageHandlerService.handleNewUserMessage(legConfiguration, pmodeKey, request, messaging, testMessage);
             final PartyInfo partyInfo = messaging.getUserMessage().getPartyInfo();
             LOG.businessInfo(DomibusMessageCode.BUS_MESSAGE_RECEIVED, partyInfo.getFrom().getFirstPartyId(), partyInfo.getTo().getFirstPartyId());
-            LOG.debug("Ping message {}", userMessageHandlerContext.isTestMessage());
+
+            LOG.debug("Ping message {}", testMessage);
         } catch (TransformerException | SOAPException | JAXBException | IOException e) {
             throw new UserMessageException(e);
         } catch (final EbMS3Exception e) {
             try {
-                if (!userMessageHandlerContext.isTestMessage() && userMessageHandlerContext.getLegConfiguration().getErrorHandling().isBusinessErrorNotifyConsumer()) {
+                if (!testMessage && legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer()) {
                     backendNotificationService.notifyMessageReceivedFailure(messaging.getUserMessage(), userMessageHandlerService.createErrorResult(e));
                 }
             } catch (Exception ex) {
-                LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, userMessageHandlerContext.getMessageId());
+                LOG.businessError(DomibusMessageCode.BUS_BACKEND_NOTIFICATION_FAILED, ex, messaging.getUserMessage().getMessageInfo().getMessageId());
             }
             throw new WebServiceException(e);
         }
         return responseMessage;
     }
-
-    protected UserMessageHandlerContext getMessageHandler() {
-        return new UserMessageHandlerContext();
-    }
-
 
 }

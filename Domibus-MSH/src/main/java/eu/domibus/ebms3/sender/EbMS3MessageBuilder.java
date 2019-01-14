@@ -46,6 +46,7 @@ public class EbMS3MessageBuilder {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(EbMS3MessageBuilder.class);
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
+    @Qualifier("messageFactory")
     @Autowired
     protected MessageFactory messageFactory;
 

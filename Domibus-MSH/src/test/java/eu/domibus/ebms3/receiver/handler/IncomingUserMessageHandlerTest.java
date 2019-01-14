@@ -19,7 +19,6 @@ import eu.domibus.ebms3.common.model.Messaging;
 import eu.domibus.ebms3.common.model.TimestampDateFormatter;
 import eu.domibus.ebms3.common.model.UserMessage;
 import eu.domibus.ebms3.receiver.BackendNotificationService;
-import eu.domibus.ebms3.receiver.UserMessageHandlerContext;
 import eu.domibus.ebms3.sender.DispatchClientDefaultProvider;
 import eu.domibus.ebms3.sender.EbMS3MessageBuilder;
 import eu.domibus.ebms3.sender.ReliabilityChecker;
@@ -171,7 +170,8 @@ public class IncomingUserMessageHandlerTest {
      * @throws TransformerException
      */
     @Test
-    public void testInvoke_tc1Process_HappyFlow(@Injectable Messaging messaging) throws Exception {
+    public void testInvoke_tc1Process_HappyFlow(@Injectable Messaging messaging,
+                                                @Injectable LegConfiguration legConfiguration) throws Exception {
 
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
@@ -179,7 +179,7 @@ public class IncomingUserMessageHandlerTest {
             soapRequestMessage.getProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY);
             result = pmodeKey;
 
-            userMessageHandlerService.handleNewUserMessage(withEqual(pmodeKey), withEqual(soapRequestMessage), withEqual(messaging), withAny(new UserMessageHandlerContext()));
+            userMessageHandlerService.handleNewUserMessage(legConfiguration, withEqual(pmodeKey), withEqual(soapRequestMessage), withEqual(messaging), false);
             result = soapResponseMessage;
         }};
 
@@ -210,18 +210,11 @@ public class IncomingUserMessageHandlerTest {
         final String pmodeKey = "blue_gw:red_gw:testService1:tc1Action:OAE:pushTestcase1tc1Action";
 
         new Expectations(incomingUserMessageHandler) {{
-
-            UserMessageHandlerContext userMessageHandlerContext = new UserMessageHandlerContext();
-            userMessageHandlerContext.setLegConfiguration(legConfiguration);
-
-            incomingUserMessageHandler.getMessageHandler();
-            result = userMessageHandlerContext;
-
             legConfiguration.getErrorHandling().isBusinessErrorNotifyConsumer();
             result = true;
 
 
-            userMessageHandlerService.handleNewUserMessage(withAny(pmodeKey), withAny(soapRequestMessage), withAny(messaging), withAny(userMessageHandlerContext));
+            userMessageHandlerService.handleNewUserMessage(legConfiguration, withAny(pmodeKey), withAny(soapRequestMessage), withAny(messaging), false);
             result = new EbMS3Exception(null, null, null, null);
 
         }};
