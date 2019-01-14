@@ -327,7 +327,8 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         InternalJMSDestination internalJmsDestination = null;
         Map<String, InternalJMSDestination> internalDestinations = findDestinationsGroupedByFQName();
         for (Map.Entry<String, InternalJMSDestination> entry : internalDestinations.entrySet()) {
-            if (entry.getKey().contains(destName)) {
+            if (entry.getKey().contains(destName)
+                    || entry.getValue().<String>getProperty(PROPERTY_JNDI_NAME).contains(destName)) {
                 LOG.debug("Internal destination found for source [" + destName + "]");
                 internalJmsDestination = entry.getValue();
             }
