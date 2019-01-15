@@ -176,8 +176,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   private setSortValues() {
     this.queues.forEach(queue => {
-      if (queue.name && queue.name.indexOf('@') > 0) {
-        const ind = queue.name.lastIndexOf('@');
+      const ind = queue.name.lastIndexOf('@');
+      if (queue.name && ind > 0) {
         queue.logicalName = queue.name.substring(ind + 1) + '@' + queue.name.substring(0, ind);
       } else {
         queue.logicalName = queue.name;
