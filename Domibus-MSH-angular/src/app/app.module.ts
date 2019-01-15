@@ -90,6 +90,7 @@ import {SanitizeHtmlPipe} from './common/sanitizeHtml.pipe';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
 import {AuthExternalProviderGuard} from "./guards/auth-external-provider.guard";
+import {LogoutAuthExtProviderComponent} from "./logout/logout.components";
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -146,7 +147,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent,
     LoggingComponent,
-    ChangePasswordComponent
+    ChangePasswordComponent,
+    LogoutAuthExtProviderComponent
   ],
   entryComponents: [
     AppComponent,

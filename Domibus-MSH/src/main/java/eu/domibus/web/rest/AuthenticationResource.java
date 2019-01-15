@@ -187,11 +187,7 @@ public class AuthenticationResource {
     }
 
     UserDetail getLoggedUser() {
-        UserDetail securityUser = null;
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            securityUser = (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        }
-        return securityUser;
+        return  (UserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     UserService getUserService() {

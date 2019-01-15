@@ -31,6 +31,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    static final String[] ALL_ROLES = {"USER", "ADMIN", "AP_ADMIN"};
+    static final String[] ADMIN_ROLES = {"ADMIN", "AP_ADMIN"};
+    static final String SUPER_ROLE = "AP_ADMIN";
+
     @Autowired
     CsrfTokenRepository tokenRepository;
 
@@ -53,6 +57,8 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .ignoring().antMatchers("/ext/**")
                 .and()
+                .ignoring().antMatchers("/logout/**")
+                .and()
                 .debug(true);
     }
 
@@ -68,21 +74,23 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/name").permitAll()
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
-                .antMatchers("/rest/application/domains").hasRole("AP_ADMIN")
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
-                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole("AP_ADMIN")
-                .antMatchers("/rest/pmode/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/party/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/truststore/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/messagefilters/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/jms/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/user/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/plugin/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/audit/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/alerts/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/testservice/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/logging/**").hasAnyRole("ADMIN", "AP_ADMIN")
-                .antMatchers("/rest/**").hasAnyRole("USER", "ADMIN", "AP_ADMIN")
+                .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole(ALL_ROLES)
+                .antMatchers(HttpMethod.PUT, "/rest/security/user/domain").hasAnyRole(SUPER_ROLE)
+                .antMatchers(HttpMethod.GET, "/rest/security/username").hasAnyRole(ALL_ROLES)
+                .antMatchers(HttpMethod.GET, "/rest/security/user").hasAnyRole(ALL_ROLES)
+                .antMatchers("/rest/pmode/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/party/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/truststore/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/messagefilters/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/jms/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/user/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/plugin/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/audit/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/alerts/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/testservice/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/logging/**").hasAnyRole(ADMIN_ROLES)
+                .antMatchers("/rest/**").hasAnyRole(ALL_ROLES)
                 .and()
                 .jee().authenticatedUserDetailsService(ecasUserDetailsService)
                 .and()

@@ -20,6 +20,7 @@ import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {AuthExternalProviderGuard} from './guards/auth-external-provider.guard';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
+import {LogoutAuthExtProviderComponent} from "./logout/logout.components";
 
 const appRoutes: Routes = [
   {
@@ -80,7 +81,7 @@ const appRoutes: Routes = [
     canDeactivate: [DirtyGuard]
   },
   {path: 'errorlog', component: ErrorLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
-  {path: 'login', component: LoginComponent},
+  {path: 'login', component: LoginComponent, canActivate: [AuthExternalProviderGuard]},
   {path: 'audit', component: AuditComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'alerts', component: AlertsComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
   {path: 'testservice', component: TestServiceComponent, canActivate: [AuthenticatedGuard, AuthorizedAdminGuard, DefaultPasswordGuard]},
@@ -93,6 +94,7 @@ const appRoutes: Routes = [
       isDomainIndependent: true
     }
   },
+  {path: 'logout', component: LogoutAuthExtProviderComponent},
   {path: '**', component: MessageLogComponent, canActivate: [AuthenticatedGuard, DefaultPasswordGuard]},
 
 ];

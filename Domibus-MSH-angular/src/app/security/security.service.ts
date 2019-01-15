@@ -81,22 +81,7 @@ export class SecurityService {
 
   getCurrentUser(): User {
     const storedUser = localStorage.getItem('currentUser');
-
-    if (!storedUser) {
-      //try to get it from server once - ECAS
-      this.getCurrentUserFromServer()
-        .subscribe((user: User) => {
-          console.log('getCurrentUser: getCurrentUserFromServer [' + user + ']');
-          this.updateCurrentUser(user);
-          this.domainService.setAppTitle();
-          return user;
-        }, (user: User) => {
-          console.log('getCurrentUserFromServer error' + user);
-        });
-    } else {
-      console.log('getCurrentUser: localStorage: ' + JSON.parse(storedUser));
-      return JSON.parse(storedUser);
-    }
+    return storedUser ? JSON.parse(storedUser) : null;
   }
 
   updateCurrentUser(user: User): void {
@@ -115,7 +100,7 @@ export class SecurityService {
     return subject.asObservable();
   }
 
-  private getCurrentUserFromServer(): Observable<User> {
+  getCurrentUserFromServer(): Observable<User> {
     const subject = new ReplaySubject();
     this.http.get('rest/security/user')
       .subscribe((res: Response) => {
@@ -156,7 +141,7 @@ export class SecurityService {
   }
 
   isUserFromExternalAuthProvider(): boolean {
-    return this.getCurrentUser().externalAuthProvider;
+    return this.getCurrentUser() ? this.getCurrentUser().externalAuthProvider : false;
   }
 
   isCurrentUserInRole(roles: Array<string>): boolean {

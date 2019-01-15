@@ -34,7 +34,23 @@
         <web-resource-collection>
             <web-resource-name>Domibus</web-resource-name>
             <description>Require users to authenticate</description>
-            <url-pattern>/*</url-pattern>
+            <url-pattern>/index.html</url-pattern>
+            <url-pattern>/pmode-current</url-pattern>
+            <url-pattern>/pmode-archive</url-pattern>
+            <url-pattern>/pmode-party</url-pattern>
+            <url-pattern>/jms</url-pattern>
+            <url-pattern>/messagefilter</url-pattern>
+            <url-pattern>/truststore</url-pattern>
+            <url-pattern>/messagelog</url-pattern>
+            <url-pattern>/user</url-pattern>
+            <url-pattern>/pluginuser</url-pattern>
+            <url-pattern>/errorlog</url-pattern>
+            <url-pattern>/audit</url-pattern>
+            <url-pattern>/alerts</url-pattern>
+            <url-pattern>/errorlog</url-pattern>
+            <url-pattern>/testservice</url-pattern>
+            <url-pattern>/changePassword</url-pattern>
+            <url-pattern>/logging</url-pattern>
             <http-method-omission>OPTIONS</http-method-omission>
         </web-resource-collection>
         <auth-constraint>
@@ -46,4 +62,9 @@
             <transport-guarantee>NONE</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
+
+    <welcome-file-list>
+        <welcome-file>index2.html</welcome-file>
+    </welcome-file-list>
+
 </web-app>

@@ -6,6 +6,7 @@ import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
 import {HttpEventService} from './http/http.event.service';
+import {User} from "./security/user";
 
 @Component({
   selector: 'app-root',
@@ -60,6 +61,31 @@ export class AppComponent implements OnInit {
         }
       }
     });
+
+    //first time redirect from auth external provider
+    if (this.isAuthExternalProviderEnabled()) {
+      console.log('auth external provider = true: ');
+
+      //get the user from server and write it in local storage
+      this.securityService.getCurrentUserFromServer()
+        .subscribe((user: User) => {
+          if (user) {
+            this.securityService.updateCurrentUser(user);
+            this.domainService.setAppTitle();
+          }
+        }, (user: User) => {
+          console.log('getCurrentUserFromServer error' + user);
+          return user;
+        });
+    }
+
+
+  }
+
+  isAuthExternalProviderEnabled(): boolean {
+    let params = new URLSearchParams(window.location.search);
+    let ticketParam = params.get('ticket');
+    return ticketParam ? ticketParam.indexOf("ST") >= 0 : false;
   }
 
   isAdmin (): boolean {
@@ -82,11 +108,22 @@ export class AppComponent implements OnInit {
 
   logout (event: Event): void {
     event.preventDefault();
-    this.router.navigate(['/login'], {queryParams: {force: true}}).then((ok) => {
-      if (ok) {
-        this.securityService.logout();
-      }
-    })
+    if (this.isUserFromExternalAuthProvider()) {
+      console.log('going to logout from external auth provider');
+      this.router.navigate(['/logout']).then((ok) => {
+
+        if (ok) {
+          this.securityService.logout();
+        }
+      })
+    } else {
+      this.router.navigate(['/login'], {queryParams: {force: true}}).then((ok) => {
+        if (ok) {
+          this.securityService.logout();
+        }
+      })
+    }
+
   }
 
   toggleMenu () {
