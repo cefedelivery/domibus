@@ -350,12 +350,9 @@ export class AlertsComponent implements OnInit {
         return;
       }
 
+      // todo: add dynamic params for csv filtering, if requested
       DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + '?' + this.createStaticSearchParams().toString());
     }
-  }
-
-  public isAlertTypeDefined(): boolean {
-    return !isNullOrUndefined(this.filter.alertType) && this.filter.alertType != '';
   }
 
   cancel() {
