@@ -13,6 +13,7 @@ import {AlertComponent} from '../alert/alert.component';
 import {isNullOrUndefined} from 'util';
 import {DatatableComponent} from '@swimlane/ngx-datatable';
 import {DomibusInfoService} from '../appinfo/domibusinfo.service';
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 @Component({
   moduleId: module.id,
@@ -21,7 +22,7 @@ import {DomibusInfoService} from '../appinfo/domibusinfo.service';
   styleUrls: ['./messagelog.component.css']
 })
 
-export class MessageLogComponent implements OnInit {
+export class MessageLogComponent extends FilteredListComponent implements OnInit {
 
   static readonly RESEND_URL: string = 'rest/message/restore?messageId=${messageId}';
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/download?messageId=${messageId}';
@@ -42,8 +43,6 @@ export class MessageLogComponent implements OnInit {
   timestampToMinDate: Date;
   timestampToMaxDate: Date;
 
-  filter: any;
-  activeFilter: any;
   loading: boolean;
   rows: any[];
   count: number;
@@ -63,9 +62,12 @@ export class MessageLogComponent implements OnInit {
 
   constructor(private http: Http, private alertService: AlertService, private domibusInfoService: DomibusInfoService,
               public dialog: MdDialog, private elementRef: ElementRef) {
+    super();
   }
 
   async ngOnInit() {
+    super.ngOnInit();
+
     this.columnPicker = new ColumnPickerBase();
     this.rowLimiter = new RowLimiterBase();
 
@@ -75,7 +77,7 @@ export class MessageLogComponent implements OnInit {
     this.timestampToMinDate = null;
     this.timestampToMaxDate = new Date();
 
-    this.filter = {};
+    // this.filter = {};
     this.loading = false;
     this.rows = [];
     this.count = 0;
@@ -275,11 +277,6 @@ export class MessageLogComponent implements OnInit {
       );
   }
 
-  resetFilters() {
-    this.filter = {};
-    Object.assign(this.filter, this.activeFilter);
-  }
-
   page(offset, pageSize) {
     this.loading = true;
     this.resetFilters();
@@ -347,13 +344,6 @@ export class MessageLogComponent implements OnInit {
     console.log('Searching using filter:' + this.filter);
     this.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
-  }
-
-  private setActiveFilter() {
-    if (!this.activeFilter) {
-      this.activeFilter = {};
-    }
-    Object.assign(this.activeFilter, this.filter);
   }
 
   resendDialog() {

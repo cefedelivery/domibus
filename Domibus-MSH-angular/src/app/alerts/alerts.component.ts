@@ -12,6 +12,7 @@ import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.compo
 import {MdDialog} from '@angular/material';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
 import {SecurityService} from '../security/security.service';
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 @Component({
   moduleId: module.id,
@@ -19,7 +20,7 @@ import {SecurityService} from '../security/security.service';
   providers: []
 })
 
-export class AlertsComponent implements OnInit {
+export class AlertsComponent extends FilteredListComponent implements OnInit {
 
   @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
@@ -52,8 +53,6 @@ export class AlertsComponent implements OnInit {
 
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
 
-  filter: any;
-  activeFilter: any;
   dynamicFilters = [];
 
   dynamicDatesFilter: any = {};
@@ -73,6 +72,8 @@ export class AlertsComponent implements OnInit {
   displayDomainCheckBox: boolean = false;
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, private securityService: SecurityService) {
+    super();
+
     this.getAlertTypes();
     this.getAlertLevels();
     this.getAlertStatuses();
@@ -222,11 +223,6 @@ export class AlertsComponent implements OnInit {
     return searchParams;
   }
 
-  resetFilters() {
-    this.filter = {};
-    Object.assign(this.filter, this.activeFilter);
-  }
-
   page(offset, pageSize, orderBy, asc) {
     this.loading = true;
     this.resetFilters();
@@ -260,13 +256,6 @@ export class AlertsComponent implements OnInit {
     console.log('Searching using filter:' + this.filter);
     this.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
-  }
-
-  private setActiveFilter() {
-    if (!this.activeFilter) {
-      this.activeFilter = {};
-    }
-    Object.assign(this.activeFilter, this.filter);
   }
 
   toggleAdvancedSearch() {

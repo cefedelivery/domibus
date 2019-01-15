@@ -1,12 +1,13 @@
-import {Component, OnInit, TemplateRef, ViewChild} from "@angular/core";
-import {AuditService} from "./audit.service";
-import {UserService} from "../user/user.service";
-import {AlertService} from "../alert/alert.service";
-import {AuditCriteria, AuditResponseRo} from "./audit";
-import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
-import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
-import {Observable} from "rxjs/Observable";
-import {AlertComponent} from "../alert/alert.component";
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
+import {AuditService} from './audit.service';
+import {UserService} from '../user/user.service';
+import {AlertService} from '../alert/alert.service';
+import {AuditCriteria, AuditResponseRo} from './audit';
+import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
+import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
+import {Observable} from 'rxjs/Observable';
+import {AlertComponent} from '../alert/alert.component';
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 /**
  * @author Thomas Dussart
@@ -21,7 +22,7 @@ import {AlertComponent} from "../alert/alert.component";
   templateUrl: './audit.component.html',
   styleUrls: ['./audit.component.css']
 })
-export class AuditComponent implements OnInit {
+export class AuditComponent extends FilteredListComponent implements OnInit {
 
 //--- Search components binding ---
   existingAuditTargets = [];
@@ -47,10 +48,11 @@ export class AuditComponent implements OnInit {
   advancedSearch: boolean;
 
   constructor(private auditService: AuditService, private userService: UserService, private alertService: AlertService) {
-
+    super();
   }
 
   ngOnInit() {
+    super.ngOnInit();
 
 //--- lets init the component's data ---
     this.existingUsers = [];
@@ -73,6 +75,8 @@ export class AuditComponent implements OnInit {
   }
 
   searchAndCount() {
+    this.setActiveFilter();
+
     this.loading = true;
     this.offset = 0;
     let auditCriteria: AuditCriteria = this.buildCriteria();
@@ -83,14 +87,14 @@ export class AuditComponent implements OnInit {
         this.loading = false;
       },
       error => {
-        this.alertService.error("Could not load audits " + error);
+        this.alertService.error('Could not load audits ' + error);
         this.loading = false;
       },
       //on complete of auditLogsObservable Observable, we load the count
       //TODO load this in parrallel and merge the stream at the end.
       () => auditCountOservable.subscribe(auditCount => this.count = auditCount,
         error => {
-          this.alertService.error("Could not count audits " + error);
+          this.alertService.error('Could not count audits ' + error);
           this.loading = false;
         })
     );
@@ -98,13 +102,13 @@ export class AuditComponent implements OnInit {
 
   toggleAdvancedSearch() {
     this.advancedSearch = !this.advancedSearch;
-    return false;//to prevent default navigation
+    return false; // to prevent default navigation
   }
 
   searchAuditLog() {
     this.loading = true;
-    let auditCriteria: AuditCriteria = this.buildCriteria();
-    let auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
+    const auditCriteria: AuditCriteria = this.buildCriteria();
+    const auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
     auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
       this.rows = response;
       this.loading = false;
@@ -112,24 +116,30 @@ export class AuditComponent implements OnInit {
   }
 
   onPage(event) {
-    console.log('Page Event', event);
+    this.resetFilters();
+
     this.offset = event.offset;
     this.searchAuditLog();
   }
 
   buildCriteria(): AuditCriteria {
-    let auditCriteria: AuditCriteria = new AuditCriteria();
-    auditCriteria.auditTargetName = this.auditTarget;
-    auditCriteria.user = this.users;
-    auditCriteria.action = this.actions;
-    auditCriteria.from = this.from;
-    auditCriteria.to = this.to;
+    const auditCriteria: AuditCriteria = new AuditCriteria();
+
+    auditCriteria.auditTargetName = this.activeFilter.auditTarget;
+    auditCriteria.user = this.activeFilter.users;
+    auditCriteria.action = this.activeFilter.actions;
+    auditCriteria.from = this.activeFilter.from;
+    auditCriteria.to = this.activeFilter.to;
+
     auditCriteria.start = this.offset * this.rowLimiter.pageSize;
     auditCriteria.max = this.rowLimiter.pageSize;
+
     return auditCriteria;
   }
 
   changePageSize(newPageLimit: number) {
+    this.resetFilters();
+
     this.offset = 0;
     this.rowLimiter.pageSize = newPageLimit;
     this.searchAuditLog();
@@ -165,18 +175,18 @@ export class AuditComponent implements OnInit {
       },
       {
         name: 'Id',
-        prop: "id",
+        prop: 'id',
         width: 300,
         sortable: false
       }
     ];
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
-      return ["Table", "User", "Action", 'Changed', 'Id'].indexOf(col.name) != -1
+      return ['Table', 'User', 'Action', 'Changed', 'Id'].indexOf(col.name) != -1
     })
   }
 
   saveAsCSV() {
-    if(this.rows.length > AlertComponent.MAX_COUNT_CSV) {
+    if (this.rows.length > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
     }
