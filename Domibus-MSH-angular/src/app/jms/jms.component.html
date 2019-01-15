@@ -12,7 +12,7 @@
         </md-select>
         <md2-datepicker id="jmsFromDatePicker" appClearInvalid
                         placeholder="Received From:"
-                        [(ngModel)]="request.fromDate"
+                        [(ngModel)]="filter.fromDate"
                         name="receivedFrom"
                         [type]="'datetime'"
                         [max]="timestampFromMaxDate"
@@ -21,7 +21,7 @@
         </md2-datepicker>
         <md2-datepicker id="jmsToDatePicker" appClearInvalid
                         placeholder="Received Up To:"
-                        [(ngModel)]="request.toDate"
+                        [(ngModel)]="filter.toDate"
                         name="receivedTo"
                         [min]="timestampToMinDate"
                         [max]="timestampToMaxDate"
@@ -31,11 +31,11 @@
         </md2-datepicker>
 
         <md-input-container id="jmsSelector">
-          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="request.selector">
+          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="filter.selector">
         </md-input-container>
 
         <md-input-container id="jmsType">
-          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="request.jmsType">
+          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="filter.jmsType">
         </md-input-container>
 
         <div class="searchArea">
@@ -80,9 +80,12 @@
     [selectionType]="'multi'"
     [selected]="selectedMessages"
     [limit]="rowLimiter.pageSize"
+    [offset]="offset"
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+    (select)="onSelect($event)"
+    (page)="onPage()"
+  >
   </ngx-datatable>
 
   <ng-template #rowWithJSONTpl let-row="row" let-value="value" ngx-datatable-cell-template>

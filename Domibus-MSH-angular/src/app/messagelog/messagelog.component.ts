@@ -77,7 +77,6 @@ export class MessageLogComponent extends FilteredListComponent implements OnInit
     this.timestampToMinDate = null;
     this.timestampToMaxDate = new Date();
 
-    // this.filter = {};
     this.loading = false;
     this.rows = [];
     this.count = 0;

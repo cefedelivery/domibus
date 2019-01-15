@@ -13,13 +13,14 @@ import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {Observable} from 'rxjs/Observable';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 @Component({
   selector: 'app-jms',
   templateUrl: './jms.component.html',
   styleUrls: ['./jms.component.css']
 })
-export class JmsComponent implements OnInit, DirtyOperations {
+export class JmsComponent extends FilteredListComponent implements OnInit, DirtyOperations {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
@@ -48,24 +49,27 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   rows: Array<any>;
   request: MessagesRequestRO;
-  private headers = new Headers({'Content-Type': 'application/json'});
 
   private _selectedSource: any;
+  offset: any;
+
   get selectedSource(): any {
     return this._selectedSource;
   }
 
   set selectedSource(value: any) {
     this._selectedSource = value;
-    this.request.source = value.name;
+    this.filter.source = value.name;
     this.defaultQueueSet.emit();
   }
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
-    this.request = new MessagesRequestRO();
+    super();
+    this.filter = new MessagesRequestRO();
   }
 
   ngOnInit() {
+    this.offset = 0;
     this.timestampFromMaxDate = new Date();
     this.timestampToMinDate = null;
     this.timestampToMaxDate = new Date();
@@ -123,8 +127,8 @@ export class JmsComponent implements OnInit, DirtyOperations {
     });
 
     // set toDate equals to now
-    this.request.toDate = new Date();
-    this.request.toDate.setHours(23, 59, 59, 999);
+    this.filter.toDate = new Date();
+    this.filter.toDate.setHours(23, 59, 59, 999);
 
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];
@@ -194,7 +198,20 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   changePageSize(newPageSize: number) {
     this.rowLimiter.pageSize = newPageSize;
-    this.search();
+    this.refresh();
+  }
+
+  refresh() {
+    // ugly but the grid does not feel the paging changes otherwise
+    this.loading = true;
+    const rows = this.rows;
+    this.rows = [];
+
+    setTimeout(() => {
+      this.rows = rows;
+      this.selectedMessages.length = 0;
+      this.loading = false;
+    }, 50);
   }
 
   onSelect({selected}) {
@@ -217,11 +234,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
   }
 
   canSearch() {
-    return this.request.source && !this.loading;
+    return this.filter.source && !this.loading;
   }
 
   search() {
-    if (!this.request.source) {
+    if (!this.filter.source) {
       this.alertService.error('Source should be set');
       return;
     }
@@ -230,18 +247,21 @@ export class JmsComponent implements OnInit, DirtyOperations {
     }
 
     this.loading = true;
+    this.setActiveFilter();
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];
     this.currentSearchSelectedSource = this.selectedSource;
     this.http.post('rest/jms/messages', {
-      source: this.request.source,
-      jmsType: this.request.jmsType,
-      fromDate: !isNullOrUndefined(this.request.fromDate) ? this.request.fromDate.getTime() : undefined,
-      toDate: !isNullOrUndefined(this.request.toDate) ? this.request.toDate.getTime() : undefined,
-      selector: this.request.selector,
-    }, {headers: this.headers}).subscribe(
+      source: this.activeFilter.source,
+      jmsType: this.activeFilter.jmsType,
+      fromDate: !isNullOrUndefined(this.activeFilter.fromDate) ? this.activeFilter.fromDate.getTime() : undefined,
+      toDate: !isNullOrUndefined(this.activeFilter.toDate) ? this.activeFilter.toDate.getTime() : undefined,
+      selector: this.activeFilter.selector,
+    }).subscribe(
       (response: Response) => {
         this.rows = response.json().messages;
+        this.offset = 0;
+        this.refresh();
         this.loading = false;
 
         this.refreshDestinations();
@@ -390,7 +410,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       destination: destination,
       selectedMessages: messageIds,
       action: 'MOVE'
-    }, {headers: this.headers}).subscribe(
+    }).subscribe(
       () => {
         this.alertService.success('The operation \'move messages\' completed successfully.');
 
@@ -417,7 +437,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
       source: source,
       selectedMessages: messageIds,
       action: 'REMOVE'
-    }, {headers: this.headers}).subscribe(
+    }).subscribe(
       () => {
         this.alertService.success('The operation \'updates on message(s)\' completed successfully.');
         this.refreshDestinations();
@@ -431,26 +451,26 @@ export class JmsComponent implements OnInit, DirtyOperations {
 
   getFilterPath() {
     let result = '?';
-    if (!isNullOrUndefined(this.request.source)) {
-      result += 'source=' + this.request.source + '&';
+    if (!isNullOrUndefined(this.filter.source)) {
+      result += 'source=' + this.filter.source + '&';
     }
-    if (!isNullOrUndefined(this.request.jmsType)) {
-      result += 'jmsType=' + this.request.jmsType + '&';
+    if (!isNullOrUndefined(this.filter.jmsType)) {
+      result += 'jmsType=' + this.filter.jmsType + '&';
     }
-    if (!isNullOrUndefined(this.request.fromDate)) {
-      result += 'fromDate=' + this.request.fromDate.getTime() + '&';
+    if (!isNullOrUndefined(this.filter.fromDate)) {
+      result += 'fromDate=' + this.filter.fromDate.getTime() + '&';
     }
-    if (!isNullOrUndefined(this.request.toDate)) {
-      result += 'toDate=' + this.request.toDate.getTime() + '&';
+    if (!isNullOrUndefined(this.filter.toDate)) {
+      result += 'toDate=' + this.filter.toDate.getTime() + '&';
     }
-    if (!isNullOrUndefined(this.request.selector)) {
-      result += 'selector=' + this.request.selector + '&';
+    if (!isNullOrUndefined(this.filter.selector)) {
+      result += 'selector=' + this.filter.selector + '&';
     }
     return result;
   }
 
   saveAsCSV() {
-    if (!this.request.source) {
+    if (!this.filter.source) {
       this.alertService.error('Source should be set');
       return;
     }
@@ -466,4 +486,7 @@ export class JmsComponent implements OnInit, DirtyOperations {
     return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
 
+  onPage() {
+    this.resetFilters();
+  }
 }
