@@ -43,6 +43,7 @@ export class MessageLogComponent implements OnInit {
   timestampToMaxDate: Date;
 
   filter: any;
+  appliedFilter: any;
   loading: boolean;
   rows: any[];
   count: number;
@@ -75,6 +76,7 @@ export class MessageLogComponent implements OnInit {
     this.timestampToMaxDate = new Date();
 
     this.filter = {};
+    this.appliedFilter = [];
     this.loading = false;
     this.rows = [];
     this.count = 0;
@@ -85,7 +87,12 @@ export class MessageLogComponent implements OnInit {
     this.messageResent = new EventEmitter(false);
 
     this.fourCornerEnabled = await this.domibusInfoService.isFourCornerEnabled();
+    this.configureColumnPicker();
 
+    this.search();
+  }
+
+  private configureColumnPicker() {
     this.columnPicker.allColumns.push(
       {
         name: 'Message Id',
@@ -180,8 +187,6 @@ export class MessageLogComponent implements OnInit {
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ['Message Id', 'From Party Id', 'To Party Id', 'Message Status', 'Received', 'AP Role', 'Message Type', 'Actions'].indexOf(col.name) != -1
     });
-
-    this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   public beforeDomainChange() {
@@ -200,67 +205,66 @@ export class MessageLogComponent implements OnInit {
       searchParams.set('asc', this.asc.toString());
     }
 
-    if (this.filter.messageId) {
-      searchParams.set('messageId', this.filter.messageId);
+    if (this.appliedFilter.messageId) {
+      searchParams.set('messageId', this.appliedFilter.messageId);
     }
 
-    if (this.filter.mshRole) {
-      searchParams.set('mshRole', this.filter.mshRole);
+    if (this.appliedFilter.mshRole) {
+      searchParams.set('mshRole', this.appliedFilter.mshRole);
     }
 
-    if (this.filter.conversationId) {
-      searchParams.set('conversationId', this.filter.conversationId);
+    if (this.appliedFilter.conversationId) {
+      searchParams.set('conversationId', this.appliedFilter.conversationId);
     }
 
-    if (this.filter.messageType) {
-      searchParams.set('messageType', this.filter.messageType);
+    if (this.appliedFilter.messageType) {
+      searchParams.set('messageType', this.appliedFilter.messageType);
     }
 
-    if (this.filter.messageStatus) {
-      searchParams.set('messageStatus', this.filter.messageStatus);
+    if (this.appliedFilter.messageStatus) {
+      searchParams.set('messageStatus', this.appliedFilter.messageStatus);
     }
 
-    if (this.filter.notificationStatus) {
-      searchParams.set('notificationStatus', this.filter.notificationStatus);
+    if (this.appliedFilter.notificationStatus) {
+      searchParams.set('notificationStatus', this.appliedFilter.notificationStatus);
     }
 
-    if (this.filter.fromPartyId) {
-      searchParams.set('fromPartyId', this.filter.fromPartyId);
+    if (this.appliedFilter.fromPartyId) {
+      searchParams.set('fromPartyId', this.appliedFilter.fromPartyId);
     }
 
-    if (this.filter.toPartyId) {
-      searchParams.set('toPartyId', this.filter.toPartyId);
+    if (this.appliedFilter.toPartyId) {
+      searchParams.set('toPartyId', this.appliedFilter.toPartyId);
     }
 
-    if (this.filter.originalSender) {
-      searchParams.set('originalSender', this.filter.originalSender);
+    if (this.appliedFilter.originalSender) {
+      searchParams.set('originalSender', this.appliedFilter.originalSender);
     }
 
-    if (this.filter.finalRecipient) {
-      searchParams.set('finalRecipient', this.filter.finalRecipient);
+    if (this.appliedFilter.finalRecipient) {
+      searchParams.set('finalRecipient', this.appliedFilter.finalRecipient);
     }
 
-    if (this.filter.refToMessageId) {
-      searchParams.set('refToMessageId', this.filter.refToMessageId);
+    if (this.appliedFilter.refToMessageId) {
+      searchParams.set('refToMessageId', this.appliedFilter.refToMessageId);
     }
 
-    if (this.filter.receivedFrom) {
-      searchParams.set('receivedFrom', this.filter.receivedFrom.getTime());
+    if (this.appliedFilter.receivedFrom) {
+      searchParams.set('receivedFrom', this.appliedFilter.receivedFrom.getTime());
     }
 
-    if (this.filter.receivedTo) {
-      searchParams.set('receivedTo', this.filter.receivedTo.getTime());
+    if (this.appliedFilter.receivedTo) {
+      searchParams.set('receivedTo', this.appliedFilter.receivedTo.getTime());
     }
 
-    if (this.filter.isTestMessage) {
-      searchParams.set('messageSubtype', this.filter.isTestMessage ? 'TEST' : null)
+    if (this.appliedFilter.isTestMessage) {
+      searchParams.set('messageSubtype', this.appliedFilter.isTestMessage ? 'TEST' : null)
     }
 
     return searchParams;
   }
 
   getMessageLogEntries(offset: number, pageSize: number): Observable<MessageLogResult> {
-
     const searchParams = this.createSearchParams();
 
     searchParams.set('page', offset.toString());
@@ -272,11 +276,14 @@ export class MessageLogComponent implements OnInit {
       );
   }
 
+  syncFilters() {
+    Object.assign(this.filter, this.appliedFilter);
+  }
+
   page(offset, pageSize) {
     this.loading = true;
-
+    this.syncFilters();
     this.getMessageLogEntries(offset, pageSize).subscribe((result: MessageLogResult) => {
-      // console.log('messageLog response:' + result);
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
       this.count = result.count;
@@ -299,14 +306,14 @@ export class MessageLogComponent implements OnInit {
       if (result.filter.receivedTo != null) {
         result.filter.receivedTo = new Date(result.filter.receivedTo);
       }
-
       result.filter.isTestMessage = !isNullOrUndefined(result.filter.messageSubtype);
-
       this.filter = result.filter;
+
       this.mshRoles = result.mshRoles;
       this.msgTypes = result.msgTypes;
       this.msgStatus = result.msgStatus;
       this.notifStatus = result.notifStatus;
+
       this.loading = false;
     }, (error: any) => {
       console.log('error getting the message log:' + error);
@@ -331,20 +338,18 @@ export class MessageLogComponent implements OnInit {
   }
 
   onActivate(event) {
-    // console.log('Activate Event', event);
-
     if ('dblclick' === event.type) {
       this.details(event.row);
     }
   }
 
   changePageSize(newPageLimit: number) {
-    console.log('New page limit:', newPageLimit);
     this.page(0, newPageLimit);
   }
 
   search() {
     console.log('Searching using filter:' + this.filter);
+    Object.assign(this.appliedFilter, this.filter);
     this.page(0, this.rowLimiter.pageSize);
   }
 
