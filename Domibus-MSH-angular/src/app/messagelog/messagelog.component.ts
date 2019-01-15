@@ -43,7 +43,7 @@ export class MessageLogComponent implements OnInit {
   timestampToMaxDate: Date;
 
   filter: any;
-  appliedFilter: any;
+  activeFilter: any;
   loading: boolean;
   rows: any[];
   count: number;
@@ -76,7 +76,7 @@ export class MessageLogComponent implements OnInit {
     this.timestampToMaxDate = new Date();
 
     this.filter = {};
-    this.appliedFilter = [];
+    this.activeFilter = [];
     this.loading = false;
     this.rows = [];
     this.count = 0;
@@ -205,60 +205,60 @@ export class MessageLogComponent implements OnInit {
       searchParams.set('asc', this.asc.toString());
     }
 
-    if (this.appliedFilter.messageId) {
-      searchParams.set('messageId', this.appliedFilter.messageId);
+    if (this.activeFilter.messageId) {
+      searchParams.set('messageId', this.activeFilter.messageId);
     }
 
-    if (this.appliedFilter.mshRole) {
-      searchParams.set('mshRole', this.appliedFilter.mshRole);
+    if (this.activeFilter.mshRole) {
+      searchParams.set('mshRole', this.activeFilter.mshRole);
     }
 
-    if (this.appliedFilter.conversationId) {
-      searchParams.set('conversationId', this.appliedFilter.conversationId);
+    if (this.activeFilter.conversationId) {
+      searchParams.set('conversationId', this.activeFilter.conversationId);
     }
 
-    if (this.appliedFilter.messageType) {
-      searchParams.set('messageType', this.appliedFilter.messageType);
+    if (this.activeFilter.messageType) {
+      searchParams.set('messageType', this.activeFilter.messageType);
     }
 
-    if (this.appliedFilter.messageStatus) {
-      searchParams.set('messageStatus', this.appliedFilter.messageStatus);
+    if (this.activeFilter.messageStatus) {
+      searchParams.set('messageStatus', this.activeFilter.messageStatus);
     }
 
-    if (this.appliedFilter.notificationStatus) {
-      searchParams.set('notificationStatus', this.appliedFilter.notificationStatus);
+    if (this.activeFilter.notificationStatus) {
+      searchParams.set('notificationStatus', this.activeFilter.notificationStatus);
     }
 
-    if (this.appliedFilter.fromPartyId) {
-      searchParams.set('fromPartyId', this.appliedFilter.fromPartyId);
+    if (this.activeFilter.fromPartyId) {
+      searchParams.set('fromPartyId', this.activeFilter.fromPartyId);
     }
 
-    if (this.appliedFilter.toPartyId) {
-      searchParams.set('toPartyId', this.appliedFilter.toPartyId);
+    if (this.activeFilter.toPartyId) {
+      searchParams.set('toPartyId', this.activeFilter.toPartyId);
     }
 
-    if (this.appliedFilter.originalSender) {
-      searchParams.set('originalSender', this.appliedFilter.originalSender);
+    if (this.activeFilter.originalSender) {
+      searchParams.set('originalSender', this.activeFilter.originalSender);
     }
 
-    if (this.appliedFilter.finalRecipient) {
-      searchParams.set('finalRecipient', this.appliedFilter.finalRecipient);
+    if (this.activeFilter.finalRecipient) {
+      searchParams.set('finalRecipient', this.activeFilter.finalRecipient);
     }
 
-    if (this.appliedFilter.refToMessageId) {
-      searchParams.set('refToMessageId', this.appliedFilter.refToMessageId);
+    if (this.activeFilter.refToMessageId) {
+      searchParams.set('refToMessageId', this.activeFilter.refToMessageId);
     }
 
-    if (this.appliedFilter.receivedFrom) {
-      searchParams.set('receivedFrom', this.appliedFilter.receivedFrom.getTime());
+    if (this.activeFilter.receivedFrom) {
+      searchParams.set('receivedFrom', this.activeFilter.receivedFrom.getTime());
     }
 
-    if (this.appliedFilter.receivedTo) {
-      searchParams.set('receivedTo', this.appliedFilter.receivedTo.getTime());
+    if (this.activeFilter.receivedTo) {
+      searchParams.set('receivedTo', this.activeFilter.receivedTo.getTime());
     }
 
-    if (this.appliedFilter.isTestMessage) {
-      searchParams.set('messageSubtype', this.appliedFilter.isTestMessage ? 'TEST' : null)
+    if (this.activeFilter.isTestMessage) {
+      searchParams.set('messageSubtype', this.activeFilter.isTestMessage ? 'TEST' : null)
     }
 
     return searchParams;
@@ -277,7 +277,7 @@ export class MessageLogComponent implements OnInit {
   }
 
   syncFilters() {
-    Object.assign(this.filter, this.appliedFilter);
+    Object.assign(this.filter, this.activeFilter);
   }
 
   page(offset, pageSize) {
@@ -333,10 +333,6 @@ export class MessageLogComponent implements OnInit {
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
-  onSelect({selected}) {
-    // console.log('Select Event', selected, this.selected);
-  }
-
   onActivate(event) {
     if ('dblclick' === event.type) {
       this.details(event.row);
@@ -349,7 +345,7 @@ export class MessageLogComponent implements OnInit {
 
   search() {
     console.log('Searching using filter:' + this.filter);
-    Object.assign(this.appliedFilter, this.filter);
+    Object.assign(this.activeFilter, this.filter);
     this.page(0, this.rowLimiter.pageSize);
   }
 
