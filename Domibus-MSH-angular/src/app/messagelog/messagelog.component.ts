@@ -276,6 +276,7 @@ export class MessageLogComponent implements OnInit {
   }
 
   resetFilters() {
+    this.filter = {};
     Object.assign(this.filter, this.activeFilter);
   }
 

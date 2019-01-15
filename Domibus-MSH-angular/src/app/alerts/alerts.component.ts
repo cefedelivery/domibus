@@ -133,10 +133,53 @@ export class AlertsComponent implements OnInit {
   }
 
   getAlertsEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<AlertsResult> {
-    let searchParams: URLSearchParams = new URLSearchParams();
+    const searchParams = this.createSearchParams();
+
     searchParams.set('page', offset.toString());
     searchParams.set('pageSize', pageSize.toString());
-    searchParams.set('orderBy', orderBy);
+
+    return this.http.get(AlertsComponent.ALERTS_URL, {
+      search: searchParams
+    }).map((response: Response) =>
+      response.json()
+    );
+  }
+
+  private createSearchParams() {
+    const searchParams = this.createStaticSearchParams();
+
+    if (this.dynamicFilters.length > 0) {
+      let d: string[] = [];
+      for (let i = 0; i < this.dynamicFilters.length; i++) {
+        d[i] = '';
+      }
+      for (let filter in this.dynamicFilters) {
+        d[filter] = this.dynamicFilters[filter];
+      }
+      searchParams.set('parameters', d.toString());
+    }
+
+    if (this.alertTypeWithDate) {
+      const from = this.dynamicDatesFilter.from;
+      if (from) {
+        searchParams.set('dynamicFrom', from.getTime());
+      }
+
+      const to = this.dynamicDatesFilter.to;
+      if (to) {
+        searchParams.set('dynamicTo', to.getTime());
+      }
+    }
+    return searchParams;
+  }
+
+  private createStaticSearchParams() {
+    const searchParams: URLSearchParams = new URLSearchParams();
+
+    searchParams.set('orderBy', this.orderBy);
+    if (this.asc != null) {
+      searchParams.set('asc', this.asc.toString());
+    }
 
     // filters
     if (this.activeFilter.processed) {
@@ -176,41 +219,11 @@ export class AlertsComponent implements OnInit {
     }
 
     searchParams.set('domainAlerts', this.activeFilter.domainAlerts);
-    if (this.dynamicFilters.length > 0) {
-      let d: string[] = [];
-      for (let i = 0; i < this.dynamicFilters.length; i++) {
-        d[i] = '';
-      }
-      for (let filter in this.dynamicFilters) {
-        d[filter] = this.dynamicFilters[filter];
-      }
-      searchParams.set('parameters', d.toString());
-    }
-
-    if (this.alertTypeWithDate) {
-      const from = this.dynamicDatesFilter.from;
-      if (from) {
-        searchParams.set('dynamicFrom', from.getTime());
-      }
-
-      const to = this.dynamicDatesFilter.to;
-      if (to) {
-        searchParams.set('dynamicTo', to.getTime());
-      }
-    }
-
-    if (asc != null) {
-      searchParams.set('asc', asc.toString());
-    }
-
-    return this.http.get(AlertsComponent.ALERTS_URL, {
-      search: searchParams
-    }).map((response: Response) =>
-      response.json()
-    );
+    return searchParams;
   }
 
   resetFilters() {
+    this.filter = {};
     Object.assign(this.filter, this.activeFilter);
   }
 
@@ -262,10 +275,9 @@ export class AlertsComponent implements OnInit {
   }
 
   getAlertParameters(alertType: string): Observable<Array<string>> {
-    let searchParams: URLSearchParams = new URLSearchParams();
+    const searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('alertType', alertType);
     return this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams}).map(this.extractData);
-
   }
 
   onAlertTypeChanged(alertType: string) {
@@ -273,7 +285,7 @@ export class AlertsComponent implements OnInit {
     this.alertTypeWithDate = false;
     this.dynamicFilters = [];
     this.dynamicDatesFilter = [];
-    let alertParametersObservable = this.getAlertParameters(alertType).flatMap(value => value);
+    const alertParametersObservable = this.getAlertParameters(alertType).flatMap(value => value);
     const TIME_SUFFIX = '_TIME';
     const DATE_SUFFIX = '_DATE';
     let nonDateParamerters = alertParametersObservable.filter(value => {
@@ -338,50 +350,8 @@ export class AlertsComponent implements OnInit {
         return;
       }
 
-      DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + this.getFilterPath());
+      DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + '?' + this.createStaticSearchParams().toString());
     }
-  }
-
-  private getFilterPath() {
-    let result = '?';
-    //filters
-    if (this.filter.processed != null) {
-      result += 'processed=' + (this.filter.processed === 'PROCESSED') + '&';
-    }
-
-    if (this.filter.alertType) {
-      result += 'alertType=' + this.filter.alertType + '&';
-    }
-
-    if (this.filter.alertStatus) {
-      result += 'alertStatus=' + this.filter.alertStatus + '&';
-    }
-    if (this.filter.alertId) {
-      result += 'alertId=' + this.filter.alertId + '&';
-    }
-
-    if (this.filter.alertLevel) {
-      result += 'alertLevel=' + this.filter.alertLevel + '&';
-    }
-
-    if (this.filter.creationFrom) {
-      result += 'creationFrom=' + this.filter.creationFrom.getTime() + '&';
-    }
-
-    if (this.filter.creationTo) {
-      result += 'creationTo=' + this.filter.creationTo.getTime() + '&';
-    }
-
-    if (this.filter.reportingFrom) {
-      result += 'reportingFrom=' + this.filter.reportingFrom.getTime() + '&';
-    }
-
-    if (this.filter.reportingTo) {
-      result += 'reportingTo=' + this.filter.reportingTo.getTime() + '&';
-    }
-
-    return result;
-
   }
 
   public isAlertTypeDefined(): boolean {
