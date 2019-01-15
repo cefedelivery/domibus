@@ -1,4 +1,4 @@
-import {Component, TemplateRef, ViewChild} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {isNullOrUndefined} from 'util';
@@ -11,7 +11,7 @@ import {AlertService} from '../alert/alert.service';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {MdDialog} from '@angular/material';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
-import {SecurityService} from "../security/security.service";
+import {SecurityService} from '../security/security.service';
 
 @Component({
   moduleId: module.id,
@@ -19,7 +19,7 @@ import {SecurityService} from "../security/security.service";
   providers: []
 })
 
-export class AlertsComponent {
+export class AlertsComponent implements OnInit {
 
   @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
@@ -52,8 +52,8 @@ export class AlertsComponent {
 
   aProcessedValues = ['PROCESSED', 'UNPROCESSED'];
 
-  filter: any = {processed:'UNPROCESSED',domainAlerts:false};
-
+  filter: any;
+  activeFilter: any;
   dynamicFilters = [];
 
   dynamicDatesFilter: any = {};
@@ -70,44 +70,20 @@ export class AlertsComponent {
 
   dateFromName: string = '';
   dateToName: string = '';
-  displayDomainCheckBox:boolean=false;
+  displayDomainCheckBox: boolean = false;
 
-  constructor (private http: Http, private alertService: AlertService, public dialog: MdDialog,private securityService: SecurityService) {
+  constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog, private securityService: SecurityService) {
     this.getAlertTypes();
     this.getAlertLevels();
     this.getAlertStatuses();
-    if(this.securityService.isCurrentUserSuperAdmin()){
-      this.displayDomainCheckBox=true;
+    if (this.securityService.isCurrentUserSuperAdmin()) {
+      this.displayDomainCheckBox = true;
     }
   }
 
-  getAlertTypes (): void {
-    this.http.get(AlertsComponent.ALERTS_TYPES_URL)
-      .map(this.extractData)
-      .catch(err => this.alertService.handleError(err))
-      .subscribe(aTypes => this.aTypes = aTypes);
-  }
+  ngOnInit() {
+    this.filter = {processed: 'UNPROCESSED', domainAlerts: false};
 
-  getAlertStatuses (): void {
-    this.http.get(AlertsComponent.ALERTS_STATUS_URL)
-      .map(this.extractData)
-      .catch(err => this.alertService.handleError(err))
-      .subscribe(aStatuses => this.aStatuses = aStatuses);
-  }
-
-  getAlertLevels (): void {
-    this.http.get(AlertsComponent.ALERTS_LEVELS_URL)
-      .map(this.extractData)
-      .catch(err => this.alertService.handleError(err))
-      .subscribe(aLevels => this.aLevels = aLevels);
-  }
-
-  private extractData (res: Response) {
-    let body = res.json();
-    return body || {};
-  }
-
-  ngOnInit () {
     this.columnPicker.allColumns = [
       {name: 'Alert Id', width: 20, prop: 'entityId'},
       {name: 'Processed', cellTemplate: this.rowProcessed, width: 20},
@@ -127,53 +103,79 @@ export class AlertsComponent {
       return ['Processed', 'Alert Type', 'Alert Level', 'Alert Status', 'Creation Time', 'Reporting Time', 'Parameters'].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
+    this.search();
   }
 
-  getAlertsEntries (offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<AlertsResult> {
+  getAlertTypes(): void {
+    this.http.get(AlertsComponent.ALERTS_TYPES_URL)
+      .map(this.extractData)
+      .catch(err => this.alertService.handleError(err))
+      .subscribe(aTypes => this.aTypes = aTypes);
+  }
+
+  getAlertStatuses(): void {
+    this.http.get(AlertsComponent.ALERTS_STATUS_URL)
+      .map(this.extractData)
+      .catch(err => this.alertService.handleError(err))
+      .subscribe(aStatuses => this.aStatuses = aStatuses);
+  }
+
+  getAlertLevels(): void {
+    this.http.get(AlertsComponent.ALERTS_LEVELS_URL)
+      .map(this.extractData)
+      .catch(err => this.alertService.handleError(err))
+      .subscribe(aLevels => this.aLevels = aLevels);
+  }
+
+  private extractData(res: Response) {
+    let body = res.json();
+    return body || {};
+  }
+
+  getAlertsEntries(offset: number, pageSize: number, orderBy: string, asc: boolean): Observable<AlertsResult> {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('page', offset.toString());
     searchParams.set('pageSize', pageSize.toString());
     searchParams.set('orderBy', orderBy);
 
     // filters
-    if (this.filter.processed) {
-      searchParams.set('processed', this.filter.processed === 'PROCESSED' ? 'true' : 'false');
+    if (this.activeFilter.processed) {
+      searchParams.set('processed', this.activeFilter.processed === 'PROCESSED' ? 'true' : 'false');
     }
 
-    if (this.filter.alertType) {
-      searchParams.set('alertType', this.filter.alertType);
+    if (this.activeFilter.alertType) {
+      searchParams.set('alertType', this.activeFilter.alertType);
     }
 
-    if (this.filter.alertStatus) {
-      searchParams.set('alertStatus', this.filter.alertStatus);
+    if (this.activeFilter.alertStatus) {
+      searchParams.set('alertStatus', this.activeFilter.alertStatus);
     }
 
-    if (this.filter.alertId) {
-      searchParams.set('alertId', this.filter.alertId);
+    if (this.activeFilter.alertId) {
+      searchParams.set('alertId', this.activeFilter.alertId);
     }
 
-    if (this.filter.alertLevel) {
-      searchParams.set('alertLevel', this.filter.alertLevel);
+    if (this.activeFilter.alertLevel) {
+      searchParams.set('alertLevel', this.activeFilter.alertLevel);
     }
 
-    if (this.filter.creationFrom) {
-      searchParams.set('creationFrom', this.filter.creationFrom.getTime());
+    if (this.activeFilter.creationFrom) {
+      searchParams.set('creationFrom', this.activeFilter.creationFrom.getTime());
     }
 
-    if (this.filter.creationTo) {
-      searchParams.set('creationTo', this.filter.creationTo.getTime());
+    if (this.activeFilter.creationTo) {
+      searchParams.set('creationTo', this.activeFilter.creationTo.getTime());
     }
 
-    if (this.filter.reportingFrom) {
-      searchParams.set('reportingFrom', this.filter.reportingFrom.getTime());
+    if (this.activeFilter.reportingFrom) {
+      searchParams.set('reportingFrom', this.activeFilter.reportingFrom.getTime());
     }
 
-    if (this.filter.reportingTo) {
-      searchParams.set('reportingTo', this.filter.reportingTo.getTime());
+    if (this.activeFilter.reportingTo) {
+      searchParams.set('reportingTo', this.activeFilter.reportingTo.getTime());
     }
 
-    searchParams.set('domainAlerts',this.filter.domainAlerts);
+    searchParams.set('domainAlerts', this.activeFilter.domainAlerts);
     if (this.dynamicFilters.length > 0) {
       let d: string[] = [];
       for (let i = 0; i < this.dynamicFilters.length; i++) {
@@ -208,9 +210,13 @@ export class AlertsComponent {
     );
   }
 
-  page (offset, pageSize, orderBy, asc) {
-    this.loading = true;
+  resetFilters() {
+    Object.assign(this.filter, this.activeFilter);
+  }
 
+  page(offset, pageSize, orderBy, asc) {
+    this.loading = true;
+    this.resetFilters();
     this.getAlertsEntries(offset, pageSize, orderBy, asc).subscribe((result: AlertsResult) => {
       console.log('alerts response: ' + result);
       this.offset = offset;
@@ -237,24 +243,32 @@ export class AlertsComponent {
     });
   }
 
-  search () {
+  search() {
     console.log('Searching using filter:' + this.filter);
+    this.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize, this.orderBy, this.asc);
   }
 
-  toggleAdvancedSearch () {
-    this.advancedSearch = !this.advancedSearch;
-    return false;//to prevent default navigation
+  private setActiveFilter() {
+    if (!this.activeFilter) {
+      this.activeFilter = {};
+    }
+    Object.assign(this.activeFilter, this.filter);
   }
 
-  getAlertParameters (alertType: string): Observable<Array<string>> {
+  toggleAdvancedSearch() {
+    this.advancedSearch = !this.advancedSearch;
+    return false; // to prevent default navigation
+  }
+
+  getAlertParameters(alertType: string): Observable<Array<string>> {
     let searchParams: URLSearchParams = new URLSearchParams();
     searchParams.set('alertType', alertType);
     return this.http.get(AlertsComponent.ALERTS_PARAMS_URL, {search: searchParams}).map(this.extractData);
 
   }
 
-  onAlertTypeChanged (alertType: string) {
+  onAlertTypeChanged(alertType: string) {
     this.nonDateParameters = [];
     this.alertTypeWithDate = false;
     this.dynamicFilters = [];
@@ -277,40 +291,31 @@ export class AlertsComponent {
     });
   }
 
-  onTimestampCreationFromChange (event) {
+  onTimestampCreationFromChange(event) {
     this.timestampCreationToMinDate = event.value;
   }
 
-  onTimestampCreationToChange (event) {
+  onTimestampCreationToChange(event) {
     this.timestampCreationFromMaxDate = event.value;
   }
 
-  onTimestampReportingFromChange (event) {
+  onTimestampReportingFromChange(event) {
     this.timestampReportingToMinDate = event.value;
   }
 
-  onTimestampReportingToChange (event) {
+  onTimestampReportingToChange(event) {
     this.timestampReportingFromMaxDate = event.value;
   }
 
 
   // datatable methods
 
-  onActivate (event) {
-    console.log('Activate Event', event);
-
-    // Prepared if in the future we will show details of alerts
-    /*if ("dblclick" === event.type) {
-      this.details(event.row);
-    }*/
-  }
-
-  onPage (event) {
+  onPage(event) {
     console.log('Page Event', event);
     this.page(event.offset, event.pageSize, this.orderBy, this.asc);
   }
 
-  onSort (event) {
+  onSort(event) {
     console.log('Sort Event', event);
     let ascending = true;
     if (event.newValue === 'desc') {
@@ -319,12 +324,12 @@ export class AlertsComponent {
     this.page(0, this.rowLimiter.pageSize, event.column.prop, ascending);
   }
 
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
     this.rowLimiter.pageSize = newPageLimit;
     this.page(0, newPageLimit, this.orderBy, this.asc);
   }
 
-  saveAsCSV () {
+  saveAsCSV() {
     if (this.isDirty) {
       this.save(true);
     } else {
@@ -337,7 +342,7 @@ export class AlertsComponent {
     }
   }
 
-  private getFilterPath () {
+  private getFilterPath() {
     let result = '?';
     //filters
     if (this.filter.processed != null) {
@@ -379,11 +384,11 @@ export class AlertsComponent {
 
   }
 
-  public isAlertTypeDefined (): boolean {
+  public isAlertTypeDefined(): boolean {
     return !isNullOrUndefined(this.filter.alertType) && this.filter.alertType != '';
   }
 
-  cancel () {
+  cancel() {
     this.dialog.open(CancelDialogComponent)
       .afterClosed().subscribe(result => {
       if (result) {
@@ -393,7 +398,7 @@ export class AlertsComponent {
     });
   }
 
-  save (withDownloadCSV: boolean) {
+  save(withDownloadCSV: boolean) {
     const headers = new Headers({'Content-Type': 'application/json'});
     const dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
@@ -417,7 +422,7 @@ export class AlertsComponent {
     });
   }
 
-  setProcessedValue (row) {
+  setProcessedValue(row) {
     this.isDirty = true;
     row.processed = !row.processed;
     this.rows[row.$$index] = row;

@@ -76,7 +76,6 @@ export class MessageLogComponent implements OnInit {
     this.timestampToMaxDate = new Date();
 
     this.filter = {};
-    this.activeFilter = [];
     this.loading = false;
     this.rows = [];
     this.count = 0;
@@ -276,13 +275,13 @@ export class MessageLogComponent implements OnInit {
       );
   }
 
-  syncFilters() {
+  resetFilters() {
     Object.assign(this.filter, this.activeFilter);
   }
 
   page(offset, pageSize) {
     this.loading = true;
-    this.syncFilters();
+    this.resetFilters();
     this.getMessageLogEntries(offset, pageSize).subscribe((result: MessageLogResult) => {
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
@@ -345,8 +344,15 @@ export class MessageLogComponent implements OnInit {
 
   search() {
     console.log('Searching using filter:' + this.filter);
-    Object.assign(this.activeFilter, this.filter);
+    this.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
+  }
+
+  private setActiveFilter() {
+    if (!this.activeFilter) {
+      this.activeFilter = {};
+    }
+    Object.assign(this.activeFilter, this.filter);
   }
 
   resendDialog() {
