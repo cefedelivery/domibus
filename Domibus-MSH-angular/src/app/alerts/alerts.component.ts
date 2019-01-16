@@ -1,7 +1,6 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
-import {isNullOrUndefined} from 'util';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {Observable} from 'rxjs/Observable';
@@ -21,16 +20,15 @@ import {FilterableListComponent} from '../common/filterable-list.component';
 })
 
 export class AlertsComponent extends FilterableListComponent implements OnInit {
-
-  @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
-  @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
-
   static readonly ALERTS_URL: string = 'rest/alerts';
   static readonly ALERTS_CSV_URL: string = AlertsComponent.ALERTS_URL + '/csv';
   static readonly ALERTS_TYPES_URL: string = AlertsComponent.ALERTS_URL + '/types';
   static readonly ALERTS_STATUS_URL: string = AlertsComponent.ALERTS_URL + '/status';
   static readonly ALERTS_LEVELS_URL: string = AlertsComponent.ALERTS_URL + '/levels';
   static readonly ALERTS_PARAMS_URL: string = AlertsComponent.ALERTS_URL + '/params';
+
+  @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
+  @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();
@@ -317,7 +315,6 @@ export class AlertsComponent extends FilterableListComponent implements OnInit {
   }
 
   onSort(event) {
-    console.log('Sort Event', event);
     let ascending = true;
     if (event.newValue === 'desc') {
       ascending = false;
@@ -355,11 +352,10 @@ export class AlertsComponent extends FilterableListComponent implements OnInit {
   }
 
   save(withDownloadCSV: boolean) {
-    const headers = new Headers({'Content-Type': 'application/json'});
     const dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: headers}).subscribe(() => {
+        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows)).subscribe(() => {
           this.alertService.success('The operation \'update alerts\' completed successfully.', false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
           this.isDirty = false;

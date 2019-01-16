@@ -24,27 +24,24 @@ import {FilterableListComponent} from '../common/filterable-list.component';
 })
 export class AuditComponent extends FilterableListComponent implements OnInit {
 
-//--- Search components binding ---
+  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
+  @ViewChild('rowWithActionMapTpl') rowWithActionMapTpl: TemplateRef<any>;
+
+// --- Search components binding ---
   existingAuditTargets = [];
   existingUsers = [];
   existingActions = [];
-  auditTarget = [];
-  users = [];
-  actions = [];
-  from: Date;
-  to: Date;
+
   loading: boolean = false;
 
-//--- Table binding ---
+// --- Table binding ---
   rows = [];
   rowLimiter: RowLimiterBase = new RowLimiterBase();
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   offset: number = 0;
   count: number = 0;
-  @ViewChild('rowWithDateFormatTpl') rowWithDateFormatTpl: TemplateRef<any>;
-  @ViewChild('rowWithActionMapTpl') rowWithActionMapTpl: TemplateRef<any>;
 
-//--- hide/show binding ---
+// --- hide/show binding ---
   advancedSearch: boolean;
 
   constructor(private auditService: AuditService, private userService: UserService, private alertService: AlertService) {
@@ -54,23 +51,23 @@ export class AuditComponent extends FilterableListComponent implements OnInit {
   ngOnInit() {
     super.ngOnInit();
 
-//--- lets init the component's data ---
+// --- lets init the component's data ---
     this.existingUsers = [];
-    let userObservable = this.userService.getUserNames();
+    const userObservable = this.userService.getUserNames();
     userObservable.subscribe((userName: string) => this.existingUsers.push(userName));
 
     this.existingActions = [];
-    let actionObservable = this.auditService.listActions();
+    const actionObservable = this.auditService.listActions();
     actionObservable.subscribe((action: string) => this.existingActions.push(action));
 
     this.existingAuditTargets = [];
-    let existingTargets = this.auditService.listTargetTypes();
+    const existingTargets = this.auditService.listTargetTypes();
     existingTargets.subscribe((target: string) => this.existingAuditTargets.push(target));
 
-//--- lets init the table columns ---
+// --- lets init the table columns ---
     this.initColumns();
 
-//--- lets count the reccords and fill the table.---
+// --- lets count the reccords and fill the table.---
     this.searchAndCount();
   }
 
@@ -79,9 +76,9 @@ export class AuditComponent extends FilterableListComponent implements OnInit {
 
     this.loading = true;
     this.offset = 0;
-    let auditCriteria: AuditCriteria = this.buildCriteria();
-    let auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
-    let auditCountOservable: Observable<number> = this.auditService.countAuditLogs(auditCriteria);
+    const auditCriteria: AuditCriteria = this.buildCriteria();
+    const auditLogsObservable = this.auditService.listAuditLogs(auditCriteria);
+    const auditCountOservable: Observable<number> = this.auditService.countAuditLogs(auditCriteria);
     auditLogsObservable.subscribe((response: AuditResponseRo[]) => {
         this.rows = response;
         this.loading = false;
@@ -90,8 +87,8 @@ export class AuditComponent extends FilterableListComponent implements OnInit {
         this.alertService.error('Could not load audits ' + error);
         this.loading = false;
       },
-      //on complete of auditLogsObservable Observable, we load the count
-      //TODO load this in parrallel and merge the stream at the end.
+      // on complete of auditLogsObservable Observable, we load the count
+      // TODO: load this in parrallel and merge the stream at the end.
       () => auditCountOservable.subscribe(auditCount => this.count = auditCount,
         error => {
           this.alertService.error('Could not count audits ' + error);
@@ -191,7 +188,7 @@ export class AuditComponent extends FilterableListComponent implements OnInit {
       return;
     }
 
-    let auditCriteria: AuditCriteria = this.buildCriteria();
+    const auditCriteria: AuditCriteria = this.buildCriteria();
     this.auditService.saveAsCsv(auditCriteria);
   }
 
