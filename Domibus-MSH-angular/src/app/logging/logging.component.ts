@@ -1,10 +1,11 @@
-import {AfterViewInit, Component, ElementRef, TemplateRef, ViewChild} from "@angular/core";
+import {Component, ElementRef, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
 import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Headers, Http, Response, URLSearchParams} from "@angular/http";
 import {Observable} from "rxjs";
 import {LoggingLevelResult} from "./logginglevelresult";
 import {AlertService} from "../alert/alert.service";
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 /**
  * @author Catalin Enache
@@ -17,7 +18,7 @@ import {AlertService} from "../alert/alert.service";
   styleUrls: ['./logging.component.css']
 })
 
-export class LoggingComponent implements AfterViewInit {
+export class LoggingComponent extends FilteredListComponent implements OnInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -26,7 +27,6 @@ export class LoggingComponent implements AfterViewInit {
 
   levels: Array<String>;
 
-  filter: any = {};
   loading: boolean = false;
   rows = [];
   private headers = new Headers({'Content-Type': 'application/json'});
@@ -37,15 +37,16 @@ export class LoggingComponent implements AfterViewInit {
   //default value
   asc: boolean = false;
 
-
   static readonly LOGGING_URL: string = 'rest/logging/loglevel';
   static readonly RESET_LOGGING_URL: string = 'rest/logging/reset';
 
   constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService) {
+    super();
   }
 
-
   ngOnInit() {
+    super.ngOnInit();
+
     this.columnPicker.allColumns = [
       {
         name: 'Logger Name',
@@ -76,10 +77,10 @@ export class LoggingComponent implements AfterViewInit {
     }
 
     if (this.filter.loggerName) {
-      searchParams.set('loggerName', this.filter.loggerName);
+      searchParams.set('loggerName', this.activeFilter.loggerName);
     }
     if (this.filter.showClasses) {
-      searchParams.set('showClasses', this.filter.showClasses);
+      searchParams.set('showClasses', this.activeFilter.showClasses);
     }
 
     return searchParams;
@@ -100,7 +101,7 @@ export class LoggingComponent implements AfterViewInit {
 
   page (offset, pageSize) {
     this.loading = true;
-
+    this.resetFilters();
     this.getLoggingEntries(offset, pageSize).subscribe((result: LoggingLevelResult) => {
       console.log('errorLog response:' + result);
 
@@ -179,18 +180,8 @@ export class LoggingComponent implements AfterViewInit {
 
   search () {
     console.log('Searching using filter:' + this.filter);
+    super.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
-  }
-
-  onSelect ({selected}) {
-    // console.log('Select Event', selected, this.selected);
-  }
-
-  onActivate (event) {
-    // console.log('Activate Event', event);
-  }
-
-  ngAfterViewInit() {
   }
 
 }
