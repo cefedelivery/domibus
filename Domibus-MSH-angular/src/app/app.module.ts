@@ -22,12 +22,12 @@ import {NgxDatatableModule} from "@swimlane/ngx-datatable";
 import {Md2Module, Md2SelectModule} from "md2";
 
 import {AppComponent} from "./app.component";
-import {LoginComponent} from "./login/login.component";
+import {LoginComponent} from "./security/login/login.component";
 import {CurrentPModeComponent} from "./pmode/current/currentPMode.component";
 import {PModeArchiveComponent} from "./pmode/archive/pmodeArchive.component";
 
-import {AuthenticatedGuard} from "./guards/authenticated.guard";
-import {AuthorizedGuard} from "./guards/authorized.guard";
+import {AuthenticatedGuard} from "./common/guards/authenticated.guard";
+import {AuthorizedGuard} from "./common/guards/authorized.guard";
 import {routing} from "./app.routes";
 import {IsAuthorized} from "./security/is-authorized.directive";
 import {ExtendedHttpClient} from "./common/http/extended-http-client";
@@ -40,7 +40,7 @@ import {AlertService} from "./common/alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./common/footer/footer.component";
 import {DomibusInfoService} from "./appinfo/domibusinfo.service";
-import {AuthorizedAdminGuard} from "./guards/authorized-admin.guard";
+import {AuthorizedAdminGuard} from "./common/guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
 import {UserComponent} from "./user/user.component";
@@ -59,7 +59,7 @@ import {MessagelogDetailsComponent} from "./messagelog/messagelog-details/messag
 import {ErrorlogDetailsComponent} from "./errorlog/errorlog-details/errorlog-details.component";
 import {EditMessageFilterComponent} from "./messagefilter/editmessagefilter-form/editmessagefilter-form.component";
 import {CancelDialogComponent} from "./common/cancel-dialog/cancel-dialog.component";
-import {DirtyGuard} from "./common/dirty.guard";
+import {DirtyGuard} from "./common/guards/dirty.guard";
 import {EditUserComponent} from "app/user/edituser-form/edituser-form.component";
 import {SaveDialogComponent} from "./common/save-dialog/save-dialog.component";
 import {TruststoreDialogComponent} from "./truststore/truststore-dialog/truststore-dialog.component";
