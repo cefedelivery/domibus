@@ -12,7 +12,7 @@ import {DownloadService} from '../common/download.service';
 import {AlertComponent} from '../common/alert/alert.component';
 import {isNullOrUndefined} from 'util';
 import {DatatableComponent} from '@swimlane/ngx-datatable';
-import {DomibusInfoService} from '../appinfo/domibusinfo.service';
+import {DomibusInfoService} from '../common/appinfo/domibusinfo.service';
 import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({

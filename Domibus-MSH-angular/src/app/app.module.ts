@@ -39,7 +39,7 @@ import {AlertComponent} from "./common/alert/alert.component";
 import {AlertService} from "./common/alert/alert.service";
 import {ErrorLogComponent} from "./errorlog/errorlog.component";
 import {FooterComponent} from "./common/footer/footer.component";
-import {DomibusInfoService} from "./appinfo/domibusinfo.service";
+import {DomibusInfoService} from "./common/appinfo/domibusinfo.service";
 import {AuthorizedAdminGuard} from "./common/guards/authorized-admin.guard";
 import {MessageFilterComponent} from "./messagefilter/messagefilter.component";
 import {MessageLogComponent} from "./messagelog/messagelog.component";
