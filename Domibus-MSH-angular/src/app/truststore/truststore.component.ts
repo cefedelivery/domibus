@@ -9,8 +9,8 @@ import {TrustStoreUploadComponent} from './truststore-upload/truststore-upload.c
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {DownloadService} from '../common/download.service';
-import {AlertComponent} from '../alert/alert.component';
-import {AlertService} from '../alert/alert.service';
+import {AlertComponent} from '../common/alert/alert.component';
+import {AlertService} from '../common/alert/alert.service';
 
 @Component({
   selector: 'app-truststore',

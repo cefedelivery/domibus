@@ -4,7 +4,7 @@ import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
 import {Headers, Http, Response, URLSearchParams} from "@angular/http";
 import {Observable} from "rxjs";
 import {LoggingLevelResult} from "./logginglevelresult";
-import {AlertService} from "../alert/alert.service";
+import {AlertService} from "../common/alert/alert.service";
 import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**

@@ -1,8 +1,8 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
-import {AlertService} from '../alert/alert.service';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertService} from '../common/alert/alert.service';
+import {AlertComponent} from '../common/alert/alert.component';
 import {PluginUserSearchCriteria, PluginUserService} from './pluginuser.service';
 import {PluginUserRO} from './pluginuser';
 import {DirtyOperations} from 'app/common/dirty-operations';

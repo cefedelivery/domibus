@@ -7,7 +7,7 @@ import {ReplaySubject} from 'rxjs';
 import {SecurityEventService} from './security.event.service';
 import {DomainService} from './domain.service';
 import {PasswordPolicyRO} from './passwordPolicyRO';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 
 @Injectable()
 export class SecurityService {

@@ -1,12 +1,12 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {AuditService} from './audit.service';
 import {UserService} from '../user/user.service';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {AuditCriteria, AuditResponseRo} from './audit';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {Observable} from 'rxjs/Observable';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertComponent} from '../common/alert/alert.component';
 import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**

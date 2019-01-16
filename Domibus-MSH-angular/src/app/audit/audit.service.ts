@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {AuditCriteria, AuditResponseRo} from "./audit";
 import {Observable} from "rxjs/Observable";
-import {AlertService} from "../alert/alert.service";
+import {AlertService} from "../common/alert/alert.service";
 import {Http} from "@angular/http";
 import {DownloadService} from "../common/download.service";
 import {isNullOrUndefined} from "util";

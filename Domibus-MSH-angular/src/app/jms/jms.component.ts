@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {Http, Headers, Response} from '@angular/http';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {MessagesRequestRO} from './ro/messages-request-ro';
 import {isNullOrUndefined} from 'util';
 import {MdDialog, MdDialogRef} from '@angular/material';
@@ -12,7 +12,7 @@ import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {Observable} from 'rxjs/Observable';
 import {DownloadService} from '../common/download.service';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertComponent} from '../common/alert/alert.component';
 import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({

@@ -3,7 +3,7 @@ import {UserResponseRO, UserState} from './user';
 import {UserSearchCriteria, UserService} from './user.service';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {UserValidatorService} from 'app/user/uservalidator.service';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {EditUserComponent} from 'app/user/edituser-form/edituser-form.component';
 import {isNullOrUndefined} from 'util';
 import {Http} from '@angular/http';
@@ -14,7 +14,7 @@ import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {SecurityService} from '../security/security.service';
 import {DownloadService} from '../common/download.service';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertComponent} from '../common/alert/alert.component';
 import {DomainService} from '../security/domain.service';
 import {Domain} from '../security/domain';
 

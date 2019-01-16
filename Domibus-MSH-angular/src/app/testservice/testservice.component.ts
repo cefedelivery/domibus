@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Headers, Http, URLSearchParams} from '@angular/http';
 import {MessageLogEntry} from '../messagelog/messagelogentry';
 import {isNullOrUndefined} from 'util';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 
 @Component({
   moduleId: module.id,

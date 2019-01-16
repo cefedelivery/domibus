@@ -2,13 +2,13 @@
 import {Observable} from 'rxjs';
 import {Http, Response, URLSearchParams} from '@angular/http';
 import {ErrorLogResult} from './errorlogresult';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {ErrorlogDetailsComponent} from 'app/errorlog/errorlog-details/errorlog-details.component';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {DownloadService} from '../common/download.service';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertComponent} from '../common/alert/alert.component';
 import {Md2Datepicker} from 'md2';
 import {FilterableListComponent} from '../common/filterable-list.component';
 

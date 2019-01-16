@@ -1,7 +1,7 @@
 ﻿import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {SecurityService} from '../security/security.service';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {SecurityEventService} from '../security/security.event.service';
 import {MdDialog} from '@angular/material';
 import {DefaultPasswordDialogComponent} from 'app/security/default-password-dialog/default-password-dialog.component';
