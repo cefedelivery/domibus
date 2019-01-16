@@ -4,7 +4,7 @@ import {MessageLogResult} from './messagelogresult';
 import {Observable} from 'rxjs';
 import {AlertService} from '../common/alert/alert.service';
 import {MessagelogDialogComponent} from 'app/messagelog/messagelog-dialog/messagelog-dialog.component';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {MessagelogDetailsComponent} from 'app/messagelog/messagelog-details/messagelog-details.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
@@ -278,7 +278,7 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
   page(offset, pageSize) {
     this.loading = true;
-    this.resetFilters();
+    super.resetFilters();
     this.getMessageLogEntries(offset, pageSize).subscribe((result: MessageLogResult) => {
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
@@ -341,23 +341,19 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
   search() {
     console.log('Searching using filter:' + this.filter);
-    this.setActiveFilter();
+    super.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
   }
 
   resendDialog() {
     const dialogRef = this.dialog.open(MessagelogDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
-      switch (result) {
-        case 'Resend' :
-          this.resend(this.selected[0].messageId);
-          this.selected = [];
-          this.messageResent.subscribe(result => {
-            this.search();
-          });
-          break;
-        case 'Cancel' :
-        // do nothing
+      if (result == 'Resend') {
+        this.resend(this.selected[0].messageId);
+        this.selected = [];
+        this.messageResent.subscribe(() => {
+          this.page(0, this.rowLimiter.pageSize);
+        });
       }
     });
   }

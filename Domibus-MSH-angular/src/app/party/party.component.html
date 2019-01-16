@@ -69,6 +69,7 @@
   [offset]="offset"
   [limit]="rowLimiter.pageSize"
   (page)="onPageChange($event)"
+  (sort)="OnSort()"
   [selected]="selected"
   [selectionType]="'single'"
   (activate)="onActivate($event)"

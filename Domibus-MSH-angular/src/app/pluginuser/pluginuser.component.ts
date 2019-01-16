@@ -290,12 +290,17 @@ export class PluginUserComponent extends FilterableListComponent implements OnIn
         return;
       }
 
+      super.resetFilters();
       DownloadService.downloadNative(PluginUserService.CSV_URL + '?'
         + this.pluginUserService.createFilterParams(this.filter).toString());
     }
   }
 
   onPageChanged() {
+    super.resetFilters();
+  }
+
+  onSort() {
     super.resetFilters();
   }
 }

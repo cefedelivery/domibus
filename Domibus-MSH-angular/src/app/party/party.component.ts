@@ -27,13 +27,6 @@ import {FilterableListComponent} from '../common/filterable-list.component';
 })
 
 export class PartyComponent extends FilterableListComponent implements OnInit, DirtyOperations {
-
-  // name: string;
-  // endPoint: string;
-  // partyID: string;
-  // process: string;
-  // process_role: string;
-
   rows: PartyResponseRo[];
   allRows: PartyResponseRo[];
   selected: PartyResponseRo[];
@@ -79,8 +72,7 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
     const res = await this.http.get(CurrentPModeComponent.PMODE_URL + '/current').toPromise();
     if (res && res.text()) {
       this.pModeExists = true;
-      super.setActiveFilter();
-      this.listPartiesAndProcesses();
+      this.search();
     } else {
       this.pModeExists = false;
     }
@@ -98,9 +90,13 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
 
   searchIfOK() {
     this.checkIsDirtyAndThen(() => {
-      super.setActiveFilter();
-      this.listPartiesAndProcesses();
+      this.search();
     });
+  }
+
+  private search() {
+    super.setActiveFilter();
+    this.listPartiesAndProcesses();
   }
 
   listPartiesAndProcesses() {
@@ -139,7 +135,6 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
 
     setTimeout(() => {
       this.rows = rows;
-
       this.selected.length = 0;
 
       this.loading = false;
@@ -176,9 +171,9 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
   }
 
   changePageSize(newPageLimit: number) {
+    super.resetFilters();
     this.offset = 0;
     this.rowLimiter.pageSize = newPageLimit;
-
     this.refresh();
   }
 
@@ -193,6 +188,7 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
       return;
     }
 
+    super.resetFilters();
     this.partyService.saveAsCsv(this.activeFilter.name, this.activeFilter.endPoint, this.activeFilter.partyID,
       this.activeFilter.process, this.activeFilter.process_role);
   }
@@ -345,4 +341,7 @@ export class PartyComponent extends FilterableListComponent implements OnInit, D
     }
   }
 
+  OnSort() {
+    super.resetFilters();
+  }
 }

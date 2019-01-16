@@ -1,10 +1,10 @@
 import {Component, ElementRef, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {ColumnPickerBase} from "../common/column-picker/column-picker-base";
-import {RowLimiterBase} from "../common/row-limiter/row-limiter-base";
-import {Headers, Http, Response, URLSearchParams} from "@angular/http";
-import {Observable} from "rxjs";
-import {LoggingLevelResult} from "./logginglevelresult";
-import {AlertService} from "../common/alert/alert.service";
+import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
+import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
+import {Headers, Http, Response, URLSearchParams} from '@angular/http';
+import {Observable} from 'rxjs';
+import {LoggingLevelResult} from './logginglevelresult';
+import {AlertService} from '../common/alert/alert.service';
 import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**
@@ -19,6 +19,8 @@ import {FilterableListComponent} from '../common/filterable-list.component';
 })
 
 export class LoggingComponent extends FilterableListComponent implements OnInit {
+  static readonly LOGGING_URL: string = 'rest/logging/loglevel';
+  static readonly RESET_LOGGING_URL: string = 'rest/logging/reset';
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -32,13 +34,8 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
   private headers = new Headers({'Content-Type': 'application/json'});
   count: number = 0;
   offset: number = 0;
-  //default value
   orderBy: string = 'loggerName';
-  //default value
   asc: boolean = false;
-
-  static readonly LOGGING_URL: string = 'rest/logging/loglevel';
-  static readonly RESET_LOGGING_URL: string = 'rest/logging/reset';
 
   constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService) {
     super();
@@ -63,7 +60,7 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
       return ['Logger Name', 'Logger Level'].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize);
+    this.search();
   }
 
   createSearchParams(): URLSearchParams {
@@ -99,9 +96,9 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
     );
   }
 
-  page (offset, pageSize) {
+  page(offset, pageSize) {
     this.loading = true;
-    this.resetFilters();
+    super.resetFilters();
     this.getLoggingEntries(offset, pageSize).subscribe((result: LoggingLevelResult) => {
       console.log('errorLog response:' + result);
 
@@ -131,18 +128,18 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
 
   }
 
-  onPage (event) {
+  onPage(event) {
     this.page(event.offset, event.pageSize);
   }
 
-  onSort (event) {
+  onSort(event) {
     this.orderBy = event.column.prop;
     this.asc = (event.newValue === 'desc') ? false : true;
 
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
     this.page(0, newPageLimit);
   }
 
@@ -178,7 +175,7 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
     );
   }
 
-  search () {
+  search() {
     console.log('Searching using filter:' + this.filter);
     super.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
