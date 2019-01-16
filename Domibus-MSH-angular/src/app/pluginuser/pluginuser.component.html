@@ -11,6 +11,7 @@
         </md-select>
 
         <md-select placeholder="User role" [(ngModel)]="filter.authRole" id="endPoint_id">
+          <md-option [value]="null"></md-option>
           <md-option *ngFor="let t of userRoles" [value]="t">
             {{t}}
           </md-option>
@@ -46,7 +47,9 @@
     </span>
     <span class="column-filter-button">
     <app-column-picker [allColumns]="columnPicker.allColumns" [selectedColumns]="columnPicker.selectedColumns"
-                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)"></app-column-picker>
+                       (onSelectedColumnsChanged)="columnPicker.changeSelectedColumns($event)">
+
+    </app-column-picker>
     </span>
     <button md-icon-button color="primary" (click)="saveAsCSV()" button-click-behaviour
             id="saveascsvbutton_id" md-tooltip="Export as CSV">
@@ -73,6 +76,7 @@
     [count]="displayedUsers.length"
     [offset]="offset"
     (activate)="onActivate($event)"
+    (page)="onPageChanged()"
     ></ngx-datatable>
 
   <ng-template #activeTpl let-row="row" ngx-datatable-cell-template>

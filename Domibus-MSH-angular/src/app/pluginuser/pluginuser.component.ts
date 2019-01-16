@@ -14,13 +14,14 @@ import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {DownloadService} from '../download/download.service';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
+import {FilteredListComponent} from '../common/filtered-list.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
   styleUrls: ['./pluginuser.component.css'],
   providers: [PluginUserService, UserService]
 })
-export class PluginUserComponent implements OnInit, DirtyOperations {
+export class PluginUserComponent extends FilteredListComponent implements OnInit, DirtyOperations {
   @ViewChild('activeTpl') activeTpl: TemplateRef<any>;
 
   columnPickerBasic: ColumnPickerBase = new ColumnPickerBase();
@@ -35,17 +36,18 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   dirty: boolean;
 
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
-  filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
+  filter: PluginUserSearchCriteria;
   columnPicker: ColumnPickerBase;
 
   userRoles: Array<String>;
 
-  constructor(private alertService: AlertService,
-              private pluginUserService: PluginUserService,
-              public dialog: MdDialog) {
+  constructor(private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog) {
+    super();
   }
 
   ngOnInit() {
+    this.filter = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
+
     this.initColumns();
 
     this.offset = 0;
@@ -56,6 +58,8 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.dirty = false;
 
     this.getUserRoles();
+
+    super.setActiveFilter();
     this.search();
   }
 
@@ -102,6 +106,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async searchIfOK(): Promise<boolean> {
     const ok = await this.checkIsDirty();
     if (ok) {
+      super.setActiveFilter();
       this.search();
     }
     return ok;
@@ -114,7 +119,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
     try {
       this.loading = true;
-      const result = await this.pluginUserService.getUsers(this.filter).toPromise();
+      const result = await this.pluginUserService.getUsers(this.activeFilter).toPromise();
       this.users = result.entries;
       this.loading = false;
 
@@ -214,6 +219,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       if (proceed) {
         await this.pluginUserService.saveUsers(this.users);
         this.alertService.success('The operation \'update plugin users\' completed successfully.');
+        super.resetFilters();
         this.search();
       }
     } catch (err) {
@@ -232,6 +238,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async cancel() {
     const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
     if (ok) {
+      super.resetFilters();
       this.search();
     }
   }
@@ -288,4 +295,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     }
   }
 
+  onPageChanged() {
+    super.resetFilters();
+  }
 }
