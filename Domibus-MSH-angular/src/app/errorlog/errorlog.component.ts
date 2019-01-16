@@ -1,4 +1,4 @@
-﻿import {Component, TemplateRef, ViewChild, Renderer2, AfterViewInit, ElementRef, OnInit} from '@angular/core';
+﻿import {Component, TemplateRef, ViewChild, Renderer2, ElementRef, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Http, Response, URLSearchParams} from '@angular/http';
 import {ErrorLogResult} from './errorlogresult';
@@ -112,32 +112,32 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
       searchParams.set('asc', this.asc.toString());
     }
 
-    if (this.filter.errorSignalMessageId) {
-      searchParams.set('errorSignalMessageId', this.filter.errorSignalMessageId);
+    if (this.activeFilter.errorSignalMessageId) {
+      searchParams.set('errorSignalMessageId', this.activeFilter.errorSignalMessageId);
     }
-    if (this.filter.mshRole) {
-      searchParams.set('mshRole', this.filter.mshRole);
+    if (this.activeFilter.mshRole) {
+      searchParams.set('mshRole', this.activeFilter.mshRole);
     }
-    if (this.filter.messageInErrorId) {
-      searchParams.set('messageInErrorId', this.filter.messageInErrorId);
+    if (this.activeFilter.messageInErrorId) {
+      searchParams.set('messageInErrorId', this.activeFilter.messageInErrorId);
     }
-    if (this.filter.errorCode) {
-      searchParams.set('errorCode', this.filter.errorCode);
+    if (this.activeFilter.errorCode) {
+      searchParams.set('errorCode', this.activeFilter.errorCode);
     }
-    if (this.filter.errorDetail) {
-      searchParams.set('errorDetail', this.filter.errorDetail);
+    if (this.activeFilter.errorDetail) {
+      searchParams.set('errorDetail', this.activeFilter.errorDetail);
     }
-    if (this.filter.timestampFrom != null) {
-      searchParams.set('timestampFrom', this.filter.timestampFrom.getTime());
+    if (this.activeFilter.timestampFrom != null) {
+      searchParams.set('timestampFrom', this.activeFilter.timestampFrom.getTime());
     }
     if (this.filter.timestampTo != null) {
-      searchParams.set('timestampTo', this.filter.timestampTo.getTime());
+      searchParams.set('timestampTo', this.activeFilter.timestampTo.getTime());
     }
-    if (this.filter.notifiedFrom != null) {
-      searchParams.set('notifiedFrom', this.filter.notifiedFrom.getTime());
+    if (this.activeFilter.notifiedFrom != null) {
+      searchParams.set('notifiedFrom', this.activeFilter.notifiedFrom.getTime());
     }
-    if (this.filter.notifiedTo != null) {
-      searchParams.set('notifiedTo', this.filter.notifiedTo.getTime());
+    if (this.activeFilter.notifiedTo != null) {
+      searchParams.set('notifiedTo', this.activeFilter.notifiedTo.getTime());
     }
 
     return searchParams;
@@ -158,8 +158,6 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
 
   page(offset, pageSize) {
     this.loading = true;
-    this.resetFilters();
-
     this.getErrorLogEntries(offset, pageSize).subscribe((result: ErrorLogResult) => {
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
@@ -203,6 +201,7 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
   }
 
   onPage(event) {
+    super.resetFilters();
     this.page(event.offset, event.pageSize);
   }
 
@@ -210,10 +209,12 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
     this.orderBy = event.column.prop;
     this.asc = (event.newValue === 'desc') ? false : true;
 
+    super.resetFilters();
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
   changePageSize(newPageLimit: number) {
+    super.resetFilters();
     this.page(0, newPageLimit);
   }
 
