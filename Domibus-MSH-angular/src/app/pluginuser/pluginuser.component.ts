@@ -12,7 +12,7 @@ import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/edit
 import {UserService} from '../user/user.service';
 import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
 import {FilterableListComponent} from '../common/filterable-list.component';
 

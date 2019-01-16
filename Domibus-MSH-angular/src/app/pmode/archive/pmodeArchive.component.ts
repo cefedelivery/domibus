@@ -13,7 +13,7 @@ import {SaveDialogComponent} from 'app/common/save-dialog/save-dialog.component'
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {Observable} from 'rxjs/Observable';
 import {DateFormatService} from 'app/customDate/dateformat.service';
-import {DownloadService} from 'app/download/download.service';
+import {DownloadService} from 'app/common/download.service';
 import {AlertComponent} from 'app/alert/alert.component';
 import {RestoreDialogComponent} from '../restore-dialog/restore-dialog.component';
 import {PmodeViewComponent} from './pmode-view/pmode-view.component';

@@ -11,7 +11,7 @@ import {DirtyOperations} from '../common/dirty-operations';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {Observable} from 'rxjs/Observable';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {FilterableListComponent} from '../common/filterable-list.component';
 

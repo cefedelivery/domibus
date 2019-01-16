@@ -13,7 +13,7 @@ import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {SecurityService} from '../security/security.service';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {DomainService} from '../security/domain.service';
 import {Domain} from '../security/domain';

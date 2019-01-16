@@ -3,7 +3,7 @@ import {AuditCriteria, AuditResponseRo} from "./audit";
 import {Observable} from "rxjs/Observable";
 import {AlertService} from "../alert/alert.service";
 import {Http} from "@angular/http";
-import {DownloadService} from "../download/download.service";
+import {DownloadService} from "../common/download.service";
 import {isNullOrUndefined} from "util";
 
 /**

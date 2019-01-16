@@ -3,7 +3,7 @@ import {Http, Response, URLSearchParams} from '@angular/http';
 import {AlertService} from 'app/alert/alert.service';
 import {PartyResponseRo, PartyFilteredResult, ProcessRo, CertificateRo} from './party';
 import {Observable} from 'rxjs/Observable';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 
 /**
  * @author Thomas Dussart

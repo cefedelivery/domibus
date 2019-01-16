@@ -89,6 +89,7 @@ import {DefaultPasswordGuard} from './security/defaultPassword.guard';
 import {SanitizeHtmlPipe} from './common/sanitizeHtml.pipe';
 import {LoggingComponent} from './logging/logging.component';
 import {ChangePasswordComponent} from './security/change-password/change-password.component';
+import {FilterableListComponent} from './common/filterable-list.component';
 
 export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions: RequestOptions, httpEventService: HttpEventService) {
   return new ExtendedHttpClient(xhrBackend, requestOptions, httpEventService);
@@ -145,7 +146,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent,
     LoggingComponent,
-    ChangePasswordComponent
+    ChangePasswordComponent,
+    FilterableListComponent
   ],
   entryComponents: [
     AppComponent,
@@ -169,7 +171,8 @@ export function extendedHttpClientFactory(xhrBackend: XHRBackend, requestOptions
     EditbasicpluginuserFormComponent,
     EditcertificatepluginuserFormComponent,
     PartyIdentifierDetailsComponent,
-    ChangePasswordComponent
+    ChangePasswordComponent,
+    FilterableListComponent
   ],
   imports: [
     BrowserModule,

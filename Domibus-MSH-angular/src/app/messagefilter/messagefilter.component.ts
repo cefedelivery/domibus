@@ -11,7 +11,7 @@ import {EditMessageFilterComponent} from './editmessagefilter-form/editmessagefi
 import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 
 @Component({
   moduleId: module.id,

@@ -8,7 +8,7 @@ import {MdDialog, MdDialogRef} from '@angular/material';
 import {MessagelogDetailsComponent} from 'app/messagelog/messagelog-details/messagelog-details.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 import {AlertComponent} from '../alert/alert.component';
 import {isNullOrUndefined} from 'util';
 import {DatatableComponent} from '@swimlane/ngx-datatable';

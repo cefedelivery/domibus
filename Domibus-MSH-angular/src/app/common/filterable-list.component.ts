@@ -7,8 +7,8 @@ import {Component, OnInit} from '@angular/core';
 })
 
 export class FilterableListComponent implements OnInit {
-  protected filter: any;
-  protected activeFilter: any;
+  public filter: any;
+  public activeFilter: any;
 
   constructor() {
   }
