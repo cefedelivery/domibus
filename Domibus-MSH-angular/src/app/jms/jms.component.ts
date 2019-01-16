@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {Http, Headers, Response} from '@angular/http';
+import {Http, Response} from '@angular/http';
 import {AlertService} from '../common/alert/alert.service';
 import {MessagesRequestRO} from './ro/messages-request-ro';
 import {isNullOrUndefined} from 'util';
@@ -65,10 +65,11 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
 
   constructor(private http: Http, private alertService: AlertService, public dialog: MdDialog) {
     super();
-    this.filter = new MessagesRequestRO();
   }
 
   ngOnInit() {
+    this.filter = new MessagesRequestRO();
+
     this.offset = 0;
     this.timestampFromMaxDate = new Date();
     this.timestampToMinDate = null;
@@ -145,7 +146,6 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
     this.defaultQueueSet.subscribe(result => {
       this.search();
     });
-
   }
 
   private getDestinations(): Observable<Response> {
@@ -238,6 +238,11 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
   }
 
   search() {
+    super.setActiveFilter();
+    this.doSearch();
+  }
+
+  private doSearch() {
     if (!this.filter.source) {
       this.alertService.error('Source should be set');
       return;
@@ -247,7 +252,6 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
     }
 
     this.loading = true;
-    this.setActiveFilter();
     this.selectedMessages = [];
     this.markedForDeletionMessages = [];
     this.currentSearchSelectedSource = this.selectedSource;
@@ -274,10 +278,10 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
   }
 
   cancel() {
-    let dialogRef: MdDialogRef<CancelDialogComponent> = this.dialog.open(CancelDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
+    this.dialog.open(CancelDialogComponent).afterClosed().subscribe(result => {
       if (result) {
-        this.search();
+        super.resetFilters();
+        this.doSearch();
       }
     });
   }
@@ -451,26 +455,26 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
 
   getFilterPath() {
     let result = '?';
-    if (!isNullOrUndefined(this.filter.source)) {
-      result += 'source=' + this.filter.source + '&';
+    if (!isNullOrUndefined(this.activeFilter.source)) {
+      result += 'source=' + this.activeFilter.source + '&';
     }
-    if (!isNullOrUndefined(this.filter.jmsType)) {
-      result += 'jmsType=' + this.filter.jmsType + '&';
+    if (!isNullOrUndefined(this.activeFilter.jmsType)) {
+      result += 'jmsType=' + this.activeFilter.jmsType + '&';
     }
-    if (!isNullOrUndefined(this.filter.fromDate)) {
-      result += 'fromDate=' + this.filter.fromDate.getTime() + '&';
+    if (!isNullOrUndefined(this.activeFilter.fromDate)) {
+      result += 'fromDate=' + this.activeFilter.fromDate.getTime() + '&';
     }
-    if (!isNullOrUndefined(this.filter.toDate)) {
-      result += 'toDate=' + this.filter.toDate.getTime() + '&';
+    if (!isNullOrUndefined(this.activeFilter.toDate)) {
+      result += 'toDate=' + this.activeFilter.toDate.getTime() + '&';
     }
-    if (!isNullOrUndefined(this.filter.selector)) {
-      result += 'selector=' + this.filter.selector + '&';
+    if (!isNullOrUndefined(this.activeFilter.selector)) {
+      result += 'selector=' + this.activeFilter.selector + '&';
     }
     return result;
   }
 
   saveAsCSV() {
-    if (!this.filter.source) {
+    if (!this.activeFilter.source) {
       this.alertService.error('Source should be set');
       return;
     }
@@ -487,6 +491,10 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
   }
 
   onPage() {
-    this.resetFilters();
+    super.resetFilters();
+  }
+
+  onSort() {
+    super.resetFilters();
   }
 }

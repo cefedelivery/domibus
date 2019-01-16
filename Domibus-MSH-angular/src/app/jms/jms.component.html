@@ -82,6 +82,7 @@
     [limit]="rowLimiter.pageSize"
     [offset]="offset"
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (sort)="onSort()"
     (activate)="onActivate($event)"
     (select)="onSelect($event)"
     (page)="onPage()"
