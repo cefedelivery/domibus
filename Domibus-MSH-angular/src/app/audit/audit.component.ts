@@ -7,7 +7,7 @@ import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {Observable} from 'rxjs/Observable';
 import {AlertComponent} from '../alert/alert.component';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**
  * @author Thomas Dussart
@@ -22,7 +22,7 @@ import {FilteredListComponent} from '../common/filtered-list.component';
   templateUrl: './audit.component.html',
   styleUrls: ['./audit.component.css']
 })
-export class AuditComponent extends FilteredListComponent implements OnInit {
+export class AuditComponent extends FilterableListComponent implements OnInit {
 
 //--- Search components binding ---
   existingAuditTargets = [];

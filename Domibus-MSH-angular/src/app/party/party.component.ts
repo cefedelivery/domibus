@@ -12,7 +12,7 @@ import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {CurrentPModeComponent} from '../pmode/current/currentPMode.component';
 import {Http} from '@angular/http';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**
  * @author Thomas Dussart
@@ -26,7 +26,7 @@ import {FilteredListComponent} from '../common/filtered-list.component';
   styleUrls: ['./party.component.css']
 })
 
-export class PartyComponent extends FilteredListComponent implements OnInit, DirtyOperations {
+export class PartyComponent extends FilterableListComponent implements OnInit, DirtyOperations {
 
   // name: string;
   // endPoint: string;

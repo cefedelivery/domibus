@@ -6,7 +6,7 @@ import {Component, OnInit} from '@angular/core';
   template: '',
 })
 
-export class FilteredListComponent implements OnInit {
+export class FilterableListComponent implements OnInit {
   protected filter: any;
   protected activeFilter: any;
 

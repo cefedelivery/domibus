@@ -14,14 +14,14 @@ import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {DownloadService} from '../download/download.service';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
   styleUrls: ['./pluginuser.component.css'],
   providers: [PluginUserService, UserService]
 })
-export class PluginUserComponent extends FilteredListComponent implements OnInit, DirtyOperations {
+export class PluginUserComponent extends FilterableListComponent implements OnInit, DirtyOperations {
   @ViewChild('activeTpl') activeTpl: TemplateRef<any>;
 
   columnPickerBasic: ColumnPickerBase = new ColumnPickerBase();

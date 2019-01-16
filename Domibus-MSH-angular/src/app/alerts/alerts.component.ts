@@ -12,7 +12,7 @@ import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.compo
 import {MdDialog} from '@angular/material';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
 import {SecurityService} from '../security/security.service';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   moduleId: module.id,
@@ -20,7 +20,7 @@ import {FilteredListComponent} from '../common/filtered-list.component';
   providers: []
 })
 
-export class AlertsComponent extends FilteredListComponent implements OnInit {
+export class AlertsComponent extends FilterableListComponent implements OnInit {
 
   @ViewChild('rowProcessed') rowProcessed: TemplateRef<any>;
   @ViewChild('rowWithDateFormatTpl') public rowWithDateFormatTpl: TemplateRef<any>;

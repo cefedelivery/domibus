@@ -13,14 +13,14 @@ import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
 import {Observable} from 'rxjs/Observable';
 import {DownloadService} from '../download/download.service';
 import {AlertComponent} from '../alert/alert.component';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   selector: 'app-jms',
   templateUrl: './jms.component.html',
   styleUrls: ['./jms.component.css']
 })
-export class JmsComponent extends FilteredListComponent implements OnInit, DirtyOperations {
+export class JmsComponent extends FilterableListComponent implements OnInit, DirtyOperations {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase();
   rowLimiter: RowLimiterBase = new RowLimiterBase();

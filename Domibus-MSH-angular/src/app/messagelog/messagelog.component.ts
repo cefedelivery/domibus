@@ -13,7 +13,7 @@ import {AlertComponent} from '../alert/alert.component';
 import {isNullOrUndefined} from 'util';
 import {DatatableComponent} from '@swimlane/ngx-datatable';
 import {DomibusInfoService} from '../appinfo/domibusinfo.service';
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   moduleId: module.id,
@@ -22,7 +22,7 @@ import {FilteredListComponent} from '../common/filtered-list.component';
   styleUrls: ['./messagelog.component.css']
 })
 
-export class MessageLogComponent extends FilteredListComponent implements OnInit {
+export class MessageLogComponent extends FilterableListComponent implements OnInit {
 
   static readonly RESEND_URL: string = 'rest/message/restore?messageId=${messageId}';
   static readonly DOWNLOAD_MESSAGE_URL: string = 'rest/message/download?messageId=${messageId}';

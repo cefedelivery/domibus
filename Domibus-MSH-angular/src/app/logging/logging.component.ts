@@ -5,7 +5,7 @@ import {Headers, Http, Response, URLSearchParams} from "@angular/http";
 import {Observable} from "rxjs";
 import {LoggingLevelResult} from "./logginglevelresult";
 import {AlertService} from "../alert/alert.service";
-import {FilteredListComponent} from '../common/filtered-list.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 /**
  * @author Catalin Enache
@@ -18,7 +18,7 @@ import {FilteredListComponent} from '../common/filtered-list.component';
   styleUrls: ['./logging.component.css']
 })
 
-export class LoggingComponent extends FilteredListComponent implements OnInit {
+export class LoggingComponent extends FilterableListComponent implements OnInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
