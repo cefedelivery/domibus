@@ -2,6 +2,7 @@ package eu.domibus.ebms3.sender;
 
 import eu.domibus.common.ErrorCode;
 import eu.domibus.common.MSHRole;
+import eu.domibus.common.dao.UserMessageLogDao;
 import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.LegConfiguration;
 import eu.domibus.common.services.impl.MessageIdGenerator;
@@ -10,6 +11,9 @@ import eu.domibus.ebms3.common.model.*;
 import eu.domibus.ebms3.sender.exception.SendMessageException;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.plugin.transformer.OutgoingMessageTransformer;
+import eu.domibus.plugin.transformer.OutgoingMessageTransformerList;
+import eu.domibus.submission.OutgoingMessageTransformerListProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.*;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -41,6 +46,9 @@ public class EbMS3MessageBuilder {
     private final ObjectFactory ebMS3Of = new ObjectFactory();
 
     @Autowired
+    protected UserMessageLogDao userMessageLogDao;
+
+    @Autowired
     private MessageFactory messageFactory;
 
     @Autowired
@@ -52,6 +60,9 @@ public class EbMS3MessageBuilder {
 
     @Autowired
     private MessageIdGenerator messageIdGenerator;
+
+    @Autowired
+    protected OutgoingMessageTransformerListProvider outgoingMessageTransformerListProvider;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -105,7 +116,10 @@ public class EbMS3MessageBuilder {
                 this.attachPayload(partInfo, message);
             }
 
+            transformBeforeSending(userMessage.getMessageInfo().getMessageId(), message);
+
             this.jaxbContext.createMarshaller().marshal(messaging, message.getSOAPHeader());
+
             final SOAPElement messagingElement = (SOAPElement) message.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
             messagingElement.setAttributeNS(NonRepudiationConstants.ID_NAMESPACE_URI, NonRepudiationConstants.ID_QUALIFIED_NAME, NonRepudiationConstants.URI_WSU_NS);
             messagingElement.addAttribute(NonRepudiationConstants.ID_QNAME, "_1" + messageIDDigest);
@@ -117,6 +131,21 @@ public class EbMS3MessageBuilder {
             throw new SendMessageException(ex);
         }
         return message;
+    }
+
+    protected void transformBeforeSending(String messageId, SOAPMessage message) {
+        final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
+        final OutgoingMessageTransformerList outgoingMessageTransformerList = outgoingMessageTransformerListProvider.getOutgoingMessageTransformerList(backendName);
+        if (outgoingMessageTransformerList == null) {
+            LOG.debug("No outgoing message transformer found for backend [" + backendName + "]");
+            return;
+        }
+        final List<OutgoingMessageTransformer> outgoingMessageTransformers = outgoingMessageTransformerList.getOutgoingMessageTransformers();
+        for (OutgoingMessageTransformer outgoingMessageTransformer : outgoingMessageTransformers) {
+            outgoingMessageTransformer.transformOutgoingMessage(message);
+        }
+
+
     }
 
     protected SOAPMessage buildSOAPMessage(final SignalMessage signalMessage) throws EbMS3Exception {
