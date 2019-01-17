@@ -50,16 +50,9 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
 
     private static final String MIME_TYPE = "MimeType";
 
-    private static final String DEFAULT_MT = "text/xml";
-
-    private static final String BODYLOAD = "#bodyload";
-
     private static final String MESSAGE_ID_EMPTY = "Message ID is empty";
 
     private static final String MESSAGE_NOT_FOUND_ID = "Message not found, id [";
-
-    private static final String ERROR_IS_PAYLOAD_DATA_HANDLER = "Error getting the input stream from the payload data handler";
-
 
     @Autowired
     private StubDtoTransformer defaultTransformer;
