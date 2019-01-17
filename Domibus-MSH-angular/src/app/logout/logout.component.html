@@ -1,15 +1,18 @@
 ﻿<div id="page" class="login-page">
   <div id="formContainer">
-      <table cellspacing="0">
+      <table cellspacing="30" cellpadding="10">
+        <tr><td>&nbsp;</td></tr>
         <tr>
           <td>
-            You have been logged out from Domibus. Click here to login again.
+            You have been logged out from Domibus. <br>
+            Click here to login again.
           </td>
         </tr>
+        <tr><td>&nbsp;</td></tr>
         <tr>
           <td>
             <button md-raised-button color="primary"  id="loginagainbutton_id"
-                    button-click-behaviour (click)="login_again();">
+                    button-click-behaviour (click)="login_again()">
               <md-icon>input</md-icon>
               <span>Login</span>
             </button>
@@ -19,3 +22,4 @@
       <footer></footer>
   </div>
 </div>
+

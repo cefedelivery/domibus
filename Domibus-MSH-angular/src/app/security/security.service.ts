@@ -45,17 +45,48 @@ export class SecurityService {
       });
   }
 
+  /**
+   * It simulates the login function for an external authentication provider
+   * Saves current user to local storage, etc
+   */
+  login_extauthprovider() {
+    console.log('login from auth external provider');
+
+    //get the user from server and write it in local storage
+    this.getCurrentUserFromServer()
+      .subscribe((user: User) => {
+        if (user) {
+          this.updateCurrentUser(user);
+          this.domainService.setAppTitle();
+        }
+      }, (error: any) => {
+        console.log('getCurrentUserFromServer error' + error);
+        return error;
+      });
+  }
+
   logout() {
     this.alertService.clearAlert();
 
     this.clearSession();
-
     this.http.delete('rest/security/authentication').subscribe((res: Response) => {
         this.securityEventService.notifyLogoutSuccessEvent(res);
       },
       (error: any) => {
         this.securityEventService.notifyLogoutErrorEvent(error);
       });
+  }
+
+  logout_extauthprovider() {
+    this.alertService.clearAlert();
+    this.clearSession();
+    console.log('logout clear session done');
+    this.http.delete('rest/security/authentication').subscribe((res: Response) => {
+      },
+      (error: any) => {
+       console.log('delete rest/security/authentication call error: ', error);
+      });
+    console.log('logout delete call done');
   }
 
   getPluginPasswordPolicy(): Promise<PasswordPolicyRO> {

@@ -73,6 +73,7 @@ public class ECASSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/info").permitAll()
                 .antMatchers("/rest/application/name").permitAll()
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
+                .antMatchers("/rest/application/extauthproviderenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasRole(SUPER_ROLE)
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole(ALL_ROLES)

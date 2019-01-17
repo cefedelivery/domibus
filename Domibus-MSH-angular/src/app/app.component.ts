@@ -6,7 +6,7 @@ import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
 import {HttpEventService} from './http/http.event.service';
-import {User} from "./security/user";
+import {ReplaySubject} from "rxjs";
 
 @Component({
   selector: 'app-root',
@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
   fourCornerEnabled: boolean = true;
+  extAuthProviderEnabled: boolean = false;
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
@@ -31,14 +32,13 @@ export class AppComponent implements OnInit {
 
     this.domainService.setAppTitle();
 
-    const fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
-
-    fourCornerModelResponse.subscribe((name: Response) => {
-      this.fourCornerEnabled = name.json();
-    });
   }
 
+
   ngOnInit () {
+    this.readFourCornerEnabled();
+    this.readExtAuthProviderEnabled();
+
     this.httpEventService.subscribe((error) => {
       if (error && (error.status === 403 || error.status === 401)) {
         console.log('Received forbidden request event');
@@ -48,7 +48,7 @@ export class AppComponent implements OnInit {
 
     this.securityEventService.onLogoutSuccessEvent().subscribe(
       data => {
-        this.router.navigate(['/login']);
+        this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']);
       });
 
     this.router.events.subscribe(event => {
@@ -62,31 +62,8 @@ export class AppComponent implements OnInit {
       }
     });
 
-    //first time redirect from auth external provider
-    if (this.isAuthExternalProviderEnabled()) {
-      console.log('auth external provider = true: ');
-
-      //get the user from server and write it in local storage
-      this.securityService.getCurrentUserFromServer()
-        .subscribe((user: User) => {
-          if (user) {
-            this.securityService.updateCurrentUser(user);
-            this.domainService.setAppTitle();
-          }
-        }, (user: User) => {
-          console.log('getCurrentUserFromServer error' + user);
-          return user;
-        });
-    }
-
-
   }
 
-  isAuthExternalProviderEnabled(): boolean {
-    let params = new URLSearchParams(window.location.search);
-    let ticketParam = params.get('ticket');
-    return ticketParam ? ticketParam.indexOf("ST") >= 0 : false;
-  }
 
   isAdmin (): boolean {
     return this.securityService.isCurrentUserAdmin();
@@ -96,9 +73,8 @@ export class AppComponent implements OnInit {
     return !!this.currentUser;
   }
 
-  isUserFromExternalAuthProvider (): boolean {
-    //console.log('isUserFromExternalAuthProvider: ' + this.securityService.isUserFromExternalAuthProvider());
-    return this.securityService.isUserFromExternalAuthProvider();
+  isExtAuthProviderEnabled (): boolean {
+    return this.extAuthProviderEnabled;
   }
 
   get currentUser (): string {
@@ -106,23 +82,14 @@ export class AppComponent implements OnInit {
     return user ? user.username : '';
   }
 
-  logout (event: Event): void {
+  logout(event: Event): void {
     event.preventDefault();
-    if (this.isUserFromExternalAuthProvider()) {
-      console.log('going to logout from external auth provider');
-      this.router.navigate(['/logout']).then((ok) => {
-
-        if (ok) {
-          this.securityService.logout();
-        }
-      })
-    } else {
-      this.router.navigate(['/login'], {queryParams: {force: true}}).then((ok) => {
-        if (ok) {
-          this.securityService.logout();
-        }
-      })
-    }
+    this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
+      if (ok) {
+        console.log('before security Service logout');
+        this.securityService.logout();
+      }
+    })
 
   }
 
@@ -142,4 +109,43 @@ export class AppComponent implements OnInit {
   changePassword() {
     this.router.navigate(['changePassword']);
   }
+
+  //read four corner enabled property
+  private readFourCornerEnabled() {
+    this.readApplicationProperty('fourcornerenabled')
+      .subscribe((appProperty: boolean) => {
+        this.fourCornerEnabled = appProperty;
+        console.log('fourCornerEnabled read:' + this.fourCornerEnabled);
+      }, (appProperty: boolean) => {
+        console.log('readFourCornerEnabled error' + appProperty);
+      });
+  }
+
+  //read external authentication provider enabled
+  // property and if true do the login
+  private readExtAuthProviderEnabled() {
+    this.readApplicationProperty('extauthproviderenabled')
+      .subscribe((appProperty: boolean) => {
+        this.extAuthProviderEnabled = appProperty;
+        console.log('extauthproviderenabled read:' + this.extAuthProviderEnabled);
+        if (this.extAuthProviderEnabled) {
+          this.securityService.login_extauthprovider();
+        }
+      }, (appProperty: boolean) => {
+        console.log('readExtAuthProviderEnabled error' + appProperty);
+      });
+  }
+
+
+  readApplicationProperty(propertyName: string): Observable<boolean> {
+    const subject = new ReplaySubject();
+    this.http.get(`rest/application/${propertyName}`)
+      .subscribe((res: Response) => {
+        subject.next(res.json());
+      }, (error: any) => {
+        subject.next(null);
+      });
+    return subject.asObservable();
+  }
+
 }

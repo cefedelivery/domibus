@@ -1,6 +1,4 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
-import {Router} from "@angular/router";
-
+import {Component} from "@angular/core";
 
 @Component({
   moduleId: module.id,
@@ -8,21 +6,16 @@ import {Router} from "@angular/router";
   styleUrls: ['./logout.component.css']
 })
 
+export class LogoutAuthExtProviderComponent {
 
-export class LogoutAuthExtProviderComponent implements OnInit, OnDestroy {
-
-  constructor(private router: Router) {
-  }
-
-  ngOnDestroy(): void {
-  }
-
-  ngOnInit(): void {
+  constructor() {
   }
 
   login_again(): void {
-    console.log('lets login again');
-    this.router.navigateByUrl('/index.html');
+    //just redirect to context path
+    let context = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
+    let url = window.location.protocol + "//" + window.location.host + context;
+    window.location.href = url;
   }
 
 }

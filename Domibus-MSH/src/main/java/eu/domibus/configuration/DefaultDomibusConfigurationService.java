@@ -89,4 +89,9 @@ public class DefaultDomibusConfigurationService implements DomibusConfigurationS
         return domibusPropertyProvider.getBooleanProperty(FOURCORNERMODEL_ENABLED_KEY);
     }
 
+    @Override
+    public boolean isExtAuthProviderEnabled() {
+        return domibusPropertyProvider.getBooleanProperty(EXTERNAL_AUTH_PROVIDER);
+    }
+
 }

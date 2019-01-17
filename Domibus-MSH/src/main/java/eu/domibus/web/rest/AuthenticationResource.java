@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Cosmin Baciu
+ * @author Cosmin Baciu, Catalin Enache
  * @since 3.3
  */
 @RestController
@@ -145,7 +145,6 @@ public class AuthenticationResource {
 
         return createUserRO(userDetail, userDetail.getUsername());
     }
-
 
     /**
      * Retrieve the current domain of the current user (in multi-tenancy mode)

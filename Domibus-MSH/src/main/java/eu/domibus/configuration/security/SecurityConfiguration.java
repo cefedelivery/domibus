@@ -59,6 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/rest/application/info").permitAll()
                 .antMatchers("/rest/application/name").permitAll()
                 .antMatchers("/rest/application/fourcornerenabled").permitAll()
+                .antMatchers("/rest/application/extauthproviderenabled").permitAll()
                 .antMatchers("/rest/application/multitenancy").permitAll()
                 .antMatchers("/rest/application/domains").hasRole("AP_ADMIN")
                 .antMatchers(HttpMethod.PUT, "/rest/security/user/password").hasAnyRole("USER", "ADMIN", "AP_ADMIN")

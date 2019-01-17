@@ -31,4 +31,11 @@ public interface DomibusConfigurationService {
 
     boolean isFourCornerEnabled();
 
+    /**
+     * Returns true if external authentication provider is enabled
+     *
+     * @return
+     */
+    boolean isExtAuthProviderEnabled();
+
 }

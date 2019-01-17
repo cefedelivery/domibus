@@ -62,9 +62,4 @@
             <transport-guarantee>NONE</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
-
-    <welcome-file-list>
-        <welcome-file>index2.html</welcome-file>
-    </welcome-file-list>
-
 </web-app>
