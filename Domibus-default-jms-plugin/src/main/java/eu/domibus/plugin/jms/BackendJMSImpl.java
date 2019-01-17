@@ -9,6 +9,7 @@ import eu.domibus.ext.exceptions.DomibusPropertyExtException;
 import eu.domibus.ext.services.DomainContextExtService;
 import eu.domibus.ext.services.DomibusPropertyExtService;
 import eu.domibus.ext.services.JMSExtService;
+import eu.domibus.ext.services.NonRepudiationExtService;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.MDCKey;
@@ -32,8 +33,7 @@ import javax.jms.Session;
 import java.text.MessageFormat;
 import java.util.List;
 
-import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_ID;
-import static eu.domibus.plugin.jms.JMSMessageConstants.MESSAGE_TYPE_SUBMIT;
+import static eu.domibus.plugin.jms.JMSMessageConstants.*;
 
 /**
  * @author Christian Koch, Stefan Mueller
@@ -59,6 +59,9 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
     @Autowired
     @Qualifier(value = "mshToBackendTemplate")
     private JmsOperations mshToBackendTemplate;
+
+    @Autowired
+    protected NonRepudiationExtService nonRepudiationExtService;
 
     private MessageRetrievalTransformer<MapMessage> messageRetrievalTransformer;
     private MessageSubmissionTransformer<MapMessage> messageSubmissionTransformer;
@@ -203,6 +206,8 @@ public class BackendJMSImpl extends AbstractBackendConnector<MapMessage, MapMess
             final MapMessage mapMessage = session.createMapMessage();
             try {
                 downloadMessage(messageId, mapMessage);
+                final String rawXmlByMessageId = nonRepudiationExtService.getRawXmlByMessageId(messageId);
+                mapMessage.setStringProperty(RAW_SOAP_REQUEST, rawXmlByMessageId);
             } catch (final MessageNotFoundException e) {
                 throw new DefaultJmsPluginException("Unable to create push message", e);
             }
