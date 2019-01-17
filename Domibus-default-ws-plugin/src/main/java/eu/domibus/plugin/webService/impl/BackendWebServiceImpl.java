@@ -1,8 +1,8 @@
 
 package eu.domibus.plugin.webService.impl;
 
-import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.ObjectFactory;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 import eu.domibus.ext.exceptions.AuthenticationExtException;
 import eu.domibus.ext.exceptions.MessageAcknowledgeExtException;
 import eu.domibus.ext.services.MessageAcknowledgeExtService;
@@ -24,7 +24,10 @@ import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -82,11 +85,12 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     public SubmitResponse submitMessage(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         LOG.debug("Received message");
 
+        validateSubmitRequest(submitRequest, ebMSHeaderInfo);
+
         List<PartInfo> partInfoList = ebMSHeaderInfo.getUserMessage().getPayloadInfo().getPartInfo();
         List<ExtendedPartInfo> partInfosToAdd = new ArrayList<>();
 
         for (Iterator<PartInfo> i = partInfoList.iterator(); i.hasNext(); ) {
-
             ExtendedPartInfo extendedPartInfo = new ExtendedPartInfo(i.next());
             partInfosToAdd.add(extendedPartInfo);
             i.remove();
@@ -140,6 +144,18 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
         final SubmitResponse response = WEBSERVICE_OF.createSubmitResponse();
         response.getMessageID().add(messageId);
         return response;
+    }
+
+    protected void validateSubmitRequest(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
+        for (final LargePayloadType payload : submitRequest.getPayload()) {
+            if (StringUtils.isBlank(payload.getPayloadId())) {
+                throw new SubmitMessageFault("Invalid request", generateDefaultFaultDetail("Attribute 'payloadId' must appear on element 'payload'"));
+            }
+        }
+        final LargePayloadType bodyload = submitRequest.getBodyload();
+        if (bodyload != null && StringUtils.isNotBlank(bodyload.getPayloadId())) {
+            throw new SubmitMessageFault("Invalid request", generateDefaultFaultDetail("Attribute 'payloadId' must not appear on element 'bodyload'"));
+        }
     }
 
     private FaultDetail generateFaultDetail(MessagingProcessingException mpEx) {
@@ -262,8 +278,6 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
                 payloadType.setValue(extPartInfo.getPayloadDatahandler());
             }
             if (extPartInfo.isInBody()) {
-                extPartInfo.setHref(BODYLOAD);
-                payloadType.setPayloadId(BODYLOAD);
                 retrieveMessageResponse.value.setBodyload(payloadType);
             } else {
                 payloadType.setPayloadId(partInfo.getHref());
