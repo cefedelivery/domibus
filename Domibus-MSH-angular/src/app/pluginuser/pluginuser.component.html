@@ -11,7 +11,7 @@
         </md-select>
 
         <md-select placeholder="User role" [(ngModel)]="filter.authRole" id="endPoint_id">
-          <md-option [value]="null"></md-option>
+          <md-option [value]=""></md-option>
           <md-option *ngFor="let t of userRoles" [value]="t">
             {{t}}
           </md-option>
