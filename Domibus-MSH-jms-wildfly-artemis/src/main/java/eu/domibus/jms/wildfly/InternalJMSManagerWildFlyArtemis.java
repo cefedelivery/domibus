@@ -192,7 +192,13 @@ public class InternalJMSManagerWildFlyArtemis implements InternalJMSManager {
     }
 
     protected Queue lookupQueue(String destName) throws NamingException {
-        String destinationJndi = getJndiName(getQueueControl(destName).getAddress());
+        String destinationJndi = destName;
+
+        ObjectName objectName = getQueueMap().get(destName);
+        if (objectName != null) {
+            destinationJndi = getJndiName(getQueueControl(objectName).getAddress());
+        }
+
         LOG.debug("Found JNDI [" + destinationJndi + "] for queue [" + destName + "]");
         return InitialContext.doLookup(destinationJndi);
     }
