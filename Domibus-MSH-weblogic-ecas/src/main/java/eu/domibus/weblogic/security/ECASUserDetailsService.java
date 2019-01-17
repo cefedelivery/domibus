@@ -6,6 +6,7 @@ import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.DomainException;
 import eu.domibus.api.multitenancy.DomainService;
+import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.security.AuthRole;
 import eu.domibus.common.model.security.UserDetail;
 import eu.domibus.logging.DomibusLogger;
@@ -39,29 +40,16 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ECASUserDetailsService.class);
 
-    private static final String WEBLOGIC_SECURITY_SECURITY = "weblogic.security.Security";
+    private static final String WEBLOGIC_SECURITY_CLASS = "weblogic.security.Security";
 
-    private static final String ERR_CANNOT_RETRIEVE_USER_DETAILS = "Cannot retrieve the user's details";
-
-    private static final String ERR_CANNOT_FIND_USER_WITH_NAME = "Cannot find any user who has the name ";
-
-    private static final String ERR_LOADING_WEBLOGIC_SECURITY_CLASS = "Error loading a Weblogic Security class";
-
-    private static final String EX_USERNAME_DOES_NOT_MATCH_PRINCIPAL =
-            "The provided username and the principal name do not match. username = %s, principal = %s";
-
-    private static final String ERR_USERNAME_DOES_NOT_MATCH_PRINCIPAL = "Username {} does not match Principal {}";
-
-    private static final String LOG_FOUND_USER_GROUP_PRINCIPAL = "Found a user group principal: {}";
-
-    private static final String GET_CURRENT_SUBJECT = "getCurrentSubject";
+    private static final String WEBLOGIC_SECURITY_GET_METHOD = "getCurrentSubject";
 
     private static final String ECAS_USER = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasUser";
 
     private static final String ECAS_GROUP = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasGroup";
 
-    private static final String ECAS_DOMIBUS_USER_ROLE_PREFIX = "DOMIBUS_USER_ROLE_";
-    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX = "DOMIBUS_DOMAIN_";
+    private static final String ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY = "domibus.security.ext.auth.provider.group.role.prefix";
+    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX_KEY = "domibus.security.ext.auth.provider.group.role.prefix";
 
     @Autowired
     private DomainService domainService;
@@ -71,6 +59,9 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
 
     @Autowired
     private DomainContextProvider domainContextProvider;
+
+    @Autowired
+    private DomibusPropertyProvider domibusPropertyProvider;
 
     @Override
     public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken preAuthenticatedAuthenticationToken) throws UsernameNotFoundException {
@@ -87,11 +78,11 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
                 return createUserDetails(username);
             } catch (Exception ex) {
                 LOG.error("error during loadUserByUserName", ex);
-                throw new UsernameNotFoundException(ERR_CANNOT_RETRIEVE_USER_DETAILS, ex);
+                throw new UsernameNotFoundException("Cannot retrieve the user's details", ex);
             }
         }
 
-        throw new UsernameNotFoundException(ERR_CANNOT_FIND_USER_WITH_NAME + username);
+        throw new UsernameNotFoundException("Cannot find any user who has the name " + username);
     }
 
     private UserDetails createUserDetails(final String username) throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException {
@@ -99,21 +90,23 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<String> userGroupsStr = new LinkedList<>();
         String domainName = null;
+        final String userRolePrefix = domibusPropertyProvider.getDomainProperty(ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY);
+        final String domainPrefix = domibusPropertyProvider.getDomainProperty(ECAS_DOMIBUS_DOMAIN_PREFIX_KEY);
 
         //extract user role and domain
         for (Principal principal : getPrincipals()) {
             if (isUserGroupPrincipal(principal)) {
-                LOG.debug(LOG_FOUND_USER_GROUP_PRINCIPAL, principal);
-                if (principal.getName().startsWith(ECAS_DOMIBUS_USER_ROLE_PREFIX)) {
-                    userGroupsStr.add(principal.getName().replaceAll("^" + ECAS_DOMIBUS_USER_ROLE_PREFIX, StringUtils.EMPTY));
-                } else if (principal.getName().startsWith(ECAS_DOMIBUS_DOMAIN_PREFIX)) {
-                    domainName = principal.getName().replaceAll("^" + ECAS_DOMIBUS_DOMAIN_PREFIX, StringUtils.EMPTY);
+                LOG.debug("Found a user group principal: {}", principal);
+                if (principal.getName().startsWith(userRolePrefix)) {
+                    userGroupsStr.add(principal.getName().replaceAll("^" + userRolePrefix, StringUtils.EMPTY));
+                } else if (principal.getName().startsWith(domainPrefix)) {
+                    domainName = principal.getName().replaceAll("^" + domainPrefix, StringUtils.EMPTY);
                 }
             } else {
                 if (isUserPrincipal(principal) && !username.equals(principal.getName())) {
-                    LOG.error(ERR_USERNAME_DOES_NOT_MATCH_PRINCIPAL, username, principal.getName());
+                    LOG.error("Username {} does not match Principal {}", username, principal.getName());
                     throw new AccessDeniedException(
-                            String.format(EX_USERNAME_DOES_NOT_MATCH_PRINCIPAL, username, principal.getName()));
+                            String.format("The provided username and the principal name do not match. username = %s, principal = %s", username, principal.getName()));
                 }
             }
         }
@@ -156,19 +149,19 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     private boolean isWeblogicSecurity() {
         boolean weblogicSecurityLoaded = false;
         try {
-            Class.forName(WEBLOGIC_SECURITY_SECURITY, false, getClass().getClassLoader());
+            Class.forName(WEBLOGIC_SECURITY_CLASS, false, getClass().getClassLoader());
             weblogicSecurityLoaded = true;
         } catch (ClassNotFoundException e) {
             // Do nothing. It can happen when an app does not use a Weblogic security provider.
-            LOG.error(ERR_LOADING_WEBLOGIC_SECURITY_CLASS, e);
+            LOG.error("Error loading a Weblogic Security class", e);
         }
         return weblogicSecurityLoaded;
     }
 
     private Set<Principal> getPrincipals()
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-        Subject subject = (Subject) Class.forName(WEBLOGIC_SECURITY_SECURITY)
-                .getMethod(GET_CURRENT_SUBJECT, null)
+        Subject subject = (Subject) Class.forName(WEBLOGIC_SECURITY_CLASS)
+                .getMethod(WEBLOGIC_SECURITY_GET_METHOD, null)
                 .invoke(null, null);
         return subject.getPrincipals();
     }
