@@ -550,11 +550,21 @@ public class JMSManagerWeblogicTest {
 
         new Expectations() {{
             entry.getKey();
-            result = queueName;
+            returns(queueName, "non-matching-key");
+
+            entry.getValue().<String>getProperty("Jndi");
+            //result = null;
+            returns(null, queueName);
         }};
 
         boolean found = jmsManagerWeblogic.matchesQueue(queueName, entry);
         assertEquals(true, found);
+
+        boolean found2 = jmsManagerWeblogic.matchesQueue(queueName, entry);
+        assertEquals(false, found2);
+
+        boolean found3 = jmsManagerWeblogic.matchesQueue(queueName, entry);
+        assertEquals(true, found3);
 
     }
 }
