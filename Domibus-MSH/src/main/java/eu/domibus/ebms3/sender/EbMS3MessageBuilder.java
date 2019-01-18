@@ -13,7 +13,8 @@ import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.plugin.transformer.OutgoingMessageTransformer;
 import eu.domibus.plugin.transformer.OutgoingMessageTransformerList;
-import eu.domibus.submission.OutgoingMessageTransformerListProvider;
+import eu.domibus.plugin.transformer.PluginHandler;
+import eu.domibus.submission.plugin.PluginHandlerProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,7 +63,7 @@ public class EbMS3MessageBuilder {
     private MessageIdGenerator messageIdGenerator;
 
     @Autowired
-    protected OutgoingMessageTransformerListProvider outgoingMessageTransformerListProvider;
+    protected PluginHandlerProvider pluginHandlerProvider;
 
     public void setJaxbContext(final JAXBContext jaxbContext) {
         this.jaxbContext = jaxbContext;
@@ -135,7 +136,13 @@ public class EbMS3MessageBuilder {
 
     protected void transformBeforeSending(String messageId, SOAPMessage message) {
         final String backendName = userMessageLogDao.findBackendForMessageId(messageId);
-        final OutgoingMessageTransformerList outgoingMessageTransformerList = outgoingMessageTransformerListProvider.getOutgoingMessageTransformerList(backendName);
+        final PluginHandler pluginHandler = pluginHandlerProvider.getPluginHandler(backendName);
+        if (pluginHandler == null) {
+            LOG.debug("No plugin handler found for backend [" + backendName + "]");
+            return;
+        }
+
+        final OutgoingMessageTransformerList outgoingMessageTransformerList = pluginHandler.getOutgoingMessageTransformerList();
         if (outgoingMessageTransformerList == null) {
             LOG.debug("No outgoing message transformer found for backend [" + backendName + "]");
             return;
