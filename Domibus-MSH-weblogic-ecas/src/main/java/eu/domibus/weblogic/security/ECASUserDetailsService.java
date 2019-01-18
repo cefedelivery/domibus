@@ -90,8 +90,8 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
         List<GrantedAuthority> userGroups = new LinkedList<>();
         List<String> userGroupsStr = new LinkedList<>();
         String domainName = null;
-        final String userRolePrefix = domibusPropertyProvider.getDomainProperty(ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY);
-        final String domainPrefix = domibusPropertyProvider.getDomainProperty(ECAS_DOMIBUS_DOMAIN_PREFIX_KEY);
+        final String userRolePrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY);
+        final String domainPrefix = domibusPropertyProvider.getProperty(ECAS_DOMIBUS_DOMAIN_PREFIX_KEY);
 
         //extract user role and domain
         for (Principal principal : getPrincipals()) {
