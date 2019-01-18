@@ -340,7 +340,7 @@ public class InternalJMSManagerWeblogic implements InternalJMSManager {
         return InitialContext.doLookup(destinationJndi);
     }
 
-    private boolean matchesQueue(String destName, Map.Entry<String, InternalJMSDestination> entry) {
+    protected boolean matchesQueue(String destName, Map.Entry<String, InternalJMSDestination> entry) {
         if (entry.getKey().contains(destName)) {
             return true;
         }
