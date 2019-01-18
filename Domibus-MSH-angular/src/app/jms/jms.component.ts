@@ -158,31 +158,11 @@ export class JmsComponent implements OnInit, DirtyOperations {
         for (const key in destinations) {
           this.queues.push(destinations[key]);
         }
-        this.orderedQueues = this.getOrderedQueues();
         this.queuesInfoGot.emit();
       }
     );
 
     return result;
-  }
-
-  private getOrderedQueues() {
-    this.setSortValues();
-    
-    return (this.queues).sort((a: any, b: any) => {
-      return a.logicalName.toLowerCase().localeCompare(b.logicalName.toLowerCase());
-    });
-  }
-
-  private setSortValues() {
-    this.queues.forEach(queue => {
-      const ind = queue.name.lastIndexOf('@');
-      if (queue.name && ind > 0) {
-        queue.logicalName = queue.name.substring(ind + 1) + '@' + queue.name.substring(0, ind);
-      } else {
-        queue.logicalName = queue.name;
-      }
-    });
   }
 
   private refreshDestinations(): Observable<Response> {

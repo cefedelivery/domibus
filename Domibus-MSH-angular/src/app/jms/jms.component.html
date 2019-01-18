@@ -6,7 +6,7 @@
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
                    id="jmsQueueSelector" style="width:40%;">
-          <md-option *ngFor="let queue of orderedQueues" [value]="queue" class="queue-combo-item">
+          <md-option *ngFor="let queue of queues" [value]="queue" class="queue-combo-item">
             {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
