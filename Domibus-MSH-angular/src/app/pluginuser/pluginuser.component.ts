@@ -296,7 +296,8 @@ export class PluginUserComponent extends FilterableListComponent implements OnIn
     }
   }
 
-  onPageChanged() {
+  onPageChanged($event) {
+    this.offset = $event.offset;
     super.resetFilters();
   }
 

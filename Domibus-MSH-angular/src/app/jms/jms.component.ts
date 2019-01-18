@@ -490,7 +490,8 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
     return !isNullOrUndefined(this.markedForDeletionMessages) && this.markedForDeletionMessages.length > 0;
   }
 
-  onPage() {
+  onPage($event) {
+    this.offset = $event.offset;
     super.resetFilters();
   }
 

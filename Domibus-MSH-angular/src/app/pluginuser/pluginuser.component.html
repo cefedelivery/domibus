@@ -76,7 +76,7 @@
     [count]="displayedUsers.length"
     [offset]="offset"
     (activate)="onActivate($event)"
-    (page)="onPageChanged()"
+    (page)="onPageChanged($event)"
     (sort)="onSort()"
     ></ngx-datatable>
 

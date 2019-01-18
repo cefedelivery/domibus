@@ -52,7 +52,7 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
   mshRoles: Array<String>;
   msgTypes: Array<String>;
-  msgStatus: Array<String>;
+  msgStatuses: Array<String>;
   notifStatus: Array<String>;
 
   advancedSearch: boolean;
@@ -307,7 +307,7 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
 
       this.mshRoles = result.mshRoles;
       this.msgTypes = result.msgTypes;
-      this.msgStatus = result.msgStatus;
+      this.msgStatuses = result.msgStatus.sort();
       this.notifStatus = result.notifStatus;
 
       this.loading = false;
