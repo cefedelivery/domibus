@@ -44,6 +44,7 @@
 	<bean id="mshToBackendTemplate"
           class="org.springframework.jms.core.JmsTemplate"
           c:connectionFactory-ref="domibusJMS-XAConnectionFactory"
+		  p:destinationResolver-ref="jndiDestinationResolver"
           p:sessionTransacted="true"
           p:sessionAcknowledgeMode="0"/>
 </beans>
