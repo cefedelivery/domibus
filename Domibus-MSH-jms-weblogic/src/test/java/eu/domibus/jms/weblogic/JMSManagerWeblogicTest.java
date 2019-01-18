@@ -553,7 +553,6 @@ public class JMSManagerWeblogicTest {
             returns(queueName, "non-matching-key");
 
             entry.getValue().<String>getProperty("Jndi");
-            //result = null;
             returns(null, queueName);
         }};
 
