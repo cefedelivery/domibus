@@ -87,7 +87,7 @@
           </md2-datepicker>
 
           <!-- Alert Type Criteria -->
-          <div class="panel" *ngIf="isAlertTypeDefined()">
+          <div class="panel" *ngIf="filter.alertType">
             <md-card>
               <div>
                 <md-card-title>
@@ -176,7 +176,7 @@
     [limit]="rowLimiter.pageSize"
     (page)='onPage($event)'
     (sort)="onSort($event)"
-    (activate)="onActivate($event)">
+  >
   </ngx-datatable>
 
   <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>

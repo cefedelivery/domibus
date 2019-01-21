@@ -1,17 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {MdDialog, MdDialogRef} from '@angular/material';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {Http, Headers, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {MessageFilterResult} from './messagefilterresult';
 import {BackendFilterEntry} from './backendfilterentry';
 import {RoutingCriteriaEntry} from './routingcriteriaentry';
-import {isNullOrUndefined, isUndefined} from 'util';
+import {isNullOrUndefined} from 'util';
 import {EditMessageFilterComponent} from './editmessagefilter-form/editmessagefilter-form.component';
 import {DirtyOperations} from '../common/dirty-operations';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 
 @Component({
   moduleId: module.id,

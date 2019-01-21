@@ -7,7 +7,7 @@ import {ReplaySubject} from 'rxjs';
 import {SecurityEventService} from './security.event.service';
 import {DomainService} from './domain.service';
 import {PasswordPolicyRO} from './passwordPolicyRO';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 
 @Injectable()
 export class SecurityService {
@@ -33,7 +33,7 @@ export class SecurityService {
         username: username,
         password: password
       }).subscribe((response: Response) => {
-        localStorage.setItem('currentUser', JSON.stringify(response.json()));
+        this.updateCurrentUser(response.json());
 
         this.domainService.setAppTitle();
 
@@ -76,16 +76,16 @@ export class SecurityService {
 
   clearSession() {
     this.domainService.resetDomain();
-    localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
   }
 
   getCurrentUser(): User {
-    const storedUser = localStorage.getItem('currentUser');
+    const storedUser = sessionStorage.getItem('currentUser');
     return storedUser ? JSON.parse(storedUser) : null;
   }
 
   updateCurrentUser(user: User): void {
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
   }
 
   private getCurrentUsernameFromServer(): Observable<string> {
