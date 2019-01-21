@@ -53,17 +53,21 @@ public class PullReceiptSender {
     }
 
     private void handleDispatchReceiptResult(SOAPMessage acknowledgementResult) throws EbMS3Exception {
-        if (acknowledgementResult != null) {
-            Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
-            Set<Error> errors = errorMessage.getSignalMessage().getError();
-            Optional<Error> firstError = errors.stream().findFirst();
-            if(firstError.isPresent()) {
-                LOG.error("An firstError occurred when sending receipt:firstError code:[{}], description:[{}]:[{}]", firstError.get().getErrorCode(), firstError.get().getShortDescription(), firstError.get().getErrorDetail());
-                EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(firstError.get().getErrorCode()), firstError.get().getErrorDetail(), firstError.get().getRefToMessageInError(), null);
-                ebMS3Ex.setMshRole(MSHRole.RECEIVING);
-                throw ebMS3Ex;
-            }
+        if (acknowledgementResult == null) {
+            LOG.debug("acknowledgementResult is null, as expected. No errors were reported");
+            return ;
+        }
+        Messaging errorMessage = MessageUtil.getMessage(acknowledgementResult, jaxbContext);
+        if(errorMessage == null || errorMessage.getSignalMessage() == null) {
+            LOG.debug("acknowledgementResult is not null, but it does not contain a SignalMessage with the reported errors. ");
+            return ;
+        }
+        Set<Error> errors = errorMessage.getSignalMessage().getError();
+        for (Error error : errors) {
+            LOG.error("An error occured when sending receipt:error code:[{}], description:[{}]:[{}]", error.getErrorCode(), error.getShortDescription(), error.getErrorDetail());
+            EbMS3Exception ebMS3Ex = new EbMS3Exception(ErrorCode.EbMS3ErrorCode.findErrorCodeBy(error.getErrorCode()), error.getErrorDetail(), error.getRefToMessageInError(), null);
+            ebMS3Ex.setMshRole(MSHRole.RECEIVING);
+            throw ebMS3Ex;
         }
     }
-
 }
