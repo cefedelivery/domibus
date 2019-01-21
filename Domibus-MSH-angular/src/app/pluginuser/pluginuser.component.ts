@@ -131,6 +131,7 @@ export class PluginUserComponent extends FilterableListComponent implements OnIn
   }
 
   changePageSize(newPageSize: number) {
+    super.resetFilters();
     this.offset = 0;
     this.rowLimiter.pageSize = newPageSize;
     this.refresh();

@@ -140,6 +140,7 @@ export class LoggingComponent extends FilterableListComponent implements OnInit 
   }
 
   changePageSize(newPageLimit: number) {
+    super.resetFilters();
     this.page(0, newPageLimit);
   }
 

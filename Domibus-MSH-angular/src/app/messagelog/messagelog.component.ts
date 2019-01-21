@@ -416,6 +416,7 @@ export class MessageLogComponent extends FilterableListComponent implements OnIn
       return;
     }
 
+    super.resetFilters();
     DownloadService.downloadNative(MessageLogComponent.MESSAGE_LOG_URL + '/csv?' + this.createSearchParams().toString());
   }
 

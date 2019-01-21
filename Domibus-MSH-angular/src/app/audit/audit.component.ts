@@ -187,7 +187,7 @@ export class AuditComponent extends FilterableListComponent implements OnInit {
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
     }
-
+    super.resetFilters();
     const auditCriteria: AuditCriteria = this.buildCriteria();
     this.auditService.saveAsCsv(auditCriteria);
   }

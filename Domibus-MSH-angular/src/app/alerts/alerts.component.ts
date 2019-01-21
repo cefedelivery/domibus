@@ -336,6 +336,7 @@ export class AlertsComponent extends FilterableListComponent implements OnInit {
         return;
       }
 
+      super.resetFilters();
       // todo: add dynamic params for csv filtering, if requested
       DownloadService.downloadNative(AlertsComponent.ALERTS_CSV_URL + '?' + this.createStaticSearchParams().toString());
     }

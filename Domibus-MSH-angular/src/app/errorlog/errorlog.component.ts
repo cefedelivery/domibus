@@ -245,13 +245,7 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
     return false;//to prevent default navigation
   }
 
-  onSelect({selected}) {
-    // console.log('Select Event', selected, this.selected);
-  }
-
   onActivate(event) {
-    // console.log('Activate Event', event);
-
     if ('dblclick' === event.type) {
       this.details(event.row);
     }
@@ -271,7 +265,7 @@ export class ErrorLogComponent extends FilterableListComponent implements OnInit
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
     }
-
+    super.resetFilters();
     DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.createSearchParams().toString());
   }
 

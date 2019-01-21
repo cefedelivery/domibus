@@ -197,6 +197,7 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
   }
 
   changePageSize(newPageSize: number) {
+    super.resetFilters();
     this.rowLimiter.pageSize = newPageSize;
     this.refresh();
   }
@@ -482,7 +483,7 @@ export class JmsComponent extends FilterableListComponent implements OnInit, Dir
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
     }
-
+    super.resetFilters();
     DownloadService.downloadNative('rest/jms/csv' + this.getFilterPath());
   }
 
