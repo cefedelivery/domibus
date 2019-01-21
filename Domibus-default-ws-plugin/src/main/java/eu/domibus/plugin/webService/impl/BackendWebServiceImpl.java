@@ -142,7 +142,7 @@ public class BackendWebServiceImpl extends AbstractBackendConnector<Messaging, U
     protected void validateSubmitRequest(SubmitRequest submitRequest, Messaging ebMSHeaderInfo) throws SubmitMessageFault {
         for (final LargePayloadType payload : submitRequest.getPayload()) {
             if (StringUtils.isBlank(payload.getPayloadId())) {
-                throw new SubmitMessageFault("Invalid request", generateDefaultFaultDetail("Attribute 'payloadId' must appear on element 'payload'"));
+                throw new SubmitMessageFault("Invalid request", generateDefaultFaultDetail("Attribute 'payloadId' of the 'payload' element must not be empty"));
             }
         }
         final LargePayloadType bodyload = submitRequest.getBodyload();
