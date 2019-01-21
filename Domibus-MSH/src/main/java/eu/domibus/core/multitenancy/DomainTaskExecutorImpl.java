@@ -39,7 +39,10 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
         final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
         try {
             utrFuture.get(5000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new DomainException("Could not execute task", e);
+        } catch (ExecutionException | TimeoutException e) {
             throw new DomainException("Could not execute task", e);
         }
     }
@@ -50,7 +53,10 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
         final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
         try {
             utrFuture.get(5000L, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new DomainException("Could not execute task for domain " + domain, e);
+        } catch (ExecutionException | TimeoutException e) {
             throw new DomainException("Could not execute task for domain " + domain, e);
         }
     }
