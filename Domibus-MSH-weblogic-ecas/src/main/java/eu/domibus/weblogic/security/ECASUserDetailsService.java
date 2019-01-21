@@ -49,7 +49,7 @@ public class ECASUserDetailsService implements AuthenticationUserDetailsService<
     private static final String ECAS_GROUP = "eu.cec.digit.ecas.client.j2ee.weblogic.EcasGroup";
 
     private static final String ECAS_DOMIBUS_USER_ROLE_PREFIX_KEY = "domibus.security.ext.auth.provider.group.role.prefix";
-    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX_KEY = "domibus.security.ext.auth.provider.group.role.prefix";
+    private static final String ECAS_DOMIBUS_DOMAIN_PREFIX_KEY = "domibus.security.ext.auth.provider.group.domain.prefix";
 
     @Autowired
     private DomainService domainService;
