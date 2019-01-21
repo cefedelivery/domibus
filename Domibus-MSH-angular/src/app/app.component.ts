@@ -4,7 +4,7 @@ import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
 import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
-import {HttpEventService} from './http/http.event.service';
+import {HttpEventService} from './common/http/http.event.service';
 
 @Component({
   selector: 'app-root',

@@ -1,0 +1,13 @@
+#footer {
+  position:absolute;
+  bottom:0;
+  left: 10px;
+  width:100%;
+  overflow:hidden;
+  text-align: center;
+}
+
+#footer .domibusVersion {
+  display: inline-block;
+  font-size: 15px;
+}

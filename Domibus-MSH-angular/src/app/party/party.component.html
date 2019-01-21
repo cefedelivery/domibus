@@ -5,23 +5,24 @@
       <form (submit)="searchIfOK()">
         <div class="panel">
           <md-input-container>
-            <input mdInput placeholder="Name" [(ngModel)]="name" name="name" id="name_id">
+            <input mdInput placeholder="Name" [(ngModel)]="filter.name" name="name" id="name_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="End Point" [(ngModel)]="endPoint" name="endPoint" id="endPoint_id">
+            <input mdInput placeholder="End Point" [(ngModel)]="filter.endPoint" name="endPoint" id="endPoint_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="Party Id" [(ngModel)]="partyID" name="partyID" id="partyID_id">
+            <input mdInput placeholder="Party Id" [(ngModel)]="filter.partyID" name="partyID" id="partyID_id">
           </md-input-container>
           <md-input-container>
-            <input mdInput placeholder="Process" [(ngModel)]="process" name="process" id="process_id">
+            <input mdInput placeholder="Process" [(ngModel)]="filter.process" name="process" id="process_id">
           </md-input-container>
-          <md-select placeholder="Process Role" [(ngModel)]="process_role" name="process_role" id="process_role_id" style="width:120px;">
+          <md-select placeholder="Process Role" [(ngModel)]="filter.process_role" name="process_role" id="process_role_id" style="width:120px;">
             <md-option [value]="''"></md-option>
             <md-option [value]="'(I)'">I</md-option>
             <md-option [value]="'(R)'">R</md-option>
             <md-option [value]="'(IR)'">IR</md-option>
           </md-select>
+
           <div class="searchArea">
             <button md-raised-button color="primary" id="searchbutton_id" button-click-behaviour>
               <md-icon>search</md-icon>
@@ -68,6 +69,7 @@
   [offset]="offset"
   [limit]="rowLimiter.pageSize"
   (page)="onPageChange($event)"
+  (sort)="OnSort()"
   [selected]="selected"
   [selectionType]="'single'"
   (activate)="onActivate($event)"
