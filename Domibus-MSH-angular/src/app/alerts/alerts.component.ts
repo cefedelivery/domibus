@@ -355,7 +355,7 @@ export class AlertsComponent extends FilterableListComponent implements OnInit {
     const dialogRef = this.dialog.open(SaveDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows)).subscribe(() => {
+        this.http.put(AlertsComponent.ALERTS_URL, JSON.stringify(this.rows), {headers: new Headers({'Content-Type': 'application/json'})}).subscribe(() => {
           this.alertService.success('The operation \'update alerts\' completed successfully.', false);
           this.page(this.offset, this.rowLimiter.pageSize, this.orderBy, this.asc);
           this.isDirty = false;
