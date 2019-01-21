@@ -1,6 +1,8 @@
 package eu.domibus.core.multitenancy;
 
 import eu.domibus.api.multitenancy.*;
+import eu.domibus.logging.DomibusLogger;
+import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -14,6 +16,8 @@ import java.util.concurrent.*;
  */
 @Service
 public class DomainTaskExecutorImpl implements DomainTaskExecutor {
+
+    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(DomainTaskExecutorImpl.class);
 
     @Autowired
     protected DomainContextProvider domainContextProvider;
@@ -35,29 +39,27 @@ public class DomainTaskExecutorImpl implements DomainTaskExecutor {
 
     @Override
     public void submit(Runnable task) {
-        final ClearDomainRunnable domainRunnable = new ClearDomainRunnable(domainContextProvider, task);
-        final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
-        try {
-            utrFuture.get(5000L, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new DomainException("Could not execute task", e);
-        } catch (ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not execute task", e);
-        }
+        LOG.trace("Submitting task");
+        final ClearDomainRunnable clearDomainRunnable = new ClearDomainRunnable(domainContextProvider, task);
+        submitRunnable(clearDomainRunnable);
     }
 
     @Override
     public void submit(Runnable task, Domain domain) {
+        LOG.trace("Submitting task for domain [{}]", domain);
         final DomainRunnable domainRunnable = new DomainRunnable(domainContextProvider, domain, task);
-        final Future<?> utrFuture = schedulingTaskExecutor.submit(domainRunnable);
+        submitRunnable(domainRunnable);
+    }
+
+    protected void submitRunnable(Runnable task) {
+        final Future<?> utrFuture = schedulingTaskExecutor.submit(task);
         try {
             utrFuture.get(5000L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new DomainException("Could not execute task for domain " + domain, e);
+            throw new DomainException("Could not execute task", e);
         } catch (ExecutionException | TimeoutException e) {
-            throw new DomainException("Could not execute task for domain " + domain, e);
+            throw new DomainException("Could not execute task", e);
         }
     }
 }
