@@ -63,10 +63,10 @@
 			</propertySet>
 		</properties>
 		<payloadProfiles>
-			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
-			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf"/>
-			<payload name="businessContentPayloadInBody" cid="cid:messageib" required="true" mimeType="text/xml" inBody="true"/>
-			<payload name="businessContentPayloadInBodyTwo" cid="cid:messageibtwo" required="true" mimeType="application/xml" inBody="true"/>
+			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml" inBody="false"/>
+			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf" inBody="false"/>
+			<payload name="businessContentPayloadInBody" cid="" required="true" mimeType="text/xml" inBody="true"/>
+			<payload name="businessContentPayloadInBodyTwo" cid="" required="true" mimeType="application/xml" inBody="true"/>
 			<payloadProfile name="MessageProfile" maxSize="40894464">
 				<attachment name="businessContentPayload"/>
 				<attachment name="businessContentAttachment"/>
