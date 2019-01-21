@@ -14,6 +14,10 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Cosmin Baciu
+ * @since 4.1
+ */
 @RunWith(JMockit.class)
 public class DomainTaskExecutorImplTest {
 
