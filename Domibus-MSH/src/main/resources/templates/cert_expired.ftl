@@ -108,18 +108,7 @@
           </tr>
         </table>
 
-        <!-- COPYRIGHT -->
-
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f1f1;">
-          <tr>
-            <td valign="top" align="center" style="font-size: 12px; font-family: Arial, Helvetica, sans-serif; color: #000000;"><br />
-              <p style="text-align: center;">&nbsp;Domibus 2018&nbsp;</p>
-				<br />
-             </td>
-          </tr>
-        </table>
-
-        <!-- COPYRIGHT --></td>
+        </td>
     </tr>
   </table>
 </center>
