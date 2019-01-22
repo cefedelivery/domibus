@@ -46,7 +46,7 @@ export class SecurityService {
   }
 
   logout() {
-    this.alertService.clearAlert();
+    this.alertService.close();
 
     this.clearSession();
 
