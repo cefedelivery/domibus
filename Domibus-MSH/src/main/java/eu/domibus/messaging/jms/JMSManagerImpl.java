@@ -65,9 +65,6 @@ public class JMSManagerImpl implements JMSManager {
     protected DomainContextProvider domainContextProvider;
 
     @Autowired
-    private MessageConverter messageConverter;
-
-    @Autowired
     @Qualifier("jsonJmsTemplate")
     private JmsTemplate jmsTemplate;
 

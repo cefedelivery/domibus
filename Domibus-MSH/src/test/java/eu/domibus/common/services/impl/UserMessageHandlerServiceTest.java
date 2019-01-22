@@ -881,29 +881,56 @@ public class UserMessageHandlerServiceTest {
     }
 
     @Test
-    public void testCheckDuplicate(@Injectable final UserMessageLog userMessageLog) {
+    public void testCheckDuplicate(@Injectable Messaging messaging, @Injectable final UserMessageLog userMessageLog, @Injectable UserMessage userMessage) throws EbMS3Exception {
+        final String MESSAGE_ID = "1234";
+        final String FROM_VALUE = "domibus-blue";
         new Expectations() {{
-            userMessageLogDao.findByMessageId(withSubstring("1234"), MSHRole.RECEIVING);
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = MESSAGE_ID;
+
+            userMessageLogDao.findByMessageId(MESSAGE_ID, MSHRole.RECEIVING);
             result = userMessageLog;
 
-            userMessageLogDao.findByMessageId(anyString, MSHRole.RECEIVING);
-            result = null;
-        }};
-        Messaging messaging1 = new Messaging();
-        UserMessage userMessage1 = new UserMessage();
-        MessageInfo messageInfo1 = new MessageInfo();
-        messageInfo1.setMessageId("1234");
-        userMessage1.setMessageInfo(messageInfo1);
-        messaging1.setUserMessage(userMessage1);
-        Assert.assertTrue("Expecting match in duplicate check", userMessageHandlerService.checkDuplicate(messaging1));
+            messagingDao.findUserMessageByMessageId(MESSAGE_ID);
+            result = userMessage;
 
-        Messaging messaging2 = new Messaging();
-        UserMessage userMessage2 = new UserMessage();
-        MessageInfo messageInfo2 = new MessageInfo();
-        messageInfo2.setMessageId("4567");
-        userMessage2.setMessageInfo(messageInfo2);
-        messaging2.setUserMessage(userMessage2);
-        Assert.assertFalse("Expecting not duplicate result", userMessageHandlerService.checkDuplicate(messaging2));
+            userMessage.getPartyInfo().getFrom().getFirstPartyId();
+            result = FROM_VALUE;
+
+            messaging.getUserMessage().getPartyInfo().getFrom().getFirstPartyId();
+            result = FROM_VALUE;
+        }};
+        Assert.assertTrue("Expecting match in duplicate check", userMessageHandlerService.checkDuplicate(messaging));
+    }
+
+    @Test(expected = EbMS3Exception.class)
+    public void testCheckDuplicateWithDifferentFromValue(@Injectable Messaging messaging,
+                                                         @Injectable final UserMessageLog userMessageLog,
+                                                         @Injectable UserMessage existingUserMessage,
+                                                         @Injectable UserMessage receivedUserMessage) throws EbMS3Exception {
+        final String MESSAGE_ID = "1234";
+        final String FROM_VALUE = "domibus-blue";
+        new Expectations() {{
+            messaging.getUserMessage().getMessageInfo().getMessageId();
+            result = MESSAGE_ID;
+
+            userMessageLogDao.findByMessageId(MESSAGE_ID, MSHRole.RECEIVING);
+            result = userMessageLog;
+
+            messagingDao.findUserMessageByMessageId(MESSAGE_ID);
+            result = existingUserMessage;
+
+            existingUserMessage.getPartyInfo().getFrom().getFirstPartyId();
+            result = FROM_VALUE;
+
+            messaging.getUserMessage();
+            result = receivedUserMessage;
+
+
+            receivedUserMessage.getPartyInfo().getFrom().getFirstPartyId();
+            result = "otherValue";
+        }};
+        Assert.assertTrue("Expecting match in duplicate check", userMessageHandlerService.checkDuplicate(messaging));
     }
 
     @Test

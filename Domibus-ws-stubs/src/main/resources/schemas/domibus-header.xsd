@@ -110,7 +110,7 @@
         <xsd:all>
             <xsd:element name="PartProperties" type="tns:PartProperties" minOccurs="0"/>
         </xsd:all>
-        <xsd:attribute name="href" type="xsd:token" use="required"/>
+        <xsd:attribute name="href" type="xsd:token"/>
     </xsd:complexType>
 
     <xsd:complexType name="Property">
