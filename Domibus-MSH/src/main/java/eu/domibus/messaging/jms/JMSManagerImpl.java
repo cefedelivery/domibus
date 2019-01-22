@@ -42,10 +42,14 @@ public class JMSManagerImpl implements JMSManager {
 
     private static final String SELECTOR = "selector";
 
-    /** queue names to be skip from showing into GUI interface */
+    /**
+     * queue names to be skip from showing into GUI interface
+     */
     private static final String[] SKIP_QUEUE_NAMES = {};
 
-    /** multi-tenancy mode - JMS plugin queues suffixes per domain */
+    /**
+     * multi-tenancy mode - JMS plugin queues suffixes per domain
+     */
     private static final String[] JMS_QUEUE_NAMES = {"domibus.backend.jms.outQueue", "domibus.backend.jms.replyQueue",
             "domibus.backend.jms.errorNotifyConsumer", "domibus.backend.jms.errorNotifyProducer"};
 
@@ -81,11 +85,11 @@ public class JMSManagerImpl implements JMSManager {
     private DomainService domainService;
 
     @Override
-    public Map<String, JMSDestination> getDestinations() {
+    public SortedMap<String, JMSDestination> getDestinations() {
         Map<String, InternalJMSDestination> destinations = internalJmsManager.findDestinationsGroupedByFQName();
         Map<String, InternalJMSDestination> result = new HashMap<>();
 
-        for (Map.Entry<String, InternalJMSDestination> mapEntry: destinations.entrySet()) {
+        for (Map.Entry<String, InternalJMSDestination> mapEntry : destinations.entrySet()) {
             final String internalQueueName = mapEntry.getValue().getName();
             if (StringUtils.indexOfAny(internalQueueName, SKIP_QUEUE_NAMES) == -1 &&
                     !jmsQueueInOtherDomain(internalQueueName)) {
@@ -93,7 +97,34 @@ public class JMSManagerImpl implements JMSManager {
             }
         }
 
-        return jmsDestinationMapper.convert(result);
+        Map<String, JMSDestination> queues = jmsDestinationMapper.convert(result);
+        return sortQueues(queues);
+    }
+
+//         in case of cluster environments, we reverse the name of the queue with the cluster name so that the ordering shows all logical queues grouped:
+//         Cluster1@inQueueX
+//         Cluster2@inQueueX
+//         Cluster1@inQueueY
+//         Cluster2@inQueueY
+//         in any case, we sort them by key = logicalName
+    protected SortedMap<String, JMSDestination> sortQueues(Map<String, JMSDestination> destinations) {
+        SortedMap<String, JMSDestination> jmsDestinations = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        if (destinations == null) {
+            return jmsDestinations;
+        }
+
+        destinations.values().forEach(queue -> {
+            int ind = queue.getName().lastIndexOf('@');
+            String logicalName;
+            if (ind > 0) {
+                logicalName = queue.getName().substring(ind + 1) + '@' + queue.getName().substring(0, ind);
+            } else {
+                logicalName = queue.getName();
+            }
+            jmsDestinations.put(logicalName, queue);
+        });
+
+        return jmsDestinations;
     }
 
     @Override
@@ -152,14 +183,14 @@ public class JMSManagerImpl implements JMSManager {
     }
 
     @Override
-    public void convertAndSendToQueue(final Object message, final Queue destination, final String selector){
+    public void convertAndSendToQueue(final Object message, final Queue destination, final String selector) {
         jmsTemplate.convertAndSend(destination, message, message1 -> {
             final Domain currentDomain = domainContextProvider.getCurrentDomainSafely();
             message1.setStringProperty(JmsMessage.PROPERTY_ORIGINAL_QUEUE, destination.getQueueName());
             //that scenario occurs when sending an event with super user... EG:Login failure with super user.
-            if(currentDomain!=null){
+            if (currentDomain != null) {
                 message1.setStringProperty(MessageConstants.DOMAIN, currentDomain.getCode());
-            }else{
+            } else {
                 LOG.debug("Sending event for super user, no current domain defined");
             }
             message1.setStringProperty(SELECTOR, selector);

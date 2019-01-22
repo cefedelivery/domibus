@@ -5,6 +5,7 @@ import javax.jms.Topic;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * // TODO Documentation
@@ -21,7 +22,7 @@ public interface JMSManager {
      *
      * @return a map where the key is the fully qualified name of the real JMS destination and the value is a JMSDestination object.
      */
-    Map<String, JMSDestination> getDestinations();
+    SortedMap<String, JMSDestination> getDestinations();
 
     /**
      * Retrieves the JMS message having a specific id  from the provided source.

@@ -41,7 +41,7 @@ public class JmsResourceTest {
     @Test
     public void testDestinations() {
         // Given
-        final Map<String, JMSDestination> resultMap = new HashMap<>();
+        final SortedMap<String, JMSDestination> resultMap = new TreeMap<>();
         JMSDestination destination1 = new JMSDestination();
         destination1.setName("destination1");
         resultMap.put("test1", destination1);

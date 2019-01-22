@@ -46,7 +46,7 @@ export class SecurityService {
   }
 
   logout() {
-    this.alertService.clearAlert();
+    this.alertService.close();
 
     this.clearSession();
 
@@ -182,14 +182,17 @@ export class SecurityService {
     }
 
     const currentUser = this.getCurrentUser();
-    if (currentUser && currentUser.daysTillExpiration > 0) {
+    if (currentUser && currentUser.daysTillExpiration !== null) {
+      let interval: string = 'in ' + currentUser.daysTillExpiration + ' day(s)';
+      if (currentUser.daysTillExpiration === 0) {
+        interval = 'today';
+      }
       return {
         response: true,
-        reason: 'The password is about to expire in ' + currentUser.daysTillExpiration + ' days. We recommend changing it.',
+        reason: 'The password is about to expire ' + interval + '. We recommend changing it.',
         redirectUrl: 'changePassword'
       };
     }
-
     return {response: false};
 
   }
