@@ -8,6 +8,8 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.message.Attachment;
 import org.apache.cxf.message.MessageImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -22,17 +24,37 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author idragusa
  * @author Cosmin Baciu
  * @since 3.2.5
  */
+@Service
 public class SoapUtil {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SoapUtil.class);
 
-    public static SOAPMessage createUserMessage(MessageImpl messageImpl) throws SOAPException, IOException, ParserConfigurationException, SAXException, TransformerException {
+    @Autowired
+    protected TransformerFactory transformerFactory;
+
+    public void logMessage(SOAPMessage request) throws IOException, TransformerException {
+        if (LOG.isDebugEnabled()) {
+            try (StringWriter sw = new StringWriter()) {
+                transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
+
+                LOG.debug(sw.toString());
+                LOG.debug("received attachments:");
+                final Iterator i = request.getAttachments();
+                while (i.hasNext()) {
+                    LOG.debug("attachment: {}", i.next());
+                }
+            }
+        }
+    }
+
+    public SOAPMessage createUserMessage(MessageImpl messageImpl) throws SOAPException, IOException, ParserConfigurationException, SAXException, TransformerException {
         LOG.debug("Creating SOAPMessage");
         SOAPMessage message = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createMessage();
 
@@ -46,21 +68,21 @@ public class SoapUtil {
         }
 
         final String soapEnvelopeString = IOUtils.toString(messageImpl.getContent(InputStream.class));
-        final SOAPMessage soapMessage = SoapUtil.createSOAPMessage(soapEnvelopeString);
+        final SOAPMessage soapMessage = createSOAPMessage(soapEnvelopeString);
         final SOAPElement next = (SOAPElement) soapMessage.getSOAPHeader().getChildElements(ObjectFactory._Messaging_QNAME).next();
         message.getSOAPHeader().addChildElement(next);
 
         message.saveChanges();
 
         if (LOG.isDebugEnabled()) {
-            final String rawXMLMessage = SoapUtil.getRawXMLMessage(message);
+            final String rawXMLMessage = getRawXMLMessage(message);
             LOG.debug("Created SOAPMessage [{}]", rawXMLMessage);
         }
 
         return message;
     }
 
-    public static String getRawXMLMessage(SOAPMessage soapMessage) throws TransformerException {
+    public String getRawXMLMessage(SOAPMessage soapMessage) throws TransformerException {
         final StringWriter rawXmlMessageWriter = new StringWriter();
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -72,7 +94,7 @@ public class SoapUtil {
         return rawXmlMessageWriter.toString();
     }
 
-    public static SOAPMessage createSOAPMessage(final String rawXml) throws SOAPException, IOException, ParserConfigurationException, SAXException {
+    public SOAPMessage createSOAPMessage(final String rawXml) throws SOAPException, IOException, ParserConfigurationException, SAXException {
         MessageFactory factory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
         SOAPMessage message = factory.createMessage();
 

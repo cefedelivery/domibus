@@ -77,6 +77,9 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
     @Autowired
     protected MessageUtil messageUtil;
 
+    @Autowired
+    protected SoapUtil soapUtil;
+
     @Override
     public SOAPMessage processMessage(SOAPMessage request, Messaging messaging) {
         LOG.trace("before pull receipt.");
@@ -143,7 +146,7 @@ public class IncomingPullReceiptHandler implements IncomingMessageHandler {
         if (pullReceiptMatcher.matchReliableReceipt(legConfiguration) && legConfiguration.getReliability().isNonRepudiation()) {
             RawEnvelopeDto rawEnvelopeDto = messageExchangeService.findPulledMessageRawXmlByMessageId(messageId);
             try {
-                soapMessage = SoapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
+                soapMessage = soapUtil.createSOAPMessage(rawEnvelopeDto.getRawMessage());
             } catch (ParserConfigurationException | SOAPException | SAXException | IOException e) {
                 throw new ReliabilityException(DomibusCoreErrorCode.DOM_004, "Raw message found in db but impossible to restore it");
             }

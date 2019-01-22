@@ -30,6 +30,7 @@ import eu.domibus.logging.DomibusMessageCode;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.cxf.attachment.AttachmentUtil;
@@ -48,7 +49,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Iterator;
 
 /**
@@ -61,6 +61,9 @@ import java.util.Iterator;
 public class UserMessageHandlerServiceImpl implements UserMessageHandlerService {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(UserMessageHandlerServiceImpl.class);
+
+    @Autowired
+    protected SoapUtil soapUtil;
 
     @Autowired
     private PModeProvider pModeProvider;
@@ -133,7 +136,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
     }
 
     protected void handleIncomingMessage(final LegConfiguration legConfiguration, String pmodeKey, final SOAPMessage request, final Messaging messaging, boolean selfSending, boolean messageExists, boolean testMessage) throws IOException, TransformerException, EbMS3Exception, SOAPException {
-        logMessage(request);
+        soapUtil.logMessage(request);
 
         if (selfSending) {
                 /* we add a defined suffix in order to assure DB integrity - messageId uniqueness
@@ -175,20 +178,7 @@ public class UserMessageHandlerServiceImpl implements UserMessageHandlerService 
         }
     }
 
-    protected void logMessage(SOAPMessage request) throws IOException, TransformerException {
-        if (LOG.isDebugEnabled()) {
-            try (StringWriter sw = new StringWriter()) {
-                transformerFactory.newTransformer().transform(new DOMSource(request.getSOAPPart()), new StreamResult(sw));
 
-                LOG.debug(sw.toString());
-                LOG.debug("received attachments:");
-                final Iterator i = request.getAttachments();
-                while (i.hasNext()) {
-                    LOG.debug("attachment: {}", i.next());
-                }
-            }
-        }
-    }
 
 
     /**

@@ -6,12 +6,13 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.core.message.fragment.SplitAndJoinService;
 import eu.domibus.core.pmode.PModeProvider;
 import eu.domibus.ebms3.common.model.Messaging;
-import eu.domibus.ebms3.receiver.handler.IncomingUserMessageHandler;
+import eu.domibus.ebms3.receiver.handler.IncomingSourceMessageHandler;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.logging.MDCKey;
 import eu.domibus.messaging.MessageConstants;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.TransformerException;
 
 /**
  * @author Cosmin Baciu
@@ -35,13 +37,16 @@ public class LargeMessageSenderListener extends AbstractMessageSenderListener {
     protected SplitAndJoinService splitAndJoinService;
 
     @Autowired
-    protected IncomingUserMessageHandler incomingUserMessageHandler;
+    protected IncomingSourceMessageHandler incomingSourceMessageHandler;
 
     @Autowired
     protected MessageUtil messageUtil;
 
     @Autowired
-    private PModeProvider pModeProvider;
+    protected PModeProvider pModeProvider;
+
+    @Autowired
+    protected SoapUtil soapUtil;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 1200) // 20 minutes
     @MDCKey(DomibusLogger.MDC_MESSAGE_ID)
@@ -57,7 +62,7 @@ public class LargeMessageSenderListener extends AbstractMessageSenderListener {
                 } catch (final JMSException e) {
                     LOG.error("Error processing JMS message", e);
                 }
-                if(StringUtils.isBlank(domainCode)) {
+                if (StringUtils.isBlank(domainCode)) {
                     LOG.error("Domain is empty: could not send message");
                     return;
                 }
@@ -68,15 +73,25 @@ public class LargeMessageSenderListener extends AbstractMessageSenderListener {
                 Messaging messaging = messageUtil.getMessage(request);
                 String pmodeKey = null;
                 try {
-                     pmodeKey = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey();
-                     request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
+                    pmodeKey = pModeProvider.findUserMessageExchangeContext(messaging.getUserMessage(), MSHRole.RECEIVING).getPmodeKey();
+                    request.setProperty(DispatchClientDefaultProvider.PMODE_KEY_CONTEXT_PROPERTY, pmodeKey);
                 } catch (EbMS3Exception | SOAPException e) {
                     //TODO return a signal error to C2 and notify the backend
                     LOG.error("Error getting the pmodeKey");
                     return;
                 }
 
-                incomingUserMessageHandler.processMessage(request, messaging);
+                final SOAPMessage response = incomingSourceMessageHandler.processMessage(request, messaging);
+
+                if (LOG.isDebugEnabled()) {
+                    try {
+                        LOG.debug("SourceMessage receipt [{}] " + soapUtil.getRawXMLMessage(response));
+                    } catch (TransformerException e) {
+                        LOG.debug("Could not log SourceMessage receipt", e);
+                    }
+                }
+
+                //TODO send the receipt
             } else {
                 super.onMessage(message);
             }

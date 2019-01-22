@@ -29,6 +29,7 @@ import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateService;
 import eu.domibus.plugin.validation.SubmissionValidationException;
 import eu.domibus.util.MessageUtil;
+import eu.domibus.util.SoapUtil;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -72,6 +73,9 @@ public class UserMessageHandlerServiceTest {
 
     @Tested
     UserMessageHandlerServiceImpl userMessageHandlerService;
+
+    @Injectable
+    SoapUtil soapUtil;
 
     @Injectable
     BackendNotificationService backendNotificationService;

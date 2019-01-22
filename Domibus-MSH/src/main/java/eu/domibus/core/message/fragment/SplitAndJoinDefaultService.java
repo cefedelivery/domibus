@@ -45,6 +45,9 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    protected SoapUtil soapUtil;
+
     @Override
     public boolean mayUseSplitAndJoin(LegConfiguration legConfiguration) {
         final Splitting splitting = legConfiguration.getSplitting();
@@ -93,7 +96,7 @@ public class SplitAndJoinDefaultService implements SplitAndJoinService {
             messageImpl.setContent(InputStream.class, rawInputStream);
             messageImpl.put(Message.CONTENT_TYPE, createContentType(messageGroupEntity.getMessageHeaderEntity().getBoundary(), messageGroupEntity.getMessageHeaderEntity().getStart()));
             new AttachmentDeserializer(messageImpl).initializeAttachments();
-            return SoapUtil.createUserMessage(messageImpl);
+            return soapUtil.createUserMessage(messageImpl);
         } catch (Exception e) {
             //TODO return a signal error to C2 and notify the backend
             LOG.error("Error parsing the source file [{}]", sourceMessageFile);
