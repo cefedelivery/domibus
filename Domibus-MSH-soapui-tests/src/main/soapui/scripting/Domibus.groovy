@@ -286,7 +286,7 @@ class Domibus{
         def cleanDatabaseAll() {
         debugLog("  ====  Calling \"cleanDatabaseAll\".", log)
         openAllDbConnections()
-        openDbConnections(allDomainsProperties.keySet())
+        cleanDatabaseForDomains(allDomainsProperties.keySet())
         closeAllDbConnections()
     }
 
