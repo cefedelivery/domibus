@@ -1,7 +1,6 @@
 package eu.domibus.common.util;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.property.DomibusPropertyProvider;
+import eu.domibus.proxy.DomibusProxy;
 import junit.framework.Assert;
 import mockit.Injectable;
 import mockit.NonStrictExpectations;
@@ -13,7 +12,8 @@ import org.junit.Test;
 
 
 /**
- * Created by idragusa on 6/5/18.
+ * @author idragusa
+ * @since 4.0
  */
 public class ProxyUtilTest {
 
@@ -21,56 +21,53 @@ public class ProxyUtilTest {
     ProxyUtil proxyUtil;
 
     @Injectable
-    protected DomibusPropertyProvider domibusPropertyProvider;
+    protected DomibusProxy domibusProxy;
 
-    @Injectable
-    protected DomibusConfigurationService domibusConfigurationService;
 
     @Test
     public void testUseProxyFalse() {
-        Assert.assertFalse(domibusConfigurationService.useProxy());
+        Assert.assertFalse(domibusProxy.isEnabled());
     }
 
     @Test
     public void testUseProxytrue() {
         new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
+            domibusProxy.isEnabled();
             result = true;
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            domibusProxy.getHttpProxyHost();
             result = "somehost";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            domibusProxy.getHttpProxyPort();
             result = "8280";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            domibusProxy.getHttpProxyUser();
             result = "someuser";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
+            domibusProxy.getHttpProxyPassword();
             result = "somepass";
 
         }};
 
-        // exception is expected
-        Assert.assertTrue(domibusConfigurationService.useProxy());
+        Assert.assertTrue(domibusProxy.isEnabled());
     }
 
     @Test
     public void testGetConfiguredProxy() {
         new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
+            domibusProxy.isEnabled();
             result = true;
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            domibusProxy.getHttpProxyHost();
             result = "somehost";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            domibusProxy.getHttpProxyPort();
             result = "8280";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            domibusProxy.getHttpProxyUser();
             result = "someuser";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
+            domibusProxy.getHttpProxyPassword();
             result = "somepass";
 
         }};
@@ -82,19 +79,19 @@ public class ProxyUtilTest {
     @Test
     public void testGetConfiguredCredentialsProvider() {
         new NonStrictExpectations() {{
-            domibusConfigurationService.useProxy();
+            domibusProxy.isEnabled();
             result = true;
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
+            domibusProxy.getHttpProxyHost();
             result = "somehost";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
+            domibusProxy.getHttpProxyPort();
             result = "8280";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
+            domibusProxy.getHttpProxyUser();
             result = "someuser";
 
-            domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
+            domibusProxy.getHttpProxyPassword();
             result = "somepass";
 
         }};

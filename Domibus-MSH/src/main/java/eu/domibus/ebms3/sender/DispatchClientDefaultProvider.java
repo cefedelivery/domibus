@@ -5,6 +5,8 @@ import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.proxy.DomibusProxy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.endpoint.Client;
@@ -56,6 +58,9 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     @Autowired
     protected DomibusPropertyProvider domibusPropertyProvider;
 
+    @Autowired
+    DomibusProxy domibusProxy;
+
     @Cacheable(value = "dispatchClient", key = "#domain + #endpoint + #pModeKey", condition = "#cacheable")
     @Override
     public Dispatch<SOAPMessage> getClient(String domain, String endpoint, String algorithm, Policy policy, final String pModeKey, boolean cacheable) {
@@ -79,12 +84,7 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
             }
         }
 
-        if (domibusPropertyProvider.getBooleanProperty(DomibusConfigurationService.DOMIBUS_PROXY_ENABLED)) {
-            LOG.info("Usage of Proxy required");
-            configureProxy(httpClientPolicy, httpConduit);
-        } else {
-            LOG.info("No proxy configured");
-        }
+        configureProxy(httpClientPolicy, httpConduit);
         return dispatch;
     }
 
@@ -115,26 +115,26 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-        String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-        String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-        String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-        String httpNonProxyHosts = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_NON_PROXY_HOSTS);
-        if (!Strings.isNullOrEmpty(httpProxyHost) && !Strings.isNullOrEmpty(httpProxyPort)) {
-            httpClientPolicy.setProxyServer(httpProxyHost);
-            httpClientPolicy.setProxyServerPort(Integer.valueOf(httpProxyPort));
-            httpClientPolicy.setProxyServerType(org.apache.cxf.transports.http.configuration.ProxyServerType.HTTP);
+        if(!domibusProxy.isEnabled()) {
+            LOG.info("Usage of Proxy not required");
+            return ;
         }
-        if (!Strings.isNullOrEmpty(httpProxyHost)) {
-            httpClientPolicy.setNonProxyHosts(httpNonProxyHosts);
+
+        LOG.debug("Configuring proxy [{}] [{}] [{}] [{}] ", domibusProxy.getHttpProxyHost(),
+                domibusProxy.getHttpProxyPort(), domibusProxy.getHttpProxyUser(), domibusProxy.getNonProxyHosts());
+        httpClientPolicy.setProxyServer(domibusProxy.getHttpProxyHost());
+        httpClientPolicy.setProxyServerPort(Integer.valueOf(domibusProxy.getHttpProxyPort()));
+        httpClientPolicy.setProxyServerType(org.apache.cxf.transports.http.configuration.ProxyServerType.HTTP);
+
+        if (!StringUtils.isBlank(domibusProxy.getNonProxyHosts())) {
+            httpClientPolicy.setNonProxyHosts(domibusProxy.getNonProxyHosts());
         }
-        if (!Strings.isNullOrEmpty(httpProxyUser) && !Strings.isNullOrEmpty(httpProxyPassword)) {
+
+        if (!StringUtils.isBlank(domibusProxy.getHttpProxyUser())) {
             ProxyAuthorizationPolicy policy = new ProxyAuthorizationPolicy();
-            policy.setUserName(httpProxyUser);
-            policy.setPassword(httpProxyPassword);
+            policy.setUserName(domibusProxy.getHttpProxyUser());
+            policy.setPassword(domibusProxy.getHttpProxyPassword());
             httpConduit.setProxyAuthorization(policy);
         }
     }
-
-
 }

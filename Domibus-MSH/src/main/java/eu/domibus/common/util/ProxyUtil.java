@@ -1,9 +1,9 @@
 package eu.domibus.common.util;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.proxy.DomibusProxy;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -21,35 +21,31 @@ public class ProxyUtil {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ProxyUtil.class);
 
     @Autowired
-    protected DomibusPropertyProvider domibusPropertyProvider;
+    DomibusProxy domibusProxy;
 
-    @Autowired
-    DomibusConfigurationService domibusConfigurationService;
+    public Boolean useProxy() {
+        return domibusProxy.isEnabled();
+    }
 
     public HttpHost getConfiguredProxy() {
-        if (domibusConfigurationService.useProxy()) {
-            String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-
-            return new HttpHost(httpProxyHost, Integer.parseInt(httpProxyPort));
+        if (domibusProxy.isEnabled()) {
+            LOG.debug("Proxy enabled, get configured proxy [{}] [{}]", domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
+            return new HttpHost(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort()));
         }
+        LOG.debug("Proxy not enabled, configured proxy is null");
         return null;
     }
 
     public CredentialsProvider getConfiguredCredentialsProvider() {
-        if(domibusConfigurationService.useProxy()) {
-            String httpProxyHost = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_HOST);
-            String httpProxyPort = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_HTTP_PORT);
-            String httpProxyUser = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_USER);
-            String httpProxyPassword = domibusPropertyProvider.getProperty(DomibusConfigurationService.DOMIBUS_PROXY_PASSWORD);
-
+        if(domibusProxy.isEnabled() && !StringUtils.isBlank(domibusProxy.getHttpProxyUser())) {
+            LOG.debug("Proxy enabled, configure credentials provider for [{}]", domibusProxy.getHttpProxyUser());
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(httpProxyHost, Integer.parseInt(httpProxyPort)),
-                    new UsernamePasswordCredentials(httpProxyUser, httpProxyPassword));
+            credsProvider.setCredentials(new AuthScope(domibusProxy.getHttpProxyHost(), Integer.parseInt(domibusProxy.getHttpProxyPort())),
+                    new UsernamePasswordCredentials(domibusProxy.getHttpProxyUser(), domibusProxy.getHttpProxyPassword()));
 
             return credsProvider;
         }
+        LOG.debug("Proxy not enabled, credentials provider is null");
         return null;
     }
-
 }

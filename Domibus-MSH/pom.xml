@@ -252,20 +252,20 @@
         <!-- Difi libraries -->
         <dependency>
             <groupId>no.difi.vefa</groupId>
-            <artifactId>sbdh</artifactId>
-            <version>0.9.3</version>
+            <artifactId>peppol-sbdh</artifactId>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>no.difi.vefa</groupId>
             <artifactId>peppol-lookup</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.1</version>
         </dependency>
 
         <!-- eDelivery SMP profile  -->
         <dependency>
             <groupId>eu.europa.ec.dynamic-discovery</groupId>
             <artifactId>dynamic-discovery-client</artifactId>
-            <version>1.5</version>
+            <version>1.9</version>
         </dependency>
         <!-- End Difi libraries -->
 
