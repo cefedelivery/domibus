@@ -1,6 +1,7 @@
 package eu.domibus.messaging.jms;
 
 import eu.domibus.api.configuration.DomibusConfigurationService;
+import eu.domibus.api.jms.JMSDestination;
 import eu.domibus.api.jms.JmsMessage;
 import eu.domibus.api.multitenancy.Domain;
 import eu.domibus.api.multitenancy.DomainContextProvider;
@@ -347,4 +348,29 @@ public class JMSManagerImplTest {
         Assert.assertFalse(jmsManager.jmsQueueInOtherDomain(jmsQueueInternalName));
     }
 
+    @Test
+    public void sortQueuesInClusterTest() {
+        Map<String, JMSDestination> queues = new HashMap();
+        queues.put("cluster2@queueX", new JMSDestination(){{
+            setName("cluster2@queueX");
+        }});
+        queues.put("cluster2@queueY", new JMSDestination(){{
+            setName("cluster2@queueY");
+        }});
+        queues.put("cluster1@queueX", new JMSDestination(){{
+            setName("cluster1@queueX");
+        }});
+        queues.put("cluster1@queueY", new JMSDestination(){{
+            setName("cluster1@queueY");
+        }});
+        queues.put("queueXY", new JMSDestination(){{
+            setName("queueXY");
+        }});
+        JMSDestination[] sortedValues = jmsManager.sortQueues(queues).values().toArray(new JMSDestination[0]);
+
+        Assert.assertEquals("cluster1@queueX", sortedValues[0].getName());
+        Assert.assertEquals("cluster2@queueX", sortedValues[1].getName());
+        Assert.assertEquals("cluster1@queueY", sortedValues[3].getName());
+        Assert.assertEquals("cluster2@queueY", sortedValues[4].getName());
+    }
 }
