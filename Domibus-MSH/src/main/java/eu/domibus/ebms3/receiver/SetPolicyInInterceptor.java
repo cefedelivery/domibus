@@ -36,6 +36,7 @@ import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.AttachmentPart;
@@ -95,7 +96,7 @@ public class SetPolicyInInterceptor extends AbstractSoapInterceptor {
     public void handleMessage(final SoapMessage message) throws Fault {
         final String httpMethod = (String) message.get("org.apache.cxf.request.method");
         //TODO add the below logic to a separate interceptor
-        if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(httpMethod, "GET")) {
+        if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(httpMethod, HttpMethod.GET)) {
             LOG.debug("Detected GET request on MSH: aborting the interceptor chain");
             message.getInterceptorChain().abort();
 
