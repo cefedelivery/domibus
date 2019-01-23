@@ -3,6 +3,7 @@ package eu.domibus.core.security;
 import eu.domibus.api.multitenancy.DomainContextProvider;
 import eu.domibus.api.multitenancy.UserDomainService;
 import eu.domibus.api.security.*;
+import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CertificateServiceImpl;
@@ -35,7 +36,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class AuthenticationDefaultServiceTest {
+public class AuthenticationDefaultServiceTest extends BaseUnitTest {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(AuthenticationDefaultServiceTest.class);
 
     private static final String DOMIBUS_URL = "https://localhost:8080/domibus/services/backend";
@@ -223,7 +224,7 @@ public class AuthenticationDefaultServiceTest {
     }
 
     private X509Certificate createCertificate(String keystore, String alias, String password) {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore, alias, password);
+        X509Certificate certificate = loadCertificateFromJKSFile(keystore, alias, password);
         assertNotNull(certificate);
         return certificate;
     }
@@ -254,4 +255,5 @@ public class AuthenticationDefaultServiceTest {
 
         return request;
     }
+
 }

@@ -1,6 +1,7 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.AuthenticationException;
+import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.pki.CRLService;
@@ -21,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class X509CertificateServiceImplTest {
+public class X509CertificateServiceImplTest extends BaseUnitTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(X509CertificateServiceImplTest.class);
 
@@ -66,10 +67,11 @@ public class X509CertificateServiceImplTest {
     }
 
     private X509Certificate[] createCertificates(String keystore_path, String alias, String password) {
-        X509Certificate certificate = certificateService.loadCertificateFromJKSFile(keystore_path, alias, password);
+        X509Certificate certificate = loadCertificateFromJKSFile(keystore_path, alias, password);
         assertNotNull(certificate);
         X509Certificate[] certificates = new X509Certificate[1];
         certificates[0] = certificate;
         return certificates;
     }
+
 }

@@ -23,8 +23,6 @@ public interface CertificateService {
 
     String extractCommonName(final X509Certificate certificate) throws InvalidNameException;
 
-    X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password);
-
     /**
      * Return the detail of the truststore entries.
      *

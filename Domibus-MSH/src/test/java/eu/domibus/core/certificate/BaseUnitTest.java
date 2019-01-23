@@ -1,4 +1,4 @@
-package eu.domibus.common.services.impl;
+package eu.domibus.core.certificate;
 
 import eu.domibus.pki.DomibusCertificateException;
 

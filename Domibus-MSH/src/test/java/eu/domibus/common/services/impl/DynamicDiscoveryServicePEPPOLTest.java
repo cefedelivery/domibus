@@ -6,27 +6,14 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.common.util.ProxyUtil;
-import eu.domibus.dynamicdiscovery.ApacheFetcherForTest;
+import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
-import no.difi.vefa.peppol.common.lang.EndpointNotFoundException;
-import no.difi.vefa.peppol.common.lang.PeppolLoadingException;
 import no.difi.vefa.peppol.common.lang.PeppolParsingException;
 import no.difi.vefa.peppol.common.model.*;
-import no.difi.vefa.peppol.lookup.LookupClientBuilder;
-import no.difi.vefa.peppol.lookup.api.LookupException;
-import no.difi.vefa.peppol.lookup.locator.BusdoxLocator;
-import no.difi.vefa.peppol.mode.*;
 import no.difi.vefa.peppol.lookup.LookupClient;
-import no.difi.vefa.peppol.security.lang.PeppolSecurityException;
-import no.difi.vefa.peppol.security.util.EmptyCertificateValidator;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.junit.Ignore;
+import no.difi.vefa.peppol.mode.Mode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(JMockit.class)
-public class DynamicDiscoveryServicePEPPOLTest {
+public class DynamicDiscoveryServicePEPPOLTest extends BaseUnitTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
 
@@ -156,7 +143,7 @@ public class DynamicDiscoveryServicePEPPOLTest {
 
     private ServiceMetadata buildServiceMetadata() {
 
-        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
+        X509Certificate testData = loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, TEST_KEYSTORE_PASSWORD);
         ProcessIdentifier processIdentifier;
         try {
             processIdentifier = ProcessIdentifier.parse(TEST_SERVICE_VALUE);
@@ -213,4 +200,5 @@ public class DynamicDiscoveryServicePEPPOLTest {
             ProcessIdentifier.of(processId);
         }};
     }
+
 }

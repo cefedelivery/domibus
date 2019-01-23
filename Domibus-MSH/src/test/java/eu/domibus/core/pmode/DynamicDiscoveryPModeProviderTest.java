@@ -13,6 +13,7 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.DynamicDiscoveryService;
+import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
@@ -28,8 +29,6 @@ import eu.domibus.xml.XMLUtilImpl;
 import eu.europa.ec.dynamicdiscovery.model.Endpoint;
 import eu.europa.ec.dynamicdiscovery.model.ProcessIdentifier;
 import eu.europa.ec.dynamicdiscovery.model.TransportProfile;
-import mockit.Expectations;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,14 +49,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Collection;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DynamicDiscoveryPModeProviderTest {
+public class DynamicDiscoveryPModeProviderTest extends BaseUnitTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
     private static final String DYNRESPONDER_AND_PARTYSELF = "dynResponderAndPartySelf.xml";
@@ -263,9 +262,9 @@ public class DynamicDiscoveryPModeProviderTest {
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();
-        }catch (EbMS3Exception ex){
+        } catch (EbMS3Exception ex) {
             assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0003, ex.getErrorCode());
-            assertEquals("No matching party found" ,ex.getErrorDetail());
+            assertEquals("No matching party found", ex.getErrorDetail());
         }
 
         doReturn(DISCOVERY_ZONE).when(domibusPropertyProvider).getDomainProperty(eq(DynamicDiscoveryService.SMLZONE_KEY));
@@ -273,14 +272,14 @@ public class DynamicDiscoveryPModeProviderTest {
         try {
             classUnderTest.findUserMessageExchangeContext(userMessage, MSHRole.SENDING);
             fail();
-        }catch (EbMS3Exception ex){
+        } catch (EbMS3Exception ex) {
             assertEquals(ErrorCode.EbMS3ErrorCode.EBMS_0010, ex.getErrorCode());
-            assertEquals("No matching dynamic discovery processes found for message." ,ex.getErrorDetail());
+            assertEquals("No matching dynamic discovery processes found for message.", ex.getErrorDetail());
         }
     }
 
 
-        @Test
+    @Test
     public void testFindDynamicReceiverProcesses_DynResponderAndPartySelf_ProcessInResultExpected() throws Exception {
         Configuration testData = initializeConfiguration(DYNRESPONDER_AND_PARTYSELF);
         DynamicDiscoveryPModeProvider classUnderTest = mock(DynamicDiscoveryPModeProvider.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
@@ -358,7 +357,7 @@ public class DynamicDiscoveryPModeProviderTest {
     @Test
     public void testExtractCommonName_PublicKeyWithCommonNameAvailable_CorrectCommonNameExpected() throws Exception {
 
-        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, CERT_PASSWORD);
+        X509Certificate testData = loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         String result = certificateService.extractCommonName(testData);
@@ -370,7 +369,7 @@ public class DynamicDiscoveryPModeProviderTest {
     public void testExtractCommonName_PublicKeyWithCommonNameNotAvailable_IllegalArgumentExceptionExpected() throws Exception {
         thrown.expect(IllegalArgumentException.class);
 
-        X509Certificate testData = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE, CERT_PASSWORD);
+        X509Certificate testData = loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, ALIAS_CN_NOT_AVAILABLE, CERT_PASSWORD);
         assertNotNull(testData);
 
         certificateService.extractCommonName(testData);
@@ -443,7 +442,7 @@ public class DynamicDiscoveryPModeProviderTest {
     private EndpointInfo buildAS4EndpointWithArguments(String processIdentifierId, String processIdentifierScheme, String address, String alias) {
         ProcessIdentifier processIdentifier = new ProcessIdentifier(processIdentifierId, processIdentifierScheme);
         TransportProfile transportProfile = new TransportProfile("bdxr-transport-ebms3-as4-v1p0");
-        X509Certificate x509Certificate = certificateService.loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
+        X509Certificate x509Certificate = loadCertificateFromJKSFile(RESOURCE_PATH + TEST_KEYSTORE, alias, CERT_PASSWORD);
 
         Endpoint endpoint = new Endpoint(processIdentifier, transportProfile, address, x509Certificate);
 
