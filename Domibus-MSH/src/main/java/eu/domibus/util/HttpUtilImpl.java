@@ -1,23 +1,17 @@
 package eu.domibus.util;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.exceptions.DomibusCoreErrorCode;
-import eu.domibus.api.exceptions.DomibusCoreException;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.api.util.HttpUtil;
 import eu.domibus.common.util.ProxyUtil;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -36,11 +30,14 @@ public class HttpUtilImpl implements HttpUtil {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(HttpUtilImpl.class);
 
     @Autowired
+    DomibusProxyService domibusProxyService;
+
+    @Autowired
     ProxyUtil proxyUtil;
 
     @Override
     public ByteArrayInputStream downloadURL(String url) throws IOException {
-        if (proxyUtil.useProxy()) {
+        if (domibusProxyService.useProxy()) {
             return downloadURLViaProxy(url);
         }
         return downloadURLDirect(url);

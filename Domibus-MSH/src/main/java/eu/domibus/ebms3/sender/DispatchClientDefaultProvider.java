@@ -1,11 +1,11 @@
 package eu.domibus.ebms3.sender;
 
-import com.google.common.base.Strings;
-import eu.domibus.api.configuration.DomibusConfigurationService;
 import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.proxy.DomibusProxy;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
@@ -59,7 +59,8 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Autowired
-    DomibusProxy domibusProxy;
+    @Qualifier("domibusProxyService")
+    protected DomibusProxyService domibusProxyService;
 
     @Cacheable(value = "dispatchClient", key = "#domain + #endpoint + #pModeKey", condition = "#cacheable")
     @Override
@@ -115,11 +116,12 @@ public class DispatchClientDefaultProvider implements DispatchClientProvider {
     }
 
     protected void configureProxy(final HTTPClientPolicy httpClientPolicy, HTTPConduit httpConduit) {
-        if(!domibusProxy.isEnabled()) {
+        if(!domibusProxyService.useProxy()) {
             LOG.debug("Usage of proxy not required");
             return ;
         }
 
+        DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();
         LOG.debug("Configuring proxy [{}] [{}] [{}] [{}] ", domibusProxy.getHttpProxyHost(),
                 domibusProxy.getHttpProxyPort(), domibusProxy.getHttpProxyUser(), domibusProxy.getNonProxyHosts());
         httpClientPolicy.setProxyServer(domibusProxy.getHttpProxyHost());

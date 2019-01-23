@@ -1,8 +1,8 @@
 package eu.domibus.util;
 
-import eu.domibus.api.configuration.DomibusConfigurationService;
-import eu.domibus.api.property.DomibusPropertyProvider;
 import eu.domibus.common.util.ProxyUtil;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import mockit.Injectable;
 import mockit.NonStrictExpectations;
 import mockit.Tested;
@@ -13,9 +13,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateFactory;
@@ -34,10 +32,13 @@ public class HttpUtilImplTest {
     @Injectable
     ProxyUtil proxyUtil;
 
+    @Injectable
+    DomibusProxyService domibusProxyService;
+
     //@Test
     public void testDownloadCRLViaProxy() throws Exception {
         new NonStrictExpectations(proxyUtil) {{
-            proxyUtil.useProxy();
+            domibusProxyService.useProxy();
             result = true;
 
             proxyUtil.getConfiguredProxy();

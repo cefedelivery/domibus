@@ -3,7 +3,8 @@ package eu.domibus.common.util;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
 import eu.domibus.proxy.DomibusProxy;
-import org.apache.commons.lang3.StringUtils;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -21,14 +22,11 @@ public class ProxyUtil {
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(ProxyUtil.class);
 
     @Autowired
-    DomibusProxy domibusProxy;
-
-    public Boolean useProxy() {
-        return domibusProxy.isEnabled();
-    }
+    DomibusProxyService domibusProxyService;
 
     public HttpHost getConfiguredProxy() {
-        if (domibusProxy.isEnabled()) {
+        if (domibusProxyService.useProxy()) {
+            DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();
             LOG.debug("Proxy enabled, get configured proxy [{}] [{}]", domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
             return new HttpHost(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort());
         }
@@ -37,7 +35,9 @@ public class ProxyUtil {
     }
 
     public CredentialsProvider getConfiguredCredentialsProvider() {
-        if(domibusProxy.isEnabled() && !StringUtils.isBlank(domibusProxy.getHttpProxyUser())) {
+
+        if(domibusProxyService.useProxy() && domibusProxyService.isProxyUserSet()) {
+            DomibusProxy domibusProxy = domibusProxyService.getDomibusProxy();
             LOG.debug("Proxy enabled, configure credentials provider for [{}]", domibusProxy.getHttpProxyUser());
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(domibusProxy.getHttpProxyHost(), domibusProxy.getHttpProxyPort()),

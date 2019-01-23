@@ -9,6 +9,8 @@ import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.core.crypto.api.MultiDomainCryptoService;
 import eu.domibus.proxy.DomibusProxy;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import eu.europa.ec.dynamicdiscovery.DynamicDiscovery;
 import eu.europa.ec.dynamicdiscovery.core.fetcher.FetcherResponse;
 import eu.europa.ec.dynamicdiscovery.core.security.impl.DefaultProxy;
@@ -25,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceGroupType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.ServiceMetadataType;
 import org.oasis_open.docs.bdxr.ns.smp._2016._05.SignedServiceMetadataType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 
@@ -75,7 +76,7 @@ public class DynamicDiscoveryServiceOASISTest {
     DomibusConfigurationService domibusConfigurationService;
 
     @Injectable
-    DomibusProxy domibusProxy;
+    DomibusProxyService domibusProxyService;
 
     @Tested
     DynamicDiscoveryServiceOASIS dynamicDiscoveryServiceOASIS;
@@ -184,20 +185,19 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProxy.isEnabled();
+            DomibusProxy domibusProxy = new DomibusProxy();
+            domibusProxy.setEnabled(true);
+            domibusProxy.setHttpProxyHost("192.168.0.0");
+            domibusProxy.setHttpProxyPort(1234);
+            domibusProxy.setHttpProxyUser("proxyUser");
+            domibusProxy.setHttpProxyPassword("proxyPassword");
+
+            domibusProxyService.getDomibusProxy();
+            result = domibusProxy;
+
+            domibusProxyService.useProxy();
             result = true;
 
-            domibusProxy.getHttpProxyHost();
-            result = "192.168.0.0";
-
-            domibusProxy.getHttpProxyPort();
-            result = 1234;
-
-            domibusProxy.getHttpProxyUser();
-            result = "proxyUser";
-
-            domibusProxy.getHttpProxyPassword();
-            result = "proxyPassword";
         }};
 
         //when
@@ -211,7 +211,7 @@ public class DynamicDiscoveryServiceOASISTest {
     public void testProxyNotConfigured() throws Exception {
         // Given
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProxy.isEnabled();
+            domibusProxyService.useProxy();
             result = false;
         }};
 
@@ -226,20 +226,18 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProxy.isEnabled();
+            DomibusProxy domibusProxy = new DomibusProxy();
+            domibusProxy.setEnabled(true);
+            domibusProxy.setHttpProxyHost("192.168.0.0");
+            domibusProxy.setHttpProxyPort(1234);
+            domibusProxy.setHttpProxyUser("proxyUser");
+            domibusProxy.setHttpProxyPassword("proxyPassword");
+
+            domibusProxyService.getDomibusProxy();
+            result = domibusProxy;
+
+            domibusProxyService.useProxy();
             result = true;
-
-            domibusProxy.getHttpProxyHost();
-            result = "192.168.0.0";
-
-            domibusProxy.getHttpProxyPort();
-            result = 1234;
-
-            domibusProxy.getHttpProxyUser();
-            result = "proxyUser";
-
-            domibusProxy.getHttpProxyPassword();
-            result = "proxyPassword";
 
             domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
             result = "domibus.domain.ec.europa.eu";
@@ -260,7 +258,7 @@ public class DynamicDiscoveryServiceOASISTest {
         // Given
 
         new Expectations(dynamicDiscoveryServiceOASIS) {{
-            domibusProxy.isEnabled();
+            domibusProxyService.useProxy();
             result = false;
 
             domibusPropertyProvider.getDomainProperty(dynamicDiscoveryServiceOASIS.SMLZONE_KEY);
@@ -290,7 +288,7 @@ public class DynamicDiscoveryServiceOASISTest {
     @Ignore
     public void testLookupInformation() throws Exception {
         new NonStrictExpectations() {{
-            domibusProxy.isEnabled();
+            domibusProxyService.isProxyUserSet();
             result = false;
 
             domibusPropertyProvider.getDomainProperty(DynamicDiscoveryService.SMLZONE_KEY);

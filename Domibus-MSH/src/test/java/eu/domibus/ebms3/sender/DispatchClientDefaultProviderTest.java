@@ -1,7 +1,8 @@
 package eu.domibus.ebms3.sender;
 
 import eu.domibus.api.property.DomibusPropertyProvider;
-import eu.domibus.proxy.DomibusProxy;
+import eu.domibus.proxy.DomibusProxyService;
+import eu.domibus.proxy.DomibusProxyServiceImpl;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
@@ -11,7 +12,6 @@ import org.apache.cxf.transports.http.configuration.ConnectionType;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.Executor;
 
@@ -32,7 +32,7 @@ public class DispatchClientDefaultProviderTest {
     protected DomibusPropertyProvider domibusPropertyProvider;
 
     @Injectable
-    protected DomibusProxy domibusProxy;
+    protected DomibusProxyService domibusProxyService;
 
     @Tested
     DispatchClientDefaultProvider dispatchClientDefaultProvider;
