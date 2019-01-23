@@ -63,9 +63,8 @@ public class HttpUtilImpl implements HttpUtil {
         if(credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
-        CloseableHttpClient httpClient = httpClientBuilder.build();
 
-        try {
+        try(CloseableHttpClient httpClient = httpClientBuilder.build()) {
             HttpHost proxy = proxyUtil.getConfiguredProxy();
 
             RequestConfig config = RequestConfig.custom()
@@ -76,8 +75,6 @@ public class HttpUtilImpl implements HttpUtil {
 
             LOG.debug("Executing request " + httpGet.getRequestLine() + " via " + proxy);
             return getByteArrayInputStream(httpClient, httpGet);
-        } finally {
-            httpClient.close();
         }
     }
 
