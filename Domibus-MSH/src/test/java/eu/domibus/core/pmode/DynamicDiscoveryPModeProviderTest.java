@@ -13,7 +13,6 @@ import eu.domibus.common.exception.EbMS3Exception;
 import eu.domibus.common.model.configuration.*;
 import eu.domibus.common.model.configuration.Process;
 import eu.domibus.common.services.DynamicDiscoveryService;
-import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.common.services.impl.DynamicDiscoveryServiceOASIS;
 import eu.domibus.common.services.impl.DynamicDiscoveryServicePEPPOL;
 import eu.domibus.common.util.EndpointInfo;
@@ -52,11 +51,12 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.UUID;
 
+import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DynamicDiscoveryPModeProviderTest extends BaseUnitTest {
+public class DynamicDiscoveryPModeProviderTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
     private static final String DYNRESPONDER_AND_PARTYSELF = "dynResponderAndPartySelf.xml";

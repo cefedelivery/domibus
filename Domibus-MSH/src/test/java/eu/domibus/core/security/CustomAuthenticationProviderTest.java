@@ -1,7 +1,6 @@
 package eu.domibus.core.security;
 
 import eu.domibus.api.security.*;
-import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.core.alerts.service.PluginUserAlertsServiceImpl;
 import eu.domibus.logging.DomibusLogger;
 import eu.domibus.logging.DomibusLoggerFactory;
@@ -26,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertNotNull;
  * @since 4.0
  */
 @RunWith(JMockit.class)
-public class CustomAuthenticationProviderTest extends BaseUnitTest {
+public class CustomAuthenticationProviderTest {
 
     private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(CustomAuthenticationProviderTest.class);
 

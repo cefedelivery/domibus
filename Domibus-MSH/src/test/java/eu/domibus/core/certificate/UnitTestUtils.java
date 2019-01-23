@@ -11,9 +11,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-public class BaseUnitTest {
+public class UnitTestUtils {
 
-    protected X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
+    public static X509Certificate loadCertificateFromJKSFile(String filePath, String alias, String password) {
         try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
 
             KeyStore keyStore = KeyStore.getInstance("JKS");

@@ -6,7 +6,6 @@ import eu.domibus.common.exception.ConfigurationException;
 import eu.domibus.common.services.DynamicDiscoveryService;
 import eu.domibus.common.util.EndpointInfo;
 import eu.domibus.common.util.ProxyUtil;
-import eu.domibus.core.certificate.BaseUnitTest;
 import eu.domibus.pki.CertificateService;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -22,11 +21,13 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.domibus.core.certificate.UnitTestUtils.loadCertificateFromJKSFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+
 @RunWith(JMockit.class)
-public class DynamicDiscoveryServicePEPPOLTest extends BaseUnitTest {
+public class DynamicDiscoveryServicePEPPOLTest {
 
     private static final String RESOURCE_PATH = "src/test/resources/eu/domibus/ebms3/common/dao/DynamicDiscoveryPModeProviderTest/";
 
