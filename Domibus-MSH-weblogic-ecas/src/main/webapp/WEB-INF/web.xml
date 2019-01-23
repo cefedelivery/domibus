@@ -60,7 +60,7 @@
         </web-resource-collection>
     </security-constraint>
 
-    <!-- for ECAS/Weblogic to not intercept BASIC authentication requests -->
+    <!-- for ECAS/Weblogic to not intercept BASIC authentication requests (calls to ws-plugin) -->
     <login-config>
         <auth-method>FORM</auth-method>
         <realm-name>Whatever</realm-name>
