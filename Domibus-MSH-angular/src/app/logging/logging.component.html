@@ -45,7 +45,6 @@
     </span>
   </div>
 
-
   <ngx-datatable
     id="loggingTable"
     class="material striped"
@@ -65,8 +64,7 @@
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
     (page)='onPage($event)'
     (sort)="onSort($event)"
-    (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+  >
 </ngx-datatable>
 
   <ng-template #rowWithToggleTpl let-row="row" let-value="value" ngx-datatable-cell-template>

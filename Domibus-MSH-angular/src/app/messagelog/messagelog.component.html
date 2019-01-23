@@ -13,7 +13,7 @@
                      id="messagestatus_id">
             <md-option [value]="''">
             </md-option>
-            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+            <md-option *ngFor="let mstatus of msgStatuses" [value]="mstatus">
               {{mstatus}}
             </md-option>
           </md-select>
@@ -55,11 +55,11 @@
             <input mdInput placeholder="Reference Message Id" name="refToMessageId" [(ngModel)]="filter.refToMessageId"
                    #refToMessageId="ngModel" id="referencemessageid_id">
           </md-input-container>
-          <md-input-container *ngIf="advancedSearch&&app.fourCornerEnabled">
+          <md-input-container *ngIf="advancedSearch && fourCornerEnabled">
             <input mdInput placeholder="Original Sender" name="originalSender" [(ngModel)]="filter.originalSender"
-                   #originalSender="ngModel" id="originalsender_id" >
+                   #originalSender="ngModel" id="originalsender_id">
           </md-input-container>
-          <md-input-container *ngIf="advancedSearch&&app.fourCornerEnabled">
+          <md-input-container *ngIf="advancedSearch && fourCornerEnabled">
             <input mdInput placeholder="Final Recipient" name="finalRecipient" [(ngModel)]="filter.finalRecipient"
                    #finalRecipient="ngModel" id="finalrecipient_id">
           </md-input-container>
@@ -140,7 +140,7 @@
     [selected]="selected"
     [selectionType]="'multi'"
     (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+  >
   </ngx-datatable>
 
   <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
@@ -152,7 +152,7 @@
   </ng-template>
 
   <ng-template #nextAttemptInfoWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>
-    <span class="text-select">{{showNextAttemptInfo(row) ? (value | domibusDate: dateFormat): ''}}</span>
+    <span class="text-select">{{showNextAttemptInfo(row) ? (value | domibusDate: dateFormat) : ''}}</span>
   </ng-template>
 
   <ng-template #rowActions let-row="row" let-value="value" ngx-datatable-cell-template>

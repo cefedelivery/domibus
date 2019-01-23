@@ -1,15 +1,16 @@
-﻿import {Component, TemplateRef, ViewChild, Renderer2, AfterViewInit, ElementRef} from '@angular/core';
+﻿import {Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Http, Response, URLSearchParams} from '@angular/http';
 import {ErrorLogResult} from './errorlogresult';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {ErrorlogDetailsComponent} from 'app/errorlog/errorlog-details/errorlog-details.component';
 import {MdDialog, MdDialogRef} from '@angular/material';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
-import {DownloadService} from '../download/download.service';
-import {AlertComponent} from '../alert/alert.component';
+import {DownloadService} from '../common/download.service';
+import {AlertComponent} from '../common/alert/alert.component';
 import {Md2Datepicker} from 'md2';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   moduleId: module.id,
@@ -18,7 +19,7 @@ import {Md2Datepicker} from 'md2';
   styleUrls: ['./errorlog.component.css']
 })
 
-export class ErrorLogComponent implements AfterViewInit {
+export class ErrorLogComponent extends FilterableListComponent implements OnInit {
 
   columnPicker: ColumnPickerBase = new ColumnPickerBase()
   rowLimiter: RowLimiterBase = new RowLimiterBase()
@@ -36,7 +37,6 @@ export class ErrorLogComponent implements AfterViewInit {
   notifiedToMinDate: Date = null;
   notifiedToMaxDate: Date = new Date();
 
-  filter: any = {};
   loading: boolean = false;
   rows = [];
   count: number = 0;
@@ -54,10 +54,13 @@ export class ErrorLogComponent implements AfterViewInit {
   static readonly ERROR_LOG_URL: string = 'rest/errorlogs';
   static readonly ERROR_LOG_CSV_URL: string = ErrorLogComponent.ERROR_LOG_URL + '/csv?';
 
-  constructor (private elementRef: ElementRef, private http: Http, private alertService: AlertService, public dialog: MdDialog, private renderer: Renderer2) {
+  constructor(private elementRef: ElementRef, private http: Http, private alertService: AlertService, public dialog: MdDialog, private renderer: Renderer2) {
+    super();
   }
 
-  ngOnInit () {
+  ngOnInit() {
+    super.ngOnInit();
+
     this.columnPicker.allColumns = [
       {
         name: 'Signal Message Id',
@@ -92,15 +95,14 @@ export class ErrorLogComponent implements AfterViewInit {
 
     ];
 
-
     this.columnPicker.selectedColumns = this.columnPicker.allColumns.filter(col => {
       return ['Message Id', 'Error Code', 'Timestamp'].indexOf(col.name) != -1
     });
 
-    this.page(this.offset, this.rowLimiter.pageSize);
+    this.search();
   }
 
-  createSearchParams (): URLSearchParams {
+  createSearchParams(): URLSearchParams {
     const searchParams = new URLSearchParams();
 
     if (this.orderBy) {
@@ -110,38 +112,38 @@ export class ErrorLogComponent implements AfterViewInit {
       searchParams.set('asc', this.asc.toString());
     }
 
-    if (this.filter.errorSignalMessageId) {
-      searchParams.set('errorSignalMessageId', this.filter.errorSignalMessageId);
+    if (this.activeFilter.errorSignalMessageId) {
+      searchParams.set('errorSignalMessageId', this.activeFilter.errorSignalMessageId);
     }
-    if (this.filter.mshRole) {
-      searchParams.set('mshRole', this.filter.mshRole);
+    if (this.activeFilter.mshRole) {
+      searchParams.set('mshRole', this.activeFilter.mshRole);
     }
-    if (this.filter.messageInErrorId) {
-      searchParams.set('messageInErrorId', this.filter.messageInErrorId);
+    if (this.activeFilter.messageInErrorId) {
+      searchParams.set('messageInErrorId', this.activeFilter.messageInErrorId);
     }
-    if (this.filter.errorCode) {
-      searchParams.set('errorCode', this.filter.errorCode);
+    if (this.activeFilter.errorCode) {
+      searchParams.set('errorCode', this.activeFilter.errorCode);
     }
-    if (this.filter.errorDetail) {
-      searchParams.set('errorDetail', this.filter.errorDetail);
+    if (this.activeFilter.errorDetail) {
+      searchParams.set('errorDetail', this.activeFilter.errorDetail);
     }
-    if (this.filter.timestampFrom != null) {
-      searchParams.set('timestampFrom', this.filter.timestampFrom.getTime());
+    if (this.activeFilter.timestampFrom != null) {
+      searchParams.set('timestampFrom', this.activeFilter.timestampFrom.getTime());
     }
     if (this.filter.timestampTo != null) {
-      searchParams.set('timestampTo', this.filter.timestampTo.getTime());
+      searchParams.set('timestampTo', this.activeFilter.timestampTo.getTime());
     }
-    if (this.filter.notifiedFrom != null) {
-      searchParams.set('notifiedFrom', this.filter.notifiedFrom.getTime());
+    if (this.activeFilter.notifiedFrom != null) {
+      searchParams.set('notifiedFrom', this.activeFilter.notifiedFrom.getTime());
     }
-    if (this.filter.notifiedTo != null) {
-      searchParams.set('notifiedTo', this.filter.notifiedTo.getTime());
+    if (this.activeFilter.notifiedTo != null) {
+      searchParams.set('notifiedTo', this.activeFilter.notifiedTo.getTime());
     }
 
     return searchParams;
   }
 
-  getErrorLogEntries (offset: number, pageSize: number): Observable<ErrorLogResult> {
+  getErrorLogEntries(offset: number, pageSize: number): Observable<ErrorLogResult> {
     const searchParams = this.createSearchParams();
 
     searchParams.set('page', offset.toString());
@@ -154,12 +156,9 @@ export class ErrorLogComponent implements AfterViewInit {
     );
   }
 
-  page (offset, pageSize) {
+  page(offset, pageSize) {
     this.loading = true;
-
     this.getErrorLogEntries(offset, pageSize).subscribe((result: ErrorLogResult) => {
-      console.log('errorLog response:' + result);
-
       this.offset = offset;
       this.rowLimiter.pageSize = pageSize;
       this.count = result.count;
@@ -201,60 +200,58 @@ export class ErrorLogComponent implements AfterViewInit {
 
   }
 
-  onPage (event) {
+  onPage(event) {
+    super.resetFilters();
     this.page(event.offset, event.pageSize);
   }
 
-  onSort (event) {
+  onSort(event) {
     this.orderBy = event.column.prop;
     this.asc = (event.newValue === 'desc') ? false : true;
 
+    super.resetFilters();
     this.page(this.offset, this.rowLimiter.pageSize);
   }
 
-  changePageSize (newPageLimit: number) {
+  changePageSize(newPageLimit: number) {
+    super.resetFilters();
     this.page(0, newPageLimit);
   }
 
-  search () {
+  search() {
     console.log('Searching using filter:' + this.filter);
+    this.setActiveFilter();
     this.page(0, this.rowLimiter.pageSize);
   }
 
-  onTimestampFromChange (event) {
+  onTimestampFromChange(event) {
     this.timestampToMinDate = event.value;
   }
 
-  onTimestampToChange (event) {
+  onTimestampToChange(event) {
     this.timestampFromMaxDate = event.value;
   }
 
-  onNotifiedFromChange (event) {
+  onNotifiedFromChange(event) {
     this.notifiedToMinDate = event.value;
   }
 
-  onNotifiedToChange (event) {
+  onNotifiedToChange(event) {
     this.notifiedFromMaxDate = event.value;
   }
 
-  toggleAdvancedSearch (): boolean {
+  toggleAdvancedSearch(): boolean {
     this.advancedSearch = !this.advancedSearch;
     return false;//to prevent default navigation
   }
 
-  onSelect ({selected}) {
-    // console.log('Select Event', selected, this.selected);
-  }
-
-  onActivate (event) {
-    // console.log('Activate Event', event);
-
+  onActivate(event) {
     if ('dblclick' === event.type) {
       this.details(event.row);
     }
   }
 
-  details (selectedRow: any) {
+  details(selectedRow: any) {
     let dialogRef: MdDialogRef<ErrorlogDetailsComponent> = this.dialog.open(ErrorlogDetailsComponent);
     dialogRef.componentInstance.message = selectedRow;
     // dialogRef.componentInstance.currentSearchSelectedSource = this.currentSearchSelectedSource;
@@ -263,19 +260,16 @@ export class ErrorLogComponent implements AfterViewInit {
     });
   }
 
-  saveAsCSV () {
+  saveAsCSV() {
     if (this.count > AlertComponent.MAX_COUNT_CSV) {
       this.alertService.error(AlertComponent.CSV_ERROR_MESSAGE);
       return;
     }
-
+    super.resetFilters();
     DownloadService.downloadNative(ErrorLogComponent.ERROR_LOG_CSV_URL + this.createSearchParams().toString());
   }
 
-  ngAfterViewInit () {
-  }
-
-  onClick (event) {
+  onClick(event) {
     console.log(event);
   }
 

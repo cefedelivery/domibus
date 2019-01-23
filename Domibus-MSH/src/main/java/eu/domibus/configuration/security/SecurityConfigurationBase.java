@@ -11,7 +11,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
- * Security configuration which contains common beans to be instantiated
+ * Spring Security configuration which contains common beans to be instantiated
  *
  * @author Catalin Enache
  * @since 4.1

@@ -63,10 +63,20 @@
 			</propertySet>
 		</properties>
 		<payloadProfiles>
-			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml"/>
-			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf"/>
+			<payload name="businessContentPayload" cid="cid:message" required="true" mimeType="text/xml" inBody="false"/>
+			<payload name="businessContentAttachment" cid="cid:attachment" required="false" mimeType="application/pdf" inBody="false"/>
+			<payload name="businessContentPayloadInBody" cid="cid:dummy" required="true" mimeType="text/xml" inBody="true"/>
+			<payload name="businessContentPayloadInBodyTwo" cid="cid:dummy2" required="true" mimeType="application/xml" inBody="true"/>
 			<payloadProfile name="MessageProfile" maxSize="40894464">
 				<attachment name="businessContentPayload"/>
+				<attachment name="businessContentAttachment"/>
+			</payloadProfile>
+			<payloadProfile name="MessageProfilePayloadInBody" maxSize="40894464">
+				<attachment name="businessContentPayloadInBody"/>
+				<attachment name="businessContentAttachment"/>
+			</payloadProfile>
+			<payloadProfile name="MessageProfilePayloadInBodyTwo" maxSize="40894464">
+				<attachment name="businessContentPayloadInBodyTwo"/>
 				<attachment name="businessContentAttachment"/>
 			</payloadProfile>
 		</payloadProfiles>
@@ -76,6 +86,8 @@
 			<security name="signOnly" policy="signOnly.xml" signatureMethod="RSA_SHA256"/>
 			<security name="eDeliveryAS4Policy_BST" policy="eDeliveryAS4Policy_BST.xml" signatureMethod="RSA_SHA256"/>
 			<security name="eDeliveryAS4Policy_IS" policy="eDeliveryAS4Policy_IS.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4PolicyEncryptBody" policy="eDeliveryAS4PolicyEncryptBody.xml" signatureMethod="RSA_SHA256"/>
+			<security name="eDeliveryAS4PolicyNoBodyEncrypt" policy="eDeliveryAS4PolicyNoBodyEncrypt.xml" signatureMethod="RSA_SHA256"/>
 		</securities>
 		<errorHandlings>
 			<errorHandling name="demoErrorHandling" errorAsResponse="true" businessErrorNotifyProducer="false" businessErrorNotifyConsumer="false" deliveryFailureNotifyProducer="false"/>
@@ -114,6 +126,9 @@
 			<service name="testService21" value="bdx:noprocess" type="tc21"/>
 			<service name="testService22" value="bdx:noprocess" type="tc22"/>
 			<service name="testService23" value="bdx:noprocess" type="tc23"/>			
+			<service name="testService24" value="bdx:noprocess" type="tc24"/>	
+			<service name="testService25" value="bdx:noprocess" type="tc25"/>
+			<service name="testService26" value="bdx:noprocess" type="tc26"/>
 			<service name="connectivityservice" value="http://ec.europa.eu/e-delivery/services/connectivity-service" type="edelivery"/>			
 		</services>
 		<actions>
@@ -140,6 +155,9 @@
 			<action name="tc21Action" value="TC21Leg1"/>
 			<action name="tc22Action" value="TC22Leg1"/>
 			<action name="tc23Action" value="TC23Leg1"/>
+			<action name="tc24Action" value="TC24Leg1"/>
+			<action name="tc25Action" value="TC25Leg1"/>
+			<action name="tc26Action" value="TC26Leg1"/>
 			<action name="submitMessage" value="submitMessage"/>			
 		</actions>
 		<as4>
@@ -172,6 +190,9 @@
 			<legConfiguration name="pushTestcase21tc21Action" service="testService21" action="tc21Action" defaultMpc="defaultMpcSeven" reliability="noReliability" security="noSigNoEnc" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			<legConfiguration name="pullTestcase22tc22Action" service="testService22" action="tc22Action" defaultMpc="defaultMpcEight" reliability="AS4Reliability" security="eDeliveryAS4Policy" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" errorHandling="demoErrorHandling" compressPayloads="false"/>
 			<legConfiguration name="pushTestcase23tc23Action" service="testService23" action="tc23Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4Policy_IS" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfile" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase24tc24Action" service="testService24" action="tc24Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4PolicyEncryptBody" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfilePayloadInBody" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase25tc25Action" service="testService25" action="tc25Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4PolicyEncryptBody" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfilePayloadInBodyTwo" errorHandling="demoErrorHandling" compressPayloads="true"/>
+			<legConfiguration name="pushTestcase26tc26Action" service="testService26" action="tc26Action" defaultMpc="defaultMpc" reliability="AS4Reliability" security="eDeliveryAS4PolicyNoBodyEncrypt" receptionAwareness="receptionAwareness" propertySet="ecodexPropertySet" payloadProfile="MessageProfilePayloadInBody" errorHandling="demoErrorHandling" compressPayloads="true"/>
 			</legConfigurations>
 		<process name="tc1Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
 			<initiatorParties>
@@ -483,6 +504,45 @@
 			</responderParties>
 			<legs>
 				<leg name="pushTestcase23tc23Action"/>
+			</legs>
+		</process>
+		<process name="tc24Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase24tc24Action"/>
+			</legs>
+		</process>
+		<process name="tc25Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase25tc25Action"/>
+			</legs>
+		</process>
+		<process name="tc26Process" agreement="agreementEmpty" mep="oneway" binding="push" initiatorRole="defaultInitiatorRole" responderRole="defaultResponderRole">
+			<initiatorParties>
+				<initiatorParty name="blue_gw"/>
+				<initiatorParty name="red_gw"/>
+			</initiatorParties>
+			<responderParties>
+				<responderParty name="blue_gw"/>
+				<responderParty name="red_gw"/>
+			</responderParties>
+			<legs>
+				<leg name="pushTestcase26tc26Action"/>
 			</legs>
 		</process>
 	</businessProcesses>

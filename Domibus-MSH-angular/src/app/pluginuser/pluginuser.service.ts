@@ -1,12 +1,11 @@
 import {Injectable} from '@angular/core';
-import {Http, URLSearchParams, Response} from '@angular/http';
+import {Http, Response, URLSearchParams} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {PluginUserRO} from './pluginuser';
 import {UserState} from '../user/user';
 import {UserService} from '../user/user.service';
 import {SecurityService} from '../security/security.service';
-import {UserComponent} from '../user/user.component';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 
 @Injectable()
 export class PluginUserService {

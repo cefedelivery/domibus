@@ -5,7 +5,7 @@ import {SecurityEventService} from './security/security.event.service';
 import {Http, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {DomainService} from './security/domain.service';
-import {HttpEventService} from './http/http.event.service';
+import {HttpEventService} from './common/http/http.event.service';
 import {ReplaySubject} from "rxjs";
 
 @Component({
@@ -31,7 +31,6 @@ export class AppComponent implements OnInit {
                private domainService: DomainService) {
 
     this.domainService.setAppTitle();
-
   }
 
 
@@ -61,9 +60,7 @@ export class AppComponent implements OnInit {
         }
       }
     });
-
   }
-
 
   isAdmin (): boolean {
     return this.securityService.isCurrentUserAdmin();
@@ -86,11 +83,9 @@ export class AppComponent implements OnInit {
     event.preventDefault();
     this.router.navigate([this.isExtAuthProviderEnabled() ? '/logout' : '/login']).then((ok) => {
       if (ok) {
-        console.log('before security Service logout');
         this.securityService.logout();
       }
     })
-
   }
 
   toggleMenu () {

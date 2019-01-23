@@ -1,7 +1,5 @@
 package eu.domibus.configuration.security;
 
-import eu.domibus.logging.DomibusLogger;
-import eu.domibus.logging.DomibusLoggerFactory;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.type.AnnotatedTypeMetadata;
@@ -15,8 +13,6 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  */
 @Configuration
 public class SecurityExternalAuthProviderCondition extends SecurityInternalAuthProviderCondition {
-
-    private static final DomibusLogger LOG = DomibusLoggerFactory.getLogger(SecurityInternalAuthProviderCondition.class);
 
     @Override
     public ConfigurationPhase getConfigurationPhase() {

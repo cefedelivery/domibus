@@ -4,13 +4,13 @@ import 'rxjs/add/operator/catch';
 import {TrustStoreService} from './trustore.service';
 import {TrustStoreEntry} from './trustore.model';
 import {TruststoreDialogComponent} from './truststore-dialog/truststore-dialog.component';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {MdDialog} from '@angular/material';
 import {TrustStoreUploadComponent} from './truststore-upload/truststore-upload.component';
 import {ColumnPickerBase} from '../common/column-picker/column-picker-base';
 import {RowLimiterBase} from '../common/row-limiter/row-limiter-base';
-import {DownloadService} from '../download/download.service';
-import {AlertComponent} from '../alert/alert.component';
-import {AlertService} from '../alert/alert.service';
+import {DownloadService} from '../common/download.service';
+import {AlertComponent} from '../common/alert/alert.component';
+import {AlertService} from '../common/alert/alert.service';
 
 @Component({
   selector: 'app-truststore',
