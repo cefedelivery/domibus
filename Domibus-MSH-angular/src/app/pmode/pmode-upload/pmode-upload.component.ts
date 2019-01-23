@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MdDialogRef, MD_DIALOG_DATA} from '@angular/material';
 import {Http} from '@angular/http';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../../common/alert/alert.service';
 
 @Component({
   selector: 'app-pmode-upload',

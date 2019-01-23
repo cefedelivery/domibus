@@ -1,6 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {MdDialogRef} from "@angular/material";
-import {AppComponent} from "../../app.component";
+import {Component, OnInit, Inject} from '@angular/core';
+import {MD_DIALOG_DATA, MdDialogRef} from '@angular/material';
 
 @Component({
   selector: 'app-messagelog-details',
@@ -13,7 +12,9 @@ export class MessagelogDetailsComponent implements OnInit {
   dateFormat: String = 'yyyy-MM-dd HH:mm:ssZ';
   fourCornerEnabled;
 
-  constructor(public dialogRef: MdDialogRef<MessagelogDetailsComponent>) {
+  constructor(public dialogRef: MdDialogRef<MessagelogDetailsComponent>, @Inject(MD_DIALOG_DATA) public data: any) {
+    this.message = data.message;
+    this.fourCornerEnabled = data.fourCornerEnabled;
   }
 
   ngOnInit() {

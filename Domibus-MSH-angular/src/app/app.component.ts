@@ -2,10 +2,9 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {SecurityService} from './security/security.service';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {SecurityEventService} from './security/security.event.service';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
+import {Http} from '@angular/http';
 import {DomainService} from './security/domain.service';
-import {HttpEventService} from './http/http.event.service';
+import {HttpEventService} from './common/http/http.event.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +15,6 @@ export class AppComponent implements OnInit {
 
   fullMenu: boolean = true;
   menuClass: string = this.fullMenu ? 'menu-expanded' : 'menu-collapsed';
-  fourCornerEnabled: boolean = true;
 
   @ViewChild(RouterOutlet)
   outlet: RouterOutlet;
@@ -29,12 +27,6 @@ export class AppComponent implements OnInit {
                private domainService: DomainService) {
 
     this.domainService.setAppTitle();
-
-    const fourCornerModelResponse: Observable<Response> = this.http.get('rest/application/fourcornerenabled');
-
-    fourCornerModelResponse.subscribe((name: Response) => {
-      this.fourCornerEnabled = name.json();
-    });
   }
 
   ngOnInit () {

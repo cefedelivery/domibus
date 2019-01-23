@@ -1,5 +1,5 @@
 import {Http, Response} from "@angular/http";
-import {AlertService} from "app/alert/alert.service";
+import {AlertService} from "app/common/alert/alert.service";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Observable";
 import {TrustStoreEntry} from "./trustore.model";

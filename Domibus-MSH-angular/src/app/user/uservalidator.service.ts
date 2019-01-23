@@ -1,5 +1,5 @@
 import {UserResponseRO, UserState} from './user';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {Injectable} from '@angular/core';
 import {AbstractControl} from '@angular/forms';
 import {SecurityService} from '../security/security.service';

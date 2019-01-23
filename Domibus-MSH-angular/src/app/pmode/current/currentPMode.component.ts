@@ -1,6 +1,6 @@
 ﻿import {Component, OnInit} from '@angular/core';
 import {Http, Response} from '@angular/http';
-import {AlertService} from 'app/alert/alert.service';
+import {AlertService} from 'app/common/alert/alert.service';
 import {MdDialog} from '@angular/material';
 import {isNullOrUndefined} from 'util';
 import {PmodeUploadComponent} from '../pmode-upload/pmode-upload.component';
@@ -8,7 +8,7 @@ import * as FileSaver from 'file-saver';
 import {CancelDialogComponent} from 'app/common/cancel-dialog/cancel-dialog.component';
 import {DirtyOperations} from 'app/common/dirty-operations';
 import {Observable} from 'rxjs/Observable';
-import {DateFormatService} from 'app/customDate/dateformat.service';
+import {DateFormatService} from 'app/common/customDate/dateformat.service';
 
 @Component({
   moduleId: module.id,

@@ -3,7 +3,7 @@ import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {UserValidatorService} from '../../user/uservalidator.service';
 import {SecurityService} from '../../security/security.service';
 import {Http, Response} from '@angular/http';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../../common/alert/alert.service';
 import {Router} from '@angular/router';
 
 @Component({

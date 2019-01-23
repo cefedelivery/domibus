@@ -1,5 +1,5 @@
 import {Directive, HostListener} from '@angular/core';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../alert/alert.service';
 
 @Directive({
   selector: '[button-click-behaviour]'
