@@ -1,5 +1,5 @@
 import {ErrorHandler, Injectable, Injector} from '@angular/core';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from './alert/alert.service';
 import {Response} from '@angular/http';
 
 @Injectable()

@@ -1,8 +1,8 @@
 import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {RowLimiterBase} from 'app/common/row-limiter/row-limiter-base';
-import {AlertService} from '../alert/alert.service';
-import {AlertComponent} from '../alert/alert.component';
+import {AlertService} from '../common/alert/alert.service';
+import {AlertComponent} from '../common/alert/alert.component';
 import {PluginUserSearchCriteria, PluginUserService} from './pluginuser.service';
 import {PluginUserRO} from './pluginuser';
 import {DirtyOperations} from 'app/common/dirty-operations';
@@ -12,15 +12,16 @@ import {EditcertificatepluginuserFormComponent} from './editpluginuser-form/edit
 import {UserService} from '../user/user.service';
 import {UserState} from '../user/user';
 import {CancelDialogComponent} from '../common/cancel-dialog/cancel-dialog.component';
-import {DownloadService} from '../download/download.service';
+import {DownloadService} from '../common/download.service';
 import {SaveDialogComponent} from '../common/save-dialog/save-dialog.component';
+import {FilterableListComponent} from '../common/filterable-list.component';
 
 @Component({
   templateUrl: './pluginuser.component.html',
   styleUrls: ['./pluginuser.component.css'],
   providers: [PluginUserService, UserService]
 })
-export class PluginUserComponent implements OnInit, DirtyOperations {
+export class PluginUserComponent extends FilterableListComponent implements OnInit, DirtyOperations {
   @ViewChild('activeTpl') activeTpl: TemplateRef<any>;
 
   columnPickerBasic: ColumnPickerBase = new ColumnPickerBase();
@@ -35,17 +36,18 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   dirty: boolean;
 
   authenticationTypes: string[] = ['BASIC', 'CERTIFICATE'];
-  filter: PluginUserSearchCriteria = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
+  filter: PluginUserSearchCriteria;
   columnPicker: ColumnPickerBase;
 
   userRoles: Array<String>;
 
-  constructor(private alertService: AlertService,
-              private pluginUserService: PluginUserService,
-              public dialog: MdDialog) {
+  constructor(private alertService: AlertService, private pluginUserService: PluginUserService, public dialog: MdDialog) {
+    super();
   }
 
   ngOnInit() {
+    this.filter = {authType: 'BASIC', authRole: '', userName: '', originalUser: ''};
+
     this.initColumns();
 
     this.offset = 0;
@@ -56,6 +58,8 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
     this.dirty = false;
 
     this.getUserRoles();
+
+    super.setActiveFilter();
     this.search();
   }
 
@@ -102,6 +106,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async searchIfOK(): Promise<boolean> {
     const ok = await this.checkIsDirty();
     if (ok) {
+      super.setActiveFilter();
       this.search();
     }
     return ok;
@@ -114,7 +119,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
 
     try {
       this.loading = true;
-      const result = await this.pluginUserService.getUsers(this.filter).toPromise();
+      const result = await this.pluginUserService.getUsers(this.activeFilter).toPromise();
       this.users = result.entries;
       this.loading = false;
 
@@ -126,6 +131,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   }
 
   changePageSize(newPageSize: number) {
+    super.resetFilters();
     this.offset = 0;
     this.rowLimiter.pageSize = newPageSize;
     this.refresh();
@@ -214,6 +220,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
       if (proceed) {
         await this.pluginUserService.saveUsers(this.users);
         this.alertService.success('The operation \'update plugin users\' completed successfully.');
+        super.resetFilters();
         this.search();
       }
     } catch (err) {
@@ -232,6 +239,7 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
   async cancel() {
     const ok = await this.dialog.open(CancelDialogComponent).afterClosed().toPromise();
     if (ok) {
+      super.resetFilters();
       this.search();
     }
   }
@@ -283,9 +291,18 @@ export class PluginUserComponent implements OnInit, DirtyOperations {
         return;
       }
 
+      super.resetFilters();
       DownloadService.downloadNative(PluginUserService.CSV_URL + '?'
         + this.pluginUserService.createFilterParams(this.filter).toString());
     }
   }
 
+  onPageChanged($event) {
+    this.offset = $event.offset;
+    super.resetFilters();
+  }
+
+  onSort() {
+    super.resetFilters();
+  }
 }

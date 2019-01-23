@@ -6,13 +6,13 @@
 
         <md-select class="searchField" placeholder="Source" [(ngModel)]="selectedSource" name="jmsQueueSelector"
                    id="jmsQueueSelector" style="width:40%;">
-          <md-option *ngFor="let queue of orderedQueues" [value]="queue" class="queue-combo-item">
+          <md-option *ngFor="let queue of queues" [value]="queue" class="queue-combo-item">
             {{queue.internal ? "[internal]" :""}} {{queue.name}} {{queue.numberOfMessages != -1 ? "(" + queue.numberOfMessages + ")" : ""}}
           </md-option>
         </md-select>
         <md2-datepicker id="jmsFromDatePicker" appClearInvalid
                         placeholder="Received From:"
-                        [(ngModel)]="request.fromDate"
+                        [(ngModel)]="filter.fromDate"
                         name="receivedFrom"
                         [type]="'datetime'"
                         [max]="timestampFromMaxDate"
@@ -21,7 +21,7 @@
         </md2-datepicker>
         <md2-datepicker id="jmsToDatePicker" appClearInvalid
                         placeholder="Received Up To:"
-                        [(ngModel)]="request.toDate"
+                        [(ngModel)]="filter.toDate"
                         name="receivedTo"
                         [min]="timestampToMinDate"
                         [max]="timestampToMaxDate"
@@ -31,11 +31,11 @@
         </md2-datepicker>
 
         <md-input-container id="jmsSelector">
-          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="request.selector">
+          <input id="jmsSelectorinput" mdInput placeholder="Selector" [(ngModel)]="filter.selector">
         </md-input-container>
 
         <md-input-container id="jmsType">
-          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="request.jmsType">
+          <input id="jmsTypeInput" mdInput placeholder="JMS Type" [(ngModel)]="filter.jmsType">
         </md-input-container>
 
         <div class="searchArea">
@@ -80,9 +80,13 @@
     [selectionType]="'multi'"
     [selected]="selectedMessages"
     [limit]="rowLimiter.pageSize"
+    [offset]="offset"
     [sorts]="[{prop: 'timestamp', dir: 'desc'}]"
+    (sort)="onSort()"
     (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+    (select)="onSelect($event)"
+    (page)="onPage($event)"
+  >
   </ngx-datatable>
 
   <ng-template #rowWithJSONTpl let-row="row" let-value="value" ngx-datatable-cell-template>

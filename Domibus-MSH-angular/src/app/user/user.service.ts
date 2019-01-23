@@ -1,7 +1,7 @@
 import {UserResponseRO} from './user';
 import {Injectable} from '@angular/core';
 import {Http, Response} from '@angular/http';
-import {AlertService} from '../alert/alert.service';
+import {AlertService} from '../common/alert/alert.service';
 import {Observable} from 'rxjs/Observable';
 import {SecurityService} from '../security/security.service';
 import {DomainService} from '../security/domain.service';

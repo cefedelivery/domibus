@@ -4,7 +4,7 @@ import {DomainService} from '../../security/domain.service';
 import {Domain} from '../../security/domain';
 import {MdDialog} from '@angular/material';
 import {CancelDialogComponent} from '../cancel-dialog/cancel-dialog.component';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../alert/alert.service';
 import {Router, RoutesRecognized} from '@angular/router';
 
 @Component({

@@ -13,7 +13,7 @@
                      id="messagestatus_id">
             <md-option [value]="''">
             </md-option>
-            <md-option *ngFor="let mstatus of msgStatus" [value]="mstatus">
+            <md-option *ngFor="let mstatus of msgStatuses" [value]="mstatus">
               {{mstatus}}
             </md-option>
           </md-select>
@@ -140,7 +140,7 @@
     [selected]="selected"
     [selectionType]="'multi'"
     (activate)="onActivate($event)"
-    (select)="onSelect($event)">
+  >
   </ngx-datatable>
 
   <ng-template #rowWithDateFormatTpl let-row="row" let-value="value" ngx-datatable-cell-template>

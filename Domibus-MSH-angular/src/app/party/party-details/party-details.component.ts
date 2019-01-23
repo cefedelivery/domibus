@@ -4,7 +4,7 @@ import {ColumnPickerBase} from 'app/common/column-picker/column-picker-base';
 import {IdentifierRo, PartyResponseRo, ProcessInfoRo} from '../party';
 import {PartyIdentifierDetailsComponent} from '../party-identifier-details/party-identifier-details.component';
 import {PartyService} from '../party.service';
-import {AlertService} from '../../alert/alert.service';
+import {AlertService} from '../../common/alert/alert.service';
 
 @Component({
   selector: 'app-party-details',
